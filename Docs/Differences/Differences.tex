@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sat Aug 29 16:17:38 2020
+%DIF ADD ../Configuration.tex        Sat Aug 29 17:50:22 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -367,23 +367,48 @@ for the implementation to warn about the use of
 \texttt{invalid\ values} is to conform to the following convention where
 applicable:
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-Type & Value\tabularnewline
-\midrule
-\endhead
-\texttt{plist\ string} & Empty string
-(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}})\tabularnewline
-\texttt{plist\ data} & Empty data
-(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}})\tabularnewline
-\texttt{plist\ integer} & 0
-(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}})\tabularnewline
-\texttt{plist\ boolean} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
-\texttt{plist\ tristate} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
-\bottomrule
-\end{longtable}
+\DIFdelbegin %DIFDELCMD < \begin{longtable}[]{@{}ll@{}}
+%DIFDELCMD < \toprule
+%DIFDELCMD < %%%
+\DIFdel{Type }\DIFdelend \DIFaddbegin \begin{center}
+\begin{tabular}{|l|l|} 
+\hline
+\textbf{\DIFadd{Type}} \DIFaddend & \DIFdelbegin \DIFdel{Value}%DIFDELCMD < \tabularnewline
+%DIFDELCMD < \midrule
+%DIFDELCMD < \endhead
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \textbf{\DIFadd{Value}} \\
+\hline
+\DIFaddend \texttt{plist\ string} & Empty string
+(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}}) \DIFdelbegin %DIFDELCMD < \tabularnewline
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \\
+\hline
+\DIFaddend \texttt{plist\ data} & Empty data
+(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}}) \DIFdelbegin %DIFDELCMD < \tabularnewline
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \\
+\hline
+\DIFaddend \texttt{plist\ integer} & 0
+(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}}) \DIFdelbegin %DIFDELCMD < \tabularnewline
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \\
+\hline
+\DIFaddend \texttt{plist\ boolean} & False
+(\texttt{\textless{}false/\textgreater{}}) \DIFdelbegin %DIFDELCMD < \tabularnewline
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \\
+\hline
+\DIFaddend \texttt{plist\ tristate} & False
+(\texttt{\textless{}false/\textgreater{}}) \DIFdelbegin %DIFDELCMD < \tabularnewline
+%DIFDELCMD < \bottomrule
+%DIFDELCMD < \end{longtable}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \\
+\hline
+\end{tabular}
+\end{center}
+\DIFaddend 
 
 \subsection{Configuration Structure}\label{configuration-structure}
 
@@ -1789,7 +1814,30 @@ blocking.
   described in \hyperref[kernelpropsemu]{Emulate Properties} section below.
 
 \item
-  \texttt{Patch}\\
+  \DIFaddbegin \texttt{\DIFadd{Force}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Load kernel drivers from system volume if they are not cached.
+}
+
+  \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each driver.
+  See }\hyperref[kernelpropsforce]{Force Properties} \DIFadd{section below.
+  This section resolves the problem of injecting drivers that depend on other
+  drivers, which are not cached otherwise. The issue normally affects older
+  operating systems, where various dependency kexts, like }\texttt{\DIFadd{IOAudioFamily}}
+  \DIFadd{or }\texttt{\DIFadd{IONetworkingFamily}} \DIFadd{may not be present in the kernel cache by default.
+  Kernel driver load order follows the item order in the array, thus the dependencies
+  should be written prior to their consumers. }\texttt{\DIFadd{Force}} \DIFadd{happens before
+  }\texttt{\DIFadd{Add}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The signature of the ``forced'' kernel drivers is not checked anyhow,
+  making the use of this feature extremely dangerous and undesired for secure boot.
+  This feature may not work on encrypted partitions in newer operating systems.
+}
+
+\item
+  \DIFaddend \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
@@ -2021,7 +2069,90 @@ blocking.
 
 \end{enumerate}
 
-\subsection{Patch Properties}\label{kernelpropspatch}
+\DIFaddbegin \subsection{\DIFadd{Force Properties}}\label{kernelpropsforce}
+
+\begin{enumerate}
+\item
+  \texttt{\DIFadd{Arch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Any}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext architecture (}\texttt{\DIFadd{Any}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{BundlePath}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext bundle path (e.g.
+  }\texttt{\DIFadd{System\textbackslash Library \textbackslash Extensions \textbackslash IONetworkingFamily.kext}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+}
+
+\item
+  \texttt{\DIFadd{Enabled}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: This kernel driver will not be added when not present
+  unless set to }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ExecutablePath}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext executable path relative to bundle
+  (e.g. }\texttt{\DIFadd{Contents/MacOS/IONetworkingFamily}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{Identifier}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext identifier to perform presence checking
+  before adding (e.g. }\texttt{\DIFadd{com.apple.iokit.IONetworkingFamily}}\DIFadd{).
+  Only drivers which identifiers are not be found in the cache will be added.
+}
+
+\item
+  \texttt{\DIFadd{MaxKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Adds kernel driver on specified macOS version or older.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Refer to }\hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} \DIFadd{for matching logic.
+}
+
+\item
+  \texttt{\DIFadd{MinKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Adds kernel driver on specified macOS version or newer.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Refer to }\hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} \DIFadd{for matching logic.
+}
+
+\item
+  \texttt{\DIFadd{PlistPath}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Kext }\texttt{\DIFadd{Info.plist}} \DIFadd{path relative to bundle
+  (e.g. }\texttt{\DIFadd{Contents/Info.plist}}\DIFadd{).
+}
+
+\end{enumerate}
+
+
+\DIFaddend \subsection{Patch Properties}\label{kernelpropspatch}
 
 \begin{enumerate}
 \item
@@ -2345,6 +2476,11 @@ blocking.
 \end{enumerate}
 
 \DIFaddbegin \subsection{\DIFadd{Scheme Properties}}\label{kernelpropsscheme}
+
+\DIFadd{These properties are particularly relevant for older macOS operating systems.
+For more details on how to install and troubleshoot such macOS installation
+refer to }\hyperref[legacyapple]{Legacy Apple OS}\DIFadd{.
+}
 
 \begin{enumerate}
 
@@ -3140,7 +3276,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCFS} --- OcFileLib
   \item \texttt{OCFV} --- OcFirmwareVolumeLib
   \item \texttt{OCHS} --- OcHashServicesLib
-  \item \texttt{OCIC} --- OcImageConversionLib
+  \item \DIFaddbegin \texttt{\DIFadd{OCI4}} \DIFadd{--- OcAppleImg4Lib
+  }\item \DIFaddend \texttt{OCIC} --- OcImageConversionLib
   \item \texttt{OCII} --- OcInputLib
   \item \texttt{OCJS} --- OcApfsLib
   \item \texttt{OCKM} --- OcAppleKeyMapLib
@@ -3207,9 +3344,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Secure Boot.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: You will have to reinstall the operating system or use macOS recovery
-  after setting this value to non-zero. Installing the operating system with
-  }\texttt{\DIFadd{ApECID}} \DIFadd{value set to non-zero is only possible through macOS recovery.
+  \emph{\DIFadd{Note 1}}\DIFadd{: You will have to reinstall the operating system or use macOS DMG recovery
+  to }\texttt{\DIFadd{bless --personalize}} \DIFadd{your installation after setting this value to non-zero.
+  Installing the operating system with }\texttt{\DIFadd{ApECID}} \DIFadd{value set to non-zero is only
+  possible through macOS recovery or personalized builds created with }\texttt{\DIFadd{asr}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Currently the use of this option is unrealiable (apparently to a bug
+  in macOS installer), and thus its use is not recommended.
 }
 
 \item
@@ -3268,9 +3410,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{Disabled}} \DIFadd{--- loading DMG images will fail.
-  }\item \texttt{\DIFadd{Signed}} \DIFadd{--- only Apple-signed DMG images will load.
+  \item \texttt{\DIFadd{Disabled}} \DIFadd{--- loading DMG images will fail. }\texttt{\DIFadd{Disabled}}
+    \DIFadd{policy will still let macOS Recovery to load in most cases as there
+    usually are }\texttt{\DIFadd{boot.efi}} \DIFadd{files compatible with Apple Secure Boot.
+    Manually downloaded DMG images stored in }\texttt{\DIFadd{com.apple.recovery.boot}}
+    \DIFadd{directories will not load, however.
+  }\item \texttt{\DIFadd{Signed}} \DIFadd{--- only Apple-signed DMG images will load. Due to
+    Apple Secure Boot design }\texttt{\DIFadd{Signed}} \DIFadd{policy will let any Apple-signed
+    macOS Recovery to load regardless of Apple Secure Boot state, which may
+    not always be desired.
   }\item \texttt{\DIFadd{Any}} \DIFadd{--- any DMG images will mount as normal filesystems.
+    }\texttt{\DIFadd{Any}} \DIFadd{policy is strongly not recommended and will cause a boot failure
+    when Apple Secure Boot is activated. 
   }\end{itemize}
 
 \item
@@ -3481,7 +3632,7 @@ rm vault.pub
   \textbf{\DIFadd{Description}}\DIFadd{: Apple Secure Boot hardware model.
 }
 
-  \DIFadd{Defines Apple Secure Boot hardware model and policy. Specifying
+  \DIFadd{Sets Apple Secure Boot hardware model and policy. Specifying
   this value defines which operating systems will be bootable.
   Operating systems shipped before the specified model was released
   will not boot. Valid values:
@@ -3517,14 +3668,38 @@ rm vault.pub
   also specify }\texttt{\DIFadd{ApECID}} \DIFadd{value.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{Default}} \DIFadd{value will increase with time to support the latest
-  major release operating system. It is not recommended to use }\texttt{\DIFadd{ApECID}}
-  \DIFadd{and }\texttt{\DIFadd{Default}} \DIFadd{value together.
+  \DIFadd{Enabling Apple Secure Boot is more demanding to incorrect configurations,
+  buggy macOS installations, and unsupported setups. Things to keep in mind:
 }
 
-\DIFaddend \end{enumerate}
+  \begin{enumerate}
+    \tightlist
+    \item \DIFadd{Just like on T2 Macs you will not be able to install any unsigned kernel
+      drivers and several signed kernel drivers including NVIDIA Web Drivers.
+    }\item \DIFadd{The list of cached drivers may be different, resulting in the need
+      to change the list of }\texttt{\DIFadd{Added}} \DIFadd{or }\texttt{\DIFadd{Forced}} \DIFadd{kernel drivers.
+      For example, }\texttt{\DIFadd{IO80211Family}} \DIFadd{cannot be injected in this case.
+    }\item \DIFadd{If your platform requires certain settings, but they were not enabled,
+      because the obvious issues did not trigger before, you may get boot failure.
+      Be extra careful with }\texttt{\DIFadd{IgnoreInvalidFlexRatio}} \DIFadd{or }\texttt{\DIFadd{HashServices}}\DIFadd{.
+    }\item \DIFadd{Operating systems released before Apple Secure Boot landed (e.g.
+      macOS~10.12 or earlier) will still boot until UEFI Secure Boot is enabled.
+      This is so, because from Apple Secure Boot point they are treated as incompatible
+      and are assumed to be handled by the firmware just like Microsoft Windows is.
+    }\item \DIFadd{On older CPUs (e.g. before Sandy Bridge) enabling Apple Secure Boot
+      might cause slightly slower loading by up to 1 second.
+    }\item \DIFadd{Since }\texttt{\DIFadd{Default}} \DIFadd{value will increase with time to support the latest
+      major release operating system, it is not recommended to use }\texttt{\DIFadd{ApECID}}
+      \DIFadd{and }\texttt{\DIFadd{Default}} \DIFadd{value together.
+  }\DIFaddend \end{enumerate}
 
-\subsection{Entry Properties}\label{miscentryprops}
+  \DIFaddbegin \DIFadd{For more details on how to configure Apple Secure Boot with UEFI Secure Boot
+  refer to }\hyperref[uefisecureboot]{UEFI Secure Boot} \DIFadd{section.
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Entry Properties}\label{miscentryprops}
 
 \begin{enumerate}
 \item
@@ -5708,18 +5883,18 @@ functioning. Feature highlights:
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
   I/O attempts to select RTC memory addresses. The list of addresses
   can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
-  variable as a data array\DIFaddbegin \DIFadd{.
-}
+  variable as a data array.
 
 \item
-  \texttt{\DIFadd{AppleSecureBoot}}\\
+  \DIFaddbegin \texttt{\DIFadd{AppleSecureBoot}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Reinstalls Apple Secure Boot protocol with a builtin
-  version}\DIFaddend .
+  version.
+}
 
 \item
-  \texttt{AppleSmcIo}\\
+  \DIFaddend \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin
@@ -5955,6 +6130,17 @@ functioning. Feature highlights:
 \end{enumerate}
 
 \section{Troubleshooting}\label{troubleshooting}
+\DIFaddbegin 
+
+\subsection{\DIFadd{Legacy Apple OS}}\label{legacyapple}
+
+\DIFadd{TBA
+}
+
+\subsection{\DIFadd{UEFI Secure Boot}}\label{uefisecureboot}
+
+\DIFadd{TBA
+}\DIFaddend 
 
 \subsection{Windows support}\label{troubleshootingwin}
 

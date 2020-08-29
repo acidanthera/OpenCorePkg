@@ -256,7 +256,7 @@ OcAppendArgumentsToLoadedImage (
   }
 
   LoadedImage->LoadOptions = NewArguments;
-  LoadedImage->LoadOptionsSize = TotalLength;
+  LoadedImage->LoadOptionsSize = (UINT32) TotalLength;
 
   return TRUE;
 }

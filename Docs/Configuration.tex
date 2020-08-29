@@ -304,23 +304,28 @@ for the implementation to warn about the use of
 \texttt{invalid\ values} is to conform to the following convention where
 applicable:
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-Type & Value\tabularnewline
-\midrule
-\endhead
+\begin{center}
+\begin{tabular}{|l|l|} 
+\hline
+\textbf{Type} & \textbf{Value} \\
+\hline
 \texttt{plist\ string} & Empty string
-(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}})\tabularnewline
+(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}}) \\
+\hline
 \texttt{plist\ data} & Empty data
-(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}})\tabularnewline
+(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}}) \\
+\hline
 \texttt{plist\ integer} & 0
-(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}})\tabularnewline
+(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}}) \\
+\hline
 \texttt{plist\ boolean} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
+(\texttt{\textless{}false/\textgreater{}}) \\
+\hline
 \texttt{plist\ tristate} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
-\bottomrule
-\end{longtable}
+(\texttt{\textless{}false/\textgreater{}}) \\
+\hline
+\end{tabular}
+\end{center}
 
 \subsection{Configuration Structure}\label{configuration-structure}
 
@@ -1721,6 +1726,26 @@ blocking.
   described in \hyperref[kernelpropsemu]{Emulate Properties} section below.
 
 \item
+  \texttt{Force}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Load kernel drivers from system volume if they are not cached.
+
+  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
+  See \hyperref[kernelpropsforce]{Force Properties} section below.
+  This section resolves the problem of injecting drivers that depend on other
+  drivers, which are not cached otherwise. The issue normally affects older
+  operating systems, where various dependency kexts, like \texttt{IOAudioFamily}
+  or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
+  Kernel driver load order follows the item order in the array, thus the dependencies
+  should be written prior to their consumers. \texttt{Force} happens before
+  \texttt{Add}.
+
+  \emph{Note}: The signature of the ``forced'' kernel drivers is not checked anyhow,
+  making the use of this feature extremely dangerous and undesired for secure boot.
+  This feature may not work on encrypted partitions in newer operating systems.
+
+\item
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
@@ -1949,6 +1974,78 @@ blocking.
   otherwise set bits take the value of \texttt{Cpuid1Data}.
 
 \end{enumerate}
+
+\subsection{Force Properties}\label{kernelpropsforce}
+
+\begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
+\item
+  \texttt{BundlePath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext bundle path (e.g.
+  \texttt{System\textbackslash Library \textbackslash Extensions \textbackslash IONetworkingFamily.kext}).
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This kernel driver will not be added when not present
+  unless set to \texttt{true}.
+
+\item
+  \texttt{ExecutablePath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext executable path relative to bundle
+  (e.g. \texttt{Contents/MacOS/IONetworkingFamily}).
+
+\item
+  \texttt{Identifier}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext identifier to perform presence checking
+  before adding (e.g. \texttt{com.apple.iokit.IONetworkingFamily}).
+  Only drivers which identifiers are not be found in the cache will be added.
+
+\item
+  \texttt{MaxKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+
+\item
+  \texttt{PlistPath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
+  (e.g. \texttt{Contents/Info.plist}).
+
+\end{enumerate}
+
 
 \subsection{Patch Properties}\label{kernelpropspatch}
 
@@ -2273,6 +2370,10 @@ blocking.
 \end{enumerate}
 
 \subsection{Scheme Properties}\label{kernelpropsscheme}
+
+These properties are particularly relevant for older macOS operating systems.
+For more details on how to install and troubleshoot such macOS installation
+refer to \hyperref[legacyapple]{Legacy Apple OS}.
 
 \begin{enumerate}
 
@@ -3056,6 +3157,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCFS} --- OcFileLib
   \item \texttt{OCFV} --- OcFirmwareVolumeLib
   \item \texttt{OCHS} --- OcHashServicesLib
+  \item \texttt{OCI4} --- OcAppleImg4Lib
   \item \texttt{OCIC} --- OcImageConversionLib
   \item \texttt{OCII} --- OcInputLib
   \item \texttt{OCJS} --- OcApfsLib
@@ -3121,9 +3223,13 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
   Secure Boot.
 
-  \emph{Note}: You will have to reinstall the operating system or use macOS recovery
-  after setting this value to non-zero. Installing the operating system with
-  \texttt{ApECID} value set to non-zero is only possible through macOS recovery.
+  \emph{Note 1}: You will have to reinstall the operating system or use macOS DMG recovery
+  to \texttt{bless --personalize} your installation after setting this value to non-zero.
+  Installing the operating system with \texttt{ApECID} value set to non-zero is only
+  possible through macOS recovery or personalized builds created with \texttt{asr}.
+
+  \emph{Note 2}: Currently the use of this option is unrealiable (apparently to a bug
+  in macOS installer), and thus its use is not recommended.
 
 \item
   \texttt{AuthRestart}\\
@@ -3179,9 +3285,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Disabled} --- loading DMG images will fail.
-  \item \texttt{Signed} --- only Apple-signed DMG images will load.
+  \item \texttt{Disabled} --- loading DMG images will fail. \texttt{Disabled}
+    policy will still let macOS Recovery to load in most cases as there
+    usually are \texttt{boot.efi} files compatible with Apple Secure Boot.
+    Manually downloaded DMG images stored in \texttt{com.apple.recovery.boot}
+    directories will not load, however.
+  \item \texttt{Signed} --- only Apple-signed DMG images will load. Due to
+    Apple Secure Boot design \texttt{Signed} policy will let any Apple-signed
+    macOS Recovery to load regardless of Apple Secure Boot state, which may
+    not always be desired.
   \item \texttt{Any} --- any DMG images will mount as normal filesystems.
+    \texttt{Any} policy is strongly not recommended and will cause a boot failure
+    when Apple Secure Boot is activated. 
   \end{itemize}
 
 \item
@@ -3389,7 +3504,7 @@ rm vault.pub
   \textbf{Failsafe}: \texttt{Default}\\
   \textbf{Description}: Apple Secure Boot hardware model.
 
-  Defines Apple Secure Boot hardware model and policy. Specifying
+  Sets Apple Secure Boot hardware model and policy. Specifying
   this value defines which operating systems will be bootable.
   Operating systems shipped before the specified model was released
   will not boot. Valid values:
@@ -3423,9 +3538,32 @@ rm vault.pub
   of Apple Secure Boot. To achieve \texttt{Full Security} one will need to
   also specify \texttt{ApECID} value.
 
-  \emph{Note}: \texttt{Default} value will increase with time to support the latest
-  major release operating system. It is not recommended to use \texttt{ApECID}
-  and \texttt{Default} value together.
+  Enabling Apple Secure Boot is more demanding to incorrect configurations,
+  buggy macOS installations, and unsupported setups. Things to keep in mind:
+
+  \begin{enumerate}
+    \tightlist
+    \item Just like on T2 Macs you will not be able to install any unsigned kernel
+      drivers and several signed kernel drivers including NVIDIA Web Drivers.
+    \item The list of cached drivers may be different, resulting in the need
+      to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
+      For example, \texttt{IO80211Family} cannot be injected in this case.
+    \item If your platform requires certain settings, but they were not enabled,
+      because the obvious issues did not trigger before, you may get boot failure.
+      Be extra careful with \texttt{IgnoreInvalidFlexRatio} or \texttt{HashServices}.
+    \item Operating systems released before Apple Secure Boot landed (e.g.
+      macOS~10.12 or earlier) will still boot until UEFI Secure Boot is enabled.
+      This is so, because from Apple Secure Boot point they are treated as incompatible
+      and are assumed to be handled by the firmware just like Microsoft Windows is.
+    \item On older CPUs (e.g. before Sandy Bridge) enabling Apple Secure Boot
+      might cause slightly slower loading by up to 1 second.
+    \item Since \texttt{Default} value will increase with time to support the latest
+      major release operating system, it is not recommended to use \texttt{ApECID}
+      and \texttt{Default} value together.
+  \end{enumerate}
+
+  For more details on how to configure Apple Secure Boot with UEFI Secure Boot
+  refer to \hyperref[uefisecureboot]{UEFI Secure Boot} section.
 
 \end{enumerate}
 
@@ -5845,6 +5983,14 @@ functioning. Feature highlights:
 \end{enumerate}
 
 \section{Troubleshooting}\label{troubleshooting}
+
+\subsection{Legacy Apple OS}\label{legacyapple}
+
+TBA
+
+\subsection{UEFI Secure Boot}\label{uefisecureboot}
+
+TBA
 
 \subsection{Windows support}\label{troubleshootingwin}
 
