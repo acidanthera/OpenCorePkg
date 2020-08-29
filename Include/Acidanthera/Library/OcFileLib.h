@@ -119,7 +119,7 @@ SafeFileOpen (
   );
 
 /**
-  Read file from device path with implicit double (2 byte) null termination.
+  Read file from file system with implicit double (2 byte) null termination.
   Null termination does not affect the returned file size.
   Depending on the implementation 0 byte files may return null.
 
@@ -136,6 +136,26 @@ ReadFile (
   IN  CONST CHAR16                     *FilePath,
   OUT UINT32                           *FileSize OPTIONAL,
   IN  UINT32                           MaxFileSize OPTIONAL
+  );
+
+/**
+  Read file from file protocol with implicit double (2 byte) null termination.
+  Null termination does not affect the returned file size.
+  Depending on the implementation 0 byte files may return null.
+
+  @param[in]  RootFile     A pointer to the file protocol of the directory.
+  @param[in]  FilePath     The full path to the file on the device.
+  @param[out] FileSize     The size of the file read (optional).
+  @param[in]  MaxFileSize  Upper file size bound (optional).
+
+  @retval A pointer to a buffer containing file read or NULL.
+**/
+VOID *
+ReadFileFromFile (
+  IN  EFI_FILE_PROTOCOL   *RootFile,
+  IN  CONST CHAR16        *FilePath,
+  OUT UINT32              *FileSize OPTIONAL,
+  IN  UINT32              MaxFileSize OPTIONAL
   );
 
 /**

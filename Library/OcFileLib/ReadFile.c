@@ -149,3 +149,59 @@ ReadFileSize (
 
   return Status;
 }
+
+VOID *
+ReadFileFromFile (
+  IN  EFI_FILE_PROTOCOL   *RootFile,
+  IN  CONST CHAR16        *FilePath,
+  OUT UINT32              *FileSize OPTIONAL,
+  IN  UINT32              MaxFileSize OPTIONAL
+  )
+{
+  EFI_STATUS            Status;
+  EFI_FILE_PROTOCOL     *File;
+  UINT32                Size;
+  UINT8                 *FileBuffer;
+
+  Status = SafeFileOpen (
+    RootFile,
+    &File,
+    (CHAR16 *) FilePath,
+    EFI_FILE_MODE_READ,
+    0
+    );
+
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  Status = GetFileSize (File, &Size);
+  if (EFI_ERROR (Status)
+    || Size >= MAX_UINT32 - 1
+    || (MaxFileSize > 0 && Size > MaxFileSize)) {
+    File->Close (File);
+    return NULL;
+  }
+
+  FileBuffer = AllocatePool (Size + 2);
+  if (FileBuffer == NULL) {
+    File->Close (File);
+    return NULL;
+  }
+
+  Status = GetFileData (File, 0, Size, FileBuffer);
+  File->Close (File);
+  if (EFI_ERROR (Status)) {
+    FreePool (FileBuffer);
+    return NULL;
+  }
+
+  FileBuffer[Size]     = 0;
+  FileBuffer[Size + 1] = 0;
+
+  if (FileSize != NULL) {
+    *FileSize = Size;
+  }
+
+  return FileBuffer;
+}
