@@ -24,7 +24,7 @@ OpenCore Changelog
 - Fixed `XhciPortLimit` quirk on 10.12.6 and possibly other versions
 - Fixed `IncreasePciBarSize` quirk on 10.11.5 and possibly other versions
 - Fixed `LapicKernelPanic` quirk on 10.8.5 and possibly other versions
-- Fixed hard-lock caused by XHCI SMI in OpenDuetPkg
+- Fixed hard-lock caused by EHCI SMI in OpenDuetPkg
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

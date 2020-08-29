@@ -118,8 +118,8 @@ typedef enum OC_PICKER_MODE_ {
 /**
   macOS Kernel capabilities.
 **/
-#define OC_KERN_CAPABILITY_K32_32  BIT0 ///< Supports K32 with 32-bit apps (10.4~10.6)
-#define OC_KERN_CAPABILITY_K32_64  BIT1 ///< Supports K32 with 64-bit apps (10.7)
+#define OC_KERN_CAPABILITY_K32_32  BIT0 ///< Supports K32 with i386 requirement (10.4~10.6)
+#define OC_KERN_CAPABILITY_K32_64  BIT1 ///< Supports K32 with x86_64 requirement (10.7)
 #define OC_KERN_CAPABILITY_K64     BIT2 ///< Supports K64 (10.6+)
 
 /**
