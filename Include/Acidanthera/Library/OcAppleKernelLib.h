@@ -71,6 +71,23 @@
 #define KC_MOSCOW_SEGMENT                         "__MOSCOW101"
 
 //
+// Kernel cache types.
+//
+typedef enum KERNEL_CACHE_TYPE_ {
+  CacheTypeCacheless,
+  CacheTypeMkext,
+  CacheTypePrelinked
+} KERNEL_CACHE_TYPE;
+
+//
+// Macro to print kernel cache type.
+//
+#define PRINT_KERNEL_CACHE_TYPE(a) ( \
+  (a)   == CacheTypeCacheless ? "Cacheless" : \
+  ((a)  == CacheTypeMkext     ? "Mkext" : \
+  (((a) == CacheTypePrelinked ? "Prelinked" : "Unknown"))))
+
+//
 // As PageCount is UINT16, we can only index 2^16 * 4096 Bytes with one chain.
 //
 #define PRELINKED_KEXTS_MAX_SIZE (BIT16 * MACHO_PAGE_SIZE)

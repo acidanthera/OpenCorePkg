@@ -611,8 +611,6 @@ OcStartImage (
   OC_FWRT_CONFIG              Config;
   UINTN                       DataSize;
 
-  CHAR8                       *AppleArchValue;
-
   BootCompat        = GetBootCompatContext ();
   AppleLoadedImage  = OcGetAppleBootLoadedImage (ImageHandle);
 
@@ -647,17 +645,6 @@ OcStartImage (
       L_STR_LEN ("slide="),
       NULL
       );
-    BootCompat->ServiceState.AppleArch = OcCheckArgumentFromEnv (
-      AppleLoadedImage,
-      BootCompat->ServicePtrs.GetVariable,
-      "arch=",
-      L_STR_LEN ("arch="),
-      &AppleArchValue
-      );
-    if (BootCompat->ServiceState.AppleArch) {
-      BootCompat->ServiceState.AppleArchPrefer32Bit = AsciiStrCmp (AppleArchValue, "i386") == 0;
-      FreePool (AppleArchValue);
-    }
 
     if (BootCompat->Settings.EnableSafeModeSlide) {
       ASSERT (AppleLoadedImage->ImageSize <= MAX_UINTN);

@@ -74,8 +74,11 @@ STATIC EFI_IMAGE_START  mOriginalEfiStartImage;
 STATIC EFI_IMAGE_UNLOAD mOriginalEfiUnloadImage;
 STATIC EFI_EXIT         mOriginalEfiExit;
 STATIC EFI_HANDLE       mCurrentImageHandle;
-STATIC UINT32           mImageLoaderCaps;
-STATIC BOOLEAN          mImageLoaderEnabled;
+
+STATIC OC_IMAGE_LOADER_PATCH     mImageLoaderPatch;
+STATIC OC_IMAGE_LOADER_CONFIGURE mImageLoaderConfigure;
+STATIC UINT32                    mImageLoaderCaps;
+STATIC BOOLEAN                   mImageLoaderEnabled;
 
 STATIC
 EFI_STATUS
@@ -198,12 +201,12 @@ OcImageLoaderLoad (
 {
   EFI_STATUS                   Status;
   IMAGE_STATUS                 ImageStatus;
-  PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;      
+  PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;
   EFI_PHYSICAL_ADDRESS         DestinationArea;
   VOID                         *DestinationBuffer;
   OC_LOADED_IMAGE_PROTOCOL     *OcLoadedImage;
   EFI_LOADED_IMAGE_PROTOCOL    *LoadedImage;
-  
+
   ASSERT (SourceBuffer != NULL);
 
   //
@@ -628,9 +631,9 @@ DetectCapabilities (
   // version pattern presence.
   //
   if (Result >= 0) {
-    return OC_KERN_CAPABILITY_K32_64;
+    return OC_KERN_CAPABILITY_K32_U64;
   }
-  return OC_KERN_CAPABILITY_K32_32;
+  return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;
 #else
   //
   // For X64 mode, when the pattern is found, this can be 10.7 or 10.8+.
@@ -638,9 +641,9 @@ DetectCapabilities (
   //
   if (Result >= 0) {
     if (((UINT8 *)SourceBuffer)[Result + L_STR_LEN ("Mac OS X 10.")] == '7') {
-      return OC_KERN_CAPABILITY_K32_64 | OC_KERN_CAPABILITY_K64;
+      return OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64;
     }
-    return OC_KERN_CAPABILITY_K64;
+    return OC_KERN_CAPABILITY_K64_U64;
   }
 
   //
@@ -657,9 +660,9 @@ DetectCapabilities (
     (INT32) (SourceSize / 2)
     );
   if (Result >= 0) {
-    return OC_KERN_CAPABILITY_K32_32 | OC_KERN_CAPABILITY_K64;
+    return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64;
   }
-  return OC_KERN_CAPABILITY_K32_32;
+  return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;
 #endif
 }
 
@@ -738,9 +741,9 @@ InternalEfiLoadImage (
   // By default assume target default.
   //
 #ifdef MDE_CPU_IA32
-  mImageLoaderCaps = OC_KERN_CAPABILITY_K32_32;
+  mImageLoaderCaps = OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;
 #else
-  mImageLoaderCaps = OC_KERN_CAPABILITY_K64; 
+  mImageLoaderCaps = OC_KERN_CAPABILITY_K64_U64;
 #endif
 
   if (SourceBuffer != NULL) {
@@ -776,6 +779,14 @@ InternalEfiLoadImage (
       SourceBuffer = NULL;
       SourceSize   = 0;
     }
+  }
+
+  if (SourceBuffer != NULL && mImageLoaderPatch != NULL) {
+    mImageLoaderPatch (
+      DevicePath,
+      SourceBuffer,
+      SourceSize
+      );
   }
 
   //
@@ -833,8 +844,9 @@ InternalEfiStartImage (
   OUT CHAR16      **ExitData OPTIONAL
   )
 {
-  EFI_STATUS                Status;
-  OC_LOADED_IMAGE_PROTOCOL  *OcLoadedImage;
+  EFI_STATUS                 Status;
+  OC_LOADED_IMAGE_PROTOCOL   *OcLoadedImage;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   //
   // If we loaded the image, invoke the entry point manually.
@@ -845,12 +857,39 @@ InternalEfiStartImage (
     (VOID **) &OcLoadedImage
     );
   if (!EFI_ERROR (Status)) {
+    //
+    // Call configure update for our images.
+    //
+    if (mImageLoaderConfigure != NULL) {
+      mImageLoaderConfigure (
+        &OcLoadedImage->LoadedImage,
+        mImageLoaderCaps
+        );
+    }
+
     return InternalDirectStartImage (
       OcLoadedImage,
       ImageHandle,
       ExitDataSize,
       ExitData
       );
+  }
+
+  //
+  // Call configure update for generic images too.
+  //
+  if (mImageLoaderConfigure != NULL) {
+    Status = gBS->HandleProtocol (
+      ImageHandle,
+      &gEfiLoadedImageProtocolGuid,
+      (VOID **) &LoadedImage
+      );
+    if (!EFI_ERROR (Status)) {
+      mImageLoaderConfigure (
+        LoadedImage,
+        mImageLoaderCaps
+        );
+    }
   }
 
   return mOriginalEfiStartImage (ImageHandle, ExitDataSize, ExitData);
@@ -948,10 +987,18 @@ OcImageLoaderActivate (
   mImageLoaderEnabled = TRUE;
 }
 
-UINT32
-OcImageLoaderGetKernCaps (
-  VOID
+VOID
+OcImageLoaderRegisterPatch (
+  IN OC_IMAGE_LOADER_PATCH  Patch      OPTIONAL
   )
 {
-  return mImageLoaderCaps;
+  mImageLoaderPatch  = Patch;
+}
+
+VOID
+OcImageLoaderRegisterConfigure (
+  IN OC_IMAGE_LOADER_CONFIGURE  Configure  OPTIONAL
+  )
+{
+  mImageLoaderConfigure = Configure;
 }

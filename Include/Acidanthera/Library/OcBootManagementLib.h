@@ -117,10 +117,21 @@ typedef enum OC_PICKER_MODE_ {
 
 /**
   macOS Kernel capabilities.
+  Written in pairs of kernel and user capabilities.
+
+  On IA32 firmware:
+  10.4-10.5 - K32_U32 | K32_U64.
+  10.6      - K32_U32 | K32_U64.
+  10.7+     - K32_U64.
+
+  On X64 firmware:
+  10.4-10.5 - K32_U32 | K32_U64.
+  10.6      - K32_U32 | K32_U64 | K64_U64.
+  10.7+     - K32_U64 | K64_U64.
 **/
-#define OC_KERN_CAPABILITY_K32_32  BIT0 ///< Supports K32 with i386 requirement (10.4~10.6)
-#define OC_KERN_CAPABILITY_K32_64  BIT1 ///< Supports K32 with x86_64 requirement (10.7)
-#define OC_KERN_CAPABILITY_K64     BIT2 ///< Supports K64 (10.6+)
+#define OC_KERN_CAPABILITY_K32_U32   BIT0 ///< Supports K32 and U32 (10.4~10.6)
+#define OC_KERN_CAPABILITY_K32_U64   BIT1 ///< Supports K32 and U64 (10.4~10.7)
+#define OC_KERN_CAPABILITY_K64_U64   BIT2 ///< Supports K64 and U64 (10.6+)
 
 /**
   Action to perform as part of executing a system boot entry.
@@ -1262,13 +1273,45 @@ OcImageLoaderActivate (
   );
 
 /**
-  Get Apple kernel capabilities for the currently loaded image.
-
-  @returns OC_KERN_CAPABILITY bitmask.
+  Image loader callback triggered before LoadImage.
 **/
-UINT32
-OcImageLoaderGetKernCaps (
-  VOID
+typedef
+VOID
+(*OC_IMAGE_LOADER_PATCH) (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
+  IN VOID                      *SourceBuffer,
+  IN UINTN                     SourceSize
+  );
+
+/**
+  Image loader callback triggered before StartImage.
+**/
+typedef
+VOID
+(*OC_IMAGE_LOADER_CONFIGURE) (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     UINT32                     Capabilities
+  );
+
+
+/**
+  Register image loading callback.
+
+  @param[in] Patch      Callback function to call on image load.
+**/
+VOID
+OcImageLoaderRegisterPatch (
+  IN OC_IMAGE_LOADER_PATCH  Patch      OPTIONAL
+  );
+
+/**
+  Register image start callback.
+
+  @param[in] Configure  Callback function to call on image start.
+**/
+VOID
+OcImageLoaderRegisterConfigure (
+  IN OC_IMAGE_LOADER_CONFIGURE  Configure  OPTIONAL
   );
 
 /**

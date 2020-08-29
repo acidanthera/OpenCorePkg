@@ -15,6 +15,7 @@
 #ifndef OPEN_CORE_H
 #define OPEN_CORE_H
 
+#include <Library/OcAppleKernelLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcCpuLib.h>
@@ -117,6 +118,42 @@ OcLoadKernelSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config,
   IN OC_CPU_INFO         *CpuInfo
+  );
+
+/**
+  Apply kernel quirk.
+**/
+EFI_STATUS
+OcKernelApplyQuirk (
+  IN     KERNEL_QUIRK_NAME  Quirk,
+  IN     KERNEL_CACHE_TYPE  CacheType,
+  IN     UINT32             DarwinVersion,
+  IN OUT VOID               *Context,
+  IN OUT PATCHER_CONTEXT    *KernelPatcher
+  );
+
+/**
+  Apply kernel patch.
+**/
+VOID
+OcKernelApplyPatches (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     OC_CPU_INFO       *CpuInfo,
+  IN     UINT32            DarwinVersion,
+  IN     KERNEL_CACHE_TYPE CacheType,
+  IN     VOID              *Context,
+  IN OUT UINT8             *Kernel,
+  IN     UINT32            Size
+  );
+
+/**
+  Apply kernel block patch.
+**/
+VOID
+OcKernelBlockKexts (
+  IN     OC_GLOBAL_CONFIG  *Config,
+  IN     UINT32            DarwinVersion,
+  IN     PRELINKED_CONTEXT *Context
   );
 
 /**

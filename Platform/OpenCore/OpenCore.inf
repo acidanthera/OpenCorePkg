@@ -39,6 +39,7 @@
   OpenCoreAcpi.c
   OpenCoreDevProps.c
   OpenCoreKernel.c
+  OpenCoreKernelPatch.c
   OpenCoreMisc.c
   OpenCoreNvram.c
   OpenCorePlatform.c

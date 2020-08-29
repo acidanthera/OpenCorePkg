@@ -26,6 +26,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcVirtualFsLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 STATIC OC_STORAGE_CONTEXT  *mOcStorage;
 STATIC OC_GLOBAL_CONFIG    *mOcConfiguration;
@@ -38,72 +39,73 @@ STATIC BOOLEAN             mUse32BitKernel;
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
-//
-// Kernel cache types.
-//
-typedef enum KERNEL_CACHE_TYPE_ {
-  CacheTypeCacheless,
-  CacheTypeMkext,
-  CacheTypePrelinked
-} KERNEL_CACHE_TYPE;
-
-#define PRINT_KERNEL_CACHE_TYPE(a) ( \
-          (a)   == CacheTypeCacheless ? L"Cacheless" : \
-          ((a)  == CacheTypeMkext     ? L"Mkext" : \
-          (((a) == CacheTypePrelinked ? L"Prelinked" : L"Unknown"))))
-
 STATIC
-VOID *
-OcKernelReadSystemKextFile (
-  IN  EFI_FILE_PROTOCOL   *RootFile,
-  IN  CONST CHAR16        *FilePath,
-  OUT UINT32              *FileSize OPTIONAL
+VOID
+OcKernelConfigureCapabilities (
+  IN OUT EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+  IN     UINT32                     Capabilities
   )
 {
-  EFI_STATUS            Status;
-  EFI_FILE_PROTOCOL     *File;
-  UINT32                Size;
-  UINT8                 *FileBuffer;
+  CONST CHAR8  *KernelArch;
+  CHAR8        *AppleArchValue;
+  BOOLEAN      HasAppleArch;
+  BOOLEAN      Automatic;
 
-  Status = SafeFileOpen (
-    RootFile,
-    &File,
-    (CHAR16 *) FilePath,
-    EFI_FILE_MODE_READ,
-    0
+  //
+  // Reset to the default value.
+  // Capabilities will always have K64 stripped when compiled for IA32.
+  //
+  mUse32BitKernel = (Capabilities & OC_KERN_CAPABILITY_K64_U64) == 0;
+
+  //
+  // Skip if not Apple image.
+  //
+  if (LoadedImage->FilePath == NULL
+    || (OcGetBootDevicePathType (LoadedImage->FilePath, NULL, NULL) & OC_BOOT_APPLE_ANY) == 0) {
+    return;
+  }
+
+  //
+  // arch boot argument overrides any compatibility checks.
+  //
+  HasAppleArch = OcCheckArgumentFromEnv (
+    LoadedImage,
+    gRT->GetVariable,
+    "arch=",
+    L_STR_LEN ("arch="),
+    &AppleArchValue
     );
 
-  if (EFI_ERROR (Status)) {
-    return NULL;
+  if (AppleArchValue) {
+    mUse32BitKernel = AsciiStrCmp (AppleArchValue, "i386") == 0;
+    DEBUG ((DEBUG_INFO, "OC: Arch %a overrides capabilities %u\n", AppleArchValue, Capabilities));
+    FreePool (AppleArchValue);
+    return;
   }
 
-  Status = GetFileSize (File, &Size);
-  if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
-    File->Close (File);
-    return NULL;
+  //
+  // FIXME: The rest is not complete.
+  //
+
+  KernelArch = OC_BLOB_GET (&mOcConfiguration->Kernel.Scheme.KernelArch);
+  Automatic = KernelArch[0] == '\0' || AsciiStrCmp (KernelArch, "Auto") == 0;
+
+  //
+  // In automatic mode, if we do not support SSSE3 and can downgrade to U32, do it.
+  //
+  if (Automatic && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
+    && (Capabilities & (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)) != 0
+    && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0) {
+    DEBUG ((DEBUG_INFO, "OC: Missing SSSE3 disables U64 capabilities %u\n", Capabilities));
+    Capabilities &= ~(OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
   }
 
-  FileBuffer = AllocatePool (Size + 2);
-  if (FileBuffer == NULL) {
-    File->Close (File);
-    return NULL;
+  //
+  // If we do not support K64 for this target, force 32.
+  //
+  if ((Capabilities & OC_KERN_CAPABILITY_K64_U64) == 0) {
+    mUse32BitKernel = TRUE;
   }
-
-  Status = GetFileData (File, 0, Size, FileBuffer);
-  File->Close (File);
-  if (EFI_ERROR (Status)) {
-    FreePool (FileBuffer);
-    return NULL;
-  }
-
-  FileBuffer[Size]     = 0;
-  FileBuffer[Size + 1] = 0;
-
-  if (FileSize != NULL) {
-    *FileSize = Size;
-  }
-
-  return FileBuffer;
 }
 
 STATIC
@@ -191,10 +193,11 @@ OcKernelLoadKextsAndReserve (
 
     UnicodeUefiSlashes (FullPath);
 
-    Kext->PlistData = OcKernelReadSystemKextFile (
+    Kext->PlistData = ReadFileFromFile (
       RootFile,
       FullPath,
-      &Kext->PlistDataSize
+      &Kext->PlistDataSize,
+      0
       );
 
     if (Kext->PlistData == NULL) {
@@ -231,10 +234,11 @@ OcKernelLoadKextsAndReserve (
 
       UnicodeUefiSlashes (FullPath);
 
-      Kext->ImageData = OcKernelReadSystemKextFile (
+      Kext->ImageData = ReadFileFromFile (
         RootFile,
         FullPath,
-        &Kext->ImageDataSize
+        &Kext->ImageDataSize,
+        0
         );
 
       if (Kext->ImageData == NULL) {
@@ -440,314 +444,6 @@ OcKernelLoadKextsAndReserve (
 }
 
 STATIC
-EFI_STATUS
-OcKernelApplyQuirk (
-  IN     KERNEL_QUIRK_NAME  Quirk,
-  IN     KERNEL_CACHE_TYPE  CacheType,
-  IN     UINT32             DarwinVersion,
-  IN OUT VOID               *Context,
-  IN OUT PATCHER_CONTEXT    *KernelPatcher
-  )
-{
-  //
-  // Apply kernel quirks to kernel, kext patches to context.
-  //
-  if (Context == NULL) {
-    ASSERT (KernelPatcher != NULL);
-    return KernelApplyQuirk (Quirk, KernelPatcher, DarwinVersion);
-  }
-
-  if (CacheType == CacheTypeCacheless) {
-    return CachelessContextAddQuirk (Context, Quirk);
-  }
-  
-  if (CacheType == CacheTypeMkext) {
-    return MkextContextApplyQuirk (Context, Quirk, DarwinVersion);
-  }
-
-  if (CacheType == CacheTypePrelinked) {
-    return PrelinkedContextApplyQuirk (Context, Quirk, DarwinVersion);
-  }
-
-  return EFI_UNSUPPORTED;
-}
-
-STATIC
-VOID
-OcKernelApplyPatches (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     UINT32            DarwinVersion,
-  IN     KERNEL_CACHE_TYPE CacheType,
-  IN     VOID              *Context,
-  IN OUT UINT8             *Kernel,
-  IN     UINT32            Size
-  )
-{
-  EFI_STATUS             Status;
-  PATCHER_CONTEXT        KernelPatcher;
-  UINT32                 Index;
-  PATCHER_GENERIC_PATCH  Patch;
-  OC_KERNEL_PATCH_ENTRY  *UserPatch;
-  CONST CHAR8            *Target;
-  CONST CHAR8            *Comment;
-  UINT32                 MaxKernel;
-  UINT32                 MinKernel;
-  BOOLEAN                IsKernelPatch;
-
-  IsKernelPatch = Context == NULL;
-
-  if (IsKernelPatch) {
-    ASSERT (Kernel != NULL);
-
-    Status = PatcherInitContextFromBuffer (
-      &KernelPatcher,
-      Kernel,
-      Size
-      );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Kernel patcher kernel init failure - %r\n", Status));
-      return;
-    }
-  }
-
-  for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
-    UserPatch = Config->Kernel.Patch.Values[Index];
-    Target    = OC_BLOB_GET (&UserPatch->Identifier);
-    Comment   = OC_BLOB_GET (&UserPatch->Comment);
-
-    if (!UserPatch->Enabled || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
-      continue;
-    }
-
-    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
-
-    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: Kernel patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
-        Target,
-        Comment,
-        Index,
-        MinKernel,
-        DarwinVersion,
-        MaxKernel
-        ));
-      continue;
-    }
-
-    //
-    // Ignore patch if:
-    // - There is nothing to replace.
-    // - We have neither symbolic base, nor find data.
-    // - Find and replace mismatch in size.
-    // - Mask and ReplaceMask mismatch in size when are available.
-    //
-    if (UserPatch->Replace.Size == 0
-      || (OC_BLOB_GET (&UserPatch->Base)[0] == '\0' && UserPatch->Find.Size != UserPatch->Replace.Size)
-      || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
-      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
-      DEBUG ((DEBUG_ERROR, "OC: Kernel patch %u for %a (%a) is borked\n", Index, Target, Comment));
-      continue;
-    }
-
-    ZeroMem (&Patch, sizeof (Patch));
-
-    if (OC_BLOB_GET (&UserPatch->Comment)[0] != '\0') {
-      Patch.Comment  = OC_BLOB_GET (&UserPatch->Comment);
-    }
-
-    if (OC_BLOB_GET (&UserPatch->Base)[0] != '\0') {
-      Patch.Base  = OC_BLOB_GET (&UserPatch->Base);
-    }
-
-    if (UserPatch->Find.Size > 0) {
-      Patch.Find  = OC_BLOB_GET (&UserPatch->Find);
-    }
-
-    Patch.Replace = OC_BLOB_GET (&UserPatch->Replace);
-
-    if (UserPatch->Mask.Size > 0) {
-      Patch.Mask  = OC_BLOB_GET (&UserPatch->Mask);
-    }
-
-    if (UserPatch->ReplaceMask.Size > 0) {
-      Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
-    }
-
-    Patch.Size    = UserPatch->Replace.Size;
-    Patch.Count   = UserPatch->Count;
-    Patch.Skip    = UserPatch->Skip;
-    Patch.Limit   = UserPatch->Limit;
-
-    if (IsKernelPatch) {
-      Status = PatcherApplyGenericPatch (&KernelPatcher, &Patch);
-    } else {
-      if (CacheType == CacheTypeCacheless) {
-        Status = CachelessContextAddPatch (Context, Target, &Patch);
-      } else if (CacheType == CacheTypeMkext) {
-        Status = MkextContextApplyPatch (Context, Target, &Patch);
-      } else if (CacheType == CacheTypePrelinked) {
-        Status = PrelinkedContextApplyPatch (Context, Target, &Patch);
-      }
-    }
-
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Kernel patcher result %u for %a (%a) - %r\n",
-      Index,
-      Target,
-      Comment,
-      Status
-      ));
-  }
-
-  if (!IsKernelPatch) {
-    if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
-      OcKernelApplyQuirk (KernelQuirkAppleCpuPmCfgLock, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.ExternalDiskIcons) {
-      OcKernelApplyQuirk (KernelQuirkExternalDiskIcons, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.ThirdPartyDrives) {
-      OcKernelApplyQuirk (KernelQuirkThirdPartyDrives, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.XhciPortLimit) {
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit1, CacheType, DarwinVersion, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit2, CacheType, DarwinVersion, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkXhciPortLimit3, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.DisableIoMapper) {
-      OcKernelApplyQuirk (KernelQuirkDisableIoMapper, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.DisableRtcChecksum) {
-      OcKernelApplyQuirk (KernelQuirkDisableRtcChecksum, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.IncreasePciBarSize) {
-      OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);     
-    }
-
-    if (Config->Kernel.Quirks.CustomSmbiosGuid) {
-      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid1, CacheType, DarwinVersion, Context, NULL);
-      OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, DarwinVersion, Context, NULL);
-    }
-
-    if (Config->Kernel.Quirks.DummyPowerManagement) {
-      OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
-    }
-  } else {
-    if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-
-    if (Config->Kernel.Quirks.AppleXcpmExtraMsrs) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-
-    if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
-      OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-
-    if (Config->Kernel.Quirks.PanicNoKextDump) {
-      OcKernelApplyQuirk (KernelQuirkPanicNoKextDump, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-
-    if (Config->Kernel.Emulate.Cpuid1Data[0] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[1] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[2] != 0
-      || Config->Kernel.Emulate.Cpuid1Data[3] != 0) {
-      PatchKernelCpuId (
-        &KernelPatcher,
-        mOcCpuInfo,
-        Config->Kernel.Emulate.Cpuid1Data,
-        Config->Kernel.Emulate.Cpuid1Mask
-        );
-    }
-
-    if (Config->Kernel.Quirks.LapicKernelPanic) {
-      OcKernelApplyQuirk (KernelQuirkLapicKernelPanic, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-
-    if (Config->Kernel.Quirks.PowerTimeoutKernelPanic) {
-      OcKernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, CacheType, DarwinVersion, NULL, &KernelPatcher);
-    }
-  }
-}
-
-STATIC
-VOID
-OcKernelBlockKexts (
-  IN     OC_GLOBAL_CONFIG  *Config,
-  IN     UINT32            DarwinVersion,
-  IN     PRELINKED_CONTEXT *Context
-  )
-{
-  EFI_STATUS             Status;
-  PATCHER_CONTEXT        Patcher;
-  UINT32                 Index;
-  OC_KERNEL_BLOCK_ENTRY  *Kext;
-  CONST CHAR8            *Target;
-  CONST CHAR8            *Comment;
-  UINT32                 MaxKernel;
-  UINT32                 MinKernel;
-
-  for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
-    Kext    = Config->Kernel.Block.Values[Index];
-    Target  = OC_BLOB_GET (&Kext->Identifier);
-    Comment = OC_BLOB_GET (&Kext->Comment);
-
-    if (!Kext->Enabled) {
-      continue;
-    }
-
-    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
-
-    if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: Prelink blocker skips %a (%a) block at %u due to version %u <= %u <= %u\n",
-        Target,
-        Comment,
-        Index,
-        MinKernel,
-        DarwinVersion,
-        MaxKernel
-        ));
-      continue;
-    }
-
-    Status = PatcherInitContextFromPrelinked (
-      &Patcher,
-      Context,
-      Target
-      );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OC: Prelink blocker %a (%a) init failure - %r\n", Target, Comment, Status));
-      continue;
-    }
-
-    Status = PatcherBlockKext (&Patcher);
-
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Prelink blocker %a (%a) - %r\n",
-      Target,
-      Comment,
-      Status
-      ));
-  }
-}
-
-STATIC
 VOID
 OcKernelInjectKext (
   IN OC_KERNEL_ADD_ENTRY  *Kext,
@@ -780,9 +476,9 @@ OcKernelInjectKext (
   if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
     DEBUG ((
       DEBUG_INFO,
-      "OC: %s%s injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
+      "OC: %a%a injection skips %a (%a) kext at %u due to version %u <= %u <= %u\n",
       PRINT_KERNEL_CACHE_TYPE (CacheType),
-      IsForced ? L" force" : L"",
+      IsForced ? " force" : "",
       BundlePath,
       Comment,
       Index,
@@ -845,9 +541,9 @@ OcKernelInjectKext (
 
   DEBUG ((
     EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-    "OC: %s%s injection %a (%a) - %r\n",
+    "OC: %a%a injection %a (%a) - %r\n",
     PRINT_KERNEL_CACHE_TYPE (CacheType),
-    IsForced ? L" force" : L"",
+    IsForced ? " force" : "",
     BundlePath,
     Comment,
     Status
@@ -928,7 +624,7 @@ OcKernelInjectKexts (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OC: %s insertion error - %r\n", PRINT_KERNEL_CACHE_TYPE (CacheType), Status));
+    DEBUG ((DEBUG_WARN, "OC: %a insertion error - %r\n", PRINT_KERNEL_CACHE_TYPE (CacheType), Status));
   }
 }
 
@@ -952,7 +648,7 @@ OcKernelProcessPrelinked (
   if (!EFI_ERROR (Status)) {
     OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, DarwinVersion, LinkedExpansion, ReservedExeSize);
 
-    OcKernelApplyPatches (Config, DarwinVersion, CacheTypePrelinked, &Context, NULL, 0);
+    OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, CacheTypePrelinked, &Context, NULL, 0);
 
     OcKernelBlockKexts (Config, DarwinVersion, &Context);
 
@@ -984,7 +680,7 @@ OcKernelProcessMkext (
 
   OcKernelInjectKexts (Config, CacheTypeMkext, &Context, DarwinVersion, 0, 0);
 
-  OcKernelApplyPatches (Config, DarwinVersion, CacheTypeMkext, &Context, NULL, 0);
+  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, CacheTypeMkext, &Context, NULL, 0);
 
   MkextInjectPatchComplete (&Context);
 
@@ -1019,7 +715,7 @@ OcKernelInitCacheless (
 
   OcKernelInjectKexts (Config, CacheTypeCacheless, Context, DarwinVersion, 0, 0);
 
-  OcKernelApplyPatches (Config, DarwinVersion, CacheTypeCacheless, Context, NULL, 0);
+  OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, CacheTypeCacheless, Context, NULL, 0);
 
   return CachelessContextOverlayExtensionsDir (Context, File);
 }
@@ -1040,11 +736,9 @@ OcKernelReadAppleKernel (
   )
 {
   EFI_STATUS         Status;
-  EFI_STATUS         Status2;
   BOOLEAN            Result;
   UINT32             DarwinVersionNew;
   BOOLEAN            IsKernel32Bit;
-  BOOLEAN            Use32BitKernel;
 
   UINT32             ReservedInfoSize;
   UINT32             NumReservedKexts;
@@ -1094,10 +788,10 @@ OcKernelReadAppleKernel (
     "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
     IsKernel32Bit ? "32-bit" : "64-bit",
     FileName,
-    Digest ? Digest[0] : 0,
-    Digest ? Digest[1] : 0,
-    Digest ? Digest[2] : 0,
-    Digest ? Digest[3] : 0,
+    Digest != NULL ? Digest[0] : 0,
+    Digest != NULL ? Digest[1] : 0,
+    Digest != NULL ? Digest[2] : 0,
+    Digest != NULL ? Digest[3] : 0,
     Status
     ));
 
@@ -1114,89 +808,16 @@ OcKernelReadAppleKernel (
     }
 
     //
-    // Recheck kernel version and expected vs actual bitness returned. If either of those differ,
-    // re-evaluate whether we can run 64-bit kernels on this platform.
+    // If we failed to obtain the requested bitness for the platform, abort.
     //
-    if (DarwinVersionNew != *DarwinVersion || mUse32BitKernel != IsKernel32Bit) {
-      //
-      // Query command line arch= argument and fallback to SMBIOS checking.
-      // Arch argument will force the desired arch.
-      //
-      Status2 = OcAbcIs32BitPreferred (&Use32BitKernel);
-      if (EFI_ERROR (Status2)) {
-        Use32BitKernel = !OcPlatformIs64BitSupported (DarwinVersionNew);
-      }
-
-      //
-      // If we did not change our desired arch, but the original kernel
-      // was wrong, just abort right away as the desired arch does not exist.
-      //
-      if (mUse32BitKernel == Use32BitKernel && mUse32BitKernel != IsKernel32Bit) {
-        DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
-        FreePool (*Kernel);
-        *Kernel = NULL;
-
-        return EFI_NOT_FOUND;
-      }
-
-      //
-      // If a different kernel arch is required, but we did not originally read it,
-      // we'll need to try to get the kernel again.
-      //
-      if (mUse32BitKernel != Use32BitKernel) {
-        FreePool (*Kernel);
-        mUse32BitKernel = Use32BitKernel;
-
-        DEBUG ((DEBUG_INFO, "OC: Wrong arch read, retrying %a XNU hook on %s\n", mUse32BitKernel ? "32-bit" : "64-bit", FileName));
-        Status = ReadAppleKernel (
-          KernelFile,
-          mUse32BitKernel,
-          &IsKernel32Bit,
-          Kernel,
-          KernelSize,
-          AllocatedSize,
-          ReservedFullSize,
-          Digest
-          );
-        DEBUG ((
-          DEBUG_INFO,
-          "OC: Result of %a XNU hook on %s (%02X%02X%02X%02X) is %r\n",
-          IsKernel32Bit ? "32-bit" : "64-bit",
-          FileName,
-          Digest != NULL ? Digest[0] : 0,
-          Digest != NULL ? Digest[1] : 0,
-          Digest != NULL ? Digest[2] : 0,
-          Digest != NULL ? Digest[3] : 0,
-          Status
-          ));
-
-        if (!EFI_ERROR (Status)) {
-          //
-          // 10.6 and below may keep older prelinkedkernels around, do not load those.
-          //
-          DarwinVersionNew = OcKernelReadDarwinVersion (*Kernel, *KernelSize);
-          if (DarwinVersionNew < *DarwinVersion) {
-            FreePool (*Kernel);
-            *Kernel = NULL;
-
-            return EFI_INVALID_PARAMETER;
-          }
-
-          //
-          // We should be matching the required arch if we get here, but check just in case.
-          //
-          if (mUse32BitKernel != IsKernel32Bit) {
-            DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
-            FreePool (*Kernel);
-            *Kernel = NULL;
-
-            return EFI_NOT_FOUND;
-          }
-        }
-      }
-
-      *DarwinVersion = DarwinVersionNew;
+    if (mUse32BitKernel != IsKernel32Bit) {
+      DEBUG ((DEBUG_WARN, "OC: %a kernel architecture is not available, aborting.\n", mUse32BitKernel ? "32-bit" : "64-bit"));
+      FreePool (*Kernel);
+      *Kernel = NULL;
+      return EFI_NOT_FOUND;
     }
+
+    *DarwinVersion = DarwinVersionNew;
   }
 
   return Status;
@@ -1479,7 +1100,7 @@ OcKernelFileOpen (
         return EFI_NOT_FOUND;
       }
 
-      OcKernelApplyPatches (mOcConfiguration, mOcDarwinVersion, 0, NULL, Kernel, KernelSize);
+      OcKernelApplyPatches (mOcConfiguration, mOcCpuInfo, mOcDarwinVersion, 0, NULL, Kernel, KernelSize);
       PrelinkedStatus = OcKernelProcessPrelinked (
         mOcConfiguration,
         mOcDarwinVersion,
@@ -1687,14 +1308,7 @@ OcLoadKernelSupport (
     mOcCpuInfo              = CpuInfo;
     mOcDarwinVersion        = 0;
     mOcCachelessInProgress  = FALSE;
-
-#if defined(MDE_CPU_IA32)
-    mUse32BitKernel         = TRUE;
-#elif defined(MDE_CPU_X64)
-    mUse32BitKernel         = FALSE;
-#else
-#error "Unsupported architecture"
-#endif
+    OcImageLoaderRegisterConfigure (OcKernelConfigureCapabilities);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
   }
@@ -1708,6 +1322,7 @@ OcUnloadKernelSupport (
   EFI_STATUS  Status;
 
   if (mOcStorage != NULL) {
+    OcImageLoaderRegisterConfigure (NULL);
     Status = DisableVirtualFs (gBS);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to disable vfs - %r\n", Status));

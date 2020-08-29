@@ -2296,24 +2296,43 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Prefer specified kernel architecture (\texttt{Auto}, \texttt{i386},
-  \texttt{x86\_64}) when available.
+  \texttt{i386-user32}, \texttt{x86\_64}) when available.
 
   On macOS 10.7 and earlier XNU kernel may not boot with the usual \texttt{x86\_64} architecture,
   and the exact choice depends on many factors including boot arguments, SMBIOS, and operating
   system type. This setting will use the specified architecture to boot macOS when it is supported
-  by the macOS and the configuration. Below is the algorithm determining the kernel architecture.
+  by the macOS and the configuration:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Auto} --- Choose the preferred architecture automatically.
+    \item \texttt{i386} --- Use \texttt{i386} (32-bit) kernel when available.
+    \item \texttt{i386-user32} --- Use \texttt{i386} (32-bit) kernel when available
+      and force the use of 32-bit userspace even on 64-bit capable processors
+      (similar to \texttt{-legacy} boot argument). This mode is relevant for older Pentium
+      processors with \texttt{x86\_64} support but without \texttt{SSSE3}, which
+      on macOS 10.6 will result in some applications crashing.
+    \item \texttt{x86\_64} --- Use \texttt{x86\_64} (64-bit) kernel when available.
+  \end{itemize}
+
+  Below is the algorithm determining the kernel architecture.
 
   \begin{enumerate}
     \tightlist
     \item \texttt{arch} argument in image arguments (e.g. when launched
-    via UEFI Shell) or in \texttt{boot-args} variable override any compatibility
-    checks and force the specified architecture.
+    via UEFI Shell) or in \texttt{boot-args} variable overrides any compatibility
+    checks and forces the specified architecture, ending this algorithm.
+    \item OpenCore build architecture restricts capabilities to \texttt{i386}
+    and \texttt{i386-user32} mode in 32-bit firmware variant.
     \item Determined EfiBoot version restricts architecture choice:
       \begin{itemize}
-      \item 10.4-10.5 --- \texttt{i386}
-      \item 10.6-10.7 --- \texttt{i386} or \texttt{x86\_64}
+      \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32}
+      \item 10.6-10.7 --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
       \item 10.8 or newer --- \texttt{x86\_64}
       \end{itemize}
+    \item \texttt{CPUID} capabilities restrict capabilities to
+      \texttt{i386-user32} if \texttt{SSSE3} is not available
+      and \texttt{KernelArch} is set to \texttt{Auto}.
     \item SMBIOS model information and EfiBoot version restrict
       architecture choice and define architecture preference for client
       and server operating systems according to the table below.
