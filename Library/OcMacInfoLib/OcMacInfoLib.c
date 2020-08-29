@@ -25,18 +25,18 @@
 STATIC CONST UINT32 mDevicePathsSupported = 1;
 
 STATIC
-CONST MAC_INFO_64BIT_COMPAT_ENTRY Mac64BitModels[] = {
+CONST MAC_INFO_64BIT_COMPAT_ENTRY gMac64BitModels[] = {
   {
     "Macmini", 0, 3
-  },
-  {
-    "MacBook", 0, 5
   },
   {
     "MacBookAir", 0, 2
   },
   {
     "MacBookPro", 4, 3
+  },
+  {
+    "MacBook", 0, 5
   },
   {
     "iMac", 8, 7
@@ -171,22 +171,22 @@ IsMacModel64BitCompatible (
 
   SystemModelLength = AsciiStrLen (ProductName);
 
-  for (Index = 0; Index < sizeof (Mac64BitModels); Index++) {
-    CurrentModelLength = AsciiStrLen (Mac64BitModels[Index].ModelName);
+  for (Index = 0; Index < sizeof (gMac64BitModels); Index++) {
+    CurrentModelLength = AsciiStrLen (gMac64BitModels[Index].ModelName);
     if (SystemModelLength <= CurrentModelLength) {
       continue;
     }
 
-    if (AsciiStrnCmp (ProductName, Mac64BitModels[Index].ModelName, CurrentModelLength) == 0) {
+    if (AsciiStrnCmp (ProductName, gMac64BitModels[Index].ModelName, CurrentModelLength) == 0) {
       SystemModelSuffix = &ProductName[CurrentModelLength];
 
       SystemModelSeparator = AsciiStrStr (SystemModelSuffix, ",");
       Status = AsciiStrDecimalToUint64S (SystemModelSuffix, &SystemModelSeparator, &SystemModelMajor);
       if (!EFI_ERROR (Status)) {
         if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
-          return Mac64BitModels[Index].SnowLeoMin64 != 0 && SystemModelMajor >= Mac64BitModels[Index].SnowLeoMin64;
+          return gMac64BitModels[Index].SnowLeoMin64 != 0 && SystemModelMajor >= gMac64BitModels[Index].SnowLeoMin64;
         } else if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX)) {
-          return Mac64BitModels[Index].LionMin64 != 0 && SystemModelMajor >= Mac64BitModels[Index].LionMin64;
+          return gMac64BitModels[Index].LionMin64 != 0 && SystemModelMajor >= gMac64BitModels[Index].LionMin64;
         }
       }
     }
