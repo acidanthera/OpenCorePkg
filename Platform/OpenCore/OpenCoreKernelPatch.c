@@ -114,7 +114,7 @@ OcKernelApplyPatches (
     if (Arch != NULL && AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Kernel patcher skips %a (%a) kext at %u due to arch %a != %a\n",
+        "OC: Kernel patcher skips %a (%a) patch at %u due to arch %a != %a\n",
         Target,
         Comment,
         Index,
