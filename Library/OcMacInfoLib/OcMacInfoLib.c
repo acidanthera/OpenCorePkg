@@ -19,6 +19,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcMacInfoLib.h>
+#include <Library/OcStringLib.h>
 
 #include "MacInfoInternal.h"
 
@@ -171,14 +172,20 @@ IsMacModel64BitCompatible (
 
   SystemModelLength = AsciiStrLen (ProductName);
 
-  for (Index = 0; Index < sizeof (gMac64BitModels); Index++) {
+  for (Index = 0; Index < ARRAY_SIZE (gMac64BitModels); Index++) {
+    //
+    // Ensure name is at least as big as what we have in the table, plus a number character.
+    //
     CurrentModelLength = AsciiStrLen (gMac64BitModels[Index].ModelName);
-    if (SystemModelLength <= CurrentModelLength) {
+    if (SystemModelLength <= CurrentModelLength + 1) {
       continue;
     }
 
     if (AsciiStrnCmp (ProductName, gMac64BitModels[Index].ModelName, CurrentModelLength) == 0) {
       SystemModelSuffix = &ProductName[CurrentModelLength];
+      if (!IsAsciiNumber (SystemModelSuffix[0])) {
+        continue;
+      }
 
       SystemModelSeparator = AsciiStrStr (SystemModelSuffix, ",");
       Status = AsciiStrDecimalToUint64S (SystemModelSuffix, &SystemModelSeparator, &SystemModelMajor);

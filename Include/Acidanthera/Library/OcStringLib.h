@@ -65,6 +65,17 @@ IsAsciiSpace (
   IN CHAR8  Char
   );
 
+/** Check if character is a number.
+
+  @param[in] Char  The ascii character to check if is number.
+
+  @retval  TRUE, if character is a number.
+**/
+BOOLEAN
+IsAsciiNumber (
+  IN CHAR8  Char
+  );
+
 /**
   Convert path with mixed slashes to UEFI slashes (\\).
 

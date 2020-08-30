@@ -55,6 +55,14 @@ IsAsciiSpace (
        || (Char == '\n'));
 }
 
+BOOLEAN
+IsAsciiNumber (
+  IN CHAR8  Char
+  )
+{
+  return Char >= L'0' && Char <= L'9';
+}
+
 VOID
 AsciiUefiSlashes (
   IN OUT CHAR8    *String
