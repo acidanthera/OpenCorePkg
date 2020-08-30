@@ -30,6 +30,7 @@
 #define OC_FSB_FREQUENCY           L"FSBFrequency"
 #define OC_ART_FREQUENCY           L"ARTFrequency"
 #define OC_DEVICE_PATHS_SUPPORTED  L"DevicePathsSupported"
+#define OC_COPROCESSOR_VERSION     L"apple-coprocessor-version"
 
 //
 // These are custom and match VirtualSMC, FakeSMC, and Clover.
@@ -57,6 +58,7 @@ typedef struct {
   CONST UINT8   *SmcRevision;
   CONST UINT8   *SmcBranch;
   CONST UINT8   *SmcPlatform;
+  CONST UINT32  *CoprocessorVersion;
 } OC_DATA_HUB_DATA;
 
 /**

@@ -288,6 +288,11 @@ UpdateDataHub (
   DataHubSetAppleMiscData (DataHub, OC_SMC_REVISION, Data->SmcRevision, OC_SMC_REVISION_SIZE);
   DataHubSetAppleMiscData (DataHub, OC_SMC_BRANCH, Data->SmcBranch, OC_SMC_BRANCH_SIZE);
   DataHubSetAppleMiscData (DataHub, OC_SMC_PLATFORM, Data->SmcPlatform, OC_SMC_PLATFORM_SIZE);
+  //
+  // Should normally be 0x20000, but it will cause issues like Recovery OS not booting
+  // without real coprocessor hardware present.
+  //
+  DataHubSetAppleMiscData (DataHub, OC_COPROCESSOR_VERSION, Data->CoprocessorVersion, sizeof (*Data->CoprocessorVersion));
 
   return EFI_SUCCESS;
 }
