@@ -52,8 +52,11 @@ OcKernelConfigureCapabilities (
   UINT32       ArgumentCount;
   UINT32       RequestedArch;
   BOOLEAN      HasAppleArch;
-  BOOLEAN      SnowLeo64;
-  BOOLEAN      Lion64;
+  UINT32       KernelVersion;
+  BOOLEAN      IsSnowLeo;
+  BOOLEAN      IsLion;
+
+  DEBUG ((DEBUG_VERBOSE, "OC: Supported boot capabilities %u\n", Capabilities));
 
   //
   // Reset to the default value.
@@ -104,27 +107,39 @@ OcKernelConfigureCapabilities (
   //
   // Determine the current operating system.
   //
-  SnowLeo64 = (Capabilities & (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64))
-    == (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
-  Lion64 = (Capabilities & (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64))
-    == (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
+  IsSnowLeo = FALSE;
+  IsLion    = FALSE;
+
+  if ((Capabilities & OC_KERN_CAPABILITY_ALL) == OC_KERN_CAPABILITY_ALL) {
+    KernelVersion = KERNEL_VERSION_SNOW_LEOPARD_MIN;
+    IsSnowLeo     = TRUE;
+  } else if ((Capabilities & OC_KERN_CAPABILITY_ALL) == OC_KERN_CAPABILITY_K32_K64_U64) {
+    KernelVersion = KERNEL_VERSION_LION_MIN;
+    IsLion        = TRUE;
+  } else if ((Capabilities & OC_KERN_CAPABILITY_ALL) == OC_KERN_CAPABILITY_K32_U32_U64) {
+    KernelVersion = KERNEL_VERSION_LEOPARD_MIN;
+  } else {
+    KernelVersion = KERNEL_VERSION_MOUNTAIN_LION_MIN;
+  }
 
   //
   // In automatic mode, if we do not support SSSE3 and can downgrade to U32, do it.
   //
   if (RequestedArch == 0
+    && (mOcCpuInfo->ExtFeatures & CPUID_EXTFEATURE_EM64T) == 0
     && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0
     && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
-    && (Capabilities & (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)) != 0) {
+    && (Capabilities & OC_KERN_CAPABILITY_K32_K64_U64) != 0) {
     DEBUG ((DEBUG_INFO, "OC: Missing SSSE3 disables U64 capabilities %u\n", Capabilities));
-    Capabilities &= ~(OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64);
+    Capabilities &= ~(OC_KERN_CAPABILITY_K32_K64_U64);
   }
 
   //
   // If we support K64 mode, check whether the board supports it.
   //
   if ((Capabilities & OC_KERN_CAPABILITY_K64_U64) != 0
-    && !OcPlatformIs64BitSupported (SnowLeo64 ? KERNEL_VERSION_SNOW_LEOPARD_MIN : KERNEL_VERSION_LION_MIN)) {
+    && !OcPlatformIs64BitSupported (KernelVersion)) {
+    DEBUG ((DEBUG_INFO, "OC: K64 forbidden due to current platform on version %u\n", KernelVersion));
     Capabilities &= ~(OC_KERN_CAPABILITY_K64_U64);
   }
 
@@ -150,9 +165,9 @@ OcKernelConfigureCapabilities (
   // - SnowLeo64 or Lion64 and try to boot i386.
   //
   ArgumentCount = 0;
-  if (Capabilities == OC_KERN_CAPABILITY_K64_U64 && SnowLeo64) {
+  if (Capabilities == OC_KERN_CAPABILITY_K64_U64 && IsSnowLeo) {
     NewArguments[ArgumentCount++] = "arch=x86_64";
-  } else if (Capabilities != OC_KERN_CAPABILITY_K64_U64 && (SnowLeo64 || Lion64)) {
+  } else if (Capabilities != OC_KERN_CAPABILITY_K64_U64 && (IsSnowLeo || IsLion)) {
     NewArguments[ArgumentCount++] = "arch=i386";
   }
 

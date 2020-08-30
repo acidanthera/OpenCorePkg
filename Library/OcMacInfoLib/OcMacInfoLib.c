@@ -192,5 +192,8 @@ IsMacModel64BitCompatible (
     }
   }
 
-  return FALSE;
+  //
+  // Default behavior allows 64-bit on both 10.6 and 10.7 if the model is not found.
+  //
+  return TRUE;
 }

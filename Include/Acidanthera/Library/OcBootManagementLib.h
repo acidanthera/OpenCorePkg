@@ -129,9 +129,13 @@ typedef enum OC_PICKER_MODE_ {
   10.6      - K32_U32 | K32_U64 | K64_U64.
   10.7+     - K32_U64 | K64_U64.
 **/
-#define OC_KERN_CAPABILITY_K32_U32   BIT0 ///< Supports K32 and U32 (10.4~10.6)
-#define OC_KERN_CAPABILITY_K32_U64   BIT1 ///< Supports K32 and U64 (10.4~10.7)
-#define OC_KERN_CAPABILITY_K64_U64   BIT2 ///< Supports K64 and U64 (10.6+)
+#define OC_KERN_CAPABILITY_K32_U32        BIT0 ///< Supports K32 and U32 (10.4~10.6)
+#define OC_KERN_CAPABILITY_K32_U64        BIT1 ///< Supports K32 and U64 (10.4~10.7)
+#define OC_KERN_CAPABILITY_K64_U64        BIT2 ///< Supports K64 and U64 (10.6+)
+
+#define OC_KERN_CAPABILITY_K32_K64_U64    (OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64)
+#define OC_KERN_CAPABILITY_K32_U32_U64    (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64)
+#define OC_KERN_CAPABILITY_ALL            (OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_K64_U64)
 
 /**
   Action to perform as part of executing a system boot entry.
@@ -1081,7 +1085,7 @@ OcParseBootArgs (
   @param[in]     GetVariable      Preferred UEFI NVRAM reader, optional.
   @param[in]     Argument         Argument, e.g. -v, slide=, debug=, etc.
   @param[in]     ArgumentLength   Argument length, e.g. L_STR_LEN ("-v").
-  @param[in,out] Value            Argument value length allocated from pool.
+  @param[in,out] Value            Argument value allocated from pool.
 
   @retval TRUE if argument is present.
 **/
