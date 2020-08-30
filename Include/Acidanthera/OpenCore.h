@@ -154,6 +154,7 @@ VOID
 OcKernelBlockKexts (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
   IN     PRELINKED_CONTEXT *Context
   );
 

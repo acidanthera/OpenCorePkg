@@ -567,7 +567,7 @@ OcKernelInjectKext (
   MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
-  if (Arch != NULL && AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
+  if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
     DEBUG ((
       DEBUG_INFO,
       "OC: %a%a injection skips %a (%a) kext at %u due to arch %a != %a\n",
@@ -763,7 +763,7 @@ OcKernelProcessPrelinked (
 
     OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context, NULL, 0);
 
-    OcKernelBlockKexts (Config, DarwinVersion, &Context);
+    OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, &Context);
 
     *KernelSize = Context.PrelinkedSize;
 

@@ -103,15 +103,17 @@ OcKernelApplyPatches (
   for (Index = 0; Index < Config->Kernel.Patch.Count; ++Index) {
     UserPatch = Config->Kernel.Patch.Values[Index];
     Target    = OC_BLOB_GET (&UserPatch->Identifier);
-    Comment   = OC_BLOB_GET (&UserPatch->Comment);
 
     if (!UserPatch->Enabled || (AsciiStrCmp (Target, "kernel") == 0) != IsKernelPatch) {
       continue;
     }
 
-    Arch = OC_BLOB_GET (&UserPatch->Arch);
+    Comment     = OC_BLOB_GET (&UserPatch->Comment);
+    Arch        = OC_BLOB_GET (&UserPatch->Arch);
+    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
 
-    if (Arch != NULL && AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
+    if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
         DEBUG_INFO,
         "OC: Kernel patcher skips %a (%a) patch at %u due to arch %a != %a\n",
@@ -123,9 +125,6 @@ OcKernelApplyPatches (
         ));
       return;
     }
-
-    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
@@ -289,6 +288,7 @@ VOID
 OcKernelBlockKexts (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
   IN     PRELINKED_CONTEXT *Context
   )
 {
@@ -298,20 +298,35 @@ OcKernelBlockKexts (
   OC_KERNEL_BLOCK_ENTRY  *Kext;
   CONST CHAR8            *Target;
   CONST CHAR8            *Comment;
+  CONST CHAR8            *Arch;
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
 
   for (Index = 0; Index < Config->Kernel.Block.Count; ++Index) {
-    Kext    = Config->Kernel.Block.Values[Index];
-    Target  = OC_BLOB_GET (&Kext->Identifier);
-    Comment = OC_BLOB_GET (&Kext->Comment);
+    Kext = Config->Kernel.Block.Values[Index];
 
     if (!Kext->Enabled) {
       continue;
     }
 
-    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
-    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+    Target      = OC_BLOB_GET (&Kext->Identifier);
+    Comment     = OC_BLOB_GET (&Kext->Comment);
+    Arch        = OC_BLOB_GET (&Kext->Arch);
+    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
+    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
+
+    if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Prelink blocker skips %a (%a) block at %u due to arch %a != %a\n",
+        Target,
+        Comment,
+        Index,
+        Arch,
+        Is32Bit ? "i386" : "x86_64"
+        ));
+      return;
+    }
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
