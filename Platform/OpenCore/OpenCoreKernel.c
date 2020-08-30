@@ -126,7 +126,7 @@ OcKernelConfigureCapabilities (
   // In automatic mode, if we do not support SSSE3 and can downgrade to U32, do it.
   //
   if (RequestedArch == 0
-    && (mOcCpuInfo->ExtFeatures & CPUID_EXTFEATURE_EM64T) == 0
+    && (mOcCpuInfo->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
     && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0
     && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
     && (Capabilities & OC_KERN_CAPABILITY_K32_K64_U64) != 0) {
