@@ -90,7 +90,7 @@ package() {
   # Mark binaries to be recognisable by OcBootManagementLib.
   bootsig="${selfdir}/Library/OcBootManagementLib/BootSignature.bin"
   efiOCBMs=(
-    "BOOTx64.efi"
+    "Bootstrap.efi"
     "OpenCore.efi"
     )
   for efiOCBM in "${efiOCBMs[@]}"; do
