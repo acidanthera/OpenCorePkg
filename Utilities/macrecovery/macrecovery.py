@@ -6,6 +6,8 @@ Gather recovery information for Macs.
 Copyright (c) 2019, vit9696
 """
 
+from __future__ import print_function
+
 import argparse
 import datetime
 import json
@@ -44,7 +46,7 @@ INFO_SIGN_SESS  = 'CT'
 INFO_REQURED    = [ INFO_PRODUCT, INFO_IMAGE_LINK, INFO_IMAGE_HASH, INFO_IMAGE_SESS,
                     INFO_SIGN_LINK, INFO_SIGN_HASH, INFO_SIGN_SESS ]
 
-def run_query(url, headers, post=None):
+def run_query(url, headers, post=None, raw=False):
   if post is not None:
     data = '\n'.join([entry + '=' + post[entry] for entry in post])
     if sys.version_info[0] >= 3:
@@ -54,6 +56,7 @@ def run_query(url, headers, post=None):
 
   req = Request(url=url, headers=headers, data=data)
   response = urlopen(req)
+  if raw: return response
   return dict(response.info()), response.read()
 
 def generate_id(type, id=None):
@@ -150,7 +153,17 @@ def save_image(url, sess, filename='', dir=''):
   print('Saving ' + url + ' to ' + filename + '...')
 
   with open (os.path.join(dir, filename), 'wb') as fh:
-    fh.write(run_query(url, headers)[1])
+    response = run_query(url, headers, raw=True)
+    size = 0
+    while True:
+      chunk = response.read(2**20)
+      if not chunk:
+        break
+      fh.write(chunk)
+      size += len(chunk)
+      print('\r{} MBs downloaded...'.format(size / (2**20)), end='')
+      sys.stdout.flush()
+    print('\rDownload complete!')
 
 def action_download(args):
   """

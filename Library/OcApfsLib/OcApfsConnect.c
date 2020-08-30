@@ -351,6 +351,13 @@ ApfsStartDriver (
     return Status;
   }
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCJS: Connecting %a APFS driver on handle %p\n",
+    mGlobalConnect ? "globally" : "normally",
+    PrivateData->LocationInfo.ControllerHandle
+    ));
+
   if (mGlobalConnect) {
     //
     // Connect all devices when implicitly requested. This is a workaround
