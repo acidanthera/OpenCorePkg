@@ -58,6 +58,7 @@
 [Protocols]
   gOcAfterBootCompatProtocolGuid    ## PRODUCES
   gOcFirmwareRuntimeProtocolGuid    ## SOMETIMES_CONSUMES
+  gVMwareMacProtocolGuid            ## SOMETIMES_PRODUCES
 
 [LibraryClasses]
   BaseLib

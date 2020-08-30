@@ -574,7 +574,7 @@ OcRunBootPicker (
     //
     if (BootContext == NULL) {
       if (Context->HideAuxiliary) {
-        DEBUG ((DEBUG_WARN, "OCB: System has no boot entries, retrying with auxiliary\n"));
+        DEBUG ((DEBUG_INFO, "OCB: System has no boot entries, retrying with auxiliary\n"));
         Context->PickerCommand = OcPickerShowPicker;
         Context->HideAuxiliary = FALSE;
         continue;

@@ -50,7 +50,8 @@
   gApfsEfiBootRecordInfoProtocolGuid              ## PROTOCOL PRODUCES
   gApfsUnsupportedBdsProtocolGuid                 ## PROTOCOL CONSUMES
   gEfiLoadedImageProtocolGuid                     ## PROTOCOL CONSUMES
-  gEfiDevicePathProtocolGuid
+  gEfiDevicePathProtocolGuid                      ## PROTOCOL CONSUMES
+  gEfiPartitionInfoProtocolGuid                   ## PROTOCOL SOMETIMES_CONSUMES
 
 [LibraryClasses]
   BaseLib

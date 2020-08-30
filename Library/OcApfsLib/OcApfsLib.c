@@ -21,6 +21,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 #include <Protocol/BlockIo.h>
+#include <Protocol/PartitionInfo.h>
 
 STATIC VOID *mApfsNewPartitionsEventKey;
 
@@ -170,6 +171,16 @@ OcApfsConnectDevices (
   )
 {
   EFI_STATUS  Status;
+  VOID        *PartitionInfoInterface;
+
+  DEBUG_CODE_BEGIN ();
+  Status = gBS->LocateProtocol (
+    &gEfiPartitionInfoProtocolGuid,
+    NULL,
+    &PartitionInfoInterface
+    );
+  DEBUG ((DEBUG_INFO, "OCJS: PartitionInfo is %r\n", Status));
+  DEBUG_CODE_END ();
 
   if (Monitor) {
     Status = ApfsMonitorNewPartitions ();

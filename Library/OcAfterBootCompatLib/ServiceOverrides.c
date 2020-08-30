@@ -34,6 +34,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Protocol/OcFirmwareRuntime.h>
+#include <Protocol/VMwareMac.h>
 
 /**
   Helper function to mark OpenRuntime as executable with proper permissions.
@@ -637,6 +638,25 @@ OcStartImage (
     // Report about macOS being loaded.
     //
     ++BootCompat->ServiceState.AppleBootNestedCount;
+
+    //
+    // VMware uses OSInfo->SetName call by EfiBoot to ensure that we are allowed
+    // to run this version of macOS on VMware. The relevant EfiBoot image handle
+    // is determined by the return address of OSInfo->SetName call, which will
+    // be found in the list they make within their StartImage wrapper.
+    //
+    // The problem here happens with Apple Secure Boot, which makes their StartImage
+    // wrapper to not be called and therefore OSInfo->SetName to fail to install anything.
+    // Simply install a protocol here. Maybe make it a quirk if necessary.
+    //
+    Status = gBS->InstallMultipleProtocolInterfaces (
+      &ImageHandle,
+      &gVMwareMacProtocolGuid,
+      NULL,
+      NULL
+      );
+    DEBUG ((DEBUG_INFO, "OCABC: VMware Mac installed on %p - %r\n", ImageHandle, Status));
+
     BootCompat->ServiceState.AppleHibernateWake = OcIsAppleHibernateWake ();
     BootCompat->ServiceState.AppleCustomSlide = OcCheckArgumentFromEnv (
       AppleLoadedImage,
@@ -667,8 +687,16 @@ OcStartImage (
       );
 
     if (!EFI_ERROR (Status)) {
-      OSInfo->OSVendor (EFI_OS_INFO_APPLE_VENDOR_NAME);
-      OSInfo->OSName ("Mac OS X 10.15");
+      //
+      // Older versions of the protocol have less fields.
+      // For instance, VMware installs 0x1 version.
+      //
+      if (OSInfo->Revision >= EFI_OS_INFO_PROTOCOL_REVISION_VENDOR) {
+        OSInfo->OSVendor (EFI_OS_INFO_APPLE_VENDOR_NAME);
+      }
+      if (OSInfo->Revision >= EFI_OS_INFO_PROTOCOL_REVISION_NAME) {
+        OSInfo->OSName ("Mac OS X 10.15");
+      }
     }
   }
 

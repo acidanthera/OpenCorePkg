@@ -21,6 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcBootstrap.h>
 #include <Protocol/SimpleFileSystem.h>
+#include <Protocol/VMwareDebug.h>
 
 #include <Library/DebugLib.h>
 #include <Library/OcDebugLogLib.h>
