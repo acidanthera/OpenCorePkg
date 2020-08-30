@@ -97,8 +97,8 @@ package() {
     dd if="${bootsig}" \
        of="${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
   done
-  cp BOOTx64.efi tmp/EFI/BOOT/ || exit 1
-  cp BOOTx64.efi tmp/EFI/OC/Bootstrap/Bootstrap.efi || exit 1
+  cp Bootstrap.efi tmp/EFI/BOOT/BOOTx64.efi || exit 1
+  cp Bootstrap.efi tmp/EFI/OC/Bootstrap/ || exit 1
 
   efiTools=(
     "BootKicker.efi"
