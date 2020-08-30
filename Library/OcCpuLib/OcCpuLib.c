@@ -729,6 +729,21 @@ OcCpuScanProcessor (
     }
   }
 
+  //
+  // Get extended processor signature.
+  //
+  if (Cpu->MaxExtId >= CPUID_EXTENDED_CPU_SIG) {
+    AsmCpuid (
+      CPUID_EXTENDED_CPU_SIG,
+      &CpuidEax,
+      &CpuidEbx,
+      &Cpu->CpuidExtSigEcx.Uint32,
+      &Cpu->CpuidExtSigEdx.Uint32
+      );
+
+    Cpu->ExtFeatures = LShiftU64 (Cpu->CpuidExtSigEcx.Uint32, 32) | Cpu->CpuidExtSigEdx.Uint32;
+  }
+
   DEBUG ((DEBUG_INFO, "OCCPU: Found %a\n", Cpu->BrandString));
 
   DEBUG ((
