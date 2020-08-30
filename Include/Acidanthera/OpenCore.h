@@ -140,6 +140,7 @@ OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     OC_CPU_INFO       *CpuInfo,
   IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
   IN     KERNEL_CACHE_TYPE CacheType,
   IN     VOID              *Context,
   IN OUT UINT8             *Kernel,

@@ -5,7 +5,6 @@ OpenCore Changelog
 - Made DMG loading support configurable via `DmgLoading`
 - Added iMac20,1 and iMac20,2 model codes
 - Fixed display name for older Xeon CPUs like Xeon E5450
-- Added kext injection support without kernel caches
 - Added Comet Lake-LP HDA device code
 - Fixed OS boot selection on SATA controllers with legacy OPROMs
 - Fixed RSDP ACPI table checksum recalculation
@@ -31,6 +30,7 @@ OpenCore Changelog
 - Added `KernelCache` option to specify kernel caching preference for older kernels
 - Added `Force` section to provide support for injecting drivers in older macOS
 - Changed kernel driver injection to happen prior to kernel driver patching
+- Added `Arch` filtering option to `Add`, `Force`, and `Patch` sections
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

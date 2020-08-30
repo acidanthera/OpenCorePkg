@@ -64,6 +64,7 @@ OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     OC_CPU_INFO       *CpuInfo,
   IN     UINT32            DarwinVersion,
+  IN     BOOLEAN           Is32Bit,
   IN     KERNEL_CACHE_TYPE CacheType,
   IN     VOID              *Context,
   IN OUT UINT8             *Kernel,
@@ -77,6 +78,7 @@ OcKernelApplyPatches (
   OC_KERNEL_PATCH_ENTRY  *UserPatch;
   CONST CHAR8            *Target;
   CONST CHAR8            *Comment;
+  CONST CHAR8            *Arch;
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
   BOOLEAN                IsKernelPatch;
@@ -107,8 +109,23 @@ OcKernelApplyPatches (
       continue;
     }
 
-    MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
-    MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
+    Arch = OC_BLOB_GET (&UserPatch->Arch);
+
+    if (Arch != NULL && AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Kernel patcher skips %a (%a) kext at %u due to arch %a != %a\n",
+        Target,
+        Comment,
+        Index,
+        Arch,
+        Is32Bit ? "i386" : "x86_64"
+        ));
+      return;
+    }
+
+    MaxKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MaxKernel));
+    MinKernel = OcParseDarwinVersion (OC_BLOB_GET (&UserPatch->MinKernel));
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
