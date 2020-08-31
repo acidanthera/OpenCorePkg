@@ -14,7 +14,7 @@ OpenCore bootloader with development SDK.
 - [KVM-OpenCore](https://github.com/Leoyzen/KVM-Opencore) in English, KVM configuration
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
-
+- [Olarila.com](https://www.olarila.com/topic/6103-opencore-bootloader/) in Portuguese
 ## Libraries
 
 This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
