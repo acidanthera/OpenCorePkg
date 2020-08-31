@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sat Aug 29 20:30:21 2020
+%DIF ADD ../Configuration.tex        Mon Aug 31 16:42:45 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -25,6 +25,9 @@
 \usepackage{textcomp}
 \usepackage{tikz}
 
+%DIF 23a22
+\setcounter{tocdepth}{2} %DIF > 
+%DIF -------
 \usetikzlibrary{trees}
 \tikzstyle{every node}=[draw=black,thick,anchor=west]
 \tikzstyle{selected}=[draw=blue]
@@ -2593,6 +2596,11 @@ refer to }\hyperref[legacyapple]{Legacy Apple OS}\DIFadd{.
   \end{tabular}
   \end{center}
 
+  \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{3+2}} \DIFadd{and }\texttt{\DIFadd{6+4}} \DIFadd{hotkeys to choose the preferred
+  architecture are unsupported due to being handled by EfiBoot and thus
+  being hard to properly detect.
+}
+
 \item
   \texttt{\DIFadd{KernelCache}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
@@ -3344,15 +3352,47 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Secure Boot.
 }
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: You will have to reinstall the operating system or use macOS DMG recovery
-  to }\texttt{\DIFadd{bless --personalize}} \DIFadd{your installation after setting this value to non-zero.
-  Installing the operating system with }\texttt{\DIFadd{ApECID}} \DIFadd{value set to non-zero is only
-  possible through macOS recovery or personalized builds created with }\texttt{\DIFadd{asr}}\DIFadd{.
+  \DIFadd{To start using personalised Apple Secure Boot you will have to reinstall the
+  operating system or personalise it. Until your operating system is personalised
+  you will only be able to load macOS DMG recovery. If you do not have DMG recovery
+  you could always download it with }\texttt{\DIFadd{macrecovery}} \DIFadd{utility and put to
+  }\texttt{\DIFadd{com.apple.recovery.boot}} \DIFadd{as explained in
+  }\hyperref[reinstallmacos]{Tips and Tricks} \DIFadd{section. Keep in mind that
+  }\hyperref[securedmgloading]{DMG loading} \DIFadd{needs to be set to }\texttt{\DIFadd{Signed}}
+  \DIFadd{to use any DMG with Apple Secure Boot.
 }
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Currently the use of this option is unrealiable (apparently to a bug
-  in macOS installer), and thus its use is not recommended.
+  \DIFadd{To personalise an existing operating system use }\texttt{\DIFadd{bless}} \DIFadd{command
+  after loading to macOS DMG recovery. Mount the system volume partition,
+  unless it has already been mounted, and execute the following command:
 }
+
+\DIFmodbegin
+\begin{lstlisting}[label=blesspersona, style=ocbash,alsolanguage=DIFcode]
+%DIF > bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
+%DIF >   --bootefi --personalize
+\end{lstlisting}
+\DIFmodend
+
+  \DIFadd{When reinstalling the operating system, keep in mind that current versions
+  of macOS Installer, tested as of 10.15.6, will usually run out of free memory
+  on the }\texttt{\DIFadd{/var/tmp}} \DIFadd{partition when trying to install macOS
+  with the personalised Apple Secure Boot. Soon after downloading the macOS installer
+  image an }\texttt{\DIFadd{Unable to verify macOS}} \DIFadd{error message will appear. To workaround
+  this issue allocate a dedicated RAM disk of 2 MBs for macOS personalisation
+  by entering the following commands in macOS recovery terminal before starting the
+  installation:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[label=secureboot, style=ocbash,alsolanguage=DIFcode]
+%DIF > disk=$(hdiutil attach -nomount ram://4096)
+%DIF > diskutil erasevolume HFS+ SecureBoot $disk
+%DIF > diskutil unmount $disk
+%DIF > mkdir /var/tmp/OSPersonalizationTemp
+%DIF > diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
+\end{lstlisting}
+\DIFmodend
 
 \item
   \DIFaddend \texttt{AuthRestart}\\
@@ -3679,6 +3719,9 @@ rm vault.pub
     }\item \DIFadd{The list of cached drivers may be different, resulting in the need
       to change the list of }\texttt{\DIFadd{Added}} \DIFadd{or }\texttt{\DIFadd{Forced}} \DIFadd{kernel drivers.
       For example, }\texttt{\DIFadd{IO80211Family}} \DIFadd{cannot be injected in this case.
+    }\item \DIFadd{System volume alterations on operating systems with sealing, like
+      macOS~11, may result in the operating system being unbootable. Do not
+      try to disable system volume encryption unless you disable Apple Secure Boot.
     }\item \DIFadd{If your platform requires certain settings, but they were not enabled,
       because the obvious issues did not trigger before, you may get boot failure.
       Be extra careful with }\texttt{\DIFadd{IgnoreInvalidFlexRatio}} \DIFadd{or }\texttt{\DIFadd{HashServices}}\DIFadd{.
@@ -6130,9 +6173,8 @@ functioning. Feature highlights:
 \end{enumerate}
 
 \section{Troubleshooting}\label{troubleshooting}
-\DIFaddbegin 
 
-\subsection{\DIFadd{Legacy Apple OS}}\label{legacyapple}
+\DIFaddbegin \subsection{\DIFadd{Legacy Apple OS}}\label{legacyapple}
 
 \DIFadd{Older operating systems may be more complicated to install, but sometimes can
 be necessary to use for all kinds of reasons. While a compatible board identifier
@@ -6177,14 +6219,47 @@ older macOS operating systems.
 \begin{itemize}
   \item \DIFadd{All previous issues apply.
   }\item \DIFadd{Last released installer images for macOS~10.6 are macOS~10.6.7
-    builds }\texttt{\DIFadd{10J3250}} \DIFadd{and }\texttt{\DIFadd{10J4139}} \DIFadd{(without Xcode).
-    These images are limited to certain model identifiers and have no
-    }\texttt{\DIFadd{-no\_compat\_check}} \DIFadd{boot argument support. Images without
-    such restrictions can be found }\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here}\DIFadd{,
+    builds }\texttt{\DIFadd{10J3250}} \DIFadd{(for }\texttt{\DIFadd{MacBookPro8,x}}\DIFadd{) and
+    }\texttt{\DIFadd{10J4139}} \DIFadd{(for }\texttt{\DIFadd{iMac12,x}}\DIFadd{), without Xcode). These
+    images are limited to their target model identifiers and have no
+    }\texttt{\DIFadd{-no\_compat\_check}} \DIFadd{boot argument support. Modified images
+    (with }\texttt{\DIFadd{ACDT}} \DIFadd{suffix) without model restrictions can be found
+    }\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here}\DIFadd{,
     assuming that you legally own macOS~10.6. Read }\texttt{\DIFadd{DIGEST.txt}}
     \DIFadd{for more details. Keep in mind, that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
 }\end{itemize}
+
+  \DIFadd{You can also patch out model checking yourself by editing }\texttt{\DIFadd{OSInstall.mpkg}}
+  \DIFadd{with e.g. }\texttt{\DIFadd{Flat Package Editor}} \DIFadd{by making }\texttt{\DIFadd{Distribution}}
+  \DIFadd{script to always return }\texttt{\DIFadd{true}} \DIFadd{in }\texttt{\DIFadd{hwbeModelCheck}} \DIFadd{function.
+  Since updating the only file in the image and not corrupting other files
+  can be difficult and may cause slow booting due to kernel cache date
+  changes, it is recommended to script image rebuilding as shown below:
+}
+
+\DIFmodbegin
+\begin{lstlisting}[label=snowrebuild, style=ocbash,alsolanguage=DIFcode]
+%DIF > #!/bin/bash
+%DIF > # Original.dmg is original image, OSInstall.mpkg is patched package
+%DIF > mkdir RO
+%DIF > hdiutil mount Original.dmg -noverify -noautoopen -noautoopenrw -noautofsck -mountpoint RO
+%DIF > cp RO/.DS_Store DS_STORE
+%DIF > hdiutil detach RO -force
+%DIF > rm -rf RO
+%DIF > hdiutil convert Original.dmg -format UDRW -o ReadWrite.dmg
+%DIF > mkdir RW
+%DIF > xattr -c OSInstall.mpkg
+%DIF > hdiutil mount ReadWrite.dmg -noverify -noautoopen -noautoopenrw -noautofsck -mountpoint RW
+%DIF > cp OSInstall.mpkg RW/System/Installation/Packages/OSInstall.mpkg
+%DIF > killall Finder fseventsd
+%DIF > rm -rf RW/.fseventsd
+%DIF > cp DS_STORE RW/.DS_Store
+%DIF > hdiutil detach RW -force
+%DIF > rm -rf DS_STORE RW
+%DIF > hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
+\end{lstlisting}
+\DIFmodend
 
 
 \subsection{\DIFadd{UEFI Secure Boot}}\label{uefisecureboot}
@@ -6240,9 +6315,8 @@ requires several steps and careful configuration of select settings as explained
 }\item \DIFadd{Password-protect changing firmware settings to ensure that UEFI Secure Boot
   cannot be disabled without your knowledge.
 }\end{enumerate}
-\DIFaddend 
 
-\subsection{Windows support}\label{troubleshootingwin}
+\DIFaddend \subsection{Windows support}\label{troubleshootingwin}
 
   \textbf{Can I install Windows?}
 
@@ -6463,8 +6537,8 @@ you will need \texttt{debug=0x8} boot argument.
   the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
   requires a separate driver for functioning.
 
-\item
-  \textbf{What is the simplest way to install macOS?}
+\item \DIFaddbegin \label{reinstallmacos}
+  \DIFaddend \textbf{What is the simplest way to install macOS?}
 
   Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)
   to \texttt{com.apple.recovery.boot} directory on a FAT32 partition with OpenCore.

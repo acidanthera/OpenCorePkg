@@ -48,6 +48,17 @@ InternalGetRecoveryInitiator (
     return NULL;
   }
 
+  //
+  // Also delete recovery initiator just in case.
+  //
+  gRT->SetVariable (
+    APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+    0,
+    NULL
+    );
+
   if (!IsDevicePathValid (DevicePath, DevicePathSize)) {
     DEBUG ((DEBUG_INFO, "OCB: Recovery initiator (%u) is invalid\n", (UINT32) DevicePathSize));
     FreePool (DevicePath);
