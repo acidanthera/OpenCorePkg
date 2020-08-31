@@ -664,6 +664,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
   //
+  // Recovery initiator if present.
+  //
+  EFI_DEVICE_PATH_PROTOCOL   *RecoveryInitiator;
+  //
   // Custom boot order updated during scanning allocated from pool.
   // Preserved here to avoid situations with losing BootNext on rescan.
   //
@@ -890,6 +894,20 @@ OcLoadBootEntry (
 EFI_STATUS
 OcActivateHibernateWake (
   IN UINT32                       HibernateMask
+  );
+
+/**
+  Handle recovery detection for later loading.
+  Recovery handling is required to choose the right operating system.
+
+  @param[out]  Initiator  Recovery initiator device path, optional.
+
+  @retval EFI_SUCCESS        Recovery boot is required.
+  @retval EFI_NOT_FOUND      System should boot normally.
+**/
+EFI_STATUS
+OcHandleRecoveryRequest (
+  OUT EFI_DEVICE_PATH_PROTOCOL  **Initiator  OPTIONAL
   );
 
 /**

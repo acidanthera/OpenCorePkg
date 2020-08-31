@@ -314,11 +314,6 @@ RegisterBootOption (
       && BootEntry->Type == OC_BOOT_APPLE_OS) {
       BootContext->DefaultEntry = BootEntry;
     }
-  } else if (BootContext->PickerContext->PickerCommand == OcPickerBootAppleRecovery) {
-    if (BootContext->DefaultEntry->Type != OC_BOOT_APPLE_RECOVERY
-      && BootEntry->Type == OC_BOOT_APPLE_RECOVERY) {
-      BootContext->DefaultEntry = BootEntry;
-    }
   }
 }
 
@@ -1575,6 +1570,87 @@ OcFreeBootContext (
   FreePool (Context);
 }
 
+EFI_STATUS
+OcSetDefaultBootRecovery (
+  IN OUT OC_BOOT_CONTEXT  *BootContext
+  )
+{
+  LIST_ENTRY          *FsLink;
+  OC_BOOT_FILESYSTEM  *FileSystem;
+  LIST_ENTRY          *EnLink;
+  OC_BOOT_ENTRY       *BootEntry;
+  OC_BOOT_ENTRY       *FirstRecovery;
+  OC_BOOT_ENTRY       *RecoveryInitiator;
+  BOOLEAN             UseInitiator;
+
+  FirstRecovery = NULL;
+  UseInitiator = BootContext->PickerContext->RecoveryInitiator != NULL;
+
+  //
+  // This could technically use AppleBootPolicy recovery getting function,
+  // but it will do extra disk i/o and will not work with HFS+ recovery.
+  //
+  for (
+    FsLink = GetFirstNode (&BootContext->FileSystems);
+    !IsNull (&BootContext->FileSystems, FsLink);
+    FsLink = GetNextNode (&BootContext->FileSystems, FsLink)) {
+    FileSystem = BASE_CR (FsLink, OC_BOOT_FILESYSTEM, Link);
+
+    RecoveryInitiator = NULL;
+
+    for (
+      EnLink = GetFirstNode (&FileSystem->BootEntries);
+      !IsNull (&FileSystem->BootEntries, EnLink);
+      EnLink = GetNextNode (&FileSystem->BootEntries, EnLink)) {
+      BootEntry = BASE_CR (EnLink, OC_BOOT_ENTRY, Link);
+
+      //
+      // Record first found recovery in case we find nothing.
+      //
+      if (FirstRecovery == NULL && BootEntry->Type == OC_BOOT_APPLE_RECOVERY) {
+        FirstRecovery = BootEntry;
+        ASSERT (BootEntry->DevicePath != NULL);
+
+        if (!UseInitiator) {
+          DebugPrintDevicePath (DEBUG_INFO, "OCB: Using first recovery path", BootEntry->DevicePath);
+          BootContext->DefaultEntry = FirstRecovery;
+          return EFI_SUCCESS;
+        } else {
+          DebugPrintDevicePath (DEBUG_INFO, "OCB: Storing first recovery path", BootEntry->DevicePath);
+        }
+      }
+
+      if (RecoveryInitiator != NULL && BootEntry->Type == OC_BOOT_APPLE_RECOVERY) {
+        DebugPrintDevicePath (DEBUG_INFO, "OCB: Using initiator recovery path", BootEntry->DevicePath);
+        BootContext->DefaultEntry = BootEntry;
+        return EFI_SUCCESS;
+      }
+
+      if (BootEntry->Type == OC_BOOT_APPLE_OS
+        && UseInitiator
+        && IsDevicePathEqual (
+          BootContext->PickerContext->RecoveryInitiator,
+          BootEntry->DevicePath)) {
+        DebugPrintDevicePath (DEBUG_INFO, "OCB: Found initiator", BootEntry->DevicePath);
+        RecoveryInitiator = BootEntry;
+      }
+    }
+
+    if (RecoveryInitiator != NULL) {
+      if (FirstRecovery != NULL) {
+        DEBUG ((DEBUG_INFO, "OCB: Using first recovery path for no initiator"));
+        BootContext->DefaultEntry = FirstRecovery;
+        return EFI_SUCCESS;
+      }
+
+      DEBUG ((DEBUG_INFO, "OCB: Looking for any first recovery due to no initiator"));
+      UseInitiator = FALSE;
+    }
+  }
+
+  return EFI_NOT_FOUND;
+}
+
 OC_BOOT_CONTEXT *
 OcScanForBootEntries (
   IN  OC_PICKER_CONTEXT  *Context
@@ -1654,6 +1730,13 @@ OcScanForBootEntries (
   if (BootContext->BootEntryCount == 0) {
     OcFreeBootContext (BootContext);
     return NULL;
+  }
+
+  //
+  // Find recovery.
+  //
+  if (BootContext->PickerContext->PickerCommand == OcPickerBootAppleRecovery) {
+    OcSetDefaultBootRecovery (BootContext);
   }
 
   return BootContext;

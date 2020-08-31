@@ -33,6 +33,7 @@
 [Sources]
   AppleHibernate.c
   ApplePanic.c
+  AppleRecovery.c
   BootArguments.c
   BootAudio.c
   BootEntryInfo.c

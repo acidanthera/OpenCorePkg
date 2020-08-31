@@ -239,7 +239,7 @@ typedef enum {
 ///
 /// Recovery initiator device path. In general EfiBoot device path that called
 /// reboot to recovery.
-/// gAppleBootVariableGuid
+/// gAppleVendorVariableGuid
 ///
 #define APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME L"RecoveryBootInitiator"
 
