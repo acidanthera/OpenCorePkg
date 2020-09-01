@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Mon Aug 31 16:42:45 2020
+%DIF ADD ../Configuration.tex        Tue Sep  1 07:50:20 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1413,8 +1413,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This is a security option allowing one to restrict single user mode usage
   by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
-  to understand how to use single user mode with this quirk enabled.
+  behaviour. Read \DIFdelbegin %DIFDELCMD < \href{https://support.apple.com/HT201573}{this article}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article}
+  \DIFaddend to understand how to use single user mode with this quirk enabled.
 
 \item
   \texttt{DisableVariableWrite}\\
@@ -3465,6 +3467,24 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   }\end{itemize}
 
 \item
+  \texttt{\DIFadd{EnablePassword}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable password protection to allow sensitive operations.
+}
+
+  \DIFadd{Password protection ensures that sensitive operations like booting a non-default
+  operating system (e.g. macOS recovery or a tool), resetting NVRAM storage,
+  trying to boot into a non-default mode (e.g. verbose mode or safe mode) are not
+  allowed without explicit user authentication by a custom password. Currently
+  password and salt are hashed with 5000000 iterations of SHA-512.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This functionality is currently in development and is not ready for
+  daily usage.
+}
+
+\item
   \DIFaddend \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
@@ -3512,7 +3532,21 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
 
-\item \DIFaddbegin \label{securevaulting}
+\item
+  \DIFaddbegin \texttt{\DIFadd{PasswordHash}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}} \DIFadd{64 bytes}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: all zero}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Password hash used when }\texttt{\DIFadd{EnabledPassword}} \DIFadd{is set.
+}
+
+\item
+  \texttt{\DIFadd{PasswordSalt}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: empty}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Password salt used when }\texttt{\DIFadd{EnabledPassword}} \DIFadd{is set.
+}
+
+\item \label{securevaulting}
   \DIFaddend \texttt{Vault}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Secure}\\
@@ -3736,7 +3770,17 @@ rm vault.pub
       \DIFadd{and }\texttt{\DIFadd{Default}} \DIFadd{value together.
   }\DIFaddend \end{enumerate}
 
-  \DIFaddbegin \DIFadd{For more details on how to configure Apple Secure Boot with UEFI Secure Boot
+  \DIFaddbegin \DIFadd{Sometimes the already installed operating system may have outdated Apple Secure
+  Boot manifests on the }\texttt{\DIFadd{Preboot}} \DIFadd{partition causing boot failure. If you
+  see the ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
+  it is likely the case. When this happens you can either reinstall the operating
+  system or copy the manifests (files with }\texttt{\DIFadd{.im4m}} \DIFadd{extension, like
+  }\texttt{\DIFadd{boot.efi.j137.im4m}}\DIFadd{) from }\texttt{\DIFadd{/usr/standalone/i386}} \DIFadd{to
+  }\texttt{\DIFadd{/Volumes/Preboot/<UUID>/System/Library/CoreServices}}\DIFadd{. Here }\texttt{\DIFadd{<UUID>}}
+  \DIFadd{is your system volume identifier.
+}
+
+  \DIFadd{For more details on how to configure Apple Secure Boot with UEFI Secure Boot
   refer to }\hyperref[uefisecureboot]{UEFI Secure Boot} \DIFadd{section.
 }
 

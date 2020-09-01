@@ -1323,7 +1323,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This is a security option allowing one to restrict single user mode usage
   by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
+  behaviour. Read \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article}
   to understand how to use single user mode with this quirk enabled.
 
 \item
@@ -3332,6 +3332,21 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   \end{itemize}
 
 \item
+  \texttt{EnablePassword}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable password protection to allow sensitive operations.
+
+  Password protection ensures that sensitive operations like booting a non-default
+  operating system (e.g. macOS recovery or a tool), resetting NVRAM storage,
+  trying to boot into a non-default mode (e.g. verbose mode or safe mode) are not
+  allowed without explicit user authentication by a custom password. Currently
+  password and salt are hashed with 5000000 iterations of SHA-512.
+
+  \emph{Note}: This functionality is currently in development and is not ready for
+  daily usage.
+
+\item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x6}\\
@@ -3376,6 +3391,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   \textbf{Description}: EDK II debug level bitmask (sum) causing CPU to
   halt (stop execution) after obtaining a message of \texttt{HaltLevel}.
   Possible values match \texttt{DisplayLevel} values.
+
+\item
+  \texttt{PasswordHash}\\
+  \textbf{Type}: \texttt{plist\ data} 64 bytes\\
+  \textbf{Failsafe}: all zero\\
+  \textbf{Description}: Password hash used when \texttt{EnabledPassword} is set.
+
+\item
+  \texttt{PasswordSalt}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: empty\\
+  \textbf{Description}: Password salt used when \texttt{EnabledPassword} is set.
 
 \item \label{securevaulting}
   \texttt{Vault}\\
@@ -3596,6 +3623,15 @@ rm vault.pub
       major release operating system, it is not recommended to use \texttt{ApECID}
       and \texttt{Default} value together.
   \end{enumerate}
+
+  Sometimes the already installed operating system may have outdated Apple Secure
+  Boot manifests on the \texttt{Preboot} partition causing boot failure. If you
+  see the ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
+  it is likely the case. When this happens you can either reinstall the operating
+  system or copy the manifests (files with \texttt{.im4m} extension, like
+  \texttt{boot.efi.j137.im4m}) from \texttt{/usr/standalone/i386} to
+  \texttt{/Volumes/Preboot/<UUID>/System/Library/CoreServices}. Here \texttt{<UUID>}
+  is your system volume identifier.
 
   For more details on how to configure Apple Secure Boot with UEFI Secure Boot
   refer to \hyperref[uefisecureboot]{UEFI Secure Boot} section.
