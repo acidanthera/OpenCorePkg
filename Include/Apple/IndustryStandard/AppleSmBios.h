@@ -144,7 +144,7 @@ typedef struct {
 // <0F01> 24 cores  Intel Xeon W                   Intel Xeon W  (10.15+)
 // <0F01> 28 cores  Intel Xeon W                   Intel Xeon W  (10.15+)
 // <1001> 06 cores  Intel Core i9                  Intel Core i9
-// <1001> 08 cores  Intel Core i9                  Intel Core i9
+// <1001> 08 cores  Intel Core i9                  Intel Core i9 (10.15+)
 // <1001> 10 cores  Intel Core i9                  Intel Core i9 (10.15+)
 //
 // Also see here for a list of CPUs used on Mac models:
