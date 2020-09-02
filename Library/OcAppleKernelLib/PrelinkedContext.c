@@ -833,6 +833,8 @@ PrelinkedInjectComplete (
   Context->PrelinkedLastAddress += MACHO_ALIGN (ExportedInfoSize);
   Context->PrelinkedSize        += MACHO_ALIGN (ExportedInfoSize);
 
+  Context->PrelinkedMachContext.FileSize = Context->PrelinkedSize;
+
   FreePool (ExportedInfo);
 
   return EFI_SUCCESS;
