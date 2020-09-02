@@ -62,4 +62,5 @@ details.
 - [nms42](https://github.com/nms42)
 - [PMHeart](https://github.com/PMHeart)
 - [savvamitrofanov](https://github.com/savvamitrofanov)
+- [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
