@@ -58,7 +58,7 @@ int main(int argc, char** argv) {
   Status = OcConfigurationInit (&Config, b, f);
 
   if (Status != EFI_SUCCESS) {
-    printf("Unsupported file\n");
+    printf("Invalid config\n");
     return -1;
   }
 
