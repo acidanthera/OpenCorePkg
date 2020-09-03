@@ -918,7 +918,7 @@ ConsoleControlInstall (
     );
 }
 
-VOID
+EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   )
@@ -944,20 +944,21 @@ OcUseBuiltinTextOutput (
 
   Status = AsciiTextReset (&mAsciiTextOutputProtocol, TRUE);
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCC: Cannot setup ASCII output - %r\n", Status));
-    return;
+  if (!EFI_ERROR (Status)) {
+    OcConsoleControlSetMode (Mode);
+    OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+
+    gST->ConOut = &mAsciiTextOutputProtocol;
+    gST->Hdr.CRC32 = 0;
+
+    gBS->CalculateCrc32 (
+      gST,
+      gST->Hdr.HeaderSize,
+      &gST->Hdr.CRC32
+      );
   }
 
-  OcConsoleControlSetMode (Mode);
-  OcConsoleControlInstallProtocol (&mConsoleControlProtocol, NULL, NULL);
+  DEBUG ((DEBUG_INFO, "OCC: Setup ASCII Output - %r\n", Status));
 
-  gST->ConOut = &mAsciiTextOutputProtocol;
-  gST->Hdr.CRC32 = 0;
-
-  gBS->CalculateCrc32 (
-    gST,
-    gST->Hdr.HeaderSize,
-    &gST->Hdr.CRC32
-    );
+  return Status;
 }

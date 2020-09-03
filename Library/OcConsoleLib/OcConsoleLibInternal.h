@@ -51,12 +51,12 @@ OcConsoleControlInstallProtocol (
   OUT EFI_CONSOLE_CONTROL_SCREEN_MODE  *OldMode  OPTIONAL
   );
 
-VOID
+EFI_STATUS
 OcUseBuiltinTextOutput (
   IN EFI_CONSOLE_CONTROL_SCREEN_MODE  Mode
   );
 
-VOID
+EFI_STATUS
 OcUseSystemTextOutput (
   IN OC_CONSOLE_RENDERER          Renderer,
   IN BOOLEAN                      IgnoreTextOutput,
