@@ -672,7 +672,7 @@ KcGetKextSize (
       // All kexts in KC use joint __LINKEDIT with the kernel.
       //
       return (UINT32) (Context->LinkEditSegment->VirtualAddress
-        - Segment->VirtualAddress + Context->LinkEditSegment->Size);
+        - SourceAddress + Context->LinkEditSegment->Size);
     }
   }
 

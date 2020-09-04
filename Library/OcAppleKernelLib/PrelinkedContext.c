@@ -835,6 +835,18 @@ PrelinkedInjectComplete (
 
   Context->PrelinkedMachContext.FileSize = Context->PrelinkedSize;
 
+  if (Context->IsKernelCollection) {
+    //
+    // After rebuilding the KC we may have moved the __LINKEDIT command.
+    // This happens when __REGION kexts are squashed.
+    // Obtain its address again.
+    //
+    Context->LinkEditSegment = MachoGetSegmentByName64 (
+      &Context->PrelinkedMachContext,
+      KC_LINKEDIT_SEGMENT
+      );
+  }
+
   FreePool (ExportedInfo);
 
   return EFI_SUCCESS;
