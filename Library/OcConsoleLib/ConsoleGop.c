@@ -89,7 +89,7 @@ ConsoleHandleProtocol (
   return EFI_UNSUPPORTED;
 }
 
-VOID
+EFI_STATUS
 OcProvideConsoleGop (
   IN BOOLEAN  Route
   )
@@ -132,7 +132,7 @@ OcProvideConsoleGop (
     //
     if (OriginalGop->Mode->MaxMode > 0) {
       mConsoleGraphicsOutput = OriginalGop;
-      return;
+      return EFI_ALREADY_STARTED;
     }
 
     DEBUG ((
@@ -150,7 +150,7 @@ OcProvideConsoleGop (
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCC: No handles with GOP protocol - %r\n", Status));
-      return;
+      return EFI_UNSUPPORTED;
     }
 
     Status = EFI_NOT_FOUND;
@@ -195,6 +195,7 @@ OcProvideConsoleGop (
   } else {
     DEBUG ((DEBUG_WARN, "OCC: Missing compatible GOP - %r\n", Status));
   }
+  return Status;
 }
 
 STATIC
