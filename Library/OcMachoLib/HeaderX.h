@@ -360,7 +360,9 @@ MACH_X (InternalMachoExpandImage) (
     //
     // Copy and zero fill file data. We can do this because only last sections can have 0 file size.
     //
+#ifndef MACHO_LIB_32
     ASSERT (CopyFileSize <= MAX_UINTN && CopyVmSize <= MAX_UINTN);
+#endif
     ZeroMem (&Destination[CopyFileOffset + OriginalDelta], CurrentDelta - OriginalDelta);
     CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], (UINTN)CopyFileSize);
     ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], (UINTN)(CopyVmSize - CopyFileSize));
