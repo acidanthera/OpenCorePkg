@@ -236,7 +236,7 @@ InternalConnectExternalSymtab (
       return EFI_INVALID_PARAMETER;
     }
 
-    if (!MachoInitialiseSymtabsExternal64 (Context, InnerContext)) {
+    if (!MachoInitialiseSymtabsExternal (Context, InnerContext)) {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: KC symtab failed getting symtab from inner %Lx %x\n",
@@ -878,7 +878,7 @@ PrelinkedReserveKextSize (
       return EFI_INVALID_PARAMETER;
     }
 
-    ExecutableSize = MachoGetVmSize64 (&Context);
+    ExecutableSize = MachoGetVmSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
     }
@@ -965,7 +965,7 @@ PrelinkedInjectKext (
     //
     KextOffset = Context->PrelinkedSize;
 
-    ExecutableSize = MachoExpandImage64 (
+    ExecutableSize = MachoExpandImage (
       &ExecutableContext,
       &Context->Prelinked[KextOffset],
       Context->PrelinkedAllocSize - KextOffset,

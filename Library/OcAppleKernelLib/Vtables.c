@@ -198,7 +198,7 @@ InternalPrepareCreateVtablesPrelinked64 (
     ++Index
     ) {
     Symbol = &Kext->LinkedSymbolTable[Index];
-    if (MachoSymbolNameIsVtable64 (Symbol->Name)) {
+    if (MachoSymbolNameIsVtable (Symbol->Name)) {
       //
       // This seems to be valid for KC format as some symbols may be kernel imports?!
       // Observed with IOACPIFamily when injecting VirtualSMC:
@@ -285,7 +285,7 @@ InternalPatchVtableSymbol (
   //
   // 1) If the symbol is defined locally, do not patch
   //
-  if (MachoSymbolIsLocalDefined (MachoContext, Symbol)) {
+  if (MachoSymbolIsLocalDefined64 (MachoContext, Symbol)) {
     return TRUE;
   }
 
@@ -325,7 +325,7 @@ InternalPatchVtableSymbol (
   // declared as part of the class and not inherited, which means we
   // should not patch it.
   //
-  if (!MachoSymbolIsDefined (Symbol)) {
+  if (!MachoSymbolIsDefined64 (Symbol)) {
     ClassName = MachoGetClassNameFromVtableName (VtableName);
 
     Success = MachoGetFunctionPrefixFromClassName (
@@ -627,7 +627,7 @@ InternalPatchByVtables64 (
     ) {
     Name = MachoGetSymbolName64 (MachoContext, Smcp);
     if (((Smcp->Type & MACH_N_TYPE_STAB) == 0)
-     && MachoSymbolNameIsSmcp64 (MachoContext, Name)) {
+     && MachoSymbolNameIsSmcp (MachoContext, Name)) {
       if (MaxSize < sizeof (*EntryWalker)) {
         return FALSE;
       }
@@ -722,7 +722,7 @@ InternalPatchByVtables64 (
       // number of vtables we're expecting, because every pointer will have a
       // class vtable and a MetaClass vtable.
       //
-      ASSERT (MachoSymbolNameIsSmcp64 (MachoContext, Name));
+      ASSERT (MachoSymbolNameIsSmcp (MachoContext, Name));
       //
       // Get the class name from the smc pointer
       //
@@ -815,7 +815,7 @@ InternalPatchByVtables64 (
         return FALSE;
       }
 
-      SymbolDummy = MachoGetLocalDefinedSymbolByName (
+      SymbolDummy = MachoGetLocalDefinedSymbolByName64 (
                   MachoContext,
                   FinalSymbolName
                   );

@@ -588,7 +588,7 @@ InternalCalculateTargetsIntel64 (
     //          the originals patched and then updates the referencing reloc.
     //
 
-    if ((Vtable != NULL) && MachoSymbolNameIsVtable64 (Name)) {
+    if ((Vtable != NULL) && MachoSymbolNameIsVtable (Name)) {
       *Vtable = InternalGetOcVtableByName (Context, Kext, Name);
     }
 
@@ -746,7 +746,7 @@ InternalRelocateRelocationIntel64 (
     return MAX_UINTN;
   }
 
-  InstructionPtr = MachoGetFilePointerByAddress64 (
+  InstructionPtr = MachoGetFilePointerByAddress (
                      &Kext->Context.MachContext,
                      (RelocationBase + Address),
                      &MaxSize
@@ -1312,7 +1312,7 @@ InternalPrelinkKext64 (
   //
   // Retrieve the symbol tables required for most following operations.
   //
-  NumSymbols = MachoGetSymbolTable (
+  NumSymbols = MachoGetSymbolTable64 (
                  MachoContext,
                  &SymbolTable,
                  &StringTable,
@@ -1373,7 +1373,7 @@ InternalPrelinkKext64 (
   // Solve indirect symbols.
   //
   WeakTestValue      = 0;
-  NumIndirectSymbols = MachoGetIndirectSymbolTable (
+  NumIndirectSymbols = MachoGetIndirectSymbolTable64 (
                          MachoContext,
                          &IndirectSymtab
                          );

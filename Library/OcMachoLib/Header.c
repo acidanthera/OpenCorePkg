@@ -26,60 +26,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "OcMachoLibInternal.h"
 
 /**
-  Returns the Mach-O's file size.
-
-  @param[in,out] Context  Context of the Mach-O.
-
-**/
-UINT32
-MachoGetFileSize (
-  IN OUT OC_MACHO_CONTEXT  *Context
-  )
-{
-  ASSERT (Context != NULL);
-  ASSERT (Context->FileSize != 0);
-
-  return Context->FileSize;
-}
-
-/**
-  Returns the Mach-O's virtual address space size.
-
-  @param[out] Context   Context of the Mach-O.
-
-**/
-UINT32
-MachoGetVmSize64 (
-  IN OUT OC_MACHO_CONTEXT  *Context
-  )
-{
-  UINT64                   VmSize;
-  MACH_SEGMENT_COMMAND_64  *Segment;
-
-  ASSERT (Context != NULL);
-  ASSERT (Context->FileSize != 0);
-
-  VmSize = 0;
-
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    if (OcOverflowAddU64 (VmSize, Segment->Size, &VmSize)) {
-      return 0;
-    }
-    VmSize = MACHO_ALIGN (VmSize);
-  }
-
-  if (VmSize > MAX_UINT32) {
-    return 0;
-  }
-
-  return (UINT32) VmSize;
-}
-
-/**
   Initializes a Mach-O Context.
 
   @param[out] Context   Mach-O Context to initialize.
@@ -190,41 +136,26 @@ MachoInitializeContext (
   return TRUE;
 }
 
-/**
-  Returns the last virtual address of a Mach-O.
-
-  @param[in,out] Context  Context of the Mach-O.
-
-  @retval 0  The binary is malformed.
-
-**/
-UINT64
-MachoGetLastAddress64 (
+UINT32
+MachoGetFileSize (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
-  UINT64                        LastAddress;
+  ASSERT (Context != NULL);
+  ASSERT (Context->FileSize != 0);
 
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT64                        Address;
+  return Context->FileSize;
+}
 
+UINT32
+MachoGetVmSize (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
   ASSERT (Context != NULL);
 
-  LastAddress = 0;
-
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    Address = (Segment->VirtualAddress + Segment->Size);
-
-    if (Address > LastAddress) {
-      LastAddress = Address;
-    }
-  }
-
-  return LastAddress;
+  return Context->Is32Bit ?
+    InternalMachoGetVmSize32 (Context) : InternalMachoGetVmSize64 (Context);
 }
 
 MACH_LOAD_COMMAND *
@@ -268,22 +199,15 @@ MachoGetNextCommand (
   return NULL;
 }
 
-/**
-  Retrieves the first UUID Load Command.
-
-  @param[in,out] Context  Context of the Mach-O.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
 MACH_UUID_COMMAND *
-MachoGetUuid64 (
+MachoGetUuid (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   MACH_UUID_COMMAND *UuidCommand;
 
   ASSERT (Context != NULL);
+
   //
   // Context initialisation guarantees the command size is a multiple of 8.
   //
@@ -315,7 +239,7 @@ MachoGetUuid64 (
 **/
 STATIC
 BOOLEAN
-InternalInitialiseSymtabs64 (
+InternalInitialiseSymtabs (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     MACH_SYMTAB_COMMAND    *Symtab,
   IN     MACH_DYSYMTAB_COMMAND  *DySymtab
@@ -332,8 +256,10 @@ InternalInitialiseSymtabs64 (
   UINT32                IndirectSymbolsOffset;
   UINT32                LocalRelocationsOffset;
   UINT32                ExternalRelocationsOffset;
-  MACH_NLIST_64         *SymbolTable;
-  MACH_NLIST_64         *IndirectSymtab;
+  MACH_NLIST            *SymbolTable32;
+  MACH_NLIST            *IndirectSymtab32;
+  MACH_NLIST_64         *SymbolTable64;
+  MACH_NLIST_64         *IndirectSymtab64;
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
 
@@ -342,9 +268,9 @@ InternalInitialiseSymtabs64 (
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
-  ASSERT (Context->SymbolTable == NULL);
+  ASSERT (Context->Is32Bit ? Context->SymbolTable32 == NULL : Context->SymbolTable64 == NULL);
 
-  FileSize = Context->FileSize;
+  FileSize  = Context->FileSize;
 
   Result = OcOverflowSubU32 (
              Symtab->SymbolsOffset,
@@ -353,7 +279,7 @@ InternalInitialiseSymtabs64 (
              );
   Result |= OcOverflowMulAddU32 (
               Symtab->NumSymbols,
-              sizeof (MACH_NLIST_64),
+              Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64),
               SymbolsOffset,
               &OffsetTop
               );
@@ -383,12 +309,20 @@ InternalInitialiseSymtabs64 (
   }
 
   Tmp = (VOID *)(MachoAddress + SymbolsOffset);
-  if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
-    return FALSE;
+  if (Context->Is32Bit) {
+    if (!OC_TYPE_ALIGNED (MACH_NLIST, Tmp)) {
+      return FALSE;
+    }
+    SymbolTable32     = (MACH_NLIST *)Tmp;
+    IndirectSymtab32  = NULL;
+  } else {
+    if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
+      return FALSE;
+    }
+    SymbolTable64     = (MACH_NLIST_64 *)Tmp;
+    IndirectSymtab64  = NULL;
   }
-  SymbolTable = (MACH_NLIST_64 *)Tmp;
 
-  IndirectSymtab    = NULL;
   LocalRelocations  = NULL;
   ExternRelocations = NULL;
 
@@ -432,7 +366,7 @@ InternalInitialiseSymtabs64 (
                  );
       Result |= OcOverflowMulAddU32 (
                   DySymtab->NumIndirectSymbols,
-                  sizeof (MACH_NLIST_64),
+                  Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64),
                   IndirectSymbolsOffset,
                   &OffsetTop
                   );
@@ -441,10 +375,17 @@ InternalInitialiseSymtabs64 (
       }
 
       Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
-      if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
-        return FALSE;
+      if (Context->Is32Bit) {
+        if (!OC_TYPE_ALIGNED (MACH_NLIST, Tmp)) {
+          return FALSE;
+        }
+        IndirectSymtab32 = (MACH_NLIST *)Tmp;
+      } else {
+        if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
+          return FALSE;
+        }
+        IndirectSymtab64 = (MACH_NLIST_64 *)Tmp;
       }
-      IndirectSymtab = (MACH_NLIST_64 *)Tmp;
     }
 
     if (DySymtab->NumOfLocalRelocations > 0 && DySymtab->LocalRelocationsOffset != 0) {
@@ -498,19 +439,25 @@ InternalInitialiseSymtabs64 (
   // Store the symbol information.
   //
   Context->Symtab      = Symtab;
-  Context->SymbolTable = SymbolTable;
   Context->StringTable = StringTable;
   Context->DySymtab    = DySymtab;
 
-  Context->IndirectSymbolTable = IndirectSymtab;
   Context->LocalRelocations    = LocalRelocations;
   Context->ExternRelocations   = ExternRelocations;
+
+  if (Context->Is32Bit) {
+    Context->SymbolTable32          = SymbolTable32;
+    Context->IndirectSymbolTable32  = IndirectSymtab32;
+  } else {
+    Context->SymbolTable64          = SymbolTable64;
+    Context->IndirectSymbolTable64  = IndirectSymtab64;
+  }
 
   return TRUE;
 }
 
 BOOLEAN
-MachoInitialiseSymtabsExternal64 (
+MachoInitialiseSymtabsExternal (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     OC_MACHO_CONTEXT  *SymsContext
   )
@@ -519,9 +466,15 @@ MachoInitialiseSymtabsExternal64 (
   MACH_DYSYMTAB_COMMAND *DySymtab;
   BOOLEAN               IsDyld;
 
-  if (Context->SymbolTable != NULL) {
+  ASSERT (Context != NULL);
+  ASSERT (Context->MachHeader != NULL);
+  ASSERT (SymsContext != NULL);
+
+  if ((Context->Is32Bit && Context->SymbolTable32 != NULL)
+    || (!Context->Is32Bit && Context->SymbolTable64 != NULL)) {
     return TRUE;
   }
+
   //
   // We cannot use SymsContext's symbol tables if Context is flagged for DYLD
   // and SymsContext is not.
@@ -539,6 +492,7 @@ MachoInitialiseSymtabsExternal64 (
     OC_ALIGNOF (MACH_SYMTAB_COMMAND) <= sizeof (UINT64),
     "Alignment is not guaranteed."
     );
+
   //
   // Retrieve SYMTAB.
   //
@@ -561,6 +515,7 @@ MachoInitialiseSymtabsExternal64 (
       OC_ALIGNOF (MACH_DYSYMTAB_COMMAND) <= sizeof (UINT64),
       "Alignment is not guaranteed."
       );
+
     //
     // Retrieve DYSYMTAB.
     //
@@ -574,447 +529,18 @@ MachoInitialiseSymtabsExternal64 (
     }
   }
 
-  return InternalInitialiseSymtabs64 (Context, Symtab, DySymtab);
+  return InternalInitialiseSymtabs (Context, Symtab, DySymtab);
 }
 
 BOOLEAN
-InternalRetrieveSymtabs64 (
+InternalRetrieveSymtabs (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {
   //
   // Retrieve the symbol information for Context from itself.
   //
-  return MachoInitialiseSymtabsExternal64 (Context, Context);
-}
-
-UINT32
-MachoGetSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-     OUT CONST MACH_NLIST_64  **SymbolTable,
-     OUT CONST CHAR8          **StringTable OPTIONAL,
-     OUT CONST MACH_NLIST_64  **LocalSymbols, OPTIONAL
-     OUT UINT32               *NumLocalSymbols, OPTIONAL
-     OUT CONST MACH_NLIST_64  **ExternalSymbols, OPTIONAL
-     OUT UINT32               *NumExternalSymbols, OPTIONAL
-     OUT CONST MACH_NLIST_64  **UndefinedSymbols, OPTIONAL
-     OUT UINT32               *NumUndefinedSymbols OPTIONAL
-  )
-{
-  UINT32              Index;
-  CONST MACH_NLIST_64 *SymTab;
-  UINT32              NoLocalSymbols;
-  UINT32              NoExternalSymbols;
-  UINT32              NoUndefinedSymbols;
-
-  ASSERT (Context != NULL);
-
-  if (!InternalRetrieveSymtabs64 (Context)) {
-    return 0;
-  }
-
-  if (Context->Symtab->NumSymbols == 0) {
-    return 0;
-  }
-
-  SymTab = Context->SymbolTable;
-
-  for (Index = 0; Index < Context->Symtab->NumSymbols; ++Index) {
-    if (!InternalSymbolIsSane (Context, &SymTab[Index])) {
-      return 0;
-    }
-  }
-
-  *SymbolTable = Context->SymbolTable;
-
-  if (StringTable != NULL) {
-    *StringTable = Context->StringTable;
-  }
-
-  NoLocalSymbols     = 0;
-  NoExternalSymbols  = 0;
-  NoUndefinedSymbols = 0;
-
-  if (Context->DySymtab != NULL) {
-    NoLocalSymbols     = Context->DySymtab->NumLocalSymbols;
-    NoExternalSymbols  = Context->DySymtab->NumExternalSymbols;
-    NoUndefinedSymbols = Context->DySymtab->NumUndefinedSymbols;
-  }
-
-  if (NumLocalSymbols != NULL) {
-    ASSERT (LocalSymbols != NULL);
-    *NumLocalSymbols = NoLocalSymbols;
-    if (NoLocalSymbols != 0) {
-      *LocalSymbols = &SymTab[Context->DySymtab->LocalSymbolsIndex];
-    }
-  }
-
-  if (NumExternalSymbols != NULL) {
-    ASSERT (ExternalSymbols != NULL);
-    *NumExternalSymbols = NoExternalSymbols;
-    if (NoExternalSymbols != 0) {
-      *ExternalSymbols = &SymTab[Context->DySymtab->ExternalSymbolsIndex];
-    }
-  }
-
-  if (NumUndefinedSymbols != NULL) {
-    ASSERT (UndefinedSymbols != NULL);
-    *NumUndefinedSymbols = NoUndefinedSymbols;
-    if (NoUndefinedSymbols != 0) {
-      *UndefinedSymbols = &SymTab[Context->DySymtab->UndefinedSymbolsIndex];
-    }
-  }
-
-  return Context->Symtab->NumSymbols;
-}
-
-UINT32
-MachoGetIndirectSymbolTable (
-  IN OUT OC_MACHO_CONTEXT     *Context,
-  OUT    CONST MACH_NLIST_64  **SymbolTable
-  )
-{
-  UINT32 Index;
-
-  if (!InternalRetrieveSymtabs64 (Context)) {
-    return 0;
-  }
-
-  for (Index = 0; Index < Context->DySymtab->NumIndirectSymbols; ++Index) {
-    if (
-      !InternalSymbolIsSane (Context, &Context->IndirectSymbolTable[Index])
-      ) {
-      return 0;
-    }
-  }
-
-  *SymbolTable = Context->IndirectSymbolTable;
-
-  return Context->DySymtab->NumIndirectSymbols;
-}
-
-/**
-  Returns a pointer to the Mach-O file at the specified virtual address.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  Virtual address to look up.    
-  @param[out]    MaxSize  Maximum data safely available from FileOffset.
-                          If NULL is returned, the output is undefined.
-
-**/
-VOID *
-MachoGetFilePointerByAddress64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    UINT32            *MaxSize OPTIONAL
-  )
-{
-  CONST MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT64                        Offset;
-
-  Segment = NULL;
-  while ((Segment = MachoGetNextSegment64 (Context, Segment)) != NULL) {
-    if ((Address >= Segment->VirtualAddress)
-     && (Address < Segment->VirtualAddress + Segment->Size)) {
-      Offset = (Address - Segment->VirtualAddress);
-
-      if (MaxSize != NULL) {
-        *MaxSize = (UINT32)(Segment->Size - Offset);
-      }
-
-      Offset += Segment->FileOffset - Context->ContainerOffset;
-      return (VOID *)((UINTN)Context->MachHeader + (UINTN)Offset);
-    }
-  }
-
-  return NULL;
-}
-
-/**
-  Strip superfluous Load Commands from the Mach-O header.  This includes the
-  Code Signature Load Command which must be removed for the binary has been
-  modified by the prelinking routines.
-
-  @param[in,out] MachHeader  Mach-O header to strip the Load Commands from.
-
-**/
-STATIC
-VOID
-InternalStripLoadCommands64 (
-  IN OUT MACH_HEADER_64  *MachHeader
-  )
-{
-  STATIC CONST MACH_LOAD_COMMAND_TYPE LoadCommandsToStrip[] = {
-    MACH_LOAD_COMMAND_CODE_SIGNATURE,
-    MACH_LOAD_COMMAND_DYLD_INFO,
-    MACH_LOAD_COMMAND_DYLD_INFO_ONLY,
-    MACH_LOAD_COMMAND_FUNCTION_STARTS,
-    MACH_LOAD_COMMAND_DATA_IN_CODE,
-    MACH_LOAD_COMMAND_DYLIB_CODE_SIGN_DRS
-  };
-
-  UINT32            Index;
-  UINT32            Index2;
-  MACH_LOAD_COMMAND *LoadCommand;
-  UINT32            SizeOfLeftCommands;
-  UINT32            OriginalCommandSize;
-  //
-  // Delete the Code Signature Load Command if existent as we modified the
-  // binary, as well as linker metadata not needed for runtime operation.
-  //
-  LoadCommand         = MachHeader->Commands;
-  SizeOfLeftCommands  = MachHeader->CommandsSize;
-  OriginalCommandSize = SizeOfLeftCommands;
-
-  for (Index = 0; Index < MachHeader->NumCommands; ++Index) {
-    //
-    // Assertion: LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD,
-    //            but they are not supposed to be present in the first place.
-    //
-    if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
-     || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
-      DEBUG ((DEBUG_WARN, "OCMCO: UNIX Thread and Main LCs are unsupported\n"));
-    }
-
-    SizeOfLeftCommands -= LoadCommand->CommandSize;
-
-    for (Index2 = 0; Index2 < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
-      if (LoadCommand->CommandType == LoadCommandsToStrip[Index2]) {
-        if (Index != (MachHeader->NumCommands - 1)) {
-          //
-          // If the current Load Command is not the last one, relocate the
-          // subsequent ones.
-          //
-          CopyMem (
-            LoadCommand,
-            NEXT_MACH_LOAD_COMMAND (LoadCommand),
-            SizeOfLeftCommands
-            );
-        }
-
-        --MachHeader->NumCommands;
-        MachHeader->CommandsSize -= LoadCommand->CommandSize;
-
-        break;
-      }
-    }
-
-    LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-  }
-
-  ZeroMem (LoadCommand, OriginalCommandSize - MachHeader->CommandsSize);
-}
-
-UINT32
-MachoExpandImage64 (
-  IN  OC_MACHO_CONTEXT   *Context,
-  OUT UINT8              *Destination,
-  IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
-  )
-{
-  MACH_HEADER_64           *Header;
-  UINT8                    *Source;
-  UINT32                   HeaderSize;
-  UINT64                   CopyFileOffset;
-  UINT64                   CopyFileSize;
-  UINT64                   CopyVmSize;
-  UINT32                   CurrentDelta;
-  UINT32                   OriginalDelta;
-  UINT64                   CurrentSize;
-  UINT32                   FileSize;
-  MACH_SEGMENT_COMMAND_64  *Segment;
-  MACH_SEGMENT_COMMAND_64  *FirstSegment;
-  MACH_SEGMENT_COMMAND_64  *DstSegment;
-  MACH_SYMTAB_COMMAND      *Symtab;
-  MACH_DYSYMTAB_COMMAND    *DySymtab;
-  UINT32                   Index;
-
-  ASSERT (Context != NULL);
-  ASSERT (Context->FileSize != 0);
-
-  //
-  // Header is valid, copy it first.
-  //
-  Header     = MachoGetMachHeader64 (Context);
-  Source     = (UINT8 *) Header;
-  HeaderSize = sizeof (*Header) + Header->CommandsSize;
-  if (HeaderSize > DestinationSize) {
-    return 0;
-  }
-  CopyMem (Destination, Header, HeaderSize);
-
-  CurrentDelta = 0;
-  FirstSegment = NULL;
-  CurrentSize  = 0;
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    //
-    // Align delta by x86 page size, this is what our lib expects.
-    //
-    OriginalDelta = CurrentDelta;
-    CurrentDelta  = MACHO_ALIGN (CurrentDelta);
-    if (Segment->FileSize > Segment->Size) {
-      return 0;
-    }
-
-    if (FirstSegment == NULL) {
-      FirstSegment = Segment;
-    }
-
-    //
-    // Do not overwrite header.
-    //
-    CopyFileOffset = Segment->FileOffset - Context->ContainerOffset;
-    CopyFileSize   = Segment->FileSize;
-    CopyVmSize     = Segment->Size;
-    if (CopyFileOffset <= HeaderSize) {
-      CopyFileOffset = HeaderSize;
-      CopyFileSize   = Segment->FileSize - CopyFileOffset;
-      CopyVmSize     = Segment->Size - CopyFileOffset;
-      if (CopyFileSize > Segment->FileSize || CopyVmSize > Segment->Size) {
-        //
-        // Header must fit in 1 segment.
-        //
-        return 0;
-      }
-    }
-    //
-    // Ensure that it still fits. In legit files segments are ordered.
-    // We do not care for other (the file will be truncated).
-    //
-    if (OcOverflowTriAddU64 (CopyFileOffset, CurrentDelta, CopyVmSize, &CurrentSize)
-      || CurrentSize > DestinationSize) {
-      return 0;
-    }
-
-    //
-    // Copy and zero fill file data. We can do this because only last sections can have 0 file size.
-    //
-    ASSERT (CopyFileSize <= MAX_UINTN && CopyVmSize <= MAX_UINTN);
-    ZeroMem (&Destination[CopyFileOffset + OriginalDelta], CurrentDelta - OriginalDelta);
-    CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], (UINTN)CopyFileSize);
-    ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], (UINTN)(CopyVmSize - CopyFileSize));
-    //
-    // Refresh destination segment size and offsets.
-    //
-    DstSegment = (MACH_SEGMENT_COMMAND_64 *) ((UINT8 *) Segment - Source + Destination);
-    DstSegment->FileOffset += CurrentDelta;
-    DstSegment->FileSize    = DstSegment->Size;
-
-    if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
-      return 0;
-    }
-
-    //
-    // We need to update fields in SYMTAB and DYSYMTAB. Tables have to be present before 0 FileSize
-    // sections as they have data, so we update them before parsing sections. 
-    // Note: There is an assumption they are in __LINKEDIT segment, another option is to check addresses.
-    //
-    if (AsciiStrnCmp (DstSegment->SegmentName, "__LINKEDIT", ARRAY_SIZE (DstSegment->SegmentName)) == 0) {
-      Symtab = (MACH_SYMTAB_COMMAND *)(
-                 MachoGetNextCommand (
-                   Context,
-                   MACH_LOAD_COMMAND_SYMTAB,
-                   NULL
-                   )
-                 );
-
-      if (Symtab != NULL) {
-        Symtab = (MACH_SYMTAB_COMMAND *) ((UINT8 *) Symtab - Source + Destination);
-        if (Symtab->SymbolsOffset != 0) {
-          Symtab->SymbolsOffset += CurrentDelta;
-        }
-        if (Symtab->StringsOffset != 0) {
-          Symtab->StringsOffset += CurrentDelta;
-        }
-      }
-
-      DySymtab = (MACH_DYSYMTAB_COMMAND *)(
-                     MachoGetNextCommand (
-                       Context,
-                       MACH_LOAD_COMMAND_DYSYMTAB,
-                       NULL
-                       )
-                     );
-
-      if (DySymtab != NULL) {
-        DySymtab = (MACH_DYSYMTAB_COMMAND *) ((UINT8 *) DySymtab - Source + Destination);
-        if (DySymtab->TableOfContentsNumEntries != 0) {
-          DySymtab->TableOfContentsNumEntries += CurrentDelta;
-        }
-        if (DySymtab->ModuleTableFileOffset != 0) {
-          DySymtab->ModuleTableFileOffset += CurrentDelta;
-        }
-        if (DySymtab->ReferencedSymbolTableFileOffset != 0) {
-          DySymtab->ReferencedSymbolTableFileOffset += CurrentDelta;
-        }
-        if (DySymtab->IndirectSymbolsOffset != 0) {
-          DySymtab->IndirectSymbolsOffset += CurrentDelta;
-        }
-        if (DySymtab->ExternalRelocationsOffset != 0) {
-          DySymtab->ExternalRelocationsOffset += CurrentDelta;
-        }
-        if (DySymtab->LocalRelocationsOffset != 0) {
-          DySymtab->LocalRelocationsOffset += CurrentDelta;
-        }
-      }
-    }
-    //
-    // These may well wrap around with invalid data.
-    // But we do not care, as we do not access these fields ourselves,
-    // and later on the section values are checked by MachoLib.
-    // Note: There is an assumption that 'CopyFileOffset + CurrentDelta' is aligned.
-    //
-    OriginalDelta  = CurrentDelta;
-    CopyFileOffset = Segment->FileOffset;
-    for (Index = 0; Index < DstSegment->NumSections; ++Index) {
-      if (DstSegment->Sections[Index].Offset == 0) {
-        DstSegment->Sections[Index].Offset = (UINT32) CopyFileOffset + CurrentDelta;
-        CurrentDelta += (UINT32) DstSegment->Sections[Index].Size;
-      } else {
-        DstSegment->Sections[Index].Offset += CurrentDelta;
-        CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
-      }
-    }
-
-    CurrentDelta = OriginalDelta + (UINT32)(Segment->Size - Segment->FileSize);
-  }
-  //
-  // CurrentSize will only be 0 if there are no valid segments, which is the
-  // case for Kernel Resource KEXTs.  In this case, try to use the raw file.
-  //
-  if (CurrentSize == 0) {
-    FileSize = MachoGetFileSize (Context);
-    //
-    // HeaderSize must be at most as big as the file size by OcMachoLib
-    // guarantees. It's sanity-checked to ensure the safety of the subtraction.
-    //
-    ASSERT (FileSize >= HeaderSize);
-
-    if (FileSize > DestinationSize) {
-      return 0;
-    }
-
-    CopyMem (
-      Destination + HeaderSize,
-      (UINT8 *)Header + HeaderSize,
-      FileSize - HeaderSize
-      );
-
-    CurrentSize = FileSize;
-  }
-
-  if (Strip) {
-    InternalStripLoadCommands64 ((MACH_HEADER_64 *) Destination);
-  }
-  //
-  // This cast is safe because CurrentSize is verified against DestinationSize.
-  //
-  return (UINT32) CurrentSize;
+  return MachoInitialiseSymtabsExternal (Context, Context);
 }
 
 UINT64
@@ -1072,115 +598,48 @@ MachoRuntimeGetEntryAddress (
   return Address;
 }
 
+VOID *
+MachoGetFilePointerByAddress (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT64            Address,
+  OUT    UINT32            *MaxSize OPTIONAL
+  )
+{
+  ASSERT (Context != NULL);
+
+  if (Context->Is32Bit) {
+    ASSERT (Address > MAX_UINT32);
+  }
+
+  return Context->Is32Bit ?
+    InternalMachoGetFilePointerByAddress32 (Context, (UINT32) Address, MaxSize) :
+    InternalMachoGetFilePointerByAddress64 (Context, Address, MaxSize);
+}
+
+UINT32
+MachoExpandImage (
+  IN  OC_MACHO_CONTEXT   *Context,
+  OUT UINT8              *Destination,
+  IN  UINT32             DestinationSize,
+  IN  BOOLEAN            Strip
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    InternalMachoExpandImage32 (Context, Destination, DestinationSize, Strip) :
+    InternalMachoExpandImage64 (Context, Destination, DestinationSize, Strip);
+}
+
 BOOLEAN
-MachoMergeSegments64 (
+MachoMergeSegments (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST CHAR8          *Prefix
   )
 {
-  UINT32                  LcIndex;
-  MACH_LOAD_COMMAND       *LoadCommand;
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  MACH_SEGMENT_COMMAND_64 *FirstSegment;
-  MACH_HEADER_64          *Header;
-  UINTN                   PrefixLength;
-  UINTN                   RemainingArea;
-  UINT32                  SkipCount;
-
   ASSERT (Context != NULL);
-  ASSERT (Context->FileSize != 0);
-  ASSERT (Prefix != NULL);
 
-  Header       = MachoGetMachHeader64 (Context);
-  PrefixLength = AsciiStrLen (Prefix);
-  FirstSegment = NULL;
-
-  SkipCount   = 0;
-
-  LoadCommand = &Header->Commands[0];
-
-  for (LcIndex = 0; LcIndex < Header->NumCommands; ++LcIndex) {
-    //
-    // Either skip or stop at unrelated commands.
-    //
-    Segment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) LoadCommand;
-
-    if (LoadCommand->CommandType != MACH_LOAD_COMMAND_SEGMENT_64
-      || AsciiStrnCmp (Segment->SegmentName, Prefix, PrefixLength) != 0) {
-      if (FirstSegment != NULL) {
-        break;
-      }
-
-      LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-      continue;
-    }
-
-    //
-    // We have a segment starting with the prefix.
-    //
-
-    //
-    // Do not support this for now as it will require changes in the file.
-    //
-    if (Segment->Size != Segment->FileSize) {
-      return FALSE;
-    }
-
-    //
-    // Remember the first segment or assume it is a skip.
-    //
-    if (FirstSegment == NULL) {
-      FirstSegment = Segment;
-    } else {
-      ++SkipCount;
-
-      //
-      // Expand the first segment.
-      // TODO: Do we need to check these for overflow for our own purposes?
-      //
-      FirstSegment->Size              = Segment->VirtualAddress - FirstSegment->VirtualAddress + Segment->Size;
-      FirstSegment->FileSize          = Segment->FileOffset - FirstSegment->FileOffset + Segment->FileSize;
-
-      //
-      // Add new segment protection to the first segment.
-      //
-      FirstSegment->InitialProtection  |= Segment->InitialProtection;
-      FirstSegment->MaximumProtection  |= Segment->MaximumProtection;
-    }
-
-    LoadCommand = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-  }
-
-  //
-  // The segment does not exist.
-  //
-  if (FirstSegment == NULL) {
-    return FALSE;
-  }
-
-  //
-  // The segment is only one.
-  //
-  if (SkipCount == 0) {
-    return FALSE;
-  }
-
-  //
-  // Move back remaining commands ontop of the skipped ones and zero this area.
-  //
-  RemainingArea = Header->CommandsSize - ((UINTN) LoadCommand - (UINTN) &Header->Commands[0]);
-  CopyMem (
-    (UINT8 *) FirstSegment + FirstSegment->CommandSize,
-    LoadCommand,
-    RemainingArea
-    );
-  ZeroMem (LoadCommand, RemainingArea);
-
-  //
-  // Account for dropped commands in the header.
-  //
-  Header->NumCommands  -= SkipCount;
-  Header->CommandsSize -= (UINT32) (sizeof (MACH_SEGMENT_COMMAND_64) * SkipCount);
-
-  return TRUE;
+  return Context->Is32Bit ?
+    InternalMachoMergeSegments32 (Context, Prefix) :
+    InternalMachoMergeSegments64 (Context, Prefix);
 }

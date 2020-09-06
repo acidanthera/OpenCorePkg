@@ -1106,7 +1106,7 @@ MkextReserveKextSize (
       return EFI_INVALID_PARAMETER;
     }
 
-    ExecutableSize = MachoGetVmSize64 (&Context);
+    ExecutableSize = MachoGetVmSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
     }

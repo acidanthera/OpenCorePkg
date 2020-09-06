@@ -136,7 +136,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMachoLib targets.
 	#
-	OBJS    += CxxSymbols.o Fat.o Header.o Header32.o Header64.o Symbols.o Relocations.o
+	OBJS    += CxxSymbols.o Fat.o Header.o Macho32.o Macho64.o Relocations.o
 	#
 	# OcAppleKeysLib targets.
 	#

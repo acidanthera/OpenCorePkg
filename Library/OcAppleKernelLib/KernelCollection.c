@@ -242,7 +242,7 @@ KcRebuildMachHeader (
     // hardware reset (like on iOS) and they now really try to require W^X:
     // https://developer.apple.com/videos/play/wwdc2020/10686/
     //
-    if (!MachoMergeSegments64 (&Context->PrelinkedMachContext, KC_REGION_SEGMENT_PREFIX)) {
+    if (!MachoMergeSegments (&Context->PrelinkedMachContext, KC_REGION_SEGMENT_PREFIX)) {
       DEBUG ((DEBUG_INFO, "OCAK: Segment expansion failure\n"));
       return EFI_UNSUPPORTED;
     }
