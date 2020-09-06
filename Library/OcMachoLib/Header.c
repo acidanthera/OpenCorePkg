@@ -42,98 +42,7 @@ MachoInitializeContext (
   IN  UINT32            ContainerOffset
   )
 {
-  EFI_STATUS              Status;
-  MACH_HEADER_64          *MachHeader;
-  UINTN                   TopOfFile;
-  UINTN                   TopOfCommands;
-  UINT32                  Index;
-  CONST MACH_LOAD_COMMAND *Command;
-  UINTN                   TopOfCommand;
-  UINT32                  CommandsSize;
-  BOOLEAN                 Result;
-
-  ASSERT (FileData != NULL);
-  ASSERT (FileSize > 0);
-  ASSERT (Context != NULL);
-
-  TopOfFile = ((UINTN)FileData + FileSize);
-  ASSERT (TopOfFile > (UINTN)FileData);
-
-  Status = FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
-  if (EFI_ERROR (Status)) {
-    return FALSE;
-  }
-
-  if (FileSize < sizeof (*MachHeader)
-    || !OC_TYPE_ALIGNED (MACH_HEADER_64, FileData)) {
-    return FALSE;
-  }
-  MachHeader = (MACH_HEADER_64 *)FileData;
-  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
-    return FALSE;
-  }
-
-  Result = OcOverflowAddUN (
-             (UINTN)MachHeader->Commands,
-             MachHeader->CommandsSize,
-             &TopOfCommands
-             );
-  if (Result || (TopOfCommands > TopOfFile)) {
-    return FALSE;
-  }
-
-  CommandsSize = 0;
-
-  for (
-    Index = 0, Command = MachHeader->Commands;
-    Index < MachHeader->NumCommands;
-    ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
-    ) {
-    Result = OcOverflowAddUN (
-               (UINTN)Command,
-               sizeof (*Command),
-               &TopOfCommand
-               );
-    if (Result
-     || (TopOfCommand > TopOfCommands)
-     || (Command->CommandSize < sizeof (*Command))
-     || ((Command->CommandSize % sizeof (UINT64)) != 0)  // Assumption: 64-bit, see below.
-      ) {
-      return FALSE;
-    }
-
-    Result = OcOverflowAddU32 (
-               CommandsSize,
-               Command->CommandSize,
-               &CommandsSize
-               );
-    if (Result) {
-      return FALSE;
-    }
-  }
-
-  if (MachHeader->CommandsSize != CommandsSize) {
-    return FALSE;
-  }
-  //
-  // Verify assumptions made by this library.
-  // Carefully audit all "Assumption:" remarks before modifying these checks.
-  //
-  if ((MachHeader->CpuType != MachCpuTypeX8664)
-   || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
-    && (MachHeader->FileType != MachHeaderFileTypeExecute)
-    && (MachHeader->FileType != MachHeaderFileTypeFileSet))) {
-    return FALSE;
-  }
-
-  ZeroMem (Context, sizeof (*Context));
-
-  Context->MachHeader      = MachHeader;
-  Context->MachHeaderAny   = (MACH_HEADER_ANY*)MachHeader;
-  Context->FileSize        = FileSize;
-  Context->ContainerOffset = ContainerOffset;
-
-  return TRUE;
+  return InternalMachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
 }
 
 UINT32
@@ -165,38 +74,11 @@ MachoGetNextCommand (
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   )
 {
-  MACH_LOAD_COMMAND       *Command;
-  MACH_HEADER_64          *MachHeader;
-  UINTN                   TopOfCommands;
-
   ASSERT (Context != NULL);
 
-  MachHeader = Context->MachHeader;
-  ASSERT (MachHeader != NULL);
-
-  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
-
-  if (LoadCommand != NULL) {
-    ASSERT (
-      (LoadCommand >= &MachHeader->Commands[0])
-        && ((UINTN)LoadCommand <= TopOfCommands)
-      );
-    Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
-  } else {
-    Command = &MachHeader->Commands[0];
-  }
-  
-  for (
-    ;
-    (UINTN)Command < TopOfCommands;
-    Command = NEXT_MACH_LOAD_COMMAND (Command)
-    ) {
-    if (Command->CommandType == LoadCommandType) {
-      return Command;
-    }
-  }
-
-  return NULL;
+  return Context->Is32Bit ?
+    InternalMachoGetNextCommand32 (Context, LoadCommandType, LoadCommand) :
+    InternalMachoGetNextCommand64 (Context, LoadCommandType, LoadCommand);
 }
 
 MACH_UUID_COMMAND *
@@ -465,6 +347,8 @@ MachoInitialiseSymtabsExternal (
   MACH_SYMTAB_COMMAND   *Symtab;
   MACH_DYSYMTAB_COMMAND *DySymtab;
   BOOLEAN               IsDyld;
+  MACH_HEADER_FLAGS     MachFlags;
+  MACH_HEADER_FLAGS     SymsMachFlags;
 
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
@@ -475,13 +359,20 @@ MachoInitialiseSymtabsExternal (
     return TRUE;
   }
 
+  MachFlags = Context->Is32Bit ?
+    Context->MachHeader->Header32.Flags :
+    Context->MachHeader->Header64.Flags;
+  SymsMachFlags = SymsContext->Is32Bit ?
+    SymsContext->MachHeader->Header32.Flags :
+    SymsContext->MachHeader->Header64.Flags;
+
   //
   // We cannot use SymsContext's symbol tables if Context is flagged for DYLD
   // and SymsContext is not.
   //
-  IsDyld = (Context->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0;
+  IsDyld = (MachFlags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) != 0;
   if (IsDyld
-   && (SymsContext->MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+   && (SymsMachFlags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
     return FALSE;
   }
 

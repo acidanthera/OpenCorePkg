@@ -197,6 +197,48 @@ MACH_X (InternalMachoGetVmSize) (
   return MACH_UINT32_CAST (VmSize);
 }
 
+MACH_LOAD_COMMAND *
+MACH_X (InternalMachoGetNextCommand) (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
+  )
+{
+  MACH_LOAD_COMMAND       *Command;
+  MACH_HEADER_X           *MachHeader;
+  UINTN                   TopOfCommands;
+
+  ASSERT (Context != NULL);
+  ASSERT (Context->MachHeader != NULL);
+  MACH_ASSERT_X;
+
+  MachHeader = MACH_X (&Context->MachHeader->Header);
+
+  TopOfCommands = ((UINTN)MachHeader->Commands + MachHeader->CommandsSize);
+
+  if (LoadCommand != NULL) {
+    ASSERT (
+      (LoadCommand >= &MachHeader->Commands[0])
+        && ((UINTN)LoadCommand <= TopOfCommands)
+      );
+    Command = NEXT_MACH_LOAD_COMMAND (LoadCommand);
+  } else {
+    Command = &MachHeader->Commands[0];
+  }
+  
+  for (
+    ;
+    (UINTN)Command < TopOfCommands;
+    Command = NEXT_MACH_LOAD_COMMAND (Command)
+    ) {
+    if (Command->CommandType == LoadCommandType) {
+      return Command;
+    }
+  }
+
+  return NULL;
+}
+
 VOID *
 MACH_X (InternalMachoGetFilePointerByAddress) (
   IN OUT OC_MACHO_CONTEXT   *Context,
@@ -555,16 +597,125 @@ MACH_X (InternalMachoMergeSegments) (
   return TRUE;
 }
 
+BOOLEAN
+MACH_X (InternalMachoInitializeContext) (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
+  )
+{
+  EFI_STATUS              Status;
+  MACH_HEADER_X           *MachHeader;
+  UINTN                   TopOfFile;
+  UINTN                   TopOfCommands;
+  UINT32                  Index;
+  CONST MACH_LOAD_COMMAND *Command;
+  UINTN                   TopOfCommand;
+  UINT32                  CommandsSize;
+  BOOLEAN                 Result;
+
+  ASSERT (FileData != NULL);
+  ASSERT (FileSize > 0);
+  ASSERT (Context != NULL);
+
+  TopOfFile = ((UINTN)FileData + FileSize);
+  ASSERT (TopOfFile > (UINTN)FileData);
+
+#ifdef MACHO_LIB_32
+  Status = FatFilterArchitecture32 ((UINT8 **) &FileData, &FileSize);
+#else
+  Status = FatFilterArchitecture64 ((UINT8 **) &FileData, &FileSize);
+#endif
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  if (FileSize < sizeof (*MachHeader)
+    || !OC_TYPE_ALIGNED (MACH_HEADER_X, FileData)) {
+    return FALSE;
+  }
+  MachHeader = (MACH_HEADER_X *)FileData;
+  if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+    return FALSE;
+  }
+
+  Result = OcOverflowAddUN (
+             (UINTN)MachHeader->Commands,
+             MachHeader->CommandsSize,
+             &TopOfCommands
+             );
+  if (Result || (TopOfCommands > TopOfFile)) {
+    return FALSE;
+  }
+
+  CommandsSize = 0;
+
+  for (
+    Index = 0, Command = MachHeader->Commands;
+    Index < MachHeader->NumCommands;
+    ++Index, Command = NEXT_MACH_LOAD_COMMAND (Command)
+    ) {
+    Result = OcOverflowAddUN (
+               (UINTN)Command,
+               sizeof (*Command),
+               &TopOfCommand
+               );
+    if (Result
+     || (TopOfCommand > TopOfCommands)
+     || (Command->CommandSize < sizeof (*Command))
+     || ((Command->CommandSize % sizeof (MACH_UINT_X)) != 0)
+      ) {
+      return FALSE;
+    }
+
+    Result = OcOverflowAddU32 (
+               CommandsSize,
+               Command->CommandSize,
+               &CommandsSize
+               );
+    if (Result) {
+      return FALSE;
+    }
+  }
+
+  if (MachHeader->CommandsSize != CommandsSize) {
+    return FALSE;
+  }
+  //
+  // Verify assumptions made by this library.
+  // Carefully audit all "Assumption:" remarks before modifying these checks.
+  //
+#ifdef MACHO_LIB_32
+  if ((MachHeader->CpuType != MachCpuTypeI386)
+#else
+  if ((MachHeader->CpuType != MachCpuTypeX8664)
+#endif
+   || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
+    && (MachHeader->FileType != MachHeaderFileTypeExecute)
+    && (MachHeader->FileType != MachHeaderFileTypeFileSet))) {
+    return FALSE;
+  }
+
+  ZeroMem (Context, sizeof (*Context));
+
+  Context->MachHeader      = (MACH_HEADER_ANY*)MachHeader;
+  Context->FileSize        = FileSize;
+  Context->ContainerOffset = ContainerOffset;
+
+  return TRUE;
+}
+
 MACH_HEADER_X *
 MACH_X (MachoGetMachHeader) (
   IN OUT OC_MACHO_CONTEXT   *Context
   )
 {
   ASSERT (Context != NULL);
-  ASSERT (Context->MachHeaderAny != NULL);
+  ASSERT (Context->MachHeader != NULL);
   MACH_ASSERT_X;
 
-  return MACH_X (&Context->MachHeaderAny->Header);
+  return MACH_X (&Context->MachHeader->Header);
 }
 
 MACH_UINT_X

@@ -32,12 +32,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /// only.  Members are not guaranteed to be sane.
 ///
 typedef struct {
-  MACH_HEADER_64        *MachHeader;
+  MACH_HEADER_ANY       *MachHeader;
   UINT32                FileSize;
   BOOLEAN               Is32Bit;
-
-  MACH_HEADER_ANY       *MachHeaderAny;
-
 
   UINT32                ContainerOffset;
   MACH_SYMTAB_COMMAND   *Symtab;

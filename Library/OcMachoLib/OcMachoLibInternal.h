@@ -91,6 +91,46 @@ InternalSymbolIsSane64 (
   );
 
 /**
+  Initializes a 32-bit Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+InternalMachoInitializeContext32 (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
+  );
+
+/**
+  Initializes a 64-bit Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+InternalMachoInitializeContext64 (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
+  );
+
+/**
   Returns the 32-bit Mach-O's virtual address space size.
 
   @param[out] Context   Context of the Mach-O.
@@ -110,6 +150,40 @@ InternalMachoGetVmSize32 (
 UINT32
 InternalMachoGetVmSize64 (
   IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Retrieves the next 32-bit Load Command of type LoadCommandType.
+
+  @param[in,out] Context          Context of the Mach-O.
+  @param[in]     LoadCommandType  Type of the Load Command to retrieve.
+  @param[in]     LoadCommand      Previous Load Command.
+                                  If NULL, the first match is returned.
+
+  @retval NULL  NULL is returned on failure.
+**/
+MACH_LOAD_COMMAND *
+InternalMachoGetNextCommand32 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
+  );
+
+/**
+  Retrieves the next 64-bit Load Command of type LoadCommandType.
+
+  @param[in,out] Context          Context of the Mach-O.
+  @param[in]     LoadCommandType  Type of the Load Command to retrieve.
+  @param[in]     LoadCommand      Previous Load Command.
+                                  If NULL, the first match is returned.
+
+  @retval NULL  NULL is returned on failure.
+**/
+MACH_LOAD_COMMAND *
+InternalMachoGetNextCommand64 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
+  IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
   );
 
 /**
