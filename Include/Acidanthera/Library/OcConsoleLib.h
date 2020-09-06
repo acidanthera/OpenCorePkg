@@ -132,7 +132,7 @@ OcSetConsoleMode (
 /**
   Ensure installed GOP protocol on ConOut handle.
 **/
-VOID
+EFI_STATUS
 OcProvideConsoleGop (
   IN BOOLEAN  Route
   );
