@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Tue Sep  1 07:50:20 2020
+%DIF ADD ../Configuration.tex        Sun Sep  6 03:06:36 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2390,7 +2390,20 @@ blocking.
   description if this is desired.
 
 \item
-  \texttt{DummyPowerManagement}\\
+  \DIFaddbegin \texttt{\DIFadd{DisableLinkeditJettison}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 11.0}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disables }\texttt{\DIFadd{\_\_LINKEDIT}} \DIFadd{jettison code.
+}
+
+  \DIFadd{This option lets }\texttt{\DIFadd{Lilu.kext}} \DIFadd{and possibly some others function
+  in macOS Big Sur with best performance without }\texttt{\DIFadd{keepsyms=1}}
+  \DIFadd{boot argument.
+}
+
+\item
+  \DIFaddend \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \DIFaddbegin \textbf{\DIFadd{Requirement}}\DIFadd{: 10.6 (64-bit)}\\

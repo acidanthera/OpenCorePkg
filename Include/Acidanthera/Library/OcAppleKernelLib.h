@@ -540,6 +540,10 @@ typedef enum {
   KernelQuirkXhciPortLimit1,
   KernelQuirkXhciPortLimit2,
   KernelQuirkXhciPortLimit3,
+  //
+  // Remove kernel __LINKEDIT jetisson.
+  //
+  KernelQuirkSegmentJettison,
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;

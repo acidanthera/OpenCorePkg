@@ -668,6 +668,8 @@
 			<false/>
 			<key>DisableRtcChecksum</key>
 			<false/>
+			<key>DisableLinkeditJettison</key>
+			<true/>
 			<key>DummyPowerManagement</key>
 			<false/>
 			<key>ExternalDiskIcons</key>

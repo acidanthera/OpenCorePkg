@@ -281,6 +281,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.PowerTimeoutKernelPanic) {
       OcKernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
+
+    if (Config->Kernel.Quirks.DisableLinkeditJettison) {
+      OcKernelApplyQuirk (KernelQuirkSegmentJettison, CacheType, DarwinVersion, NULL, &KernelPatcher);     
+    }
   }
 }
 

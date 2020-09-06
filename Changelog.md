@@ -31,6 +31,7 @@ OpenCore Changelog
 - Added `Force` section to provide support for injecting drivers in older macOS
 - Changed kernel driver injection to happen prior to kernel driver patching
 - Added `Arch` filtering option to `Add`, `Block`, `Force`, and `Patch` sections
+- Added `DisableLinkeditJettison` quirk to workaround 11.0b5 kernel panics
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

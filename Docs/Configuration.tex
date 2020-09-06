@@ -2280,6 +2280,17 @@ blocking.
   description if this is desired.
 
 \item
+  \texttt{DisableLinkeditJettison}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 11.0\\
+  \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
+
+  This option lets \texttt{Lilu.kext} and possibly some others function
+  in macOS Big Sur with best performance without \texttt{keepsyms=1}
+  boot argument.
+
+\item
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

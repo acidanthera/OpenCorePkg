@@ -20,6 +20,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleKernelLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 
 STATIC CONST UINT8 mMovEcxE2[] = {
@@ -1969,6 +1970,92 @@ PatchAppleRtcChecksum (
   return Status;
 }
 
+STATIC
+EFI_STATUS
+PatchSegmentJettison (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       *RemoveBs;
+  UINT8       *StaticMfree;
+  UINT8       *CurrFreeCall;
+  CHAR8       *Jettisoning;
+  UINT8       *Last;
+  UINTN       Index;
+  UINT32      Diff;
+  UINT32      Diff2;
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping SegmentJettison on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  Last = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
+
+  Status = PatcherGetSymbolAddress (Patcher, "__ZN6OSKext19removeKextBootstrapEv", (UINT8 **) &RemoveBs);
+  if (EFI_ERROR (Status) || RemoveBs > Last) {
+    DEBUG ((DEBUG_INFO, "OCAK: Missing removeKextBootstrap - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  Status = PatcherGetSymbolAddress (Patcher, "_ml_static_mfree", (UINT8 **) &StaticMfree);
+  if (EFI_ERROR (Status) || RemoveBs > Last) {
+    DEBUG ((DEBUG_INFO, "OCAK: Missing ml_static_mfree - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  if (RemoveBs - StaticMfree > MAX_INT32) {
+    DEBUG ((DEBUG_INFO, "OCAK: ml_static_mfree %p removeKextBootstrap %p are too far\n", StaticMfree, RemoveBs));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Find the call to _ml_static_mfree.
+  //
+  Diff = (UINT32)((UINTN)StaticMfree - (UINTN)RemoveBs - 5);
+
+  CurrFreeCall = NULL;
+  for (Index = 0; Index < EFI_PAGE_SIZE; ++Index) {
+    if (RemoveBs[0] == 0xE8
+      && CompareMem (&RemoveBs[1], &Diff, sizeof (Diff)) == 0) {
+      CurrFreeCall = RemoveBs;
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "OCAK: CurrFreeCall %02X %02X %02X %02X %02X %X\n",
+        RemoveBs[0],
+        RemoveBs[1],
+        RemoveBs[2],
+        RemoveBs[3],
+        RemoveBs[4],
+        Diff
+        ));
+    } else if (CurrFreeCall != NULL
+      && RemoveBs[0] == 0x48 && RemoveBs[1] == 0x8D && RemoveBs[2] == 0x15) {
+      //
+      // Check if this lea rdx, address is pointing to "Jettisoning fileset Linkedit segments from..."
+      //
+      CopyMem (&Diff2, &RemoveBs[3], sizeof (Diff2));
+      Jettisoning = (CHAR8 *) RemoveBs + Diff2 + 7;
+      if ((UINT8 *) Jettisoning <= Last
+        && AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0) {
+        DEBUG ((DEBUG_INFO, "OCAK: Found jettisoning fileset\n"));
+        SetMem (CurrFreeCall, 0x90, 5);
+        return EFI_SUCCESS;    
+      }
+    }
+
+    ++RemoveBs;
+    --Diff;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to find jettisoning fileset - %p\n", CurrFreeCall));
+
+  return EFI_NOT_FOUND;
+}
+
 //
 // Quirks table.
 //
@@ -1991,6 +2078,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkXhciPortLimit1] = { "com.apple.iokit.IOUSBHostFamily", PatchUsbXhciPortLimit1 },
   [KernelQuirkXhciPortLimit2] = { "com.apple.driver.usb.AppleUSBXHCI", PatchUsbXhciPortLimit2 },
   [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
+  [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
 };
 
 EFI_STATUS
