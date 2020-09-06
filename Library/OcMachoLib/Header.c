@@ -190,21 +190,24 @@ InternalInitialiseSymtabs (
     return FALSE;
   }
 
+  SymbolTable32 = NULL;
+  SymbolTable64 = NULL;
+
   Tmp = (VOID *)(MachoAddress + SymbolsOffset);
   if (Context->Is32Bit) {
     if (!OC_TYPE_ALIGNED (MACH_NLIST, Tmp)) {
       return FALSE;
     }
     SymbolTable32     = (MACH_NLIST *)Tmp;
-    IndirectSymtab32  = NULL;
   } else {
     if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
       return FALSE;
     }
     SymbolTable64     = (MACH_NLIST_64 *)Tmp;
-    IndirectSymtab64  = NULL;
   }
 
+  IndirectSymtab32  = NULL;
+  IndirectSymtab64  = NULL;
   LocalRelocations  = NULL;
   ExternRelocations = NULL;
 
