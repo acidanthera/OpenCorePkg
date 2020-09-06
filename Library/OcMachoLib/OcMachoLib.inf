@@ -35,3 +35,6 @@
   OcMachoLibInternal.h
   Relocations.c
   Symbols.c
+  HeaderInternal.h
+  Header32.c
+  Header64.c

@@ -858,8 +858,8 @@ typedef struct {
   UINT32 Size;                     ///< size in bytes of this section
   UINT32 Offset;                   ///< file offset of this section
   UINT32 Alignment;                ///< section alignment (power of 2)
-  UINT32 RelocationEntriesOffset;  ///< file offset of relocation entries
-  UINT32 NumRelocationEntries;     ///< number of relocation entries
+  UINT32 RelocationsOffset;        ///< file offset of relocation entries
+  UINT32 NumRelocations;           ///< number of relocation entries
   UINT32 Flags;                    ///< flags (section type and attributes)
   UINT32 Reserved1;                ///< reserved (for offset or index)
   UINT32 Reserved2;                ///< reserved (for count or sizeof)

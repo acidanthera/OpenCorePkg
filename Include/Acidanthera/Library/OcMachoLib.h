@@ -34,6 +34,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct {
   MACH_HEADER_64        *MachHeader;
   UINT32                FileSize;
+
+  MACH_HEADER_ANY       *MachHeaderAny;
+  BOOLEAN               Is32Bit;
+
   UINT32                ContainerOffset;
   MACH_SYMTAB_COMMAND   *Symtab;
   MACH_NLIST_64         *SymbolTable;
@@ -65,7 +69,18 @@ MachoInitializeContext (
   );
 
 /**
-  Returns the Mach-O Header structure.
+  Returns the 32-bit Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER *
+MachoGetMachHeader32 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the 64-bit Mach-O Header structure.
 
   @param[in,out] Context  Context of the Mach-O.
 
@@ -124,7 +139,22 @@ MachoGetUuid64 (
   );
 
 /**
-  Retrieves the first segment by the name of SegmentName.
+  Retrieves the first 32-bit segment by the name of SegmentName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  Segment name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND *
+MachoGetSegmentByName32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
+  );
+
+/**
+  Retrieves the first 64-bit segment by the name of SegmentName.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  Segment name to search for.
@@ -139,7 +169,24 @@ MachoGetSegmentByName64 (
   );
 
 /**
-  Retrieves the first section by the name of SectionName.
+  Retrieves the first 32-bit section by the name of SectionName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByName32 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND     *Segment,
+  IN     CONST CHAR8              *SectionName
+  );
+
+/**
+  Retrieves the first 64-bit section by the name of SectionName.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     Segment      Segment to search in.
@@ -156,7 +203,24 @@ MachoGetSectionByName64 (
   );
 
 /**
-  Retrieves a section within a segment by the name of SegmentName.
+  Retrieves a 32-bit section within a segment by the name of SegmentName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  The name of the segment to search in.
+  @param[in]     SectionName  The name of the section to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSegmentSectionByName32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
+  );
+
+/**
+  Retrieves a 64-bit section within a segment by the name of SegmentName.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  The name of the segment to search in.
@@ -173,13 +237,29 @@ MachoGetSegmentSectionByName64 (
   );
 
 /**
-  Retrieves the next segment.
+  Retrieves the next 32-bit segment.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Segment  Segment to retrieve the successor of.
                           if NULL, the first segment is returned.
 
-  @retal NULL  NULL is returned on failure.
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND *
+MachoGetNextSegment32 (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND     *Segment  OPTIONAL
+  );
+
+/**
+  Retrieves the next 64-bit segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
+
+  @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
@@ -189,7 +269,24 @@ MachoGetNextSegment64 (
   );
 
 /**
-  Retrieves the next section of a segment.
+  Retrieves the next 32-bit section of a segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  The segment to get the section of.
+  @param[in]     Section  The section to get the successor of.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetNextSection32 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND     *Segment,
+  IN     MACH_SECTION             *Section  OPTIONAL
+  );
+
+/**
+  Retrieves the next 64-bit section of a segment.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Segment  The segment to get the section of.
@@ -206,7 +303,22 @@ MachoGetNextSection64 (
   );
 
 /**
-  Retrieves a section by its index.
+  Retrieves a 32-bit section by its index.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Index    Index of the section to retrieve.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByIndex32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
+  Retrieves a 64-bit section by its index.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Index    Index of the section to retrieve.
@@ -221,7 +333,22 @@ MachoGetSectionByIndex64 (
   );
 
 /**
-  Retrieves a section by its address.
+  Retrieves a 32-bit section by its address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address of the section to retrieve.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByAddress32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Address
+  );
+
+/**
+  Retrieves a 64-bit section by its address.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address of the section to retrieve.
@@ -822,7 +949,7 @@ MachoRuntimeGetEntryAddress (
   @retval NULL  NULL is returned on failure.
 **/
 MACH_LOAD_COMMAND *
-MachoGetNextCommand64 (
+MachoGetNextCommand (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL

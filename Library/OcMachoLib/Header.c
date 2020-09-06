@@ -26,23 +26,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "OcMachoLibInternal.h"
 
 /**
-  Returns the Mach-O Header structure.
-
-  @param[in,out] Context  Context of the Mach-O.
-
-**/
-MACH_HEADER_64 *
-MachoGetMachHeader64 (
-  IN OUT OC_MACHO_CONTEXT  *Context
-  )
-{
-  ASSERT (Context != NULL);
-  ASSERT (Context->MachHeader != NULL);
-
-  return Context->MachHeader;
-}
-
-/**
   Returns the Mach-O's file size.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -200,6 +183,7 @@ MachoInitializeContext (
   ZeroMem (Context, sizeof (*Context));
 
   Context->MachHeader      = MachHeader;
+  Context->MachHeaderAny   = (MACH_HEADER_ANY*)MachHeader;
   Context->FileSize        = FileSize;
   Context->ContainerOffset = ContainerOffset;
 
@@ -244,7 +228,7 @@ MachoGetLastAddress64 (
 }
 
 MACH_LOAD_COMMAND *
-MachoGetNextCommand64 (
+MachoGetNextCommand (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL
@@ -308,7 +292,7 @@ MachoGetUuid64 (
     "Alignment is not guaranteed."
     );
 
-  UuidCommand = (MACH_UUID_COMMAND *) (VOID *) MachoGetNextCommand64 (
+  UuidCommand = (MACH_UUID_COMMAND *) (VOID *) MachoGetNextCommand (
     Context,
     MACH_LOAD_COMMAND_UUID,
     NULL
@@ -317,425 +301,6 @@ MachoGetUuid64 (
     return NULL;
   }
   return UuidCommand;
-}
-
-/**
-  Retrieves the first segment by the name of SegmentName.
-
-  @param[in,out] Context      Context of the Mach-O.
-  @param[in]     SegmentName  Segment name to search for.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SEGMENT_COMMAND_64 *
-MachoGetSegmentByName64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8       *SegmentName
-  )
-{
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  INTN                    Result;
-
-  ASSERT (Context != NULL);
-  ASSERT (SegmentName != NULL);
-
-  Result = 0;
-
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    Result = AsciiStrnCmp (
-                Segment->SegmentName,
-                SegmentName,
-                ARRAY_SIZE (Segment->SegmentName)
-                );
-    if (Result == 0) {
-      return Segment;
-    }
-  }
-
-  return NULL;
-}
-
-/**
-  Returns whether Section is sane.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Section  Section to verify.
-  @param[in]     Segment  Segment the section is part of.
-
-**/
-STATIC
-BOOLEAN
-InternalSectionIsSane (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SECTION_64          *Section,
-  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment
-  )
-{
-  UINT64  TopOffset64;
-  UINT32  TopOffset32;
-  UINT64  TopOfSegment;
-  BOOLEAN Result;
-  UINT64  TopOfSection;
-
-  ASSERT (Context != NULL);
-  ASSERT (Section != NULL);
-  ASSERT (Segment != NULL);
-  //
-  // Section->Alignment is stored as a power of 2.
-  //
-  if ((Section->Alignment > 31)
-   || ((Section->Offset != 0) && (Section->Offset < Segment->FileOffset))) {
-    return FALSE;
-  }
-
-  TopOfSegment = (Segment->VirtualAddress + Segment->Size);
-  Result       = OcOverflowAddU64 (
-                   Section->Address,
-                   Section->Size,
-                   &TopOfSection
-                   );
-  if (Result || (TopOfSection > TopOfSegment)) {
-    return FALSE;
-  }
-
-  Result   = OcOverflowAddU64 (
-                Section->Offset,
-                Section->Size,
-                &TopOffset64
-                );
-  if (Result || (TopOffset64 > (Segment->FileOffset + Segment->FileSize))) {
-    return FALSE;
-  }
-
-  if (Section->NumRelocations != 0) {
-    Result = OcOverflowSubU32 (
-                Section->RelocationsOffset,
-                Context->ContainerOffset,
-                &TopOffset32
-                );
-    Result |= OcOverflowMulAddU32 (
-               Section->NumRelocations,
-               sizeof (MACH_RELOCATION_INFO),
-               TopOffset32,
-               &TopOffset32
-               );
-    if (Result || (TopOffset32 > Context->FileSize)) {
-      return FALSE;
-    }
-  }
-
-  return TRUE;
-}
-
-/**
-  Retrieves the first section by the name of SectionName.
-
-  @param[in,out] Context      Context of the Mach-O.
-  @param[in]     Segment      Segment to search in.
-  @param[in]     SectionName  Section name to search for.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetSectionByName64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     CONST CHAR8              *SectionName
-  )
-{
-  MACH_SECTION_64 *Section;
-  INTN            Result;
-
-  ASSERT (Context != NULL);
-  ASSERT (Segment != NULL);
-  ASSERT (SectionName != NULL);
-
-  for (
-    Section = MachoGetNextSection64 (Context, Segment, NULL);
-    Section != NULL;
-    Section = MachoGetNextSection64 (Context, Segment, Section)
-    ) {
-    //
-    // Assumption: Mach-O is not of type MH_OBJECT.
-    // MH_OBJECT might have sections in segments they do not belong in for
-    // performance reasons.  This library does not support intermediate
-    // objects.
-    //
-    Result = AsciiStrnCmp (
-               Section->SectionName,
-               SectionName,
-               ARRAY_SIZE (Section->SectionName)
-               );
-    if (Result == 0) {
-      return Section;
-    }
-  }
-
-  return NULL;
-}
-
-/**
-  Retrieves a section within a segment by the name of SegmentName.
-
-  @param[in,out] Context      Context of the Mach-O.
-  @param[in]     SegmentName  The name of the segment to search in.
-  @param[in]     SectionName  The name of the section to search for.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetSegmentSectionByName64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8       *SegmentName,
-  IN     CONST CHAR8       *SectionName
-  )
-{
-  MACH_SEGMENT_COMMAND_64 *Segment;
-
-  ASSERT (Context != NULL);
-  ASSERT (SegmentName != NULL);
-  ASSERT (SectionName != NULL);
-
-  Segment = MachoGetSegmentByName64 (Context, SegmentName);
-
-  if (Segment != NULL) {
-    return MachoGetSectionByName64 (Context, Segment, SectionName);
-  }
-
-  return NULL;
-}
-
-/**
-  Retrieves the next segment.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Segment  Segment to retrieve the successor of.
-                          if NULL, the first segment is returned.
-
-  @retal NULL  NULL is returned on failure.
-
-**/
-MACH_SEGMENT_COMMAND_64 *
-MachoGetNextSegment64 (
-  IN OUT OC_MACHO_CONTEXT               *Context,
-  IN     CONST MACH_SEGMENT_COMMAND_64  *Segment  OPTIONAL
-  )
-{
-  MACH_SEGMENT_COMMAND_64 *NextSegment;
-
-  CONST MACH_HEADER_64    *MachHeader;
-  UINTN                   TopOfCommands;
-  BOOLEAN                 Result;
-  UINT64                  TopOfSegment;
-  UINTN                   TopOfSections;
-
-  ASSERT (Context != NULL);
-
-  ASSERT (Context->MachHeader != NULL);
-  ASSERT (Context->FileSize > 0);
-
-  if (Segment != NULL) {
-    MachHeader    = Context->MachHeader;
-    TopOfCommands = ((UINTN) MachHeader->Commands + MachHeader->CommandsSize);
-    ASSERT (
-      ((UINTN) Segment >= (UINTN) &MachHeader->Commands[0])
-        && ((UINTN) Segment < TopOfCommands)
-      );
-  }
-  //
-  // Context initialisation guarantees the command size is a multiple of 8.
-  //
-  STATIC_ASSERT (
-    OC_ALIGNOF (MACH_SEGMENT_COMMAND_64) <= sizeof (UINT64),
-    "Alignment is not guaranteed."
-    );
-  NextSegment = (MACH_SEGMENT_COMMAND_64 *) (VOID *) MachoGetNextCommand64 (
-    Context,
-    MACH_LOAD_COMMAND_SEGMENT_64,
-    (CONST MACH_LOAD_COMMAND *) Segment
-    );
-  if (NextSegment == NULL || NextSegment->CommandSize < sizeof (*NextSegment)) {
-    return NULL;
-  }
-
-  Result = OcOverflowMulAddUN (
-             NextSegment->NumSections,
-             sizeof (*NextSegment->Sections),
-             (UINTN) NextSegment->Sections,
-             &TopOfSections
-             );
-  if (Result || (((UINTN) NextSegment + NextSegment->CommandSize) < TopOfSections)) {
-    return NULL;
-  }
-
-  Result = OcOverflowSubU64 (
-             NextSegment->FileOffset,
-             Context->ContainerOffset,
-             &TopOfSegment
-             );
-  Result |= OcOverflowAddU64 (
-              TopOfSegment,
-              NextSegment->FileSize,
-              &TopOfSegment
-              );
-  if (Result || (TopOfSegment > Context->FileSize)) {
-    return NULL;
-  }
-
-  if (NextSegment->VirtualAddress + NextSegment->Size < NextSegment->VirtualAddress) {
-    return NULL;
-  }
-
-  return NextSegment;
-}
-
-/**
-  Retrieves the next section of a segment.
-
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Segment  The segment to get the section of.
-  @param[in]     Section  The section to get the successor of.
-                          If NULL, the first section is returned.
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetNextSection64 (
-  IN OUT OC_MACHO_CONTEXT         *Context,
-  IN     MACH_SEGMENT_COMMAND_64  *Segment,
-  IN     MACH_SECTION_64          *Section  OPTIONAL
-  )
-{
-  ASSERT (Context != NULL);
-  ASSERT (Segment != NULL);
-
-  if (Section != NULL) {
-    ASSERT (Section >= Segment->Sections);
-
-    ++Section;
-
-    if (Section >= &Segment->Sections[Segment->NumSections]) {
-      return NULL;
-    }
-  } else if (Segment->NumSections > 0) {
-    Section = &Segment->Sections[0];
-  } else {
-    return NULL;
-  }
-
-  if (!InternalSectionIsSane (Context, Section, Segment)) {
-    return NULL;
-  }
-
-  return Section;
-}
-
-/**
-  Retrieves a section by its index.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Index    Index of the section to retrieve.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetSectionByIndex64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT32            Index
-  )
-{
-  MACH_SECTION_64         *Section;
-
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  UINT32                  SectionIndex;
-  UINT32                  NextSectionIndex;
-  BOOLEAN                 Result;
-
-  ASSERT (Context != NULL);
-
-  SectionIndex = 0;
-
-  Segment = NULL;
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    Result = OcOverflowAddU32 (
-               SectionIndex,
-               Segment->NumSections,
-               &NextSectionIndex
-               );
-    //
-    // If NextSectionIndex is wrapping around, Index must be contained.
-    //
-    if (Result || (Index < NextSectionIndex)) {
-      Section = &Segment->Sections[Index - SectionIndex];
-      if (!InternalSectionIsSane (Context, Section, Segment)) {
-        return NULL;
-      }
-
-      return Section;
-    }
-
-    SectionIndex = NextSectionIndex;
-  }
-
-  return NULL;
-}
-
-/**
-  Retrieves a section by its address.
-
-  @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  Address of the section to retrieve.
-
-  @retval NULL  NULL is returned on failure.
-
-**/
-MACH_SECTION_64 *
-MachoGetSectionByAddress64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address
-  )
-{
-  MACH_SEGMENT_COMMAND_64 *Segment;
-  MACH_SECTION_64         *Section;
-  UINT64                  TopOfSegment;
-  UINT64                  TopOfSection;
-
-  ASSERT (Context != NULL);
-
-  for (
-    Segment = MachoGetNextSegment64 (Context, NULL);
-    Segment != NULL;
-    Segment = MachoGetNextSegment64 (Context, Segment)
-    ) {
-    TopOfSegment = (Segment->VirtualAddress + Segment->Size);
-    if ((Address >= Segment->VirtualAddress) && (Address < TopOfSegment)) {
-      for (
-        Section = MachoGetNextSection64 (Context, Segment, NULL);
-        Section != NULL;
-        Section = MachoGetNextSection64 (Context, Segment, Section)
-        ) {
-        TopOfSection = (Section->Address + Section->Size);
-        if ((Address >= Section->Address) && (Address < TopOfSection)) {
-          return Section;
-        }
-      }
-    }
-  }
-
-  return NULL;
 }
 
 /**
@@ -977,7 +542,7 @@ MachoInitialiseSymtabsExternal64 (
   //
   // Retrieve SYMTAB.
   //
-  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+  Symtab = (MACH_SYMTAB_COMMAND *) (VOID *) MachoGetNextCommand (
     SymsContext,
     MACH_LOAD_COMMAND_SYMTAB,
     NULL
@@ -999,7 +564,7 @@ MachoInitialiseSymtabsExternal64 (
     //
     // Retrieve DYSYMTAB.
     //
-    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand64 (
+    DySymtab = (MACH_DYSYMTAB_COMMAND *) (VOID *) MachoGetNextCommand (
       SymsContext,
       MACH_LOAD_COMMAND_DYSYMTAB,
       NULL
@@ -1351,7 +916,7 @@ MachoExpandImage64 (
     //
     if (AsciiStrnCmp (DstSegment->SegmentName, "__LINKEDIT", ARRAY_SIZE (DstSegment->SegmentName)) == 0) {
       Symtab = (MACH_SYMTAB_COMMAND *)(
-                 MachoGetNextCommand64 (
+                 MachoGetNextCommand (
                    Context,
                    MACH_LOAD_COMMAND_SYMTAB,
                    NULL
@@ -1369,7 +934,7 @@ MachoExpandImage64 (
       }
 
       DySymtab = (MACH_DYSYMTAB_COMMAND *)(
-                     MachoGetNextCommand64 (
+                     MachoGetNextCommand (
                        Context,
                        MACH_LOAD_COMMAND_DYSYMTAB,
                        NULL
