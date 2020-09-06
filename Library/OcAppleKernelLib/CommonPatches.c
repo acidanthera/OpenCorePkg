@@ -2042,7 +2042,7 @@ PatchSegmentJettison (
       if ((UINT8 *) Jettisoning <= Last
         && AsciiStrnCmp (Jettisoning, "Jettisoning fileset", L_STR_LEN ("Jettisoning fileset")) == 0) {
         DEBUG ((DEBUG_INFO, "OCAK: Found jettisoning fileset\n"));
-        SetMem (CurrFreeCall, 0x90, 5);
+        SetMem (CurrFreeCall, 5, 0x90);
         return EFI_SUCCESS;    
       }
     }
