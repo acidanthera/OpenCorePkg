@@ -666,10 +666,10 @@
 			<false/>
 			<key>DisableIoMapper</key>
 			<false/>
-			<key>DisableRtcChecksum</key>
-			<false/>
 			<key>DisableLinkeditJettison</key>
 			<true/>
+			<key>DisableRtcChecksum</key>
+			<false/>
 			<key>DummyPowerManagement</key>
 			<false/>
 			<key>ExternalDiskIcons</key>

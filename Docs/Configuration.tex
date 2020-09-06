@@ -2264,6 +2264,17 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
+  \texttt{DisableLinkeditJettison}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 11.0\\
+  \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
+
+  This option lets \texttt{Lilu.kext} and possibly some others function
+  in macOS Big Sur with best performance without \texttt{keepsyms=1}
+  boot argument.
+
+\item
   \texttt{DisableRtcChecksum}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2278,17 +2289,6 @@ blocking.
   \emph{Note 2}: This option will not protect areas from being overwritten
   at firmware stage (e.g. macOS bootloader), see \texttt{AppleRtc} protocol
   description if this is desired.
-
-\item
-  \texttt{DisableLinkeditJettison}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 11.0\\
-  \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
-
-  This option lets \texttt{Lilu.kext} and possibly some others function
-  in macOS Big Sur with best performance without \texttt{keepsyms=1}
-  boot argument.
 
 \item
   \texttt{DummyPowerManagement}\\
