@@ -137,6 +137,10 @@ struct OC_SCHEMA_ {
   //
   PLIST_NODE_TYPE      Type;
   //
+  // Whether this node is optional to use.
+  //
+  BOOLEAN              Optional;
+  //
   // Apply handler that will merge Node data into object.
   //
   OC_APPLY             Apply;
@@ -234,11 +238,11 @@ ParseSerialized (
 // Smart declaration base macros, see usage below.
 //
 #define OC_SCHEMA_VALUE(Name, Offset, Type, SourceType)                  \
-  {(Name), PLIST_NODE_TYPE_ANY, ParseSerializedValue,                    \
+  {(Name), PLIST_NODE_TYPE_ANY, FALSE, ParseSerializedValue,             \
     {.Value = {Offset, sizeof (Type), SourceType}}}
 
 #define OC_SCHEMA_BLOB(Name, Offset, SourceType)                         \
-  {(Name), PLIST_NODE_TYPE_ANY, ParseSerializedBlob,                     \
+  {(Name), PLIST_NODE_TYPE_ANY, FALSE, ParseSerializedBlob,              \
     {.Blob = {Offset, SourceType}}}
 
 //
@@ -253,7 +257,11 @@ ParseSerialized (
 // F suffix stands for Fixed, which means fixed file size is assumed.
 //
 #define OC_SCHEMA_DICT(Name, Schema)                                     \
-  {(Name), PLIST_NODE_TYPE_DICT, ParseSerializedDict,                    \
+  {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedDict,             \
+    {.Dict = {(Schema), ARRAY_SIZE (Schema)}}}
+
+#define OC_SCHEMA_DICT_OPT(Name, Schema)                                 \
+  {(Name), PLIST_NODE_TYPE_DICT, TRUE, ParseSerializedDict,              \
     {.Dict = {(Schema), ARRAY_SIZE (Schema)}}}
 
 #define OC_SCHEMA_BOOLEAN(Name)                                          \
@@ -281,11 +289,11 @@ ParseSerialized (
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_MDATA)
 
 #define OC_SCHEMA_ARRAY(Name, ChildSchema)                               \
-  {(Name), PLIST_NODE_TYPE_ARRAY, ParseSerializedArray,                  \
+  {(Name), PLIST_NODE_TYPE_ARRAY, FALSE, ParseSerializedArray,           \
     {.List = {0, ChildSchema}}}
 
 #define OC_SCHEMA_MAP(Name, ChildSchema)                                 \
-  {(Name), PLIST_NODE_TYPE_DICT, ParseSerializedMap,                     \
+  {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedMap,              \
     {.List = {0, ChildSchema}}}
 
 //
@@ -327,11 +335,11 @@ ParseSerialized (
     OC_SCHEMA_VALUE_MDATA)
 
 #define OC_SCHEMA_ARRAY_IN(Name, Type, Field, ChildSchema)               \
-  {(Name), PLIST_NODE_TYPE_ARRAY, ParseSerializedArray,                  \
+  {(Name), PLIST_NODE_TYPE_ARRAY, FALSE, ParseSerializedArray,           \
     {.List = {OFFSET_OF (Type, Field), ChildSchema}}}
 
 #define OC_SCHEMA_MAP_IN(Name, Type, Field, ChildSchema)                 \
-  {(Name), PLIST_NODE_TYPE_DICT, ParseSerializedMap,                     \
+  {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedMap,              \
     {.List = {OFFSET_OF (Type, Field), ChildSchema}}}
 
 #endif // OC_SERIALIZE_LIB_H

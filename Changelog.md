@@ -32,6 +32,7 @@ OpenCore Changelog
 - Changed kernel driver injection to happen prior to kernel driver patching
 - Added `Arch` filtering option to `Add`, `Block`, `Force`, and `Patch` sections
 - Added `DisableLinkeditJettison` quirk to workaround 11.0b5 kernel panics
+- Added debugging of missing fields in the configuration
 
 #### v0.6.0
 - Fixed sound corruption with AudioDxe

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Aug  8 20:55:30 2020
-%DIF ADD ../Configuration.tex        Sun Sep  6 04:01:51 2020
+%DIF ADD ../Configuration.tex        Sun Sep  6 15:26:35 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4424,8 +4424,12 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
-  \textbf{Optional}: When \texttt{Automatic} is \texttt{false}\\
-  \textbf{Description}: Update all fields. This section is read only
+  \DIFdelbegin \textbf{\DIFdel{Optional}}%DIFAUXCMD
+\DIFdel{: When }\texttt{\DIFdel{Automatic}} %DIFAUXCMD
+\DIFdel{is }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Update all fields. This section is read only
   when \texttt{Automatic} is active.
 \item
   \texttt{DataHub}\\

@@ -53,6 +53,8 @@ int main(int argc, char** argv) {
 
   long long a = current_timestamp();
 
+  PcdGet8 (PcdDebugPropertyMask) |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
+
   OC_GLOBAL_CONFIG   Config;
   EFI_STATUS         Status;
   Status = OcConfigurationInit (&Config, b, f);
