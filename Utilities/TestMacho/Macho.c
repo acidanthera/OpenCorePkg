@@ -39,7 +39,7 @@ MACH_UUID_COMMAND Uuid;
 
 static int FeedMacho(void *file, uint32_t size) {
   OC_MACHO_CONTEXT Context;
-  if (!MachoInitializeContext (&Context, file, size, 0)) {
+  if (!MachoInitializeContext64 (&Context, file, size, 0)) {
     return -1;
   }
 
