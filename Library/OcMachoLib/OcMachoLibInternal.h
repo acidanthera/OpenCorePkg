@@ -91,46 +91,6 @@ InternalSymbolIsSane64 (
   );
 
 /**
-  Initializes a 32-bit Mach-O Context.
-
-  @param[out] Context          Mach-O Context to initialize.
-  @param[in]  FileData         Pointer to the file's expected Mach-O header.
-  @param[in]  FileSize         File size of FileData.
-  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
-                               from the base (container, e.g. KC) of the file.
-
-  @return  Whether Context has been initialized successfully.
-
-**/
-BOOLEAN
-InternalMachoInitializeContext32 (
-  OUT OC_MACHO_CONTEXT  *Context,
-  IN  VOID              *FileData,
-  IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset
-  );
-
-/**
-  Initializes a 64-bit Mach-O Context.
-
-  @param[out] Context          Mach-O Context to initialize.
-  @param[in]  FileData         Pointer to the file's expected Mach-O header.
-  @param[in]  FileSize         File size of FileData.
-  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
-                               from the base (container, e.g. KC) of the file.
-
-  @return  Whether Context has been initialized successfully.
-
-**/
-BOOLEAN
-InternalMachoInitializeContext64 (
-  OUT OC_MACHO_CONTEXT  *Context,
-  IN  VOID              *FileData,
-  IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset
-  );
-
-/**
   Returns the 32-bit Mach-O's virtual address space size.
 
   @param[out] Context   Context of the Mach-O.

@@ -600,7 +600,7 @@ MACH_X (InternalMachoMergeSegments) (
 }
 
 BOOLEAN
-MACH_X (InternalMachoInitializeContext) (
+MACH_X (MachoInitializeContext) (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
@@ -638,7 +638,11 @@ MACH_X (InternalMachoInitializeContext) (
     return FALSE;
   }
   MachHeader = (MACH_HEADER_X *)FileData;
+#ifdef MACHO_LIB_32
+  if (MachHeader->Signature != MACH_HEADER_SIGNATURE) {
+#else
   if (MachHeader->Signature != MACH_HEADER_64_SIGNATURE) {
+#endif
     return FALSE;
   }
 
@@ -695,13 +699,15 @@ MACH_X (InternalMachoInitializeContext) (
 #endif
    || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
     && (MachHeader->FileType != MachHeaderFileTypeExecute)
-    && (MachHeader->FileType != MachHeaderFileTypeFileSet))) {
+    && (MachHeader->FileType != MachHeaderFileTypeFileSet)
+    && (MachHeader->FileType != MachHeaderFileTypeObject))) {
     return FALSE;
   }
 
   ZeroMem (Context, sizeof (*Context));
 
   Context->MachHeader      = (MACH_HEADER_ANY*)MachHeader;
+  Context->Is32Bit         = MachHeader->CpuType == MachCpuTypeI386;
   Context->FileSize        = FileSize;
   Context->ContainerOffset = ContainerOffset;
 

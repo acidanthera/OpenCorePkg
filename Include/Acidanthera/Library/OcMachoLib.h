@@ -49,7 +49,7 @@ typedef struct {
 } OC_MACHO_CONTEXT;
 
 /**
-  Initializes a Mach-O Context.
+  Initializes a 32-bit Mach-O Context.
 
   @param[out] Context          Mach-O Context to initialize.
   @param[in]  FileData         Pointer to the file's expected Mach-O header.
@@ -61,11 +61,53 @@ typedef struct {
 
 **/
 BOOLEAN
-MachoInitializeContext (
+MachoInitializeContext32 (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
   IN  UINT32            ContainerOffset
+  );
+
+/**
+  Initializes a 64-bit Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext64 (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
+  );
+
+/**
+  Initializes a Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+  @param[in]  Use32Bit         Use 32-bit instead of 64-bit.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset,
+  IN  BOOLEAN           Use32Bit
   );
 
 /**

@@ -216,7 +216,7 @@ InternalCreatePrelinkedKext (
 
   if (Prelinked != NULL
     && HasExe
-    && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
+    && !MachoInitializeContext64 (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
     FreePool (NewKext);
     return NULL;
   }

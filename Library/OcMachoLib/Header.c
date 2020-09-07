@@ -25,24 +25,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "OcMachoLibInternal.h"
 
-/**
-  Initializes a Mach-O Context.
-
-  @param[out] Context   Mach-O Context to initialize.
-  @param[in]  FileData  Pointer to the file's data.
-  @param[in]  FileSize  File size of FileData.
-
-  @return  Whether Context has been initialized successfully.
-**/
 BOOLEAN
 MachoInitializeContext (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
-  IN  UINT32            ContainerOffset
+  IN  UINT32            ContainerOffset,
+  IN  BOOLEAN           Use32Bit
   )
 {
-  return InternalMachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
+  return Use32Bit ?
+    MachoInitializeContext32 (Context, FileData, FileSize, ContainerOffset) :
+    MachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
 }
 
 UINT32
@@ -91,12 +85,19 @@ MachoGetUuid (
   ASSERT (Context != NULL);
 
   //
-  // Context initialisation guarantees the command size is a multiple of 8.
+  // Context initialisation guarantees the command size is a multiple of 4 or 8.
   //
-  STATIC_ASSERT (
-    OC_ALIGNOF (MACH_UUID_COMMAND) <= sizeof (UINT64),
-    "Alignment is not guaranteed."
-    );
+  if (Context->Is32Bit) {
+    STATIC_ASSERT (
+      OC_ALIGNOF (MACH_UUID_COMMAND) <= sizeof (UINT32),
+      "Alignment is not guaranteed."
+      );
+  } else {
+    STATIC_ASSERT (
+      OC_ALIGNOF (MACH_UUID_COMMAND) <= sizeof (UINT64),
+      "Alignment is not guaranteed."
+      );
+  }
 
   UuidCommand = (MACH_UUID_COMMAND *) (VOID *) MachoGetNextCommand (
     Context,
