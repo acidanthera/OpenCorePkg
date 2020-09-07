@@ -193,6 +193,51 @@ MACH_X (InternalSymbolIsSane) (
 }
 
 BOOLEAN
+MACH_X (InternalMachoSymbolGetDirectFileOffset) (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     MACH_UINT_X            Address,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
+  )
+{
+  MACH_UINT_X               Offset;
+  MACH_UINT_X               Base;
+  MACH_UINT_X               Size;
+  MACH_SEGMENT_COMMAND_X    *Segment;
+
+  ASSERT (Context != NULL);
+  ASSERT (FileOffset != NULL);
+  MACH_ASSERT_X;
+
+  for (
+    Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
+    Segment != NULL;
+    Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
+    ) {
+    if ((Address >= Segment->VirtualAddress)
+     && (Address < (Segment->VirtualAddress + Segment->Size))) {
+      break;
+    }
+  }
+
+  if (Segment == NULL) {
+    return FALSE;
+  }
+
+  Offset = Address - Segment->VirtualAddress;
+  Base   = Segment->FileOffset;
+  Size   = Segment->Size;
+
+  *FileOffset = MACH_UINT32_CAST (Base - Context->ContainerOffset + Offset);
+
+  if (MaxSize != NULL) {
+    *MaxSize = MACH_UINT32_CAST (Size - Offset);
+  }
+
+  return TRUE;
+}
+
+BOOLEAN
 MACH_X (MachoIsSymbolValueInRange) (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_X   *Symbol
@@ -587,51 +632,6 @@ MACH_X (MachoSymbolGetFileOffset) (
       return FALSE;
     }
   }
-
-  *FileOffset = MACH_UINT32_CAST (Base - Context->ContainerOffset + Offset);
-
-  if (MaxSize != NULL) {
-    *MaxSize = MACH_UINT32_CAST (Size - Offset);
-  }
-
-  return TRUE;
-}
-
-BOOLEAN
-MACH_X (MachoSymbolGetDirectFileOffset) (
-  IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     MACH_UINT_X            Address,
-  OUT    UINT32                 *FileOffset,
-  OUT    UINT32                 *MaxSize OPTIONAL
-  )
-{
-  MACH_UINT_X               Offset;
-  MACH_UINT_X               Base;
-  MACH_UINT_X               Size;
-  MACH_SEGMENT_COMMAND_X    *Segment;
-
-  ASSERT (Context != NULL);
-  ASSERT (FileOffset != NULL);
-  MACH_ASSERT_X;
-
-  for (
-    Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
-    Segment != NULL;
-    Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
-    ) {
-    if ((Address >= Segment->VirtualAddress)
-     && (Address < (Segment->VirtualAddress + Segment->Size))) {
-      break;
-    }
-  }
-
-  if (Segment == NULL) {
-    return FALSE;
-  }
-
-  Offset = Address - Segment->VirtualAddress;
-  Base   = Segment->FileOffset;
-  Size   = Segment->Size;
 
   *FileOffset = MACH_UINT32_CAST (Base - Context->ContainerOffset + Offset);
 

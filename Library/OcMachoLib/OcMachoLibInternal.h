@@ -91,6 +91,46 @@ InternalSymbolIsSane64 (
   );
 
 /**
+  Retrieves the Mach-O file offset of the address pointed to by a 32-bit Symbol.
+
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Address     Virtual address to retrieve the offset of.
+  @param[out]    FileOffset  Pointer the file offset is returned into.
+                             If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
+
+  @retval 0  0 is returned on failure.
+
+**/
+BOOLEAN
+InternalMachoSymbolGetDirectFileOffset32 (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     UINT32                 Address,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
+  );
+
+/**
+  Retrieves the Mach-O file offset of the address pointed to by a 64-bit Symbol.
+
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Address     Virtual address to retrieve the offset of.
+  @param[out]    FileOffset  Pointer the file offset is returned into.
+                             If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
+
+  @retval 0  0 is returned on failure.
+
+**/
+BOOLEAN
+InternalMachoSymbolGetDirectFileOffset64 (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     UINT64                 Address,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
+  );
+
+/**
   Returns the 32-bit Mach-O's virtual address space size.
 
   @param[out] Context   Context of the Mach-O.

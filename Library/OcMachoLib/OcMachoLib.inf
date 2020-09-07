@@ -39,4 +39,5 @@
   Macho64.c
   MachoX.h
   Relocations.c
+  Symbols.c
   SymbolsX.h

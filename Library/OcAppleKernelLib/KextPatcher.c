@@ -162,12 +162,11 @@ PatcherGetSymbolAddress (
   IN OUT UINT8              **Address
   )
 {
-  MACH_NLIST     *Symbol32;
-  MACH_NLIST_64  *Symbol64;
-  CONST CHAR8    *SymbolName;
-  UINT64         SymbolAddress;
-  UINT32         Offset;
-  UINT32         Index;
+  MACH_NLIST_ANY  *Symbol;
+  CONST CHAR8     *SymbolName;
+  UINT64          SymbolAddress;
+  UINT32          Offset;
+  UINT32          Index;
 
   Index  = 0;
   Offset = 0;
@@ -175,13 +174,8 @@ PatcherGetSymbolAddress (
     //
     // Try the usual way first via SYMTAB.
     //
-    if (Context->Is32Bit) {
-      Symbol32 = MachoGetSymbolByIndex32 (&Context->MachContext, Index);
-    } else {
-      Symbol64 = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
-    }
-    if ((Context->Is32Bit && Symbol32 == NULL) ||
-      (!Context->Is32Bit && Symbol64 == NULL)) {
+    Symbol = MachoGetSymbolByIndexAny (&Context->MachContext, Index);
+    if (Symbol == NULL) {
       //
       // If we have KxldState, use it.
       //
@@ -194,36 +188,23 @@ PatcherGetSymbolAddress (
         //
         // If we have a symbol, get its ondisk offset.
         //
-        if (SymbolAddress != 0) {
-          if (Context->Is32Bit
-            && SymbolAddress < MAX_UINT32
-            && MachoSymbolGetDirectFileOffset32 (&Context->MachContext, (UINT32) SymbolAddress, &Offset, NULL)) {
-            //
-            // Proceed to success.
-            //
-            break;
-          } else if (!Context->Is32Bit
-            && MachoSymbolGetDirectFileOffset64 (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
-            //
-            // Proceed to success.
-            //
-            break;
-          }
+        if (SymbolAddress != 0 && MachoSymbolGetDirectFileOffset (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
+          //
+          // Proceed to success.
+          //
+          break;
         }
       }
 
       return EFI_NOT_FOUND;
     }
 
-    SymbolName = Context->Is32Bit ?
-      MachoGetSymbolName32 (&Context->MachContext, Symbol32) :
-      MachoGetSymbolName64 (&Context->MachContext, Symbol64);
+    SymbolName = MachoGetSymbolNameAny (&Context->MachContext, Symbol);
     if (SymbolName != NULL && AsciiStrCmp (Name, SymbolName) == 0) {
       //
       // Once we have a symbol, get its ondisk offset.
       //
-      if ((Context->Is32Bit && MachoSymbolGetFileOffset32 (&Context->MachContext, Symbol32, &Offset, NULL))
-        || (!Context->Is32Bit && MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol64, &Offset, NULL))) {
+      if (MachoSymbolGetFileOffsetAny (&Context->MachContext, Symbol, &Offset, NULL)) {
         //
         // Proceed to success.
         //

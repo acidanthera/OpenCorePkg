@@ -570,6 +570,21 @@ MachoGetSymbolByIndex64 (
   );
 
 /**
+  Retrieves a symbol by its index.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_NLIST_ANY *
+MachoGetSymbolByIndexAny (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
   Retrieves a 32-bit Symbol's name.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -597,6 +612,21 @@ CONST CHAR8 *
 MachoGetSymbolName64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
+  Retrieves a Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the name of.
+
+  @retval symbol name.
+
+**/
+CONST CHAR8 *
+MachoGetSymbolNameAny (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY *Symbol
   );
 
 /**
@@ -808,10 +838,10 @@ MachoSymbolGetFileOffset64 (
   );
 
 /**
-  Retrieves the Mach-O file offset of the address pointed to by a 32-bit Symbol.
+  Retrieves the Mach-O file offset of the address pointed to by a Symbol.
 
   @param[in,out] Context     Context of the Mach-O.
-  @param[in]     Address     Virtual address to retrieve the offset of.
+  @param[in]     Symbol      Symbol to retrieve the offset of.
   @param[out]    FileOffset  Pointer the file offset is returned into.
                              If FALSE is returned, the output is undefined.
   @param[out]    MaxSize     Maximum data safely available from FileOffset.
@@ -820,15 +850,15 @@ MachoSymbolGetFileOffset64 (
 
 **/
 BOOLEAN
-MachoSymbolGetDirectFileOffset32 (
+MachoSymbolGetFileOffsetAny (
   IN OUT OC_MACHO_CONTEXT       *Context,
-  IN     UINT32                 Address,
+  IN     CONST  MACH_NLIST_ANY  *Symbol,
   OUT    UINT32                 *FileOffset,
   OUT    UINT32                 *MaxSize OPTIONAL
   );
 
 /**
-  Retrieves the Mach-O file offset of the address pointed to by a 64-bit Symbol.
+  Retrieves the Mach-O file offset of the address pointed to by a Symbol.
 
   @param[in,out] Context     Context of the Mach-O.
   @param[in]     Address     Virtual address to retrieve the offset of.
@@ -840,7 +870,7 @@ MachoSymbolGetDirectFileOffset32 (
 
 **/
 BOOLEAN
-MachoSymbolGetDirectFileOffset64 (
+MachoSymbolGetDirectFileOffset (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     UINT64                 Address,
   OUT    UINT32                 *FileOffset,
