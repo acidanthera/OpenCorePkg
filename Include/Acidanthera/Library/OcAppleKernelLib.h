@@ -311,6 +311,10 @@ typedef struct {
   //
   OC_MACHO_CONTEXT         MachContext;
   //
+  // Binary is 32-bit.
+  //
+  BOOLEAN                  Is32Bit;
+  //
   // Virtual base to subtract to obtain file offset.
   //
   UINT64                   VirtualBase;
@@ -406,6 +410,10 @@ typedef struct {
   // Current kernel version.
   //
   UINT32                KernelVersion;
+  //
+  // System is booting in 32-bit mode.
+  //
+  BOOLEAN               Is32Bit;
   //
   // Flag to indicate if above list is valid. List is built during the first read from SLE.
   //
@@ -768,6 +776,7 @@ PrelinkedInjectComplete (
   @param[in]     InfoPlistSize     Kext Info.plist size.
   @param[in]     Executable        Kext executable, optional.
   @param[in]     ExecutableSize    Kext executable size, optional.
+  @param[in]     Is32Bit           TRUE to process 32-bit kext.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -777,7 +786,8 @@ PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
   IN     UINT8        *Executable OPTIONAL,
-  IN     UINT32       ExecutableSize OPTIONAL
+  IN     UINT32       ExecutableSize OPTIONAL,
+  IN     BOOLEAN      Is32Bit
   );
 
 /**
@@ -976,6 +986,7 @@ PatcherInitContextFromMkext(
   @param[in,out] Context         Patcher context.
   @param[in,out] Buffer          Kernel buffer (could be prelinked).
   @param[in]     BufferSize      Kernel buffer size.
+  @param[in]     Is32Bit         TRUE to use 32-bit.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -983,7 +994,8 @@ EFI_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
-  IN     UINT32             BufferSize
+  IN     UINT32             BufferSize,
+  IN     BOOLEAN            Use32Bit
   );
 
 /**
@@ -1054,6 +1066,7 @@ PatchKernelCpuId (
   @param[in]     FileName            Extensions directory filename.
   @param[in]     ExtensionsDir       Extensions directory EFI_FILE_PROTOCOL. 
   @param[in]     KernelVersion       Current kernel version.
+  @param[in]     Is32Bit             TRUE if booting in 32-bit kernel mode.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1062,7 +1075,8 @@ CachelessContextInit (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     CONST CHAR16         *FileName,
   IN     EFI_FILE_PROTOCOL    *ExtensionsDir,
-  IN     UINT32               KernelVersion
+  IN     UINT32               KernelVersion,
+  IN     BOOLEAN              Is32Bit
   );
 
 /**
@@ -1271,6 +1285,7 @@ MkextContextFree (
   @param[in]     InfoPlistSize     Kext Info.plist size.
   @param[in]     Executable        Kext executable, optional.
   @param[in]     ExecutableSize    Kext executable size, optional.
+  @param[in]     Is32Bit           TRUE to process 32-bit kext.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1279,8 +1294,9 @@ MkextReserveKextSize (
   IN OUT UINT32       *ReservedInfoSize,
   IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
-  IN     UINT8        *Executable,
-  IN     UINT32       ExecutableSize OPTIONAL
+  IN     UINT8        *Executable OPTIONAL,
+  IN     UINT32       ExecutableSize OPTIONAL,
+  IN     BOOLEAN      Is32Bit
   );
 
 /**

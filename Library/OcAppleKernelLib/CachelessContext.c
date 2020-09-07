@@ -647,7 +647,8 @@ CachelessContextInit (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     CONST CHAR16         *FileName,
   IN     EFI_FILE_PROTOCOL    *ExtensionsDir,
-  IN     UINT32               KernelVersion
+  IN     UINT32               KernelVersion,
+  IN     BOOLEAN              Is32Bit
   )
 {
   ASSERT (Context != NULL);
@@ -659,6 +660,7 @@ CachelessContextInit (
   Context->ExtensionsDir          = ExtensionsDir;
   Context->ExtensionsDirFileName  = FileName;
   Context->KernelVersion          = KernelVersion;
+  Context->Is32Bit                = Is32Bit;
   
   InitializeListHead (&Context->InjectedKexts);
   InitializeListHead (&Context->InjectedDependencies);
@@ -1429,7 +1431,7 @@ CachelessContextHookBuiltin (
         return Status;
       }
 
-      Status = PatcherInitContextFromBuffer (&Patcher, Buffer, BufferSize);
+      Status = PatcherInitContextFromBuffer (&Patcher, Buffer, BufferSize, Context->Is32Bit);
       if (EFI_ERROR (Status)) {
         FreePool (Buffer);
         return Status;

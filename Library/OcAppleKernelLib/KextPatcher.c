@@ -59,19 +59,25 @@ PatcherInitContextFromMkext(
     return EFI_NOT_FOUND;
   }
 
-  return PatcherInitContextFromBuffer (Context, &Mkext->Mkext[Kext->BinaryOffset], Kext->BinarySize);
+  return PatcherInitContextFromBuffer (Context, &Mkext->Mkext[Kext->BinaryOffset], Kext->BinarySize, Mkext->Is32Bit);
 }
 
 EFI_STATUS
 PatcherInitContextFromBuffer (
   IN OUT PATCHER_CONTEXT    *Context,
   IN OUT UINT8              *Buffer,
-  IN     UINT32             BufferSize
+  IN     UINT32             BufferSize,
+  IN     BOOLEAN            Is32Bit
   )
 {
-  EFI_STATUS               Status;
-  OC_MACHO_CONTEXT         InnerContext;
-  MACH_SEGMENT_COMMAND_64  *Segment;
+  EFI_STATUS                Status;
+  OC_MACHO_CONTEXT          InnerContext;
+  MACH_SEGMENT_COMMAND      *Segment32;
+  MACH_SECTION              *Section32;
+  MACH_SEGMENT_COMMAND_64   *Segment64;
+
+  UINT64                    VirtualAddress;
+  UINT64                    FileOffset;
 
   ASSERT (Context != NULL);
   ASSERT (Buffer != NULL);
@@ -84,33 +90,66 @@ PatcherInitContextFromBuffer (
   // and request PRELINK_KERNEL_IDENTIFIER.
   //
 
-  if (!MachoInitializeContext64 (&Context->MachContext, Buffer, BufferSize, 0)) {
+  if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize, 0, Is32Bit)) {
     DEBUG ((DEBUG_INFO, "OCAK: Patcher init from buffer %p %u has unsupported mach-o\n", Buffer, BufferSize));
     return EFI_INVALID_PARAMETER;
   }
 
-  Segment = MachoGetSegmentByName64 (
-    &Context->MachContext,
-    "__TEXT"
-    );
-  if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
-    return EFI_NOT_FOUND;
+  //
+  // 32-bit can be of type MH_OBJECT, which has all sections in a single unnamed segment.
+  // We'll fallback to that if there is no __TEXT segment.
+  //
+  if (Is32Bit) {
+    Segment32 = MachoGetSegmentByName32 (
+      &Context->MachContext,
+      "__TEXT"
+      );
+    if (Segment32 == NULL || Segment32->VirtualAddress < Segment32->FileOffset) {
+      Section32 = MachoGetSegmentSectionByName32 (
+        &Context->MachContext,
+        "",
+        "__text"
+        );
+      if (Section32 == NULL) {
+        return EFI_NOT_FOUND;
+      }
+      VirtualAddress = Section32->Address;
+      FileOffset     = Section32->Offset;
+    } else {
+      VirtualAddress = Segment32->VirtualAddress;
+      FileOffset     = Segment32->FileOffset;
+    }
+
+  } else {
+    Segment64 = MachoGetSegmentByName64 (
+      &Context->MachContext,
+      "__TEXT"
+      );
+    if (Segment64 == NULL || Segment64->VirtualAddress < Segment64->FileOffset) {
+      return EFI_NOT_FOUND;
+    }
+
+    VirtualAddress = Segment64->VirtualAddress;
+    FileOffset     = Segment64->FileOffset;
   }
 
-  Context->VirtualBase   = Segment->VirtualAddress - Segment->FileOffset;
-  Context->VirtualKmod   = 0;
-  Context->KxldState     = NULL;
-  Context->KxldStateSize = 0;
+  Context->Is32Bit        = Is32Bit;
+  Context->VirtualBase    = VirtualAddress < FileOffset ? VirtualAddress - FileOffset : FileOffset; // FIXME: 32-bit MH_OBJECT
+  Context->VirtualKmod    = 0;
+  Context->KxldState      = NULL;
+  Context->KxldStateSize  = 0;
 
-  Status = InternalConnectExternalSymtab (
-    &Context->MachContext,
-    &InnerContext,
-    Buffer,
-    BufferSize,
-    NULL
-    );
-  if (EFI_ERROR (Status)) {
-    return Status;
+  if (!Context->Is32Bit) {
+    Status = InternalConnectExternalSymtab (
+      &Context->MachContext,
+      &InnerContext,
+      Buffer,
+      BufferSize,
+      NULL
+      );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   return EFI_SUCCESS;
@@ -123,7 +162,8 @@ PatcherGetSymbolAddress (
   IN OUT UINT8              **Address
   )
 {
-  MACH_NLIST_64  *Symbol;
+  MACH_NLIST     *Symbol32;
+  MACH_NLIST_64  *Symbol64;
   CONST CHAR8    *SymbolName;
   UINT64         SymbolAddress;
   UINT32         Offset;
@@ -135,8 +175,13 @@ PatcherGetSymbolAddress (
     //
     // Try the usual way first via SYMTAB.
     //
-    Symbol = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
-    if (Symbol == NULL) {
+    if (Context->Is32Bit) {
+      Symbol32 = MachoGetSymbolByIndex32 (&Context->MachContext, Index);
+    } else {
+      Symbol64 = MachoGetSymbolByIndex64 (&Context->MachContext, Index);
+    }
+    if ((Context->Is32Bit && Symbol32 == NULL) ||
+      (!Context->Is32Bit && Symbol64 == NULL)) {
       //
       // If we have KxldState, use it.
       //
@@ -149,24 +194,36 @@ PatcherGetSymbolAddress (
         //
         // If we have a symbol, get its ondisk offset.
         //
-        if (SymbolAddress != 0
-          && MachoSymbolGetDirectFileOffset64 (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
-          //
-          // Proceed to success.
-          //
-          break;
+        if (SymbolAddress != 0) {
+          if (Context->Is32Bit
+            && SymbolAddress < MAX_UINT32
+            && MachoSymbolGetDirectFileOffset32 (&Context->MachContext, (UINT32) SymbolAddress, &Offset, NULL)) {
+            //
+            // Proceed to success.
+            //
+            break;
+          } else if (!Context->Is32Bit
+            && MachoSymbolGetDirectFileOffset64 (&Context->MachContext, SymbolAddress, &Offset, NULL)) {
+            //
+            // Proceed to success.
+            //
+            break;
+          }
         }
       }
 
       return EFI_NOT_FOUND;
     }
 
-    SymbolName = MachoGetSymbolName64 (&Context->MachContext, Symbol);
+    SymbolName = Context->Is32Bit ?
+      MachoGetSymbolName32 (&Context->MachContext, Symbol32) :
+      MachoGetSymbolName64 (&Context->MachContext, Symbol64);
     if (SymbolName != NULL && AsciiStrCmp (Name, SymbolName) == 0) {
       //
       // Once we have a symbol, get its ondisk offset.
       //
-      if (MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol, &Offset, NULL)) {
+      if ((Context->Is32Bit && MachoSymbolGetFileOffset32 (&Context->MachContext, Symbol32, &Offset, NULL))
+        || (!Context->Is32Bit && MachoSymbolGetFileOffset64 (&Context->MachContext, Symbol64, &Offset, NULL))) {
         //
         // Proceed to success.
         //
@@ -179,7 +236,7 @@ PatcherGetSymbolAddress (
     Index++;
   }
 
-  *Address = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + Offset;
+  *Address = (UINT8 *) MachoGetMachHeaderAny (&Context->MachContext) + Offset;
   return EFI_SUCCESS;
 }
 
@@ -194,28 +251,30 @@ PatcherApplyGenericPatch (
   UINT32         Size;
   UINT32         ReplaceCount;
 
-  Base = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext);
+  Base = (UINT8 *)MachoGetMachHeaderAny (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: %a base lookup failure %r\n",
+        "OCAK: %s %a base lookup failure %r\n",
+        Context->Is32Bit ? L"32-bit" : L"64-bit",
         Patch->Comment != NULL ? Patch->Comment : "Patch",
         Status
         ));
       return Status;
     }
 
-    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeader64 (&Context->MachContext));
+    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeaderAny (&Context->MachContext));
   }
 
   if (Patch->Find == NULL) {
     if (Size < Patch->Size) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: %a is borked, not found\n",
+        "OCAK: %s %a is borked, not found\n",
+        Context->Is32Bit ? L"32-bit" : L"64-bit",
         Patch->Comment != NULL ? Patch->Comment : "Patch"
         ));
       return EFI_NOT_FOUND;
@@ -242,7 +301,8 @@ PatcherApplyGenericPatch (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCAK: %a replace count - %u\n",
+    "OCAK: %s %a replace count - %u\n",
+    Context->Is32Bit ? L"32-bit" : L"64-bit",
     Patch->Comment != NULL ? Patch->Comment : "Patch",
     ReplaceCount
     ));
@@ -250,7 +310,8 @@ PatcherApplyGenericPatch (
   if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
     DEBUG ((
       DEBUG_INFO,
-      "OCAK: %a performed only %u replacements out of %u\n",
+      "OCAK: %s %a performed only %u replacements out of %u\n",
+      Context->Is32Bit ? L"32-bit" : L"64-bit",
       Patch->Comment != NULL ? Patch->Comment : "Patch",
       ReplaceCount,
       Patch->Count

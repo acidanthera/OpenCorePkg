@@ -206,6 +206,7 @@ OcKernelLoadKextsAndReserve (
   IN  OC_STORAGE_CONTEXT  *Storage,
   IN  OC_GLOBAL_CONFIG    *Config,
   IN  KERNEL_CACHE_TYPE   CacheType,
+  IN  BOOLEAN             Is32Bit,
   OUT UINT32              *ReservedExeSize,
   OUT UINT32              *ReservedInfoSize,
   OUT UINT32              *NumReservedKexts
@@ -352,7 +353,8 @@ OcKernelLoadKextsAndReserve (
         ReservedExeSize,
         Kext->PlistDataSize,
         Kext->ImageData,
-        Kext->ImageDataSize
+        Kext->ImageDataSize,
+        Is32Bit
         );
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedReserveKextSize (
@@ -360,7 +362,8 @@ OcKernelLoadKextsAndReserve (
         ReservedExeSize,
         Kext->PlistDataSize,
         Kext->ImageData,
-        Kext->ImageDataSize
+        Kext->ImageDataSize,
+        Is32Bit
         );
     }
 
@@ -371,6 +374,10 @@ OcKernelLoadKextsAndReserve (
         BundlePath,
         Comment
         ));
+      if (Kext->ImageData != NULL) {
+        FreePool (Kext->ImageData);
+        Kext->ImageData = NULL;
+      }
       FreePool (Kext->PlistData);
       Kext->PlistData = NULL;
       continue;
@@ -491,7 +498,8 @@ OcKernelLoadKextsAndReserve (
         ReservedExeSize,
         Kext->PlistDataSize,
         Kext->ImageData,
-        Kext->ImageDataSize
+        Kext->ImageDataSize,
+        Is32Bit
         );
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedReserveKextSize (
@@ -499,7 +507,8 @@ OcKernelLoadKextsAndReserve (
         ReservedExeSize,
         Kext->PlistDataSize,
         Kext->ImageData,
-        Kext->ImageDataSize
+        Kext->ImageDataSize,
+        Is32Bit
         );
     }
 
@@ -510,7 +519,10 @@ OcKernelLoadKextsAndReserve (
         BundlePath,
         Comment
         ));
-      Kext->Enabled = FALSE;
+      if (Kext->ImageData != NULL) {
+        FreePool (Kext->ImageData);
+        Kext->ImageData = NULL;
+      }
       FreePool (Kext->PlistData);
       Kext->PlistData = NULL;
       continue;
@@ -822,7 +834,8 @@ OcKernelInitCacheless (
     Context,
     FileName,
     ExtensionsDir,
-    DarwinVersion
+    DarwinVersion,
+    Is32Bit
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -865,6 +878,7 @@ OcKernelReadAppleKernel (
     mOcStorage,
     mOcConfiguration,
     CacheTypePrelinked,
+    Is32Bit,
     ReservedExeSize,
     &ReservedInfoSize,
     &NumReservedKexts
@@ -1295,6 +1309,7 @@ OcKernelFileOpen (
       mOcStorage,
       mOcConfiguration,
       CacheTypeMkext,
+      mUse32BitKernel,
       &ReservedExeSize,
       &ReservedInfoSize,
       &NumReservedKexts
@@ -1379,6 +1394,7 @@ OcKernelFileOpen (
       mOcStorage,
       mOcConfiguration,
       CacheTypeCacheless,
+      mUse32BitKernel,
       &ReservedExeSize,
       &ReservedInfoSize,
       &NumReservedKexts

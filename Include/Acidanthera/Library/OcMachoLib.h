@@ -96,7 +96,7 @@ MachoInitializeContext64 (
   @param[in]  FileSize         File size of FileData.
   @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
                                from the base (container, e.g. KC) of the file.
-  @param[in]  Use32Bit         Use 32-bit instead of 64-bit.
+  @param[in]  Is32Bit          TRUE if Mach-O is 32-bit.
 
   @return  Whether Context has been initialized successfully.
 
@@ -107,7 +107,18 @@ MachoInitializeContext (
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
   IN  UINT32            ContainerOffset,
-  IN  BOOLEAN           Use32Bit
+  IN  BOOLEAN           Is32Bit
+  );
+
+/**
+  Returns the universal Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER_ANY *
+MachoGetMachHeaderAny (
+  IN OUT OC_MACHO_CONTEXT   *Context
   );
 
 /**

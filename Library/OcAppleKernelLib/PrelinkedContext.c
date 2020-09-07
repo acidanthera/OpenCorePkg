@@ -857,8 +857,9 @@ PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedInfoSize,
   IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
-  IN     UINT8        *Executable,
-  IN     UINT32       ExecutableSize OPTIONAL
+  IN     UINT8        *Executable OPTIONAL,
+  IN     UINT32       ExecutableSize OPTIONAL,
+  IN     BOOLEAN      Is32Bit
   )
 {
   OC_MACHO_CONTEXT  Context;
@@ -874,7 +875,7 @@ PrelinkedReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext64 (&Context, Executable, ExecutableSize, 0)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 

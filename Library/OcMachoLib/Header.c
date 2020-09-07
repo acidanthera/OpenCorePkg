@@ -31,12 +31,23 @@ MachoInitializeContext (
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
   IN  UINT32            ContainerOffset,
-  IN  BOOLEAN           Use32Bit
+  IN  BOOLEAN           Is32Bit
   )
 {
-  return Use32Bit ?
+  return Is32Bit ?
     MachoInitializeContext32 (Context, FileData, FileSize, ContainerOffset) :
     MachoInitializeContext64 (Context, FileData, FileSize, ContainerOffset);
+}
+
+MACH_HEADER_ANY *
+MachoGetMachHeaderAny (
+  IN OUT OC_MACHO_CONTEXT   *Context
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Context->MachHeader != NULL);
+
+  return Context->MachHeader;
 }
 
 UINT32

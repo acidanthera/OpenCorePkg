@@ -91,7 +91,8 @@ OcKernelApplyPatches (
     Status = PatcherInitContextFromBuffer (
       &KernelPatcher,
       Kernel,
-      Size
+      Size,
+      Is32Bit
       );
 
     if (EFI_ERROR (Status)) {

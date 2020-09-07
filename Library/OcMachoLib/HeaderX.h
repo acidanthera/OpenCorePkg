@@ -700,7 +700,11 @@ MACH_X (MachoInitializeContext) (
    || ((MachHeader->FileType != MachHeaderFileTypeKextBundle)
     && (MachHeader->FileType != MachHeaderFileTypeExecute)
     && (MachHeader->FileType != MachHeaderFileTypeFileSet)
+#ifdef MACHO_LIB_32
     && (MachHeader->FileType != MachHeaderFileTypeObject))) {
+#else
+    )) {
+#endif
     return FALSE;
   }
 
