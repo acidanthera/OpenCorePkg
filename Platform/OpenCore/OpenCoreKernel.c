@@ -527,7 +527,6 @@ OcKernelInjectKext (
   CONST CHAR8             *BundlePath;
   CONST CHAR8             *ExecutablePath;
   CONST CHAR8             *Comment;
-  CONST CHAR8             *Arch;
   CHAR8                   FullPath[OC_STORAGE_SAFE_PATH_MAX];
   UINT32                  MaxKernel;
   UINT32                  MinKernel;
@@ -539,7 +538,6 @@ OcKernelInjectKext (
   Identifier  = OC_BLOB_GET (&Kext->Identifier);
   BundlePath  = OC_BLOB_GET (&Kext->BundlePath);
   Comment     = OC_BLOB_GET (&Kext->Comment);
-  Arch        = OC_BLOB_GET (&Kext->Arch);
   MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MaxKernel));
   MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Kext->MinKernel));
 
