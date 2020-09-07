@@ -1913,35 +1913,70 @@ PatchPowerStateTimeout (
 // we patch-out __ZN8AppleRTC8rtcWriteEjh call arguments (0x58 and 0x59) with
 // invalid (out of range) value 0xFFFF in 4 places.
 //
+// 10.5 and below do not have __ZN8AppleRTC19rtcRecordTracePointEjjj.
+//
 
 STATIC
 UINT8
-mAppleRtcChecksumPatchFind[] = {
+mAppleRtcChecksumPatchFind32[] = {
+  0xC7, 0x00, 0x00, 0x00, 0x58, 0x00, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchMask32[] = {
+  0xFF, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0xFF
+};
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchReplace32[] = {
+  0xC7, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00
+};
+
+STATIC
+UINT8
+mAppleRtcChecksumPatchFind64[] = {
   0xBE, 0x58, 0x00, 0x00, 0x00
 };
 
 STATIC
 UINT8
-mAppleRtcChecksumPatchMask[] = {
+mAppleRtcChecksumPatchMask64[] = {
   0xFF, 0xFE, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
 UINT8
-mAppleRtcChecksumPatchReplace[] = {
+mAppleRtcChecksumPatchReplace64[] = {
   0xBE, 0xFF, 0xFF, 0x00, 0x00
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAppleRtcChecksumPatch = {
-  .Comment     = DEBUG_POINTER ("DisableRtcChecksum"),
+mAppleRtcChecksumPatch32 = {
+  .Comment     = DEBUG_POINTER ("DisableRtcChecksum32"),
   .Base        = NULL,
-  .Find        = mAppleRtcChecksumPatchFind,
-  .Mask        = mAppleRtcChecksumPatchMask,
-  .Replace     = mAppleRtcChecksumPatchReplace,
+  .Find        = mAppleRtcChecksumPatchFind32,
+  .Mask        = mAppleRtcChecksumPatchMask32,
+  .Replace     = mAppleRtcChecksumPatchReplace32,
+  .ReplaceMask = mAppleRtcChecksumPatchMask32,
+  .Size        = sizeof (mAppleRtcChecksumPatchFind32),
+  .Count       = 4,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mAppleRtcChecksumPatch64 = {
+  .Comment     = DEBUG_POINTER ("DisableRtcChecksum64"),
+  .Base        = NULL,
+  .Find        = mAppleRtcChecksumPatchFind64,
+  .Mask        = mAppleRtcChecksumPatchMask64,
+  .Replace     = mAppleRtcChecksumPatchReplace64,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mAppleRtcChecksumPatchFind),
+  .Size        = sizeof (mAppleRtcChecksumPatchFind64),
   .Count       = 4,
   .Skip        = 0,
   .Limit       = 0
@@ -1960,7 +1995,7 @@ PatchAppleRtcChecksum (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mAppleRtcChecksumPatch);
+  Status = PatcherApplyGenericPatch (Patcher, Patcher->Is32Bit ? &mAppleRtcChecksumPatch32 : &mAppleRtcChecksumPatch64);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch com.apple.driver.AppleRTC DisableRtcChecksum - %r\n", Status));
   } else {
