@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.6.2
+ Updated builtin firmware versions for SMBIOS and the rest
+
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
 - Made DMG loading support configurable via `DmgLoading`
