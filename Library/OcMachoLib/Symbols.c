@@ -80,5 +80,5 @@ MachoSymbolGetDirectFileOffset (
 
   return Context->Is32Bit ?
     InternalMachoSymbolGetDirectFileOffset32 (Context, (UINT32) Address, FileOffset, MaxSize) :
-    InternalMachoSymbolGetDirectFileOffset32 (Context, Address, FileOffset, MaxSize);
+    InternalMachoSymbolGetDirectFileOffset64 (Context, Address, FileOffset, MaxSize);
 }
