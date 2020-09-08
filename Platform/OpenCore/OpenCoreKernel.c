@@ -341,15 +341,16 @@ OcKernelLoadAndReserveKext (
     Status = OcUnicodeSafeSPrint (
       FullPath,
       sizeof (FullPath),
-      L"%a\\%a",
+      IsForced ? L"%a\\%a" : OPEN_CORE_KEXT_PATH "%a\\%a",
       BundlePath,
       ExecutablePath
       );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_WARN,
-        "OC: Failed to fit %s kext path %a\\%a",
+        "OC: Failed to fit %s kext path %s%a\\%a",
         IsForced ? L"forced" : L"injected",
+        IsForced ? L"" : OPEN_CORE_KEXT_PATH,
         BundlePath,
         ExecutablePath
         ));
