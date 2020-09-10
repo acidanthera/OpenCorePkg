@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Sep  7 20:41:54 2020
-%DIF ADD ../Configuration.tex        Mon Sep  7 20:44:00 2020
+%DIF DEL PreviousConfiguration.tex   Thu Sep 10 18:48:52 2020
+%DIF ADD ../Configuration.tex        Thu Sep 10 18:56:58 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4383,7 +4383,12 @@ be used. Version with macOS specific enhancements can be downloaded from
       a drive with EFI partition being the first partition on the disk.
   \end{itemize}
 
-\item
+\DIFaddbegin \item
+  \texttt{\DIFadd{ProcessorType}}
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Automatic}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Refer to SMBIOS }\texttt{\DIFadd{ProcessorType}}\DIFadd{.
+}\DIFaddend \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{MacPro6,1}\\
