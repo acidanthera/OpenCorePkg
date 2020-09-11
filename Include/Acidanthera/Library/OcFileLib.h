@@ -470,15 +470,6 @@ OcGetGptPartitionEntry (
   );
 
 /**
-  Unblocks all partition handles without a File System protocol attached from
-  driver connection, if applicable.
-**/
-VOID
-OcUnblockUnmountedPartitions (
-  VOID
-  );
-
-/**
   Creates a device path for a firmware file.
 
   @param[in]  FileGuid  Firmware file GUID.

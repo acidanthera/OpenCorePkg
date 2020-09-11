@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added `ProcessorType` option to `Generic` allowing custom CPU names
+- Fixed `UnblockFsConnect` option not working with APFS JumpStart
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash

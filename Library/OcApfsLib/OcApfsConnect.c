@@ -37,6 +37,7 @@ STATIC UINT32            mApfsMinimalDate    = OC_APFS_DATE_DEFAULT;
 STATIC UINT32            mOcScanPolicy;
 STATIC BOOLEAN           mIgnoreVerbose;
 STATIC BOOLEAN           mGlobalConnect;
+STATIC BOOLEAN           mDisconnectHandles;
 STATIC EFI_SYSTEM_TABLE  *mNullSystemTable;
 
 //
@@ -353,10 +354,21 @@ ApfsStartDriver (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCJS: Connecting %a APFS driver on handle %p\n",
+    "OCJS: Connecting %a%a APFS driver on handle %p\n",
     mGlobalConnect ? "globally" : "normally",
+    mDisconnectHandles ? " with disconnection" : "",
     PrivateData->LocationInfo.ControllerHandle
     ));
+
+  if (mDisconnectHandles) {
+    //
+    // Unblock handles as some firmwares like that on HP EliteBook 840 G2
+    // may automatically lock all volumes without filesystem drivers upon
+    // any attempt to connect them.
+    // REF: https://github.com/acidanthera/bugtracker/issues/1128
+    //
+    OcDisconnectDriversOnHandle (PrivateData->LocationInfo.ControllerHandle);
+  }
 
   if (mGlobalConnect) {
     //
@@ -434,6 +446,7 @@ OcApfsConfigure (
   IN UINT32   MinDate,
   IN UINT32   ScanPolicy,
   IN BOOLEAN  GlobalConnect,
+  IN BOOLEAN  DisconnectHandles,
   IN BOOLEAN  IgnoreVerbose
   )
 {
@@ -456,9 +469,10 @@ OcApfsConfigure (
     mApfsMinimalDate = MinDate;
   }
 
-  mOcScanPolicy  = ScanPolicy;
-  mIgnoreVerbose = IgnoreVerbose;
-  mGlobalConnect = GlobalConnect;
+  mOcScanPolicy      = ScanPolicy;
+  mIgnoreVerbose     = IgnoreVerbose;
+  mGlobalConnect     = GlobalConnect;
+  mDisconnectHandles = DisconnectHandles;
 }
 
 EFI_STATUS

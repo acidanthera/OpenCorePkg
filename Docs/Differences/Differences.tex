@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Sep 10 18:48:52 2020
-%DIF ADD ../Configuration.tex        Thu Sep 10 18:56:58 2020
+%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
+%DIF ADD ../Configuration.tex        Fri Sep 11 14:02:33 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3227,10 +3227,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCCL} --- OcAppleChunkListLib
   \item \texttt{OCCPU} --- OcCpuLib
   \item \texttt{OCC} --- OcConsoleLib
-  \item \texttt{OCDH} --- OcDataHubLib
+  \item \DIFaddbegin \texttt{\DIFadd{OCDC}} \DIFadd{--- OcDriverConnectionLib
+  }\item \DIFaddend \texttt{OCDH} --- OcDataHubLib
   \item \texttt{OCDI} --- OcAppleDiskImageLib
-  \item \texttt{OCFSQ} --- OcFileLib, UnblockFs quirk
-  \item \texttt{OCFS} --- OcFileLib
+  \item \DIFdelbegin \texttt{\DIFdel{OCFSQ}} %DIFAUXCMD
+\DIFdel{--- OcFileLib, UnblockFs quirk
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdelend \texttt{OCFS} --- OcFileLib
   \item \texttt{OCFV} --- OcFirmwareVolumeLib
   \item \texttt{OCHS} --- OcHashServicesLib
   \item \texttt{OCI4} --- OcAppleImg4Lib

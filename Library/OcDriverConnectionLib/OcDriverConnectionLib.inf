@@ -30,6 +30,7 @@
 
 [Sources]
   OcDriverConnectionLib.c
+  DriverDisconnection.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -37,6 +38,10 @@
 
 [Protocols]
   gEfiPlatformDriverOverrideProtocolGuid
+  gEfiDevicePathProtocolGuid
+  gEfiBlockIo2ProtocolGuid
+  gEfiBlockIoProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
 
 [LibraryClasses]
   DebugLib
