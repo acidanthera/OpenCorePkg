@@ -173,6 +173,10 @@ PatchKernelCpuIdLegacy (
   IsSnow      = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
   IsLion      = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX);
   StructAddr  = 0;
+  
+  LocationSnow32  = NULL;
+  LocationTsc     = NULL;
+  LocationTscEnd  = NULL;
 
   //
   // Locate _cpuid_set_info or _cpuid_get_info.
