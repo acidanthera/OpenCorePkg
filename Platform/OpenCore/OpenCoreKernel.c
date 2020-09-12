@@ -38,7 +38,6 @@ STATIC BOOLEAN             mUse32BitKernel;
 
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
-STATIC BOOLEAN             mOcCachelessHookInProgress;
 
 STATIC
 VOID
@@ -1336,8 +1335,7 @@ OcKernelFileOpen (
     if (mOcCachelessInProgress) {
       CachelessContextFree (&mOcCachelessContext);
     }
-    mOcCachelessInProgress      = FALSE;
-    mOcCachelessHookInProgress  = FALSE;
+    mOcCachelessInProgress = FALSE;
 
     OcKernelLoadKextsAndReserve (
       This,
@@ -1376,20 +1374,14 @@ OcKernelFileOpen (
   // Hook /S/L/E contents for processing during cacheless boots.
   //
   if (mOcCachelessInProgress
-    && !mOcCachelessHookInProgress
     && OpenMode == EFI_FILE_MODE_READ
     && StrnCmp (FileName, L"System\\Library\\Extensions\\", L_STR_LEN (L"System\\Library\\Extensions\\")) == 0) {
-      //
-      // Prevent hooking ourselves from any reads during SLE scans.
-      //
-      mOcCachelessHookInProgress = TRUE;
       Status = CachelessContextHookBuiltin (
         &mOcCachelessContext,
         FileName,
         *NewHandle,
         &VirtualFileHandle
         );
-      mOcCachelessHookInProgress = FALSE;
 
       if (!EFI_ERROR (Status) && VirtualFileHandle != NULL) {
         *NewHandle = VirtualFileHandle;
@@ -1416,12 +1408,11 @@ OcLoadKernelSupport (
   Status = EnableVirtualFs (gBS, OcKernelFileOpen);
 
   if (!EFI_ERROR (Status)) {
-    mOcStorage                  = Storage;
-    mOcConfiguration            = Config;
-    mOcCpuInfo                  = CpuInfo;
-    mOcDarwinVersion            = 0;
-    mOcCachelessInProgress      = FALSE;
-    mOcCachelessHookInProgress  = FALSE;
+    mOcStorage              = Storage;
+    mOcConfiguration        = Config;
+    mOcCpuInfo              = CpuInfo;
+    mOcDarwinVersion        = 0;
+    mOcCachelessInProgress  = FALSE;
     OcImageLoaderRegisterConfigure (OcKernelConfigureCapabilities);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
