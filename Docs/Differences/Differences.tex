@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
-%DIF ADD ../Configuration.tex        Fri Sep 11 15:10:51 2020
+%DIF ADD ../Configuration.tex        Sat Sep 12 18:27:55 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2500,8 +2500,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
     \item Determined EfiBoot version restricts architecture choice:
       \begin{itemize}
       \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32}
-      \item 10.6-10.7 --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
-      \item 10.8 or newer --- \texttt{x86\_64}
+      \item 10.6 \DIFdelbegin \DIFdel{-10.7 }\DIFdelend --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
+      \item \DIFaddbegin \DIFadd{10.7 --- }\texttt{\DIFadd{i386}} \DIFadd{or }\texttt{\DIFadd{x86\_64}}
+      \item \DIFaddend 10.8 or newer --- \texttt{x86\_64}
       \end{itemize}
     \item If \texttt{KernelArch} is set to \texttt{Auto} and \texttt{SSSE3}
       is not supported by the CPU, capabilities are restricted to \texttt{i386-user32}
