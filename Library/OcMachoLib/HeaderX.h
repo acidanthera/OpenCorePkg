@@ -39,7 +39,7 @@ InternalSectionIsSane (
   ASSERT (Context != NULL);
   ASSERT (Section != NULL);
   ASSERT (Segment != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   //
   // Section->Alignment is stored as a power of 2.
@@ -173,7 +173,7 @@ MACH_X (InternalMachoGetVmSize) (
 
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize != 0);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   VmSize = 0;
 
@@ -194,7 +194,7 @@ MACH_X (InternalMachoGetVmSize) (
   }
 #endif
 
-  return MACH_UINT32_CAST (VmSize);
+  return MACH_X_TO_UINT32 (VmSize);
 }
 
 MACH_LOAD_COMMAND *
@@ -210,7 +210,7 @@ MACH_X (InternalMachoGetNextCommand) (
 
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   MachHeader = MACH_X (&Context->MachHeader->Header);
 
@@ -250,7 +250,7 @@ MACH_X (InternalMachoGetFilePointerByAddress) (
   MACH_UINT_X                   Offset;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Segment = NULL;
   while ((Segment = MACH_X (MachoGetNextSegment) (Context, Segment)) != NULL) {
@@ -259,7 +259,7 @@ MACH_X (InternalMachoGetFilePointerByAddress) (
       Offset = (Address - Segment->VirtualAddress);
 
       if (MaxSize != NULL) {
-        *MaxSize = MACH_UINT32_CAST (Segment->Size - Offset);
+        *MaxSize = MACH_X_TO_UINT32 (Segment->Size - Offset);
       }
 
       Offset += Segment->FileOffset - Context->ContainerOffset;
@@ -297,7 +297,7 @@ MACH_X (InternalMachoExpandImage) (
 
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize != 0);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   //
   // Header is valid, copy it first.
@@ -441,15 +441,15 @@ MACH_X (InternalMachoExpandImage) (
     CopyFileOffset = Segment->FileOffset;
     for (Index = 0; Index < DstSegment->NumSections; ++Index) {
       if (DstSegment->Sections[Index].Offset == 0) {
-        DstSegment->Sections[Index].Offset = MACH_UINT32_CAST (CopyFileOffset + CurrentDelta);
-        CurrentDelta += MACH_UINT32_CAST (DstSegment->Sections[Index].Size);
+        DstSegment->Sections[Index].Offset = MACH_X_TO_UINT32 (CopyFileOffset + CurrentDelta);
+        CurrentDelta += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
       } else {
         DstSegment->Sections[Index].Offset += CurrentDelta;
         CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
       }
     }
 
-    CurrentDelta = OriginalDelta + MACH_UINT32_CAST (Segment->Size - Segment->FileSize);
+    CurrentDelta = OriginalDelta + MACH_X_TO_UINT32 (Segment->Size - Segment->FileSize);
   }
   //
   // CurrentSize will only be 0 if there are no valid segments, which is the
@@ -482,7 +482,7 @@ MACH_X (InternalMachoExpandImage) (
   //
   // This cast is safe because CurrentSize is verified against DestinationSize.
   //
-  return MACH_UINT32_CAST (CurrentSize);
+  return MACH_X_TO_UINT32 (CurrentSize);
 }
 
 BOOLEAN
@@ -503,7 +503,7 @@ MACH_X (InternalMachoMergeSegments) (
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize != 0);
   ASSERT (Prefix != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Header       = MACH_X (MachoGetMachHeader) (Context);
   PrefixLength = AsciiStrLen (Prefix);
@@ -725,7 +725,7 @@ MACH_X (MachoGetMachHeader) (
 {
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   return MACH_X (&Context->MachHeader->Header);
 }
@@ -741,7 +741,7 @@ MACH_X (MachoGetLastAddress) (
   MACH_UINT_X                   Address;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   LastAddress = 0;
 
@@ -771,7 +771,7 @@ MACH_X (MachoGetSegmentByName) (
 
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Result = 0;
 
@@ -806,7 +806,7 @@ MACH_X (MachoGetSectionByName) (
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
   ASSERT (SectionName != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   for (
     Section = MACH_X (MachoGetNextSection) (Context, Segment, NULL);
@@ -844,7 +844,7 @@ MACH_X (MachoGetSegmentSectionByName) (
   ASSERT (Context != NULL);
   ASSERT (SegmentName != NULL);
   ASSERT (SectionName != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Segment = MACH_X (MachoGetSegmentByName) (Context, SegmentName);
 
@@ -871,7 +871,7 @@ MACH_X (MachoGetNextSegment) (
 
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize > 0);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (Segment != NULL) {
     MachHeader    = MACH_X (MachoGetMachHeader) (Context);
@@ -937,7 +937,7 @@ MACH_X (MachoGetNextSection) (
 {
   ASSERT (Context != NULL);
   ASSERT (Segment != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (Section != NULL) {
     ASSERT (Section >= Segment->Sections);
@@ -974,7 +974,7 @@ MACH_X (MachoGetSectionByIndex) (
   BOOLEAN                 Result;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   SectionIndex = 0;
 
@@ -1019,7 +1019,7 @@ MACH_X (MachoGetSectionByAddress) (
   MACH_UINT_X             TopOfSection;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   for (
     Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
@@ -1065,7 +1065,7 @@ MACH_X (MachoGetSymbolTable) (
 
   ASSERT (Context != NULL);
   ASSERT (SymbolTable != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (!InternalRetrieveSymtabs (Context)) {
     return 0;
@@ -1075,7 +1075,7 @@ MACH_X (MachoGetSymbolTable) (
     return 0;
   }
 
-  SymTab = MACH_X (Context->SymbolTable);
+  SymTab = MACH_X (&Context->SymbolTable->Symbol);
 
   for (Index = 0; Index < Context->Symtab->NumSymbols; ++Index) {
     if (!MACH_X (InternalSymbolIsSane) (Context, &SymTab[Index])) {
@@ -1083,7 +1083,7 @@ MACH_X (MachoGetSymbolTable) (
     }
   }
 
-  *SymbolTable = MACH_X (Context->SymbolTable);
+  *SymbolTable = MACH_X (&Context->SymbolTable->Symbol);
 
   if (StringTable != NULL) {
     *StringTable = Context->StringTable;
@@ -1136,7 +1136,7 @@ MACH_X (MachoGetIndirectSymbolTable) (
 
   ASSERT (Context != NULL);
   ASSERT (SymbolTable != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (!InternalRetrieveSymtabs (Context)) {
     return 0;
@@ -1144,13 +1144,13 @@ MACH_X (MachoGetIndirectSymbolTable) (
 
   for (Index = 0; Index < Context->DySymtab->NumIndirectSymbols; ++Index) {
     if (
-      !MACH_X (InternalSymbolIsSane) (Context, MACH_X (&Context->IndirectSymbolTable)[Index])
+      !MACH_X (InternalSymbolIsSane) (Context, &(MACH_X (&Context->IndirectSymbolTable->Symbol))[Index])
       ) {
       return 0;
     }
   }
 
-  *SymbolTable = MACH_X (Context->IndirectSymbolTable);
+  *SymbolTable = MACH_X (&Context->IndirectSymbolTable->Symbol);
 
   return Context->DySymtab->NumIndirectSymbols;
 }

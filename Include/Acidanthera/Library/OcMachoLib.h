@@ -34,18 +34,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 typedef struct {
   MACH_HEADER_ANY       *MachHeader;
   UINT32                FileSize;
-  BOOLEAN               Is32Bit;
 
   UINT32                ContainerOffset;
   MACH_SYMTAB_COMMAND   *Symtab;
-  MACH_NLIST            *SymbolTable32;
-  MACH_NLIST_64         *SymbolTable64;
+  MACH_NLIST_ANY        *SymbolTable;
   CHAR8                 *StringTable;
   MACH_DYSYMTAB_COMMAND *DySymtab;
-  MACH_NLIST            *IndirectSymbolTable32;
-  MACH_NLIST_64         *IndirectSymbolTable64;
+  MACH_NLIST_ANY        *IndirectSymbolTable;
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
+
+  BOOLEAN               Is32Bit;
 } OC_MACHO_CONTEXT;
 
 /**
@@ -117,7 +116,7 @@ MachoInitializeContext (
 
 **/
 MACH_HEADER_ANY *
-MachoGetMachHeaderAny (
+MachoGetMachHeader (
   IN OUT OC_MACHO_CONTEXT   *Context
   );
 
@@ -579,7 +578,7 @@ MachoGetSymbolByIndex64 (
 
 **/
 MACH_NLIST_ANY *
-MachoGetSymbolByIndexAny (
+MachoGetSymbolByIndex (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT32            Index
   );
@@ -624,7 +623,7 @@ MachoGetSymbolName64 (
 
 **/
 CONST CHAR8 *
-MachoGetSymbolNameAny (
+MachoGetSymbolName (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_ANY *Symbol
   );
@@ -850,7 +849,7 @@ MachoSymbolGetFileOffset64 (
 
 **/
 BOOLEAN
-MachoSymbolGetFileOffsetAny (
+MachoSymbolGetFileOffset (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     CONST  MACH_NLIST_ANY  *Symbol,
   OUT    UINT32                 *FileOffset,

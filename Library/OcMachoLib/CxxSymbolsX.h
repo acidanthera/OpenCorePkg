@@ -25,7 +25,7 @@ MACH_X (MachoGetMetaclassSymbolFromSmcpSymbol) (
 
   ASSERT (Context != NULL);
   ASSERT (Smcp != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Result = MACH_X (MachoGetSymbolByRelocationOffset) (
              Context,
@@ -64,7 +64,7 @@ MACH_X (MachoGetVtableSymbolsFromSmcp) (
   ASSERT (SmcpName != NULL);
   ASSERT (Vtable != NULL);
   ASSERT (MetaVtable != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Result = MachoGetClassNameFromSuperMetaClassPointer (
              Context,

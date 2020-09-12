@@ -54,7 +54,7 @@ PatchAppleCpuPmCfgLock (
   }
 
   Count = 0;
-  Walker = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext);
+  Walker = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
   WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mWrmsrMaxDistance;
 
   //
@@ -218,7 +218,7 @@ PatchAppleXcpmCfgLock (
     return EFI_SUCCESS;
   }
 
-  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
   Replacements = 0;
@@ -349,7 +349,7 @@ PatchAppleXcpmExtraMsrs (
     return EFI_SUCCESS;
   }
 
-  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+  Last = (XCPM_MSR_RECORD *) ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - sizeof (XCPM_MSR_RECORD));
 
   Replacements = 0;
@@ -476,7 +476,7 @@ PatchAppleXcpmForceBoost (
     return EFI_SUCCESS;
   }
 
-  Start   = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext);
+  Start   = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
   Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2;
   Start  += EFI_PAGE_SIZE;
   Current = Start;
@@ -1162,7 +1162,7 @@ PatchPanicKextDump (
     return EFI_SUCCESS;
   }
 
-  Last = ((UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+  Last = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE);
 
   //
@@ -1537,7 +1537,7 @@ PatchSegmentJettison (
     return EFI_SUCCESS;
   }
 
-  Last = (UINT8 *) MachoGetMachHeader64 (&Patcher->MachContext)
+  Last = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - sizeof (EFI_PAGE_SIZE) * 2;
 
   Status = PatcherGetSymbolAddress (Patcher, "__ZN6OSKext19removeKextBootstrapEv", (UINT8 **) &RemoveBs);

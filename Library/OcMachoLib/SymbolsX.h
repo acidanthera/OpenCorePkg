@@ -85,12 +85,12 @@ MACH_X (InternalGetSymbolByValue) (
 {
   UINT32 Index;
 
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab != NULL);
 
   for (Index = 0; Index < Context->Symtab->NumSymbols; ++Index) {
-    if (MACH_X (Context->SymbolTable)[Index].Value == Value) {
-      return MACH_X (&Context->SymbolTable)[Index];
+    if ((MACH_X (&Context->SymbolTable->Symbol))[Index].Value == Value) {
+      return &(MACH_X (&Context->SymbolTable->Symbol))[Index];
     }
   }
 
@@ -108,7 +108,7 @@ InternalGetSymbolByExternRelocationOffset (
   CONST MACH_RELOCATION_INFO *Relocation;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Relocation = InternalGetExternRelocationByOffset (Context, Address);
   if (Relocation != NULL) {
@@ -171,16 +171,16 @@ MACH_X (InternalSymbolIsSane) (
 {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->NumSymbols > 0);
 
-  ASSERT (((Symbol >= MACH_X (&Context->SymbolTable)[0])
-        && (Symbol < MACH_X (&Context->SymbolTable)[Context->Symtab->NumSymbols]))
+  ASSERT (((Symbol >= &(MACH_X (&Context->SymbolTable->Symbol))[0])
+        && (Symbol < &(MACH_X (&Context->SymbolTable->Symbol))[Context->Symtab->NumSymbols]))
        || ((Context->DySymtab != NULL)
-        && (Symbol >= MACH_X (&Context->IndirectSymbolTable)[0])
-        && (Symbol < MACH_X (&Context->IndirectSymbolTable)[Context->DySymtab->NumIndirectSymbols])));
+        && (Symbol >= &(MACH_X (&Context->IndirectSymbolTable->Symbol))[0])
+        && (Symbol < &(MACH_X (&Context->IndirectSymbolTable->Symbol))[Context->DySymtab->NumIndirectSymbols])));
   //
   // Symbol->Section is implicitly verified by MachoGetSectionByIndex() when
   // passed to it.
@@ -207,7 +207,7 @@ MACH_X (InternalMachoSymbolGetDirectFileOffset) (
 
   ASSERT (Context != NULL);
   ASSERT (FileOffset != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   for (
     Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
@@ -228,10 +228,10 @@ MACH_X (InternalMachoSymbolGetDirectFileOffset) (
   Base   = Segment->FileOffset;
   Size   = Segment->Size;
 
-  *FileOffset = MACH_UINT32_CAST (Base - Context->ContainerOffset + Offset);
+  *FileOffset = MACH_X_TO_UINT32 (Base - Context->ContainerOffset + Offset);
 
   if (MaxSize != NULL) {
-    *MaxSize = MACH_UINT32_CAST (Size - Offset);
+    *MaxSize = MACH_X_TO_UINT32 (Size - Offset);
   }
 
   return TRUE;
@@ -247,7 +247,7 @@ MACH_X (MachoIsSymbolValueInRange) (
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (MACH_X (MachoSymbolIsLocalDefined) (Context, Symbol)) {
     for (
@@ -302,10 +302,10 @@ MACH_X (MachoSymbolIsLocalDefined) (
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   DySymtab = Context->DySymtab;
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
 
   if ((DySymtab == NULL) || (DySymtab->NumUndefinedSymbols == 0)) {
     return TRUE;
@@ -315,14 +315,14 @@ MACH_X (MachoSymbolIsLocalDefined) (
   // no information on whether the symbol has been solved explicitely, check
   // its storage location for Undefined or Indirect.
   //
-  UndefinedSymbols    = MACH_X (&Context->SymbolTable)[DySymtab->UndefinedSymbolsIndex];
+  UndefinedSymbols    = &(MACH_X (&Context->SymbolTable->Symbol))[DySymtab->UndefinedSymbolsIndex];
   UndefinedSymbolsTop = &UndefinedSymbols[DySymtab->NumUndefinedSymbols];
 
   if ((Symbol >= UndefinedSymbols) && (Symbol < UndefinedSymbolsTop)) {
     return FALSE;
   }
 
-  IndirectSymbols = MACH_X (Context->IndirectSymbolTable);
+  IndirectSymbols = MACH_X (&Context->IndirectSymbolTable->Symbol);
   IndirectSymbolsTop = &IndirectSymbols[DySymtab->NumIndirectSymbols];
 
   if ((Symbol >= IndirectSymbols) && (Symbol < IndirectSymbolsTop)) {
@@ -341,16 +341,16 @@ MACH_X (MachoGetSymbolByIndex) (
   MACH_NLIST_X  *Symbol;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (!InternalRetrieveSymtabs (Context)) {
     return NULL;
   }
 
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
 
   if (Index < Context->Symtab->NumSymbols) {
-    Symbol = MACH_X (&Context->SymbolTable)[Index];
+    Symbol = &(MACH_X (&Context->SymbolTable->Symbol))[Index];
     if (MACH_X (InternalSymbolIsSane) (Context, Symbol)) {
       return Symbol;
     }
@@ -367,9 +367,9 @@ MACH_X (MachoGetSymbolName) (
 {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
   ASSERT (Context->Symtab->StringsSize > Symbol->UnifiedName.StringIndex);
 
   return (Context->StringTable + Symbol->UnifiedName.StringIndex);
@@ -383,9 +383,9 @@ MACH_X (MachoGetIndirectSymbolName) (
 {
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
-  ASSERT (MACH_X (Context->SymbolTable) != NULL);
+  ASSERT (Context->SymbolTable != NULL);
 
   if ((Symbol->Type & MACH_N_TYPE_STAB) != 0
     || (Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
@@ -433,7 +433,7 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   VOID                        *Tmp;
 
   ASSERT (Context != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   Result = MACH_X (OcOverflowAddU) (Address, sizeof (MACH_UINT_X), &AddressTop);
   if (Result || AddressTop > MachoGetFileSize (Context)) {
@@ -484,14 +484,14 @@ MACH_X (MachoGetLocalDefinedSymbolByName) (
 
   ASSERT (Context != NULL);
   ASSERT (Name != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (!InternalRetrieveSymtabs (Context)) {
     return NULL;
   }
 
-  SymbolTable = MACH_X (Context->SymbolTable);
-  ASSERT (SymbolTable != NULL);
+  ASSERT (Context->SymbolTable != NULL);
+  SymbolTable = MACH_X (&Context->SymbolTable->Symbol);
 
   DySymtab = Context->DySymtab;
 
@@ -536,7 +536,7 @@ MACH_X (MachoRelocateSymbol) (
 
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   //
   // Symbols are relocated when they describe sections.
@@ -591,7 +591,7 @@ MACH_X (MachoSymbolGetFileOffset) (
   ASSERT (Context != NULL);
   ASSERT (Symbol != NULL);
   ASSERT (FileOffset != NULL);
-  MACH_ASSERT_X;
+  MACH_ASSERT_X (Context);
 
   if (Symbol->Section == NO_SECT) {
     return FALSE;
@@ -633,10 +633,10 @@ MACH_X (MachoSymbolGetFileOffset) (
     }
   }
 
-  *FileOffset = MACH_UINT32_CAST (Base - Context->ContainerOffset + Offset);
+  *FileOffset = MACH_X_TO_UINT32 (Base - Context->ContainerOffset + Offset);
 
   if (MaxSize != NULL) {
-    *MaxSize = MACH_UINT32_CAST (Size - Offset);
+    *MaxSize = MACH_X_TO_UINT32 (Size - Offset);
   }
 
   return TRUE;

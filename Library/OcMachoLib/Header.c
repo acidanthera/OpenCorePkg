@@ -40,7 +40,7 @@ MachoInitializeContext (
 }
 
 MACH_HEADER_ANY *
-MachoGetMachHeaderAny (
+MachoGetMachHeader (
   IN OUT OC_MACHO_CONTEXT   *Context
   )
 {
@@ -150,10 +150,8 @@ InternalInitialiseSymtabs (
   UINT32                IndirectSymbolsOffset;
   UINT32                LocalRelocationsOffset;
   UINT32                ExternalRelocationsOffset;
-  MACH_NLIST            *SymbolTable32;
-  MACH_NLIST            *IndirectSymtab32;
-  MACH_NLIST_64         *SymbolTable64;
-  MACH_NLIST_64         *IndirectSymtab64;
+  MACH_NLIST_ANY        *SymbolTable;
+  MACH_NLIST_ANY        *IndirectSymtab;
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
 
@@ -162,7 +160,7 @@ InternalInitialiseSymtabs (
   ASSERT (Context != NULL);
   ASSERT (Context->MachHeader != NULL);
   ASSERT (Context->FileSize > 0);
-  ASSERT (Context->Is32Bit ? Context->SymbolTable32 == NULL : Context->SymbolTable64 == NULL);
+  ASSERT (Context->SymbolTable == NULL);
 
   FileSize  = Context->FileSize;
 
@@ -202,24 +200,15 @@ InternalInitialiseSymtabs (
     return FALSE;
   }
 
-  SymbolTable32 = NULL;
-  SymbolTable64 = NULL;
+  SymbolTable = NULL;
 
   Tmp = (VOID *)(MachoAddress + SymbolsOffset);
-  if (Context->Is32Bit) {
-    if (!OC_TYPE_ALIGNED (MACH_NLIST, Tmp)) {
-      return FALSE;
-    }
-    SymbolTable32     = (MACH_NLIST *)Tmp;
-  } else {
-    if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
-      return FALSE;
-    }
-    SymbolTable64     = (MACH_NLIST_64 *)Tmp;
+  if (!OC_TYPE_ALIGNED (MACH_NLIST_ANY, Tmp)) {
+    return FALSE;
   }
 
-  IndirectSymtab32  = NULL;
-  IndirectSymtab64  = NULL;
+  SymbolTable       = (MACH_NLIST_ANY *)Tmp;
+  IndirectSymtab    = NULL;
   LocalRelocations  = NULL;
   ExternRelocations = NULL;
 
@@ -272,17 +261,10 @@ InternalInitialiseSymtabs (
       }
 
       Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
-      if (Context->Is32Bit) {
-        if (!OC_TYPE_ALIGNED (MACH_NLIST, Tmp)) {
-          return FALSE;
-        }
-        IndirectSymtab32 = (MACH_NLIST *)Tmp;
-      } else {
-        if (!OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp)) {
-          return FALSE;
-        }
-        IndirectSymtab64 = (MACH_NLIST_64 *)Tmp;
+      if (!OC_TYPE_ALIGNED (MACH_NLIST_ANY, Tmp)) {
+        return FALSE;
       }
+      IndirectSymtab = (MACH_NLIST_ANY *)Tmp;
     }
 
     if (DySymtab->NumOfLocalRelocations > 0 && DySymtab->LocalRelocationsOffset != 0) {
@@ -339,16 +321,10 @@ InternalInitialiseSymtabs (
   Context->StringTable = StringTable;
   Context->DySymtab    = DySymtab;
 
-  Context->LocalRelocations    = LocalRelocations;
-  Context->ExternRelocations   = ExternRelocations;
-
-  if (Context->Is32Bit) {
-    Context->SymbolTable32          = SymbolTable32;
-    Context->IndirectSymbolTable32  = IndirectSymtab32;
-  } else {
-    Context->SymbolTable64          = SymbolTable64;
-    Context->IndirectSymbolTable64  = IndirectSymtab64;
-  }
+  Context->LocalRelocations     = LocalRelocations;
+  Context->ExternRelocations    = ExternRelocations;
+  Context->SymbolTable          = SymbolTable;
+  Context->IndirectSymbolTable  = IndirectSymtab;
 
   return TRUE;
 }
@@ -369,8 +345,7 @@ MachoInitialiseSymtabsExternal (
   ASSERT (Context->MachHeader != NULL);
   ASSERT (SymsContext != NULL);
 
-  if ((Context->Is32Bit && Context->SymbolTable32 != NULL)
-    || (!Context->Is32Bit && Context->SymbolTable64 != NULL)) {
+  if (Context->SymbolTable != NULL) {
     return TRUE;
   }
 

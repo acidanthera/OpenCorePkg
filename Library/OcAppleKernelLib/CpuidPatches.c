@@ -787,7 +787,7 @@ PatchKernelCpuId (
     && mKernelCpuIdFindRelNew[3] == mKernelCpuIdFindRelOld[3]
     );
 
-  Start = ((UINT8 *) MachoGetMachHeaderAny (&Patcher->MachContext));
+  Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
   Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
 
   //

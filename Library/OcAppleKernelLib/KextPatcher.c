@@ -174,7 +174,7 @@ PatcherGetSymbolAddress (
     //
     // Try the usual way first via SYMTAB.
     //
-    Symbol = MachoGetSymbolByIndexAny (&Context->MachContext, Index);
+    Symbol = MachoGetSymbolByIndex (&Context->MachContext, Index);
     if (Symbol == NULL) {
       //
       // If we have KxldState, use it.
@@ -199,12 +199,12 @@ PatcherGetSymbolAddress (
       return EFI_NOT_FOUND;
     }
 
-    SymbolName = MachoGetSymbolNameAny (&Context->MachContext, Symbol);
+    SymbolName = MachoGetSymbolName (&Context->MachContext, Symbol);
     if (SymbolName != NULL && AsciiStrCmp (Name, SymbolName) == 0) {
       //
       // Once we have a symbol, get its ondisk offset.
       //
-      if (MachoSymbolGetFileOffsetAny (&Context->MachContext, Symbol, &Offset, NULL)) {
+      if (MachoSymbolGetFileOffset (&Context->MachContext, Symbol, &Offset, NULL)) {
         //
         // Proceed to success.
         //
@@ -217,7 +217,7 @@ PatcherGetSymbolAddress (
     Index++;
   }
 
-  *Address = (UINT8 *) MachoGetMachHeaderAny (&Context->MachContext) + Offset;
+  *Address = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + Offset;
   return EFI_SUCCESS;
 }
 
@@ -232,7 +232,7 @@ PatcherApplyGenericPatch (
   UINT32         Size;
   UINT32         ReplaceCount;
 
-  Base = (UINT8 *)MachoGetMachHeaderAny (&Context->MachContext);
+  Base = (UINT8 *)MachoGetMachHeader (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
@@ -247,7 +247,7 @@ PatcherApplyGenericPatch (
       return Status;
     }
 
-    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeaderAny (&Context->MachContext));
+    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeader (&Context->MachContext));
   }
 
   if (Patch->Find == NULL) {

@@ -25,7 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "OcMachoLibInternal.h"
 
 MACH_NLIST_ANY *
-MachoGetSymbolByIndexAny (
+MachoGetSymbolByIndex (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT32            Index
   )
@@ -38,7 +38,7 @@ MachoGetSymbolByIndexAny (
 }
 
 CONST CHAR8 *
-MachoGetSymbolNameAny (
+MachoGetSymbolName (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_ANY *Symbol
   )
@@ -51,7 +51,7 @@ MachoGetSymbolNameAny (
 }
 
 BOOLEAN
-MachoSymbolGetFileOffsetAny (
+MachoSymbolGetFileOffset (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     CONST  MACH_NLIST_ANY  *Symbol,
   OUT    UINT32                 *FileOffset,

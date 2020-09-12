@@ -42,9 +42,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MACH_LOAD_COMMAND_SEGMENT_X MACH_LOAD_COMMAND_SEGMENT
 
 #define MACH_X(a)                   a##32
-#define MACH_ASSERT_X               ASSERT (Context->Is32Bit)
+#define MACH_ASSERT_X(a)            ASSERT ((a)->Is32Bit)
 
-#define MACH_UINT32_CAST(a)         (a)
+#define MACH_X_TO_UINT32(a)         (a)
 
 //
 // 64-bit functions
@@ -60,9 +60,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define MACH_LOAD_COMMAND_SEGMENT_X MACH_LOAD_COMMAND_SEGMENT_64
 
 #define MACH_X(a)                   a##64
-#define MACH_ASSERT_X               ASSERT (!Context->Is32Bit)
+#define MACH_ASSERT_X(a)            ASSERT (!(a)->Is32Bit)
 
-#define MACH_UINT32_CAST(a)         (UINT32)(a)
+#define MACH_X_TO_UINT32(a)         (UINT32)(a)
 #endif
 
 #endif // MACHO_X_INTERNAL_H
