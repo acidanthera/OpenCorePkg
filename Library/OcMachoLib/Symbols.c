@@ -51,6 +51,19 @@ MachoGetSymbolName (
 }
 
 BOOLEAN
+MachoIsSymbolValueInRange (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY *Symbol
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MachoIsSymbolValueInRange32 (Context, &Symbol->Symbol32) :
+    MachoIsSymbolValueInRange64 (Context, &Symbol->Symbol64);  
+}
+
+BOOLEAN
 MachoSymbolGetFileOffset (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     CONST  MACH_NLIST_ANY  *Symbol,

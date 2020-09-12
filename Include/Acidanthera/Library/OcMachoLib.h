@@ -234,6 +234,23 @@ MachoGetSegmentByName64 (
   );
 
 /**
+  Retrieves the first section by the name of SectionName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION_ANY *
+MachoGetSectionByName (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
+  IN     CONST CHAR8              *SectionName
+  );
+
+/**
   Retrieves the first 32-bit section by the name of SectionName.
 
   @param[in,out] Context      Context of the Mach-O.
@@ -299,6 +316,22 @@ MachoGetSegmentSectionByName64 (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SegmentName,
   IN     CONST CHAR8       *SectionName
+  );
+
+/**
+  Retrieves the next segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND_ANY *
+MachoGetNextSegment (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_ANY *Segment  OPTIONAL
   );
 
 /**
@@ -656,6 +689,20 @@ CONST CHAR8 *
 MachoGetIndirectSymbolName64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
+  Returns whether the symbol's value is a valid address within the Mach-O
+  referenced to by Context.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to verify the value of.
+
+**/
+BOOLEAN
+MachoIsSymbolValueInRange (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY *Symbol
   );
 
 /**

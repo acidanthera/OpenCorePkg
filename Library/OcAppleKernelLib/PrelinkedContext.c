@@ -96,57 +96,6 @@ PrelinkedFindLastLoadAddress (
 }
 
 STATIC
-BOOLEAN
-PrelinkedFindKmodAddress (
-  IN  OC_MACHO_CONTEXT  *ExecutableContext,
-  IN  UINT64            LoadAddress,
-  IN  UINT32            Size,
-  OUT UINT64            *Kmod
-  )
-{
-  MACH_NLIST_64            *Symbol;
-  CONST CHAR8              *SymbolName;
-  MACH_SEGMENT_COMMAND_64  *TextSegment;
-  UINT64                   Address;
-  UINT32                   Index;
-
-  Index = 0;
-  while (TRUE) {
-    Symbol = MachoGetSymbolByIndex64 (ExecutableContext, Index);
-    if (Symbol == NULL) {
-      *Kmod = 0;
-      return TRUE;
-    }
-
-    if ((Symbol->Type & MACH_N_TYPE_STAB) == 0) {
-      SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
-      if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
-        if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
-          return FALSE;
-        }
-        break;
-      }
-    }
-
-    Index++;
-  }
-
-  TextSegment = MachoGetSegmentByName64 (ExecutableContext, "__TEXT");
-  if (TextSegment == NULL || TextSegment->FileOffset > TextSegment->VirtualAddress) {
-    return FALSE;
-  }
-
-  Address = TextSegment->VirtualAddress - TextSegment->FileOffset;
-  if (OcOverflowTriAddU64 (Address, LoadAddress, Symbol->Value, &Address)
-    || Address > LoadAddress + Size - sizeof (KMOD_INFO_64_V1)) {
-    return FALSE;
-  }
-
-  *Kmod = Address;
-  return TRUE;
-}
-
-STATIC
 EFI_STATUS
 PrelinkedGetSegmentsFromMacho (
   IN   OC_MACHO_CONTEXT         *MachoContext,
@@ -990,7 +939,7 @@ PrelinkedInjectKext (
       return EFI_INVALID_PARAMETER;
     }
 
-    Result = PrelinkedFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
+    Result = KextFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
     if (!Result) {
       return EFI_INVALID_PARAMETER;
     }

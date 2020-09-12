@@ -1041,6 +1041,24 @@ PatcherBlockKext (
   );
 
 /**
+  Find kmod address.
+
+  @param[in]  ExecutableContext   Mach-O context.
+  @param[in]  LoadAddress         Load address.
+  @param[in]  Size                Executable size.
+  @param[out] Kmod                Pointer to kmod.
+
+  @return  TRUE on success.
+**/
+BOOLEAN
+KextFindKmodAddress (
+  IN  OC_MACHO_CONTEXT  *ExecutableContext,
+  IN  UINT64            LoadAddress,
+  IN  UINT32            Size,
+  OUT UINT64            *Kmod
+  );
+
+/**
   Apply modification to CPUID 1.
 
   @param Patcher        Patcher context.

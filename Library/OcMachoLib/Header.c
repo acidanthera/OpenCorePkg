@@ -121,6 +121,33 @@ MachoGetUuid (
   return UuidCommand;
 }
 
+MACH_SEGMENT_COMMAND_ANY *
+MachoGetNextSegment (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_ANY *Segment  OPTIONAL
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SEGMENT_COMMAND_ANY *) MachoGetNextSegment32 (Context, Segment != NULL ? &Segment->Segment32 : NULL) :
+    (MACH_SEGMENT_COMMAND_ANY *) MachoGetNextSegment64 (Context, Segment != NULL ? &Segment->Segment64 : NULL);
+}
+
+MACH_SECTION_ANY *
+MachoGetSectionByName (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
+  IN     CONST CHAR8              *SectionName
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetSectionByName32 (Context, &Segment->Segment32, SectionName) :
+    (MACH_SECTION_ANY *) MachoGetSectionByName64 (Context, &Segment->Segment64, SectionName);
+}
+
 /**
   Initialises the symbol information of Context.
 

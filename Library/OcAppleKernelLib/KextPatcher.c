@@ -27,6 +27,76 @@
 #include "MkextInternal.h"
 #include "PrelinkedInternal.h"
 
+STATIC
+BOOLEAN
+GetTextBaseOffset (
+  IN  OC_MACHO_CONTEXT  *ExecutableContext,
+  OUT UINT64            *Address,
+  OUT UINT64            *Offset
+  )
+{
+  MACH_SEGMENT_COMMAND      *Segment32;
+  MACH_SECTION              *Section32;
+  MACH_SEGMENT_COMMAND_64   *Segment64;
+
+  UINT64                    VirtualAddress;
+  UINT64                    FileOffset;
+
+  //
+  // 32-bit can be of type MH_OBJECT, which has all sections in a single unnamed segment.
+  // We'll fallback to that if there is no __TEXT segment.
+  //
+  if (ExecutableContext->Is32Bit) {
+    Segment32 = MachoGetNextSegment32 (ExecutableContext, NULL);
+    if (Segment32 == NULL) {
+      return FALSE;
+    }
+
+    if (AsciiStrCmp (Segment32->SegmentName, "") == 0) {
+      Section32 = MachoGetSectionByName32 (
+        ExecutableContext,
+        Segment32,
+        "__text"
+        );
+      if (Section32 == NULL) {
+        return FALSE;
+      }
+
+      VirtualAddress = Section32->Address;
+      FileOffset     = Section32->Offset;
+
+    } else {
+      Segment32 = MachoGetSegmentByName32 (
+        ExecutableContext,
+        "__TEXT"
+        );
+      if (Segment32 == NULL || Segment32->VirtualAddress < Segment32->FileOffset) {
+        return FALSE;
+      }
+
+      VirtualAddress = Segment32->VirtualAddress;
+      FileOffset     = Segment32->FileOffset;
+    }
+
+  } else {
+    Segment64 = MachoGetSegmentByName64 (
+      ExecutableContext,
+      "__TEXT"
+      );
+    if (Segment64 == NULL || Segment64->VirtualAddress < Segment64->FileOffset) {
+      return FALSE;
+    }
+
+    VirtualAddress = Segment64->VirtualAddress;
+    FileOffset     = Segment64->FileOffset;
+  }
+
+  *Address  = VirtualAddress;
+  *Offset   = FileOffset;
+
+  return TRUE;
+}
+
 EFI_STATUS
 PatcherInitContextFromPrelinked (
   IN OUT PATCHER_CONTEXT    *Context,
@@ -72,9 +142,6 @@ PatcherInitContextFromBuffer (
 {
   EFI_STATUS                Status;
   OC_MACHO_CONTEXT          InnerContext;
-  MACH_SEGMENT_COMMAND      *Segment32;
-  MACH_SECTION              *Section32;
-  MACH_SEGMENT_COMMAND_64   *Segment64;
 
   UINT64                    VirtualAddress;
   UINT64                    FileOffset;
@@ -95,49 +162,22 @@ PatcherInitContextFromBuffer (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // 32-bit can be of type MH_OBJECT, which has all sections in a single unnamed segment.
-  // We'll fallback to that if there is no __TEXT segment.
-  //
-  if (Is32Bit) {
-    Segment32 = MachoGetSegmentByName32 (
-      &Context->MachContext,
-      "__TEXT"
-      );
-    if (Segment32 == NULL || Segment32->VirtualAddress < Segment32->FileOffset) {
-      Section32 = MachoGetSegmentSectionByName32 (
-        &Context->MachContext,
-        "",
-        "__text"
-        );
-      if (Section32 == NULL) {
-        return EFI_NOT_FOUND;
-      }
-      VirtualAddress = Section32->Address;
-      FileOffset     = Section32->Offset;
-    } else {
-      VirtualAddress = Segment32->VirtualAddress;
-      FileOffset     = Segment32->FileOffset;
-    }
-
-  } else {
-    Segment64 = MachoGetSegmentByName64 (
-      &Context->MachContext,
-      "__TEXT"
-      );
-    if (Segment64 == NULL || Segment64->VirtualAddress < Segment64->FileOffset) {
-      return EFI_NOT_FOUND;
-    }
-
-    VirtualAddress = Segment64->VirtualAddress;
-    FileOffset     = Segment64->FileOffset;
+  if (!GetTextBaseOffset (&Context->MachContext, &VirtualAddress, &FileOffset)) {
+    return EFI_NOT_FOUND;
   }
 
   Context->Is32Bit        = Is32Bit;
-  Context->VirtualBase    = VirtualAddress < FileOffset ? VirtualAddress - FileOffset : FileOffset; // FIXME: 32-bit MH_OBJECT
+  Context->VirtualBase    = VirtualAddress > FileOffset ? VirtualAddress - FileOffset : FileOffset - VirtualAddress;
   Context->VirtualKmod    = 0;
   Context->KxldState      = NULL;
   Context->KxldStateSize  = 0;
+
+  KextFindKmodAddress (
+    &Context->MachContext,
+    0,
+    BufferSize,
+    &Context->VirtualKmod
+    );
 
   if (!Context->Is32Bit) {
     Status = InternalConnectExternalSymtab (
@@ -354,4 +394,62 @@ PatcherBlockKext (
   PatchAddr[5] = 0xC3;
 
   return EFI_SUCCESS;
+}
+
+BOOLEAN
+KextFindKmodAddress (
+  IN  OC_MACHO_CONTEXT  *ExecutableContext,
+  IN  UINT64            LoadAddress,
+  IN  UINT32            Size,
+  OUT UINT64            *Kmod
+  )
+{
+  BOOLEAN                   Is32Bit;
+  MACH_NLIST_ANY            *Symbol;
+  CONST CHAR8               *SymbolName;
+  UINT64                    Address;
+  UINT64                    FileOffset;
+  UINT32                    Index;
+
+  Is32Bit = ExecutableContext->Is32Bit;
+  Index   = 0;
+
+  while (TRUE) {
+    Symbol = MachoGetSymbolByIndex (ExecutableContext, Index);
+    if (Symbol == NULL) {
+      *Kmod = 0;
+      return TRUE;
+    }
+
+    if (((Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type) & MACH_N_TYPE_STAB) == 0) {
+      SymbolName = MachoGetSymbolName (ExecutableContext, Symbol);
+      if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
+        if (!MachoIsSymbolValueInRange (ExecutableContext, Symbol)) {
+          return FALSE;
+        }
+        break;
+      }
+    }
+
+    Index++;
+  }
+
+  if (!GetTextBaseOffset (ExecutableContext, &Address, &FileOffset)) {
+    return FALSE;
+  }
+
+  if (Address > FileOffset) {
+    Address = FileOffset - Address;
+  } else {
+    Address = Address - FileOffset;
+  }
+
+  if (OcOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)
+    || Address > LoadAddress + Size - (Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1))
+    || (Is32Bit && Address > MAX_UINT32)) {
+    return FALSE;
+  }
+
+  *Kmod = Address;
+  return TRUE;
 }
