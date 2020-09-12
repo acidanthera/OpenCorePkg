@@ -26,34 +26,35 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 STATIC
 CONST UINT8
 mKernelCpuIdFindRelNew[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, ///< mov ecx, 8Bh
-  0x31, 0xC0,                   ///< xor eax, eax
-  0x31, 0xD2,                   ///< xor edx, edx
-  0x0F, 0x30,                   ///< wrmsr
-  0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
-  0x31, 0xDB,                   ///< xor ebx, ebx
-  0x31, 0xC9,                   ///< xor ecx, ecx
-  0x31, 0xD2,                   ///< xor edx, edx
-  0x0F, 0xA2                    ///< cpuid
+  0xB9, 0x8B, 0x00, 0x00, 0x00, // mov ecx, 8Bh
+  0x31, 0xC0,                   // xor eax, eax
+  0x31, 0xD2,                   // xor edx, edx
+  0x0F, 0x30,                   // wrmsr
+  0xB8, 0x01, 0x00, 0x00, 0x00, // mov eax, 1
+  0x31, 0xDB,                   // xor ebx, ebx
+  0x31, 0xC9,                   // xor ecx, ecx
+  0x31, 0xD2,                   // xor edx, edx
+  0x0F, 0xA2                    // cpuid
 };
 
 STATIC
 CONST UINT8
 mKernelCpuIdFindRelOld[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, ///< mov ecx, 8Bh
-  0x31, 0xD2,                   ///< xor edx, edx
-  0x0F, 0x30,                   ///< wrmsr
-  0xB8, 0x01, 0x00, 0x00, 0x00, ///< mov eax, 1
-  0x31, 0xDB,                   ///< xor ebx, ebx
-  0x31, 0xC9,                   ///< xor ecx, ecx
-  0x31, 0xD2,                   ///< xor edx, edx
-  0x0F, 0xA2                    ///< cpuid
+  0xB9, 0x8B, 0x00, 0x00, 0x00, // mov ecx, 8Bh
+  0x31, 0xD2,                   // xor edx, edx
+  0x0F, 0x30,                   // wrmsr
+  0xB8, 0x01, 0x00, 0x00, 0x00, // mov eax, 1
+  0x31, 0xDB,                   // xor ebx, ebx
+  0x31, 0xC9,                   // xor ecx, ecx
+  0x31, 0xD2,                   // xor edx, edx
+  0x0F, 0xA2                    // cpuid
 };
 
 STATIC
 CONST UINT8
 mKernelCpuidFindMcRel[] = {
-  0xB9, 0x8B, 0x00, 0x00, 0x00, 0x0F, 0x32
+  0xB9, 0x8B, 0x00, 0x00, 0x00, // mov ecx, 8Bh
+  0x0F, 0x32                    // rdmsr
 };
 
 /**
@@ -74,16 +75,16 @@ mKernelCpuidFindMcRel[] = {
 STATIC
 CONST UINT8
 mKernelCpuidReplaceDbg[] = {
-  0xC7, 0x47, 0x68, 0x11, 0x11, 0x11, 0x11,                   ///< mov dword ptr [rdi+68h], 11111111h
-  0xC6, 0x47, 0x50, 0x22,                                     ///< mov byte ptr [rdi+50h], 22h
-  0x48, 0xB8, 0x55, 0x55, 0x55, 0x55, 0x44, 0x33, 0x66, 0x77, ///< mov rax, 7766334455555555h
-  0x48, 0x89, 0x47, 0x48,                                     ///< mov [rdi+48h], rax
-  0x48, 0xB8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, ///< mov rax, 8888888888888888h
-  0x48, 0x89, 0x47, 0x58,                                     ///< mov [rdi+58h], rax
-  0xC7, 0x87, 0xCC, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, ///< mov dword ptr [rdi+0CCh], 99999999h
-  0xC7, 0x87, 0x88, 0x01, 0x00, 0x00, 0xAA, 0xAA, 0xAA, 0xAA, ///< mov dword ptr [rdi+188h], 0AAAAAAAAh
-  0xB8, 0xAA, 0xAA, 0xAA, 0xAA,                               ///< mov eax, 0AAAAAAAAh
-  0xC3                                                        ///< retn
+  0xC7, 0x47, 0x68, 0x11, 0x11, 0x11, 0x11,                   // mov dword ptr [rdi+68h], 11111111h
+  0xC6, 0x47, 0x50, 0x22,                                     // mov byte ptr [rdi+50h], 22h
+  0x48, 0xB8, 0x55, 0x55, 0x55, 0x55, 0x44, 0x33, 0x66, 0x77, // mov rax, 7766334455555555h
+  0x48, 0x89, 0x47, 0x48,                                     // mov [rdi+48h], rax
+  0x48, 0xB8, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, 0x88, // mov rax, 8888888888888888h
+  0x48, 0x89, 0x47, 0x58,                                     // mov [rdi+58h], rax
+  0xC7, 0x87, 0xCC, 0x00, 0x00, 0x00, 0x99, 0x99, 0x99, 0x99, // mov dword ptr [rdi+0CCh], 99999999h
+  0xC7, 0x87, 0x88, 0x01, 0x00, 0x00, 0xAA, 0xAA, 0xAA, 0xAA, // mov dword ptr [rdi+188h], 0AAAAAAAAh
+  0xB8, 0xAA, 0xAA, 0xAA, 0xAA,                               // mov eax, 0AAAAAAAAh
+  0xC3                                                        // retn
 };
 
 #pragma pack(push, 1)
@@ -148,6 +149,7 @@ PatchKernelCpuIdLegacy (
   EFI_STATUS            Status;
 
   UINT8                 *Record;
+  UINT8                 *BlockClearFunc;
   UINT8                 *StartPointer;
   UINT8                 *EndPointer;
   UINT32                StructAddr;
@@ -160,6 +162,7 @@ PatchKernelCpuIdLegacy (
   BOOLEAN               IsTiger;
   BOOLEAN               IsLeopard;
   BOOLEAN               IsSnow;
+  BOOLEAN               IsLion;
   UINT32                Index;
   UINT32                MaxExt;
   INT32                 Delta;
@@ -168,6 +171,7 @@ PatchKernelCpuIdLegacy (
   IsTiger     = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_TIGER_MIN, KERNEL_VERSION_TIGER_MAX);
   IsLeopard   = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LEOPARD_MIN, KERNEL_VERSION_LEOPARD_MAX);
   IsSnow      = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_SNOW_LEOPARD_MIN, KERNEL_VERSION_SNOW_LEOPARD_MAX);
+  IsLion      = OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX);
   StructAddr  = 0;
 
   //
@@ -193,19 +197,21 @@ PatchKernelCpuIdLegacy (
   // 10.5 and 32-bit 10.6 have the struct hardcoded. This can be
   //   pulled right below the call to _blkclr, as below.
   // 64-bit 10.6 has the struct in rdi, a bit before lea rsi... below.
+  // 32-bit 10.7 has the struct hardcoded, and can be pulled right
+  // before the call to _bzero
   //
   STATIC CONST UINT8 mKernelCpuidFindPatchTigerStart[4] = {
     0x8D, 0x45, 0xEC,               // lea eax, dword [...]
-    0xC7                            // mov from mov dword [...], 0x4
+    0xC7                            // mov from mov dword [...], 4
   };
 
-  STATIC CONST UINT8 mKernelCpuidFindPatchLeoSnowStruct32[2] = {
-    0x00,                           // 0x0 from end of mov dword [...], [struct address]
-    0xE8                            // call from call _blkclr
+  STATIC CONST UINT8 mKernelCpuidFindPatchLeoSnowLionStruct32[2] = {
+    0x00,                           // 0 from end of mov dword [...], [struct address]
+    0xE8                            // call from call _blkclr or _bzero
   };
 
-  STATIC CONST UINT8 mKernelCpuidFindPatchLeoSnowStart32[5] = {
-    0x04, 0x00, 0x00, 0x00,         // 0x4 from mov dword [...], 0x4
+  STATIC CONST UINT8 mKernelCpuidFindPatchLeoSnowLionStart32[5] = {
+    0x04, 0x00, 0x00, 0x00,         // 4 from mov dword [...], 4
     0xC7                            // mov...
   };
 
@@ -226,11 +232,21 @@ PatchKernelCpuIdLegacy (
       }
     } else {
       //
+      // We need to get the address of _blkclr or _bzero first for proper matching.
+      //
+      Status = PatcherGetSymbolAddress (Patcher, IsLion ? "_bzero" : "_blkclr", (UINT8 **) &BlockClearFunc);
+      if (EFI_ERROR (Status) || Record >= Last) {
+        DEBUG ((DEBUG_WARN, "OCAK: Failed to locate %a (%p) - %r\n", IsLion ? "_bzero" : "_blkclr", Record, Status));
+        return EFI_NOT_FOUND;
+      }
+
+      //
       // Get struct address first.
       //
       for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
-        if (Record[0] == mKernelCpuidFindPatchLeoSnowStruct32[0]
-          && Record[1] == mKernelCpuidFindPatchLeoSnowStruct32[1]) {
+        if (Record[0] == mKernelCpuidFindPatchLeoSnowLionStruct32[0]
+          && Record[1] == mKernelCpuidFindPatchLeoSnowLionStruct32[1]
+          && *((INT32 *) &Record[2]) == (INT32) (BlockClearFunc - (Record + sizeof (mKernelCpuidFindPatchLeoSnowLionStruct32) + sizeof (UINT32)))) {
           break;
         }
       }
@@ -242,11 +258,11 @@ PatchKernelCpuIdLegacy (
       StructAddr = *((UINT32 *) (Record - 3));
 
       for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
-        if (Record[0] == mKernelCpuidFindPatchLeoSnowStart32[0]
-          && Record[1] == mKernelCpuidFindPatchLeoSnowStart32[1]
-          && Record[2] == mKernelCpuidFindPatchLeoSnowStart32[2]
-          && Record[3] == mKernelCpuidFindPatchLeoSnowStart32[3]
-          && Record[4] == mKernelCpuidFindPatchLeoSnowStart32[4]) {
+        if (Record[0] == mKernelCpuidFindPatchLeoSnowLionStart32[0]
+          && Record[1] == mKernelCpuidFindPatchLeoSnowLionStart32[1]
+          && Record[2] == mKernelCpuidFindPatchLeoSnowLionStart32[2]
+          && Record[3] == mKernelCpuidFindPatchLeoSnowLionStart32[3]
+          && Record[4] == mKernelCpuidFindPatchLeoSnowLionStart32[4]) {
           break;
         }
       }
@@ -280,19 +296,19 @@ PatchKernelCpuIdLegacy (
   // End of patch area.
   //
   STATIC CONST UINT8 mKernelCpuidFindPatchTigerEnd[4] = {
-    0x00,                           // 0 from mov byte [...], 0x0
+    0x00,                           // 0 from mov byte [...], 0
     0x31, 0xDB,                     // xor ebx, ebx
     0x8B                            // mov ...
   };
 
-  STATIC UINT8 mKernelCpuidFindPatchSnowEnd32[7] = {
-    0xC6, 0x05, 0xFF, 0xFF, 0xFF, 0xFF, 0x00    // mov byte [struct_addr], 0x0
+  STATIC UINT8 mKernelCpuidFindPatchSnowLionEnd32[7] = {
+    0xC6, 0x05, 0xFF, 0xFF, 0xFF, 0xFF, 0x00    // mov byte [struct_addr], 0
   };
-  STATIC UINT32 *mKernelCpuidFindPatchSnowEndPtr32 = (UINT32 *) &mKernelCpuidFindPatchSnowEnd32[2];
-  *mKernelCpuidFindPatchSnowEndPtr32 = StructAddr + sizeof (Signature[0]) * 3;
+  STATIC UINT32 *mKernelCpuidFindPatchSnowLionEndPtr32 = (UINT32 *) &mKernelCpuidFindPatchSnowLionEnd32[2];
+  *mKernelCpuidFindPatchSnowLionEndPtr32 = StructAddr + sizeof (Signature[0]) * 3;
 
   STATIC CONST UINT8 mKernelCpuidFindPatchLeoEnd1[5] = {
-    0xB8, 0x00, 0x00, 0x00, 0x80    // mov eax/edx, 0x80000000
+    0xB8, 0x00, 0x00, 0x00, 0x80    // mov eax/edx, 80000000h
   };
   STATIC CONST UINT8 mKernelCpuidFindPatchLeoEnd1Mask = 0xFD;
 
@@ -305,15 +321,15 @@ PatchKernelCpuIdLegacy (
         break;
       }
     }
-  } else if (IsSnow && Patcher->Is32Bit) {
+  } else if ((IsSnow || IsLion) && Patcher->Is32Bit) {
     for (Index = 0; Index < EFI_PAGE_SIZE; Index++, Record++) {
-      if (Record[0] == mKernelCpuidFindPatchSnowEnd32[0]
-        && Record[1] == mKernelCpuidFindPatchSnowEnd32[1]
-        && Record[2] == mKernelCpuidFindPatchSnowEnd32[2]
-        && Record[3] == mKernelCpuidFindPatchSnowEnd32[3]
-        && Record[4] == mKernelCpuidFindPatchSnowEnd32[4]
-        && Record[5] == mKernelCpuidFindPatchSnowEnd32[5]
-        && Record[6] == mKernelCpuidFindPatchSnowEnd32[6]) {
+      if (Record[0] == mKernelCpuidFindPatchSnowLionEnd32[0]
+        && Record[1] == mKernelCpuidFindPatchSnowLionEnd32[1]
+        && Record[2] == mKernelCpuidFindPatchSnowLionEnd32[2]
+        && Record[3] == mKernelCpuidFindPatchSnowLionEnd32[3]
+        && Record[4] == mKernelCpuidFindPatchSnowLionEnd32[4]
+        && Record[5] == mKernelCpuidFindPatchSnowLionEnd32[5]
+        && Record[6] == mKernelCpuidFindPatchSnowLionEnd32[6]) {
         break;
       }
     }
@@ -363,18 +379,26 @@ PatchKernelCpuIdLegacy (
   // 32-bit 10.6 has two different mov eax, 0x1 pairs for 32-bit and 64-bit.
   // The first is patched out with nops, and we'll use the second for the jmp.
   //
+  // 32-bit 10.7 has a call to a function that is very similar to 32-bit 10.6, and calls
+  // cpuid in 64-bit mode if supported. We can simply replace this call with one to the patched area.
+  //
   STATIC CONST UINT8 mKernelCpuidFindLocLeoTigerStart[7] = {
-    0xB9, 0x01, 0x00, 0x00, 0x00,       // mov ecx, 0x1
+    0xB9, 0x01, 0x00, 0x00, 0x00,       // mov ecx, 1
     0x89, 0xC8                          // mov eax, ecx
   };
 
   STATIC CONST UINT8 mKernelCpuidFindLocSnowStart[5] = {
-    0xB8, 0x01, 0x00, 0x00, 0x00        // mov eax, 0x1
+    0xB8, 0x01, 0x00, 0x00, 0x00        // mov eax, 1
   };
 
   STATIC CONST UINT8 mKernelCpuidFindLocSnowStart32[6] = {
     0xE8, 0xFF, 0xFF, 0xFF, 0xFF,       // call _cpuid64
     0xEB                                // jmp ...
+  };
+
+  STATIC CONST UINT8 mKernelCpuidFindLocLionStart32[8] = {
+    0xB9, 0x01, 0x00, 0x00, 0x00,       // mov ecx, 1
+    0x8D, 0x55, 0xD0                    // lea edx, dword [...]
   };
 
   if (IsTiger || IsLeopard) {
@@ -389,7 +413,7 @@ PatchKernelCpuIdLegacy (
         break;
       }
     }
-  } else {
+  } else if (IsSnow) {
     for (; Index < EFI_PAGE_SIZE; Index++, Record++) {
       if (Record[0] == mKernelCpuidFindLocSnowStart[0]
         && Record[1] == mKernelCpuidFindLocSnowStart[1]
@@ -432,27 +456,18 @@ PatchKernelCpuIdLegacy (
         }
       }
     }
-  }
-
-  if (Index >= EFI_PAGE_SIZE) {
-    return EFI_NOT_FOUND;
-  }
-
-  Location = Record;
-
-  //
-  // End of CPUID location.
-  //
-  STATIC CONST UINT8 mKernelCpuidFindLegacyLocEnd[3] = {
-    0x0F, 0xA2,                   // cpuid
-    0x89                          // mov ...
-  };
-
-  for (; Index < EFI_PAGE_SIZE; Index++, Record++) {
-    if (Record[0] == mKernelCpuidFindLegacyLocEnd[0]
-      && Record[1] == mKernelCpuidFindLegacyLocEnd[1]
-      && Record[2] == mKernelCpuidFindLegacyLocEnd[2]) {
-      break;
+  } else {
+    for (; Index < EFI_PAGE_SIZE; Index++, Record++) {
+      if (Record[0] == mKernelCpuidFindLocLionStart32[0]
+        && Record[1] == mKernelCpuidFindLocLionStart32[1]
+        && Record[2] == mKernelCpuidFindLocLionStart32[2]
+        && Record[3] == mKernelCpuidFindLocLionStart32[3]
+        && Record[4] == mKernelCpuidFindLocLionStart32[4]
+        && Record[5] == mKernelCpuidFindLocLionStart32[5]
+        && Record[6] == mKernelCpuidFindLocLionStart32[6]
+        && Record[7] == mKernelCpuidFindLocLionStart32[7]) {
+        break;
+      }
     }
   }
 
@@ -460,7 +475,33 @@ PatchKernelCpuIdLegacy (
     return EFI_NOT_FOUND;
   }
 
-  LocationEnd = Record + 2;
+  Location = IsLion ? Record + sizeof (mKernelCpuidFindLocLionStart32): Record;
+
+  //
+  // End of CPUID location. Not applicable to 10.7.
+  //
+  STATIC CONST UINT8 mKernelCpuidFindLegacyLocEnd[3] = {
+    0x0F, 0xA2,                   // cpuid
+    0x89                          // mov ...
+  };
+
+  if (!IsLion) {
+    for (; Index < EFI_PAGE_SIZE; Index++, Record++) {
+      if (Record[0] == mKernelCpuidFindLegacyLocEnd[0]
+        && Record[1] == mKernelCpuidFindLegacyLocEnd[1]
+        && Record[2] == mKernelCpuidFindLegacyLocEnd[2]) {
+        break;
+      }
+    }
+
+    if (Index >= EFI_PAGE_SIZE) {
+      return EFI_NOT_FOUND;
+    }
+
+    LocationEnd = Record + 2;
+  } else {
+    LocationEnd = Location;
+  }
 
   //
   // Locate _tsc_init on 10.4, as there is a CPUID (1) call that needs to be patched.
@@ -479,7 +520,7 @@ PatchKernelCpuIdLegacy (
     // populate the CPUID (1) info.
     //
     STATIC CONST UINT8 mKernelCpuidFindTscLocTigerStart[7] = {
-      0xBA, 0x01, 0x00, 0x00, 0x00,       // mov edx, 0x1
+      0xBA, 0x01, 0x00, 0x00, 0x00,       // mov edx, 1
       0x89, 0xD0                          // mov eax, edx
     };
 
@@ -554,7 +595,7 @@ PatchKernelCpuIdLegacy (
     CopyMem (StartPointer, &Signature[Index], sizeof (Signature[0]));
     StartPointer += sizeof (Signature[0]);
 
-    if (IsLeopard || (IsSnow && Patcher->Is32Bit)) {
+    if (IsLeopard || ((IsSnow || IsLion) && Patcher->Is32Bit)) {
       //
       // mov dword [struct_addr], eax
       //
@@ -589,8 +630,6 @@ PatchKernelCpuIdLegacy (
       }
     }
   }
-
-  DEBUG ((DEBUG_INFO, "OCAK: Finished patch @ 0x%X\n", StartPointer - Start));
 
   //
   // Ensure that we still have room, which is within 2-byte jmp (127)
@@ -655,6 +694,7 @@ PatchKernelCpuIdLegacy (
   //
   // Write virtualised CPUID.
   // 20 bytes.
+  // 10.7 requires the registers to be copied to a memory location in EDX, so we'll use ESI instead.
   //
   Patch.EaxCmd = 0xB8;
   Patch.EaxVal = (Data[0] & DataMask[0]) | (CpuInfo->CpuidVerEax.Uint32 & ~DataMask[0]);
@@ -662,16 +702,46 @@ PatchKernelCpuIdLegacy (
   Patch.EbxVal = (Data[1] & DataMask[1]) | (CpuInfo->CpuidVerEbx.Uint32 & ~DataMask[1]);
   Patch.EcxCmd = 0xB9;
   Patch.EcxVal = (Data[2] & DataMask[2]) | (CpuInfo->CpuidVerEcx.Uint32 & ~DataMask[2]);
-  Patch.EdxCmd = 0xBA;
+  Patch.EdxCmd = IsLion ? 0xBE : 0xBA;
   Patch.EdxVal = (Data[3] & DataMask[3]) | (CpuInfo->CpuidVerEdx.Uint32 & ~DataMask[3]);
   CopyMem (StartPointer, &Patch, sizeof (Patch));
   StartPointer += sizeof (Patch);
+
+  //
+  // Under 10.7, we need to copy registers to memory in EDX.
+  //
+  if (IsLion) {
+    //
+    // mov [edx], eax
+    //
+    *StartPointer++ = 0x89;
+    *StartPointer++ = 0x02;
+    //
+    // mov [edx+4], ebx
+    //
+    *StartPointer++ = 0x89;
+    *StartPointer++ = 0x5A;
+    *StartPointer++ = 0x04;
+    //
+    // mov [edx+8], ecx
+    //
+    *StartPointer++ = 0x89;
+    *StartPointer++ = 0x4A;
+    *StartPointer++ = 0x08;
+    //
+    // mov [edx+12], esi
+    //
+    *StartPointer++ = 0x89;
+    *StartPointer++ = 0x72;
+    *StartPointer++ = 0x0C;
+  }
 
   //
   // Return to the end of location.
   //
   *StartPointer++ = 0xC3;
 
+  DEBUG ((DEBUG_INFO, "OCAK: Legacy CPUID patch completed @ %p\n", StartPointer - Start));
   return EFI_SUCCESS;
 }
 
@@ -717,9 +787,10 @@ PatchKernelCpuId (
   Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - sizeof (mKernelCpuIdFindRelNew);
 
   //
-  // Do legacy patching for 10.6 and older.
+  // Do legacy patching for 32-bit 10.7, and 10.6 and older.
   //
-  if (OcMatchDarwinVersion (KernelVersion, 0, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
+  if ((OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, KERNEL_VERSION_LION_MAX) && Patcher->Is32Bit)
+    || OcMatchDarwinVersion (KernelVersion, 0, KERNEL_VERSION_SNOW_LEOPARD_MAX)) {
     Status = PatchKernelCpuIdLegacy (Patcher, KernelVersion, CpuInfo, Data, DataMask, Start, Last);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OCAK: Failed to patch legacy CPUID - %r\n", Status));
