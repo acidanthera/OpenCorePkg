@@ -271,7 +271,8 @@ OcKernelApplyPatches (
         &KernelPatcher,
         CpuInfo,
         Config->Kernel.Emulate.Cpuid1Data,
-        Config->Kernel.Emulate.Cpuid1Mask
+        Config->Kernel.Emulate.Cpuid1Mask,
+        DarwinVersion
         );
     }
 

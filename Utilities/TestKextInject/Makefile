@@ -7,6 +7,7 @@ PROJECT = KextInject
 PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	CommonPatches.o \
+	CpuidPatches.o \
 	KernelVersion.o \
 	KextPatcher.o \
 	KxldState.o \

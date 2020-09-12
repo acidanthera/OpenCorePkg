@@ -42,6 +42,7 @@
   Vtables.c
   CachelessContext.c
   MkextContext.c
+  CpuidPatches.c
 
 [Packages]
   MdePkg/MdePkg.dec

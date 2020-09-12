@@ -1043,10 +1043,11 @@ PatcherBlockKext (
 /**
   Apply modification to CPUID 1.
 
-  @param Patcher  Patcher context.
-  @param CpuInfo  CPU information.
-  @param Data     4 32-bit integers with CPUID data.
-  @param DataMask 4 32-bit integers with CPUID enabled overrides data.
+  @param Patcher        Patcher context.
+  @param CpuInfo        CPU information.
+  @param Data           4 32-bit integers with CPUID data.
+  @param DataMask       4 32-bit integers with CPUID enabled overrides data.
+  @param KernelVersion  Curent kernel version.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1055,7 +1056,8 @@ PatchKernelCpuId (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
-  IN     UINT32           *DataMask
+  IN     UINT32           *DataMask,
+  IN     UINT32           KernelVersion
   );
 
 /**

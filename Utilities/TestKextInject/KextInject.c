@@ -415,7 +415,8 @@ ApplyKernelPatches (
       &Patcher,
       &CpuInfo,
       VirtualCpuid,
-      VirtualCpuidMask
+      VirtualCpuidMask,
+      KernelVersion
       );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
