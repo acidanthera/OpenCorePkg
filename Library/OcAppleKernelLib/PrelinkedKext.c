@@ -221,12 +221,13 @@ InternalCreatePrelinkedKext (
     return NULL;
   }
 
-  NewKext->Signature            = PRELINKED_KEXT_SIGNATURE;
-  NewKext->Identifier           = KextIdentifier;
-  NewKext->BundleLibraries      = BundleLibraries;
-  NewKext->CompatibleVersion    = CompatibleVersion;
-  NewKext->Context.VirtualBase  = VirtualBase;
-  NewKext->Context.VirtualKmod  = VirtualKmod;
+  NewKext->Signature                  = PRELINKED_KEXT_SIGNATURE;
+  NewKext->Identifier                 = KextIdentifier;
+  NewKext->BundleLibraries            = BundleLibraries;
+  NewKext->CompatibleVersion          = CompatibleVersion;
+  NewKext->Context.VirtualBase        = VirtualBase;
+  NewKext->Context.VirtualKmod        = VirtualKmod;
+  NewKext->Context.IsKernelCollection = Prelinked->IsKernelCollection;
 
   //
   // Provide pointer to 10.6.8 KXLD state.
@@ -738,12 +739,13 @@ InternalCachedPrelinkedKernel (
     return NULL;
   }
 
-  NewKext->Signature            = PRELINKED_KEXT_SIGNATURE;
-  NewKext->Identifier           = PRELINK_KERNEL_IDENTIFIER;
-  NewKext->BundleLibraries      = NULL;
-  NewKext->CompatibleVersion    = "0";
-  NewKext->Context.VirtualBase  = Segment->VirtualAddress - Segment->FileOffset;
-  NewKext->Context.VirtualKmod  = 0;
+  NewKext->Signature                  = PRELINKED_KEXT_SIGNATURE;
+  NewKext->Identifier                 = PRELINK_KERNEL_IDENTIFIER;
+  NewKext->BundleLibraries            = NULL;
+  NewKext->CompatibleVersion          = "0";
+  NewKext->Context.VirtualBase        = Segment->VirtualAddress - Segment->FileOffset;
+  NewKext->Context.VirtualKmod        = 0;
+  NewKext->Context.IsKernelCollection = Prelinked->IsKernelCollection;
 
   if (!Prelinked->IsKernelCollection) {
     //

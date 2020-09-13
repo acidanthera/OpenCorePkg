@@ -335,6 +335,10 @@ typedef struct {
   // Binary is 32-bit.
   //
   BOOLEAN                  Is32Bit;
+  //
+  // Patcher context is contained within a kernel collection.
+  //
+  BOOLEAN                  IsKernelCollection;
 } PATCHER_CONTEXT;
 
 //

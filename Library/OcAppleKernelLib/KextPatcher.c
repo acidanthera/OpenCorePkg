@@ -158,7 +158,13 @@ PatcherInitContextFromBuffer (
   //
 
   if (!MachoInitializeContext (&Context->MachContext, Buffer, BufferSize, 0, Is32Bit)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patcher init from buffer %p %u has unsupported mach-o\n", Buffer, BufferSize));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: %a-bit patcher init from buffer %p %u has unsupported mach-o\n",
+      Is32Bit ? "32" : "64",
+      Buffer, 
+      BufferSize
+      ));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -166,12 +172,13 @@ PatcherInitContextFromBuffer (
     return EFI_NOT_FOUND;
   }
 
-  Context->Is32Bit        = Is32Bit;
-  Context->VirtualBase    = VirtualAddress;
-  Context->FileOffset     = FileOffset;
-  Context->VirtualKmod    = 0;
-  Context->KxldState      = NULL;
-  Context->KxldStateSize  = 0;
+  Context->Is32Bit            = Is32Bit;
+  Context->VirtualBase        = VirtualAddress;
+  Context->FileOffset         = FileOffset;
+  Context->VirtualKmod        = 0;
+  Context->KxldState          = NULL;
+  Context->KxldStateSize      = 0;
+  Context->IsKernelCollection = FALSE;
 
   KextFindKmodAddress (
     &Context->MachContext,
@@ -192,6 +199,15 @@ PatcherInitContextFromBuffer (
       return Status;
     }
   }
+
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCAK: %a-bit patcher base 0x%llX kmod 0x%llX file 0x%llX\n",
+    Is32Bit ? "32" : "64",
+    Context->VirtualBase,
+    Context->VirtualKmod,
+    Context->FileOffset
+    ));
 
   return EFI_SUCCESS;
 }
@@ -280,8 +296,8 @@ PatcherApplyGenericPatch (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: %s %a base lookup failure %r\n",
-        Context->Is32Bit ? L"32-bit" : L"64-bit",
+        "OCAK: %a-bit %a base lookup failure %r\n",
+        Context->Is32Bit ? "32" : "64",
         Patch->Comment != NULL ? Patch->Comment : "Patch",
         Status
         ));
@@ -295,8 +311,8 @@ PatcherApplyGenericPatch (
     if (Size < Patch->Size) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: %s %a is borked, not found\n",
-        Context->Is32Bit ? L"32-bit" : L"64-bit",
+        "OCAK: %a-bit %a is borked, not found\n",
+        Context->Is32Bit ? "32" : "64",
         Patch->Comment != NULL ? Patch->Comment : "Patch"
         ));
       return EFI_NOT_FOUND;
@@ -323,8 +339,8 @@ PatcherApplyGenericPatch (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCAK: %s %a replace count - %u\n",
-    Context->Is32Bit ? L"32-bit" : L"64-bit",
+    "OCAK: %a-bit %a replace count - %u\n",
+    Context->Is32Bit ? "32" : "64",
     Patch->Comment != NULL ? Patch->Comment : "Patch",
     ReplaceCount
     ));
@@ -332,8 +348,8 @@ PatcherApplyGenericPatch (
   if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
     DEBUG ((
       DEBUG_INFO,
-      "OCAK: %s %a performed only %u replacements out of %u\n",
-      Context->Is32Bit ? L"32-bit" : L"64-bit",
+      "OCAK: %a-bit %a performed only %u replacements out of %u\n",
+      Context->Is32Bit ? "32" : "64",
       Patch->Comment != NULL ? Patch->Comment : "Patch",
       ReplaceCount,
       Patch->Count
@@ -352,6 +368,8 @@ PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )
 {
+  UINT8             *MachBase;
+  UINT32            MachSize;
   UINT64            KmodOffset;
   UINT64            StartAddr;
   UINT64            TmpOffset;
@@ -365,28 +383,47 @@ PatcherBlockKext (
     return EFI_UNSUPPORTED;
   }
 
-  KmodOffset = Context->VirtualKmod - Context->VirtualBase + Context->FileOffset;
-  KmodInfo   = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + KmodOffset;
+  MachBase = (UINT8 *) MachoGetMachHeader (&Context->MachContext);
+  MachSize = MachoGetFileSize (&Context->MachContext);
+
+  //
+  // Determine offset of kmod within file.
+  //
+  KmodOffset = Context->VirtualKmod - Context->VirtualBase;
+  if (OcOverflowAddU64 (KmodOffset, Context->FileOffset, &KmodOffset)
+    || OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
+    || TmpOffset > MachSize) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  KmodInfo = MachBase + KmodOffset;
   if (Context->Is32Bit) {
     StartAddr = ((KMOD_INFO_32_V1 *) KmodInfo)->StartAddr;
   } else {
     StartAddr = ((KMOD_INFO_64_V1 *) KmodInfo)->StartAddr;
-    StartAddr = KcFixupValue (StartAddr, NULL);
+    if (Context->IsKernelCollection) {
+      StartAddr = KcFixupValue (StartAddr, NULL);
+    }
   }
 
-  if (OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
-    || TmpOffset > MachoGetFileSize (&Context->MachContext)
-    || StartAddr == 0
-    || Context->VirtualBase > StartAddr) {
+  if (StartAddr == 0 || Context->VirtualBase > StartAddr) {
     return EFI_INVALID_PARAMETER;
   }
 
-  TmpOffset = StartAddr - Context->VirtualBase + Context->FileOffset;
-  if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
+  TmpOffset = StartAddr - Context->VirtualBase;
+  if (OcOverflowAddU64 (TmpOffset, Context->FileOffset, &TmpOffset)
+    || TmpOffset > MachSize - 6) {
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  PatchAddr = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + TmpOffset;
+  DEBUG ((
+    DEBUG_VERBOSE,
+    "OCAK: %a-bit blocker start @ 0x%llX\n",
+    Context->Is32Bit ? "32" : "64",
+    TmpOffset
+    ));
+
+  PatchAddr = MachBase + TmpOffset;
 
   //
   // mov eax, KMOD_RETURN_FAILURE
