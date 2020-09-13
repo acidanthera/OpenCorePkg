@@ -7,6 +7,9 @@ OpenCore Changelog
 - Added IA32 binary variant to the release bundles
 - Fixed improper handling of cacheless kexts without an Info.plist
 - Fixed improper calculation of kext startup address for blocking
+- Added mkext 32-bit kext injection (10.4-10.6)
+- Added cacheless 32-bit kext injection (10.4-10.7)
+- Added 32-bit kernel/kext patching/blocking support
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
