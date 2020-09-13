@@ -858,8 +858,8 @@ typedef struct {
   UINT32 Size;                     ///< size in bytes of this section
   UINT32 Offset;                   ///< file offset of this section
   UINT32 Alignment;                ///< section alignment (power of 2)
-  UINT32 RelocationEntriesOffset;  ///< file offset of relocation entries
-  UINT32 NumRelocationEntries;     ///< number of relocation entries
+  UINT32 RelocationsOffset;        ///< file offset of relocation entries
+  UINT32 NumRelocations;           ///< number of relocation entries
   UINT32 Flags;                    ///< flags (section type and attributes)
   UINT32 Reserved1;                ///< reserved (for offset or index)
   UINT32 Reserved2;                ///< reserved (for count or sizeof)
@@ -882,6 +882,11 @@ typedef struct {
   UINT32 Reserved2;          ///< reserved (for count or sizeof)
   UINT32 Reserved3;          ///< reserved
 } MACH_SECTION_64;
+
+typedef union {
+  MACH_SECTION    Section32;
+  MACH_SECTION_64 Section64;
+} MACH_SECTION_ANY;
 
 #define NEXT_MACH_SEGMENT(Segment) \
   (MACH_SEGMENT_COMMAND *)((UINTN)(Segment) + (Segment)->Command.Size)
@@ -938,6 +943,11 @@ typedef struct {
   MACH_SEGMENT_FLAGS Flags;              ///< flags
   MACH_SECTION_64    Sections[];
 } MACH_SEGMENT_COMMAND_64;
+
+typedef union {
+  MACH_SEGMENT_COMMAND    Segment32;
+  MACH_SEGMENT_COMMAND_64 Segment64;
+} MACH_SEGMENT_COMMAND_ANY;
 
 ///
 /// A fixed virtual shared library (filetype == MH_FVMLIB in the mach header)
@@ -2108,6 +2118,11 @@ typedef struct {
   UINT16 Descriptor;   ///< see <mach-o/stab.h>
   UINT64 Value;        ///< value of this symbol (or stab offset)
 } MACH_NLIST_64;
+
+typedef union {
+  MACH_NLIST    Symbol32;
+  MACH_NLIST_64 Symbol64;
+} MACH_NLIST_ANY;
 
 //
 // Symbols with a index into the string table of zero (n_un.n_strx == 0) are

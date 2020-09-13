@@ -393,7 +393,8 @@ ApplyKernelPatches (
   Status = PatcherInitContextFromBuffer (
     &Patcher,
     Kernel,
-    Size
+    Size,
+    FALSE
     );
 
   if (!EFI_ERROR (Status)) {
@@ -414,7 +415,8 @@ ApplyKernelPatches (
       &Patcher,
       &CpuInfo,
       VirtualCpuid,
-      VirtualCpuidMask
+      VirtualCpuidMask,
+      KernelVersion
       );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
@@ -575,7 +577,8 @@ int wrap_main(int argc, char** argv) {
       &ReservedExeSize,
       TestPlistSize,
       TestData,
-      TestDataSize
+      TestDataSize,
+      FALSE
       );
 
     free(TestData);
@@ -636,7 +639,8 @@ int wrap_main(int argc, char** argv) {
   Status = PatcherInitContextFromBuffer (
     &Patcher,
     Prelinked,
-    PrelinkedSize
+    PrelinkedSize,
+    FALSE
     );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[OK] Patcher init success\n"));

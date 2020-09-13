@@ -32,20 +32,23 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /// only.  Members are not guaranteed to be sane.
 ///
 typedef struct {
-  MACH_HEADER_64        *MachHeader;
+  MACH_HEADER_ANY       *MachHeader;
   UINT32                FileSize;
+
   UINT32                ContainerOffset;
   MACH_SYMTAB_COMMAND   *Symtab;
-  MACH_NLIST_64         *SymbolTable;
+  MACH_NLIST_ANY        *SymbolTable;
   CHAR8                 *StringTable;
   MACH_DYSYMTAB_COMMAND *DySymtab;
-  MACH_NLIST_64         *IndirectSymbolTable;
+  MACH_NLIST_ANY        *IndirectSymbolTable;
   MACH_RELOCATION_INFO  *LocalRelocations;
   MACH_RELOCATION_INFO  *ExternRelocations;
+
+  BOOLEAN               Is32Bit;
 } OC_MACHO_CONTEXT;
 
 /**
-  Initializes a Mach-O Context.
+  Initializes a 32-bit Mach-O Context.
 
   @param[out] Context          Mach-O Context to initialize.
   @param[in]  FileData         Pointer to the file's expected Mach-O header.
@@ -57,7 +60,7 @@ typedef struct {
 
 **/
 BOOLEAN
-MachoInitializeContext (
+MachoInitializeContext32 (
   OUT OC_MACHO_CONTEXT  *Context,
   IN  VOID              *FileData,
   IN  UINT32            FileSize,
@@ -65,7 +68,71 @@ MachoInitializeContext (
   );
 
 /**
-  Returns the Mach-O Header structure.
+  Initializes a 64-bit Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext64 (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset
+  );
+
+/**
+  Initializes a Mach-O Context.
+
+  @param[out] Context          Mach-O Context to initialize.
+  @param[in]  FileData         Pointer to the file's expected Mach-O header.
+  @param[in]  FileSize         File size of FileData.
+  @param[in]  ContainerOffset  The amount of Bytes the Mach-O header is offset
+                               from the base (container, e.g. KC) of the file.
+  @param[in]  Is32Bit          TRUE if Mach-O is 32-bit.
+
+  @return  Whether Context has been initialized successfully.
+
+**/
+BOOLEAN
+MachoInitializeContext (
+  OUT OC_MACHO_CONTEXT  *Context,
+  IN  VOID              *FileData,
+  IN  UINT32            FileSize,
+  IN  UINT32            ContainerOffset,
+  IN  BOOLEAN           Is32Bit
+  );
+
+/**
+  Returns the universal Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER_ANY *
+MachoGetMachHeader (
+  IN OUT OC_MACHO_CONTEXT   *Context
+  );
+
+/**
+  Returns the 32-bit Mach-O Header structure.
+
+  @param[in,out] Context  Context of the Mach-O.
+
+**/
+MACH_HEADER *
+MachoGetMachHeader32 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the 64-bit Mach-O Header structure.
 
   @param[in,out] Context  Context of the Mach-O.
 
@@ -93,12 +160,25 @@ MachoGetFileSize (
 
 **/
 UINT32
-MachoGetVmSize64 (
+MachoGetVmSize (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
 
 /**
-  Returns the last virtual address of a Mach-O.
+  Returns the last virtual address of a 32-bit Mach-O.
+
+  @param[in] Context  Context of the Mach-O.
+
+  @retval 0  The binary is malformed.
+
+**/
+UINT32
+MachoGetLastAddress32 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the last virtual address of a 64-bit Mach-O.
 
   @param[in] Context  Context of the Mach-O.
 
@@ -119,12 +199,27 @@ MachoGetLastAddress64 (
 
 **/
 MACH_UUID_COMMAND *
-MachoGetUuid64 (
+MachoGetUuid (
   IN OUT OC_MACHO_CONTEXT  *Context
   );
 
 /**
-  Retrieves the first segment by the name of SegmentName.
+  Retrieves the first 32-bit segment by the name of SegmentName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  Segment name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND *
+MachoGetSegmentByName32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
+  );
+
+/**
+  Retrieves the first 64-bit segment by the name of SegmentName.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  Segment name to search for.
@@ -148,6 +243,40 @@ MachoGetSegmentByName64 (
   @retval NULL  NULL is returned on failure.
 
 **/
+MACH_SECTION_ANY *
+MachoGetSectionByName (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
+  IN     CONST CHAR8              *SectionName
+  );
+
+/**
+  Retrieves the first 32-bit section by the name of SectionName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByName32 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND     *Segment,
+  IN     CONST CHAR8              *SectionName
+  );
+
+/**
+  Retrieves the first 64-bit section by the name of SectionName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     Segment      Segment to search in.
+  @param[in]     SectionName  Section name to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
 MACH_SECTION_64 *
 MachoGetSectionByName64 (
   IN OUT OC_MACHO_CONTEXT         *Context,
@@ -156,7 +285,24 @@ MachoGetSectionByName64 (
   );
 
 /**
-  Retrieves a section within a segment by the name of SegmentName.
+  Retrieves a 32-bit section within a segment by the name of SegmentName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  The name of the segment to search in.
+  @param[in]     SectionName  The name of the section to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSegmentSectionByName32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
+  );
+
+/**
+  Retrieves a 64-bit section within a segment by the name of SegmentName.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     SegmentName  The name of the segment to search in.
@@ -179,7 +325,39 @@ MachoGetSegmentSectionByName64 (
   @param[in]     Segment  Segment to retrieve the successor of.
                           if NULL, the first segment is returned.
 
-  @retal NULL  NULL is returned on failure.
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND_ANY *
+MachoGetNextSegment (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND_ANY *Segment  OPTIONAL
+  );
+
+/**
+  Retrieves the next 32-bit segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SEGMENT_COMMAND *
+MachoGetNextSegment32 (
+  IN OUT OC_MACHO_CONTEXT               *Context,
+  IN     CONST MACH_SEGMENT_COMMAND     *Segment  OPTIONAL
+  );
+
+/**
+  Retrieves the next 64-bit segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  Segment to retrieve the successor of.
+                          if NULL, the first segment is returned.
+
+  @retval NULL  NULL is returned on failure.
 
 **/
 MACH_SEGMENT_COMMAND_64 *
@@ -189,7 +367,24 @@ MachoGetNextSegment64 (
   );
 
 /**
-  Retrieves the next section of a segment.
+  Retrieves the next 32-bit section of a segment.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Segment  The segment to get the section of.
+  @param[in]     Section  The section to get the successor of.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetNextSection32 (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND     *Segment,
+  IN     MACH_SECTION             *Section  OPTIONAL
+  );
+
+/**
+  Retrieves the next 64-bit section of a segment.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Segment  The segment to get the section of.
@@ -206,7 +401,22 @@ MachoGetNextSection64 (
   );
 
 /**
-  Retrieves a section by its index.
+  Retrieves a 32-bit section by its index.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Index    Index of the section to retrieve.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByIndex32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
+  Retrieves a 64-bit section by its index.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Index    Index of the section to retrieve.
@@ -221,7 +431,22 @@ MachoGetSectionByIndex64 (
   );
 
 /**
-  Retrieves a section by its address.
+  Retrieves a 32-bit section by its address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address of the section to retrieve.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION *
+MachoGetSectionByAddress32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Address
+  );
+
+/**
+  Retrieves a 64-bit section by its address.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address of the section to retrieve.
@@ -245,61 +470,124 @@ MachoGetSectionByAddress64 (
 
 **/
 BOOLEAN
-MachoMergeSegments64 (
+MachoMergeSegments (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST CHAR8          *Prefix
   );
 
 /**
-  Returns whether Symbol describes a section.
+  Returns whether 32-bit Symbol describes a section.
 
   @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
-MachoSymbolIsSection (
-  IN CONST MACH_NLIST_64  *Symbol
+MachoSymbolIsSection32 (
+  IN CONST MACH_NLIST     *Symbol
   );
 
 /**
-  Returns whether Symbol is defined.
+  Returns whether 64-bit Symbol describes a section.
 
   @param[in] Symbol  Symbol to evaluate.
 
 **/
 BOOLEAN
-MachoSymbolIsDefined (
+MachoSymbolIsSection64 (
   IN CONST MACH_NLIST_64  *Symbol
   );
 
 /**
-  Returns whether Symbol is defined locally.
+  Returns whether 32-bit Symbol is defined.
+
+  @param[in] Symbol  Symbol to evaluate.
+
+**/
+BOOLEAN
+MachoSymbolIsDefined32 (
+  IN CONST MACH_NLIST     *Symbol
+  );
+
+/**
+  Returns whether 64-bit Symbol is defined.
+
+  @param[in] Symbol  Symbol to evaluate.
+
+**/
+BOOLEAN
+MachoSymbolIsDefined64 (
+  IN CONST MACH_NLIST_64  *Symbol
+  );
+
+/**
+  Returns whether 32-bit Symbol is defined locally.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Symbol to evaluate.
 
 **/
 BOOLEAN
-MachoSymbolIsLocalDefined (
+MachoSymbolIsLocalDefined32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST     *Symbol
+  );
+
+/**
+  Returns whether 64-bit Symbol is defined locally.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to evaluate.
+
+**/
+BOOLEAN
+MachoSymbolIsLocalDefined64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
-  Retrieves a locally defined symbol by its name.
+  Retrieves a locally defined 32-bit symbol by its name.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Name     Name of the symbol to locate.
+
+**/
+MACH_NLIST *
+MachoGetLocalDefinedSymbolByName32 (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     CONST CHAR8        *Name
+  );
+
+/**
+  Retrieves a locally defined 64-bit symbol by its name.
 
   @param[in] Context  Context of the Mach-O.
   @param[in] Name     Name of the symbol to locate.
 
 **/
 MACH_NLIST_64 *
-MachoGetLocalDefinedSymbolByName (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     CONST CHAR8       *Name
+MachoGetLocalDefinedSymbolByName64 (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     CONST CHAR8        *Name
   );
 
 /**
-  Retrieves a symbol by its index.
+  Retrieves a 32-bit symbol by its index.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_NLIST *
+MachoGetSymbolByIndex32 (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
+  Retrieves a 64-bit symbol by its index.
 
   @param[in] Context  Context of the Mach-O.
   @param[in] Index    Index of the symbol to locate.
@@ -314,7 +602,37 @@ MachoGetSymbolByIndex64 (
   );
 
 /**
-  Retrieves Symbol's name.
+  Retrieves a symbol by its index.
+
+  @param[in] Context  Context of the Mach-O.
+  @param[in] Index    Index of the symbol to locate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_NLIST_ANY *
+MachoGetSymbolByIndex (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
+  Retrieves a 32-bit Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the name of.
+
+  @retval symbol name.
+
+**/
+CONST CHAR8 *
+MachoGetSymbolName32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST     *Symbol
+  );
+
+/**
+  Retrieves a 64-bit Symbol's name.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Symbol to retrieve the name of.
@@ -329,7 +647,37 @@ MachoGetSymbolName64 (
   );
 
 /**
-  Retrieves Symbol's name.
+  Retrieves a Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to retrieve the name of.
+
+  @retval symbol name.
+
+**/
+CONST CHAR8 *
+MachoGetSymbolName (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY *Symbol
+  );
+
+/**
+  Retrieves a 32-bit Symbol's name.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Indirect symbol to retrieve the name of.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+CONST CHAR8 *
+MachoGetIndirectSymbolName32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST     *Symbol
+  );
+
+/**
+  Retrieves a 64-bit Symbol's name.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Symbol   Indirect symbol to retrieve the name of.
@@ -352,13 +700,60 @@ MachoGetIndirectSymbolName64 (
 
 **/
 BOOLEAN
+MachoIsSymbolValueInRange (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY *Symbol
+  );
+
+/**
+  Returns whether the 32-bit symbol's value is a valid address within the Mach-O
+  referenced to by Context.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to verify the value of.
+
+**/
+BOOLEAN
+MachoIsSymbolValueInRange32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST     *Symbol
+  );
+
+/**
+  Returns whether the 64-bit symbol's value is a valid address within the Mach-O
+  referenced to by Context.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Symbol   Symbol to verify the value of.
+
+**/
+BOOLEAN
 MachoIsSymbolValueInRange64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
   IN     CONST MACH_NLIST_64  *Symbol
   );
 
 /**
-  Retrieves the symbol referenced by the Relocation targeting Address.
+  Retrieves the 32-bit symbol referenced by the Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer to output the symbol referenced by the
+                          Relocation into.  The output is undefined when FALSE
+                          is returned.  May be NULL.
+
+  @returns  Whether the Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByRelocationOffset32 (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT32             Address,
+  OUT    MACH_NLIST         **Symbol
+  );
+
+/**
+  Retrieves the 64-bit symbol referenced by the Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
@@ -371,13 +766,32 @@ MachoIsSymbolValueInRange64 (
 **/
 BOOLEAN
 MachoGetSymbolByRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_NLIST_64     **Symbol
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT64             Address,
+  OUT    MACH_NLIST_64      **Symbol
   );
 
 /**
-  Retrieves the symbol referenced by the extern Relocation targeting Address.
+  Retrieves the 32-bit symbol referenced by the extern Relocation targeting Address.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Address  Address to search for.
+  @param[out]    Symbol   Buffer to output the symbol referenced by the
+                          Relocation into.  The output is undefined when FALSE
+                          is returned.  May be NULL.
+
+  @returns  Whether the Relocation exists.
+
+**/
+BOOLEAN
+MachoGetSymbolByExternRelocationOffset32 (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT32             Address,
+  OUT    MACH_NLIST         **Symbol
+  );
+
+/**
+  Retrieves the 64-bit symbol referenced by the extern Relocation targeting Address.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Address  Address to search for.
@@ -390,13 +804,30 @@ MachoGetSymbolByRelocationOffset64 (
 **/
 BOOLEAN
 MachoGetSymbolByExternRelocationOffset64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            Address,
-  OUT    MACH_NLIST_64     **Symbol
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT64             Address,
+  OUT    MACH_NLIST_64      **Symbol
   );
 
 /**
-  Relocate Symbol to be against LinkAddress.
+  Relocate 32-bit Symbol to be against LinkAddress.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     LinkAddress  The address to be linked against.
+  @param[in,out] Symbol       The symbol to be relocated.
+
+  @returns  Whether the operation has been completed successfully.
+
+**/
+BOOLEAN
+MachoRelocateSymbol32 (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT32             LinkAddress,
+  IN OUT MACH_NLIST         *Symbol
+  );
+
+/**
+  Relocate 64-bit Symbol to be against LinkAddress.
 
   @param[in,out] Context      Context of the Mach-O.
   @param[in]     LinkAddress  The address to be linked against.
@@ -407,13 +838,33 @@ MachoGetSymbolByExternRelocationOffset64 (
 **/
 BOOLEAN
 MachoRelocateSymbol64 (
-  IN OUT OC_MACHO_CONTEXT  *Context,
-  IN     UINT64            LinkAddress,
-  IN OUT MACH_NLIST_64     *Symbol
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT64             LinkAddress,
+  IN OUT MACH_NLIST_64      *Symbol
   );
 
 /**
-  Retrieves the Mach-O file offset of the address pointed to by Symbol.
+  Retrieves the Mach-O file offset of the address pointed to by a 32-bit Symbol.
+
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Symbol      Symbol to retrieve the offset of.
+  @param[out]    FileOffset  Pointer the file offset is returned into.
+                             If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
+
+  @retval 0  0 is returned on failure.
+
+**/
+BOOLEAN
+MachoSymbolGetFileOffset32 (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     CONST  MACH_NLIST      *Symbol,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
+  );
+
+/**
+  Retrieves the Mach-O file offset of the address pointed to by a 64-bit Symbol.
 
   @param[in,out] Context     Context of the Mach-O.
   @param[in]     Symbol      Symbol to retrieve the offset of.
@@ -426,14 +877,34 @@ MachoRelocateSymbol64 (
 **/
 BOOLEAN
 MachoSymbolGetFileOffset64 (
-  IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     CONST  MACH_NLIST_64  *Symbol,
-  OUT    UINT32                *FileOffset,
-  OUT    UINT32                *MaxSize OPTIONAL
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     CONST  MACH_NLIST_64   *Symbol,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
   );
 
 /**
-  Retrieves the Mach-O file offset of the address pointed to by Symbol.
+  Retrieves the Mach-O file offset of the address pointed to by a Symbol.
+
+  @param[in,out] Context     Context of the Mach-O.
+  @param[in]     Symbol      Symbol to retrieve the offset of.
+  @param[out]    FileOffset  Pointer the file offset is returned into.
+                             If FALSE is returned, the output is undefined.
+  @param[out]    MaxSize     Maximum data safely available from FileOffset.
+
+  @retval 0  0 is returned on failure.
+
+**/
+BOOLEAN
+MachoSymbolGetFileOffset (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     CONST  MACH_NLIST_ANY  *Symbol,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
+  );
+
+/**
+  Retrieves the Mach-O file offset of the address pointed to by a Symbol.
 
   @param[in,out] Context     Context of the Mach-O.
   @param[in]     Address     Virtual address to retrieve the offset of.
@@ -445,11 +916,11 @@ MachoSymbolGetFileOffset64 (
 
 **/
 BOOLEAN
-MachoSymbolGetDirectFileOffset64 (
-  IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     UINT64                Address,
-  OUT    UINT32                *FileOffset,
-  OUT    UINT32                *MaxSize OPTIONAL
+MachoSymbolGetDirectFileOffset (
+  IN OUT OC_MACHO_CONTEXT       *Context,
+  IN     UINT64                 Address,
+  OUT    UINT32                 *FileOffset,
+  OUT    UINT32                 *MaxSize OPTIONAL
   );
 
 /**
@@ -482,7 +953,7 @@ MachoSymbolNameIsPadslot (
 
 **/
 BOOLEAN
-MachoSymbolNameIsSmcp64 (
+MachoSymbolNameIsSmcp (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SymbolName
   );
@@ -495,7 +966,7 @@ MachoSymbolNameIsSmcp64 (
 
 **/
 BOOLEAN
-MachoSymbolNameIsMetaclassPointer64 (
+MachoSymbolNameIsMetaclassPointer (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     CONST CHAR8       *SymbolName
   );
@@ -624,7 +1095,7 @@ MachoGetFinalSymbolNameFromClassName (
 
 **/
 BOOLEAN
-MachoSymbolNameIsVtable64 (
+MachoSymbolNameIsVtable (
   IN CONST CHAR8  *SymbolName
   );
 
@@ -640,7 +1111,22 @@ MachoSymbolNameIsCxx (
   );
 
 /**
-  Retrieves Metaclass symbol of a SMCP.
+  Retrieves 32-bit Metaclass symbol of a SMCP.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Smcp     The SMCP to evaluate.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_NLIST *
+MachoGetMetaclassSymbolFromSmcpSymbol32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST     *Smcp
+  );
+
+/**
+  Retrieves 64-bit Metaclass symbol of a SMCP.
 
   @param[in,out] Context  Context of the Mach-O.
   @param[in]     Smcp     The SMCP to evaluate.
@@ -655,7 +1141,25 @@ MachoGetMetaclassSymbolFromSmcpSymbol64 (
   );
 
 /**
-  Retrieves VTable and Meta VTable of a SMCP.
+  Retrieves 32-bit VTable and Meta VTable of a SMCP.
+  Logically matches XNU's get_vtable_syms_from_smcp.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SmcpName     SMCP Symbol mame to retrieve the VTables from.
+  @param[out]    Vtable       Output buffer for the VTable symbol pointer.
+  @param[out]    MetaVtable   Output buffer for the Meta VTable symbol pointer.
+
+**/
+BOOLEAN
+MachoGetVtableSymbolsFromSmcp32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST CHAR8          *SmcpName,
+  OUT    CONST MACH_NLIST     **Vtable,
+  OUT    CONST MACH_NLIST     **MetaVtable
+  );
+
+/**
+  Retrieves 64-bit VTable and Meta VTable of a SMCP.
   Logically matches XNU's get_vtable_syms_from_smcp.
 
   @param[in,out] Context      Context of the Mach-O.
@@ -716,13 +1220,13 @@ MachoPreserveRelocationIntel64 (
   @returns  Whether the operation was successful.
 */
 BOOLEAN
-MachoInitialiseSymtabsExternal64 (
+MachoInitialiseSymtabsExternal (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     OC_MACHO_CONTEXT  *SymsContext
   );
 
 /**
-  Obtain symbol tables.
+  Obtain 32-bit symbol tables.
 
   @param[in]     Context              Context of the Mach-O.
   @param[out]    SymbolTable          Symbol table.
@@ -737,7 +1241,35 @@ MachoInitialiseSymtabsExternal64 (
   @return number of symbols in symbol table or 0.
 **/
 UINT32
-MachoGetSymbolTable (
+MachoGetSymbolTable32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST     **SymbolTable,
+     OUT CONST CHAR8          **StringTable OPTIONAL,
+     OUT CONST MACH_NLIST     **LocalSymbols OPTIONAL,
+     OUT UINT32               *NumLocalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST     **ExternalSymbols OPTIONAL,
+     OUT UINT32               *NumExternalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST     **UndefinedSymbols OPTIONAL,
+     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  );
+
+/**
+  Obtain 64-bit symbol tables.
+
+  @param[in]     Context              Context of the Mach-O.
+  @param[out]    SymbolTable          Symbol table.
+  @param[out]    StringTable          String table for that symbol table.
+  @param[out]    LocalSymbols         Local symbol table.
+  @param[out]    NumLocalSymbols      Number of symbols in local symbol table.
+  @param[out]    ExternalSymbols      External symbol table.
+  @param[out]    NumExternalSymbols   Number of symbols in external symbol table.
+  @param[out]    UndefinedSymbols     Undefined symbol table.
+  @param[out]    NumUndefinedSymbols  Number of symbols in undefined symbol table.
+
+  @return number of symbols in symbol table or 0.
+**/
+UINT32
+MachoGetSymbolTable64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
      OUT CONST MACH_NLIST_64  **SymbolTable,
      OUT CONST CHAR8          **StringTable OPTIONAL,
@@ -750,7 +1282,7 @@ MachoGetSymbolTable (
   );
 
 /**
-  Obtain indirect symbol table.
+  Obtain indirect 32-bit symbol table.
 
   @param[in]     Context              Context of the Mach-O.
   @param[in,out] SymbolTable          Indirect symbol table.
@@ -758,7 +1290,21 @@ MachoGetSymbolTable (
   @return number of symbols in indirect symbol table or 0.
 **/
 UINT32
-MachoGetIndirectSymbolTable (
+MachoGetIndirectSymbolTable32 (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST     **SymbolTable
+  );
+
+/**
+  Obtain indirect 64-bit symbol table.
+
+  @param[in]     Context              Context of the Mach-O.
+  @param[in,out] SymbolTable          Indirect symbol table.
+
+  @return number of symbols in indirect symbol table or 0.
+**/
+UINT32
+MachoGetIndirectSymbolTable64 (
   IN OUT OC_MACHO_CONTEXT     *Context,
      OUT CONST MACH_NLIST_64  **SymbolTable
   );
@@ -773,7 +1319,7 @@ MachoGetIndirectSymbolTable (
 
 **/
 VOID *
-MachoGetFilePointerByAddress64 (
+MachoGetFilePointerByAddress (
   IN OUT OC_MACHO_CONTEXT  *Context,
   IN     UINT64            Address,
   OUT    UINT32            *MaxSize OPTIONAL
@@ -791,7 +1337,7 @@ MachoGetFilePointerByAddress64 (
 
 **/
 UINT32
-MachoExpandImage64 (
+MachoExpandImage (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
@@ -822,7 +1368,7 @@ MachoRuntimeGetEntryAddress (
   @retval NULL  NULL is returned on failure.
 **/
 MACH_LOAD_COMMAND *
-MachoGetNextCommand64 (
+MachoGetNextCommand (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_LOAD_COMMAND_TYPE   LoadCommandType,
   IN     CONST MACH_LOAD_COMMAND  *LoadCommand  OPTIONAL

@@ -91,7 +91,8 @@ OcKernelApplyPatches (
     Status = PatcherInitContextFromBuffer (
       &KernelPatcher,
       Kernel,
-      Size
+      Size,
+      Is32Bit
       );
 
     if (EFI_ERROR (Status)) {
@@ -116,7 +117,8 @@ OcKernelApplyPatches (
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Kernel patcher skips %a (%a) patch at %u due to arch %a != %a\n",
+        "OC: %a patcher skips %a (%a) patch at %u due to arch %a != %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
         Target,
         Comment,
         Index,
@@ -129,7 +131,8 @@ OcKernelApplyPatches (
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Kernel patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
+        "OC: %a patcher skips %a (%a) patch at %u due to version %u <= %u <= %u\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
         Target,
         Comment,
         Index,
@@ -198,7 +201,8 @@ OcKernelApplyPatches (
 
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Kernel patcher result %u for %a (%a) - %r\n",
+      "OC: %a patcher result %u for %a (%a) - %r\n",
+      PRINT_KERNEL_CACHE_TYPE (CacheType),
       Index,
       Target,
       Comment,
@@ -270,7 +274,8 @@ OcKernelApplyPatches (
         &KernelPatcher,
         CpuInfo,
         Config->Kernel.Emulate.Cpuid1Data,
-        Config->Kernel.Emulate.Cpuid1Mask
+        Config->Kernel.Emulate.Cpuid1Mask,
+        DarwinVersion
         );
     }
 
@@ -293,11 +298,11 @@ OcKernelBlockKexts (
   IN     OC_GLOBAL_CONFIG  *Config,
   IN     UINT32            DarwinVersion,
   IN     BOOLEAN           Is32Bit,
-  IN     PRELINKED_CONTEXT *Context
+  IN     KERNEL_CACHE_TYPE CacheType,
+  IN     VOID              *Context
   )
 {
   EFI_STATUS             Status;
-  PATCHER_CONTEXT        Patcher;
   UINT32                 Index;
   OC_KERNEL_BLOCK_ENTRY  *Kext;
   CONST CHAR8            *Target;
@@ -322,7 +327,8 @@ OcKernelBlockKexts (
     if (AsciiStrCmp (Arch, Is32Bit ? "x86_64" : "i386") == 0) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Prelink blocker skips %a (%a) block at %u due to arch %a != %a\n",
+        "OC: %a blocker skips %a (%a) block at %u due to arch %a != %a\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
         Target,
         Comment,
         Index,
@@ -335,7 +341,8 @@ OcKernelBlockKexts (
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
       DEBUG ((
         DEBUG_INFO,
-        "OC: Prelink blocker skips %a (%a) block at %u due to version %u <= %u <= %u\n",
+        "OC: %a blocker skips %a (%a) block at %u due to version %u <= %u <= %u\n",
+        PRINT_KERNEL_CACHE_TYPE (CacheType),
         Target,
         Comment,
         Index,
@@ -346,22 +353,19 @@ OcKernelBlockKexts (
       continue;
     }
 
-    Status = PatcherInitContextFromPrelinked (
-      &Patcher,
-      Context,
-      Target
-      );
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "OC: Prelink blocker %a (%a) init failure - %r\n", Target, Comment, Status));
-      continue;
+    if (CacheType == CacheTypeCacheless) {
+      Status = CachelessContextBlock (Context, Target);
+    } else if (CacheType == CacheTypeMkext) {
+      Status = MkextContextBlock (Context, Target);
+    } else if (CacheType == CacheTypePrelinked) {
+      Status = PrelinkedContextBlock (Context, Target);
     }
-
-    Status = PatcherBlockKext (&Patcher);
 
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: Prelink blocker %a (%a) - %r\n",
+      "OC: %a blocker result %u for %a (%a) - %r\n",
+      PRINT_KERNEL_CACHE_TYPE (CacheType),
+      Index,
       Target,
       Comment,
       Status

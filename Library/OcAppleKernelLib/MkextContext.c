@@ -1089,8 +1089,9 @@ MkextReserveKextSize (
   IN OUT UINT32       *ReservedInfoSize,
   IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
-  IN     UINT8        *Executable,
-  IN     UINT32       ExecutableSize OPTIONAL
+  IN     UINT8        *Executable OPTIONAL,
+  IN     UINT32       ExecutableSize OPTIONAL,
+  IN     BOOLEAN      Is32Bit
   )
 {
   OC_MACHO_CONTEXT  Context;
@@ -1102,11 +1103,11 @@ MkextReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 
-    ExecutableSize = MachoGetVmSize64 (&Context);
+    ExecutableSize = MachoGetVmSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
     }
@@ -1370,7 +1371,7 @@ MkextContextApplyPatch (
 
   Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", Identifier, Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
     return Status;
   }
 
@@ -1403,7 +1404,27 @@ MkextContextApplyQuirk (
   //
   DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
+}
 
+EFI_STATUS
+MkextContextBlock (
+  IN OUT MKEXT_CONTEXT          *Context,
+  IN     CONST CHAR8            *Identifier
+  )
+{
+  EFI_STATUS            Status;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
+    return Status;
+  }
+
+  return PatcherBlockKext (&Patcher);
 }
 
 EFI_STATUS

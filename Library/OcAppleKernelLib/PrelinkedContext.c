@@ -96,57 +96,6 @@ PrelinkedFindLastLoadAddress (
 }
 
 STATIC
-BOOLEAN
-PrelinkedFindKmodAddress (
-  IN  OC_MACHO_CONTEXT  *ExecutableContext,
-  IN  UINT64            LoadAddress,
-  IN  UINT32            Size,
-  OUT UINT64            *Kmod
-  )
-{
-  MACH_NLIST_64            *Symbol;
-  CONST CHAR8              *SymbolName;
-  MACH_SEGMENT_COMMAND_64  *TextSegment;
-  UINT64                   Address;
-  UINT32                   Index;
-
-  Index = 0;
-  while (TRUE) {
-    Symbol = MachoGetSymbolByIndex64 (ExecutableContext, Index);
-    if (Symbol == NULL) {
-      *Kmod = 0;
-      return TRUE;
-    }
-
-    if ((Symbol->Type & MACH_N_TYPE_STAB) == 0) {
-      SymbolName = MachoGetSymbolName64 (ExecutableContext, Symbol);
-      if (SymbolName && AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
-        if (!MachoIsSymbolValueInRange64 (ExecutableContext, Symbol)) {
-          return FALSE;
-        }
-        break;
-      }
-    }
-
-    Index++;
-  }
-
-  TextSegment = MachoGetSegmentByName64 (ExecutableContext, "__TEXT");
-  if (TextSegment == NULL || TextSegment->FileOffset > TextSegment->VirtualAddress) {
-    return FALSE;
-  }
-
-  Address = TextSegment->VirtualAddress - TextSegment->FileOffset;
-  if (OcOverflowTriAddU64 (Address, LoadAddress, Symbol->Value, &Address)
-    || Address > LoadAddress + Size - sizeof (KMOD_INFO_64_V1)) {
-    return FALSE;
-  }
-
-  *Kmod = Address;
-  return TRUE;
-}
-
-STATIC
 EFI_STATUS
 PrelinkedGetSegmentsFromMacho (
   IN   OC_MACHO_CONTEXT         *MachoContext,
@@ -222,7 +171,7 @@ InternalConnectExternalSymtab (
       return EFI_INVALID_PARAMETER;
     }
 
-    if (!MachoInitializeContext (
+    if (!MachoInitializeContext64 (
       InnerContext,
       &Buffer[Segment->FileOffset],
       (UINT32) (BufferSize - Segment->FileOffset),
@@ -236,7 +185,7 @@ InternalConnectExternalSymtab (
       return EFI_INVALID_PARAMETER;
     }
 
-    if (!MachoInitialiseSymtabsExternal64 (Context, InnerContext)) {
+    if (!MachoInitialiseSymtabsExternal (Context, InnerContext)) {
       DEBUG ((
         DEBUG_INFO,
         "OCAK: KC symtab failed getting symtab from inner %Lx %x\n",
@@ -292,7 +241,7 @@ PrelinkedContextInit (
   //
   // Initialise primary context.
   //
-  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0)) {
+  if (!MachoInitializeContext64 (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0)) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -857,8 +806,9 @@ PrelinkedReserveKextSize (
   IN OUT UINT32       *ReservedInfoSize,
   IN OUT UINT32       *ReservedExeSize,
   IN     UINT32       InfoPlistSize,
-  IN     UINT8        *Executable,
-  IN     UINT32       ExecutableSize OPTIONAL
+  IN     UINT8        *Executable OPTIONAL,
+  IN     UINT32       ExecutableSize OPTIONAL,
+  IN     BOOLEAN      Is32Bit
   )
 {
   OC_MACHO_CONTEXT  Context;
@@ -874,11 +824,11 @@ PrelinkedReserveKextSize (
 
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0)) {
+    if (!MachoInitializeContext (&Context, Executable, ExecutableSize, 0, Is32Bit)) {
       return EFI_INVALID_PARAMETER;
     }
 
-    ExecutableSize = MachoGetVmSize64 (&Context);
+    ExecutableSize = MachoGetVmSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
     }
@@ -956,7 +906,7 @@ PrelinkedInjectKext (
   //
   if (Executable != NULL) {
     ASSERT (ExecutableSize > 0);
-    if (!MachoInitializeContext (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0)) {
+    if (!MachoInitializeContext64 (&ExecutableContext, (UINT8 *)Executable, ExecutableSize, 0)) {
       DEBUG ((DEBUG_INFO, "OCAK: Injected kext %a/%a is not a supported executable\n", BundlePath, ExecutablePath));
       return EFI_INVALID_PARAMETER;
     }
@@ -965,7 +915,7 @@ PrelinkedInjectKext (
     //
     KextOffset = Context->PrelinkedSize;
 
-    ExecutableSize = MachoExpandImage64 (
+    ExecutableSize = MachoExpandImage (
       &ExecutableContext,
       &Context->Prelinked[KextOffset],
       Context->PrelinkedAllocSize - KextOffset,
@@ -985,11 +935,11 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0)) {
+    if (!MachoInitializeContext64 (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0)) {
       return EFI_INVALID_PARAMETER;
     }
 
-    Result = PrelinkedFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
+    Result = KextFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
     if (!Result) {
       return EFI_INVALID_PARAMETER;
     }
@@ -1210,6 +1160,27 @@ PrelinkedContextApplyQuirk (
   //
   // It is up to the function to decide whether this is critical or not.
   //
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->Identifier, Status));
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
+}
+
+EFI_STATUS
+PrelinkedContextBlock (
+  IN OUT PRELINKED_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier
+  )
+{
+  EFI_STATUS            Status;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, Identifier);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", Identifier, Status));
+    return Status;
+  }
+
+  return PatcherBlockKext (&Patcher);
 }

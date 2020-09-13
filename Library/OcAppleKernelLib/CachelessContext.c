@@ -588,6 +588,35 @@ ScanDependencies (
 
 STATIC
 EFI_STATUS
+InternalAddPatchedKext (
+  IN OUT CACHELESS_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier,
+     OUT PATCHED_KEXT           **Kext
+  )
+{
+  PATCHED_KEXT *PatchedKext;
+
+  PatchedKext = AllocateZeroPool (sizeof (*PatchedKext));
+  if (PatchedKext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  
+  PatchedKext->Signature  = PATCHED_KEXT_SIGNATURE;
+  PatchedKext->Identifier = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
+  if (PatchedKext->Identifier == NULL) {
+    FreePool (PatchedKext);
+    return EFI_OUT_OF_RESOURCES;
+  }
+  InitializeListHead (&PatchedKext->Patches);
+
+  InsertTailList (&Context->PatchedKexts, &PatchedKext->Link);
+
+  *Kext = PatchedKext;
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
 InternalAddKextPatch (
   IN OUT CACHELESS_CONTEXT      *Context,
   IN     CONST CHAR8            *Identifier,
@@ -595,6 +624,7 @@ InternalAddKextPatch (
   IN     KERNEL_QUIRK_NAME      QuirkName
   )
 {
+  EFI_STATUS            Status;
   PATCHED_KEXT          *PatchedKext;
   KEXT_PATCH            *KextPatch;
   KERNEL_QUIRK          *KernelQuirk;
@@ -611,20 +641,10 @@ InternalAddKextPatch (
   //
   PatchedKext = LookupPatchedKextForIdentifier (Context, Identifier);
   if (PatchedKext == NULL) {
-    PatchedKext = AllocateZeroPool (sizeof (*PatchedKext));
-    if (PatchedKext == NULL) {
-      return EFI_OUT_OF_RESOURCES;
+    Status = InternalAddPatchedKext (Context, Identifier, &PatchedKext);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
-    
-    PatchedKext->Signature  = PATCHED_KEXT_SIGNATURE;
-    PatchedKext->Identifier   = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
-    if (PatchedKext->Identifier == NULL) {
-      FreePool (PatchedKext);
-      return EFI_OUT_OF_RESOURCES;
-    }
-    InitializeListHead (&PatchedKext->Patches);
-
-    InsertTailList (&Context->PatchedKexts, &PatchedKext->Link);
   }
 
   //
@@ -657,7 +677,8 @@ CachelessContextInit (
   IN OUT CACHELESS_CONTEXT    *Context,
   IN     CONST CHAR16         *FileName,
   IN     EFI_FILE_PROTOCOL    *ExtensionsDir,
-  IN     UINT32               KernelVersion
+  IN     UINT32               KernelVersion,
+  IN     BOOLEAN              Is32Bit
   )
 {
   ASSERT (Context != NULL);
@@ -669,6 +690,7 @@ CachelessContextInit (
   Context->ExtensionsDir          = ExtensionsDir;
   Context->ExtensionsDirFileName  = FileName;
   Context->KernelVersion          = KernelVersion;
+  Context->Is32Bit                = Is32Bit;
   
   InitializeListHead (&Context->InjectedKexts);
   InitializeListHead (&Context->InjectedDependencies);
@@ -984,6 +1006,31 @@ CachelessContextAddQuirk (
   ASSERT (Context != NULL);
 
   return InternalAddKextPatch (Context, NULL, NULL, Quirk);
+}
+
+EFI_STATUS
+CachelessContextBlock (
+  IN OUT CACHELESS_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier
+  )
+{
+  EFI_STATUS      Status;
+  PATCHED_KEXT    *PatchedKext;
+
+  //
+  // Check if bundle is already present. If not, add to list.
+  //
+  PatchedKext = LookupPatchedKextForIdentifier (Context, Identifier);
+  if (PatchedKext == NULL) {
+    Status = InternalAddPatchedKext (Context, Identifier, &PatchedKext);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  PatchedKext->Block = TRUE;  
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -1439,7 +1486,7 @@ CachelessContextHookBuiltin (
         return Status;
       }
 
-      Status = PatcherInitContextFromBuffer (&Patcher, Buffer, BufferSize);
+      Status = PatcherInitContextFromBuffer (&Patcher, Buffer, BufferSize, Context->Is32Bit);
       if (EFI_ERROR (Status)) {
         FreePool (Buffer);
         return Status;
@@ -1456,7 +1503,7 @@ CachelessContextHookBuiltin (
           Status = KernelApplyQuirk (KextPatch->QuirkName, &Patcher, Context->KernelVersion);
           DEBUG ((
             EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-            "OCAK: Kernel quirk result for %a (%u) - %r\n",
+            "OCAK: Cacheless kernel quirk result for %a (%u) - %r\n",
             PatchedKext->Identifier,
             KextPatch->QuirkName,
             Status
@@ -1465,7 +1512,7 @@ CachelessContextHookBuiltin (
           Status = PatcherApplyGenericPatch (&Patcher, &KextPatch->Patch);
           DEBUG ((
             EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-            "OCAK: Kext patcher result for %a (%a) - %r\n",
+            "OCAK: Cacheless patcher result for %a (%a) - %r\n",
             PatchedKext->Identifier,
             KextPatch->Patch.Comment,
             Status
@@ -1473,6 +1520,20 @@ CachelessContextHookBuiltin (
         }
 
         KextLink = GetNextNode (&PatchedKext->Patches, KextLink);
+      }
+
+      //
+      // Block kext if requested.
+      //
+      if (PatchedKext->Block) {
+        Status = PatcherBlockKext (&Patcher);
+        DEBUG ((
+          EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+          "OCAK: Cacheless blocker result for %a (%a) - %r\n",
+          PatchedKext->Identifier,
+          KextPatch->Patch.Comment,
+          Status
+          ));
       }
 
       //

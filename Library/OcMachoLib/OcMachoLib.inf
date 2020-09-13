@@ -30,8 +30,14 @@
 
 [Sources]
   CxxSymbols.c
+  CxxSymbolsX.h
   Fat.c
   Header.c
+  HeaderX.h
   OcMachoLibInternal.h
+  Macho32.c
+  Macho64.c
+  MachoX.h
   Relocations.c
   Symbols.c
+  SymbolsX.h

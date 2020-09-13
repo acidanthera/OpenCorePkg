@@ -242,7 +242,7 @@ KcRebuildMachHeader (
     // hardware reset (like on iOS) and they now really try to require W^X:
     // https://developer.apple.com/videos/play/wwdc2020/10686/
     //
-    if (!MachoMergeSegments64 (&Context->PrelinkedMachContext, KC_REGION_SEGMENT_PREFIX)) {
+    if (!MachoMergeSegments (&Context->PrelinkedMachContext, KC_REGION_SEGMENT_PREFIX)) {
       DEBUG ((DEBUG_INFO, "OCAK: Segment expansion failure\n"));
       return EFI_UNSUPPORTED;
     }
@@ -316,7 +316,7 @@ KcInitKextFixupChains (
     "Alignment is not guaranteed."
     );
   
-  DyldChainedFixups = (CONST MACH_LINKEDIT_DATA_COMMAND *) MachoGetNextCommand64 (
+  DyldChainedFixups = (CONST MACH_LINKEDIT_DATA_COMMAND *) MachoGetNextCommand (
     &Context->PrelinkedMachContext,
     MACH_LOAD_COMMAND_DYLD_CHAINED_FIXUPS,
     NULL
@@ -583,7 +583,7 @@ KcKextIndexFixups (
   // re-initialisation in mind. We really don't want to sanitise everything
   // again, so avoid the dedicated API for now.
   //
-  DySymtab = (MACH_DYSYMTAB_COMMAND *) MachoGetNextCommand64 (
+  DySymtab = (MACH_DYSYMTAB_COMMAND *) MachoGetNextCommand (
     MachContext,
     MACH_LOAD_COMMAND_DYSYMTAB,
     NULL
