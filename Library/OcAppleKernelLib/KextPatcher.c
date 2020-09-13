@@ -273,7 +273,7 @@ PatcherApplyGenericPatch (
   UINT32         Size;
   UINT32         ReplaceCount;
 
-  Base = (UINT8 *)MachoGetMachHeader (&Context->MachContext);
+  Base = (UINT8 *) MachoGetMachHeader (&Context->MachContext);
   Size = MachoGetFileSize (&Context->MachContext);
   if (Patch->Base != NULL) {
     Status = PatcherGetSymbolAddress (Context, Patch->Base, &Base);
@@ -288,7 +288,7 @@ PatcherApplyGenericPatch (
       return Status;
     }
 
-    Size -= (UINT32)(Base - (UINT8 *)MachoGetMachHeader (&Context->MachContext));
+    Size -= (UINT32)(Base - (UINT8 *) MachoGetMachHeader (&Context->MachContext));
   }
 
   if (Patch->Find == NULL) {
