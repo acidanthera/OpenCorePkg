@@ -2166,7 +2166,7 @@ blocking.
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit)\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
@@ -2247,7 +2247,7 @@ blocking.
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit)\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
   \texttt{Custom} mode. Usually relevant for Dell laptops.
 
@@ -2278,7 +2278,7 @@ blocking.
   \texttt{DisableRtcChecksum}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit)\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
   writing in AppleRTC.
 
@@ -2294,7 +2294,7 @@ blocking.
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit)\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
   \emph{Note}: This option is a preferred alternative to
@@ -2305,7 +2305,7 @@ blocking.
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit)\\
+  \textbf{Requirement}: 10.4\\
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
@@ -2354,7 +2354,7 @@ blocking.
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.6 (64-bit, not required for older)\\
+  \textbf{Requirement}: 10.6 (not required for older)\\
   \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
   support on 10.15 and newer.
@@ -2514,13 +2514,13 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \hline
   \textbf{macOS} & \textbf{i386 NC} & \textbf{i386 MK} & \textbf{i386 PK} & \textbf{x86\_64 NC} & \textbf{x86\_64 MK} & \textbf{x86\_64 PK} & \textbf{x86\_64 KC} \\
   \hline
-  10.4 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  10.4 & YES & YES (V1) & NO & --- & --- & --- & --- \\
   \hline
-  10.5 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  10.5 & YES & YES (V1) & NO & --- & --- & --- & --- \\
   \hline
-  10.6 & NO & NO (V2) & NO & YES & YES (V2) & YES & --- \\
+  10.6 & YES & YES (V2) & NO & YES & YES (V2) & YES & --- \\
   \hline
-  10.7 & NO & --- & NO & YES & --- & YES & --- \\
+  10.7 & YES & --- & NO & YES & --- & YES & --- \\
   \hline
   10.8-10.9 & --- & --- & --- & YES & --- & YES & --- \\
   \hline
