@@ -326,6 +326,10 @@ typedef struct {
   // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
   //
   UINT32                   KxldStateSize;
+  //
+  // Patcher context is contained within a kernel collection.
+  //
+  BOOLEAN                   IsKernelCollection;
 } PATCHER_CONTEXT;
 
 //

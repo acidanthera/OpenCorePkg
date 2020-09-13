@@ -97,10 +97,11 @@ PatcherInitContextFromBuffer (
     return EFI_NOT_FOUND;
   }
 
-  Context->VirtualBase   = Segment->VirtualAddress - Segment->FileOffset;
-  Context->VirtualKmod   = 0;
-  Context->KxldState     = NULL;
-  Context->KxldStateSize = 0;
+  Context->VirtualBase        = Segment->VirtualAddress - Segment->FileOffset;
+  Context->VirtualKmod        = 0;
+  Context->KxldState          = NULL;
+  Context->KxldStateSize      = 0;
+  Context->IsKernelCollection = FALSE;
 
   Status = InternalConnectExternalSymtab (
     &Context->MachContext,
@@ -284,7 +285,9 @@ PatcherBlockKext (
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
   KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
-  StartAddr  = KcFixupValue (KmodInfo->StartAddr, NULL);;
+  if (Context->IsKernelCollection) {
+    StartAddr = KcFixupValue (KmodInfo->StartAddr, NULL);
+  }
 
   if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
     || TmpOffset > MachoGetFileSize (&Context->MachContext)
