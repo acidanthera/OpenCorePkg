@@ -56,7 +56,7 @@ Kexts
 - [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313)
 - [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC)
 - [CPUFriend.kext](https://github.com/acidanthera/CPUFriend)
-- [FakeSMC.kext and sensors](https://github.com/CloverHackyColor/FakeSMC3_with_plugins)
+- [FakeSMC.kext and sensors](https://github.com/CloverHackyColor/FakeSMC3_with_plugins) for 10.7.5 and older
 - [HWPEnabler.kext](https://github.com/headkaze/HWPEnable)
 - [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/)
 - [telemetrap.kext](https://forums.macrumors.com/posts/28447707)
