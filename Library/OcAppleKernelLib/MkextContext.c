@@ -1371,7 +1371,7 @@ MkextContextApplyPatch (
 
   Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", Identifier, Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
     return Status;
   }
 
@@ -1404,7 +1404,27 @@ MkextContextApplyQuirk (
   //
   DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
+}
 
+EFI_STATUS
+MkextContextBlock (
+  IN OUT MKEXT_CONTEXT          *Context,
+  IN     CONST CHAR8            *Identifier
+  )
+{
+  EFI_STATUS            Status;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  Status = PatcherInitContextFromMkext (&Patcher, Context, Identifier);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to mkext find %a - %r\n", Identifier, Status));
+    return Status;
+  }
+
+  return PatcherBlockKext (&Patcher);
 }
 
 EFI_STATUS

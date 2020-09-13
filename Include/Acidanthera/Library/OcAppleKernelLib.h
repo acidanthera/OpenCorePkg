@@ -74,6 +74,7 @@
 // Kernel cache types.
 //
 typedef enum KERNEL_CACHE_TYPE_ {
+  CacheTypeNone,
   CacheTypeCacheless,
   CacheTypeMkext,
   CacheTypePrelinked
@@ -85,7 +86,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define PRINT_KERNEL_CACHE_TYPE(a) ( \
   (a)   == CacheTypeCacheless ? "Cacheless" : \
   ((a)  == CacheTypeMkext     ? "Mkext" : \
-  (((a) == CacheTypePrelinked ? "Prelinked" : "Unknown"))))
+  (((a) == CacheTypePrelinked ? "Prelinked" : "Kernel"))))
 
 //
 // As PageCount is UINT16, we can only index 2^16 * 4096 Bytes with one chain.
@@ -311,13 +312,13 @@ typedef struct {
   //
   OC_MACHO_CONTEXT         MachContext;
   //
-  // Binary is 32-bit.
-  //
-  BOOLEAN                  Is32Bit;
-  //
-  // Virtual base to subtract to obtain file offset.
+  // Virtual base of text segment.
   //
   UINT64                   VirtualBase;
+  //
+  // File offset.
+  //
+  UINT32                   FileOffset;
   //
   // Virtual kmod_info_t address.
   //
@@ -330,6 +331,10 @@ typedef struct {
   // Pointer to KXLD state (read only, it is allocated in PrelinkedStateKexts).
   //
   UINT32                   KxldStateSize;
+  //
+  // Binary is 32-bit.
+  //
+  BOOLEAN                  Is32Bit;
 } PATCHER_CONTEXT;
 
 //
@@ -850,6 +855,20 @@ PrelinkedContextApplyQuirk (
   );
 
 /**
+  Block kext in prelinked.
+
+  @param[in,out] Context         Prelinked context.
+  @param[in]     Identifier      Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PrelinkedContextBlock (
+  IN OUT PRELINKED_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier
+  );
+
+/**
   Update Mach-O header with new commands.
 
   @Param[in,out] Context      Prelinked context.
@@ -1176,6 +1195,20 @@ CachelessContextAddQuirk (
   );
 
 /**
+  Add block request to cacheless context to be applied later on.
+
+  @param[in,out] Context         Cacheless context.
+  @param[in]     Identifier      Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+CachelessContextBlock (
+  IN OUT CACHELESS_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier
+  );
+
+/**
   Creates virtual directory overlay EFI_FILE_PROTOCOL from cacheless context.
 
   @param[in,out] Context             Cacheless context.
@@ -1374,6 +1407,20 @@ MkextContextApplyQuirk (
   IN OUT MKEXT_CONTEXT        *Context,
   IN     KERNEL_QUIRK_NAME    Quirk,
   IN     UINT32               KernelVersion
+  );
+
+/**
+  Block kext in mkext.
+
+  @param[in,out] Context         Mkext context.
+  @param[in]     Identifier      Kext bundle identifier.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+MkextContextBlock (
+  IN OUT MKEXT_CONTEXT          *Context,
+  IN     CONST CHAR8            *Identifier
   );
 
 /**

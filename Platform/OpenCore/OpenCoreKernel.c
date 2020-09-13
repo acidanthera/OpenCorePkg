@@ -723,7 +723,7 @@ OcKernelProcessPrelinked (
 
     OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context, NULL, 0);
 
-    OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, &Context);
+    OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypePrelinked, &Context);
 
     *KernelSize = Context.PrelinkedSize;
 
@@ -755,6 +755,8 @@ OcKernelProcessMkext (
   OcKernelInjectKexts (Config, CacheTypeMkext, &Context, DarwinVersion, Is32Bit, 0, 0);
 
   OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeMkext, &Context, NULL, 0);
+
+  OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypeMkext, &Context);
 
   MkextInjectPatchComplete (&Context);
 
@@ -792,6 +794,8 @@ OcKernelInitCacheless (
   OcKernelInjectKexts (Config, CacheTypeCacheless, Context, DarwinVersion, Is32Bit, 0, 0);
 
   OcKernelApplyPatches (Config, mOcCpuInfo, DarwinVersion, Is32Bit, CacheTypeCacheless, Context, NULL, 0);
+
+  OcKernelBlockKexts (Config, DarwinVersion, Is32Bit, CacheTypeCacheless, Context);
 
   return CachelessContextOverlayExtensionsDir (Context, File);
 }
@@ -1190,7 +1194,7 @@ OcKernelFileOpen (
         mOcCpuInfo,
         mOcDarwinVersion,
         mUse32BitKernel,
-        0,
+        CacheTypeNone,
         NULL,
         Kernel,
         KernelSize

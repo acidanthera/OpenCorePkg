@@ -1160,6 +1160,27 @@ PrelinkedContextApplyQuirk (
   //
   // It is up to the function to decide whether this is critical or not.
   //
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to find %a - %r\n", KernelQuirk->Identifier, Status));
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", KernelQuirk->Identifier, Status));
   return KernelQuirk->PatchFunction (NULL, KernelVersion);
+}
+
+EFI_STATUS
+PrelinkedContextBlock (
+  IN OUT PRELINKED_CONTEXT      *Context,
+  IN     CONST CHAR8            *Identifier
+  )
+{
+  EFI_STATUS            Status;
+  PATCHER_CONTEXT       Patcher;
+
+  ASSERT (Context != NULL);
+  ASSERT (Identifier != NULL);
+
+  Status = PatcherInitContextFromPrelinked (&Patcher, Context, Identifier);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to pk find %a - %r\n", Identifier, Status));
+    return Status;
+  }
+
+  return PatcherBlockKext (&Patcher);
 }

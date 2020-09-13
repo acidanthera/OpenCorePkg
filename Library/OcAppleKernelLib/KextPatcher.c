@@ -167,7 +167,8 @@ PatcherInitContextFromBuffer (
   }
 
   Context->Is32Bit        = Is32Bit;
-  Context->VirtualBase    = VirtualAddress > FileOffset ? VirtualAddress - FileOffset : FileOffset - VirtualAddress;
+  Context->VirtualBase    = VirtualAddress;
+  Context->FileOffset     = FileOffset;
   Context->VirtualKmod    = 0;
   Context->KxldState      = NULL;
   Context->KxldStateSize  = 0;
@@ -351,11 +352,11 @@ PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )
 {
-  UINT64           KmodOffset;
-  UINT64           StartAddr;
-  UINT64           TmpOffset;
-  KMOD_INFO_64_V1  *KmodInfo;
-  UINT8            *PatchAddr;
+  UINT64            KmodOffset;
+  UINT64            StartAddr;
+  UINT64            TmpOffset;
+  UINT8             *KmodInfo;
+  UINT8             *PatchAddr;
 
   //
   // Kernel has 0 kmod.
@@ -364,23 +365,28 @@ PatcherBlockKext (
     return EFI_UNSUPPORTED;
   }
 
-  KmodOffset = Context->VirtualKmod - Context->VirtualBase;
-  KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
-  StartAddr  = KcFixupValue (KmodInfo->StartAddr, NULL);;
+  KmodOffset = Context->VirtualKmod - Context->VirtualBase + Context->FileOffset;
+  KmodInfo   = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + KmodOffset;
+  if (Context->Is32Bit) {
+    StartAddr = ((KMOD_INFO_32_V1 *) KmodInfo)->StartAddr;
+  } else {
+    StartAddr = ((KMOD_INFO_64_V1 *) KmodInfo)->StartAddr;
+    StartAddr = KcFixupValue (StartAddr, NULL);
+  }
 
-  if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
+  if (OcOverflowAddU64 (KmodOffset, Context->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1), &TmpOffset)
     || TmpOffset > MachoGetFileSize (&Context->MachContext)
     || StartAddr == 0
     || Context->VirtualBase > StartAddr) {
     return EFI_INVALID_PARAMETER;
   }
 
-  TmpOffset = StartAddr - Context->VirtualBase;
+  TmpOffset = StartAddr - Context->VirtualBase + Context->FileOffset;
   if (TmpOffset > MachoGetFileSize (&Context->MachContext) - 6) {
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  PatchAddr = (UINT8 *)MachoGetMachHeader64 (&Context->MachContext) + TmpOffset;
+  PatchAddr = (UINT8 *) MachoGetMachHeader (&Context->MachContext) + TmpOffset;
 
   //
   // mov eax, KMOD_RETURN_FAILURE
@@ -436,12 +442,6 @@ KextFindKmodAddress (
 
   if (!GetTextBaseOffset (ExecutableContext, &Address, &FileOffset)) {
     return FALSE;
-  }
-
-  if (Address > FileOffset) {
-    Address = FileOffset - Address;
-  } else {
-    Address = Address - FileOffset;
   }
 
   if (OcOverflowTriAddU64 (Address, LoadAddress, Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value, &Address)

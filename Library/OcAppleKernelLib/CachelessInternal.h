@@ -135,6 +135,10 @@ typedef struct {
   // List of patches to apply.
   //
   LIST_ENTRY          Patches;
+  //
+  // Block kext.
+  //
+  BOOLEAN             Block;
 } PATCHED_KEXT;
 
 //
