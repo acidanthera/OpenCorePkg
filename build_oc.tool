@@ -111,7 +111,11 @@ package() {
     # copy OpenCore main program.
     cp "${arch}/OpenCore.efi" "${dstdir}/${arch}/EFI/OC" || exit 1
 
-    cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOTx64.efi" || exit 1
+    local suffix="${arch}"
+    if [ "${suffix}" = "IA32" ]; then
+      suffix="Ia32"
+    fi
+    cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/OC/Bootstrap"/ || exit 1
 
     efiTools=(
