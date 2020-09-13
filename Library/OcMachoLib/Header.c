@@ -230,7 +230,7 @@ InternalInitialiseSymtabs (
   SymbolTable = NULL;
 
   Tmp = (VOID *)(MachoAddress + SymbolsOffset);
-  if (!OC_TYPE_ALIGNED (MACH_NLIST_ANY, Tmp)) {
+  if (!(Context->Is32Bit ? OC_TYPE_ALIGNED (MACH_NLIST, Tmp) : OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp))) {
     return FALSE;
   }
 
@@ -288,7 +288,7 @@ InternalInitialiseSymtabs (
       }
 
       Tmp = (VOID *)(MachoAddress + IndirectSymbolsOffset);
-      if (!OC_TYPE_ALIGNED (MACH_NLIST_ANY, Tmp)) {
+      if (!(Context->Is32Bit ? OC_TYPE_ALIGNED (MACH_NLIST, Tmp) : OC_TYPE_ALIGNED (MACH_NLIST_64, Tmp))) {
         return FALSE;
       }
       IndirectSymtab = (MACH_NLIST_ANY *)Tmp;
