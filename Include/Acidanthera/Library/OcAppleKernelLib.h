@@ -318,7 +318,7 @@ typedef struct {
   //
   // File offset.
   //
-  UINT32                   FileOffset;
+  UINT64                   FileOffset;
   //
   // Virtual kmod_info_t address.
   //
