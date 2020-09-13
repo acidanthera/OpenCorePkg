@@ -227,7 +227,7 @@ InternalCreatePrelinkedKext (
   NewKext->CompatibleVersion          = CompatibleVersion;
   NewKext->Context.VirtualBase        = VirtualBase;
   NewKext->Context.VirtualKmod        = VirtualKmod;
-  NewKext->Context.IsKernelCollection = Prelinked->IsKernelCollection;
+  NewKext->Context.IsKernelCollection = Prelinked != NULL ? Prelinked->IsKernelCollection : FALSE;
 
   //
   // Provide pointer to 10.6.8 KXLD state.
