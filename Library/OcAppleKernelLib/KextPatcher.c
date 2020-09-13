@@ -285,8 +285,9 @@ PatcherBlockKext (
 
   KmodOffset = Context->VirtualKmod - Context->VirtualBase;
   KmodInfo   = (KMOD_INFO_64_V1 *)((UINT8 *) MachoGetMachHeader64 (&Context->MachContext) + KmodOffset);
+  StartAddr  = KmodInfo->StartAddr;
   if (Context->IsKernelCollection) {
-    StartAddr = KcFixupValue (KmodInfo->StartAddr, NULL);
+    StartAddr = KcFixupValue (StartAddr, NULL);
   }
 
   if (OcOverflowAddU64 (KmodOffset, sizeof (KMOD_INFO_64_V1), &TmpOffset)
