@@ -580,7 +580,8 @@ STATIC
 EFI_STATUS
 InternalAddPatchedKext (
   IN OUT CACHELESS_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+     OUT PATCHED_KEXT           **Kext
   )
 {
   PATCHED_KEXT *PatchedKext;
@@ -599,6 +600,8 @@ InternalAddPatchedKext (
   InitializeListHead (&PatchedKext->Patches);
 
   InsertTailList (&Context->PatchedKexts, &PatchedKext->Link);
+
+  *Kext = PatchedKext;
   return EFI_SUCCESS;
 }
 
@@ -628,7 +631,7 @@ InternalAddKextPatch (
   //
   PatchedKext = LookupPatchedKextForIdentifier (Context, Identifier);
   if (PatchedKext == NULL) {
-    Status = InternalAddPatchedKext (Context, Identifier);
+    Status = InternalAddPatchedKext (Context, Identifier, &PatchedKext);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -1009,7 +1012,7 @@ CachelessContextBlock (
   //
   PatchedKext = LookupPatchedKextForIdentifier (Context, Identifier);
   if (PatchedKext == NULL) {
-    Status = InternalAddPatchedKext (Context, Identifier);
+    Status = InternalAddPatchedKext (Context, Identifier, &PatchedKext);
     if (EFI_ERROR (Status)) {
       return Status;
     }
