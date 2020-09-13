@@ -926,6 +926,8 @@
 			<false/>
 			<key>MLB</key>
 			<string>M0000000000000001</string>
+			<key>ProcessorType</key>
+			<integer>0</integer>
 			<key>ROM</key>
 			<data>ESIzRFVm</data>
 			<key>SpoofVendor</key>

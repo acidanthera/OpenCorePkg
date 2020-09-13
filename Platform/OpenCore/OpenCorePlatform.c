@@ -345,8 +345,14 @@ OcPlatformUpdateSmbios (
       Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
     }
 
-    Data.ProcessorType        = NULL;
-    Data.PlatformFeature      = MacInfo->Smbios.PlatformFeature;
+    //
+    // Permit overriding the CPU type for those that want it.
+    //
+    if (Config->PlatformInfo.Generic.ProcessorType != 0) {
+      Data.ProcessorType = &Config->PlatformInfo.Generic.ProcessorType;
+    }
+
+    Data.PlatformFeature = MacInfo->Smbios.PlatformFeature;
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       OcSmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);

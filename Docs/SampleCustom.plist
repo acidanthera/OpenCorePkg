@@ -920,6 +920,25 @@
 	<dict>
 		<key>Automatic</key>
 		<false/>
+		<key>Generic</key>
+		<dict>
+			<key>AdviseWindows</key>
+			<false/>
+			<key>MLB</key>
+			<string></string>
+			<key>ProcessorType</key>
+			<integer>0</integer>
+			<key>ROM</key>
+			<data></data>
+			<key>SpoofVendor</key>
+			<false/>
+			<key>SystemProductName</key>
+			<string></string>
+			<key>SystemSerialNumber</key>
+			<string></string>
+			<key>SystemUUID</key>
+			<string></string>
+		</dict>
 		<key>DataHub</key>
 		<dict>
 			<key>ARTFrequency</key>

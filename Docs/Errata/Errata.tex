@@ -247,6 +247,29 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
     \item Update to master version
   \end{itemize}
 
+\item
+  \textbf{Identifier}: \texttt{ERR061-1} \\
+  \textbf{Published}: 2020-09-11 14:55 MSK \\
+  \textbf{Updated}: 2020-09-11 14:55 MSK \\
+  \textbf{Affected versions}: 0.5.3-0.6.1 \\
+  \textbf{Resolved in}: 0.6.2 (\href{https://github.com/acidanthera/OpenCorePkg/commit/d3cf117c8661a4eda1863ca1fcdfae5c277974db}{d3cf117c}) \\
+  \textbf{Description}:
+
+  APFS-formatted drives previously made available with \texttt{ApfsImageLoader.efi}
+  driver are no longer visible with OpenCore builtin \texttt{EnableJumpstart} APFS
+  functionality on platforms that need \texttt{UnblockFsConnect} quirk. Reference:
+  \href{https://github.com/acidanthera/bugtracker/issues/1128}{acidanthera/bugtracker\#1128}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item Update to master version \texttt{OR}
+    \item Disable \texttt{ConnectDrivers} and enable \texttt{GlobalConnect} (may cause
+      performance and compatibility issues depending on the driver use)
+
+  \end{itemize}
+
 \end{itemize}
 
 \end{document}

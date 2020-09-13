@@ -1387,6 +1387,10 @@ OcKernelFileOpen (
         &VirtualFileHandle
         );
 
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OC: Error SLE hooking %s - %r\n", FileName, Status));
+      }
+
       if (!EFI_ERROR (Status) && VirtualFileHandle != NULL) {
         *NewHandle = VirtualFileHandle;
         return EFI_SUCCESS;

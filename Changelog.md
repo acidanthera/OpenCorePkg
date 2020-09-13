@@ -1,5 +1,13 @@
 OpenCore Changelog
 ==================
+#### v0.6.2
+- Updated builtin firmware versions for SMBIOS and the rest
+- Added `ProcessorType` option to `Generic` allowing custom CPU names
+- Fixed `UnblockFsConnect` option not working with APFS JumpStart
+- Added IA32 binry variant to the release bundles
+- Fixed improper handling of cacheless kexts without an Info.plist
+- Fixed improper calculation of kext startup address for blocking
+
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
 - Made DMG loading support configurable via `DmgLoading`

@@ -30,7 +30,30 @@ OcRegisterDriversToHighestPriority (
   );
 
 /**
+  Unblocks all partition handles without a File System protocol attached from
+  driver connection, if applicable.
+**/
+VOID
+OcUnblockUnmountedPartitions (
+  VOID
+  );
+
+/**
+  Disconnect effectively all drivers attached at handle.
+
+  @param[in] Controller    Handle to disconnect the drivers from.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcDisconnectDriversOnHandle (
+  IN EFI_HANDLE  Controller
+  );
+
+/**
   Connect effectively all drivers to effectively all handles.
+
+  @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 OcConnectDrivers (

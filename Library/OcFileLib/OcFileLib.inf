@@ -35,7 +35,6 @@
   ReadFile.c
   GptPartitionEntry.c
   FirmwareFile.c
-  FsConnectQuirk.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec

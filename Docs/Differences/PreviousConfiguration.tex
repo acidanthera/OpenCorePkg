@@ -3,7 +3,6 @@
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
 \usepackage{ifxetex,ifluatex}
-\usepackage{fixltx2e} % provides \textsubscript
 \usepackage[T1]{fontenc}
 \usepackage[utf8]{inputenc}
 \usepackage{upquote}
@@ -20,6 +19,7 @@
 \usepackage{textcomp}
 \usepackage{tikz}
 
+\setcounter{tocdepth}{2}
 \usetikzlibrary{trees}
 \tikzstyle{every node}=[draw=black,thick,anchor=west]
 \tikzstyle{selected}=[draw=blue]
@@ -89,7 +89,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6.0)
+       Reference Manual (0.6.1)
 
        \vspace{0.2in}
 
@@ -305,23 +305,28 @@ for the implementation to warn about the use of
 \texttt{invalid\ values} is to conform to the following convention where
 applicable:
 
-\begin{longtable}[]{@{}ll@{}}
-\toprule
-Type & Value\tabularnewline
-\midrule
-\endhead
+\begin{center}
+\begin{tabular}{|l|l|} 
+\hline
+\textbf{Type} & \textbf{Value} \\
+\hline
 \texttt{plist\ string} & Empty string
-(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}})\tabularnewline
+(\texttt{\textless{}string\textgreater{}\textless{}/string\textgreater{}}) \\
+\hline
 \texttt{plist\ data} & Empty data
-(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}})\tabularnewline
+(\texttt{\textless{}data\textgreater{}\textless{}/data\textgreater{}}) \\
+\hline
 \texttt{plist\ integer} & 0
-(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}})\tabularnewline
+(\texttt{\textless{}integer\textgreater{}0\textless{}/integer\textgreater{}}) \\
+\hline
 \texttt{plist\ boolean} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
+(\texttt{\textless{}false/\textgreater{}}) \\
+\hline
 \texttt{plist\ tristate} & False
-(\texttt{\textless{}false/\textgreater{}})\tabularnewline
-\bottomrule
-\end{longtable}
+(\texttt{\textless{}false/\textgreater{}}) \\
+\hline
+\end{tabular}
+\end{center}
 
 \subsection{Configuration Structure}\label{configuration-structure}
 
@@ -602,9 +607,10 @@ The latest Xcode version is recommended for use despite the toolchain name. Exam
 command sequence may look as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
-git clone --recursive --depth=1 https://github.com/acidanthera/audk UDK
+git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
-git clone https://github.com/acidanthera/OpenCorePkg
+git submodule update --init --recommend-shallow
+git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
 source edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
@@ -762,6 +768,8 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
+There also are some unofficial resources that provide per-commit binary
+builds of OpenCore, like \href{https://dortania.github.io/builds}{Dortania}.
 
 \section{ACPI}\label{acpi}
 
@@ -1315,7 +1323,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This is a security option allowing one to restrict single user mode usage
   by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Read \href{https://support.apple.com/HT201573}{this article}
+  behaviour. Read \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article}
   to understand how to use single user mode with this quirk enabled.
 
 \item
@@ -1719,6 +1727,26 @@ blocking.
   described in \hyperref[kernelpropsemu]{Emulate Properties} section below.
 
 \item
+  \texttt{Force}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Load kernel drivers from system volume if they are not cached.
+
+  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
+  See \hyperref[kernelpropsforce]{Force Properties} section below.
+  This section resolves the problem of injecting drivers that depend on other
+  drivers, which are not cached otherwise. The issue normally affects older
+  operating systems, where various dependency kexts, like \texttt{IOAudioFamily}
+  or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
+  Kernel driver load order follows the item order in the array, thus the dependencies
+  should be written prior to their consumers. \texttt{Force} happens before
+  \texttt{Add}.
+
+  \emph{Note}: The signature of the ``forced'' kernel drivers is not checked anyhow,
+  making the use of this feature extremely dangerous and undesired for secure boot.
+  This feature may not work on encrypted partitions in newer operating systems.
+
+\item
   \texttt{Patch}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
@@ -1734,11 +1762,24 @@ blocking.
   \textbf{Description}: Apply individual kernel and driver quirks described
   in \hyperref[kernelpropsquirks]{Quirks Properties} section below.
 
+\item
+  \texttt{Scheme}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Define kernelspace operation mode via parameters
+  described in \hyperref[kernelpropsscheme]{Scheme Properties} section below.
+
+
 \end{enumerate}
 
 \subsection{Add Properties}\label{kernelpropsadd}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1831,6 +1872,12 @@ blocking.
 \subsection{Block Properties}\label{kernelpropsblock}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext block architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -1929,9 +1976,87 @@ blocking.
 
 \end{enumerate}
 
+\subsection{Force Properties}\label{kernelpropsforce}
+
+\begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
+\item
+  \texttt{BundlePath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext bundle path (e.g.
+  \texttt{System\textbackslash Library \textbackslash Extensions \textbackslash IONetworkingFamily.kext}).
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This kernel driver will not be added when not present
+  unless set to \texttt{true}.
+
+\item
+  \texttt{ExecutablePath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext executable path relative to bundle
+  (e.g. \texttt{Contents/MacOS/IONetworkingFamily}).
+
+\item
+  \texttt{Identifier}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext identifier to perform presence checking
+  before adding (e.g. \texttt{com.apple.iokit.IONetworkingFamily}).
+  Only drivers which identifiers are not be found in the cache will be added.
+
+\item
+  \texttt{MaxKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+
+\item
+  \texttt{PlistPath}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
+  (e.g. \texttt{Contents/Info.plist}).
+
+\end{enumerate}
+
+
 \subsection{Patch Properties}\label{kernelpropspatch}
 
 \begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Kext patch architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
 \item
   \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -2041,6 +2166,7 @@ blocking.
   \texttt{AppleCpuPmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
@@ -2073,13 +2199,14 @@ blocking.
       your actual offset, and reboot.
   \end{enumerate}
 
-  \textbf{WARNING}: Variable offsets are unique not only to each motherboard but even to its firmware
+  \textbf{Warning}: Variable offsets are unique not only to each motherboard but even to its firmware
   version. Never ever try to use an offset without checking.
 
 \item
   \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables \texttt{PKG\_CST\_CONFIG\_CONTROL} (\texttt{0xE2})
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
@@ -2091,6 +2218,7 @@ blocking.
   \texttt{AppleXcpmExtraMsrs}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables multiple MSR access critical for select CPUs,
   which have no native XCPM support.
 
@@ -2105,6 +2233,7 @@ blocking.
   \texttt{AppleXcpmForceBoost}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Forces maximum performance in XCPM mode.
 
   This patch writes \texttt{0xFF00} to \texttt{MSR\_IA32\_PERF\_CONTROL} (\texttt{0x199}),
@@ -2118,6 +2247,7 @@ blocking.
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Performs GUID patching for \texttt{UpdateSMBIOSMode}
   \texttt{Custom} mode. Usually relevant for Dell laptops.
 
@@ -2125,6 +2255,7 @@ blocking.
   \texttt{DisableIoMapper}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8 (not required for older)\\
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
@@ -2133,9 +2264,21 @@ blocking.
   VT-d support in other systems in case they need it.
 
 \item
+  \texttt{DisableLinkeditJettison}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 11.0\\
+  \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
+
+  This option lets \texttt{Lilu.kext} and possibly some others function
+  in macOS Big Sur with best performance without \texttt{keepsyms=1}
+  boot argument.
+
+\item
   \texttt{DisableRtcChecksum}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables primary checksum (\texttt{0x58}-\texttt{0x59})
   writing in AppleRTC.
 
@@ -2151,6 +2294,7 @@ blocking.
   \texttt{DummyPowerManagement}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
   \emph{Note}: This option is a preferred alternative to
@@ -2161,6 +2305,7 @@ blocking.
   \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
@@ -2171,6 +2316,7 @@ blocking.
   \texttt{IncreasePciBarSize}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.10\\
   \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
 
   \emph{Note}: This option should be avoided whenever possible. In general the necessity
@@ -2180,12 +2326,14 @@ blocking.
   \texttt{LapicKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit)\\
   \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
   \texttt{PanicNoKextDump}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.13 (not required for older)\\
   \textbf{Description}: Prevent kernel from printing kext dump in the panic
   log preventing from observing panic details. Affects 10.13 and above.
 
@@ -2193,6 +2341,7 @@ blocking.
   \texttt{PowerTimeoutKernelPanic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.15 (not required for older)\\
   \textbf{Description}: Disables kernel panic on setPowerState timeout.
 
   An additional security measure was added to macOS Catalina (10.15) causing
@@ -2205,6 +2354,7 @@ blocking.
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.6 (64-bit, not required for older)\\
   \textbf{Description}: Apply vendor patches to IOAHCIBlockStorage.kext to enable
   native features for third-party drives, such as TRIM on SSDs or hibernation
   support on 10.15 and newer.
@@ -2219,6 +2369,7 @@ blocking.
   \texttt{XhciPortLimit}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.11 (not required for older)\\
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
@@ -2229,6 +2380,160 @@ blocking.
   More details can be found on \href{https://applelife.ru/posts/550233}{AppleLife.ru}.
 
 \end{enumerate}
+
+\subsection{Scheme Properties}\label{kernelpropsscheme}
+
+These properties are particularly relevant for older macOS operating systems.
+For more details on how to install and troubleshoot such macOS installation
+refer to \hyperref[legacyapple]{Legacy Apple OS}.
+
+\begin{enumerate}
+
+\item
+  \texttt{FuzzyMatch}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use \texttt{kernelcache} with different checksums when available.
+
+  On macOS 10.6 and earlier \texttt{kernelcache} filename has a checksum, which essentially
+  is \texttt{adler32} from SMBIOS product name and EfiBoot device path. On certain firmwares
+  EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics,
+  rendering \texttt{kernelcache} checksum as always different.
+
+  This setting allows matching the latest \texttt{kernelcache} with a suitable architecture
+  when the \texttt{kernelcache} without suffix is unavailable, improving macOS 10.6 boot
+  performance on several platforms.
+
+\item
+  \texttt{KernelArch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Prefer specified kernel architecture (\texttt{Auto}, \texttt{i386},
+  \texttt{i386-user32}, \texttt{x86\_64}) when available.
+
+  On macOS 10.7 and earlier XNU kernel can boot with architectures different from
+  the usual \texttt{x86\_64}. This setting will use the specified architecture to boot
+  macOS when it is supported by the macOS and the configuration:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Auto} --- Choose the preferred architecture automatically.
+    \item \texttt{i386} --- Use \texttt{i386} (32-bit) kernel when available.
+    \item \texttt{i386-user32} --- Use \texttt{i386} (32-bit) kernel when available
+      and force the use of 32-bit userspace on 64-bit capable processors.
+      On macOS 64-bit capable processors are assumed to support \texttt{SSSE3}.
+      This is not the case for older 64-bit capable Pentium processors, which
+      cause some applications to crash on macOS~10.6. The behaviour corresponds
+      to \texttt{-legacy} kernel boot argument.
+    \item \texttt{x86\_64} --- Use \texttt{x86\_64} (64-bit) kernel when available.
+  \end{itemize}
+
+  Below is the algorithm determining the kernel architecture.
+
+  \begin{enumerate}
+    \tightlist
+    \item \texttt{arch} argument in image arguments (e.g. when launched
+    via UEFI Shell) or in \texttt{boot-args} variable overrides any compatibility
+    checks and forces the specified architecture, completing this algorithm.
+    \item OpenCore build architecture restricts capabilities to \texttt{i386}
+      and \texttt{i386-user32} mode for the 32-bit firmware variant.
+    \item Determined EfiBoot version restricts architecture choice:
+      \begin{itemize}
+      \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32}
+      \item 10.6-10.7 --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
+      \item 10.8 or newer --- \texttt{x86\_64}
+      \end{itemize}
+    \item If \texttt{KernelArch} is set to \texttt{Auto} and \texttt{SSSE3}
+      is not supported by the CPU, capabilities are restricted to \texttt{i386-user32}
+      if supported by EfiBoot.
+    \item Board identifier (from SMBIOS) based on EfiBoot version
+      disables \texttt{x86\_64} support on an unsupported model
+      if any \texttt{i386} variant is supported. \texttt{Auto}
+      is not consulted here as the list is not overridable in EfiBoot.
+    \item \texttt{KernelArch} restricts the support to the explicitly
+      specified architecture (when not set to \texttt{Auto}) if
+      the architecture remains present in the capabilities.
+    \item The best supported architecture is chosen in this order:
+      \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
+  \end{enumerate}
+
+  Unlike macOS~10.7, where select boards identifiers are treated as the \texttt{i386}
+  only machines, and macOS~10.5 or earlier, where \texttt{x86\_64} is not supported
+  by the macOS kernel, macOS~10.6 is very special. The architecture choice on macOS~10.6
+  depends on many factors including not only the board identifier, but also macOS
+  product type (client vs server), macOS point release, and RAM amount. The detection
+  of them all is complicated and not practical, because several point releases had genuine
+  bugs and failed to properly perform the server detection in the first place.
+  For this reason OpenCore on macOS~10.6 will fallback to \texttt{x86\_64}
+  architecture whenever it is supported by the board at all, just like on macOS~10.7.
+  As a reference here is the 64-bit Mac model compatibility corresponding to actual
+  EfiBoot behaviour on macOS 10.6.8 and 10.7.5.
+
+  \begin{center}
+  \begin{tabular}{|p{0.9in}|c|c|c|c|} 
+  \hline
+  \textbf{Model} & \textbf{10.6 (minimal)} & \textbf{10.6 (client)} & \textbf{10.6 (server)} & \textbf{10.7 (any)} \\
+  \hline
+  Macmini & 4,x (Mid 2010) & 5,x (Mid 2011) & 4,x (Mid 2010) & 3,x (Early 2009) \\
+  \hline
+  MacBook & Unsupported & Unsupported & Unsupported & 5,x (2009/09) \\
+  \hline
+  MacBookAir & Unsupported & Unsupported & Unsupported & 2,x (Late 2008) \\
+  \hline
+  MacBookPro & 4,x (Early 2008) & 8,x (Early 2011) & 8,x (Early 2011) & 3,x (Mid 2007) \\
+  \hline
+  iMac & 8,x (Early 2008) & 12,x (Mid 2011) & 12,x (Mid 2011) & 7,x (Mid 2007) \\
+  \hline
+  MacPro & 3,x (Early 2008) & 5,x (Mid 2010) & 3,x (Early 2008) & 3,x (Early 2008) \\
+  \hline
+  Xserve & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) & 2,x (Early 2008) \\
+  \hline
+  \end{tabular}
+  \end{center}
+
+  \emph{Note}: \texttt{3+2} and \texttt{6+4} hotkeys to choose the preferred
+  architecture are unsupported due to being handled by EfiBoot and thus
+  being hard to properly detect.
+
+\item
+  \texttt{KernelCache}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Prefer specified kernel cache type (\texttt{Auto}, \texttt{Cacheless},
+  \texttt{Mkext}, \texttt{Prelinked}) when available.
+
+  Different variants of macOS support different kernel caching variants designed to improve
+  boot performance. This setting allows to prevent using faster kernel caching variants
+  if slower variants are available for debugging and stability reasons. I.e. by
+  specifying \texttt{Mkext} one will disable \texttt{Prelinked} for e.g. 10.6 but not 10.7.
+
+  The list of available kernel caching types and its current support in OpenCore is listed below.
+
+  \begin{center}
+  \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|} 
+  \hline
+  \textbf{macOS} & \textbf{i386 NC} & \textbf{i386 MK} & \textbf{i386 PK} & \textbf{x86\_64 NC} & \textbf{x86\_64 MK} & \textbf{x86\_64 PK} & \textbf{x86\_64 KC} \\
+  \hline
+  10.4 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  \hline
+  10.5 & NO & NO (V1) & NO & --- & --- & --- & --- \\
+  \hline
+  10.6 & NO & NO (V2) & NO & YES & YES (V2) & YES & --- \\
+  \hline
+  10.7 & NO & --- & NO & YES & --- & YES & --- \\
+  \hline
+  10.8-10.9 & --- & --- & --- & YES & --- & YES & --- \\
+  \hline
+  10.10-10.15 & --- & --- & --- & --- & --- & YES & --- \\
+  \hline
+  11.0+ & --- & --- & --- & --- & --- & YES & YES \\
+  \hline
+  \end{tabular}
+  \end{center}
+
+
+\end{enumerate}
+
 
 \section{Misc}\label{misc}
 
@@ -2374,7 +2679,7 @@ entry choice will update till next manual reconfiguration.
   \hyperref[miscsecurityprops]{Security Properties} section below.
 
 \item
-  \texttt{Tools}\\
+  \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add tool entries to boot picker.
 
@@ -2384,7 +2689,8 @@ entry choice will update till next manual reconfiguration.
   \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
   in vaulted ones and protected with secure boot, as they may be used to easily
-  bypass secure boot chain.
+  bypass secure boot chain. For tool examples check the \hyperref[uefitools]{UEFI}
+  section of this document.
 
 \end{enumerate}
 
@@ -2483,7 +2789,7 @@ entry choice will update till next manual reconfiguration.
   \tightlist
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
-    
+
     For \texttt{Tools} OpenCore will try to load a custom icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
@@ -2492,21 +2798,21 @@ entry choice will update till next manual reconfiguration.
       \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
         --- icon near the tool file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
-    
+
     For custom boot \texttt{Entries} OpenCore will try to load a custom icon and fallback
     to the volume icon or the default icon:
     \begin{itemize}
     \tightlist
       \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
-    
+
     For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
       \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
-    
+
     Volume icons can be set in Finder. Note, that enabling this may result in
     external and internal icons to be indistinguishable.
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
@@ -2655,7 +2961,8 @@ entry choice will update till next manual reconfiguration.
   presses of \texttt{Escape} key to enter the boot menu.
 
   \emph{Note 3}: On Macs with problematic GOP it may be difficult to access Apple BootPicker.
-  To workaround this problem even without loading OpenCore \texttt{BootKicker} utility can be blessed.
+  \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
+  OpenCore. On some Macs \texttt{BootKicker} will not run from OpenCore.
 
 \end{enumerate}
 
@@ -2746,7 +3053,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   (any) debug logging. Serial port configuration is defined via PCDs at compile time
   in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID. Default values as found in
   \texttt{MdeModulePkg.dec} are as follows:
-  
+
   \begin{itemize}
   \tightlist
     \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
@@ -2808,7 +3115,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \emph{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  \textbf{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
   This means that they may not be able to always free space after variable deletion.
   Do not use non-volatile NVRAM logging without extra need on such devices.
 
@@ -2866,6 +3173,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCFS} --- OcFileLib
   \item \texttt{OCFV} --- OcFirmwareVolumeLib
   \item \texttt{OCHS} --- OcHashServicesLib
+  \item \texttt{OCI4} --- OcAppleImg4Lib
   \item \texttt{OCIC} --- OcImageConversionLib
   \item \texttt{OCII} --- OcInputLib
   \item \texttt{OCJS} --- OcApfsLib
@@ -2918,6 +3226,55 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   to set the default boot option in boot picker.
 
 \item
+  \texttt{ApECID}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Apple Enclave Identifier.
+
+  Setting this value to any non-zero 64-bit integer will allow using
+  personalised Apple Secure Boot identifiers. If you want to use this setting,
+  make sure to generate a random 64-bit number with a cryptographically secure
+  random number generator. With this value set and \texttt{SecureBootModel} valid
+  and not \texttt{Disabled} it is possible to achieve
+  \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
+  Secure Boot.
+
+  To start using personalised Apple Secure Boot you will have to reinstall the
+  operating system or personalise it. Until your operating system is personalised
+  you will only be able to load macOS DMG recovery. If you do not have DMG recovery
+  you could always download it with \texttt{macrecovery} utility and put to
+  \texttt{com.apple.recovery.boot} as explained in
+  \hyperref[reinstallmacos]{Tips and Tricks} section. Keep in mind that
+  \hyperref[securedmgloading]{DMG loading} needs to be set to \texttt{Signed}
+  to use any DMG with Apple Secure Boot.
+
+  To personalise an existing operating system use \texttt{bless} command
+  after loading to macOS DMG recovery. Mount the system volume partition,
+  unless it has already been mounted, and execute the following command:
+
+\begin{lstlisting}[label=blesspersona, style=ocbash]
+bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
+  --bootefi --personalize
+\end{lstlisting}
+
+  When reinstalling the operating system, keep in mind that current versions
+  of macOS Installer, tested as of 10.15.6, will usually run out of free memory
+  on the \texttt{/var/tmp} partition when trying to install macOS
+  with the personalised Apple Secure Boot. Soon after downloading the macOS installer
+  image an \texttt{Unable to verify macOS} error message will appear. To workaround
+  this issue allocate a dedicated RAM disk of 2 MBs for macOS personalisation
+  by entering the following commands in macOS recovery terminal before starting the
+  installation:
+
+\begin{lstlisting}[label=secureboot, style=ocbash]
+disk=$(hdiutil attach -nomount ram://4096)
+diskutil erasevolume HFS+ SecureBoot $disk
+diskutil unmount $disk
+mkdir /var/tmp/OSPersonalizationTemp
+diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
+\end{lstlisting}
+
+\item
   \texttt{AuthRestart}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2961,6 +3318,45 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
+\item \label{securedmgloading}
+  \texttt{DmgLoading}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Signed}\\
+  \textbf{Description}: Define Disk Image (DMG) loading policy used for macOS Recovery.
+
+  Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Disabled} --- loading DMG images will fail. \texttt{Disabled}
+    policy will still let macOS Recovery to load in most cases as there
+    usually are \texttt{boot.efi} files compatible with Apple Secure Boot.
+    Manually downloaded DMG images stored in \texttt{com.apple.recovery.boot}
+    directories will not load, however.
+  \item \texttt{Signed} --- only Apple-signed DMG images will load. Due to
+    Apple Secure Boot design \texttt{Signed} policy will let any Apple-signed
+    macOS Recovery to load regardless of Apple Secure Boot state, which may
+    not always be desired.
+  \item \texttt{Any} --- any DMG images will mount as normal filesystems.
+    \texttt{Any} policy is strongly not recommended and will cause a boot failure
+    when Apple Secure Boot is activated. 
+  \end{itemize}
+
+\item
+  \texttt{EnablePassword}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable password protection to allow sensitive operations.
+
+  Password protection ensures that sensitive operations like booting a non-default
+  operating system (e.g. macOS recovery or a tool), resetting NVRAM storage,
+  trying to boot into a non-default mode (e.g. verbose mode or safe mode) are not
+  allowed without explicit user authentication by a custom password. Currently
+  password and salt are hashed with 5000000 iterations of SHA-512.
+
+  \emph{Note}: This functionality is currently in development and is not ready for
+  daily usage.
+
 \item
   \texttt{ExposeSensitiveData}\\
   \textbf{Type}: \texttt{plist\ integer}\\
@@ -2993,7 +3389,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
 
   To obtain OEM information use the following commands in macOS:
-\begin{lstlisting}[label=nvramver, style=ocbash]
+\begin{lstlisting}[label=nvramoem, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-product # SMBIOS Type1 ProductName
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-vendor  # SMBIOS Type2 Manufacturer
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductName
@@ -3008,6 +3404,18 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
   Possible values match \texttt{DisplayLevel} values.
 
 \item
+  \texttt{PasswordHash}\\
+  \textbf{Type}: \texttt{plist\ data} 64 bytes\\
+  \textbf{Failsafe}: all zero\\
+  \textbf{Description}: Password hash used when \texttt{EnabledPassword} is set.
+
+\item
+  \texttt{PasswordSalt}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: empty\\
+  \textbf{Description}: Password salt used when \texttt{EnabledPassword} is set.
+
+\item \label{securevaulting}
   \texttt{Vault}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Secure}\\
@@ -3159,6 +3567,85 @@ rm vault.pub
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SCSI}
   \item \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}
   \end{itemize}
+
+\item \label{secureapplesb}
+  \texttt{SecureBootModel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Default}\\
+  \textbf{Description}: Apple Secure Boot hardware model.
+
+  Sets Apple Secure Boot hardware model and policy. Specifying
+  this value defines which operating systems will be bootable.
+  Operating systems shipped before the specified model was released
+  will not boot. Valid values:
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Default} --- Recent available model, currently set to \texttt{j137}.
+  \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
+  \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017) minimum macOS 10.13.2 (17C2111)}
+  \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018) minimum macOS 10.13.6 (17G2112)}
+  \item \texttt{j132} --- \texttt{MacBookPro15,2 (July 2018) minimum macOS 10.13.6 (17G2112)}
+  \item \texttt{j174} --- \texttt{Macmini8,1 (October 2018) minimum macOS 10.14 (18A2063)}
+  \item \texttt{j140k} --- \texttt{MacBookAir8,1 (October 2018) minimum macOS 10.14.1 (18B2084)}
+  \item \texttt{j780} --- \texttt{MacBookPro15,3 (May 2019)  minimum macOS 10.14.5 (18F132)}
+  \item \texttt{j213} --- \texttt{MacBookPro15,4 (July 2019) minimum macOS 10.14.5 (18F2058)}
+  \item \texttt{j140a} --- \texttt{MacBookAir8,2 (July 2019) minimum macOS 10.14.5 (18F2058)}
+  \item \texttt{j152f} --- \texttt{MacBookPro16,1 (November 2019) minimum macOS 10.15.1 (19B2093)}
+  \item \texttt{j160} --- \texttt{MacPro7,1 (December 2019) minimum macOS 10.15.1 (19B88)}
+  \item \texttt{j230k} --- \texttt{MacBookAir9,1 (March 2020) minimum macOS 10.15.3 (19D2064)}
+  \item \texttt{j214k} --- \texttt{MacBookPro16,2 (May 2020) minimum macOS 10.15.4 (19E2269)}
+  \item \texttt{j223} --- \texttt{MacBookPro16,3 (May 2020) minimum macOS 10.15.4 (19E2265)}
+  \item \texttt{j215} --- \texttt{MacBookPro16,4 (June 2020) minimum macOS 10.15.5 (19F96)}
+  \item \texttt{j185} --- \texttt{iMac20,1 (August 2020) minimum macOS 10.15.6 (19G2005)}
+  \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020) minimum macOS 10.15.6 (19G2005)}
+  \end{itemize}
+
+  \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
+  allowing to enabling Apple Secure Boot with any SMBIOS. Setting
+  \texttt{SecureBootModel} to any valid value but \texttt{Disabled} is equivalent to
+  \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
+  of Apple Secure Boot. To achieve \texttt{Full Security} one will need to
+  also specify \texttt{ApECID} value.
+
+  Enabling Apple Secure Boot is more demanding to incorrect configurations,
+  buggy macOS installations, and unsupported setups. Things to keep in mind:
+
+  \begin{enumerate}
+    \tightlist
+    \item Just like on T2 Macs you will not be able to install any unsigned kernel
+      drivers and several signed kernel drivers including NVIDIA Web Drivers.
+    \item The list of cached drivers may be different, resulting in the need
+      to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
+      For example, \texttt{IO80211Family} cannot be injected in this case.
+    \item System volume alterations on operating systems with sealing, like
+      macOS~11, may result in the operating system being unbootable. Do not
+      try to disable system volume encryption unless you disable Apple Secure Boot.
+    \item If your platform requires certain settings, but they were not enabled,
+      because the obvious issues did not trigger before, you may get boot failure.
+      Be extra careful with \texttt{IgnoreInvalidFlexRatio} or \texttt{HashServices}.
+    \item Operating systems released before Apple Secure Boot landed (e.g.
+      macOS~10.12 or earlier) will still boot until UEFI Secure Boot is enabled.
+      This is so, because from Apple Secure Boot point they are treated as incompatible
+      and are assumed to be handled by the firmware just like Microsoft Windows is.
+    \item On older CPUs (e.g. before Sandy Bridge) enabling Apple Secure Boot
+      might cause slightly slower loading by up to 1 second.
+    \item Since \texttt{Default} value will increase with time to support the latest
+      major release operating system, it is not recommended to use \texttt{ApECID}
+      and \texttt{Default} value together.
+  \end{enumerate}
+
+  Sometimes the already installed operating system may have outdated Apple Secure
+  Boot manifests on the \texttt{Preboot} partition causing boot failure. If you
+  see the ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
+  it is likely the case. When this happens you can either reinstall the operating
+  system or copy the manifests (files with \texttt{.im4m} extension, like
+  \texttt{boot.efi.j137.im4m}) from \texttt{/usr/standalone/i386} to
+  \texttt{/Volumes/Preboot/<UUID>/System/Library/CoreServices}. Here \texttt{<UUID>}
+  is your system volume identifier.
+
+  For more details on how to configure Apple Secure Boot with UEFI Secure Boot
+  refer to \hyperref[uefisecureboot]{UEFI Secure Boot} section.
 
 \end{enumerate}
 
@@ -3321,7 +3808,7 @@ use.
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with OpenCore EFI partition UUID.
 
-  \textbf{WARNING}: This feature is very dangerous as it passes unprotected data to your
+  \textbf{Warning}: This feature is very dangerous as it passes unprotected data to your
   firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
 
@@ -3367,7 +3854,7 @@ A continuously updated variable list can be found in a corresponding document:
 
 \subsection{Mandatory Variables}\label{nvramvars}
 
-\emph{Warning}: These variables may be added by
+\textbf{Warning}: These variables may be added by
 \hyperref[platforminfonvram]{PlatformNVRAM} or
 \hyperref[platforminfogeneric]{Generic} subsections of
 \hyperref[platforminfo]{PlatformInfo} section.
@@ -3714,6 +4201,12 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{PlatformNVRAM} data is unused.
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
+
+  \textbf{Warning}: It is strongly discouraged set this option to \texttt{false}
+  when intending to update platform information. The only reason to do that is
+  when doing minor correction of the SMBIOS present and alike. In all other
+  cases not using \texttt{Automatic} may lead to hard to debug errors.
+
 \item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -3778,7 +4271,6 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictonary}\\
-  \textbf{Optional}: When \texttt{Automatic} is \texttt{false}\\
   \textbf{Description}: Update all fields. This section is read only
   when \texttt{Automatic} is active.
 \item
@@ -4441,11 +4933,12 @@ build -a X64 -b RELEASE -t XCODE5 -p FatPkg/FatPkg.dsc
 build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \end{lstlisting}
 
-\subsection{Tools}\label{uefitools}
+\subsection{Tools and Applications}\label{uefitools}
 
 Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
-While some tools can be launched from within OpenCore many should be run separately either directly
-or from \texttt{Shell}.
+While some tools can be launched from within OpenCore, see more details in
+the \hyperref[misctools]{Tools} subsection of the configuration, most should be run
+separately either directly or from \texttt{Shell}.
 
 To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
 under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
@@ -4513,7 +5006,7 @@ similar to the builtin text interface.
 
 OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet 
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
@@ -4568,11 +5061,6 @@ While there are many utilities to generate font files, currently it is recommend
 \href{https://github.com/danpla/dpfontbaker}{dpFontBaker} to generate bitmap font
 (\href{https://github.com/danpla/dpfontbaker/pull/1}{using CoreText produces best results})
 and \href{https://github.com/usr-sse2/fonverter}{fonverter} to export it to binary format.
-
-\emph{WARNING}: OpenCanopy is currently considered experimental and is not recommended for
-everyday use. Refer to
-\href{https://github.com/acidanthera/bugtracker/issues/759}{acidanthera/bugtracker\#759}
-for more details regarding the current limitations.
 
 \subsection{OpenRuntime}\label{uefiruntime}
 
@@ -5074,6 +5562,9 @@ functioning. Feature highlights:
   \item \texttt{BuiltinGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{Builtin} renderer with
     custom \texttt{ConsoleControl}.
+  \item \texttt{BuiltinText} --- Switch to \texttt{Text}
+    mode and use \texttt{Builtin} renderer with
+    custom \texttt{ConsoleControl}.
   \item \texttt{SystemGraphics} --- Switch to \texttt{Graphics}
     mode and use \texttt{System} renderer with
     custom \texttt{ConsoleControl}.
@@ -5086,7 +5577,9 @@ functioning. Feature highlights:
 
   The use of \texttt{BuiltinGraphics} is generally straightforward.
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
-  set \texttt{Resolution} to \texttt{Max}.
+  set \texttt{Resolution} to \texttt{Max}. \texttt{BuiltinText} variant is
+  an alternative \texttt{BuiltinGraphics} for some very old and buggy laptop
+  firmwares, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.
@@ -5301,6 +5794,14 @@ functioning. Feature highlights:
   version.
 
 \item
+  \texttt{AppleImg4Verification}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple IMG4 Verification protocol with a builtin
+  version. This protocol is used to verify \texttt{im4m} manifest files used by
+  Apple Secure Boot.
+
+\item
   \texttt{AppleKeyMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5318,6 +5819,13 @@ functioning. Feature highlights:
   I/O attempts to select RTC memory addresses. The list of addresses
   can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
   variable as a data array.
+
+\item
+  \texttt{AppleSecureBoot}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reinstalls Apple Secure Boot protocol with a builtin
+  version.
 
 \item
   \texttt{AppleSmcIo}\\
@@ -5557,6 +6065,143 @@ functioning. Feature highlights:
 
 \section{Troubleshooting}\label{troubleshooting}
 
+\subsection{Legacy Apple OS}\label{legacyapple}
+
+Older operating systems may be more complicated to install, but sometimes can
+be necessary to use for all kinds of reasons. While a compatible board identifier
+and CPUID are the obvious requiremenets for proper functioning of an older
+operating system, there are many other less obvious things to keep in mind.
+This section tries to cover a common set of issues relevant to installing
+older macOS operating systems.
+
+\subsubsection{macOS 10.8 and 10.9}\label{legacy108}
+
+\begin{itemize}
+  \item Disk images on these systems use Apple Partitioning Scheme
+    and will require the proprietary \texttt{PartitionDxe} driver
+    to run DMG recovery and installation. It is possible to set
+    \texttt{DmgLoading} to \texttt{Disabled} to run the recovery
+    without DMG loading avoiding the need for \texttt{PartitionDxe}.
+  \item Cached kernel images often do not contain family drivers
+    for networking (\texttt{IONetworkingFamily}) or audio
+    (\texttt{IOAudioFamily}) requiring one to use \texttt{Force}
+    loading in order to inject networking or audio drivers.
+\end{itemize}
+
+\subsubsection{macOS 10.7}\label{legacy107}
+
+\begin{itemize}
+  \item All previous issues apply.
+  \item Many kexts, including \texttt{Lilu} and its plugins, are
+    unsupported on macOS~10.7 and older as they require newer
+    kernel APIs, which are not part of the macOS~10.7 SDK.
+  \item Prior to macOS~10.8 KASLR sliding is not supported, which
+    will result in memory allocation failures on firmwares
+    that utilise lower memory for their own purposes. Refer to
+    \href{https://github.com/acidanthera/bugtracker/issues/1125}{acidanthera/bugtracker\#1125}
+    for tracking.
+  \item 32-bit kernel interaction is unsupported and will lead to
+    issues like kernel patching or injection failure.
+\end{itemize}
+
+\subsubsection{macOS 10.6}\label{legacy106}
+
+\begin{itemize}
+  \item All previous issues apply.
+  \item Last released installer images for macOS~10.6 are macOS~10.6.7
+    builds \texttt{10J3250} (for \texttt{MacBookPro8,x}) and
+    \texttt{10J4139} (for \texttt{iMac12,x}), without Xcode). These
+    images are limited to their target model identifiers and have no
+    \texttt{-no\_compat\_check} boot argument support. Modified images
+    (with \texttt{ACDT} suffix) without model restrictions can be found
+    \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here},
+    assuming that you legally own macOS~10.6. Read \texttt{DIGEST.txt}
+    for more details. Keep in mind, that these are the earliest tested
+    versions of macOS~10.6 with OpenCore.
+\end{itemize}
+
+  You can also patch out model checking yourself by editing \texttt{OSInstall.mpkg}
+  with e.g. \texttt{Flat Package Editor} by making \texttt{Distribution}
+  script to always return \texttt{true} in \texttt{hwbeModelCheck} function.
+  Since updating the only file in the image and not corrupting other files
+  can be difficult and may cause slow booting due to kernel cache date
+  changes, it is recommended to script image rebuilding as shown below:
+
+\begin{lstlisting}[label=snowrebuild, style=ocbash]
+#!/bin/bash
+# Original.dmg is original image, OSInstall.mpkg is patched package
+mkdir RO
+hdiutil mount Original.dmg -noverify -noautoopen -noautoopenrw -noautofsck -mountpoint RO
+cp RO/.DS_Store DS_STORE
+hdiutil detach RO -force
+rm -rf RO
+hdiutil convert Original.dmg -format UDRW -o ReadWrite.dmg
+mkdir RW
+xattr -c OSInstall.mpkg
+hdiutil mount ReadWrite.dmg -noverify -noautoopen -noautoopenrw -noautofsck -mountpoint RW
+cp OSInstall.mpkg RW/System/Installation/Packages/OSInstall.mpkg
+killall Finder fseventsd
+rm -rf RW/.fseventsd
+cp DS_STORE RW/.DS_Store
+hdiutil detach RW -force
+rm -rf DS_STORE RW
+hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
+\end{lstlisting}
+
+
+\subsection{UEFI Secure Boot}\label{uefisecureboot}
+
+OpenCore is designed to provide a secure boot chain between your firmware
+and your operating system. On most x86 platforms trusted loading is implemented
+via \href{https://en.wikipedia.org/wiki/UEFI_Secure_Boot}{UEFI Secure Boot} model.
+Not only OpenCore fully supports this model, but it also extends its capabilities
+to ensure sealed configuration via \hyperref[securevaulting]{vaulting} and
+provide trusted loading to the operating systems using custom verification,
+such as \hyperref[secureapplesb]{Apple Secure Boot}. Proper secure boot chain
+requires several steps and careful configuration of select settings as explained below:
+
+\begin{enumerate}
+\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} if you need to
+  run macOS. Note, that not every macOS is compatible with Apple Secure Boot and
+  there are several other restrictions as explained in
+  \hyperref[secureapplesb]{Apple Secure Boot} section.
+\item Disable DMG loading by setting \texttt{DmgLoading} to \texttt{Disabled}
+  if you are concerned of loading old vulnerable DMG recoveries. This is
+  \textbf{not} required, but recommended. For the actual tradeoffs
+  see the details in \hyperref[securedmgloading]{DMG loading} section.
+\item Make sure that APFS JumpStart functionality restricts the loading
+  of old vulnerable drivers by setting \texttt{MinDate} and \texttt{MinVersion}
+  to \texttt{0}. More details are provided in \hyperref[uefiapfsprops]{APFS JumpStart}
+  section. An alternative is to install \texttt{apfs.efi} driver manually. 
+\item Make sure that you do not need \texttt{Force} driver loading and can
+  still boot all the operating systems you need.
+\item Make sure that \texttt{ScanPolicy} restricts loading from undesired
+  devices. It is a good idea to prohibit all removable drivers or unknown
+  filesystems.
+\item Sign all the installed drivers and tools with your private key. Do not sign
+  tools that provide administrative access to your computer, like UEFI Shell.
+\item Vault your configuration as explained \hyperref[securevaulting]{Vaulting}
+  section.
+\item Sign all OpenCore binaries (\texttt{BOOTX64.efi}, \texttt{BOOTIa32.efi},
+  \texttt{Bootstrap.efi}, \texttt{OpenCore.efi}) used on this system with
+  the same private key.
+\item Sign all third-party operating system (not made by Microsoft or Apple)
+  bootloaders if you need them. For Linux there is an option to install
+  Microsoft-signed Shim bootloader as explained on e.g.
+  \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}. 
+\item Enable UEFI Secure Boot in your firmware preferences and install the
+  certificate with a private key you own. Details on how to generate a certificate
+  can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
+  and are out of the scope of this document. If you need to launch Windows you
+  will also need to add the
+  \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
+  If you need to launch option ROMs or decided to use signed Linux drivers
+  you will also need the
+  \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}.
+\item Password-protect changing firmware settings to ensure that UEFI Secure Boot
+  cannot be disabled without your knowledge.
+\end{enumerate}
+
 \subsection{Windows support}\label{troubleshootingwin}
 
   \textbf{Can I install Windows?}
@@ -5778,7 +6423,7 @@ you will need \texttt{debug=0x8} boot argument.
   the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
   requires a separate driver for functioning.
 
-\item
+\item \label{reinstallmacos}
   \textbf{What is the simplest way to install macOS?}
 
   Copy online recovery image (\texttt{*.dmg} and \texttt{*.chunklist} files)

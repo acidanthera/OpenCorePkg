@@ -186,19 +186,29 @@ ScanExtensions (
     if (FileInfoSize > 0) {
       if (OcUnicodeEndsWith (FileInfo->FileName, L".kext")) {
         Status = File->Open (File, &FileKext, FileInfo->FileName, EFI_FILE_MODE_READ, EFI_FILE_DIRECTORY);
-        if (!EFI_ERROR (Status)) {
-          Status = FileKext->Open (FileKext, &FilePlist, L"Contents\\Info.plist", EFI_FILE_MODE_READ, 0);
-          UseContents = !EFI_ERROR (Status);
-          if (Status == EFI_NOT_FOUND) {
-            Status = FileKext->Open (FileKext, &FilePlist, L"Info.plist", EFI_FILE_MODE_READ, 0);
-          }
-          if (EFI_ERROR (Status)) {
-            FileKext->Close (FileKext);
-            File->SetPosition (File, 0);
-            FreePool (FileInfo);
-            return Status;
-          }
+        if (EFI_ERROR (Status)) {
+          continue;
+        }
 
+        //
+        // Determine if Contents directory exists.
+        // If not, we'll use the root of the kext.
+        //
+        Status      = FileKext->Open (FileKext, &FilePlist, L"Contents", EFI_FILE_MODE_READ, EFI_FILE_DIRECTORY);
+        UseContents = !EFI_ERROR (Status);
+
+        //
+        // There are some kexts that do not have an Info.plist, but do have PlugIns.
+        // This was observed in some versions of 10.4.
+        //
+        Status = FileKext->Open (
+          FileKext,
+          &FilePlist,
+          UseContents ? L"Contents\\Info.plist" : L"Info.plist",
+          EFI_FILE_MODE_READ,
+          0
+          );
+        if (!EFI_ERROR (Status)) {
           //
           // Parse Info.plist.
           //
@@ -393,40 +403,40 @@ ScanExtensions (
             BuiltinKext->BinaryPath,
             BuiltinKext->OSBundleRequiredValue
             ));
+        }
 
-          //
-          // Scan PlugIns directory.
-          //
-          if (ReadPlugins) {
-            Status = FileKext->Open (FileKext, &FilePlugins, UseContents ? L"Contents\\PlugIns" : L"PlugIns", EFI_FILE_MODE_READ, EFI_FILE_DIRECTORY);
-            if (Status == EFI_SUCCESS) {
-              Status = OcUnicodeSafeSPrint (
-                TmpPath,
-                sizeof (TmpPath),
-                L"%s\\%s\\%s",
-                FilePath,
-                FileInfo->FileName,
-                UseContents ? L"Contents\\PlugIns" : L"PlugIns"
-                );
+        //
+        // Scan PlugIns directory.
+        //
+        if (ReadPlugins) {
+          Status = FileKext->Open (FileKext, &FilePlugins, UseContents ? L"Contents\\PlugIns" : L"PlugIns", EFI_FILE_MODE_READ, EFI_FILE_DIRECTORY);
+          if (Status == EFI_SUCCESS) {
+            Status = OcUnicodeSafeSPrint (
+              TmpPath,
+              sizeof (TmpPath),
+              L"%s\\%s\\%s",
+              FilePath,
+              FileInfo->FileName,
+              UseContents ? L"Contents\\PlugIns" : L"PlugIns"
+              );
 
-              Status = ScanExtensions (Context, FilePlugins, TmpPath, FALSE);
-              FilePlugins->Close (FilePlugins);
-              if (EFI_ERROR (Status)) {
-                FileKext->Close (FileKext);
-                File->SetPosition (File, 0);
-                FreePool (FileInfo);
-                return Status;
-              }
-            } else if (Status != EFI_NOT_FOUND) {
+            Status = ScanExtensions (Context, FilePlugins, TmpPath, FALSE);
+            FilePlugins->Close (FilePlugins);
+            if (EFI_ERROR (Status)) {
               FileKext->Close (FileKext);
               File->SetPosition (File, 0);
               FreePool (FileInfo);
               return Status;
             }
+          } else if (Status != EFI_NOT_FOUND) {
+            FileKext->Close (FileKext);
+            File->SetPosition (File, 0);
+            FreePool (FileInfo);
+            return Status;
           }
-
-          FileKext->Close (FileKext);
         }
+
+        FileKext->Close (FileKext);
       }
     }
   } while (FileInfoSize > 0);

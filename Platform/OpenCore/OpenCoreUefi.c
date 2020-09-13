@@ -632,6 +632,7 @@ OcLoadUefiSupport (
       Config->Uefi.Apfs.MinDate,
       Config->Misc.Security.ScanPolicy,
       Config->Uefi.Apfs.GlobalConnect,
+      Config->Uefi.Quirks.UnblockFsConnect,
       Config->Uefi.Apfs.HideVerbose
       );
 

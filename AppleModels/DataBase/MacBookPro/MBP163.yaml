@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.40.9.0.0"
-BIOSLegacyVersion: "MBP163.88Z.F000.B00.2008092231"
-BIOSReleaseDate: "08/09/2020"
+BIOSVersion: "1554.40.13.0.0"
+BIOSLegacyVersion: "MBP163.88Z.F000.B00.2008232306"
+BIOSReleaseDate: "08/23/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro16,3"
 SystemVersion: "1.0"
@@ -45,12 +45,12 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP163.88Z.F000.B00.2008092231
+    BIOS ID:      MBP163.88Z.F000.B00.2008232306
     Model:        MBP163
-    EFI Version:  1554.40.9.0.0
-    Built by:     root@bb-g9-pdb68
-    Date:         Sun Aug  9 22:31:31 2020
-    Revision:     1554.40.9 (B&I)
+    EFI Version:  1554.40.13.0.0
+    Built by:     root@bb-g8-pdb13
+    Date:         Sun Aug 23 23:06:40 2020
+    Revision:     1554.40.13 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1200.0.30.1

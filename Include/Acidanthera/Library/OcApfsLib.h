@@ -54,11 +54,12 @@
 /**
   Configure APFS driver loading for subsequent connections.
 
-  @param[in] MinVersion     Minimal allowed APFS driver version to load.
-  @param[in] MinDate        Minimal allowed APFS driver date to load.
-  @param[in] ScanPolicy     OpenCore scan policy.
-  @param[in] GlobalConnect  Perform global device connection for APFS.
-  @param[in] IgnoreVerbose  Avoid APFS driver verbose output.
+  @param[in] MinVersion        Minimal allowed APFS driver version to load.
+  @param[in] MinDate           Minimal allowed APFS driver date to load.
+  @param[in] ScanPolicy        OpenCore scan policy.
+  @param[in] GlobalConnect     Perform global device connection for APFS.
+  @param[in] DisconnectHandles Perform handle disconnection prior to connection.
+  @param[in] IgnoreVerbose     Avoid APFS driver verbose output.
 **/
 VOID
 OcApfsConfigure (
@@ -66,6 +67,7 @@ OcApfsConfigure (
   IN UINT32   MinDate,
   IN UINT32   ScanPolicy,
   IN BOOLEAN  GlobalConnect,
+  IN BOOLEAN  DisconnectHandles,
   IN BOOLEAN  IgnoreVerbose
   );
 

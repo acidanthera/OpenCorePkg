@@ -270,6 +270,11 @@ InternalDetectAppleProcessorType (
         // TODO: CPU major type check for SNB based Xeon E3
         return AppleProcessorTypeXeon;          // 0x0501
       }
+      if (CoreCount > 4) {
+        // This can possibly be some engineering sample of a Xeon CPU.
+        // REF: https://github.com/acidanthera/bugtracker/issues/1149
+        return AppleProcessorTypeXeonE5;
+      }
       // here stands for Pentium and Celeron (Sandy), not used by Apple at all.
       // putting 0x0903 (i3) as lowest
       return AppleProcessorTypeCorei3Type3;   // 0x0903
