@@ -4,7 +4,7 @@
 
 cd "$(dirname "$0")" || exit 1
 
-if [ ! -f boot ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
+if [ ! -f "boot${ARCHS}" ] || [ ! -f boot0 ] || [ ! -f boot1f32 ]; then
   echo "Boot files are missing from this package!"
   echo "You probably forgot to build DuetPkg first."
   exit 1
@@ -40,7 +40,7 @@ dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
 sudo dd if=newbs of=/dev/rdisk"${N}"s1
 diskutil mount disk"${N}"s1
 
-cp -v boot "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
+cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
 
 if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
 then
