@@ -4,7 +4,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added `ProcessorType` option to `Generic` allowing custom CPU names
 - Fixed `UnblockFsConnect` option not working with APFS JumpStart
-- Added IA32 binry variant to the release bundles
+- Added IA32 binary variant to the release bundles
 - Fixed improper handling of cacheless kexts without an Info.plist
 - Fixed improper calculation of kext startup address for blocking
 
