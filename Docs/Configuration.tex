@@ -4076,7 +4076,7 @@ troubleshooting:
     \begin{itemize}
     \item \texttt{0} --- disables serial logging (default).
     \item \texttt{1} --- enables serial logging for \texttt{EXITBS:END} onwards.
-    \item \texttt{1} --- enables serial logging for \texttt{EXITBS:START} onwards.
+    \item \texttt{2} --- enables serial logging for \texttt{EXITBS:START} onwards.
     \item \texttt{3} --- enables serial logging when debug protocol is missing.
     \item \texttt{4} --- enables serial logging unconditionally.
     \end{itemize}
@@ -6413,7 +6413,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this you may
-    need \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} arguments.
+    need \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments.
     Refer to the patches in Sample.plist when dying before serial init.
   \item Always read the logs carefully.
   \end{itemize}

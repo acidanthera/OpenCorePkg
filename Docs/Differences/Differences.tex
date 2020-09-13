@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
-%DIF ADD ../Configuration.tex        Sat Sep 12 18:27:55 2020
+%DIF ADD ../Configuration.tex        Sun Sep 13 14:57:07 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4141,7 +4141,7 @@ troubleshooting:
     \begin{itemize}
     \item \texttt{0} --- disables serial logging (default).
     \item \texttt{1} --- enables serial logging for \texttt{EXITBS:END} onwards.
-    \item \texttt{1} --- enables serial logging for \texttt{EXITBS:START} onwards.
+    \item \texttt{\DIFdelbegin \DIFdel{1}\DIFdelend \DIFaddbegin \DIFadd{2}\DIFaddend } --- enables serial logging for \texttt{EXITBS:START} onwards.
     \item \texttt{3} --- enables serial logging when debug protocol is missing.
     \item \texttt{4} --- enables serial logging unconditionally.
     \end{itemize}
@@ -4897,8 +4897,8 @@ Apple ROM Version
   \textbf{Failsafe}: Automatic\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
   \texttt{ProcessorType}\\
-  \textbf{Description}: Combined of Processor Major and Minor types\DIFaddbegin \DIFadd{.
-}
+  \textbf{Description}: Combined of Processor Major and Minor types.
+\DIFaddbegin 
 
   \DIFadd{Automatic value generation tries to provide most accurate value for
   the currently installed CPU. When this fails please make sure to create
@@ -4907,8 +4907,8 @@ Apple ROM Version
   }\href{https://github.com/acidanthera/dmidecode}{\texttt{dmidecode}} \DIFadd{output.
   For a full list of available values and their limitations (the value will
   only apply if the CPU core count matches) refer to Apple SMBIOS definitions header
-  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}\DIFaddend .
-\item
+  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}\DIFadd{.
+}\DIFaddend \item
   \texttt{MemoryFormFactor}\\
   \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
   \textbf{Failsafe}: OEM specified\\
@@ -6479,7 +6479,7 @@ you will need \texttt{debug=0x8} boot argument.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this you may
-    need \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} arguments.
+    need \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} \DIFaddbegin \DIFadd{boot }\DIFaddend arguments.
     Refer to the patches in Sample.plist when dying before serial init.
   \item Always read the logs carefully.
   \end{itemize}
