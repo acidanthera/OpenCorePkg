@@ -310,6 +310,9 @@ MACH_X (InternalMachoExpandImage) (
   }
   CopyMem (Destination, Header, HeaderSize);
 
+
+    DEBUG ((DEBUG_INFO, "here2\n"));
+
   CurrentDelta = 0;
   FirstSegment = NULL;
   CurrentSize  = 0;
@@ -331,6 +334,9 @@ MACH_X (InternalMachoExpandImage) (
       FirstSegment = Segment;
     }
 
+
+    DEBUG ((DEBUG_INFO, "here3\n"));
+
     //
     // Do not overwrite header.
     //
@@ -348,6 +354,9 @@ MACH_X (InternalMachoExpandImage) (
         return 0;
       }
     }
+
+
+    DEBUG ((DEBUG_INFO, "here4\n"));
     //
     // Ensure that it still fits. In legit files segments are ordered.
     // We do not care for other (the file will be truncated).
@@ -373,9 +382,11 @@ MACH_X (InternalMachoExpandImage) (
     DstSegment->FileOffset += CurrentDelta;
     DstSegment->FileSize    = DstSegment->Size;
 
-    if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
+    /*if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
       return 0;
-    }
+    }*/
+
+    DEBUG ((DEBUG_INFO, "here\n"));
 
     //
     // We need to update fields in SYMTAB and DYSYMTAB. Tables have to be present before 0 FileSize
@@ -731,7 +742,7 @@ MACH_X (MachoGetMachHeader) (
 }
 
 MACH_UINT_X
-MACH_X (MachoGetLastAddress) (
+MACH_X (InternalMachoGetLastAddress) (
   IN OUT OC_MACHO_CONTEXT  *Context
   )
 {

@@ -63,4 +63,9 @@ typedef struct KMOD_INFO_64_V1 {
 
 #pragma pack()
 
+typedef union {
+  KMOD_INFO_32_V1 Kmod32;
+  KMOD_INFO_64_V1 Kmod64;
+} KMOD_INFO_ANY;
+
 #endif // APPLE_KMOD_INFO_H

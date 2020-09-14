@@ -463,13 +463,23 @@ InternalKxldStateRebuild (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Context->PrelinkedStateSegment->VirtualAddress = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSegment->Size           = AlignedSize;
-  Context->PrelinkedStateSegment->FileOffset     = Context->PrelinkedSize;
-  Context->PrelinkedStateSegment->FileSize       = AlignedSize;
-  Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
-  Context->PrelinkedStateSectionKernel->Size     = Context->PrelinkedStateKernelSize;
+  if (Context->Is32Bit) {
+    Context->PrelinkedStateSegment->Segment32.VirtualAddress = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSegment->Segment32.Size           = AlignedSize;
+    Context->PrelinkedStateSegment->Segment32.FileOffset     = Context->PrelinkedSize;
+    Context->PrelinkedStateSegment->Segment32.FileSize       = AlignedSize;
+    Context->PrelinkedStateSectionKernel->Section32.Address  = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Section32.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Section32.Size     = Context->PrelinkedStateKernelSize;
+  } else {
+    Context->PrelinkedStateSegment->Segment64.VirtualAddress = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSegment->Segment64.Size           = AlignedSize;
+    Context->PrelinkedStateSegment->Segment64.FileOffset     = Context->PrelinkedSize;
+    Context->PrelinkedStateSegment->Segment64.FileSize       = AlignedSize;
+    Context->PrelinkedStateSectionKernel->Section64.Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Section64.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Section64.Size     = Context->PrelinkedStateKernelSize;
+  }
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
@@ -490,11 +500,19 @@ InternalKxldStateRebuild (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Context->PrelinkedStateSegment->Size         += AlignedSize;
-  Context->PrelinkedStateSegment->FileSize     += AlignedSize;
-  Context->PrelinkedStateSectionKexts->Address  = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSectionKexts->Offset   = Context->PrelinkedSize;
-  Context->PrelinkedStateSectionKexts->Size     = Context->PrelinkedStateKextsSize;
+  if (Context->Is32Bit) {
+    Context->PrelinkedStateSegment->Segment32.Size         += AlignedSize;
+    Context->PrelinkedStateSegment->Segment32.FileSize     += AlignedSize;
+    Context->PrelinkedStateSectionKexts->Section32.Address  = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKexts->Section32.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKexts->Section32.Size     = Context->PrelinkedStateKextsSize;
+  } else {
+    Context->PrelinkedStateSegment->Segment64.Size         += AlignedSize;
+    Context->PrelinkedStateSegment->Segment64.FileSize     += AlignedSize;
+    Context->PrelinkedStateSectionKexts->Section64.Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKexts->Section64.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKexts->Section64.Size     = Context->PrelinkedStateKextsSize;
+  }
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
@@ -509,19 +527,25 @@ InternalKxldStateRebuild (
   Context->PrelinkedLastAddress += AlignedSize;
   Context->PrelinkedSize        += AlignedSize;
 
-  if (Context->PrelinkedStateSectionKexts->Address != Context->PrelinkedStateKextsAddress) {
+  if ((Context->Is32Bit ?
+    Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address)
+    != Context->PrelinkedStateKextsAddress) {
     Status = InternalKxldStateRebasePlist (
       Context,
-      (INT64) (Context->PrelinkedStateSectionKexts->Address - Context->PrelinkedStateKextsAddress)
+      (INT64) ((Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address)
+        - Context->PrelinkedStateKextsAddress)
       );
     if (!EFI_ERROR (Status)) {
-      Context->PrelinkedStateKextsAddress = Context->PrelinkedStateSectionKexts->Address;
+      Context->PrelinkedStateKextsAddress = Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address;
     }
     DEBUG ((
       DEBUG_INFO,
       "OCAK: Rebasing KXLD state from %Lx to %Lx - %r\n",
       Context->PrelinkedStateKextsAddress,
-      Context->PrelinkedStateSectionKexts->Address,
+      Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address,
       Status
       ));
   } else {

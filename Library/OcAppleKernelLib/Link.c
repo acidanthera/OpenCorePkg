@@ -280,19 +280,27 @@ InternalOcGetSymbolValue (
 /**
   Patches Symbol with Value and marks it as solved.
 
+  @param[in]  Is32Bit 32-bit.
   @param[in]  Value   The value to solve Symbol with.
   @param[out] Symbol  The symbol to solve.
 
 **/
 VOID
-InternalSolveSymbolValue64 (
-  IN  UINT64         Value,
-  OUT MACH_NLIST_64  *Symbol
+InternalSolveSymbolValue (
+  IN  BOOLEAN             Is32Bit,
+  IN  UINT64              Value,
+  OUT MACH_NLIST_ANY      *Symbol
   )
 {
-  Symbol->Value   = Value;
-  Symbol->Type    = (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT);
-  Symbol->Section = NO_SECT;
+  if (Is32Bit) {
+    Symbol->Symbol32.Value   = (UINT32) Value;
+    Symbol->Symbol32.Type    = (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT);
+    Symbol->Symbol32.Section = NO_SECT;
+  } else {
+    Symbol->Symbol64.Value   = Value;
+    Symbol->Symbol64.Type    = (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT);
+    Symbol->Symbol64.Section = NO_SECT;
+  }
 }
 
 /**
@@ -309,24 +317,27 @@ InternalSolveSymbolValue64 (
 **/
 STATIC
 BOOLEAN
-InternalSolveSymbolNonWeak64 (
+InternalSolveSymbolNonWeak (
   IN     PRELINKED_CONTEXT         *Context,
   IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
-  IN OUT MACH_NLIST_64             *Symbol
+  IN OUT MACH_NLIST_ANY            *Symbol
   )
 {
   INTN                        Result;
   CONST PRELINKED_KEXT_SYMBOL *ResolveSymbol;
+  UINT8                       SymbolType;
 
-  if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
-    if ((Symbol->Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
+  SymbolType = Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type;
+
+  if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
+    if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
       //
       // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
       // at the end of InternalSolveSymbol64. 
       //
       Result = AsciiStrCmp (
-                 MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol),
+                 MachoGetSymbolName (&Kext->Context.MachContext, Symbol),
                  KXLD_WEAK_TEST_SYMBOL
                  );
       if (Result == 0) {
@@ -340,7 +351,7 @@ InternalSolveSymbolNonWeak64 (
       //
       return FALSE;
     }
-  } else if (Symbol->Value != 0) {
+  } else if ((Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value) != 0) {
     //
     // Common symbols are not supported.
     //
@@ -357,7 +368,7 @@ InternalSolveSymbolNonWeak64 (
                     OcGetSymbolFirstLevel
                     );
   if (ResolveSymbol != NULL) {
-    InternalSolveSymbolValue64 (ResolveSymbol->Value, Symbol);
+    InternalSolveSymbolValue (Context->Is32Bit, ResolveSymbol->Value, Symbol);
   }
 
   return TRUE;
@@ -383,32 +394,32 @@ InternalSolveSymbolNonWeak64 (
 **/
 STATIC
 BOOLEAN
-InternalSolveSymbol64 (
+InternalSolveSymbol (
   IN     PRELINKED_CONTEXT         *Context,
   IN     PRELINKED_KEXT            *Kext,
   IN     CONST CHAR8               *Name,
-  IN OUT MACH_NLIST_64             *Symbol,
+  IN OUT MACH_NLIST_ANY            *Symbol,
   IN OUT UINT64                    *WeakTestValue,
-  IN     CONST MACH_NLIST_64       *UndefinedSymbols,
+  IN     CONST MACH_NLIST_ANY      *UndefinedSymbols,
   IN     UINT32                    NumUndefinedSymbols
   )
 {
-  BOOLEAN             Success;
-  UINT32              Index;
-  INTN                Result;
-  UINT64              Value;
-  CONST MACH_NLIST_64 *WeakTestSymbol;
+  BOOLEAN               Success;
+  UINT32                Index;
+  INTN                  Result;
+  UINT64                Value;
+  CONST MACH_NLIST_ANY  *WeakTestSymbol;
 
   ASSERT (Symbol != NULL);
   ASSERT (UndefinedSymbols != NULL || NumUndefinedSymbols == 0);
   //
   // STAB symbols are not considered undefined.
   //
-  if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
+  if (((Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type) & MACH_N_TYPE_STAB) != 0) {
     return TRUE;
   }
 
-  Success = InternalSolveSymbolNonWeak64 (
+  Success = InternalSolveSymbolNonWeak (
               Context,
               Kext,
               Name,
@@ -418,7 +429,7 @@ InternalSolveSymbol64 (
     return TRUE;
   }
 
-  if ((Symbol->Descriptor & MACH_N_WEAK_DEF) != 0) {
+  if (((Context->Is32Bit ? Symbol->Symbol32.Descriptor : Symbol->Symbol64.Descriptor) & MACH_N_WEAK_DEF) != 0) {
     //
     // KXLD_WEAK_TEST_SYMBOL is not going to be defined or exposed by a KEXT
     // prelinked by this library, hence only check the undefined symbols region
@@ -430,15 +441,16 @@ InternalSolveSymbol64 (
       for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
         WeakTestSymbol = &UndefinedSymbols[Index];
         Result = AsciiStrCmp (
-                   MachoGetSymbolName64 (
+                   MachoGetSymbolName (
                      &Kext->Context.MachContext,
                      WeakTestSymbol
                      ),
                    KXLD_WEAK_TEST_SYMBOL
                    );
         if (Result == 0) {
-          if ((WeakTestSymbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
-            Success = InternalSolveSymbolNonWeak64 (
+          if (((Context->Is32Bit ?
+            WeakTestSymbol->Symbol32.Descriptor : WeakTestSymbol->Symbol64.Descriptor) & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+            Success = InternalSolveSymbolNonWeak (
                         Context,
                         Kext,
                         Name,
@@ -449,7 +461,7 @@ InternalSolveSymbol64 (
             }
           }
 
-          Value = WeakTestSymbol->Value;
+          Value = Context->Is32Bit ? WeakTestSymbol->Symbol32.Value : WeakTestSymbol->Symbol64.Value;
           *WeakTestValue = Value;
           break;
         }
@@ -457,7 +469,7 @@ InternalSolveSymbol64 (
     }
 
     if (Value != 0) {
-      InternalSolveSymbolValue64 (Value, Symbol);
+      InternalSolveSymbolValue (Context->Is32Bit, Value, Symbol);
       return TRUE;
     }
   }
@@ -1233,19 +1245,21 @@ InternalProcessSymbolPointers (
 
 **/
 EFI_STATUS
-InternalPrelinkKext64 (
+InternalPrelinkKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
   IN     UINT64             LoadAddress
   )
 {
   OC_MACHO_CONTEXT           *MachoContext;
-  MACH_SEGMENT_COMMAND_64    *LinkEditSegment;
+  MACH_SEGMENT_COMMAND_ANY   *LinkEditSegment;
+  UINT64                     LinkEditFileOffset;
+  UINT64                     LinkEditFileSize;
 
-  MACH_HEADER_64             *MachHeader;
+  MACH_HEADER_ANY            *MachHeader;
 
-  MACH_SEGMENT_COMMAND_64    *Segment;
-  MACH_SECTION_64            *Section;
+  MACH_SEGMENT_COMMAND_ANY   *Segment;
+  MACH_SECTION_ANY           *Section;
 
   UINT32                     Index;
   BOOLEAN                    Result;
@@ -1254,18 +1268,18 @@ InternalPrelinkKext64 (
 
   MACH_SYMTAB_COMMAND        *Symtab;
   MACH_DYSYMTAB_COMMAND      *DySymtab;
-  MACH_NLIST_64              *Symbol;
+  MACH_NLIST_ANY             *Symbol;
   CONST CHAR8                *SymbolName;
-  CONST MACH_NLIST_64        *SymbolTable;
+  CONST MACH_NLIST_ANY       *SymbolTable;
   CONST CHAR8                *StringTable;
   UINT32                     NumSymbols;
-  CONST MACH_NLIST_64        *IndirectSymtab;
+  CONST MACH_NLIST_ANY       *IndirectSymtab;
   UINT32                     NumIndirectSymbols;
-  CONST MACH_NLIST_64        *LocalSymtab;
+  CONST MACH_NLIST_ANY       *LocalSymtab;
   UINT32                     NumLocalSymbols;
-  CONST MACH_NLIST_64        *ExternalSymtab;
+  CONST MACH_NLIST_ANY       *ExternalSymtab;
   UINT32                     NumExternalSymbols;
-  CONST MACH_NLIST_64        *UndefinedSymtab;
+  CONST MACH_NLIST_ANY       *UndefinedSymtab;
   UINT32                     NumUndefinedSymbols;
   UINT64                     WeakTestValue;
 
@@ -1273,7 +1287,7 @@ InternalPrelinkKext64 (
   UINT32                     NumRelocations2;
   CONST MACH_RELOCATION_INFO *Relocations;
   MACH_RELOCATION_INFO       *TargetRelocation;
-  MACH_SEGMENT_COMMAND_64    *FirstSegment;
+  MACH_SEGMENT_COMMAND_ANY   *FirstSegment;
 
   VOID                       *LinkEdit;
   UINT32                     LinkEditSize;
@@ -1289,7 +1303,7 @@ InternalPrelinkKext64 (
 
   UINT64                     SegmentVmSizes;
   UINT32                     KmodInfoOffset;
-  KMOD_INFO_64_V1            *KmodInfo;
+  KMOD_INFO_ANY              *KmodInfo;
 
   ASSERT (Context != NULL);
   ASSERT (Kext != NULL);
@@ -1298,11 +1312,11 @@ InternalPrelinkKext64 (
   MachoContext    = &Kext->Context.MachContext;
   LinkEditSegment = Kext->LinkEditSegment;
 
-  MachHeader = MachoGetMachHeader64 (MachoContext);
+  MachHeader = MachoGetMachHeader (MachoContext);
   //
   // Only perform actions when the kext is flag'd to be dynamically linked.
   //
-  if ((MachHeader->Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+  if (((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
     return EFI_SUCCESS;
   }
 
@@ -1312,7 +1326,7 @@ InternalPrelinkKext64 (
   //
   // Retrieve the symbol tables required for most following operations.
   //
-  NumSymbols = MachoGetSymbolTable64 (
+  NumSymbols = MachoGetSymbolTable (
                  MachoContext,
                  &SymbolTable,
                  &StringTable,
@@ -1361,7 +1375,8 @@ InternalPrelinkKext64 (
   LinkEdit     = Context->LinkBuffer;
   LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
-  if (LinkEditSize > LinkEditSegment->FileSize) {
+  if (LinkEditSize > (Context->Is32Bit ?
+    LinkEditSegment->Segment32.FileSize : LinkEditSegment->Segment64.FileSize)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -1373,18 +1388,18 @@ InternalPrelinkKext64 (
   // Solve indirect symbols.
   //
   WeakTestValue      = 0;
-  NumIndirectSymbols = MachoGetIndirectSymbolTable64 (
+  NumIndirectSymbols = MachoGetIndirectSymbolTable (
                          MachoContext,
                          &IndirectSymtab
                          );
   for (Index = 0; Index < NumIndirectSymbols; ++Index) {
-    Symbol     = (MACH_NLIST_64 *)&IndirectSymtab[Index];
-    SymbolName = MachoGetIndirectSymbolName64 (MachoContext, Symbol);
+    Symbol     = (MACH_NLIST_ANY *) &IndirectSymtab[Index];
+    SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
     if (SymbolName == NULL) {
       return EFI_LOAD_ERROR;
     }
 
-    Result = InternalSolveSymbol64 (
+    Result = InternalSolveSymbol (
                Context,
                Kext,
                SymbolName,
@@ -1401,12 +1416,12 @@ InternalPrelinkKext64 (
   // Solve undefined symbols.
   //
   for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
-    Symbol = (MACH_NLIST_64 *)&UndefinedSymtab[Index];
+    Symbol = (MACH_NLIST_ANY *) &UndefinedSymtab[Index];
     //
     // Undefined symbols are solved via their name.
     //
-    SymbolName = MachoGetSymbolName64 (MachoContext, Symbol);
-    Result = InternalSolveSymbol64 (
+    SymbolName = MachoGetSymbolName (MachoContext, Symbol);
+    Result = InternalSolveSymbol (
                Context,
                Kext,
                SymbolName,
@@ -1419,7 +1434,7 @@ InternalPrelinkKext64 (
       DEBUG ((
         DEBUG_INFO,
         "OCAK: Symbol %a was unresolved for kext %a\n",
-        MachoGetSymbolName64 (MachoContext, Symbol),
+        MachoGetSymbolName (MachoContext, Symbol),
         Kext->Identifier
         ));
       return EFI_LOAD_ERROR;
@@ -1427,9 +1442,9 @@ InternalPrelinkKext64 (
       DEBUG ((
         DEBUG_VERBOSE,
         "OCAK: Symbol %a was resolved for kext %a to %Lx\n",
-        MachoGetSymbolName64 (MachoContext, Symbol),
+        MachoGetSymbolName (MachoContext, Symbol),
         Kext->Identifier,
-        Symbol->Value
+        Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value
         ));
     }
   }
@@ -1468,9 +1483,9 @@ InternalPrelinkKext64 (
     return EFI_LOAD_ERROR;
   }
 
-  KmodInfo = (KMOD_INFO_64_V1 *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
+  KmodInfo = (KMOD_INFO_ANY *)((UINTN)MachHeader + (UINTN)KmodInfoOffset);
 
-  FirstSegment = MachoGetNextSegment64 (MachoContext, NULL);
+  FirstSegment = MachoGetNextSegment (MachoContext, NULL);
   if (FirstSegment == NULL) {
     return EFI_UNSUPPORTED;
   }
@@ -1495,7 +1510,7 @@ InternalPrelinkKext64 (
              Context,
              Kext,
              LoadAddress,
-             FirstSegment->VirtualAddress,
+             Context->Is32Bit ? FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
              Relocations,
              &NumRelocations,
              &TargetRelocation[0]
@@ -1510,7 +1525,7 @@ InternalPrelinkKext64 (
              Context,
              Kext,
              LoadAddress,
-             FirstSegment->VirtualAddress,
+             Context->Is32Bit ? FirstSegment->Segment32.VirtualAddress : FirstSegment->Segment64.VirtualAddress,
              Relocations,
              &NumRelocations2,
              &TargetRelocation[NumRelocations]
@@ -1525,7 +1540,7 @@ InternalPrelinkKext64 (
   //
   SymtabSize = SymbolTableSize;
   if (NumUndefinedSymbols > 0) {
-    SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * sizeof (MACH_NLIST_64));
+    SymtabSize = (UINT32)((UndefinedSymtab - SymbolTable) * (Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
   }
 
   CopyMem (
@@ -1536,7 +1551,7 @@ InternalPrelinkKext64 (
 
   if (NumUndefinedSymbols > 0) {
     SymtabSize2  = (UINT32)(&SymbolTable[NumSymbols] - &UndefinedSymtab[NumUndefinedSymbols]);
-    SymtabSize2 *= sizeof (MACH_NLIST_64);
+    SymtabSize2 *= Context->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64);
     CopyMem (
       (VOID *)((UINTN)LinkEdit + SymbolTableOffset + SymtabSize),
       (VOID *)&UndefinedSymtab[NumUndefinedSymbols],
@@ -1558,11 +1573,19 @@ InternalPrelinkKext64 (
   //
   // Set up the tables with the new offsets and Symbol Table length.
   //
-  Symtab->SymbolsOffset = (UINT32)(LinkEditSegment->FileOffset + SymbolTableOffset);
+  if (Context->Is32Bit) {
+    LinkEditFileOffset = LinkEditSegment->Segment32.FileOffset;
+    LinkEditFileSize   = LinkEditSegment->Segment32.FileSize;
+  } else {
+    LinkEditFileOffset = LinkEditSegment->Segment64.FileOffset;
+    LinkEditFileSize   = LinkEditSegment->Segment64.FileSize;
+  }
+  
+  Symtab->SymbolsOffset = (UINT32)(LinkEditFileOffset + SymbolTableOffset);
   Symtab->NumSymbols    = NumSymbols;
-  Symtab->StringsOffset = (UINT32)(LinkEditSegment->FileOffset + StringTableOffset);
+  Symtab->StringsOffset = (UINT32)(LinkEditFileOffset + StringTableOffset);
 
-  DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditSegment->FileOffset + RelocationsOffset);
+  DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditFileOffset + RelocationsOffset);
   DySymtab->NumOfLocalRelocations  = NumRelocations;
   //
   // Clear dynamic linker information.
@@ -1583,18 +1606,23 @@ InternalPrelinkKext64 (
   LinkEditSize = (SymbolTableSize + RelocationsSize + StringTableSize);
 
   CopyMem (
-    (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset),
+    (VOID *)((UINTN)MachHeader + (UINTN)LinkEditFileOffset),
     LinkEdit,
     LinkEditSize
     );
   ZeroMem (
-    (VOID *)((UINTN)MachHeader + (UINTN)LinkEditSegment->FileOffset + LinkEditSize),
-    (UINTN)(LinkEditSegment->FileSize - LinkEditSize)
+    (VOID *)((UINTN)MachHeader + (UINTN)LinkEditFileOffset + LinkEditSize),
+    (UINTN)(LinkEditFileSize - LinkEditSize)
     );
 
   LinkEditSize = MACHO_ALIGN (LinkEditSize);
-  LinkEditSegment->FileSize = LinkEditSize;
-  LinkEditSegment->Size     = LinkEditSize;
+  if (Context->Is32Bit) {
+    LinkEditSegment->Segment32.FileSize = LinkEditSize;
+    LinkEditSegment->Segment32.Size     = LinkEditSize;
+  } else {
+    LinkEditSegment->Segment64.FileSize = LinkEditSize;
+    LinkEditSegment->Segment64.Size     = LinkEditSize;
+  }
 
   //
   // Adapt the link addresses of all Segments and their Sections.
@@ -1605,54 +1633,107 @@ InternalPrelinkKext64 (
   SegmentVmSizes = 0;
 
   Segment = NULL;
-  while ((Segment = MachoGetNextSegment64 (MachoContext, Segment)) != NULL) {
+  while ((Segment = MachoGetNextSegment (MachoContext, Segment)) != NULL) {
     Section = NULL;
-    while ((Section = MachoGetNextSection64 (MachoContext, Segment, Section)) != NULL) {
-      Section->Address = ALIGN_VALUE (
-                           (Section->Address + LoadAddress),
-                           (UINT64)(1U << Section->Alignment)
-                           );
+    while ((Section = MachoGetNextSection (MachoContext, Segment, Section)) != NULL) {
+      if (Context->Is32Bit) {
+        Section->Section32.Address = ALIGN_VALUE (
+                                      (Section->Section32.Address + LoadAddress),
+                                      (UINT64)(1U << Section->Section32.Alignment)
+                                      );
+      } else {
+        Section->Section64.Address = ALIGN_VALUE (
+                                      (Section->Section64.Address + LoadAddress),
+                                      (UINT64)(1U << Section->Section64.Alignment)
+                                      );
+      }
     }
 
-    Segment->VirtualAddress += LoadAddress;
+    if (Context->Is32Bit) {
+      Segment->Segment32.VirtualAddress += (UINT32) LoadAddress;
 
-    //
-    // Logically equivalent to kxld_seg_set_vm_protections.
-    // Assertion: Not i386 (strict protection).
-    //
-    if (AsciiStrnCmp (Segment->SegmentName, "__TEXT", ARRAY_SIZE (Segment->SegmentName)) == 0) {
-      Segment->InitialProtection = TEXT_SEG_PROT;
-      Segment->MaximumProtection = TEXT_SEG_PROT;
+      //
+      // Logically equivalent to kxld_seg_set_vm_protections.
+      // Assertion: Not i386 (strict protection).
+      //
+      if (AsciiStrnCmp (Segment->Segment32.SegmentName, "__TEXT", ARRAY_SIZE (Segment->Segment32.SegmentName)) == 0) {
+        Segment->Segment32.InitialProtection = TEXT_SEG_PROT;
+        Segment->Segment32.MaximumProtection = TEXT_SEG_PROT;
+      } else {
+        Segment->Segment32.InitialProtection = DATA_SEG_PROT;
+        Segment->Segment32.MaximumProtection = DATA_SEG_PROT;
+      }
+
+      if (Segment->Segment32.FileOffset > SegmentOffset) {
+        SegmentOffset = Segment->Segment32.FileOffset;
+        SegmentSize   = Segment->Segment32.FileSize;
+      }
+
+      SegmentVmSizes += Segment->Segment32.Size;
     } else {
-      Segment->InitialProtection = DATA_SEG_PROT;
-      Segment->MaximumProtection = DATA_SEG_PROT;
-    }
+      Segment->Segment64.VirtualAddress += LoadAddress;
 
-    if (Segment->FileOffset > SegmentOffset) {
-      SegmentOffset = (UINT32)Segment->FileOffset;
-      SegmentSize   = (UINT32)Segment->FileSize;
-    }
+      //
+      // Logically equivalent to kxld_seg_set_vm_protections.
+      // Assertion: Not i386 (strict protection).
+      //
+      if (AsciiStrnCmp (Segment->Segment64.SegmentName, "__TEXT", ARRAY_SIZE (Segment->Segment64.SegmentName)) == 0) {
+        Segment->Segment64.InitialProtection = TEXT_SEG_PROT;
+        Segment->Segment64.MaximumProtection = TEXT_SEG_PROT;
+      } else {
+        Segment->Segment64.InitialProtection = DATA_SEG_PROT;
+        Segment->Segment64.MaximumProtection = DATA_SEG_PROT;
+      }
 
-    SegmentVmSizes += Segment->Size;
+      if (Segment->Segment64.FileOffset > SegmentOffset) {
+        SegmentOffset = (UINT32)Segment->Segment64.FileOffset;
+        SegmentSize   = (UINT32)Segment->Segment64.FileSize;
+      }
+
+      SegmentVmSizes += Segment->Segment64.Size;
+    }
   }
-  //
-  // Populate kmod information.
-  //
-  KmodInfo->Address = LoadAddress;
-  //
-  // This is a hack borrowed from XNU. Real header size is equal to:
-  //   sizeof (*MachHeader) + MachHeader->CommandsSize (often aligned to 4096)
-  // However, it cannot be set to this value unless it exists in a separate segment,
-  // and presently it is not the case on macOS. When header is put to __TEXT (as usual),
-  // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
-  // See OSKext::setVMAttributes.
-  //
-  KmodInfo->HdrSize = 0;
-  KmodInfo->Size    = KmodInfo->HdrSize + SegmentVmSizes;
-  //
-  // Adapt the Mach-O header to signal being prelinked.
-  //
-  MachHeader->Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+
+  if (Context->Is32Bit) {
+    //
+    // Populate kmod information.
+    //
+    KmodInfo->Kmod32.Address = (UINT32) LoadAddress;
+    //
+    // This is a hack borrowed from XNU. Real header size is equal to:
+    //   sizeof (*MachHeader) + MachHeader->CommandsSize (often aligned to 4096)
+    // However, it cannot be set to this value unless it exists in a separate segment,
+    // and presently it is not the case on macOS. When header is put to __TEXT (as usual),
+    // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
+    // See OSKext::setVMAttributes.
+    //
+    KmodInfo->Kmod32.HdrSize = 0;
+    KmodInfo->Kmod32.Size    = KmodInfo->Kmod32.HdrSize + (UINT32) SegmentVmSizes;
+    //
+    // Adapt the Mach-O header to signal being prelinked.
+    //
+    MachHeader->Header32.Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+  } else {
+    //
+    // Populate kmod information.
+    //
+    KmodInfo->Kmod64.Address = LoadAddress;
+    //
+    // This is a hack borrowed from XNU. Real header size is equal to:
+    //   sizeof (*MachHeader) + MachHeader->CommandsSize (often aligned to 4096)
+    // However, it cannot be set to this value unless it exists in a separate segment,
+    // and presently it is not the case on macOS. When header is put to __TEXT (as usual),
+    // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
+    // See OSKext::setVMAttributes.
+    //
+    KmodInfo->Kmod64.HdrSize = 0;
+    KmodInfo->Kmod64.Size    = KmodInfo->Kmod64.HdrSize + SegmentVmSizes;
+    //
+    // Adapt the Mach-O header to signal being prelinked.
+    //
+    MachHeader->Header64.Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+  }
+
   //
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.

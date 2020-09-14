@@ -174,31 +174,31 @@ typedef struct {
   //
   // Pointer to PRELINK_INFO_SEGMENT.
   //
-  MACH_SEGMENT_COMMAND_64  *PrelinkedInfoSegment;
+  MACH_SEGMENT_COMMAND_ANY *PrelinkedInfoSegment;
   //
   // Pointer to PRELINK_INFO_SECTION.
   //
-  MACH_SECTION_64          *PrelinkedInfoSection;
+  MACH_SECTION_ANY         *PrelinkedInfoSection;
   //
   // Pointer to PRELINK_TEXT_SEGMENT.
   //
-  MACH_SEGMENT_COMMAND_64  *PrelinkedTextSegment;
+  MACH_SEGMENT_COMMAND_ANY *PrelinkedTextSegment;
   //
   // Pointer to PRELINK_TEXT_SECTION.
   //
-  MACH_SECTION_64          *PrelinkedTextSection;
+  MACH_SECTION_ANY         *PrelinkedTextSection;
   //
   // Pointer to PRELINK_STATE_SEGMENT (for 10.6.8).
   //
-  MACH_SEGMENT_COMMAND_64  *PrelinkedStateSegment;
+  MACH_SEGMENT_COMMAND_ANY *PrelinkedStateSegment;
   //
   // Pointer to PRELINK_STATE_SECTION_KERNEL (for 10.6.8).
   //
-  MACH_SECTION_64          *PrelinkedStateSectionKernel;
+  MACH_SECTION_ANY         *PrelinkedStateSectionKernel;
   //
   // Pointer to PRELINK_STATE_SECTION_KEXTS (for 10.6.8).
   //
-  MACH_SECTION_64          *PrelinkedStateSectionKexts;
+  MACH_SECTION_ANY         *PrelinkedStateSectionKexts;
   //
   // Contents of PRELINK_STATE_SECTION_KERNEL section (for 10.6.8).
   //
@@ -222,7 +222,7 @@ typedef struct {
   //
   // Pointer to KC_LINKEDIT_SEGMENT (for KC mode).
   //
-  MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
+  MACH_SEGMENT_COMMAND_ANY *LinkEditSegment;
   //
   // Pointer to KC_REGION0_SEGMENT (for KC mode).
   //
@@ -301,6 +301,10 @@ typedef struct {
   // Kernel virtual base.
   //
   UINT64                   VirtualBase;
+  //
+  // Prelinked is 32-bit.
+  //
+  BOOLEAN                  Is32Bit;
 } PRELINKED_CONTEXT;
 
 //

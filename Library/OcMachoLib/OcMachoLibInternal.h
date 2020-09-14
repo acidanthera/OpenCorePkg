@@ -153,6 +153,32 @@ InternalMachoGetVmSize64 (
   );
 
 /**
+  Returns the last virtual address of a 32-bit Mach-O.
+
+  @param[in] Context  Context of the Mach-O.
+
+  @retval 0  The binary is malformed.
+
+**/
+UINT32
+InternalMachoGetLastAddress32 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the last virtual address of a 64-bit Mach-O.
+
+  @param[in] Context  Context of the Mach-O.
+
+  @retval 0  The binary is malformed.
+
+**/
+UINT64
+InternalMachoGetLastAddress64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
   Retrieves the next 32-bit Load Command of type LoadCommandType.
 
   @param[in,out] Context          Context of the Mach-O.

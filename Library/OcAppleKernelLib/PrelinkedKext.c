@@ -57,7 +57,7 @@ InternalCreatePrelinkedKext (
   UINT64                   SourceSize;
   UINT64                   CalculatedSourceSize;
   UINT64                   SourceEnd;
-  MACH_SEGMENT_COMMAND_64  *BaseSegment;
+  MACH_SEGMENT_COMMAND_ANY *BaseSegment;
   UINT64                   KxldState;
   UINT64                   KxldOffset;
   UINT32                   KxldStateSize;
@@ -188,15 +188,15 @@ InternalCreatePrelinkedKext (
 
   if (Prelinked != NULL && HasExe) {
     if (Prelinked->IsKernelCollection) {
-      BaseSegment = Prelinked->RegionSegment;
+      BaseSegment = (MACH_SEGMENT_COMMAND_ANY *) Prelinked->RegionSegment;
     } else {
       BaseSegment = Prelinked->PrelinkedTextSegment;
     }
 
-    SourceBase -= BaseSegment->VirtualAddress;
-    if (OcOverflowAddU64 (SourceBase, BaseSegment->FileOffset, &SourceBase) ||
-      OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd) ||
-      SourceEnd > Prelinked->PrelinkedSize) {
+    SourceBase -= Prelinked->Is32Bit ? BaseSegment->Segment32.VirtualAddress : BaseSegment->Segment64.VirtualAddress;
+    if (OcOverflowAddU64 (SourceBase, Prelinked->Is32Bit ? BaseSegment->Segment32.FileOffset : BaseSegment->Segment64.FileOffset, &SourceBase)
+      || OcOverflowAddU64 (SourceBase, SourceSize, &SourceEnd)
+      || SourceEnd > Prelinked->PrelinkedSize) {
       return NULL;
     }
 
@@ -270,11 +270,13 @@ InternalScanCurrentPrelinkedKextLinkInfo (
     return;
   }
 
+  DEBUG ((DEBUG_INFO, "here kxld\n"));
+
   if (Kext->LinkEditSegment == NULL && Kext->NumberOfSymbols == 0) {
     if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
       Kext->LinkEditSegment = Context->LinkEditSegment;
     } else {
-      Kext->LinkEditSegment = MachoGetSegmentByName64 (
+      Kext->LinkEditSegment = MachoGetSegmentByName (
         &Kext->Context.MachContext,
         "__LINKEDIT"
         );
@@ -284,12 +286,12 @@ InternalScanCurrentPrelinkedKextLinkInfo (
       "OCAK: Requesting __LINKEDIT for %a - %p at %p\n",
       Kext->Identifier,
       Kext->LinkEditSegment,
-      (UINT8 *) MachoGetMachHeader64 (&Kext->Context.MachContext) - Context->Prelinked
+      (UINT8 *) MachoGetMachHeader (&Kext->Context.MachContext) - Context->Prelinked
       ));
   }
 
   if (Kext->SymbolTable == NULL && Kext->NumberOfSymbols == 0) {
-    Kext->NumberOfSymbols = MachoGetSymbolTable64 (
+    Kext->NumberOfSymbols = MachoGetSymbolTable (
                    &Kext->Context.MachContext,
                    &Kext->SymbolTable,
                    &Kext->StringTable,
@@ -316,7 +318,7 @@ InternalScanBuildLinkedSymbolTable (
   IN     PRELINKED_CONTEXT  *Context
   )
 {
-  CONST MACH_HEADER_64  *MachHeader;
+  CONST MACH_HEADER_ANY *MachHeader;
   BOOLEAN               ResolveSymbols;
   PRELINKED_KEXT_SYMBOL *SymbolTable;
   PRELINKED_KEXT_SYMBOL *WalkerBottom;
@@ -324,8 +326,9 @@ InternalScanBuildLinkedSymbolTable (
   UINT32                NumCxxSymbols;
   UINT32                NumDiscardedSyms;
   UINT32                Index;
-  CONST MACH_NLIST_64   *Symbol;
-  MACH_NLIST_64         SymbolScratch;
+  CONST MACH_NLIST_ANY  *Symbol;
+  UINT8                 SymbolType;
+  MACH_NLIST_ANY        SymbolScratch;
   CONST PRELINKED_KEXT_SYMBOL *ResolvedSymbol;
   CONST CHAR8           *Name;
   BOOLEAN               Result;
@@ -339,12 +342,12 @@ InternalScanBuildLinkedSymbolTable (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  MachHeader = MachoGetMachHeader64 (&Kext->Context.MachContext);
+  MachHeader = MachoGetMachHeader (&Kext->Context.MachContext);
   ASSERT (MachHeader != NULL);
   //
   // KPIs declare undefined and indirect symbols even in prelinkedkernel.
   //
-  ResolveSymbols = ((MachHeader->Flags & MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES) == 0);
+  ResolveSymbols = (((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES) == 0);
   NumDiscardedSyms = 0;
 
   WalkerBottom = &SymbolTable[0];
@@ -353,8 +356,9 @@ InternalScanBuildLinkedSymbolTable (
   NumCxxSymbols = 0;
 
   for (Index = 0; Index < Kext->NumberOfSymbols; ++Index) {
-    Symbol = &Kext->SymbolTable[Index];
-    if ((Symbol->Type & MACH_N_TYPE_STAB) != 0) {
+    Symbol     = &Kext->SymbolTable[Index];
+    SymbolType = Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type;
+    if ((SymbolType & MACH_N_TYPE_STAB) != 0) {
       ++NumDiscardedSyms;
       continue;
     }
@@ -363,20 +367,20 @@ InternalScanBuildLinkedSymbolTable (
     // Undefined symbols will be resolved via the KPI's dependencies and
     // hence do not need to be included (again).
     //
-    if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
+    if ((SymbolType & MACH_N_TYPE_TYPE) == MACH_N_TYPE_UNDF) {
       ++NumDiscardedSyms;
       continue;
     }
 
-    Name   = MachoGetSymbolName64 (&Kext->Context.MachContext, Symbol);
+    Name   = MachoGetSymbolName (&Kext->Context.MachContext, Symbol);
     Result = MachoSymbolNameIsCxx (Name);
 
     if (ResolveSymbols) {
       //
       // Resolve indirect symbols via the KPI's dependencies (kernel).
       //
-      if ((Symbol->Type & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR) {
-        Name = MachoGetIndirectSymbolName64 (&Kext->Context.MachContext, Symbol);
+      if ((SymbolType & MACH_N_TYPE_TYPE) == MACH_N_TYPE_INDR) {
+        Name = MachoGetIndirectSymbolName (&Kext->Context.MachContext, Symbol);
         if (Name == NULL) {
           FreePool (SymbolTable);
           return EFI_LOAD_ERROR;
@@ -393,19 +397,25 @@ InternalScanBuildLinkedSymbolTable (
           FreePool (SymbolTable);
           return EFI_NOT_FOUND;
         }
-        SymbolScratch.Value = ResolvedSymbol->Value;
+        if (Context->Is32Bit) {
+          SymbolScratch.Symbol32.Value = (UINT32) ResolvedSymbol->Value;
+        } else {
+          SymbolScratch.Symbol64.Value = ResolvedSymbol->Value;
+        }
         Symbol = &SymbolScratch;
       }
     }
 
     if (!Result) {
-      WalkerBottom->Value  = Symbol->Value;
-      WalkerBottom->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
+      WalkerBottom->Value  = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+      WalkerBottom->Name   = Kext->StringTable + (Context->Is32Bit ?
+        Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
       WalkerBottom->Length = (UINT32)AsciiStrLen (WalkerBottom->Name);
       ++WalkerBottom;
     } else {
-      WalkerTop->Value  = Symbol->Value;
-      WalkerTop->Name   = Kext->StringTable + Symbol->UnifiedName.StringIndex;
+      WalkerTop->Value  = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+      WalkerTop->Name   = Kext->StringTable + (Context->Is32Bit ?
+        Symbol->Symbol32.UnifiedName.StringIndex : Symbol->Symbol64.UnifiedName.StringIndex);
       WalkerTop->Length = (UINT32)AsciiStrLen (WalkerTop->Name);
       --WalkerTop;
 
@@ -538,10 +548,11 @@ InternalGetLinkBufferSize (
   // LinkBuffer must be able to hold all symbols and for KEXTs to be prelinked
   // also the __LINKEDIT segment (however not both simultaneously/separately).
   //
-  Size = Kext->NumberOfSymbols * sizeof (MACH_NLIST_64);
+  Size = Kext->NumberOfSymbols * (Kext->Context.Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64));
   
   if (Kext->LinkEditSegment != NULL) {
-    Size = MAX ((UINT32) Kext->LinkEditSegment->FileSize, Size);
+    Size = MAX ((UINT32) (Kext->Context.Is32Bit ?
+      Kext->LinkEditSegment->Segment32.FileSize : Kext->LinkEditSegment->Segment64.FileSize), Size);
   }
 
   return Size;
@@ -704,9 +715,16 @@ InternalCachedPrelinkedKernel (
   IN OUT PRELINKED_CONTEXT  *Prelinked
   )
 {
-  LIST_ENTRY               *Kext;
-  PRELINKED_KEXT           *NewKext;
-  MACH_SEGMENT_COMMAND_64  *Segment;
+  LIST_ENTRY                *Kext;
+  PRELINKED_KEXT            *NewKext;
+  MACH_SEGMENT_COMMAND_ANY  *Segment;
+
+  UINT64                    VirtualAddress;
+  UINT64                    FileOffset;
+  UINT64                    KernelSize;
+  UINT64                    KextsSize;
+  UINT64                    KernelOffset;
+  UINT64                    KextsOffset;
 
   //
   // First entry is prelinked kernel.
@@ -730,11 +748,14 @@ InternalCachedPrelinkedKernel (
     sizeof (NewKext->Context.MachContext)
     );
 
-  Segment = MachoGetSegmentByName64 (
+  Segment = MachoGetSegmentByName (
     &NewKext->Context.MachContext,
     "__TEXT"
     );
-  if (Segment == NULL || Segment->VirtualAddress < Segment->FileOffset) {
+  VirtualAddress = Prelinked->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+  FileOffset     = Prelinked->Is32Bit ? Segment->Segment32.FileOffset : Segment->Segment64.FileOffset;
+
+  if (Segment == NULL || VirtualAddress < FileOffset) {
     FreePool (NewKext);
     return NULL;
   }
@@ -743,7 +764,8 @@ InternalCachedPrelinkedKernel (
   NewKext->Identifier                 = PRELINK_KERNEL_IDENTIFIER;
   NewKext->BundleLibraries            = NULL;
   NewKext->CompatibleVersion          = "0";
-  NewKext->Context.VirtualBase        = Segment->VirtualAddress - Segment->FileOffset;
+  NewKext->Context.Is32Bit            = Prelinked->Is32Bit;
+  NewKext->Context.VirtualBase        = VirtualAddress - FileOffset;
   NewKext->Context.VirtualKmod        = 0;
   NewKext->Context.IsKernelCollection = Prelinked->IsKernelCollection;
 
@@ -751,42 +773,57 @@ InternalCachedPrelinkedKernel (
     //
     // Find optional __PRELINK_STATE segment, present in 10.6.8
     //
-    Prelinked->PrelinkedStateSegment = MachoGetSegmentByName64 (
+    Prelinked->PrelinkedStateSegment = MachoGetSegmentByName (
       &Prelinked->PrelinkedMachContext,
       PRELINK_STATE_SEGMENT
       );
 
     if (Prelinked->PrelinkedStateSegment != NULL) {
-      Prelinked->PrelinkedStateSectionKernel = MachoGetSectionByName64 (
+      Prelinked->PrelinkedStateSectionKernel = MachoGetSectionByName (
         &Prelinked->PrelinkedMachContext,
         Prelinked->PrelinkedStateSegment,
         PRELINK_STATE_SECTION_KERNEL
         );
-      Prelinked->PrelinkedStateSectionKexts = MachoGetSectionByName64 (
+      Prelinked->PrelinkedStateSectionKexts = MachoGetSectionByName (
         &Prelinked->PrelinkedMachContext,
         Prelinked->PrelinkedStateSegment,
         PRELINK_STATE_SECTION_KEXTS
         );
 
+      KernelSize = Prelinked->Is32Bit ?
+        Prelinked->PrelinkedStateSectionKernel->Section32.Size :
+        Prelinked->PrelinkedStateSectionKernel->Section64.Size;
+      KextsSize = Prelinked->Is32Bit ?
+        Prelinked->PrelinkedStateSectionKexts->Section32.Size :
+        Prelinked->PrelinkedStateSectionKexts->Section64.Size;
+      KernelOffset = Prelinked->Is32Bit ?
+        Prelinked->PrelinkedStateSectionKernel->Section32.Offset :
+        Prelinked->PrelinkedStateSectionKernel->Section64.Offset;
+      KextsOffset = Prelinked->Is32Bit ?
+        Prelinked->PrelinkedStateSectionKexts->Section32.Offset :
+        Prelinked->PrelinkedStateSectionKexts->Section64.Offset;
+
       if (Prelinked->PrelinkedStateSectionKernel != NULL
         && Prelinked->PrelinkedStateSectionKexts != NULL
-        && Prelinked->PrelinkedStateSectionKernel->Size > 0
-        && Prelinked->PrelinkedStateSectionKexts->Size > 0) {
-        Prelinked->PrelinkedStateKernelSize = (UINT32) Prelinked->PrelinkedStateSectionKernel->Size;
-        Prelinked->PrelinkedStateKextsSize = (UINT32) Prelinked->PrelinkedStateSectionKexts->Size;
+        && KernelSize > 0
+        && KextsSize > 0) {
+        Prelinked->PrelinkedStateKernelSize = (UINT32) KernelSize;
+        Prelinked->PrelinkedStateKextsSize = (UINT32) KextsSize;
         Prelinked->PrelinkedStateKernel = AllocateCopyPool (
           Prelinked->PrelinkedStateKernelSize,
-          &Prelinked->Prelinked[Prelinked->PrelinkedStateSectionKernel->Offset]
+          &Prelinked->Prelinked[KernelOffset]
           );
         Prelinked->PrelinkedStateKexts = AllocateCopyPool (
           Prelinked->PrelinkedStateKextsSize,
-          &Prelinked->Prelinked[Prelinked->PrelinkedStateSectionKexts->Offset]
+          &Prelinked->Prelinked[KextsOffset]
           );
       }
 
       if (Prelinked->PrelinkedStateKernel != NULL
         && Prelinked->PrelinkedStateKexts != NULL) {
-        Prelinked->PrelinkedStateKextsAddress = Prelinked->PrelinkedStateSectionKexts->Address;
+        Prelinked->PrelinkedStateKextsAddress = Prelinked->Is32Bit ?
+          Prelinked->PrelinkedStateSectionKexts->Section32.Address :
+          Prelinked->PrelinkedStateSectionKexts->Section64.Address;
         NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
         NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
       } else {
@@ -1070,7 +1107,7 @@ InternalLinkPrelinkedKext (
   Kext->Context.VirtualBase = LoadAddress;
   Kext->Context.VirtualKmod = KmodAddress;
 
-  Status = InternalPrelinkKext64 (Context, Kext, LoadAddress);
+  Status = InternalPrelinkKext (Context, Kext, LoadAddress);
 
   if (EFI_ERROR (Status)) {
     InternalFreePrelinkedKext (Kext);

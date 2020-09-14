@@ -104,7 +104,7 @@ struct PRELINKED_KEXT_ {
   //
   // Linkedit segment reference.
   //
-  MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
+  MACH_SEGMENT_COMMAND_ANY *LinkEditSegment;
   //
   // The String Table associated with this symbol table.
   //
@@ -112,7 +112,7 @@ struct PRELINKED_KEXT_ {
   //
   // Symbol table.
   //
-  CONST MACH_NLIST_64      *SymbolTable;
+  CONST MACH_NLIST_ANY     *SymbolTable;
   //
   // Symbol table size.
   //
@@ -263,9 +263,11 @@ InternalConnectExternalSymtab (
 
 #define SYM_MAX_NAME_LEN  256U
 
+#define VTABLE_ENTRY_SIZE_32   4U
 #define VTABLE_ENTRY_SIZE_64   8U
-#define VTABLE_HEADER_LEN_64   2U
-#define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
+#define VTABLE_HEADER_LEN      2U
+#define VTABLE_HEADER_SIZE_32  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_32)
+#define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_64)
 
 #define KERNEL_ADDRESS_MASK 0xFFFFFFFF00000000ULL
 #define KERNEL_ADDRESS_KEXT 0xFFFFFF7F00000000ULL
@@ -311,14 +313,14 @@ STATIC_ASSERT (
   );
 
 typedef struct {
-  CONST MACH_NLIST_64 *Smcp;
-  CONST MACH_NLIST_64 *Vtable;
-  UINT64              *VtableData;
-  CONST MACH_NLIST_64 *MetaVtable;
-  UINT64              *MetaVtableData;
-  UINT32              NumSolveSymbols;
-  UINT32              MetaSymsIndex;
-  MACH_NLIST_64       *SolveSymbols[];
+  CONST MACH_NLIST_ANY  *Smcp;
+  CONST MACH_NLIST_ANY  *Vtable;
+  VOID                  *VtableData;
+  CONST MACH_NLIST_ANY  *MetaVtable;
+  VOID                  *MetaVtableData;
+  UINT32                NumSolveSymbols;
+  UINT32                MetaSymsIndex;
+  MACH_NLIST_ANY        *SolveSymbols[];
 } OC_VTABLE_PATCH_ENTRY;
 //
 // This ASSERT is very dirty, but it is unlikely to trigger nevertheless.
@@ -404,9 +406,10 @@ InternalOcGetSymbolValue (
   );
 
 VOID
-InternalSolveSymbolValue64 (
-  IN  UINT64         Value,
-  OUT MACH_NLIST_64  *Symbol
+InternalSolveSymbolValue (
+  IN  BOOLEAN             Is32Bit,
+  IN  UINT64              Value,
+  OUT MACH_NLIST_ANY      *Symbol
   );
 
 /**
@@ -422,7 +425,7 @@ InternalSolveSymbolValue64 (
 
 **/
 EFI_STATUS
-InternalPrelinkKext64 (
+InternalPrelinkKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
   IN     UINT64             LoadAddress

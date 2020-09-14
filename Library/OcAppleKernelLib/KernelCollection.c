@@ -74,7 +74,7 @@ InternalKcWriteCommandHeaders (
 
   Command.Address = (UINTN) MachHeader->Commands + MachHeader->CommandsSize;
 
-  Kext       = GetFirstNode (&Context->InjectedKexts);
+  Kext            = GetFirstNode (&Context->InjectedKexts);
 
   while (!IsNull (&Context->InjectedKexts, Kext)) {
     PrelinkedKext = GET_INJECTED_KEXT_FROM_LINK (Kext);
@@ -161,27 +161,27 @@ InternalKcWriteCommandHeaders (
   //
   CopyMem (
     (VOID *) Command.Address,
-    Context->PrelinkedInfoSegment,
-    Context->PrelinkedInfoSegment->CommandSize
+    &Context->PrelinkedInfoSegment->Segment64,
+    Context->PrelinkedInfoSegment->Segment64.CommandSize
     );
 
   //
   // Must choose a different name to avoid collisions.
   //
-  CopyMem (Context->PrelinkedInfoSegment->SegmentName, "__KREMLIN_START", sizeof ("__KREMLIN_START"));
-  CopyMem (Context->PrelinkedInfoSection->SectionName, "__kremlin_start", sizeof ("__kremlin_start"));
+  CopyMem (Context->PrelinkedInfoSegment->Segment64.SegmentName, "__KREMLIN_START", sizeof ("__KREMLIN_START"));
+  CopyMem (Context->PrelinkedInfoSection->Section64.SectionName, "__kremlin_start", sizeof ("__kremlin_start"));
 
   //
   // Refresh Mach-O header constants to include the new segment command.
   //
   MachHeader->NumCommands++;
-  MachHeader->CommandsSize += Context->PrelinkedInfoSegment->CommandSize;
+  MachHeader->CommandsSize += Context->PrelinkedInfoSegment->Segment64.CommandSize;
 
   //
   // Update __PRELINKED_INFO pointers to get them updated at a later stage.
   //
-  Context->PrelinkedInfoSegment = (MACH_SEGMENT_COMMAND_64 *) Command.Address;
-  Context->PrelinkedInfoSection = &Context->PrelinkedInfoSegment->Sections[0];
+  Context->PrelinkedInfoSegment = (MACH_SEGMENT_COMMAND_ANY *) Command.Address;
+  Context->PrelinkedInfoSection = (MACH_SECTION_ANY *) &Context->PrelinkedInfoSegment->Segment64.Sections[0];
 }
 
 EFI_STATUS
@@ -201,7 +201,7 @@ KcRebuildMachHeader (
 
   CurrentSize  = MachHeader->CommandsSize + sizeof (*MachHeader);
   FilesetSize  = InternalKcGetKextFilesetSize (Context);
-  RequiredSize = FilesetSize + sizeof (MACH_SEGMENT_COMMAND_64) + Context->PrelinkedInfoSegment->CommandSize;
+  RequiredSize = FilesetSize + sizeof (MACH_SEGMENT_COMMAND_64) + Context->PrelinkedInfoSegment->Segment64.CommandSize;
 
   TextSegment = MachoGetSegmentByName64 (
     &Context->PrelinkedMachContext,
@@ -325,7 +325,7 @@ KcInitKextFixupChains (
   // Show that StartsInImage is aligned relative to __LINKEDIT start so we only
   // need to check DataOffset below.
   //
-  ASSERT ((Context->LinkEditSegment->FileOffset % MACHO_PAGE_SIZE) == 0);
+  ASSERT ((Context->LinkEditSegment->Segment64.FileOffset % MACHO_PAGE_SIZE) == 0);
   STATIC_ASSERT (
     OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, MACHO_PAGE_SIZE),
     "Alignment is not guaranteed."
@@ -334,8 +334,8 @@ KcInitKextFixupChains (
   if (DyldChainedFixups == NULL
    || DyldChainedFixups->CommandSize != sizeof (*DyldChainedFixups)
    || DyldChainedFixups->DataSize < sizeof (MACHO_DYLD_CHAINED_FIXUPS_HEADER)
-   || DyldChainedFixups->DataOffset < Context->LinkEditSegment->FileOffset
-   || (Context->LinkEditSegment->FileOffset + Context->LinkEditSegment->FileSize)
+   || DyldChainedFixups->DataOffset < Context->LinkEditSegment->Segment64.FileOffset
+   || (Context->LinkEditSegment->Segment64.FileOffset + Context->LinkEditSegment->Segment64.FileSize)
         - DyldChainedFixups->DataOffset < DyldChainedFixups->DataSize
    || !OC_TYPE_ALIGNED (MACHO_DYLD_CHAINED_FIXUPS_HEADER, DyldChainedFixups->DataOffset)) {
     DEBUG ((DEBUG_WARN, "ChainedFixups insane\n"));
@@ -607,7 +607,7 @@ KcKextIndexFixups (
   // The Mach-O file to index must be included in Segment.
   //
   ASSERT (FirstSegment->VirtualAddress >= Context->KextsVmAddress);
-  ASSERT (MachoGetLastAddress64 (MachContext) <= Context->PrelinkedLastAddress);
+  ASSERT (MachoGetLastAddress (MachContext) <= Context->PrelinkedLastAddress);
   //
   // Prelinking must have eliminated all external relocations.
   //
@@ -671,8 +671,8 @@ KcGetKextSize (
       //
       // All kexts in KC use joint __LINKEDIT with the kernel.
       //
-      return (UINT32) (Context->LinkEditSegment->VirtualAddress
-        - SourceAddress + Context->LinkEditSegment->Size);
+      return (UINT32) (Context->LinkEditSegment->Segment64.VirtualAddress
+        - SourceAddress + Context->LinkEditSegment->Segment64.Size);
     }
   }
 
