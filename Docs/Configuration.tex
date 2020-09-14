@@ -1052,11 +1052,19 @@ In the majority of the cases ACPI patches are not useful and harmful:
   level, as done by
   \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}.
 \item
-  Avoid patching \texttt{\_OSI} to support a higher level of feature sets
-  unless absolutely required. Commonly this enables a number of hacks on APTIO
+  Try to avoid patching \texttt{\_OSI} to support a higher level of feature sets
+  whenever possible. Commonly this enables a number of hacks on APTIO
   firmwares, which result in the need to add more patches. Modern firmwares
   generally do not need it at all, and those that do are fine with much
-  smaller patches.
+  smaller patches. However, laptop vendors usually rely on this method to 
+  determine the availability of functions like modern I2C input support, thermal
+  adjustment and custom feature additions.
+\item
+  Avoid patching embedded controller event \texttt{\_Qxx} just for enabling
+  brightness keys. The conventional process to find these keys usually involves
+  massive modification on DSDT and SSDTs and the debug kext is not stable on
+  newer systems. Please switch to built-in brightness key discovery of
+  \href{https://github.com/acidanthera/VoodooPS2}{VoodooPS2} instead.
 \item
   Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
@@ -1073,8 +1081,9 @@ Several cases, where patching actually does make sense, include:
   \texttt{A0 10 93 4F 53 46 4C 00} with \texttt{A4 0A 0F A3 A3 A3 A3 A3}.
 \item
   To provide custom method implementation with in an SSDT, for instance,
-  to report functional key presses on a laptop, the original method can be replaced
-  with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
+  to inject shutdown fix on certain computers, the original method can be
+  replaced with a dummy name by patching \texttt{\_PTS} with \texttt{ZPTS}
+  and adding a callback to original method.
 \end{itemize}
 
 Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
