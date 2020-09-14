@@ -35,9 +35,8 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
      */
 
     /**
-    
     External (_SB_.PCI0.LPCB.EC0, DeviceObj)
-    
+
     Scope (\_SB.PCI0.LPCB.EC0)
     {
         Method (_STA, 0, NotSerialized)  // _STA: Status
@@ -52,9 +51,13 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
             }
         }
     }
+    **/
+
+    /*
+     * Uncomment the following to disable EC if the STA method exists.
+     */
     
-    if the STA method exists, use
-    
+    /**
     External (_SB_.PCI0.LPCB.EC0_._STA, UnknownObj)
     
     Scope (\)
@@ -65,7 +68,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
         }
         
     }    
-    **/    
+    **/
 
     Scope (\_SB)
     {
