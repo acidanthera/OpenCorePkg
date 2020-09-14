@@ -382,7 +382,7 @@ MACH_X (InternalMachoExpandImage) (
     DstSegment->FileOffset += CurrentDelta;
     DstSegment->FileSize    = DstSegment->Size;
 
-    /*if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
+    /*if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) { // FIXME: This is invalid on 32-bit
       return 0;
     }*/
 
