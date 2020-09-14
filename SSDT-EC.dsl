@@ -1,12 +1,11 @@
 /*
- * AppleUsbPower compatibility table for Skylake+.
+ * AppleUsbPower compatibility table for legacy hardware.
  *
  * Be warned that power supply values can be different
  * for different systems. Depending on the configuration
- * these values must match injected IOKitPersonalities
- * for com.apple.driver.AppleUSBMergeNub. iPad remains
- * being the most reliable device for testing USB port
- * charging support.
+ * the values must be present in injected IOKitPersonalities
+ * for com.apple.driver.AppleUSBMergeNub. iPad remains being
+ * the most reliable device for testing USB port charging.
  *
  * Try NOT to rename EC0, H_EC, etc. to EC.
  * These devices are incompatible with macOS and may break
@@ -68,47 +67,6 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
         }
     }    
     **/
-
-    Scope (\_SB)
-    {
-        Device (USBX)
-        {
-            Name (_ADR, Zero)  // _ADR: Address
-            Method (_DSM, 4, NotSerialized)  // _DSM: Device-Specific Method
-            {
-                If ((Arg2 == Zero))
-                {
-                    Return (Buffer (One)
-                    {
-                         0x03                                             // .
-                    })
-                }
-
-                Return (Package (0x08)
-                {
-                    "kUSBSleepPowerSupply",
-                    0x13EC,
-                    "kUSBSleepPortCurrentLimit",
-                    0x0834,
-                    "kUSBWakePowerSupply",
-                    0x13EC,
-                    "kUSBWakePortCurrentLimit",
-                    0x0834
-                })
-            }
-            Method (_STA, 0, NotSerialized)  // _STA: Status
-            {
-                If (_OSI ("Darwin"))
-                {
-                    Return (0x0F)
-                }
-                Else
-                {
-                    Return (Zero)
-                }
-            }
-        }
-    }
 
     Scope (\_SB.PCI0.LPCB)
     {
