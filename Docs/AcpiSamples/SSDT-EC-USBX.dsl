@@ -97,6 +97,17 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
                     0x0834
                 })
             }
+            Method (_STA, 0, NotSerialized)  // _STA: Status
+        {
+            If (_OSI ("Darwin"))
+            {
+                Return (0)
+            }
+            Else
+            {
+                Return (0x0F)
+            }
+        }
         }
     }
 
