@@ -8,20 +8,12 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
 
     Scope (_SB.PCI0)
     {
+    If (_OSI ("Darwin"))
+        {
         Device (MCHC)
         {
             Name (_ADR, Zero)  // _ADR: Address
-            Method (_STA, 0, NotSerialized)  // _STA: Status
-        {
-            If (_OSI ("Darwin"))
-            {
-                Return (0)
-            }
-            Else
-            {
-                Return (0x0F)
-            }
-        }
+          }
         }
     }
 
@@ -54,11 +46,11 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
         {
             If (_OSI ("Darwin"))
             {
-                Return (0)
+                Return (0x0F)
             }
             Else
             {
-                Return (0x0F)
+                Return (Zero)
             }
         }
     }
