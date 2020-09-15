@@ -794,11 +794,11 @@ PrelinkedInjectComplete (
 #endif
 
   if (Context->Is32Bit) {
-    Context->PrelinkedInfoSegment->Segment32.VirtualAddress = Context->PrelinkedLastAddress;
+    Context->PrelinkedInfoSegment->Segment32.VirtualAddress = (UINT32) Context->PrelinkedLastAddress;
     Context->PrelinkedInfoSegment->Segment32.Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->PrelinkedInfoSegment->Segment32.FileOffset     = Context->PrelinkedSize;
     Context->PrelinkedInfoSegment->Segment32.FileSize       = MACHO_ALIGN (ExportedInfoSize);
-    Context->PrelinkedInfoSection->Section32.Address        = Context->PrelinkedLastAddress;
+    Context->PrelinkedInfoSection->Section32.Address        = (UINT32) Context->PrelinkedLastAddress;
     Context->PrelinkedInfoSection->Section32.Size           = MACHO_ALIGN (ExportedInfoSize);
     Context->PrelinkedInfoSection->Section32.Offset         = Context->PrelinkedSize;
   } else {
