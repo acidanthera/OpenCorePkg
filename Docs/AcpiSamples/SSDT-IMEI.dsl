@@ -8,12 +8,20 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "IMEI", 0x00000000)
 
     Scope (_SB.PCI0)
     {
-    If (_OSI ("Darwin"))
-        {
         Device (IMEI)
         {
             Name (_ADR, 0x00160000)  // _ADR: Address
-          }
+            Method (_STA, 0, NotSerialized)  // _STA: Status
+        {
+            If (_OSI ("Darwin"))
+            {
+                Return (0x0F)
+            }
+            Else
+            {
+                Return (Zero)
+            }
+        }
         }
     }
 }
