@@ -257,6 +257,8 @@ InternalConnectExternalSymtab (
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
+#define KXLD_ANY_NEXT(a,b) ((VOID *) ((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64)))
+
 #define OS_METACLASS_VTABLE_NAME "__ZTV11OSMetaClass"
 
 #define X86_64_RIP_RELATIVE_LIMIT  0x80000000ULL
@@ -273,6 +275,10 @@ InternalConnectExternalSymtab (
 #define KERNEL_ADDRESS_KEXT 0xFFFFFF7F00000000ULL
 #define KERNEL_ADDRESS_BASE 0xFFFFFF8000000000ULL
 #define KERNEL_FIXUP_OFFSET BASE_1MB
+
+#define VTABLE_ENTRY_X(a,b,c)     ((a) ? ((UINT32 *)(b))[(c)] : ((UINT64 *)(b))[(c)])
+#define VTABLE_ENTRY_SIZE_X(a)    ((a) ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64)
+#define VTABLE_HEADER_SIZE_X(a)   ((a) ? VTABLE_HEADER_SIZE_32 : VTABLE_HEADER_SIZE_64)
 
 typedef union {
   struct {
@@ -303,7 +309,7 @@ typedef struct {
   CONST CHAR8  *Name;
   union {
     UINT64       Value;
-    CONST UINT64 *Data;
+    CONST VOID   *Data;
   } Vtable;
 } OC_PRELINKED_VTABLE_LOOKUP_ENTRY;
 
@@ -338,20 +344,21 @@ STATIC_ASSERT (
 //
 
 BOOLEAN
-InternalGetVtableEntries64 (
-  IN  CONST UINT64  *VtableData,
+InternalGetVtableEntries (
+  IN  BOOLEAN       Is32Bit,
+  IN  CONST VOID    *VtableData,
   IN  UINT32        MaxSize,
   OUT UINT32        *NumEntries
   );
 
 BOOLEAN
-InternalPatchByVtables64 (
+InternalPatchByVtables (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext
   );
 
 BOOLEAN
-InternalPrepareCreateVtablesPrelinked64 (
+InternalPrepareCreateVtablesPrelinked (
   IN  PRELINKED_KEXT                    *Kext,
   IN  UINT32                            MaxSize,
   OUT UINT32                            *NumVtables,
@@ -359,7 +366,7 @@ InternalPrepareCreateVtablesPrelinked64 (
   );
 
 VOID
-InternalCreateVtablesPrelinked64 (
+InternalCreateVtablesPrelinked (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,
   IN     UINT32                                  NumVtables,
@@ -474,6 +481,7 @@ InternalKxldStateRebuild (
 /**
   Solve symbol through KXLD state.
 
+  @param[in] Is32Bit         KXLD is 32-bit.
   @param[in] KxldState       KXLD state.
   @param[in] KxldStateSize   KXLD state size.
   @param[in] Name            Symbol name.
@@ -483,6 +491,7 @@ InternalKxldStateRebuild (
 **/
 UINT64
 InternalKxldSolveSymbol (
+  IN BOOLEAN       Is32Bit,
   IN CONST VOID    *KxldState,
   IN UINT32        KxldStateSize,
   IN CONST CHAR8   *Name

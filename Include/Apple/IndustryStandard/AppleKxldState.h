@@ -99,6 +99,11 @@ STATIC_ASSERT (sizeof (KXLD_SYM_ENTRY_64) == 16, "Invalid KXLD_SYM_ENTRY_64 size
 
 #pragma pack(pop)
 
+typedef union {
+  KXLD_SYM_ENTRY_32 Kxld32;
+  KXLD_SYM_ENTRY_64 Kxld64;
+} KXLD_SYM_ENTRY_ANY;
+
 /**
   Symbol marked with this flag is obsolete (deprecated).
 **/

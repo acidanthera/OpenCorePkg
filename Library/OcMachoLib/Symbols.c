@@ -133,6 +133,23 @@ MachoGetSymbolByExternRelocationOffset (
 }
 
 BOOLEAN
+MachoRelocateSymbol (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT64             LinkAddress,
+  IN OUT MACH_NLIST_ANY     *Symbol
+  )
+{
+  ASSERT (Context != NULL);
+  if (Context->Is32Bit) {
+    ASSERT (LinkAddress < MAX_UINT32);
+  }
+
+  return Context->Is32Bit ?
+    MachoRelocateSymbol32 (Context, (UINT32) LinkAddress, &Symbol->Symbol32) :
+    MachoRelocateSymbol64 (Context, LinkAddress, &Symbol->Symbol64) ; 
+}
+
+BOOLEAN
 MachoSymbolGetFileOffset (
   IN OUT OC_MACHO_CONTEXT       *Context,
   IN     CONST  MACH_NLIST_ANY  *Symbol,

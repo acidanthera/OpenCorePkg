@@ -334,7 +334,7 @@ InternalSolveSymbolNonWeak (
     if ((SymbolType & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
       //
       // KXLD_WEAK_TEST_SYMBOL might have been resolved by the resolving code
-      // at the end of InternalSolveSymbol64. 
+      // at the end of InternalSolveSymbol. 
       //
       Result = AsciiStrCmp (
                  MachoGetSymbolName (&Kext->Context.MachContext, Symbol),
@@ -1081,16 +1081,16 @@ InternalRelocateSymbols (
   IN     OC_MACHO_CONTEXT  *MachoContext,
   IN     UINT64            LoadAddress,
   IN     UINT32            NumSymbols,
-  IN OUT MACH_NLIST_64     *Symbols,
+  IN OUT MACH_NLIST_ANY    *Symbols,
   OUT    UINT32            *KmodInfoOffset
   )
 {
-  UINT32        Index;
-  MACH_NLIST_64 *Symbol;
-  CONST CHAR8   *SymbolName;
-  BOOLEAN       Result;
-  UINT32        KmodOffset;
-  UINT32        MaxSize;
+  UINT32          Index;
+  MACH_NLIST_ANY  *Symbol;
+  CONST CHAR8     *SymbolName;
+  BOOLEAN         Result;
+  UINT32          KmodOffset;
+  UINT32          MaxSize;
 
   ASSERT (MachoContext != NULL);
   ASSERT (Symbols != NULL || NumSymbols == 0);
@@ -1101,20 +1101,20 @@ InternalRelocateSymbols (
   for (Index = 0; Index < NumSymbols; ++Index) {
     Symbol = &Symbols[Index];
 
-    if ((KmodOffset == 0) && ((Symbol->Type & MACH_N_TYPE_STAB) == 0)) {
-      SymbolName = MachoGetSymbolName64 (MachoContext, Symbol);
+    if ((KmodOffset == 0) && (((MachoContext->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type) & MACH_N_TYPE_STAB) == 0)) {
+      SymbolName = MachoGetSymbolName (MachoContext, Symbol);
       ASSERT (SymbolName != NULL);
 
       if (AsciiStrCmp (SymbolName, "_kmod_info") == 0) {
-        Result = MachoSymbolGetFileOffset64 (
+        Result = MachoSymbolGetFileOffset (
                    MachoContext,
                    Symbol,
                    &KmodOffset,
                    &MaxSize
                    );
         if (!Result
-         || (MaxSize < sizeof (KMOD_INFO_64_V1)
-         || (KmodOffset % 4) != 0)) {
+         || (MaxSize < (MachoContext->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1))
+         || (KmodOffset % 4) != 0)) { //FIXME ?
           return FALSE;
         }
 
@@ -1122,7 +1122,7 @@ InternalRelocateSymbols (
       }
     }
 
-    Result = MachoRelocateSymbol64 (
+    Result = MachoRelocateSymbol (
                MachoContext,
                LoadAddress,
                Symbol
@@ -1146,21 +1146,21 @@ InternalProcessSymbolPointers (
   IN UINT64                       LoadAddress
   )
 {
-  CONST MACH_HEADER_64  *MachHeader;
-  UINT32                MachSize;
-  CONST MACH_SECTION_64 *Section;
-  UINT32                NumSymbols;
-  UINT32                FirstSym;
-  BOOLEAN               Result;
-  UINT32                OffsetTop;
-  CONST UINT32          *SymIndices;
-  UINT64                *IndirectSymPtr;
-  UINT32                Index;
-  CONST MACH_NLIST_64   *Symbol;
+  CONST MACH_HEADER_ANY   *MachHeader;
+  UINT32                  MachSize;
+  CONST MACH_SECTION_ANY  *Section;
+  UINT32                  NumSymbols;
+  UINT32                  FirstSym;
+  BOOLEAN                 Result;
+  UINT32                  OffsetTop;
+  CONST UINT32            *SymIndices;
+  VOID                    *IndirectSymPtr;
+  UINT32                  Index;
+  CONST MACH_NLIST_ANY    *Symbol;
 
   VOID                  *Tmp;
 
-  Section = MachoGetSegmentSectionByName64 (
+  Section = MachoGetSegmentSectionByName (
               MachoContext,
               "__DATA",
               "__nl_symbol_ptr"
@@ -1169,8 +1169,13 @@ InternalProcessSymbolPointers (
     return TRUE;
   }
 
-  NumSymbols = (UINT32)(Section->Size / sizeof (*IndirectSymPtr));
-  FirstSym   = Section->Reserved1;
+  if (MachoContext->Is32Bit) {
+    NumSymbols = Section->Section32.Size / sizeof (UINT32);
+    FirstSym   = Section->Section32.Reserved1;
+  } else {
+    NumSymbols = (UINT32)(Section->Section64.Size / sizeof (UINT64));
+    FirstSym   = Section->Section64.Reserved1;
+  }
 
   Result = OcOverflowAddU32 (FirstSym, NumSymbols, &OffsetTop);
   if (Result || (OffsetTop > DySymtab->NumIndirectSymbols)) {
@@ -1180,7 +1185,7 @@ InternalProcessSymbolPointers (
   MachSize = MachoGetFileSize (MachoContext);
   Result = OcOverflowMulAddU32 (
              DySymtab->NumIndirectSymbols,
-             sizeof (*IndirectSymPtr),
+             MachoContext->Is32Bit ? sizeof (UINT32) : sizeof (UINT64),
              DySymtab->IndirectSymbolsOffset,
              &OffsetTop
              );
@@ -1188,7 +1193,7 @@ InternalProcessSymbolPointers (
     return FALSE;
   }
 
-  MachHeader = MachoGetMachHeader64 (MachoContext);
+  MachHeader = MachoGetMachHeader (MachoContext);
   ASSERT (MachHeader != NULL);
   //
   // Iterate through the indirect symbol table and fill in the section of
@@ -1206,11 +1211,10 @@ InternalProcessSymbolPointers (
   }
   SymIndices = (UINT32 *)Tmp + FirstSym;
 
-  Tmp = (VOID *)((UINTN)MachHeader + Section->Offset);
-  if (!OC_TYPE_ALIGNED (UINT64, Tmp)) {
+  IndirectSymPtr = (VOID *)((UINTN)MachHeader + (MachoContext->Is32Bit ? Section->Section32.Offset : Section->Section64.Offset));
+  if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, IndirectSymPtr) : !OC_TYPE_ALIGNED (UINT64, IndirectSymPtr)) {
     return FALSE;
   }
-  IndirectSymPtr = (UINT64 *)Tmp;
 
   for (Index = 0; Index < NumSymbols; ++Index) {
     if ((SymIndices[Index] & MACH_INDIRECT_SYMBOL_LOCAL) != 0) {
@@ -1218,14 +1222,22 @@ InternalProcessSymbolPointers (
         continue;
       }
 
-      IndirectSymPtr[Index] += LoadAddress;
+      if (MachoContext->Is32Bit) {
+        ((UINT32 *) IndirectSymPtr)[Index] += (UINT32) LoadAddress;
+      } else {
+        ((UINT64 *) IndirectSymPtr)[Index] += LoadAddress;
+      }
     } else {
-      Symbol = MachoGetSymbolByIndex64 (MachoContext, SymIndices[Index]);
+      Symbol = MachoGetSymbolByIndex (MachoContext, SymIndices[Index]);
       if (Symbol == NULL) {
         return FALSE;
       }
 
-      IndirectSymPtr[Index] += Symbol->Value;
+      if (MachoContext->Is32Bit) {
+        ((UINT32 *) IndirectSymPtr)[Index] += Symbol->Symbol32.Value;
+      } else {
+        ((UINT64 *) IndirectSymPtr)[Index] += Symbol->Symbol64.Value;
+      }
     }
   }
 
@@ -1451,7 +1463,7 @@ InternalPrelinkKext (
   //
   // Create and patch the KEXT's VTables.
   //
-  Result = InternalPatchByVtables64 (Context, Kext);
+  Result = InternalPatchByVtables (Context, Kext);
   if (!Result) {
     DEBUG ((DEBUG_INFO, "OCAK: Vtable patching failed for kext %a\n", Kext->Identifier));
     return EFI_LOAD_ERROR;
@@ -1465,7 +1477,7 @@ InternalPrelinkKext (
              MachoContext,
              LoadAddress,
              NumLocalSymbols,
-             (MACH_NLIST_64 *)LocalSymtab,
+             (MACH_NLIST_ANY *)LocalSymtab,
              &KmodInfoOffset
              );
   if (!Result) {
@@ -1476,7 +1488,7 @@ InternalPrelinkKext (
              MachoContext,
              LoadAddress,
              NumExternalSymbols,
-             (MACH_NLIST_64 *)ExternalSymtab,
+             (MACH_NLIST_ANY *)ExternalSymtab,
              &KmodInfoOffset
              );
   if (!Result || (KmodInfoOffset == 0)) {

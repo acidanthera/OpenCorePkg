@@ -287,6 +287,23 @@ MachoGetSectionByName64 (
   );
 
 /**
+  Retrieves a section within a segment by the name of SegmentName.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     SegmentName  The name of the segment to search in.
+  @param[in]     SectionName  The name of the section to search for.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION_ANY *
+MachoGetSegmentSectionByName (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
+  );
+
+/**
   Retrieves a 32-bit section within a segment by the name of SegmentName.
 
   @param[in,out] Context      Context of the Mach-O.
@@ -899,6 +916,23 @@ MachoGetSymbolByExternRelocationOffset64 (
   IN OUT OC_MACHO_CONTEXT   *Context,
   IN     UINT64             Address,
   OUT    MACH_NLIST_64      **Symbol
+  );
+
+/**
+  Relocate Symbol to be against LinkAddress.
+
+  @param[in,out] Context      Context of the Mach-O.
+  @param[in]     LinkAddress  The address to be linked against.
+  @param[in,out] Symbol       The symbol to be relocated.
+
+  @returns  Whether the operation has been completed successfully.
+
+**/
+BOOLEAN
+MachoRelocateSymbol (
+  IN OUT OC_MACHO_CONTEXT   *Context,
+  IN     UINT64             LinkAddress,
+  IN OUT MACH_NLIST_ANY     *Symbol
   );
 
 /**

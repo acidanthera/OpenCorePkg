@@ -216,7 +216,7 @@ InternalCreatePrelinkedKext (
 
   if (Prelinked != NULL
     && HasExe
-    && !MachoInitializeContext64 (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset)) {
+    && !MachoInitializeContext (&NewKext->Context.MachContext, &Prelinked->Prelinked[SourceBase], (UINT32)SourceSize, ContainerOffset, Prelinked->Is32Bit)) {
     FreePool (NewKext);
     return NULL;
   }
@@ -228,6 +228,7 @@ InternalCreatePrelinkedKext (
   NewKext->Context.VirtualBase        = VirtualBase;
   NewKext->Context.VirtualKmod        = VirtualKmod;
   NewKext->Context.IsKernelCollection = Prelinked != NULL ? Prelinked->IsKernelCollection : FALSE;
+  NewKext->Context.Is32Bit            = Prelinked != NULL ? Prelinked->Is32Bit : FALSE;
 
   //
   // Provide pointer to 10.6.8 KXLD state.
@@ -457,10 +458,8 @@ InternalScanBuildLinkedVtables (
   UINT32                           Index;
   UINT32                           VtableMaxSize;
   UINT32                           ResultingSize;
-  CONST UINT64                     *VtableData;
+  CONST VOID                       *VtableData;
   PRELINKED_VTABLE                 *LinkedVtables;
-
-  VOID                             *Tmp;
 
   if (Kext->LinkedVtables != NULL) {
     return EFI_SUCCESS;
@@ -469,7 +468,7 @@ InternalScanBuildLinkedVtables (
   VtableLookups = Context->LinkBuffer;
   MaxSize       = Context->LinkBufferSize;
 
-  Result = InternalPrepareCreateVtablesPrelinked64 (
+  Result = InternalPrepareCreateVtablesPrelinked (
              Kext,
              MaxSize,
              &NumVtables,
@@ -487,17 +486,17 @@ InternalScanBuildLinkedVtables (
     //       need to abort anyway when the value is out of its bounds, we can
     //       just locate it by address in the first place.
     //
-    Tmp = MachoGetFilePointerByAddress (
+    VtableData = MachoGetFilePointerByAddress (
             &Kext->Context.MachContext,
             VtableLookups[Index].Vtable.Value,
             &VtableMaxSize
             );
-    if (Tmp == NULL || !OC_TYPE_ALIGNED (UINT64, Tmp)) {
+    if (VtableData == NULL || (Context->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData))) {
       return EFI_UNSUPPORTED;
     }
-    VtableData = (UINT64 *)Tmp;
 
-    Result = InternalGetVtableEntries64 (
+    Result = InternalGetVtableEntries (
+               Context->Is32Bit,
                VtableData,
                VtableMaxSize,
                &NumEntriesTemp
@@ -523,7 +522,7 @@ InternalScanBuildLinkedVtables (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  InternalCreateVtablesPrelinked64 (
+  InternalCreateVtablesPrelinked (
              Context,
              Kext,
              NumVtables,

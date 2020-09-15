@@ -187,6 +187,20 @@ MachoGetSectionByName (
     (MACH_SECTION_ANY *) MachoGetSectionByName64 (Context, &Segment->Segment64, SectionName);
 }
 
+MACH_SECTION_ANY *
+MachoGetSegmentSectionByName (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName32 (Context, SegmentName, SectionName) :
+    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName64 (Context, SegmentName, SectionName);
+}
+
 /**
   Initialises the symbol information of Context.
 

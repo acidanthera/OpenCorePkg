@@ -89,14 +89,14 @@ InternalGetOcVtableByName (
 
 STATIC
 VOID
-InternalConstructVtablePrelinked64 (
+InternalConstructVtablePrelinked (
   IN     PRELINKED_CONTEXT                      *Context,
   IN OUT PRELINKED_KEXT                         *Kext,
   IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookup,
   OUT    PRELINKED_VTABLE                       *Vtable
   )
 {
-  CONST UINT64                                  *VtableData;
+  CONST VOID                                    *VtableData;
   UINT64                                        Value;
   UINT32                                        Index;
   CONST PRELINKED_KEXT_SYMBOL                   *Symbol;
@@ -115,12 +115,12 @@ InternalConstructVtablePrelinked64 (
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
-  // VTable bounds are verified in InternalGetVtableEntries64() called earlier.
+  // VTable bounds are verified in InternalGetVtableEntries() called earlier.
   // The buffer is allocated to be able to hold all entries.
   //
   for (
     Index = 0;
-    (Value = VtableData[Index + VTABLE_HEADER_LEN]) != 0;
+    (Value = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN)) != 0;
     ++Index
     ) {
 
@@ -148,8 +148,9 @@ InternalConstructVtablePrelinked64 (
 }
 
 BOOLEAN
-InternalGetVtableEntries64 (
-  IN  CONST UINT64  *VtableData,
+InternalGetVtableEntries (
+  IN  BOOLEAN       Is32Bit,
+  IN  CONST VOID    *VtableData,
   IN  UINT32        MaxSize,
   OUT UINT32        *NumEntries
   )
@@ -162,20 +163,20 @@ InternalGetVtableEntries64 (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  MaxSize /= VTABLE_ENTRY_SIZE_64;
+  MaxSize /= VTABLE_ENTRY_SIZE_X (Is32Bit);
   Index    = VTABLE_HEADER_LEN;
   do {
     if (Index >= MaxSize) {
       return FALSE;
     }
-  } while (VtableData[Index++] != 0);
+  } while (VTABLE_ENTRY_X (Is32Bit, VtableData, Index++) != 0);
 
   *NumEntries = (Index - VTABLE_HEADER_LEN);
   return TRUE;
 }
 
 BOOLEAN
-InternalPrepareCreateVtablesPrelinked64 (
+InternalPrepareCreateVtablesPrelinked (
   IN  PRELINKED_KEXT                    *Kext,
   IN  UINT32                            MaxSize,
   OUT UINT32                            *NumVtables,
@@ -230,7 +231,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 }
 
 VOID
-InternalCreateVtablesPrelinked64 (
+InternalCreateVtablesPrelinked (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,
   IN     UINT32                                  NumVtables,
@@ -243,7 +244,7 @@ InternalCreateVtablesPrelinked64 (
   ASSERT (Kext != NULL);
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    InternalConstructVtablePrelinked64 (
+    InternalConstructVtablePrelinked (
                 Context,
                 Kext,
                 &VtableLookups[Index],
@@ -388,7 +389,7 @@ InternalInitializeVtableByEntriesAndRelocations (
   IN     PRELINKED_KEXT               *Kext,
   IN     CONST PRELINKED_VTABLE       *SuperVtable,
   IN     CONST MACH_NLIST_ANY         *VtableSymbol,
-  IN     CONST UINT64                 *VtableData,
+  IN     CONST VOID                   *VtableData,
   IN     UINT32                       NumSolveSymbols,
   IN OUT MACH_NLIST_ANY               **SolveSymbols,
   OUT    PRELINKED_VTABLE             *Vtable
@@ -414,7 +415,7 @@ InternalInitializeVtableByEntriesAndRelocations (
   //             retrieved from VtableData.
   //
   for (Index = 0; Index < SuperVtable->NumEntries; ++Index) {
-    EntryValue = VtableData[Index + VTABLE_HEADER_LEN];
+    EntryValue = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN);
     if (EntryValue != 0) {
       //
       // If we can't find a symbol, it means it is a locally-defined,
@@ -521,7 +522,7 @@ InternalInitializeVtablePatchData (
   //             retrieved from VtableData.
   //
   MaxSymbols     = (*MaxSize / sizeof (*SolveSymbols)); // FIXME valid for both?
-  VtableMaxSize /= MachoContext->Is32Bit ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64;
+  VtableMaxSize /= VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit);
 
   SymIndex = 0;
 
@@ -530,10 +531,10 @@ InternalInitializeVtablePatchData (
     EntryOffset < VtableMaxSize;
     ++EntryOffset
     ) {
-    if ((MachoContext->Is32Bit ? ((UINT32 *) VtableData)[EntryOffset] : ((UINT64 *) VtableData)[EntryOffset]) == 0) {
+    if (VTABLE_ENTRY_X (MachoContext->Is32Bit, VtableData, EntryOffset) == 0) {
       Result = OcOverflowAddU64 (
                  MachoContext->Is32Bit ? VtableSymbol->Symbol32.Value : VtableSymbol->Symbol64.Value,
-                 (EntryOffset * (MachoContext->Is32Bit ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64)),
+                 (EntryOffset * VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit)),
                  &FileOffset
                  );
       if (Result) {
@@ -570,7 +571,7 @@ InternalInitializeVtablePatchData (
 }
 
 BOOLEAN
-InternalPatchByVtables64 (
+InternalPatchByVtables (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext
   )
