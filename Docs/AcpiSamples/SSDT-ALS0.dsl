@@ -7,8 +7,6 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "ALS0", 0x00000000)
 {
     Scope (_SB)
     {
-    If (_OSI ("Darwin"))
-        {
         Device (ALS0)
         {
             Name (_HID, "ACPI0008" /* Ambient Light Sensor Device */)  // _HID: Hardware ID
@@ -22,7 +20,17 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "ALS0", 0x00000000)
                     0x012C
                 }
             })
-           }
+            Method (_STA, 0, NotSerialized)  // _STA: Status
+            {
+                If (_OSI ("Darwin"))
+                {
+                    Return (0x0F)
+                }
+                Else
+                {
+                    Return (Zero)
+                }
+            }
         }
     }
 }
