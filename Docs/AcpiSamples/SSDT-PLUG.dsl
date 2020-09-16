@@ -35,117 +35,116 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlug", 0x00003000)
     If (CondRefOf (\_SB.CPU0)) {
         If ((ObjectType (\_SB.CPU0) == 0x0C)) {
             Scope (\_SB.CPU0) {
-              If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                If (_OSI ("Darwin")) {
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
     
     If (CondRefOf (\_PR.CPU0)) {
         If ((ObjectType (\_PR.CPU0) == 0x0C)) {
             Scope (\_PR.CPU0) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
 
     If (CondRefOf (\_SB.PR00)) {
         If ((ObjectType (\_SB.PR00) == 0x0C)) {
             Scope (\_SB.PR00) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
 
     If (CondRefOf (\_PR.CP00)) {
         If ((ObjectType (\_PR.CP00) == 0x0C)) {
             Scope (\_PR.CP00) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
 
     If (CondRefOf (\_PR.C000)) {
         If ((ObjectType (\_PR.C000) == 0x0C)) {
             Scope (\_PR.C000) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
     
-   If (CondRefOf (\_PR.P000)) {
+    If (CondRefOf (\_PR.P000)) {
         If ((ObjectType (\_PR.P000) == 0x0C)) {
             Scope (\_PR.P000) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
     
-   If (CondRefOf (\_PR.PR00)) {
+    If (CondRefOf (\_PR.PR00)) {
         If ((ObjectType (\_PR.PR00) == 0x0C)) {
             Scope (\_PR.PR00) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
 
-   If (CondRefOf (\_SB.SCK0.CP00)) {
+    If (CondRefOf (\_SB.SCK0.CP00)) {
         If ((ObjectType (\_SB.SCK0.CP00) == 0x0C)) {
             Scope (\_SB.SCK0.CP00) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
+    }
 
-   If (CondRefOf (\_SB.SCK0.PR00)) {
+    If (CondRefOf (\_SB.SCK0.PR00)) {
         If ((ObjectType (\_SB.SCK0.PR00) == 0x0C)) {
             Scope (\_SB.SCK0.PR00) {
                 If (_OSI ("Darwin")) {
-                Method (_DSM, 4, NotSerialized)  
-                {
-                    Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    Method (_DSM, 4, NotSerialized)  
+                    {
+                        Return (PMPM (Arg0, Arg1, Arg2, Arg3))
+                    }
                 }
-              }
             }
-          }
         }
-      }
+    }

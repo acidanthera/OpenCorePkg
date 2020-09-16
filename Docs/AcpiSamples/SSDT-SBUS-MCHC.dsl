@@ -7,7 +7,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
     External (_SB_.PCI0.SBUS, DeviceObj)
 
     Scope (_SB.PCI0)
-     {
+    {
         Device (MCHC)
         {
             Name (_ADR, Zero)  // _ADR: Address
