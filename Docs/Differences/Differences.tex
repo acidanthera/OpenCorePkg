@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
-%DIF ADD ../Configuration.tex        Sun Sep 13 23:16:31 2020
+%DIF DEL PreviousConfiguration.tex   Wed Sep 16 22:53:45 2020
+%DIF ADD ../Configuration.tex        Wed Sep 16 22:58:02 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1112,13 +1112,21 @@ In the majority of the cases ACPI patches are not useful and harmful:
   level, as done by
   \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}.
 \item
-  Avoid patching \texttt{\_OSI} to support a higher level of feature sets
-  unless absolutely required. Commonly this enables a number of hacks on APTIO
+  \DIFdelbegin \DIFdel{Avoid }\DIFdelend \DIFaddbegin \DIFadd{Try to avoid }\DIFaddend patching \texttt{\_OSI} to support a higher level of feature sets
+  \DIFdelbegin \DIFdel{unless absolutely required}\DIFdelend \DIFaddbegin \DIFadd{whenever possible}\DIFaddend . Commonly this enables a number of hacks on APTIO
   firmwares, which result in the need to add more patches. Modern firmwares
   generally do not need it at all, and those that do are fine with much
-  smaller patches.
-\item
-  Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
+  smaller patches. \DIFaddbegin \DIFadd{However, laptop vendors usually rely on this method to 
+  determine the availability of functions like modern I2C input support, thermal
+  adjustment and custom feature additions.
+}\DIFaddend \item
+  \DIFaddbegin \DIFadd{Avoid patching embedded controller event }\texttt{\DIFadd{\_Qxx}} \DIFadd{just for enabling
+  brightness keys. The conventional process to find these keys usually involves
+  massive modification on DSDT and SSDTs and the debug kext is not stable on
+  newer systems. Please switch to built-in brightness key discovery of
+  }\href{https://github.com/acidanthera/VoodooPS2}{VoodooPS2} \DIFadd{instead.
+}\item
+  \DIFaddend Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
@@ -1133,8 +1141,9 @@ Several cases, where patching actually does make sense, include:
   \texttt{A0 10 93 4F 53 46 4C 00} with \texttt{A4 0A 0F A3 A3 A3 A3 A3}.
 \item
   To provide custom method implementation with in an SSDT, for instance,
-  to report functional key presses on a laptop, the original method can be replaced
-  with a dummy name by patching \texttt{\_Q11} with \texttt{XQ11}.
+  to \DIFdelbegin \DIFdel{report functional key presses on a laptop}\DIFdelend \DIFaddbegin \DIFadd{inject shutdown fix on certain computers}\DIFaddend , the original method can be
+  replaced with a dummy name by patching \texttt{\_\DIFdelbegin \DIFdel{Q11}\DIFdelend \DIFaddbegin \DIFadd{PTS}\DIFaddend } with \texttt{\DIFdelbegin \DIFdel{XQ11}\DIFdelend \DIFaddbegin \DIFadd{ZPTS}\DIFaddend }
+  \DIFaddbegin \DIFadd{and adding a callback to original method}\DIFaddend .
 \end{itemize}
 
 Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
@@ -2347,7 +2356,7 @@ blocking.
   kernel extension if this is desired.
 
   \emph{Note 2}: This option will not protect areas from being overwritten
-  at firmware stage (e.g. macOS bootloader), see \texttt{AppleRtc} protocol
+  at firmware stage (e.g. macOS bootloader), see \texttt{\DIFdelbegin \DIFdel{AppleRtc}\DIFdelend \DIFaddbegin \DIFadd{AppleRtcRam}\DIFaddend } protocol
   description if this is desired.
 
 \item
