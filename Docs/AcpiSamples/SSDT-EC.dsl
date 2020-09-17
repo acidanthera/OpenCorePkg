@@ -65,7 +65,6 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
         {
             \_SB.PCI0.LPCB.EC0._STA = Zero
         }
-        
     }    
     **/
 
