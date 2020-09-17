@@ -26,7 +26,7 @@ uint8_t *readFile(const char *str, uint32_t *size) {
 }
 
 void writeFile(const char *str, void *data, uint32_t size) {
-  FILE *Fh = fopen("out.bin", "wb");
+  FILE *Fh = fopen(str, "wb");
 
   if (Fh != NULL) {
     if (fwrite (data, size, 1, Fh) != 1)
