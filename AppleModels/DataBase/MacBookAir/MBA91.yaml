@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.40.13.0.0"
-BIOSLegacyVersion: "MBA91.88Z.F000.B00.2008232306"
-BIOSReleaseDate: "08/23/2020"
+BIOSVersion: "1554.40.18.0.0"
+BIOSLegacyVersion: "MBA91.88Z.F000.B00.2009080103"
+BIOSReleaseDate: "09/08/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir9,1"
 SystemVersion: "1.0"
@@ -48,17 +48,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBA91.88Z.F000.B00.2008232306
+    BIOS ID:      MBA91.88Z.F000.B00.2009080103
     Model:        MBA91
-    EFI Version:  1554.40.13.0.0
-    Built by:     root@bb-g8-pdb13
-    Date:         Sun Aug 23 23:06:42 2020
-    Revision:     1554.40.13 (B&I)
+    EFI Version:  1554.40.18.0.0
+    Built by:     root@bb-g9-pdb13
+    Date:         Tue Sep  8 01:03:51 2020
+    Revision:     1554.40.18 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1200.0.30.1
+    Compiler:     clang-1200.0.30.2
     UUID:         A701B3B1-0889-3E38-8EA3-57BDE30E3C06
-    UUID:         26B1702C-AEE7-3634-9C75-8EFBA45590DC
+    UUID:         8A16FD5B-FB2E-3122-8DD9-3EB2CE16C348
 Specifications:
   CPUCodename:
     - "Ice Lake Y"
