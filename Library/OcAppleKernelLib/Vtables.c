@@ -521,7 +521,7 @@ InternalInitializeVtablePatchData (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  MaxSymbols     = (*MaxSize / sizeof (*SolveSymbols)); // FIXME valid for both?
+  MaxSymbols     = (*MaxSize / (MachoContext->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
   VtableMaxSize /= VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit);
 
   SymIndex = 0;
@@ -551,7 +551,7 @@ InternalInitializeVtablePatchData (
         // If the VTable entry is 0 and it is not referenced by a Relocation,
         // it is the end of the table.
         //
-        *MaxSize      -= (SymIndex * sizeof (*SolveSymbols)); // FIXME valid for both?
+        *MaxSize      -= (SymIndex * (MachoContext->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
         *VtableDataPtr = VtableData;
         *NumEntries    = (EntryOffset - VTABLE_HEADER_LEN);
         *NumSymbols    = SymIndex;
