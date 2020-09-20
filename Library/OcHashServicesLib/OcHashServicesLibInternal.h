@@ -4,7 +4,7 @@
  * Forcibly reinstalls EFI_HASH_PROTOCOL with working MD5, SHA-1,
  * SHA-256 implementations.
  *
- * Author: Joel Höner <athre0z@zyantific.com>
+ * Author: Joel Hoener <athre0z@zyantific.com>
  */
 
 #ifndef HASH_SERVICES_H

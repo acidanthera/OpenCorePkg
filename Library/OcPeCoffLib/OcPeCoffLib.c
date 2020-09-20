@@ -121,8 +121,7 @@ InternalVerifySections (
     //
     // FIXME: Misaligned images should be handled with a PCD.
     //
-    if (Sections[SectIndex].VirtualAddress < SectRvaPrevEnd
-      || Sections[SectIndex].VirtualAddress > NextSectRva) {
+    if (Sections[SectIndex].VirtualAddress < SectRvaPrevEnd) {
       return IMAGE_ERROR_UNSUPPORTED;
     }
 
