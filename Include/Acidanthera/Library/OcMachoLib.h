@@ -437,6 +437,21 @@ MachoGetNextSection64 (
   );
 
 /**
+  Retrieves a section by its index.
+
+  @param[in,out] Context  Context of the Mach-O.
+  @param[in]     Index    Index of the section to retrieve.
+
+  @retval NULL  NULL is returned on failure.
+
+**/
+MACH_SECTION_ANY *
+MachoGetSectionByIndex (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  );
+
+/**
   Retrieves a 32-bit section by its index.
 
   @param[in,out] Context  Context of the Mach-O.
@@ -1333,6 +1348,18 @@ MachoGetVtableSymbolsFromSmcp64 (
   IN     CONST CHAR8          *SmcpName,
   OUT    CONST MACH_NLIST_64  **Vtable,
   OUT    CONST MACH_NLIST_64  **MetaVtable
+  );
+
+/**
+  Returns whether the Relocation's type indicates a Pair for the Intel 32
+  platform.
+  
+  @param[in] Type  The Relocation's type to verify.
+
+**/
+BOOLEAN
+MachoRelocationIsPairIntel32 (
+  IN UINT8  Type
   );
 
 /**

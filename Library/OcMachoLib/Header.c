@@ -160,6 +160,19 @@ MachoGetNextSection (
     (MACH_SECTION_ANY *) MachoGetNextSection64 (Context, &Segment->Segment64, Section != NULL ? &Section->Section64 : NULL);
 }
 
+MACH_SECTION_ANY *
+MachoGetSectionByIndex (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetSectionByIndex32 (Context, Index) :
+    (MACH_SECTION_ANY *) MachoGetSectionByIndex64 (Context, Index);
+}
+
 MACH_SEGMENT_COMMAND_ANY *
 MachoGetSegmentByName (
   IN OUT OC_MACHO_CONTEXT  *Context,
@@ -622,7 +635,7 @@ MachoGetFilePointerByAddress (
   ASSERT (Context != NULL);
 
   if (Context->Is32Bit) {
-    ASSERT (Address > MAX_UINT32);
+    ASSERT (Address < MAX_UINT32);
   }
 
   return Context->Is32Bit ?

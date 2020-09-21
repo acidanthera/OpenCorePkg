@@ -22,6 +22,21 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "OcMachoLibInternal.h"
 
 /**
+  Returns whether the Relocation's type indicates a Pair for the Intel 32
+  platform.
+  
+  @param[in] Type  The Relocation's type to verify.
+
+**/
+BOOLEAN
+MachoRelocationIsPairIntel32 (
+  IN UINT8  Type
+  )
+{
+  return (Type == MachGenericRelocSectDiff || Type == MachGenericRelocLocalSectDiff);
+}
+
+/**
   Returns whether the Relocation's type indicates a Pair for the Intel 64
   platform.
   
