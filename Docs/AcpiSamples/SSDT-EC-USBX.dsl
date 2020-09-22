@@ -53,22 +53,6 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
     }
     **/
 
-    /*
-     * Uncomment the following to disable EC if the STA method exists.
-     */
-    
-    /**
-    External (_SB_.PCI0.LPCB.EC0_._STA, UnknownObj)
-    
-    Scope (\)
-    {
-        If (_OSI ("Darwin"))
-        {
-            \_SB.PCI0.LPCB.EC0._STA = Zero
-        }  
-    }    
-    **/
-
     Scope (\_SB)
     {
         Device (USBX)
