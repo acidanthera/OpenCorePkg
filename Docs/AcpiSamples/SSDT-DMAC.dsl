@@ -4,7 +4,7 @@
  */
 DefinitionBlock ("", "SSDT", 2, "ACDT", "DMAC", 0x00000000)
 {
-    External(_SB.PCI0.LPCB, DeviceObj)
+    External(_SB_.PCI0.LPCB, DeviceObj)
 
     Scope (_SB.PCI0.LPCB)
     {
