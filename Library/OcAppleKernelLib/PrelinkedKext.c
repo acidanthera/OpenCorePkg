@@ -357,7 +357,11 @@ InternalScanBuildLinkedSymbolTable (
   NumCxxSymbols = 0;
 
   for (Index = 0; Index < Kext->NumberOfSymbols; ++Index) {
-    Symbol     = &Kext->SymbolTable[Index];
+    if (Context->Is32Bit) {
+      Symbol = (MACH_NLIST_ANY *)&(&Kext->SymbolTable->Symbol32)[Index];
+    } else {
+      Symbol = (MACH_NLIST_ANY *)&(&Kext->SymbolTable->Symbol64)[Index];
+    }
     SymbolType = Context->Is32Bit ? Symbol->Symbol32.Type : Symbol->Symbol64.Type;
     if ((SymbolType & MACH_N_TYPE_STAB) != 0) {
       ++NumDiscardedSyms;
