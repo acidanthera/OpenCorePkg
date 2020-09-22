@@ -2,7 +2,7 @@
  * Only necessary when no DMAC device (with any name) is present in the DSDT and a custom device-id
  * Often missing on intel generations from Skylake and later).
  */
-DefinitionBlock ("", "SSDT", 2, "ACDT", "DMAC", 0)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "DMAC", 0x00000000)
 {
     External(_SB.PCI0.LPCB, DeviceObj)
 
