@@ -271,8 +271,6 @@ InternalScanCurrentPrelinkedKextLinkInfo (
     return;
   }
 
-  DEBUG ((DEBUG_INFO, "here kxld\n"));
-
   if (Kext->LinkEditSegment == NULL && Kext->NumberOfSymbols == 0) {
     if (AsciiStrCmp (Kext->Identifier, PRELINK_KERNEL_IDENTIFIER) == 0) {
       Kext->LinkEditSegment = Context->LinkEditSegment;
@@ -1055,7 +1053,8 @@ InternalLinkPrelinkedKext (
   IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
   IN     UINT64             LoadAddress,
-  IN     UINT64             KmodAddress
+  IN     UINT64             KmodAddress,
+  IN     UINT64             FileOffset
   )
 {
   EFI_STATUS      Status;
@@ -1110,7 +1109,7 @@ InternalLinkPrelinkedKext (
   Kext->Context.VirtualBase = LoadAddress;
   Kext->Context.VirtualKmod = KmodAddress;
 
-  Status = InternalPrelinkKext (Context, Kext, LoadAddress);
+  Status = InternalPrelinkKext (Context, Kext, LoadAddress, FileOffset);
 
   if (EFI_ERROR (Status)) {
     InternalFreePrelinkedKext (Kext);

@@ -308,7 +308,7 @@ MACH_X (MachoSymbolIsLocalDefined) (
   ASSERT (Context->SymbolTable != NULL);
 
   if ((DySymtab == NULL) || (DySymtab->NumUndefinedSymbols == 0)) {
-    return TRUE;
+    return FALSE; // FIXME: Required under 32-bit during vtable parent resolution, if using MH_OBJECT.
   }
   //
   // The symbol must have been declared locally prior to solving.  As there is

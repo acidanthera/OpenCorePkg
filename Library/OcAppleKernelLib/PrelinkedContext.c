@@ -885,10 +885,13 @@ PrelinkedReserveKextSize (
       return EFI_INVALID_PARAMETER;
     }
 
-    ExecutableSize = MachoGetVmSize (&Context);
+    /*ExecutableSize = MachoGetVmSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
-    }
+    }*/
+
+    ExecutableSize  = MACHO_ALIGN (ExecutableSize);
+    ExecutableSize += SIZE_16KB; // FIXME: Need to calculate size that MachoExpandImage requires.
   }
 
   if (OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
@@ -936,6 +939,8 @@ PrelinkedInjectKext (
   CHAR8             ExecutableLoadAddrStr[24];
   CHAR8             KmodInfoStr[24];
   UINT32            KextOffset;
+  UINT64            FileOffset;
+  UINT64            LoadAddressOffset;
 
   PrelinkedKext = NULL;
 
@@ -976,7 +981,8 @@ PrelinkedInjectKext (
       &ExecutableContext,
       &Context->Prelinked[KextOffset],
       Context->PrelinkedAllocSize - KextOffset,
-      TRUE
+      TRUE,
+      &FileOffset
       );
 
     AlignedExecutableSize = MACHO_ALIGN (ExecutableSize);
@@ -984,7 +990,6 @@ PrelinkedInjectKext (
     if (OcOverflowAddU32 (KextOffset, AlignedExecutableSize, &NewPrelinkedSize)
       || NewPrelinkedSize > Context->PrelinkedAllocSize
       || ExecutableSize == 0) {
-        DEBUG ((DEBUG_INFO, "got here %X\n", ExecutableSize ));
       return EFI_BUFFER_TOO_SMALL;
     }
 
@@ -993,11 +998,12 @@ PrelinkedInjectKext (
       AlignedExecutableSize - ExecutableSize
       );
 
-    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)) {
+    if (!MachoInitializeContext (&ExecutableContext, &Context->Prelinked[KextOffset], ExecutableSize, 0, Context->Is32Bit)
+      || OcOverflowAddU64 (Context->PrelinkedLastLoadAddress, FileOffset, &LoadAddressOffset)) {
       return EFI_INVALID_PARAMETER;
     }
 
-    Result = KextFindKmodAddress (&ExecutableContext, Context->PrelinkedLastLoadAddress, ExecutableSize, &KmodAddress);
+    Result = KextFindKmodAddress (&ExecutableContext, LoadAddressOffset, ExecutableSize, &KmodAddress);
     if (!Result) {
       return EFI_INVALID_PARAMETER;
     }
@@ -1073,17 +1079,15 @@ PrelinkedInjectKext (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  DEBUG ((DEBUG_INFO, "got here\n"));
-
   if (Executable != NULL) {
     PrelinkedKext = InternalLinkPrelinkedKext (
       Context,
       &ExecutableContext,
       InfoPlistRoot,
       Context->PrelinkedLastLoadAddress,
-      KmodAddress
+      KmodAddress,
+      FileOffset
       );
-    DEBUG ((DEBUG_INFO, "got here 3\n"));
 
     if (PrelinkedKext == NULL) {
       XmlDocumentFree (InfoPlistDocument);
@@ -1122,9 +1126,15 @@ PrelinkedInjectKext (
       //
       // For legacy prelinkedkernel we append to __PRELINK_TEXT.
       //
-      Context->PrelinkedTextSegment->Segment64.Size     += AlignedExecutableSize;
-      Context->PrelinkedTextSegment->Segment64.FileSize += AlignedExecutableSize;
-      Context->PrelinkedTextSection->Section64.Size     += AlignedExecutableSize;
+      if (Context->Is32Bit) {
+        Context->PrelinkedTextSegment->Segment32.Size     += AlignedExecutableSize;
+        Context->PrelinkedTextSegment->Segment32.FileSize += AlignedExecutableSize;
+        Context->PrelinkedTextSection->Section32.Size     += AlignedExecutableSize;
+      } else {
+        Context->PrelinkedTextSegment->Segment64.Size     += AlignedExecutableSize;
+        Context->PrelinkedTextSegment->Segment64.FileSize += AlignedExecutableSize;
+        Context->PrelinkedTextSection->Section64.Size     += AlignedExecutableSize;
+      }
     }
   }
 

@@ -1,6 +1,5 @@
 /** @file
   Library handling KEXT prelinking.
-  Currently limited to Intel 64 architectures.
 
 Copyright (c) 2018, Download-Fritz.  All rights reserved.<BR>
 This program and the accompanying materials are licensed and made available

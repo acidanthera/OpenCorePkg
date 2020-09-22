@@ -648,14 +648,15 @@ MachoExpandImage (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT UINT64             *FileOffset OPTIONAL
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoExpandImage32 (Context, Destination, DestinationSize, Strip) :
-    InternalMachoExpandImage64 (Context, Destination, DestinationSize, Strip);
+    InternalMachoExpandImage32 (Context, Destination, DestinationSize, Strip, (UINT32 *) FileOffset) :
+    InternalMachoExpandImage64 (Context, Destination, DestinationSize, Strip, FileOffset);
 }
 
 BOOLEAN

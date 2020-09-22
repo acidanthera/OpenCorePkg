@@ -1560,6 +1560,7 @@ MachoGetFilePointerByAddress (
   @param[out] Destination      Output buffer.
   @param[in]  DestinationSize  Output buffer maximum size.
   @param[in]  Strip            Output with stripped prelink commands.
+  @param[in]  FileOffset       Pointer to the file offset of the first segment.
 
   @returns  New image size or 0 on failure.
 
@@ -1569,7 +1570,8 @@ MachoExpandImage (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT UINT64             *FileOffset OPTIONAL
   );
 
 /**

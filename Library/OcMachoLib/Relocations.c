@@ -128,6 +128,65 @@ InternalLookupRelocationByOffset (
   return NULL;
 }
 
+STATIC
+MACH_RELOCATION_INFO *
+InternalLookupSectionRelocationByOffset (
+  IN OUT OC_MACHO_CONTEXT      *Context,
+  IN     UINT64                Address
+  )
+{
+  MACH_SECTION_ANY        *Section;
+  UINT32                  SectionIndex;
+  UINT32                  Index;
+
+  MACH_RELOCATION_INFO    *Relocations;
+  MACH_RELOCATION_INFO    *Relocation;
+  UINT32                  RelocationCount;
+
+  SectionIndex = 0;
+  while (TRUE) {
+    Section = MachoGetSectionByIndex (Context, SectionIndex);
+    if (Section == NULL) {
+      break;
+    }
+
+    //
+    // Each section has its own relocations table.
+    //
+    RelocationCount = Context->Is32Bit ? Section->Section32.NumRelocations : Section->Section64.NumRelocations;
+    if (RelocationCount > 0) {
+      Relocations = (MACH_RELOCATION_INFO*) (((UINTN)(Context->MachHeader))
+        + (Context->Is32Bit ? Section->Section32.RelocationsOffset : Section->Section64.RelocationsOffset));
+
+      for (Index = 0; Index < RelocationCount; Index++) {
+          Relocation = &Relocations[Index];
+                    
+          //
+          // A section-based relocation entry can be skipped for absolute symbols.
+          //
+          if ((Relocation->Extern == 0)
+          && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+            continue;
+          }
+
+          if (Context->Is32Bit) {
+            if (((UINT32)Relocation->Address + Section->Section32.Address) == Address) {
+              return Relocation;
+            }
+          } else {
+            if (((UINT64)Relocation->Address + Section->Section64.Address) == Address) {
+              return Relocation;
+            }
+          }
+        }
+    }
+
+    SectionIndex++;
+  }
+
+  return NULL;
+}
+
 /**
   Retrieves an extern Relocation by the address it targets.
 
@@ -143,6 +202,16 @@ InternalGetExternRelocationByOffset (
   IN     UINT64            Address
   )
 {
+  //
+  // MH_OBJECT does not have a DYSYMTAB.
+  //
+  if (Context->DySymtab == NULL) {
+    return InternalLookupSectionRelocationByOffset (
+      Context,
+      Address
+      );
+  }
+
   return InternalLookupRelocationByOffset (
            Address,
            Context->DySymtab->NumExternalRelocations,

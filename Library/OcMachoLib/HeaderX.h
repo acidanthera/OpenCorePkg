@@ -275,7 +275,8 @@ MACH_X (InternalMachoExpandImage) (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT MACH_UINT_X        *FileOffset OPTIONAL
   )
 {
   MACH_HEADER_X             *Header;
@@ -284,6 +285,8 @@ MACH_X (InternalMachoExpandImage) (
   MACH_UINT_X               CopyFileOffset;
   MACH_UINT_X               CopyFileSize;
   MACH_UINT_X               CopyVmSize;
+  MACH_UINT_X               RelocationsSize;
+  MACH_UINT_X               SymtabSize;
   UINT32                    CurrentDelta;
   UINT32                    OriginalDelta;
   MACH_UINT_X               CurrentSize;
@@ -294,6 +297,7 @@ MACH_X (InternalMachoExpandImage) (
   MACH_SYMTAB_COMMAND       *Symtab;
   MACH_DYSYMTAB_COMMAND     *DySymtab;
   UINT32                    Index;
+  BOOLEAN                   FoundLinkedit;
 
   ASSERT (Context != NULL);
   ASSERT (Context->FileSize != 0);
@@ -310,32 +314,18 @@ MACH_X (InternalMachoExpandImage) (
   }
   CopyMem (Destination, Header, HeaderSize);
 
-
-    DEBUG ((DEBUG_INFO, "here2\n"));
-
-  CurrentDelta = 0;
-  FirstSegment = NULL;
-  CurrentSize  = 0;
+  CurrentDelta  = 0;
+  FirstSegment  = NULL;
+  CurrentSize   = 0;
+  FoundLinkedit = FALSE;
   for (
     Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
     Segment != NULL;
     Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
     ) {
-    //
-    // Align delta by x86 page size, this is what our lib expects.
-    //
-    OriginalDelta = CurrentDelta;
-    CurrentDelta  = MACHO_ALIGN (CurrentDelta);
     if (Segment->FileSize > Segment->Size) {
       return 0;
     }
-
-    if (FirstSegment == NULL) {
-      FirstSegment = Segment;
-    }
-
-
-    DEBUG ((DEBUG_INFO, "here3\n"));
 
     //
     // Do not overwrite header.
@@ -343,20 +333,40 @@ MACH_X (InternalMachoExpandImage) (
     CopyFileOffset = Segment->FileOffset - Context->ContainerOffset;
     CopyFileSize   = Segment->FileSize;
     CopyVmSize     = Segment->Size;
-    if (CopyFileOffset <= HeaderSize) {
+    /*if (CopyFileOffset <= HeaderSize) { // FIXME
       CopyFileOffset = HeaderSize;
       CopyFileSize   = Segment->FileSize - CopyFileOffset;
       CopyVmSize     = Segment->Size - CopyFileOffset;
       if (CopyFileSize > Segment->FileSize || CopyVmSize > Segment->Size) {
         //
-        // Header must fit in 1 segment.
+        // Header must fit in 1 segment, but only if not MH_OBJECT.
         //
         return 0;
       }
+    }*/
+
+    //
+    // Align delta by x86 page size, this is what our lib expects.
+    //
+    OriginalDelta = CurrentDelta;
+    CurrentDelta  = MACHO_ALIGN (CurrentDelta);
+
+    DEBUG ((DEBUG_INFO, "OriginalDelta %x CurrentDelta %x\n", OriginalDelta, CurrentDelta));
+
+    //
+    // Store first segment and ensure it is aligned.
+    // MH_OBJECT does not include the header in the single unnamed segment, with the
+    // segment having an offset directly after the header instead. We'll align it here.
+    //
+    if (FirstSegment == NULL) {
+      FirstSegment = Segment;
+      CurrentDelta = CurrentDelta + MACHO_ALIGN (CopyFileOffset) - CopyFileOffset;
+
+      if (FileOffset != NULL) {
+        *FileOffset = CopyFileOffset + CurrentDelta; // FIXME
+      }
     }
 
-
-    DEBUG ((DEBUG_INFO, "here4\n"));
     //
     // Ensure that it still fits. In legit files segments are ordered.
     // We do not care for other (the file will be truncated).
@@ -375,18 +385,22 @@ MACH_X (InternalMachoExpandImage) (
     ZeroMem (&Destination[CopyFileOffset + OriginalDelta], CurrentDelta - OriginalDelta);
     CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], (UINTN)CopyFileSize);
     ZeroMem (&Destination[CopyFileOffset + CurrentDelta + CopyFileSize], (UINTN)(CopyVmSize - CopyFileSize));
+    DEBUG ((DEBUG_INFO, "%x %x\n", CopyFileOffset + OriginalDelta, CurrentDelta - OriginalDelta));
+    DEBUG ((DEBUG_INFO, "%x %x %x\n", CopyFileOffset + CurrentDelta, CopyFileOffset, (UINTN)CopyFileSize));
+    DEBUG ((DEBUG_INFO, "%x %x\n", CopyFileOffset + CurrentDelta + CopyFileSize, (UINTN)(CopyVmSize - CopyFileSize)));
+  
     //
-    // Refresh destination segment size and offsets.
+    // Grab pointer to destination segment and updated offsets.
     //
     DstSegment = (MACH_SEGMENT_COMMAND_X *) ((UINT8 *) Segment - Source + Destination);
     DstSegment->FileOffset += CurrentDelta;
     DstSegment->FileSize    = DstSegment->Size;
 
+    DEBUG ((DEBUG_INFO, "Dest segment offset 0x%X size 0x%X\n", DstSegment->FileOffset, DstSegment->FileSize));
+
     /*if (DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) { // FIXME: This is invalid on 32-bit
       return 0;
     }*/
-
-    DEBUG ((DEBUG_INFO, "here\n"));
 
     //
     // We need to update fields in SYMTAB and DYSYMTAB. Tables have to be present before 0 FileSize
@@ -394,6 +408,8 @@ MACH_X (InternalMachoExpandImage) (
     // Note: There is an assumption they are in __LINKEDIT segment, another option is to check addresses.
     //
     if (AsciiStrnCmp (DstSegment->SegmentName, "__LINKEDIT", ARRAY_SIZE (DstSegment->SegmentName)) == 0) {
+      FoundLinkedit = TRUE;
+
       Symtab = (MACH_SYMTAB_COMMAND *)(
                  MachoGetNextCommand (
                    Context,
@@ -442,6 +458,7 @@ MACH_X (InternalMachoExpandImage) (
         }
       }
     }
+
     //
     // These may well wrap around with invalid data.
     // But we do not care, as we do not access these fields ourselves,
@@ -449,19 +466,103 @@ MACH_X (InternalMachoExpandImage) (
     // Note: There is an assumption that 'CopyFileOffset + CurrentDelta' is aligned.
     //
     OriginalDelta  = CurrentDelta;
-    CopyFileOffset = Segment->FileOffset;
+    CopyFileOffset = DstSegment->FileOffset;
     for (Index = 0; Index < DstSegment->NumSections; ++Index) {
+     // DEBUG ((DEBUG_INFO, "section %u %Lx %Lx %Lx %x\n", Index, CopyFileOffset, DstSegment->Sections[Index].Offset, DstSegment->Sections[Index].Size, CurrentDelta));
+
+      DEBUG ((DEBUG_INFO, "Section at %u, offset 0x%X size 0x%X delta 0x%X\n", Index, DstSegment->Sections[Index].Offset, DstSegment->Sections[Index].Size, CurrentDelta));
+      //
+      // Allocate space for zero offset sections.
+      // For all other sections, copy as-is.
+      //
       if (DstSegment->Sections[Index].Offset == 0) {
-        DstSegment->Sections[Index].Offset = MACH_X_TO_UINT32 (CopyFileOffset + CurrentDelta);
+        DstSegment->Sections[Index].Offset = MACH_X_TO_UINT32 (CopyFileOffset);
+        CopyFileOffset += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
         CurrentDelta += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
       } else {
         DstSegment->Sections[Index].Offset += CurrentDelta;
         CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
       }
+      DEBUG ((DEBUG_INFO, "Section at %u, offset 0x%X size 0x%X delta 0x%X - final\n", Index, DstSegment->Sections[Index].Offset, DstSegment->Sections[Index].Size, CurrentDelta));
+    //  DEBUG ((DEBUG_INFO, "new section %u %Lx %Lx %Lx %x\n", Index, CopyFileOffset, DstSegment->Sections[Index].Offset, DstSegment->Sections[Index].Size, CurrentDelta));
     }
 
     CurrentDelta = OriginalDelta + MACH_X_TO_UINT32 (Segment->Size - Segment->FileSize);
+    DEBUG ((DEBUG_INFO, "New delta %X\n", CurrentDelta));
   }
+
+  //
+  // If we did not find __LINKEDIT, we'll need to manually update SYMTAB and section relocations.
+  // This assumes that if there is __LINKEDIT, all relocations are in __LINKEDIT and not in sections.
+  //
+  if (!FoundLinkedit) {
+    //
+    // Copy section relocations.
+    //
+    for (
+      Segment = MACH_X (MachoGetNextSegment) (Context, NULL);
+      Segment != NULL;
+      Segment = MACH_X (MachoGetNextSegment) (Context, Segment)
+      ) {
+      DstSegment = (MACH_SEGMENT_COMMAND_X *) ((UINT8 *) Segment - Source + Destination);
+
+      for (Index = 0; Index < DstSegment->NumSections; ++Index) {
+        if (DstSegment->Sections[Index].RelocationsOffset != 0) {
+          CopyFileOffset  = DstSegment->Sections[Index].RelocationsOffset;
+          CurrentDelta    = ALIGN_VALUE (CurrentDelta, sizeof (MACH_RELOCATION_INFO));
+          RelocationsSize = DstSegment->Sections[Index].NumRelocations * sizeof (MACH_RELOCATION_INFO);
+
+          if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, RelocationsSize, &CurrentSize)
+            || CurrentSize > DestinationSize) {
+            return 0;
+          }
+          DEBUG ((DEBUG_INFO, "Section relocations at %u, offset 0x%X delta 0x%X\n", Index, DstSegment->Sections[Index].RelocationsOffset, CurrentDelta));
+          DstSegment->Sections[Index].RelocationsOffset += CurrentDelta;
+          CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], RelocationsSize);
+          DEBUG ((DEBUG_INFO, "Section relocations at %u, offset 0x%X delta 0x%X - final\n", Index, DstSegment->Sections[Index].RelocationsOffset, CurrentDelta));
+        }
+      }
+    }
+
+    //
+    // Copy symbols and string tables.
+    //
+    Symtab = (MACH_SYMTAB_COMMAND *)(
+               MachoGetNextCommand (
+                 Context,
+                 MACH_LOAD_COMMAND_SYMTAB,
+                 NULL
+                 )
+               );
+    if (Symtab != NULL) {
+      CurrentDelta = ALIGN_VALUE (CurrentDelta, sizeof (MACH_SYMTAB_COMMAND));
+      Symtab       = (MACH_SYMTAB_COMMAND *) ((UINT8 *) Symtab - Source + Destination);
+      DEBUG ((DEBUG_INFO, "symbols 0x%X strings 0x%X delta 0x%X\n", Symtab->SymbolsOffset, Symtab->StringsOffset, CurrentDelta));
+      if (Symtab->SymbolsOffset != 0) {
+        CopyFileOffset = Symtab->SymbolsOffset;
+        SymtabSize     = Symtab->NumSymbols * sizeof (MACH_NLIST_X);
+        if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, SymtabSize, &CurrentSize)
+          || CurrentSize > DestinationSize) {
+          return 0;
+        }
+
+        Symtab->SymbolsOffset += CurrentDelta;
+        CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], SymtabSize);
+      }
+      if (Symtab->StringsOffset != 0) {
+        CopyFileOffset = Symtab->StringsOffset;
+        if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, Symtab->StringsSize, &CurrentSize)
+          || CurrentSize > DestinationSize) {
+          return 0;
+        }
+
+        Symtab->StringsOffset += CurrentDelta;
+        CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], Symtab->StringsSize);
+      }
+      DEBUG ((DEBUG_INFO, "symbols 0x%X strings 0x%X delta 0x%X - final\n", Symtab->SymbolsOffset, Symtab->StringsOffset, CurrentDelta));
+    }
+  }
+
   //
   // CurrentSize will only be 0 if there are no valid segments, which is the
   // case for Kernel Resource KEXTs.  In this case, try to use the raw file.
@@ -490,6 +591,7 @@ MACH_X (InternalMachoExpandImage) (
   if (Strip) {
     InternalStripLoadCommands ((MACH_HEADER_X *) Destination);
   }
+
   //
   // This cast is safe because CurrentSize is verified against DestinationSize.
   //
@@ -1149,7 +1251,7 @@ MACH_X (MachoGetIndirectSymbolTable) (
   ASSERT (SymbolTable != NULL);
   MACH_ASSERT_X (Context);
 
-  if (!InternalRetrieveSymtabs (Context)) {
+  if (!InternalRetrieveSymtabs (Context) || Context->DySymtab == NULL) {
     return 0;
   }
 

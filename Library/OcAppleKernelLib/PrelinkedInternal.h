@@ -234,6 +234,7 @@ InternalUnlockContextKexts (
   @param[in]     PlistRoot       Current kext info.plist.
   @param[in]     LoadAddress     Kext load address.
   @param[in]     KmodAddress     Kext kmod address.
+  @param[in]     FileOffset      The file offset of the first segment.
 
   @return  prelinked kext to be inserted into PRELINKED_CONTEXT.
 **/
@@ -243,7 +244,8 @@ InternalLinkPrelinkedKext (
   IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
   IN     UINT64             LoadAddress,
-  IN     UINT64             KmodAddress
+  IN     UINT64             KmodAddress,
+  IN     UINT64             FileOffset
   );
 
 EFI_STATUS
@@ -426,6 +428,7 @@ InternalSolveSymbolValue (
   @param[in,out] Context      Prelinking context.
   @param[in]     Kext         KEXT prelinking context.
   @param[in]     LoadAddress  The address this KEXT shall be linked against.
+  @param[in]     FileOffset   The file offset of the first segment.
 
   @retval  Returned is whether the prelinking process has been successful.
            The state of the KEXT is undefined in case this routine fails.
@@ -435,7 +438,8 @@ EFI_STATUS
 InternalPrelinkKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
-  IN     UINT64             LoadAddress
+  IN     UINT64             LoadAddress,
+  IN     UINT64             FileOffset
   );
 
 /**
