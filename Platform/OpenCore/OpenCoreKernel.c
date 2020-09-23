@@ -716,7 +716,7 @@ OcKernelProcessPrelinked (
   EFI_STATUS           Status;
   PRELINKED_CONTEXT    Context;
 
-  Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize);
+  Status = PrelinkedContextInit (&Context, Kernel, *KernelSize, AllocatedSize, Is32Bit);
 
   if (!EFI_ERROR (Status)) {
     OcKernelInjectKexts (Config, CacheTypePrelinked, &Context, DarwinVersion, Is32Bit, LinkedExpansion, ReservedExeSize);

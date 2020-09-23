@@ -716,6 +716,7 @@ OcMatchDarwinVersion (
   @param[in,out] Prelinked           Unpacked prelinked buffer (Mach-O image).
   @param[in]     PrelinkedSize       Unpacked prelinked buffer size.
   @param[in]     PrelinkedAllocSize  Unpacked prelinked buffer allocated size.
+  @param[in]     Is32Bit             TRUE if prelinked is 32-bit.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -724,7 +725,8 @@ PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN OUT  UINT8              *Prelinked,
   IN      UINT32             PrelinkedSize,
-  IN      UINT32             PrelinkedAllocSize
+  IN      UINT32             PrelinkedAllocSize,
+  IN      BOOLEAN            Is32Bit
   );
 
 /**

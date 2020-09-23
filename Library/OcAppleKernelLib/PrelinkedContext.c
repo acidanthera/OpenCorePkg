@@ -205,7 +205,8 @@ PrelinkedContextInit (
   IN OUT  PRELINKED_CONTEXT  *Context,
   IN OUT  UINT8              *Prelinked,
   IN      UINT32             PrelinkedSize,
-  IN      UINT32             PrelinkedAllocSize
+  IN      UINT32             PrelinkedAllocSize,
+  IN      BOOLEAN            Is32Bit
   )
 {
   EFI_STATUS               Status;
@@ -227,6 +228,7 @@ PrelinkedContextInit (
   Context->Prelinked          = Prelinked;
   Context->PrelinkedSize      = MACHO_ALIGN (PrelinkedSize);
   Context->PrelinkedAllocSize = PrelinkedAllocSize;
+  Context->Is32Bit            = Is32Bit;
 
   //
   // Ensure that PrelinkedSize is always aligned.
@@ -242,10 +244,9 @@ PrelinkedContextInit (
   //
   // Initialise primary context.
   //
-  if (!MachoInitializeContext32 (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0)) {
+  if (!MachoInitializeContext (&Context->PrelinkedMachContext, Prelinked, PrelinkedSize, 0, Context->Is32Bit)) {
     return EFI_INVALID_PARAMETER;
   }
-  Context->Is32Bit = TRUE;
 
   Status = InternalConnectExternalSymtab (
     &Context->PrelinkedMachContext,
@@ -588,19 +589,21 @@ PrelinkedInjectPrepare (
     if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: Reducing prelink size from %X to %X via plist\n",
+        "OCAK: Reducing %a-bit prelink size from %X to %X via plist\n",
+        Context->Is32Bit ? "32" : "64",
         Context->PrelinkedSize,
         (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-          Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment32.FileOffset
+          Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
           )
         ));
       Context->PrelinkedSize = (UINT32) MACHO_ALIGN (Context->Is32Bit ?
-        Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment32.FileOffset
+        Context->PrelinkedInfoSegment->Segment32.FileOffset : Context->PrelinkedInfoSegment->Segment64.FileOffset
         );
     } else {
        DEBUG ((
         DEBUG_INFO,
-        "OCAK:Leaving unchanged prelink size %X due to %LX plist\n",
+        "OCAK:Leaving unchanged %a-bit prelink size %X due to %LX plist\n",
+        Context->Is32Bit ? "32" : "64",
         Context->PrelinkedSize,
         SegmentEndOffset
         ));
@@ -614,7 +617,8 @@ PrelinkedInjectPrepare (
       if (MACHO_ALIGN (SegmentEndOffset) == Context->PrelinkedSize) {
         DEBUG ((
           DEBUG_INFO,
-          "OCAK: Reducing prelink size from %X to %X via state\n",
+          "OCAK: Reducing %a-bit prelink size from %X to %X via state\n",
+          Context->Is32Bit ? "32" : "64",
           Context->PrelinkedSize,
           (UINT32) MACHO_ALIGN (Context->Is32Bit ?
             Context->PrelinkedStateSegment->Segment32.FileOffset : Context->PrelinkedStateSegment->Segment64.FileOffset
@@ -654,7 +658,8 @@ PrelinkedInjectPrepare (
       } else {
          DEBUG ((
           DEBUG_INFO,
-          "OCAK:Leaving unchanged prelink size %X due to %LX state\n",
+          "OCAK:Leaving unchanged %a-bit prelink size %X due to %LX state\n",
+          Context->Is32Bit ? "32" : "64",
           Context->PrelinkedSize,
           SegmentEndOffset
           ));
