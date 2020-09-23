@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Sep 16 22:53:45 2020
-%DIF ADD ../Configuration.tex        Wed Sep 16 22:58:02 2020
+%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
+%DIF ADD ../Configuration.tex        Wed Sep 23 22:27:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4403,7 +4403,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \DIFaddbegin \texttt{\DIFadd{ProcessorType}}
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: Automatic}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(Automatic)}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Refer to SMBIOS }\texttt{\DIFadd{ProcessorType}}\DIFadd{.
 }\item
   \DIFaddend \texttt{SystemProductName}\\
@@ -4543,7 +4543,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FSBFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Automatic}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(Automatic)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
 
@@ -4557,7 +4557,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Automatic}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(Automatic)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
 
@@ -4903,7 +4903,7 @@ Apple ROM Version
 \item
   \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Automatic}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(Automatic)}\DIFaddend \\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
   \texttt{ProcessorType}\\
   \textbf{Description}: Combined of Processor Major and Minor types.
@@ -6133,7 +6133,13 @@ functioning. Feature highlights:
   The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
   type, and page-aligned (4 KBs).
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Some firmwares may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
+  code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
+  and enabled you could find these areas in the lower memory and fix them up by doing the reservation.
+  See }\texttt{\DIFadd{Sample.plist}} \DIFadd{for more details.
+}
+
+\DIFaddend \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty string\\
@@ -6148,7 +6154,34 @@ functioning. Feature highlights:
   \textbf{Description}: Size of the reserved memory region, must be page-aligned (4 KBs).
 
 \item
-  \texttt{Enabled}\\
+  \DIFaddbegin \texttt{\DIFadd{Type}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Reserved}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Memory region type matching the UEFI specification memory descriptor
+  types. Mapping:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Reserved}} \DIFadd{--- }\texttt{\DIFadd{EfiReservedMemoryType}}
+    \item \texttt{\DIFadd{LoaderCode}} \DIFadd{--- }\texttt{\DIFadd{EfiLoaderCode}}
+    \item \texttt{\DIFadd{LoaderData}} \DIFadd{--- }\texttt{\DIFadd{EfiLoaderData}}
+    \item \texttt{\DIFadd{BootServiceCode}} \DIFadd{--- }\texttt{\DIFadd{EfiBootServicesCode}}
+    \item \texttt{\DIFadd{BootServiceData}} \DIFadd{--- }\texttt{\DIFadd{EfiBootServicesData}}
+    \item \texttt{\DIFadd{RuntimeCode}} \DIFadd{--- }\texttt{\DIFadd{EfiRuntimeServicesCode}}
+    \item \texttt{\DIFadd{RuntimeData}} \DIFadd{--- }\texttt{\DIFadd{EfiRuntimeServicesData}}
+    \item \texttt{\DIFadd{Available}} \DIFadd{--- }\texttt{\DIFadd{EfiConventionalMemory}}
+    \item \texttt{\DIFadd{Persistent}} \DIFadd{--- }\texttt{\DIFadd{EfiPersistentMemory}}
+    \item \texttt{\DIFadd{UnusableMemory}} \DIFadd{--- }\texttt{\DIFadd{EfiUnusableMemory}}
+    \item \texttt{\DIFadd{ACPIReclaimMemory}} \DIFadd{--- }\texttt{\DIFadd{EfiACPIReclaimMemory}}
+    \item \texttt{\DIFadd{ACPIMemoryNVS}} \DIFadd{--- }\texttt{\DIFadd{EfiACPIMemoryNVS}}
+    \item \texttt{\DIFadd{MemoryMappedIO}} \DIFadd{--- }\texttt{\DIFadd{EfiMemoryMappedIO}}
+    \item \texttt{\DIFadd{MemoryMappedIOPortSpace}} \DIFadd{--- }\texttt{\DIFadd{EfiMemoryMappedIOPortSpace}}
+    \item \texttt{\DIFadd{PalCode}} \DIFadd{--- }\texttt{\DIFadd{EfiPalCode}}
+  \end{itemize}
+
+\item
+  \DIFaddend \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This region will not be reserved unless set to \texttt{true}.

@@ -50,6 +50,13 @@
 **/
 #define OC_DEFAULT_MEMORY_MAP_SIZE  (EFI_PAGE_SIZE*3)
 
+#define OC_MEMORY_TYPE_DESC_COUNT 16
+
+typedef struct {
+  CHAR8            *Name;
+  EFI_MEMORY_TYPE  Type;
+} OC_MEMORY_TYPE_DESC;
+
 /**
   Lock the legacy region specified to enable modification.
 
@@ -322,7 +329,7 @@ OcGetMemoryAttributes (
   Refresh memory attributes entry containing the specified address.
 
   @param[in]  Address         Address contained in the updated entry.
-  @param[in]  GetMemoryMap    
+  @param[in]  GetMemoryMap
 
   @retval EFI_SUCCESS on success.
   @retval EFI_NOT_FOUND no entry contains the specified address.
@@ -393,6 +400,22 @@ OcGetPhysicalAddress (
   IN  PAGE_MAP_AND_DIRECTORY_POINTER   *PageTable  OPTIONAL,
   IN  EFI_VIRTUAL_ADDRESS              VirtualAddr,
   OUT EFI_PHYSICAL_ADDRESS             *PhysicalAddr
+  );
+
+/**
+  Return EFI memory type for given type description
+
+  @param[in]  MemoryTypeDesc  Memory type string representation.
+  @param[out] MemoryType      EFI memory type to return.
+
+  @retval EFI_NOT_FOUND on unsuccessful lookup.
+  @retval EFI_INVALID_PARAMETER on wrong passed agruments.
+  @retval EFI_SUCCESS on successful lookup.
+**/
+EFI_STATUS
+OcDescToMemoryType (
+  IN  CHAR8            *MemoryTypeDesc,
+  OUT EFI_MEMORY_TYPE  *MemoryType
   );
 
 /**

@@ -664,6 +664,7 @@ mUefiReservedMemoryEntrySchema[] = {
   OC_SCHEMA_STRING_IN    ("Comment", OC_UEFI_RSVD_ENTRY, Comment),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled", OC_UEFI_RSVD_ENTRY, Enabled),
   OC_SCHEMA_INTEGER_IN   ("Size",    OC_UEFI_RSVD_ENTRY, Size),
+  OC_SCHEMA_STRING_IN    ("Type",    OC_UEFI_RSVD_ENTRY, Type),
 };
 
 STATIC

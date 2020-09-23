@@ -140,7 +140,7 @@ ProduceDebugReport (
     Status = AcpiDumpTables (SubReport);
     SubReport->Close (SubReport);
   }
-  DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status)); 
+  DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
   Status = SafeFileOpen (
     SysReport,
@@ -154,7 +154,7 @@ ProduceDebugReport (
     Status = OcSmbiosDump (SubReport);
     SubReport->Close (SubReport);
   }
-  DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status)); 
+  DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
   Fs->Close (Fs);

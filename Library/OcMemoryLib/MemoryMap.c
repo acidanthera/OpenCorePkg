@@ -23,6 +23,94 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
 
+STATIC OC_MEMORY_TYPE_DESC OcMemoryTypeString [OC_MEMORY_TYPE_DESC_COUNT] = {
+  {
+    "Reserved",
+    EfiReservedMemoryType
+  },
+  {
+    "LoaderCode",
+    EfiLoaderCode
+  },
+  {
+    "LoaderData",
+    EfiLoaderData
+  },
+  {
+    "BootServiceCode",
+    EfiBootServicesCode
+  },
+  {
+    "BootServiceData",
+    EfiBootServicesData
+  },
+  {
+    "RuntimeCode",
+    EfiRuntimeServicesCode
+  },
+  {
+    "RuntimeData",
+    EfiRuntimeServicesData
+  },
+  {
+    "Available",
+    EfiConventionalMemory
+  },
+  {
+    "Persistent",
+    EfiPersistentMemory
+  },
+  {
+    "UnusableMemory",
+    EfiUnusableMemory
+  },
+  {
+    "ACPIReclaimMemory",
+    EfiACPIReclaimMemory
+  },
+  {
+    "ACPIMemoryNVS",
+    EfiACPIMemoryNVS
+  },
+  {
+    "MemoryMappedIO",
+    EfiMemoryMappedIO
+  },
+  {
+    "MemoryMappedIOPortSpace",
+    EfiMemoryMappedIOPortSpace
+  },
+  {
+    "PalCode",
+    EfiPalCode
+  }
+};
+
+EFI_STATUS
+OcDescToMemoryType (
+  IN  CHAR8            *MemoryTypeDesc,
+  OUT EFI_MEMORY_TYPE  *MemoryType
+  )
+{
+  UINTN       Index;
+  EFI_STATUS  Status = EFI_INVALID_PARAMETER;
+
+  if (MemoryTypeDesc != NULL && MemoryType !=NULL) {
+    for (Index = 0; Index < OC_MEMORY_TYPE_DESC_COUNT; Index++) {
+      if (AsciiStrCmp (MemoryTypeDesc, OcMemoryTypeString[Index].Name) == 0) {
+        Status = EFI_SUCCESS;
+        *MemoryType=OcMemoryTypeString[Index].Type;
+        break;
+      }
+    }
+    if (EFI_ERROR (Status)) {
+      Status = EFI_NOT_FOUND;
+    }
+  }
+
+  return Status;
+}
+
 EFI_MEMORY_DESCRIPTOR *
 OcGetCurrentMemoryMap (
   OUT UINTN   *MemoryMapSize,

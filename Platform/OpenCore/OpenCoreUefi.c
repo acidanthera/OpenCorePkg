@@ -42,6 +42,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcFirmwareVolumeLib.h>
 #include <Library/OcHashServicesLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcMemoryLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
@@ -498,6 +499,55 @@ OcLoadBooterUefiSupport (
   OcAbcInitialize (&AbcSettings);
 }
 
+
+VOID
+OcReserveMemory (
+  IN OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS            Status;
+  UINTN                 Index;
+  EFI_PHYSICAL_ADDRESS  ReservedAddress;
+  EFI_MEMORY_TYPE       RsvdMemoryType;
+  CHAR8                 *RsvdMemoryTypeStr;
+
+  for (Index = 0; Index < Config->Uefi.ReservedMemory.Count; ++Index) {
+    if (!Config->Uefi.ReservedMemory.Values[Index]->Enabled) {
+      continue;
+    }
+
+    if ((Config->Uefi.ReservedMemory.Values[Index]->Address & (BASE_4KB - 1)) != 0
+      || (Config->Uefi.ReservedMemory.Values[Index]->Size & (BASE_4KB - 1)) != 0) {
+      Status = EFI_INVALID_PARAMETER;
+    } else {
+      RsvdMemoryTypeStr = OC_BLOB_GET (&Config->Uefi.ReservedMemory.Values[Index]->Type);
+
+      Status = OcDescToMemoryType (RsvdMemoryTypeStr, &RsvdMemoryType);
+      if (EFI_ERROR (Status)){
+        DEBUG ((DEBUG_INFO, "OC: Invalid ReservedMemory Type: %a\n", RsvdMemoryTypeStr));
+        RsvdMemoryType = EfiReservedMemoryType;
+      }
+
+      ReservedAddress = Config->Uefi.ReservedMemory.Values[Index]->Address;
+      Status = gBS->AllocatePages (
+        AllocateAddress,
+        RsvdMemoryType,
+        (UINTN) EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
+        &ReservedAddress
+        );
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Reserving region %Lx of %Lx size - %r\n",
+      Config->Uefi.ReservedMemory.Values[Index]->Address,
+      Config->Uefi.ReservedMemory.Values[Index]->Size,
+      Status
+      ));
+  }
+}
+
+
 VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
@@ -505,14 +555,11 @@ OcLoadUefiSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  EFI_STATUS            Status;
   EFI_HANDLE            *DriversToConnect;
-  UINTN                 Index;
   UINT16                *BootOrder;
   UINTN                 BootOrderCount;
   BOOLEAN               BootOrderChanged;
   EFI_EVENT             Event;
-  EFI_PHYSICAL_ADDRESS  ReservedAddress;
 
   OcReinstallProtocols (Config);
 
@@ -584,32 +631,10 @@ OcLoadUefiSupport (
 
   OcMiscUefiQuirksLoaded (Config);
 
-  for (Index = 0; Index < Config->Uefi.ReservedMemory.Count; ++Index) {
-    if (!Config->Uefi.ReservedMemory.Values[Index]->Enabled) {
-      continue;
-    }
-
-    if ((Config->Uefi.ReservedMemory.Values[Index]->Address & (BASE_4KB - 1)) != 0
-      || (Config->Uefi.ReservedMemory.Values[Index]->Size & (BASE_4KB - 1)) != 0) {
-      Status = EFI_INVALID_PARAMETER;
-    } else {
-      ReservedAddress = Config->Uefi.ReservedMemory.Values[Index]->Address;
-      Status = gBS->AllocatePages (
-        AllocateAddress,
-        EfiReservedMemoryType,
-        (UINTN) EFI_SIZE_TO_PAGES (Config->Uefi.ReservedMemory.Values[Index]->Size),
-        &ReservedAddress
-        );
-    }
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: Reserving region %Lx of %Lx size - %r\n",
-      Config->Uefi.ReservedMemory.Values[Index]->Address,
-      Config->Uefi.ReservedMemory.Values[Index]->Size,
-      Status
-      ));
-  }
+  //
+  // Reserve requested memory regions
+  //
+  OcReserveMemory (Config);
 
   if (Config->Uefi.ConnectDrivers) {
     OcLoadDrivers (Storage, Config, &DriversToConnect);

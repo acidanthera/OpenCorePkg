@@ -601,6 +601,7 @@ typedef enum {
   _(UINT64                      , Address          ,     , 0       , () ) \
   _(UINT64                      , Size             ,     , 0       , () ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE   , () ) \
+  _(OC_STRING                   , Type             ,     , OC_STRING_CONSTR ("Reserved", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_UEFI_RSVD_ENTRY)
 

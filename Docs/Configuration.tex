@@ -4338,7 +4338,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{ProcessorType}
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
 \item
   \texttt{SystemProductName}\\
@@ -4478,7 +4478,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FSBFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Sets \texttt{FSBFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
 
@@ -4492,7 +4492,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{ARTFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Sets \texttt{ARTFrequency} in
   \texttt{gEfiProcessorSubClassGuid}.
 
@@ -4838,7 +4838,7 @@ Apple ROM Version
 \item
   \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
-  \textbf{Failsafe}: Automatic\\
+  \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE131} -
   \texttt{ProcessorType}\\
   \textbf{Description}: Combined of Processor Major and Minor types.
@@ -6067,6 +6067,11 @@ functioning. Feature highlights:
   The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
   type, and page-aligned (4 KBs).
 
+  \emph{Note}: Some firmwares may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
+  code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
+  and enabled you could find these areas in the lower memory and fix them up by doing the reservation.
+  See \texttt{Sample.plist} for more details.
+
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6080,6 +6085,32 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Size of the reserved memory region, must be page-aligned (4 KBs).
+
+\item
+  \texttt{Type}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Reserved}\\
+  \textbf{Description}: Memory region type matching the UEFI specification memory descriptor
+  types. Mapping:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Reserved} --- \texttt{EfiReservedMemoryType}
+    \item \texttt{LoaderCode} --- \texttt{EfiLoaderCode}
+    \item \texttt{LoaderData} --- \texttt{EfiLoaderData}
+    \item \texttt{BootServiceCode} --- \texttt{EfiBootServicesCode}
+    \item \texttt{BootServiceData} --- \texttt{EfiBootServicesData}
+    \item \texttt{RuntimeCode} --- \texttt{EfiRuntimeServicesCode}
+    \item \texttt{RuntimeData} --- \texttt{EfiRuntimeServicesData}
+    \item \texttt{Available} --- \texttt{EfiConventionalMemory}
+    \item \texttt{Persistent} --- \texttt{EfiPersistentMemory}
+    \item \texttt{UnusableMemory} --- \texttt{EfiUnusableMemory}
+    \item \texttt{ACPIReclaimMemory} --- \texttt{EfiACPIReclaimMemory}
+    \item \texttt{ACPIMemoryNVS} --- \texttt{EfiACPIMemoryNVS}
+    \item \texttt{MemoryMappedIO} --- \texttt{EfiMemoryMappedIO}
+    \item \texttt{MemoryMappedIOPortSpace} --- \texttt{EfiMemoryMappedIOPortSpace}
+    \item \texttt{PalCode} --- \texttt{EfiPalCode}
+  \end{itemize}
 
 \item
   \texttt{Enabled}\\
