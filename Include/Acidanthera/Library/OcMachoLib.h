@@ -1575,6 +1575,19 @@ MachoExpandImage (
   );
 
 /**
+  Calculates size required for expanded Mach-O image using MachoExpandImage().
+
+  @param[in]  Context          Context of the Mach-O.
+
+  @returns  New image size or 0 on failure.
+
+**/
+UINT32
+MachoGetExpandedImageSize (
+  IN  OC_MACHO_CONTEXT   *Context
+  );
+
+/**
   Find Mach-O entry point from LC_UNIXTHREAD loader command.
   This command does not verify Mach-O and assumes it is valid.
 
