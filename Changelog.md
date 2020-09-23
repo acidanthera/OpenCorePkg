@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added 32-bit kernel/kext patching/blocking support
 - Fixed issues loading 10.7 EfiBoot
 - Added `Type` to `ReservedMemory` to fulfil hibernation hack needs
+- Added workaround to displaying `Preboot` instead of `Macintosh HD`
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash

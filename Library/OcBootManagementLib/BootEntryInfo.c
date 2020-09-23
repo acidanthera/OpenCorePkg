@@ -506,7 +506,7 @@ InternalDescribeBootEntry (
 {
   EFI_STATUS                       Status;
   CHAR16                           *BootDirectoryName;
-  CHAR16                           *RecoveryBootName;
+  CHAR16                           *TmpBootName;
   EFI_HANDLE                       Device;
   UINT32                           BcdSize;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
@@ -579,16 +579,26 @@ InternalDescribeBootEntry (
 
   if (BootEntry->Name == NULL) {
     BootEntry->Name = GetVolumeLabel (FileSystem);
-    if (BootEntry->Name != NULL
-      && (!StrCmp (BootEntry->Name, L"Recovery HD")
-       || !StrCmp (BootEntry->Name, L"Recovery"))) {
-      if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
-        BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
+    if (BootEntry->Name != NULL) {
+      if (StrCmp (BootEntry->Name, L"Recovery HD") == 0
+        || StrCmp (BootEntry->Name, L"Recovery") == 0) {
+        if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
+          BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
+        }
+        TmpBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);
+      } else if (StrCmp (BootEntry->Name, L"Preboot") == 0) {
+        //
+        // Common Big Sur beta bug failing to create .contentDetails files.
+        // Workaround it by choosing the default name following Apple BootPicker behaviour.
+        //
+        TmpBootName = AllocateCopyPool (sizeof (L"Macintosh HD"), L"Macintosh HD");
+      } else {
+        TmpBootName = NULL;
       }
-      RecoveryBootName = InternalGetAppleRecoveryName (FileSystem, BootDirectoryName);
-      if (RecoveryBootName != NULL) {
+
+      if (TmpBootName != NULL) {
         FreePool (BootEntry->Name);
-        BootEntry->Name = RecoveryBootName;
+        BootEntry->Name = TmpBootName;
       }
     }
   }
