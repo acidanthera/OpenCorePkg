@@ -655,8 +655,20 @@ MachoExpandImage (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoExpandImage32 (Context, Destination, DestinationSize, Strip, (UINT32 *) FileOffset) :
-    InternalMachoExpandImage64 (Context, Destination, DestinationSize, Strip, FileOffset);
+    InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, (UINT32 *) FileOffset) :
+    InternalMachoExpandImage64 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset);
+}
+
+UINT32
+MachoGetExpandedImageSize (
+  IN  OC_MACHO_CONTEXT   *Context
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MACHO_ALIGN (InternalMachoExpandImage32 (Context, TRUE, NULL, 0, FALSE, NULL)) :
+    MACHO_ALIGN (InternalMachoExpandImage64 (Context, TRUE, NULL, 0, FALSE, NULL));
 }
 
 BOOLEAN

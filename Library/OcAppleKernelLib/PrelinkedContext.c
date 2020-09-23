@@ -885,13 +885,10 @@ PrelinkedReserveKextSize (
       return EFI_INVALID_PARAMETER;
     }
 
-    /*ExecutableSize = MachoGetVmSize (&Context);
+    ExecutableSize = MachoGetExpandedImageSize (&Context);
     if (ExecutableSize == 0) {
       return EFI_INVALID_PARAMETER;
-    }*/
-
-    ExecutableSize  = MACHO_ALIGN (ExecutableSize);
-    ExecutableSize += SIZE_16KB; // FIXME: Need to calculate size that MachoExpandImage requires.
+    }
   }
 
   if (OcOverflowAddU32 (*ReservedInfoSize, InfoPlistSize, &InfoPlistSize)
