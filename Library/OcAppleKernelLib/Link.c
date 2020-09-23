@@ -1935,7 +1935,7 @@ InternalPrelinkKext (
     while ((Section = MachoGetNextSection (MachoContext, Segment, Section)) != NULL) {
       if (Context->Is32Bit) {
         Section->Section32.Address = ALIGN_VALUE (
-                                      (Section->Section32.Address + LoadAddressOffset),
+                                      (Section->Section32.Address + (UINT32) LoadAddressOffset),
                                       (UINT32)(1U << Section->Section32.Alignment)
                                       );
       } else {

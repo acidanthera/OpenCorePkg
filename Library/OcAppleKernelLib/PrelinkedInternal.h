@@ -259,7 +259,7 @@ InternalConnectExternalSymtab (
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
-#define KXLD_ANY_NEXT(a,b) ((VOID *) ((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64)))
+#define KXLD_ANY_NEXT(a,b) ((VOID *) (((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64))))
 
 #define OS_METACLASS_VTABLE_NAME "__ZTV11OSMetaClass"
 
