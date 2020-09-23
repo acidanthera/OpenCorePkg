@@ -649,7 +649,7 @@ int wrap_main(int argc, char** argv) {
     FailedToProcess = TRUE;
   }
 
-  Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize);
+  Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize, FALSE);
 
   if (!EFI_ERROR (Status)) {
     Status = PrelinkedInjectPrepare (&Context, LinkedExpansion, ReservedExeSize);

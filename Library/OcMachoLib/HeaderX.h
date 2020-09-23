@@ -331,6 +331,7 @@ MACH_X (InternalMachoExpandImage) (
   // Align header size to page size if this is an MH_OBJECT.
   // The header does not exist in a segment in MH_OBJECT files.
   //
+  HeaderSizeAligned = 0;
   if (IsObject) {
     HeaderSizeAligned = MACHO_ALIGN (HeaderSize);
     if (!CalculateSizeOnly) {

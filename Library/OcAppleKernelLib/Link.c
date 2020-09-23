@@ -1897,25 +1897,25 @@ InternalPrelinkKext (
       LinkEditSegment->Segment64.FileSize = LinkEditSize;
       LinkEditSegment->Segment64.Size     = LinkEditSize;
     }
-  }
 
-  if (DySymtab != NULL) {
-    DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditFileOffset + RelocationsOffset);
-    DySymtab->NumOfLocalRelocations  = NumRelocations;
+    if (DySymtab != NULL) {
+      DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditFileOffset + RelocationsOffset);
+      DySymtab->NumOfLocalRelocations  = NumRelocations;
 
-    //
-    // Clear dynamic linker information.
-    //
-    DySymtab->LocalSymbolsIndex         = 0;
-    DySymtab->NumLocalSymbols           = 0;
-    DySymtab->NumExternalSymbols        = 0;
-    DySymtab->ExternalSymbolsIndex      = 0;
-    DySymtab->NumExternalRelocations    = 0;
-    DySymtab->ExternalRelocationsOffset = 0;
-    DySymtab->UndefinedSymbolsIndex     = 0;
-    DySymtab->NumUndefinedSymbols       = 0;
-    DySymtab->IndirectSymbolsOffset     = 0;
-    DySymtab->NumIndirectSymbols        = 0;
+      //
+      // Clear dynamic linker information.
+      //
+      DySymtab->LocalSymbolsIndex         = 0;
+      DySymtab->NumLocalSymbols           = 0;
+      DySymtab->NumExternalSymbols        = 0;
+      DySymtab->ExternalSymbolsIndex      = 0;
+      DySymtab->NumExternalRelocations    = 0;
+      DySymtab->ExternalRelocationsOffset = 0;
+      DySymtab->UndefinedSymbolsIndex     = 0;
+      DySymtab->NumUndefinedSymbols       = 0;
+      DySymtab->IndirectSymbolsOffset     = 0;
+      DySymtab->NumIndirectSymbols        = 0;
+    }
   }
 
   //
@@ -2011,6 +2011,10 @@ InternalPrelinkKext (
     // Adapt the Mach-O header to signal being prelinked.
     //
     MachHeader->Header32.Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+
+    if (LinkEditSegment != NULL) { //FIXME : Symbols are not in a segment in MH_OBJECT.
+      MachSize = SegmentOffset + SegmentSize;
+    }
   } else {
     //
     // Populate kmod information.
@@ -2030,14 +2034,15 @@ InternalPrelinkKext (
     // Adapt the Mach-O header to signal being prelinked.
     //
     MachHeader->Header64.Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
+
+    MachSize = SegmentOffset + SegmentSize;
   }
 
   //
   // Reinitialize the Mach-O context to account for the changed __LINKEDIT
   // segment and file size.
   //
-  //FIXME : Symbols are not in a segment in MH_OBJECT.
-  if (!MachoInitializeContext (MachoContext, MachHeader, MachSize /*(SegmentOffset + SegmentSize)*/, MachoContext->ContainerOffset, Context->Is32Bit)) { 
+  if (!MachoInitializeContext (MachoContext, MachHeader, MachSize, MachoContext->ContainerOffset, Context->Is32Bit)) { 
     //
     // This should never failed under normal and abnormal conditions.
     //
