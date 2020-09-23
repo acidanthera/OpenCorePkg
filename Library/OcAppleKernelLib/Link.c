@@ -885,12 +885,14 @@ InternalRelocateRelocation (
         Target = Target + Address - (LinkPc + RelocationBase);
       }
 
-      ASSERT (Type == MachGenericRelocVanilla); // FIXME
-
       switch (Type) {
         case MachGenericRelocVanilla:
           Instruction32 += (UINT32) Target;
           break;
+
+        default:
+          DEBUG ((DEBUG_ERROR, "OCAK: Non-vanilla 32-bit relocations are unsupported\n")); //FIXME: Implement paired relocs.
+          return MAX_UINTN;
       }
 
     } else {
