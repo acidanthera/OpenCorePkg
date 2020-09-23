@@ -729,14 +729,16 @@ InternalIsDirectPureVirtualCall (
   IN UINT64                  Offset
   )
 {
+  UINT32                       Remainder;
   UINT64                       Index;
   CONST PRELINKED_VTABLE_ENTRY *Entry;
 
-  if ((Offset % (Is32Bit ? sizeof (UINT32) : sizeof (UINT64))) != 0 || (Offset < VTABLE_ENTRY_SIZE_X (Is32Bit))) {
+  DivU64x32Remainder (Offset, Is32Bit ? sizeof (UINT32) : sizeof (UINT64), &Remainder);
+  if (Remainder != 0 || Offset < VTABLE_ENTRY_SIZE_X (Is32Bit)) {
     return FALSE;
   }
 
-  Index = ((Offset - VTABLE_ENTRY_SIZE_X (Is32Bit)) / (Is32Bit ? sizeof (UINT32) : sizeof (UINT64)));
+  Index = DivU64x32 (Offset - VTABLE_ENTRY_SIZE_X (Is32Bit), Is32Bit ? sizeof (UINT32) : sizeof (UINT64));
   if (Index >= Vtable->NumEntries) {
     return FALSE;
   }
