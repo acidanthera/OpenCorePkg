@@ -387,7 +387,7 @@ MACH_X (InternalMachoExpandImage) (
       // Some kexts seem to have empty space after header and before segment.
       //
       if (CopyFileOffset > HeaderSize) {
-        CurrentDelta -= CopyFileOffset - HeaderSize;
+        CurrentDelta -= (UINT32) (CopyFileOffset - HeaderSize);
       }
       if (FileOffset != NULL) {
         *FileOffset = HeaderSizeAligned;
