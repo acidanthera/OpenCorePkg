@@ -389,7 +389,7 @@ InternalScanBuildLinkedSymbolTable (
           return EFI_LOAD_ERROR;
         }
 
-        CopyMem (&SymbolScratch, Symbol, sizeof (SymbolScratch));
+        CopyMem (&SymbolScratch, Symbol, Context->Is32Bit ? sizeof (SymbolScratch.Symbol32) : sizeof (SymbolScratch.Symbol64));
         ResolvedSymbol = InternalOcGetSymbolName (
                            Context,
                            Kext,
