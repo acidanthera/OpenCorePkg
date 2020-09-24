@@ -132,7 +132,8 @@ STATIC
 MACH_RELOCATION_INFO *
 InternalLookupSectionRelocationByOffset (
   IN OUT OC_MACHO_CONTEXT      *Context,
-  IN     UINT64                Address
+  IN     UINT64                Address,
+  IN     BOOLEAN               External
   )
 {
   MACH_SECTION_ANY        *Section;
@@ -160,12 +161,18 @@ InternalLookupSectionRelocationByOffset (
 
       for (Index = 0; Index < RelocationCount; Index++) {
           Relocation = &Relocations[Index];
-                    
           //
           // A section-based relocation entry can be skipped for absolute symbols.
           //
           if ((Relocation->Extern == 0)
           && (Relocation->SymbolNumber == MACH_RELOC_ABSOLUTE)) {
+            continue;
+          }
+
+          //
+          // Filter out the other relocation type.
+          //
+          if (Relocation->Extern != (External ? 1 : 0)) {
             continue;
           }
 
@@ -208,7 +215,8 @@ InternalGetExternRelocationByOffset (
   if (Context->DySymtab == NULL) {
     return InternalLookupSectionRelocationByOffset (
       Context,
-      Address
+      Address,
+      TRUE
       );
   }
 
@@ -234,6 +242,17 @@ InternalGetLocalRelocationByOffset (
   IN     UINT64            Address
   )
 {
+  //
+  // MH_OBJECT does not have a DYSYMTAB.
+  //
+  if (Context->DySymtab == NULL) {
+    return InternalLookupSectionRelocationByOffset (
+      Context,
+      Address,
+      FALSE
+      );
+  }
+
   return InternalLookupRelocationByOffset (
            Address,
            Context->DySymtab->NumOfLocalRelocations,

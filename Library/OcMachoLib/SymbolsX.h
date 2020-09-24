@@ -429,6 +429,7 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   CONST MACH_UINT_X           *Data;
   MACH_NLIST_X                *Sym;
   MACH_UINT_X                 AddressTop;
+  UINT32                      MaxSize;
 
   VOID                        *Tmp;
 
@@ -453,7 +454,10 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   if (Relocation != NULL) {
     Sym = NULL;
 
-    Tmp = (VOID *)((UINTN)Context->MachHeader + (UINTN)Address);
+    Tmp = (VOID *) MachoGetFilePointerByAddress (Context, Address, &MaxSize);
+    if (Tmp == NULL || MaxSize < sizeof (MACH_UINT_X)) {
+      return FALSE;
+    }
 
     if (OC_TYPE_ALIGNED (MACH_UINT_X, Tmp)) {
       Data = (MACH_UINT_X *)Tmp;
