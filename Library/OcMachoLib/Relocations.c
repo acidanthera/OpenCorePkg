@@ -172,7 +172,7 @@ InternalLookupSectionRelocationByOffset (
           //
           // Filter out the other relocation type.
           //
-          if (Relocation->Extern != (External ? 1 : 0)) {
+          if (Relocation->Extern != (UINT32)(External ? 1 : 0)) {
             continue;
           }
 
