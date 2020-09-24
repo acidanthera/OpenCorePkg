@@ -290,8 +290,8 @@ MACH_X (InternalMachoExpandImage) (
   MACH_UINT_X               CopyFileOffset;
   MACH_UINT_X               CopyFileSize;
   MACH_UINT_X               CopyVmSize;
-  UINTN                     RelocationsSize;
-  UINTN                     SymtabSize;
+  UINT32                    RelocationsSize;
+  UINT32                    SymtabSize;
   UINT32                    CurrentDelta;
   UINT32                    OriginalDelta;
   MACH_UINT_X               CurrentSize;
