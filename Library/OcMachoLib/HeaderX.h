@@ -290,6 +290,9 @@ MACH_X (InternalMachoExpandImage) (
   MACH_UINT_X               CopyFileOffset;
   MACH_UINT_X               CopyFileSize;
   MACH_UINT_X               CopyVmSize;
+  MACH_UINT_X               SeOffset;
+  MACH_UINT_X               SeOffset2;
+  MACH_UINT_X               SeSize;
   UINT32                    RelocationsSize;
   UINT32                    SymtabSize;
   UINT32                    CurrentDelta;
@@ -439,22 +442,27 @@ MACH_X (InternalMachoExpandImage) (
     //
     if (!CalculateSizeOnly) {
       DstSegment = (MACH_SEGMENT_COMMAND_X *) ((UINT8 *) Segment - Source + Destination);
-      DstSegment->FileOffset += CurrentDelta;
-      DstSegment->FileSize    = DstSegment->Size;
     } else {
       DstSegment = Segment;
     }
 
+    SeOffset = DstSegment->FileOffset + CurrentDelta;
+    SeSize   = DstSegment->Size;
+
     DEBUG ((
       DEBUG_VERBOSE,
       "OCMCO: Dst segment offset 0x%X size 0x%X delta 0x%X\n",
-      DstSegment->FileOffset,
-      DstSegment->FileSize,
+      SeOffset,
+      SeSize,
       CurrentDelta
       ));
 
-    if (!IsObject && DstSegment->VirtualAddress - (DstSegment->FileOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
+    if (!IsObject && DstSegment->VirtualAddress - (SeOffset - Context->ContainerOffset) != FirstSegment->VirtualAddress) {
       return 0;
+    }
+    if (!CalculateSizeOnly) {
+      DstSegment->FileOffset = SeOffset;
+      DstSegment->FileSize   = SeSize;
     }
 
     //
@@ -525,11 +533,13 @@ MACH_X (InternalMachoExpandImage) (
     OriginalDelta  = CurrentDelta;
     CopyFileOffset = DstSegment->FileOffset;
     for (Index = 0; Index < DstSegment->NumSections; ++Index) {
+      SeOffset = DstSegment->Sections[Index].Offset;
+
       DEBUG ((
         DEBUG_VERBOSE,
         "OCMCO: Src section %u offset 0x%X size 0x%X delta 0x%X\n",
         Index,
-        DstSegment->Sections[Index].Offset,
+        SeOffset,
         DstSegment->Sections[Index].Size,
         CurrentDelta
         ));
@@ -539,26 +549,26 @@ MACH_X (InternalMachoExpandImage) (
       // For all other sections, copy as-is.
       //
       if (DstSegment->Sections[Index].Offset == 0) {
-        if (!CalculateSizeOnly) {
-          DstSegment->Sections[Index].Offset = MACH_X_TO_UINT32 (CopyFileOffset);
-        }
+        SeOffset        = MACH_X_TO_UINT32 (CopyFileOffset);
         CopyFileOffset += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
-        CurrentDelta += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
+        CurrentDelta   += MACH_X_TO_UINT32 (DstSegment->Sections[Index].Size);
       } else {
-        if (!CalculateSizeOnly) {
-          DstSegment->Sections[Index].Offset += CurrentDelta;
-        }
-        CopyFileOffset = DstSegment->Sections[Index].Offset + DstSegment->Sections[Index].Size;
+        SeOffset       += CurrentDelta;
+        CopyFileOffset  = SeOffset + DstSegment->Sections[Index].Size;
       }
 
       DEBUG ((
         DEBUG_VERBOSE,
         "OCMCO: Dst section %u offset 0x%X size 0x%X delta 0x%X\n",
         Index,
-        DstSegment->Sections[Index].Offset,
+        SeOffset,
         DstSegment->Sections[Index].Size,
         CurrentDelta
         ));
+
+      if (!CalculateSizeOnly) {
+        DstSegment->Sections[Index].Offset = SeOffset;
+      }
     }
 
     CurrentDelta = OriginalDelta + MACH_X_TO_UINT32 (Segment->Size - Segment->FileSize);
@@ -587,17 +597,19 @@ MACH_X (InternalMachoExpandImage) (
       }
 
       for (Index = 0; Index < DstSegment->NumSections; ++Index) {
-        if (DstSegment->Sections[Index].RelocationsOffset != 0) {
+        SeOffset = DstSegment->Sections[Index].RelocationsOffset;
+
+        if (SeOffset != 0) {
           DEBUG ((
             DEBUG_VERBOSE,
             "OCMCO: Src section %u relocs offset 0x%X count %u delta 0x%X\n",
             Index,
-            DstSegment->Sections[Index].RelocationsOffset,
+            SeOffset,
             DstSegment->Sections[Index].NumRelocations,
             CurrentDelta
             ));
 
-          CopyFileOffset  = DstSegment->Sections[Index].RelocationsOffset;
+          CopyFileOffset  = SeOffset;
           CurrentDelta    = ALIGN_VALUE (CurrentDelta, sizeof (MACH_RELOCATION_INFO));
           RelocationsSize = DstSegment->Sections[Index].NumRelocations * sizeof (MACH_RELOCATION_INFO);
 
@@ -605,19 +617,21 @@ MACH_X (InternalMachoExpandImage) (
             || (!CalculateSizeOnly && CurrentSize > DestinationSize)) {
             return 0;
           }
-          if (!CalculateSizeOnly) {
-            DstSegment->Sections[Index].RelocationsOffset += CurrentDelta;
-            CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], RelocationsSize);
-          }
+          SeOffset += CurrentDelta;
 
           DEBUG ((
             DEBUG_VERBOSE,
             "OCMCO: Dst section %u relocs offset 0x%X count %u delta 0x%X\n",
             Index,
-            DstSegment->Sections[Index].RelocationsOffset,
+            SeOffset,
             DstSegment->Sections[Index].NumRelocations,
             CurrentDelta
             ));
+
+          if (!CalculateSizeOnly) {
+            DstSegment->Sections[Index].RelocationsOffset = SeOffset;
+            CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], RelocationsSize);
+          }
         }
       }
     }
@@ -633,12 +647,15 @@ MACH_X (InternalMachoExpandImage) (
                  )
                );
     if (Symtab != NULL) {
+      SeOffset  = Symtab->SymbolsOffset;
+      SeOffset2 = Symtab->StringsOffset;
+
       DEBUG ((
         DEBUG_VERBOSE,
         "OCMCO: Src symtab 0x%X (%u symbols), strings 0x%X (size 0x%X) delta 0x%X\n",
-        Symtab->SymbolsOffset,
+        SeOffset,
         Symtab->NumSymbols,
-        Symtab->StringsOffset,
+        SeOffset2,
         Symtab->StringsSize,
         CurrentDelta
         ));
@@ -648,28 +665,37 @@ MACH_X (InternalMachoExpandImage) (
         Symtab = (MACH_SYMTAB_COMMAND *) ((UINT8 *) Symtab - Source + Destination);
       }
 
-      if (Symtab->SymbolsOffset != 0) {
-        CopyFileOffset = Symtab->SymbolsOffset;
+      //
+      // Copy symbol table.
+      //
+      if (SeOffset != 0) {
+        CopyFileOffset = SeOffset;
         SymtabSize     = Symtab->NumSymbols * sizeof (MACH_NLIST_X);
         if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, SymtabSize, &CurrentSize)
           || (!CalculateSizeOnly && CurrentSize > DestinationSize)) {
           return 0;
         }
+        SeOffset += CurrentDelta;
 
         if (!CalculateSizeOnly) {
-          Symtab->SymbolsOffset += CurrentDelta;
+          Symtab->SymbolsOffset = SeOffset;
           CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], SymtabSize);
         }
       }
-      if (Symtab->StringsOffset != 0) {
-        CopyFileOffset = Symtab->StringsOffset;
+
+      //
+      // Copy string table.
+      //
+      if (SeOffset2 != 0) {
+        CopyFileOffset = SeOffset2;
         if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, Symtab->StringsSize, &CurrentSize)
           || (!CalculateSizeOnly && CurrentSize > DestinationSize)) {
           return 0;
         }
+        SeOffset2 += CurrentDelta;
 
         if (!CalculateSizeOnly) {
-          Symtab->StringsOffset += CurrentDelta;
+          Symtab->StringsOffset = SeOffset2;
           CopyMem (&Destination[CopyFileOffset + CurrentDelta], &Source[CopyFileOffset], Symtab->StringsSize);
         }
       }
@@ -677,9 +703,9 @@ MACH_X (InternalMachoExpandImage) (
       DEBUG ((
         DEBUG_VERBOSE,
         "OCMCO: Dst symtab 0x%X (%u symbols), strings 0x%X (size 0x%X) delta 0x%X\n",
-        Symtab->SymbolsOffset,
+        SeOffset,
         Symtab->NumSymbols,
-        Symtab->StringsOffset,
+        SeOffset2,
         Symtab->StringsSize,
         CurrentDelta
         ));
