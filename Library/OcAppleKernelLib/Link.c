@@ -1507,7 +1507,6 @@ InternalPrelinkKext (
   UINT32                     NumExternalSymbols;
   CONST MACH_NLIST_ANY       *UndefinedSymtab;
   UINT32                     NumUndefinedSymbols;
-  UINT32                     NumUndefinedSymbolsActual;
   UINT64                     WeakTestValue;
 
   UINT32                     NumRelocations;
@@ -1524,6 +1523,8 @@ InternalPrelinkKext (
   UINT32                     RelocationsSize;
   UINT32                     StringTableOffset;
   UINT32                     StringTableSize;
+  MACH_NLIST                 *SymtabLinkEdit32;
+  UINT32                     NumSymtabLinkEdit32Symbols;
 
   UINT32                     SegmentOffset;
   UINT32                     SegmentSize;
@@ -1668,14 +1669,15 @@ InternalPrelinkKext (
 
   //
   // Solve undefined symbols. If on 32-bit, we may not have a DYSYMTAB so fallback to checking all symbols.
+  // All non-undefined symbols will have their indexes stored in the new symtab in LinkBuffer for later use.
   //
-  NumUndefinedSymbolsActual = NumUndefinedSymbols;
-  if (NumUndefinedSymbols == 0 && Context->Is32Bit) {
-    NumUndefinedSymbolsActual = NumSymbols;
+  NumSymtabLinkEdit32Symbols = 0;
+  if (Context->Is32Bit && DySymtab == NULL) {
+    NumUndefinedSymbols = NumSymbols;
   }
-  for (Index = 0; Index < NumUndefinedSymbolsActual; ++Index) {
+  for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
     if (Context->Is32Bit) {
-      Symbol = (MACH_NLIST_ANY *) (NumUndefinedSymbols == 0 ? &(&SymbolTable->Symbol32)[Index] : &(&UndefinedSymtab->Symbol32)[Index]);
+      Symbol = (MACH_NLIST_ANY *) (DySymtab != NULL ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
       if ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
         continue;
       }
@@ -1693,8 +1695,8 @@ InternalPrelinkKext (
                SymbolName,
                Symbol,
                &WeakTestValue,
-               UndefinedSymtab,
-               NumUndefinedSymbols
+               DySymtab != NULL ? UndefinedSymtab : NULL,
+               DySymtab != NULL ? NumUndefinedSymbols : 0
                );
     if (!Result) {
       DEBUG ((
@@ -1814,7 +1816,7 @@ InternalPrelinkKext (
     RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
   }
 
-  if (LinkEditSegment != NULL) {
+  if (LinkEditSegment != NULL && DySymtab != NULL) {
     //
     // Copy the entire symbol table excluding the area for undefined symbols.
     //
@@ -1902,23 +1904,64 @@ InternalPrelinkKext (
       LinkEditSegment->Segment64.Size     = LinkEditSize;
     }
 
-    if (DySymtab != NULL) {
-      DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditFileOffset + RelocationsOffset);
-      DySymtab->NumOfLocalRelocations  = NumRelocations;
+    DySymtab->LocalRelocationsOffset = (UINT32)(LinkEditFileOffset + RelocationsOffset);
+    DySymtab->NumOfLocalRelocations  = NumRelocations;
+
+    //
+    // Clear dynamic linker information.
+    //
+    DySymtab->LocalSymbolsIndex         = 0;
+    DySymtab->NumLocalSymbols           = 0;
+    DySymtab->NumExternalSymbols        = 0;
+    DySymtab->ExternalSymbolsIndex      = 0;
+    DySymtab->NumExternalRelocations    = 0;
+    DySymtab->ExternalRelocationsOffset = 0;
+    DySymtab->UndefinedSymbolsIndex     = 0;
+    DySymtab->NumUndefinedSymbols       = 0;
+    DySymtab->IndirectSymbolsOffset     = 0;
+    DySymtab->NumIndirectSymbols        = 0;
+
+  } else if (Context->Is32Bit && DySymtab == NULL) {
+    if (NumUndefinedSymbols > 0) {
+      //
+      // Copy the entire symbol table excluding undefined symbols.
+      // Any symbols that point to locations before our kext are ones
+      // that were previously undefined, and can be skipped.
+      //
+      SymtabLinkEdit32           = (MACH_NLIST *) LinkEdit;
+      NumSymtabLinkEdit32Symbols = 0;
+      for (Index = 0; Index < NumSymbols; ++Index) {
+        Symbol = (MACH_NLIST_ANY *) &(&SymbolTable->Symbol32)[Index];
+        if (Symbol->Symbol32.Type == (MACH_N_TYPE_ABS | MACH_N_TYPE_EXT)
+          && Symbol->Symbol32.Section == NO_SECT
+          && Symbol->Symbol32.Value < LoadAddress) {
+          continue;
+        }
+
+        CopyMem (
+          &SymtabLinkEdit32[NumSymtabLinkEdit32Symbols++],
+          Symbol,
+          sizeof (MACH_NLIST)
+          );
+      }
+
+      SymtabSize  = (UINT32)(NumSymbols * sizeof (MACH_NLIST));
+      SymtabSize2 = (UINT32)(NumSymtabLinkEdit32Symbols * sizeof (MACH_NLIST));
 
       //
-      // Clear dynamic linker information.
+      // Zero out the existing symbol table, and copy our non-undefined symbols back.
       //
-      DySymtab->LocalSymbolsIndex         = 0;
-      DySymtab->NumLocalSymbols           = 0;
-      DySymtab->NumExternalSymbols        = 0;
-      DySymtab->ExternalSymbolsIndex      = 0;
-      DySymtab->NumExternalRelocations    = 0;
-      DySymtab->ExternalRelocationsOffset = 0;
-      DySymtab->UndefinedSymbolsIndex     = 0;
-      DySymtab->NumUndefinedSymbols       = 0;
-      DySymtab->IndirectSymbolsOffset     = 0;
-      DySymtab->NumIndirectSymbols        = 0;
+      ZeroMem (
+        (VOID *)((UINTN)MachHeader + Symtab->SymbolsOffset),
+        SymtabSize
+        );
+      CopyMem (
+        (VOID *)((UINTN)MachHeader + Symtab->SymbolsOffset),
+        SymtabLinkEdit32,
+        SymtabSize2
+        );
+
+      Symtab->NumSymbols = NumSymtabLinkEdit32Symbols;
     }
   }
 
