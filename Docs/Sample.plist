@@ -454,7 +454,7 @@
 				<key>BundlePath</key>
 				<string>System/Library/Extensions/IONetworkingFamily.kext</string>
 				<key>Comment</key>
-				<string>Patch engine</string>
+				<string></string>
 				<key>Enabled</key>
 				<false/>
 				<key>Identifier</key>
