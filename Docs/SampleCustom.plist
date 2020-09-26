@@ -931,7 +931,7 @@
 			<key>ROM</key>
 			<data></data>
 			<key>SpoofVendor</key>
-			<false/>
+			<true/>
 			<key>SystemProductName</key>
 			<string></string>
 			<key>SystemSerialNumber</key>
