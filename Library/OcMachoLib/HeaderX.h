@@ -294,6 +294,7 @@ MACH_X (InternalMachoExpandImage) (
   UINT32                    SectionOffset;
   UINT32                    SymbolsOffset;
   UINT32                    StringsOffset;
+  UINT32                    AlignedOffset;
   UINT32                    RelocationsSize;
   UINT32                    SymtabSize;
   UINT32                    CurrentDelta;
@@ -609,8 +610,9 @@ MACH_X (InternalMachoExpandImage) (
             ));
 
           CopyFileOffset  = SectionOffset;
-          CurrentDelta    = ALIGN_VALUE (CurrentDelta, sizeof (MACH_RELOCATION_INFO));
           RelocationsSize = DstSegment->Sections[Index].NumRelocations * sizeof (MACH_RELOCATION_INFO);
+          AlignedOffset   = ALIGN_VALUE (SectionOffset + CurrentDelta, sizeof (MACH_RELOCATION_INFO));
+          CurrentDelta    = AlignedOffset - SectionOffset;
 
           if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, RelocationsSize, &CurrentSize)
             || (!CalculateSizeOnly && CurrentSize > DestinationSize)) {
@@ -659,7 +661,6 @@ MACH_X (InternalMachoExpandImage) (
         CurrentDelta
         ));
 
-      CurrentDelta = ALIGN_VALUE (CurrentDelta, sizeof (MACH_SYMTAB_COMMAND));
       if (!CalculateSizeOnly) {
         Symtab = (MACH_SYMTAB_COMMAND *) ((UINT8 *) Symtab - Source + Destination);
       }
@@ -670,6 +671,9 @@ MACH_X (InternalMachoExpandImage) (
       if (SymbolsOffset != 0) {
         CopyFileOffset = SymbolsOffset;
         SymtabSize     = Symtab->NumSymbols * sizeof (MACH_NLIST_X);
+        AlignedOffset  = ALIGN_VALUE (SymbolsOffset + CurrentDelta, sizeof (MACH_NLIST_X));
+        CurrentDelta   = AlignedOffset - SymbolsOffset;
+
         if (MACH_X (OcOverflowTriAddU) (CopyFileOffset, CurrentDelta, SymtabSize, &CurrentSize)
           || (!CalculateSizeOnly && CurrentSize > DestinationSize)) {
           return 0;
