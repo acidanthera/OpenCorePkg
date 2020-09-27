@@ -134,7 +134,7 @@ OcPlatformUpdateDataHub (
     //
     Data.PlatformName = MacInfo->DataHub.PlatformName;
     Data.SystemProductName = MacInfo->DataHub.SystemProductName;
-  
+
     if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)[0] != '\0') {
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
     }
@@ -174,8 +174,10 @@ OcPlatformUpdateSmbios (
 {
   EFI_STATUS       Status;
   OC_SMBIOS_DATA   Data;
+  UINT32           PlatformFeature;
   EFI_GUID         Uuid;
   UINT8            SmcVersion[APPLE_SMBIOS_SMC_VERSION_SIZE];
+  CONST CHAR8      *SystemMemoryStatus;
 
   ZeroMem (&Data, sizeof (Data));
 
@@ -353,6 +355,25 @@ OcPlatformUpdateSmbios (
     }
 
     Data.PlatformFeature = MacInfo->Smbios.PlatformFeature;
+    if (Data.PlatformFeature != NULL) {
+      PlatformFeature = *Data.PlatformFeature;
+    } else {
+      PlatformFeature = 0;
+    }
+
+    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus)[0] != '\0') {
+      SystemMemoryStatus = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemMemoryStatus);
+
+      if (AsciiStrCmp (SystemMemoryStatus, "Upgradable") == 0) {
+        PlatformFeature &= ~PT_FEATURE_HAS_SOLDERED_SYSTEM_MEMORY;
+        Data.PlatformFeature = &PlatformFeature;
+      } else if (AsciiStrCmp (SystemMemoryStatus, "Soldered") == 0) {
+        PlatformFeature |= PT_FEATURE_HAS_SOLDERED_SYSTEM_MEMORY;
+        Data.PlatformFeature = &PlatformFeature;
+      } else if (AsciiStrCmp (SystemMemoryStatus, "Auto") != 0) {
+        DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS system memory status %a\n", SystemMemoryStatus));
+      }
+    }
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       OcSmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);

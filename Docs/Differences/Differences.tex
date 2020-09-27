@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
-%DIF ADD ../Configuration.tex        Wed Sep 23 22:27:56 2020
+%DIF DEL PreviousConfiguration.tex   Sat Sep 26 20:43:38 2020
+%DIF ADD ../Configuration.tex        Mon Sep 28 15:42:12 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -366,7 +366,7 @@ for the implementation to warn about the use of
 applicable:
 
 \begin{center}
-\begin{tabular}{|l|l|} 
+\begin{tabular}{|l|l|}
 \hline
 \textbf{Type} & \textbf{Value} \\
 \hline
@@ -1116,7 +1116,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   \DIFdelbegin \DIFdel{unless absolutely required}\DIFdelend \DIFaddbegin \DIFadd{whenever possible}\DIFaddend . Commonly this enables a number of hacks on APTIO
   firmwares, which result in the need to add more patches. Modern firmwares
   generally do not need it at all, and those that do are fine with much
-  smaller patches. \DIFaddbegin \DIFadd{However, laptop vendors usually rely on this method to 
+  smaller patches. \DIFaddbegin \DIFadd{However, laptop vendors usually rely on this method to
   determine the availability of functions like modern I2C input support, thermal
   adjustment and custom feature additions.
 }\DIFaddend \item
@@ -2540,7 +2540,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   EfiBoot behaviour on macOS 10.6.8 and 10.7.5.
 
   \begin{center}
-  \begin{tabular}{|p{0.9in}|c|c|c|c|} 
+  \begin{tabular}{|p{0.9in}|c|c|c|c|}
   \hline
   \textbf{Model} & \textbf{10.6 (minimal)} & \textbf{10.6 (client)} & \textbf{10.6 (server)} & \textbf{10.7 (any)} \\
   \hline
@@ -2580,7 +2580,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   The list of available kernel caching types and its current support in OpenCore is listed below.
 
   \begin{center}
-  \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|} 
+  \begin{tabular}{|p{0.67in}|c|c|c|c|c|c|c|}
   \hline
   \textbf{macOS} & \textbf{i386 NC} & \textbf{i386 MK} & \textbf{i386 PK} & \textbf{x86\_64 NC} & \textbf{x86\_64 MK} & \textbf{x86\_64 PK} & \textbf{x86\_64 KC} \\
   \hline
@@ -3413,7 +3413,7 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
     not always be desired.
   \item \texttt{Any} --- any DMG images will mount as normal filesystems.
     \texttt{Any} policy is strongly not recommended and will cause a boot failure
-    when Apple Secure Boot is activated. 
+    when Apple Secure Boot is activated.
   \end{itemize}
 
 \item
@@ -4401,7 +4401,32 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ProcessorType}}
+  \DIFaddbegin \texttt{\DIFadd{SystemMemoryStatus}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Indicates whether system memory is upgradable in }\texttt{\DIFadd{PlatformFeature}}\DIFadd{.
+  This controls the visibility of the Memory tab in About This Mac.
+}
+
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Auto}} \DIFadd{--- use the original }\texttt{\DIFadd{PlatformFeature}} \DIFadd{value.
+    }\item \texttt{\DIFadd{Upgradable}} \DIFadd{--- explicitly unset }\texttt{\DIFadd{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}}
+    \DIFadd{(}\texttt{\DIFadd{0x2}}\DIFadd{) in }\texttt{\DIFadd{PlatformFeature}}\DIFadd{.
+    }\item \texttt{\DIFadd{Soldered}} \DIFadd{--- explicitly set }\texttt{\DIFadd{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}}
+    \DIFadd{(}\texttt{\DIFadd{0x2}}\DIFadd{) in }\texttt{\DIFadd{PlatformFeature}}\DIFadd{.
+  }\end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: On certain Mac models (namely }\texttt{\DIFadd{MacBookPro10,x}} \DIFadd{and any }\texttt{\DIFadd{MacBookAir}}\DIFadd{),
+  SPMemoryReporter.spreporter will ignore }\texttt{\DIFadd{PT\_FEATURE\_HAS\_SOLDERED\_SYSTEM\_MEMORY}}
+  \DIFadd{and assume that system memory is non-upgradable.
+}
+
+\item
+  \texttt{\DIFadd{ProcessorType}}
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(Automatic)}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Refer to SMBIOS }\texttt{\DIFadd{ProcessorType}}\DIFadd{.
@@ -6297,7 +6322,7 @@ requires several steps and careful configuration of select settings as explained
 \item Make sure that APFS JumpStart functionality restricts the loading
   of old vulnerable drivers by setting \texttt{MinDate} and \texttt{MinVersion}
   to \texttt{0}. More details are provided in \hyperref[uefiapfsprops]{APFS JumpStart}
-  section. An alternative is to install \texttt{apfs.efi} driver manually. 
+  section. An alternative is to install \texttt{apfs.efi} driver manually.
 \item Make sure that you do not need \texttt{Force} driver loading and can
   still boot all the operating systems you need.
 \item Make sure that \texttt{ScanPolicy} restricts loading from undesired
@@ -6313,7 +6338,7 @@ requires several steps and careful configuration of select settings as explained
 \item Sign all third-party operating system (not made by Microsoft or Apple)
   bootloaders if you need them. For Linux there is an option to install
   Microsoft-signed Shim bootloader as explained on e.g.
-  \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}. 
+  \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}.
 \item Enable UEFI Secure Boot in your firmware preferences and install the
   certificate with a private key you own. Details on how to generate a certificate
   can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
