@@ -32,6 +32,10 @@
  rm -rf Macho.dSYM DICT fuzz*.log Macho
 */
 
+#ifdef FUZZING_TEST
+#define main no_main
+#endif
+
 MACH_HEADER_64 Header;
 MACH_SECTION_64 Sect;
 MACH_SEGMENT_COMMAND_64 Seg;

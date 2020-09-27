@@ -53,8 +53,10 @@ ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o /dev/null 2>&1),
 endif
 
 ifeq ($(DIST),Darwin)
-	CFLAGS  += -mmacosx-version-min=10.6
-	LDFLAGS += -mmacosx-version-min=10.6
+	ifneq ($(FUZZ),1)
+		CFLAGS  += -mmacosx-version-min=10.6
+		LDFLAGS += -mmacosx-version-min=10.6
+	endif
 endif
 
 ifeq ($(DIST),Windows)
@@ -65,6 +67,11 @@ endif
 ifeq ($(SANITIZE),1)
 	CFLAGS  += -fsanitize=undefined,address
 	LDFLAGS += -fsanitize=undefined,address
+endif
+
+ifeq ($(FUZZ),1)
+	CFLAGS  += -fsanitize=fuzzer -D FUZZING_TEST
+	LDFLAGS += -fsanitize=fuzzer -D FUZZING_TEST
 endif
 
 ifeq ($(DEBUG),1)
