@@ -1260,7 +1260,7 @@ InternalRelocateSymbol (
                 );
       if (!Result
       || (MaxSize < (MachoContext->Is32Bit ? sizeof (KMOD_INFO_32_V1) : sizeof (KMOD_INFO_64_V1))
-      || (KmodOffset % 4) != 0)) { //FIXME ?
+      || (KmodOffset % 4) != 0)) {
         return FALSE;
       }
 
@@ -1483,6 +1483,7 @@ InternalPrelinkKext (
 
   MACH_HEADER_ANY            *MachHeader;
   UINT32                     MachSize;
+  BOOLEAN                    IsObject32;
 
   MACH_SEGMENT_COMMAND_ANY   *Segment;
   MACH_SECTION_ANY           *Section;
@@ -1541,7 +1542,7 @@ InternalPrelinkKext (
   //
   // ASSUMPTIONS:
   // If kext is 64-bit, it has a __LINKEDIT segment and DYSYMTAB.
-  // If kext is 32-bit, it can optionally have a __LINKEDIT segment and DYSYMTAB.
+  // If kext is 32-bit, it has a __LINKEDIT segment and DYSYMTAB if its not MH_OBJECT.
   //
 
   MachoContext    = &Kext->Context.MachContext;
@@ -1550,14 +1551,17 @@ InternalPrelinkKext (
   MachHeader = MachoGetMachHeader (MachoContext);
   MachSize   = MachoGetFileSize (MachoContext);
 
+  IsObject32 = Context->Is32Bit && MachHeader->Header32.FileType == MachHeaderFileTypeObject; 
+
   //
   // Only perform actions when the kext is flag'd to be dynamically linked.
   //
-  if (!Context->Is32Bit && (MachHeader->Header64.Flags & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
+  if (!IsObject32
+    && ((Context->Is32Bit ? MachHeader->Header32.Flags : MachHeader->Header64.Flags) & MACH_HEADER_FLAG_DYNAMIC_LINKER_LINK) == 0) {
     return EFI_SUCCESS;
   }
 
-  if ((!Context->Is32Bit && LinkEditSegment == NULL) || Kext->Context.VirtualKmod == 0) {
+  if ((!IsObject32 && LinkEditSegment == NULL) || Kext->Context.VirtualKmod == 0) {
     return EFI_UNSUPPORTED;
   }
 
@@ -1590,7 +1594,7 @@ InternalPrelinkKext (
   ASSERT (Symtab != NULL);
 
   DySymtab = MachoContext->DySymtab;
-  if (!Context->Is32Bit) {
+  if (!IsObject32) {
     ASSERT (DySymtab != NULL);
   }
 
@@ -1617,7 +1621,7 @@ InternalPrelinkKext (
   // For the allocation, assume all relocations will be preserved to simplify
   // the code, the memory is only temporarily allocated anyway.
   //
-  if (DySymtab != NULL) {
+  if (!IsObject32) {
     NumRelocations  = DySymtab->NumOfLocalRelocations;
     NumRelocations += DySymtab->NumExternalRelocations;
   } else {
@@ -1628,7 +1632,7 @@ InternalPrelinkKext (
   LinkEdit        = Context->LinkBuffer;
   LinkEditSize    = (SymbolTableSize + RelocationsSize + StringTableSize);
 
-  if (LinkEditSegment != NULL
+  if (!IsObject32
     && LinkEditSize > (Context->Is32Bit ? LinkEditSegment->Segment32.FileSize : LinkEditSegment->Segment64.FileSize)) {
     return EFI_UNSUPPORTED;
   }
@@ -1640,30 +1644,33 @@ InternalPrelinkKext (
 
   //
   // Solve indirect symbols.
+  // For 32-bit objects, we will solve those at the same time as undefined symbols later.
   //
-  WeakTestValue      = 0;
-  NumIndirectSymbols = MachoGetIndirectSymbolTable ( // FIXME
-                         MachoContext,
-                         &IndirectSymtab
-                         );
-  for (Index = 0; Index < NumIndirectSymbols; ++Index) {
-    Symbol     = (MACH_NLIST_ANY *) &IndirectSymtab[Index];
-    SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
-    if (SymbolName == NULL) {
-      return EFI_LOAD_ERROR;
-    }
+  if (!IsObject32) {
+    WeakTestValue      = 0;
+    NumIndirectSymbols = MachoGetIndirectSymbolTable (
+                          MachoContext,
+                          &IndirectSymtab
+                          );
+    for (Index = 0; Index < NumIndirectSymbols; ++Index) {
+      Symbol     = (MACH_NLIST_ANY *) &IndirectSymtab[Index];
+      SymbolName = MachoGetIndirectSymbolName (MachoContext, Symbol);
+      if (SymbolName == NULL) {
+        return EFI_LOAD_ERROR;
+      }
 
-    Result = InternalSolveSymbol (
-               Context,
-               Kext,
-               SymbolName,
-               Symbol,
-               &WeakTestValue,
-               UndefinedSymtab,
-               NumUndefinedSymbols
-               );
-    if (!Result) {
-      return EFI_LOAD_ERROR;
+      Result = InternalSolveSymbol (
+                Context,
+                Kext,
+                SymbolName,
+                Symbol,
+                &WeakTestValue,
+                UndefinedSymtab,
+                NumUndefinedSymbols
+                );
+      if (!Result) {
+        return EFI_LOAD_ERROR;
+      }
     }
   }
 
@@ -1672,13 +1679,15 @@ InternalPrelinkKext (
   // All non-undefined symbols will have their indexes stored in the new symtab in LinkBuffer for later use.
   //
   NumSymtabLinkEdit32Symbols = 0;
-  if (Context->Is32Bit && DySymtab == NULL) {
+  if (IsObject32) {
     NumUndefinedSymbols = NumSymbols;
   }
   for (Index = 0; Index < NumUndefinedSymbols; ++Index) {
     if (Context->Is32Bit) {
-      Symbol = (MACH_NLIST_ANY *) (DySymtab != NULL ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
-      if ((Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF) {
+      Symbol = (MACH_NLIST_ANY *) (!IsObject32 ? &(&UndefinedSymtab->Symbol32)[Index] : &(&SymbolTable->Symbol32)[Index]);
+      if (IsObject32
+        && (Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_UNDF
+        && (Symbol->Symbol32.Type & MACH_N_TYPE_TYPE) != MACH_N_TYPE_INDR) {
         continue;
       }
     } else {
@@ -1695,8 +1704,8 @@ InternalPrelinkKext (
                SymbolName,
                Symbol,
                &WeakTestValue,
-               DySymtab != NULL ? UndefinedSymtab : NULL,
-               DySymtab != NULL ? NumUndefinedSymbols : 0
+               !IsObject32 ? UndefinedSymtab : NULL,
+               !IsObject32 ? NumUndefinedSymbols : 0
                );
     if (!Result) {
       DEBUG ((
@@ -1730,7 +1739,7 @@ InternalPrelinkKext (
   // We only need to call InternalRelocateSymbols once if there is no DYSYMTAB.
   //
   KmodInfoOffset = 0;
-  if (DySymtab != NULL) {
+  if (!IsObject32) {
       Result = InternalRelocateSymbols (
               MachoContext,
               LoadAddressOffset,
@@ -1778,7 +1787,7 @@ InternalPrelinkKext (
   // Relocate and copy local and external relocations.
   //
   Relocations    = MachoContext->LocalRelocations;
-  NumRelocations = DySymtab != NULL ? DySymtab->NumOfLocalRelocations : 0;
+  NumRelocations = !IsObject32 ? DySymtab->NumOfLocalRelocations : 0;
   Result = InternalRelocateAndCopyRelocations (
              Context,
              Kext,
@@ -1796,7 +1805,7 @@ InternalPrelinkKext (
   // If there is no DYSYMTAB, the call to InternalRelocateAndCopyRelocations
   // above takes care of all relocations.
   //
-  if (DySymtab != NULL) {
+  if (!IsObject32) {
     Relocations     = MachoContext->ExternRelocations;
     NumRelocations2 = DySymtab->NumExternalRelocations;
     Result = InternalRelocateAndCopyRelocations (
@@ -1816,7 +1825,7 @@ InternalPrelinkKext (
     RelocationsSize = (NumRelocations * sizeof (MACH_RELOCATION_INFO));
   }
 
-  if (LinkEditSegment != NULL && DySymtab != NULL) {
+  if (!IsObject32) {
     //
     // Copy the entire symbol table excluding the area for undefined symbols.
     //
@@ -1921,7 +1930,7 @@ InternalPrelinkKext (
     DySymtab->IndirectSymbolsOffset     = 0;
     DySymtab->NumIndirectSymbols        = 0;
 
-  } else if (Context->Is32Bit && DySymtab == NULL) {
+  } else {
     if (NumUndefinedSymbols > 0) {
       //
       // Copy the entire symbol table excluding undefined symbols.
@@ -2052,14 +2061,14 @@ InternalPrelinkKext (
     // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
     // See OSKext::setVMAttributes.
     //
-    KmodInfo->Kmod32.HdrSize = 0;
-    KmodInfo->Kmod32.Size    = KmodInfo->Kmod32.HdrSize + (UINT32) SegmentVmSizes;
+    KmodInfo->Kmod32.HdrSize = IsObject32 ? FileOffset : 0;
+    KmodInfo->Kmod32.Size    = IsObject32 ? MachSize : KmodInfo->Kmod32.HdrSize + SegmentVmSizes;
     //
     // Adapt the Mach-O header to signal being prelinked.
     //
     MachHeader->Header32.Flags = MACH_HEADER_FLAG_NO_UNDEFINED_REFERENCES;
 
-    if (LinkEditSegment != NULL) { //FIXME : Symbols are not in a segment in MH_OBJECT.
+    if (!IsObject32) {
       MachSize = SegmentOffset + SegmentSize;
     }
   } else {
