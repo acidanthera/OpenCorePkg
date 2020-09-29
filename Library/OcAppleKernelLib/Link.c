@@ -2061,8 +2061,8 @@ InternalPrelinkKext (
     // XNU makes it read only, and this prevents __TEXT from gaining executable permission.
     // See OSKext::setVMAttributes.
     //
-    KmodInfo->Kmod32.HdrSize = IsObject32 ? FileOffset : 0;
-    KmodInfo->Kmod32.Size    = IsObject32 ? MachSize : KmodInfo->Kmod32.HdrSize + SegmentVmSizes;
+    KmodInfo->Kmod32.HdrSize = IsObject32 ? (UINT32) FileOffset : 0;
+    KmodInfo->Kmod32.Size    = IsObject32 ? MachSize : KmodInfo->Kmod32.HdrSize + (UINT32) SegmentVmSizes;
     //
     // Adapt the Mach-O header to signal being prelinked.
     //
