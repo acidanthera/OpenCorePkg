@@ -238,6 +238,7 @@ PatcherGetSymbolAddress (
       //
       if (Index == 0 && Context->KxldState != NULL) {
         SymbolAddress = InternalKxldSolveSymbol (
+          Context->Is32Bit,
           Context->KxldState,
           Context->KxldStateSize,
           Name

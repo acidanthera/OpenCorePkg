@@ -192,7 +192,8 @@ InternalKxldStateBuildLinkedSymbolTable (
   PRELINKED_KEXT_SYMBOL    *WalkerBottom;
   PRELINKED_KEXT_SYMBOL    *WalkerTop;
   CONST CHAR8              *Name;
-  CONST KXLD_SYM_ENTRY_64  *KxldSymbols;
+  CONST KXLD_SYM_ENTRY_ANY *KxldSymbols;
+  UINT64                   KxldAddress;
   UINT32                   Index;
   UINT32                   NumSymbols;
   UINT32                   NumCxxSymbols;
@@ -208,7 +209,7 @@ InternalKxldStateBuildLinkedSymbolTable (
   KxldSymbols = InternalGetKxldSymbols (
     Kext->Context.KxldState,
     Kext->Context.KxldStateSize,
-    MachCpuTypeX8664,
+    Context->Is32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
     &NumSymbols
     );
 
@@ -228,7 +229,8 @@ InternalKxldStateBuildLinkedSymbolTable (
 
   DEBUG ((
     DEBUG_VERBOSE,
-    "OCAK: Processing %a KXLD state with %u symbols\n",
+    "OCAK: Processing %a-bit %a KXLD state with %u symbols\n",
+    Context->Is32Bit ? "32" : "64",
     Kext->Identifier,
     NumSymbols
     ));
@@ -237,7 +239,7 @@ InternalKxldStateBuildLinkedSymbolTable (
     Name = InternalGetKxldString (
       Kext->Context.KxldState,
       Kext->Context.KxldStateSize,
-      KxldSymbols->NameOffset
+      Context->Is32Bit ? KxldSymbols->Kxld32.NameOffset : KxldSymbols->Kxld64.NameOffset
       );
     if (Name == NULL) {
       return EFI_INVALID_PARAMETER;
@@ -245,29 +247,32 @@ InternalKxldStateBuildLinkedSymbolTable (
 
     Result = MachoSymbolNameIsCxx (Name);
 
+    KxldAddress = Context->Is32Bit ? KxldSymbols->Kxld32.Address : KxldSymbols->Kxld64.Address;
+
     DEBUG ((
       DEBUG_VERBOSE,
-      "OCAK: Adding symbol %a with %Lx value (flags %u)\n",
+      "OCAK: Adding %a-bit symbol %a with %Lx value (flags %u)\n",
+      Context->Is32Bit ? "32" : "64",
       Name,
-      KxldSymbols->Address,
-      KxldSymbols->Flags
+      KxldAddress,
+      Context->Is32Bit ? KxldSymbols->Kxld32.Flags : KxldSymbols->Kxld64.Flags
       ));
 
     if (!Result) {
-      WalkerBottom->Value  = KxldSymbols->Address;
+      WalkerBottom->Value  = KxldAddress;
       WalkerBottom->Name   = Name;
-      WalkerBottom->Length = (UINT32)AsciiStrLen (WalkerBottom->Name);
+      WalkerBottom->Length = (UINT32) AsciiStrLen (WalkerBottom->Name);
       ++WalkerBottom;
     } else {
-      WalkerTop->Value  = KxldSymbols->Address;
+      WalkerTop->Value  = KxldAddress;
       WalkerTop->Name   = Name;
-      WalkerTop->Length = (UINT32)AsciiStrLen (WalkerTop->Name);
+      WalkerTop->Length = (UINT32) AsciiStrLen (WalkerTop->Name);
       --WalkerTop;
 
       ++NumCxxSymbols;
     }
 
-    ++KxldSymbols;
+    KxldSymbols = KXLD_ANY_NEXT (Context->Is32Bit, KxldSymbols);
   }
 
   Kext->NumberOfSymbols    = NumSymbols;
@@ -285,7 +290,7 @@ InternalKxldStateBuildLinkedVtables (
 {
   PRELINKED_VTABLE                 *LinkedVtables;
   PRELINKED_VTABLE                 *CurrentVtable;
-  CONST KXLD_SYM_ENTRY_64          *KxldSymbols;
+  CONST KXLD_SYM_ENTRY_ANY         *KxldSymbols;
   CONST KXLD_VTABLE_HEADER         *KxldVtables;
   UINT32                           Index;
   UINT32                           Index2;
@@ -303,7 +308,7 @@ InternalKxldStateBuildLinkedVtables (
   KxldVtables = InternalGetKxldVtables (
     Kext->Context.KxldState,
     Kext->Context.KxldStateSize,
-    MachCpuTypeX8664,
+    Context->Is32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
     &NumVtables
     );
 
@@ -346,7 +351,7 @@ InternalKxldStateBuildLinkedVtables (
       return EFI_INVALID_PARAMETER;
     }
 
-    KxldSymbols = (KXLD_SYM_ENTRY_64 *) ((UINT8 *) Kext->Context.KxldState + KxldVtables[Index].EntryOffset);
+    KxldSymbols = (KXLD_SYM_ENTRY_ANY *) ((UINT8 *) Kext->Context.KxldState + KxldVtables[Index].EntryOffset);
     CurrentVtable->NumEntries = KxldVtables[Index].NumEntries;
 
     DEBUG ((
@@ -360,18 +365,18 @@ InternalKxldStateBuildLinkedVtables (
       ));
 
     for (Index2 = 0; Index2 < CurrentVtable->NumEntries; ++Index2) {
-      CurrentVtable->Entries[Index2].Address = KxldSymbols->Address;
+      CurrentVtable->Entries[Index2].Address = Context->Is32Bit ? KxldSymbols->Kxld32.Address : KxldSymbols->Kxld64.Address;
       CurrentVtable->Entries[Index2].Name    = InternalGetKxldString (
         Kext->Context.KxldState,
         Kext->Context.KxldStateSize,
-        KxldSymbols->NameOffset
+        Context->Is32Bit ? KxldSymbols->Kxld32.NameOffset : KxldSymbols->Kxld64.NameOffset
         );
       if (CurrentVtable->Entries[Index2].Name == NULL) {
         FreePool (LinkedVtables);
         return EFI_INVALID_PARAMETER;
       }
 
-      ++KxldSymbols;
+      KxldSymbols = KXLD_ANY_NEXT (Context->Is32Bit, KxldSymbols);
     }
 
     CurrentVtable = GET_NEXT_PRELINKED_VTABLE (CurrentVtable);
@@ -463,13 +468,23 @@ InternalKxldStateRebuild (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Context->PrelinkedStateSegment->VirtualAddress = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSegment->Size           = AlignedSize;
-  Context->PrelinkedStateSegment->FileOffset     = Context->PrelinkedSize;
-  Context->PrelinkedStateSegment->FileSize       = AlignedSize;
-  Context->PrelinkedStateSectionKernel->Address  = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSectionKernel->Offset   = Context->PrelinkedSize;
-  Context->PrelinkedStateSectionKernel->Size     = Context->PrelinkedStateKernelSize;
+  if (Context->Is32Bit) {
+    Context->PrelinkedStateSegment->Segment32.VirtualAddress = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSegment->Segment32.Size           = AlignedSize;
+    Context->PrelinkedStateSegment->Segment32.FileOffset     = Context->PrelinkedSize;
+    Context->PrelinkedStateSegment->Segment32.FileSize       = AlignedSize;
+    Context->PrelinkedStateSectionKernel->Section32.Address  = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Section32.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Section32.Size     = Context->PrelinkedStateKernelSize;
+  } else {
+    Context->PrelinkedStateSegment->Segment64.VirtualAddress = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSegment->Segment64.Size           = AlignedSize;
+    Context->PrelinkedStateSegment->Segment64.FileOffset     = Context->PrelinkedSize;
+    Context->PrelinkedStateSegment->Segment64.FileSize       = AlignedSize;
+    Context->PrelinkedStateSectionKernel->Section64.Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKernel->Section64.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKernel->Section64.Size     = Context->PrelinkedStateKernelSize;
+  }
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
@@ -490,11 +505,19 @@ InternalKxldStateRebuild (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Context->PrelinkedStateSegment->Size         += AlignedSize;
-  Context->PrelinkedStateSegment->FileSize     += AlignedSize;
-  Context->PrelinkedStateSectionKexts->Address  = Context->PrelinkedLastAddress;
-  Context->PrelinkedStateSectionKexts->Offset   = Context->PrelinkedSize;
-  Context->PrelinkedStateSectionKexts->Size     = Context->PrelinkedStateKextsSize;
+  if (Context->Is32Bit) {
+    Context->PrelinkedStateSegment->Segment32.Size         += AlignedSize;
+    Context->PrelinkedStateSegment->Segment32.FileSize     += AlignedSize;
+    Context->PrelinkedStateSectionKexts->Section32.Address  = (UINT32) Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKexts->Section32.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKexts->Section32.Size     = Context->PrelinkedStateKextsSize;
+  } else {
+    Context->PrelinkedStateSegment->Segment64.Size         += AlignedSize;
+    Context->PrelinkedStateSegment->Segment64.FileSize     += AlignedSize;
+    Context->PrelinkedStateSectionKexts->Section64.Address  = Context->PrelinkedLastAddress;
+    Context->PrelinkedStateSectionKexts->Section64.Offset   = Context->PrelinkedSize;
+    Context->PrelinkedStateSectionKexts->Section64.Size     = Context->PrelinkedStateKextsSize;
+  }
 
   CopyMem (
     &Context->Prelinked[Context->PrelinkedSize],
@@ -509,19 +532,26 @@ InternalKxldStateRebuild (
   Context->PrelinkedLastAddress += AlignedSize;
   Context->PrelinkedSize        += AlignedSize;
 
-  if (Context->PrelinkedStateSectionKexts->Address != Context->PrelinkedStateKextsAddress) {
+  if ((Context->Is32Bit ?
+    Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address)
+    != Context->PrelinkedStateKextsAddress) {
     Status = InternalKxldStateRebasePlist (
       Context,
-      (INT64) (Context->PrelinkedStateSectionKexts->Address - Context->PrelinkedStateKextsAddress)
+      (INT64) ((Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address)
+        - Context->PrelinkedStateKextsAddress)
       );
     if (!EFI_ERROR (Status)) {
-      Context->PrelinkedStateKextsAddress = Context->PrelinkedStateSectionKexts->Address;
+      Context->PrelinkedStateKextsAddress = Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address;
     }
     DEBUG ((
       DEBUG_INFO,
-      "OCAK: Rebasing KXLD state from %Lx to %Lx - %r\n",
+      "OCAK: Rebasing %a-bit KXLD state from %Lx to %Lx - %r\n",
+      Context->Is32Bit ? "32" : "64",
       Context->PrelinkedStateKextsAddress,
-      Context->PrelinkedStateSectionKexts->Address,
+      Context->Is32Bit ?
+        Context->PrelinkedStateSectionKexts->Section32.Address : Context->PrelinkedStateSectionKexts->Section64.Address,
       Status
       ));
   } else {
@@ -533,13 +563,15 @@ InternalKxldStateRebuild (
 
 UINT64
 InternalKxldSolveSymbol (
+  IN BOOLEAN       Is32Bit,
   IN CONST VOID    *KxldState,
   IN UINT32        KxldStateSize,
   IN CONST CHAR8   *Name
   )
 {
   CONST CHAR8              *LocalName;
-  CONST KXLD_SYM_ENTRY_64  *KxldSymbols;
+  CONST KXLD_SYM_ENTRY_ANY *KxldSymbols;
+  UINT64                   KxldAddress;
   UINT32                   Index;
   UINT32                   NumSymbols;
 
@@ -550,7 +582,7 @@ InternalKxldSolveSymbol (
   KxldSymbols = InternalGetKxldSymbols (
     KxldState,
     KxldStateSize,
-    MachCpuTypeX8664,
+    Is32Bit ? MachCpuTypeI386 : MachCpuTypeX8664,
     &NumSymbols
     );
 
@@ -560,7 +592,8 @@ InternalKxldSolveSymbol (
 
   DEBUG ((
     DEBUG_VERBOSE,
-    "OCAK: Processing KXLD state for %a with %u symbols\n",
+    "OCAK: Processing %a-bit KXLD state for %a with %u symbols\n",
+    Is32Bit ? "32" : "64",
     Name,
     NumSymbols
     ));
@@ -569,25 +602,28 @@ InternalKxldSolveSymbol (
     LocalName = InternalGetKxldString (
       KxldState,
       KxldStateSize,
-      KxldSymbols->NameOffset
+      Is32Bit ? KxldSymbols->Kxld32.NameOffset : KxldSymbols->Kxld64.NameOffset
       );
     if (LocalName == NULL) {
       return 0;
     }
 
+    KxldAddress = Is32Bit ? KxldSymbols->Kxld32.Address : KxldSymbols->Kxld64.Address;
+
     DEBUG ((
       DEBUG_VERBOSE,
-      "OCAK: Checking symbol %a with %Lx value (flags %u)\n",
+      "OCAK: Checking %a-bit symbol %a with %Lx value (flags %u)\n",
+      Is32Bit ? "32" : "64",
       LocalName,
-      KxldSymbols->Address,
-      KxldSymbols->Flags
+      KxldAddress,
+      Is32Bit ? KxldSymbols->Kxld32.Flags : KxldSymbols->Kxld64.Flags
       ));
 
     if (AsciiStrCmp (LocalName, Name) == 0) {
-      return KxldSymbols->Address;
+      return KxldAddress;
     }
 
-    ++KxldSymbols;
+    KxldSymbols = KXLD_ANY_NEXT (Is32Bit, KxldSymbols);
   }
 
   return 0;

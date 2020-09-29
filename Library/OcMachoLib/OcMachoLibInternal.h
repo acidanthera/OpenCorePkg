@@ -153,6 +153,32 @@ InternalMachoGetVmSize64 (
   );
 
 /**
+  Returns the last virtual address of a 32-bit Mach-O.
+
+  @param[in] Context  Context of the Mach-O.
+
+  @retval 0  The binary is malformed.
+
+**/
+UINT32
+InternalMachoGetLastAddress32 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
+  Returns the last virtual address of a 64-bit Mach-O.
+
+  @param[in] Context  Context of the Mach-O.
+
+  @retval 0  The binary is malformed.
+
+**/
+UINT64
+InternalMachoGetLastAddress64 (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  );
+
+/**
   Retrieves the next 32-bit Load Command of type LoadCommandType.
 
   @param[in,out] Context          Context of the Mach-O.
@@ -221,10 +247,12 @@ InternalMachoGetFilePointerByAddress64 (
 /**
   Expand 32-bit Mach-O image to Destination (make segment file sizes equal to vm sizes).
 
-  @param[in]  Context          Context of the Mach-O.
-  @param[out] Destination      Output buffer.
-  @param[in]  DestinationSize  Output buffer maximum size.
-  @param[in]  Strip            Output with stripped prelink commands.
+  @param[in]  Context             Context of the Mach-O.
+  @param[in]  CalculateSizeOnly   TRUE to only calcuate a size and not actually expand the image.
+  @param[out] Destination         Output buffer.
+  @param[in]  DestinationSize     Output buffer maximum size.
+  @param[in]  Strip               Output with stripped prelink commands.
+  @param[in]  FileOffset          Pointer to the file offset of the first segment.
 
   @returns  New image size or 0 on failure.
 
@@ -232,18 +260,22 @@ InternalMachoGetFilePointerByAddress64 (
 UINT32
 InternalMachoExpandImage32 (
   IN  OC_MACHO_CONTEXT   *Context,
+  IN  BOOLEAN            CalculateSizeOnly,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT UINT32             *FileOffset OPTIONAL
   );
 
 /**
   Expand 64-bit Mach-O image to Destination (make segment file sizes equal to vm sizes).
 
-  @param[in]  Context          Context of the Mach-O.
-  @param[out] Destination      Output buffer.
-  @param[in]  DestinationSize  Output buffer maximum size.
-  @param[in]  Strip            Output with stripped prelink commands.
+  @param[in]  Context             Context of the Mach-O.
+  @param[in]  CalculateSizeOnly   TRUE to only calcuate a size and not actually expand the image.
+  @param[out] Destination         Output buffer.
+  @param[in]  DestinationSize     Output buffer maximum size.
+  @param[in]  Strip               Output with stripped prelink commands.
+  @param[in]  FileOffset          Pointer to the file offset of the first segment.
 
   @returns  New image size or 0 on failure.
 
@@ -251,9 +283,11 @@ InternalMachoExpandImage32 (
 UINT32
 InternalMachoExpandImage64 (
   IN  OC_MACHO_CONTEXT   *Context,
+  IN  BOOLEAN            CalculateSizeOnly,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT UINT64             *FileOffset OPTIONAL
   );
 
 /**

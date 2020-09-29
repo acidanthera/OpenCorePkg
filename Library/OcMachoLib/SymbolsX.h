@@ -308,7 +308,7 @@ MACH_X (MachoSymbolIsLocalDefined) (
   ASSERT (Context->SymbolTable != NULL);
 
   if ((DySymtab == NULL) || (DySymtab->NumUndefinedSymbols == 0)) {
-    return TRUE;
+    return FALSE; // FIXME: Required under 32-bit during vtable parent resolution, if using MH_OBJECT.
   }
   //
   // The symbol must have been declared locally prior to solving.  As there is
@@ -429,6 +429,7 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   CONST MACH_UINT_X           *Data;
   MACH_NLIST_X                *Sym;
   MACH_UINT_X                 AddressTop;
+  UINT32                      MaxSize;
 
   VOID                        *Tmp;
 
@@ -453,7 +454,10 @@ MACH_X (MachoGetSymbolByRelocationOffset) (
   if (Relocation != NULL) {
     Sym = NULL;
 
-    Tmp = (VOID *)((UINTN)Context->MachHeader + (UINTN)Address);
+    Tmp = (VOID *) MachoGetFilePointerByAddress (Context, Address, &MaxSize);
+    if (Tmp == NULL || MaxSize < sizeof (MACH_UINT_X)) {
+      return FALSE;
+    }
 
     if (OC_TYPE_ALIGNED (MACH_UINT_X, Tmp)) {
       Data = (MACH_UINT_X *)Tmp;

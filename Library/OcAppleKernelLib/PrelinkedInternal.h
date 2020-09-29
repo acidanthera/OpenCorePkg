@@ -104,7 +104,7 @@ struct PRELINKED_KEXT_ {
   //
   // Linkedit segment reference.
   //
-  MACH_SEGMENT_COMMAND_64  *LinkEditSegment;
+  MACH_SEGMENT_COMMAND_ANY *LinkEditSegment;
   //
   // The String Table associated with this symbol table.
   //
@@ -112,7 +112,7 @@ struct PRELINKED_KEXT_ {
   //
   // Symbol table.
   //
-  CONST MACH_NLIST_64      *SymbolTable;
+  CONST MACH_NLIST_ANY     *SymbolTable;
   //
   // Symbol table size.
   //
@@ -234,6 +234,7 @@ InternalUnlockContextKexts (
   @param[in]     PlistRoot       Current kext info.plist.
   @param[in]     LoadAddress     Kext load address.
   @param[in]     KmodAddress     Kext kmod address.
+  @param[in]     FileOffset      The file offset of the first segment.
 
   @return  prelinked kext to be inserted into PRELINKED_CONTEXT.
 **/
@@ -243,7 +244,8 @@ InternalLinkPrelinkedKext (
   IN OUT OC_MACHO_CONTEXT   *Executable,
   IN     XML_NODE           *PlistRoot,
   IN     UINT64             LoadAddress,
-  IN     UINT64             KmodAddress
+  IN     UINT64             KmodAddress,
+  IN     UINT64             FileOffset
   );
 
 EFI_STATUS
@@ -257,20 +259,28 @@ InternalConnectExternalSymtab (
 
 #define KXLD_WEAK_TEST_SYMBOL  "_gOSKextUnresolved"
 
+#define KXLD_ANY_NEXT(a,b) ((VOID *) (((UINTN)(b)) + ((a) ? sizeof ((b)->Kxld32) : sizeof ((b)->Kxld64))))
+
 #define OS_METACLASS_VTABLE_NAME "__ZTV11OSMetaClass"
 
 #define X86_64_RIP_RELATIVE_LIMIT  0x80000000ULL
 
 #define SYM_MAX_NAME_LEN  256U
 
+#define VTABLE_ENTRY_SIZE_32   4U
 #define VTABLE_ENTRY_SIZE_64   8U
-#define VTABLE_HEADER_LEN_64   2U
-#define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN_64 * VTABLE_ENTRY_SIZE_64)
+#define VTABLE_HEADER_LEN      2U
+#define VTABLE_HEADER_SIZE_32  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_32)
+#define VTABLE_HEADER_SIZE_64  (VTABLE_HEADER_LEN * VTABLE_ENTRY_SIZE_64)
 
 #define KERNEL_ADDRESS_MASK 0xFFFFFFFF00000000ULL
 #define KERNEL_ADDRESS_KEXT 0xFFFFFF7F00000000ULL
 #define KERNEL_ADDRESS_BASE 0xFFFFFF8000000000ULL
 #define KERNEL_FIXUP_OFFSET BASE_1MB
+
+#define VTABLE_ENTRY_X(a,b,c)     ((a) ? ((UINT32 *)(b))[(c)] : ((UINT64 *)(b))[(c)])
+#define VTABLE_ENTRY_SIZE_X(a)    ((a) ? VTABLE_ENTRY_SIZE_32 : VTABLE_ENTRY_SIZE_64)
+#define VTABLE_HEADER_SIZE_X(a)   ((a) ? VTABLE_HEADER_SIZE_32 : VTABLE_HEADER_SIZE_64)
 
 typedef union {
   struct {
@@ -301,7 +311,7 @@ typedef struct {
   CONST CHAR8  *Name;
   union {
     UINT64       Value;
-    CONST UINT64 *Data;
+    CONST VOID   *Data;
   } Vtable;
 } OC_PRELINKED_VTABLE_LOOKUP_ENTRY;
 
@@ -311,14 +321,14 @@ STATIC_ASSERT (
   );
 
 typedef struct {
-  CONST MACH_NLIST_64 *Smcp;
-  CONST MACH_NLIST_64 *Vtable;
-  UINT64              *VtableData;
-  CONST MACH_NLIST_64 *MetaVtable;
-  UINT64              *MetaVtableData;
-  UINT32              NumSolveSymbols;
-  UINT32              MetaSymsIndex;
-  MACH_NLIST_64       *SolveSymbols[];
+  CONST MACH_NLIST_ANY  *Smcp;
+  CONST MACH_NLIST_ANY  *Vtable;
+  VOID                  *VtableData;
+  CONST MACH_NLIST_ANY  *MetaVtable;
+  VOID                  *MetaVtableData;
+  UINT32                NumSolveSymbols;
+  UINT32                MetaSymsIndex;
+  MACH_NLIST_ANY        *SolveSymbols[];
 } OC_VTABLE_PATCH_ENTRY;
 //
 // This ASSERT is very dirty, but it is unlikely to trigger nevertheless.
@@ -336,20 +346,21 @@ STATIC_ASSERT (
 //
 
 BOOLEAN
-InternalGetVtableEntries64 (
-  IN  CONST UINT64  *VtableData,
+InternalGetVtableEntries (
+  IN  BOOLEAN       Is32Bit,
+  IN  CONST VOID    *VtableData,
   IN  UINT32        MaxSize,
   OUT UINT32        *NumEntries
   );
 
 BOOLEAN
-InternalPatchByVtables64 (
+InternalPatchByVtables (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext
   );
 
 BOOLEAN
-InternalPrepareCreateVtablesPrelinked64 (
+InternalPrepareCreateVtablesPrelinked (
   IN  PRELINKED_KEXT                    *Kext,
   IN  UINT32                            MaxSize,
   OUT UINT32                            *NumVtables,
@@ -357,7 +368,7 @@ InternalPrepareCreateVtablesPrelinked64 (
   );
 
 VOID
-InternalCreateVtablesPrelinked64 (
+InternalCreateVtablesPrelinked (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,
   IN     UINT32                                  NumVtables,
@@ -404,9 +415,10 @@ InternalOcGetSymbolValue (
   );
 
 VOID
-InternalSolveSymbolValue64 (
-  IN  UINT64         Value,
-  OUT MACH_NLIST_64  *Symbol
+InternalSolveSymbolValue (
+  IN  BOOLEAN             Is32Bit,
+  IN  UINT64              Value,
+  OUT MACH_NLIST_ANY      *Symbol
   );
 
 /**
@@ -416,16 +428,18 @@ InternalSolveSymbolValue64 (
   @param[in,out] Context      Prelinking context.
   @param[in]     Kext         KEXT prelinking context.
   @param[in]     LoadAddress  The address this KEXT shall be linked against.
+  @param[in]     FileOffset   The file offset of the first segment.
 
   @retval  Returned is whether the prelinking process has been successful.
            The state of the KEXT is undefined in case this routine fails.
 
 **/
 EFI_STATUS
-InternalPrelinkKext64 (
+InternalPrelinkKext (
   IN OUT PRELINKED_CONTEXT  *Context,
   IN     PRELINKED_KEXT     *Kext,
-  IN     UINT64             LoadAddress
+  IN     UINT64             LoadAddress,
+  IN     UINT64             FileOffset
   );
 
 /**
@@ -471,6 +485,7 @@ InternalKxldStateRebuild (
 /**
   Solve symbol through KXLD state.
 
+  @param[in] Is32Bit         KXLD is 32-bit.
   @param[in] KxldState       KXLD state.
   @param[in] KxldStateSize   KXLD state size.
   @param[in] Name            Symbol name.
@@ -480,6 +495,7 @@ InternalKxldStateRebuild (
 **/
 UINT64
 InternalKxldSolveSymbol (
+  IN BOOLEAN       Is32Bit,
   IN CONST VOID    *KxldState,
   IN UINT32        KxldStateSize,
   IN CONST CHAR8   *Name

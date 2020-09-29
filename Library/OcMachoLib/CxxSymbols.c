@@ -393,3 +393,31 @@ MachoSymbolNameIsCxx (
   ASSERT (Name != NULL);
   return AsciiStrnCmp (Name, CXX_PREFIX, L_STR_LEN (CXX_PREFIX)) == 0;
 }
+
+MACH_NLIST_ANY *
+MachoGetMetaclassSymbolFromSmcpSymbol (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST MACH_NLIST_ANY  *Smcp
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_NLIST_ANY *) MachoGetMetaclassSymbolFromSmcpSymbol32 (Context, &Smcp->Symbol32) :
+    (MACH_NLIST_ANY *) MachoGetMetaclassSymbolFromSmcpSymbol64 (Context, &Smcp->Symbol64);
+}
+
+BOOLEAN
+MachoGetVtableSymbolsFromSmcp (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+  IN     CONST CHAR8          *SmcpName,
+  OUT    CONST MACH_NLIST_ANY **Vtable,
+  OUT    CONST MACH_NLIST_ANY **MetaVtable
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MachoGetVtableSymbolsFromSmcp32 (Context, SmcpName, (CONST MACH_NLIST **) Vtable, (CONST MACH_NLIST **) MetaVtable) :
+    MachoGetVtableSymbolsFromSmcp64 (Context, SmcpName, (CONST MACH_NLIST_64 **) Vtable, (CONST MACH_NLIST_64 **) MetaVtable);
+}

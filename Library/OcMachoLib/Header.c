@@ -72,6 +72,17 @@ MachoGetVmSize (
     InternalMachoGetVmSize32 (Context) : InternalMachoGetVmSize64 (Context);
 }
 
+UINT64
+MachoGetLastAddress (
+  IN OUT OC_MACHO_CONTEXT  *Context
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    InternalMachoGetLastAddress32 (Context) : InternalMachoGetLastAddress64 (Context);
+}
+
 MACH_LOAD_COMMAND *
 MachoGetNextCommand (
   IN OUT OC_MACHO_CONTEXT         *Context,
@@ -135,6 +146,47 @@ MachoGetNextSegment (
 }
 
 MACH_SECTION_ANY *
+MachoGetNextSection (
+  IN OUT OC_MACHO_CONTEXT         *Context,
+  IN     MACH_SEGMENT_COMMAND_ANY *Segment,
+  IN     MACH_SECTION_ANY         *Section  OPTIONAL
+  )
+{
+  ASSERT (Context != NULL);
+  ASSERT (Segment != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetNextSection32 (Context, &Segment->Segment32, Section != NULL ? &Section->Section32 : NULL) :
+    (MACH_SECTION_ANY *) MachoGetNextSection64 (Context, &Segment->Segment64, Section != NULL ? &Section->Section64 : NULL);
+}
+
+MACH_SECTION_ANY *
+MachoGetSectionByIndex (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     UINT32            Index
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetSectionByIndex32 (Context, Index) :
+    (MACH_SECTION_ANY *) MachoGetSectionByIndex64 (Context, Index);
+}
+
+MACH_SEGMENT_COMMAND_ANY *
+MachoGetSegmentByName (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SEGMENT_COMMAND_ANY *) MachoGetSegmentByName32 (Context, SegmentName) :
+    (MACH_SEGMENT_COMMAND_ANY *) MachoGetSegmentByName64 (Context, SegmentName);
+}
+
+MACH_SECTION_ANY *
 MachoGetSectionByName (
   IN OUT OC_MACHO_CONTEXT         *Context,
   IN     MACH_SEGMENT_COMMAND_ANY *Segment,
@@ -146,6 +198,20 @@ MachoGetSectionByName (
   return Context->Is32Bit ?
     (MACH_SECTION_ANY *) MachoGetSectionByName32 (Context, &Segment->Segment32, SectionName) :
     (MACH_SECTION_ANY *) MachoGetSectionByName64 (Context, &Segment->Segment64, SectionName);
+}
+
+MACH_SECTION_ANY *
+MachoGetSegmentSectionByName (
+  IN OUT OC_MACHO_CONTEXT  *Context,
+  IN     CONST CHAR8       *SegmentName,
+  IN     CONST CHAR8       *SectionName
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName32 (Context, SegmentName, SectionName) :
+    (MACH_SECTION_ANY *) MachoGetSegmentSectionByName64 (Context, SegmentName, SectionName);
 }
 
 /**
@@ -451,6 +517,59 @@ InternalRetrieveSymtabs (
   return MachoInitialiseSymtabsExternal (Context, Context);
 }
 
+UINT32
+MachoGetSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST_ANY **SymbolTable,
+     OUT CONST CHAR8          **StringTable OPTIONAL,
+     OUT CONST MACH_NLIST_ANY **LocalSymbols OPTIONAL,
+     OUT UINT32               *NumLocalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST_ANY **ExternalSymbols OPTIONAL,
+     OUT UINT32               *NumExternalSymbols OPTIONAL,
+     OUT CONST MACH_NLIST_ANY **UndefinedSymbols OPTIONAL,
+     OUT UINT32               *NumUndefinedSymbols OPTIONAL
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MachoGetSymbolTable32 (
+      Context,
+      (CONST MACH_NLIST **) SymbolTable,
+      StringTable,
+      (CONST MACH_NLIST **) LocalSymbols,
+      NumLocalSymbols,
+      (CONST MACH_NLIST **) ExternalSymbols,
+      NumExternalSymbols, 
+      (CONST MACH_NLIST **) UndefinedSymbols,
+      NumUndefinedSymbols
+      ) :
+    MachoGetSymbolTable64 (
+      Context,
+      (CONST MACH_NLIST_64 **) SymbolTable,
+      StringTable,
+      (CONST MACH_NLIST_64 **) LocalSymbols,
+      NumLocalSymbols,
+      (CONST MACH_NLIST_64 **) ExternalSymbols,
+      NumExternalSymbols, 
+      (CONST MACH_NLIST_64 **) UndefinedSymbols,
+      NumUndefinedSymbols
+      );
+}
+
+UINT32
+MachoGetIndirectSymbolTable (
+  IN OUT OC_MACHO_CONTEXT     *Context,
+     OUT CONST MACH_NLIST_ANY **SymbolTable
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MachoGetIndirectSymbolTable32 (Context, (CONST MACH_NLIST **) SymbolTable) :
+    MachoGetIndirectSymbolTable64 (Context, (CONST MACH_NLIST_64 **) SymbolTable);
+}
+
 UINT64
 MachoRuntimeGetEntryAddress (
   IN VOID  *Image
@@ -516,7 +635,7 @@ MachoGetFilePointerByAddress (
   ASSERT (Context != NULL);
 
   if (Context->Is32Bit) {
-    ASSERT (Address > MAX_UINT32);
+    ASSERT (Address < MAX_UINT32);
   }
 
   return Context->Is32Bit ?
@@ -529,14 +648,27 @@ MachoExpandImage (
   IN  OC_MACHO_CONTEXT   *Context,
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
-  IN  BOOLEAN            Strip
+  IN  BOOLEAN            Strip,
+  OUT UINT64             *FileOffset OPTIONAL
   )
 {
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoExpandImage32 (Context, Destination, DestinationSize, Strip) :
-    InternalMachoExpandImage64 (Context, Destination, DestinationSize, Strip);
+    InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, (UINT32 *) FileOffset) :
+    InternalMachoExpandImage64 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset);
+}
+
+UINT32
+MachoGetExpandedImageSize (
+  IN  OC_MACHO_CONTEXT   *Context
+  )
+{
+  ASSERT (Context != NULL);
+
+  return Context->Is32Bit ?
+    MACHO_ALIGN (InternalMachoExpandImage32 (Context, TRUE, NULL, 0, FALSE, NULL)) :
+    MACHO_ALIGN (InternalMachoExpandImage64 (Context, TRUE, NULL, 0, FALSE, NULL));
 }
 
 BOOLEAN

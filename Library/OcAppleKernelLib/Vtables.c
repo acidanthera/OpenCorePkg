@@ -1,6 +1,5 @@
 /** @file
   Library handling KEXT prelinking.
-  Currently limited to Intel 64 architectures.
 
 Copyright (c) 2018, Download-Fritz.  All rights reserved.<BR>
 This program and the accompanying materials are licensed and made available
@@ -89,14 +88,14 @@ InternalGetOcVtableByName (
 
 STATIC
 VOID
-InternalConstructVtablePrelinked64 (
+InternalConstructVtablePrelinked (
   IN     PRELINKED_CONTEXT                      *Context,
   IN OUT PRELINKED_KEXT                         *Kext,
   IN     CONST OC_PRELINKED_VTABLE_LOOKUP_ENTRY *VtableLookup,
   OUT    PRELINKED_VTABLE                       *Vtable
   )
 {
-  CONST UINT64                                  *VtableData;
+  CONST VOID                                    *VtableData;
   UINT64                                        Value;
   UINT32                                        Index;
   CONST PRELINKED_KEXT_SYMBOL                   *Symbol;
@@ -115,12 +114,12 @@ InternalConstructVtablePrelinked64 (
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
-  // VTable bounds are verified in InternalGetVtableEntries64() called earlier.
+  // VTable bounds are verified in InternalGetVtableEntries() called earlier.
   // The buffer is allocated to be able to hold all entries.
   //
   for (
     Index = 0;
-    (Value = VtableData[Index + VTABLE_HEADER_LEN_64]) != 0;
+    (Value = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN)) != 0;
     ++Index
     ) {
 
@@ -148,8 +147,9 @@ InternalConstructVtablePrelinked64 (
 }
 
 BOOLEAN
-InternalGetVtableEntries64 (
-  IN  CONST UINT64  *VtableData,
+InternalGetVtableEntries (
+  IN  BOOLEAN       Is32Bit,
+  IN  CONST VOID    *VtableData,
   IN  UINT32        MaxSize,
   OUT UINT32        *NumEntries
   )
@@ -162,20 +162,20 @@ InternalGetVtableEntries64 (
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  MaxSize /= VTABLE_ENTRY_SIZE_64;
-  Index    = VTABLE_HEADER_LEN_64;
+  MaxSize /= VTABLE_ENTRY_SIZE_X (Is32Bit);
+  Index    = VTABLE_HEADER_LEN;
   do {
     if (Index >= MaxSize) {
       return FALSE;
     }
-  } while (VtableData[Index++] != 0);
+  } while (VTABLE_ENTRY_X (Is32Bit, VtableData, Index++) != 0);
 
-  *NumEntries = (Index - VTABLE_HEADER_LEN_64);
+  *NumEntries = (Index - VTABLE_HEADER_LEN);
   return TRUE;
 }
 
 BOOLEAN
-InternalPrepareCreateVtablesPrelinked64 (
+InternalPrepareCreateVtablesPrelinked (
   IN  PRELINKED_KEXT                    *Kext,
   IN  UINT32                            MaxSize,
   OUT UINT32                            *NumVtables,
@@ -230,7 +230,7 @@ InternalPrepareCreateVtablesPrelinked64 (
 }
 
 VOID
-InternalCreateVtablesPrelinked64 (
+InternalCreateVtablesPrelinked (
   IN     PRELINKED_CONTEXT                       *Context,
   IN OUT PRELINKED_KEXT                          *Kext,
   IN     UINT32                                  NumVtables,
@@ -243,7 +243,7 @@ InternalCreateVtablesPrelinked64 (
   ASSERT (Kext != NULL);
 
   for (Index = 0; Index < NumVtables; ++Index) {
-    InternalConstructVtablePrelinked64 (
+    InternalConstructVtablePrelinked (
                 Context,
                 Kext,
                 &VtableLookups[Index],
@@ -262,7 +262,7 @@ InternalPatchVtableSymbol (
   IN OUT OC_MACHO_CONTEXT              *MachoContext,
   IN     CONST PRELINKED_VTABLE_ENTRY  *ParentEntry,
   IN     CONST CHAR8                   *VtableName,
-  OUT    MACH_NLIST_64                 *Symbol
+  OUT    MACH_NLIST_ANY                *Symbol
   )
 {
   CONST CHAR8 *Name;
@@ -285,11 +285,11 @@ InternalPatchVtableSymbol (
   //
   // 1) If the symbol is defined locally, do not patch
   //
-  if (MachoSymbolIsLocalDefined64 (MachoContext, Symbol)) {
+  if (MachoSymbolIsLocalDefined (MachoContext, Symbol)) {
     return TRUE;
   }
 
-  Name = MachoGetSymbolName64 (MachoContext, Symbol);
+  Name = MachoGetSymbolName (MachoContext, Symbol);
   //
   // 2) If the child is a pure virtual function, do not patch.
   // In general, we want to proceed with patching when the symbol is
@@ -325,7 +325,7 @@ InternalPatchVtableSymbol (
   // declared as part of the class and not inherited, which means we
   // should not patch it.
   //
-  if (!MachoSymbolIsDefined64 (Symbol)) {
+  if (!MachoSymbolIsDefined (MachoContext, Symbol)) {
     ClassName = MachoGetClassNameFromVtableName (VtableName);
 
     Success = MachoGetFunctionPrefixFromClassName (
@@ -363,7 +363,7 @@ InternalPatchVtableSymbol (
   //       changed for the symbol value is already resolved and nothing but a
   //       VTable Relocation should reference it.
   //
-  InternalSolveSymbolValue64 (ParentEntry->Address, Symbol);
+  InternalSolveSymbolValue (MachoContext->Is32Bit, ParentEntry->Address, Symbol);
   //
   // The C++ ABI requires that functions be aligned on a 2-byte boundary:
   // http://www.codesourcery.com/public/cxx-abi/abi.html#member-pointers
@@ -373,7 +373,8 @@ InternalPatchVtableSymbol (
   // context.
   //
   Name = ParentEntry->Name;
-  if (!MachoSymbolNameIsPureVirtual (Name) && ((Symbol->Value & 1U) != 0)) {
+  if (!MachoSymbolNameIsPureVirtual (Name)
+    && (((MachoContext->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value) & 1U) != 0)) {
     DEBUG ((DEBUG_WARN, "OCAK: Prelink: Invalid VTable symbol\n"));
   }
 
@@ -382,14 +383,14 @@ InternalPatchVtableSymbol (
 
 STATIC
 BOOLEAN
-InternalInitializeVtableByEntriesAndRelocations64 (
+InternalInitializeVtableByEntriesAndRelocations (
   IN     PRELINKED_CONTEXT            *Context,
   IN     PRELINKED_KEXT               *Kext,
   IN     CONST PRELINKED_VTABLE       *SuperVtable,
-  IN     CONST MACH_NLIST_64          *VtableSymbol,
-  IN     CONST UINT64                 *VtableData,
+  IN     CONST MACH_NLIST_ANY         *VtableSymbol,
+  IN     CONST VOID                   *VtableData,
   IN     UINT32                       NumSolveSymbols,
-  IN OUT MACH_NLIST_64                **SolveSymbols,
+  IN OUT MACH_NLIST_ANY               **SolveSymbols,
   OUT    PRELINKED_VTABLE             *Vtable
   )
 {
@@ -401,19 +402,19 @@ InternalInitializeVtableByEntriesAndRelocations64 (
   UINT64                     EntryValue;
   UINT32                     SolveSymbolIndex;
   BOOLEAN                    Result;
-  MACH_NLIST_64              *Symbol;
+  MACH_NLIST_ANY             *Symbol;
 
   MachoContext  = &Kext->Context.MachContext;
   VtableEntries = Vtable->Entries;
 
-  VtableName       = MachoGetSymbolName64 (MachoContext, VtableSymbol);
+  VtableName       = MachoGetSymbolName (MachoContext, VtableSymbol);
   SolveSymbolIndex = 0;
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
   for (Index = 0; Index < SuperVtable->NumEntries; ++Index) {
-    EntryValue = VtableData[Index + VTABLE_HEADER_LEN_64];
+    EntryValue = VTABLE_ENTRY_X (Context->Is32Bit, VtableData, Index + VTABLE_HEADER_LEN);
     if (EntryValue != 0) {
       //
       // If we can't find a symbol, it means it is a locally-defined,
@@ -459,8 +460,8 @@ InternalInitializeVtableByEntriesAndRelocations64 (
           return FALSE;
         }
 
-        VtableEntries[Index].Name    = MachoGetSymbolName64 (MachoContext, Symbol);
-        VtableEntries[Index].Address = Symbol->Value;
+        VtableEntries[Index].Name    = MachoGetSymbolName (MachoContext, Symbol);
+        VtableEntries[Index].Address = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
         continue;
       }
     }
@@ -479,28 +480,26 @@ STATIC
 BOOLEAN
 InternalInitializeVtablePatchData (
   IN OUT OC_MACHO_CONTEXT     *MachoContext,
-  IN     CONST MACH_NLIST_64  *VtableSymbol,
+  IN     CONST MACH_NLIST_ANY *VtableSymbol,
   IN OUT UINT32               *MaxSize,
-  OUT    UINT64               **VtableDataPtr,
+  OUT    VOID                 **VtableDataPtr,
   OUT    UINT32               *NumEntries,
   OUT    UINT32               *NumSymbols,
-  OUT    MACH_NLIST_64        **SolveSymbols
+  OUT    MACH_NLIST_ANY       **SolveSymbols
   )
 {
-  BOOLEAN              Result;
-  UINT32               VtableOffset;
-  UINT32               VtableMaxSize;
-  CONST MACH_HEADER_64 *MachHeader;
-  UINT64               *VtableData;
-  UINT32               SymIndex;
-  UINT32               EntryOffset;
-  UINT64               FileOffset;
-  UINT32               MaxSymbols;
-  MACH_NLIST_64        *Symbol;
+  BOOLEAN               Result;
+  UINT32                VtableOffset;
+  UINT32                VtableMaxSize;
+  CONST MACH_HEADER_ANY *MachHeader;
+  VOID                  *VtableData;
+  UINT32                SymIndex;
+  UINT32                EntryOffset;
+  UINT64                FileOffset;
+  UINT32                MaxSymbols;
+  MACH_NLIST_ANY        *Symbol;
 
-  VOID                 *Tmp;
-
-  Result = MachoSymbolGetFileOffset64 (
+  Result = MachoSymbolGetFileOffset (
              MachoContext,
              VtableSymbol,
              &VtableOffset,
@@ -510,39 +509,38 @@ InternalInitializeVtablePatchData (
     return FALSE;
   }
 
-  MachHeader = MachoGetMachHeader64 (MachoContext);
+  MachHeader = MachoGetMachHeader (MachoContext);
   ASSERT (MachHeader != NULL);
 
-  Tmp = (VOID *)((UINTN)MachHeader + VtableOffset);
-  if (!OC_TYPE_ALIGNED (UINT64, Tmp)) {
+  VtableData = (VOID *)((UINTN) MachHeader + VtableOffset);
+  if (MachoContext->Is32Bit ? !OC_TYPE_ALIGNED (UINT32, VtableData) : !OC_TYPE_ALIGNED (UINT64, VtableData)) {
     return FALSE;
   }
-  VtableData = (UINT64 *)Tmp;
   //
   // Assumption: Not ARM (ARM requires an alignment to the function pointer
   //             retrieved from VtableData.
   //
-  MaxSymbols     = (*MaxSize / sizeof (*SolveSymbols));
-  VtableMaxSize /= VTABLE_ENTRY_SIZE_64;
+  MaxSymbols     = (*MaxSize / (MachoContext->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
+  VtableMaxSize /= VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit);
 
   SymIndex = 0;
 
   for (
-    EntryOffset = VTABLE_HEADER_LEN_64;
+    EntryOffset = VTABLE_HEADER_LEN;
     EntryOffset < VtableMaxSize;
     ++EntryOffset
     ) {
-    if (VtableData[EntryOffset] == 0) {
+    if (VTABLE_ENTRY_X (MachoContext->Is32Bit, VtableData, EntryOffset) == 0) {
       Result = OcOverflowAddU64 (
-                 VtableSymbol->Value,
-                 (EntryOffset * VTABLE_ENTRY_SIZE_64),
+                 MachoContext->Is32Bit ? VtableSymbol->Symbol32.Value : VtableSymbol->Symbol64.Value,
+                 (EntryOffset * VTABLE_ENTRY_SIZE_X (MachoContext->Is32Bit)),
                  &FileOffset
                  );
       if (Result) {
         return FALSE;
       }
 
-      Result = MachoGetSymbolByExternRelocationOffset64 (
+      Result = MachoGetSymbolByExternRelocationOffset (
                  MachoContext,
                  FileOffset,
                  &Symbol
@@ -552,9 +550,9 @@ InternalInitializeVtablePatchData (
         // If the VTable entry is 0 and it is not referenced by a Relocation,
         // it is the end of the table.
         //
-        *MaxSize      -= (SymIndex * sizeof (*SolveSymbols));
+        *MaxSize      -= (SymIndex * (MachoContext->Is32Bit ? sizeof (MACH_NLIST) : sizeof (MACH_NLIST_64)));
         *VtableDataPtr = VtableData;
-        *NumEntries    = (EntryOffset - VTABLE_HEADER_LEN_64);
+        *NumEntries    = (EntryOffset - VTABLE_HEADER_LEN);
         *NumSymbols    = SymIndex;
         return TRUE;
       }
@@ -572,7 +570,7 @@ InternalInitializeVtablePatchData (
 }
 
 BOOLEAN
-InternalPatchByVtables64 (
+InternalPatchByVtables (
   IN     PRELINKED_CONTEXT         *Context,
   IN OUT PRELINKED_KEXT            *Kext
   )
@@ -581,28 +579,29 @@ InternalPatchByVtables64 (
   OC_VTABLE_PATCH_ENTRY *EntryWalker;
   UINT32                MaxSize;
 
-  OC_MACHO_CONTEXT     *MachoContext;
-  CONST MACH_HEADER_64 *MachHeader;
-  UINT32               Index;
-  UINT32               NumTables;
-  UINT32               NumEntries;
-  UINT32               NumEntriesTemp;
-  UINT32               NumPatched;
-  BOOLEAN              Result;
-  CONST MACH_NLIST_64  *Smcp;
-  CONST CHAR8          *Name;
-  CONST MACH_NLIST_64  *MetaClass;
-  CONST PRELINKED_VTABLE *SuperVtable;
-  CONST PRELINKED_VTABLE *MetaVtable;
-  CONST VOID           *OcSymbolDummy;
-  MACH_NLIST_64        *SymbolDummy;
-  CHAR8                ClassName[SYM_MAX_NAME_LEN];
-  CHAR8                SuperClassName[SYM_MAX_NAME_LEN];
-  CHAR8                VtableName[SYM_MAX_NAME_LEN];
-  CHAR8                SuperVtableName[SYM_MAX_NAME_LEN];
-  CHAR8                FinalSymbolName[SYM_MAX_NAME_LEN];
-  BOOLEAN              SuccessfulIteration;
-  PRELINKED_VTABLE     *CurrentVtable;
+  OC_MACHO_CONTEXT        *MachoContext;
+  CONST MACH_HEADER_ANY   *MachHeader;
+  UINT32                  Index;
+  UINT32                  NumTables;
+  UINT32                  NumEntries;
+  UINT32                  NumEntriesTemp;
+  UINT32                  NumPatched;
+  BOOLEAN                 Result;
+  CONST MACH_NLIST_ANY    *Smcp;
+  CONST CHAR8             *Name;
+  CONST MACH_NLIST_ANY    *MetaClass;
+  CONST PRELINKED_VTABLE  *SuperVtable;
+  CONST PRELINKED_VTABLE  *MetaVtable;
+  CONST VOID              *OcSymbolDummy;
+  MACH_NLIST_ANY          *SymbolDummy;
+  CHAR8                   ClassName[SYM_MAX_NAME_LEN];
+  CHAR8                   SuperClassName[SYM_MAX_NAME_LEN];
+  CHAR8                   VtableName[SYM_MAX_NAME_LEN];
+  CHAR8                   SuperVtableName[SYM_MAX_NAME_LEN];
+  CHAR8                   FinalSymbolName[SYM_MAX_NAME_LEN];
+  BOOLEAN                 SuccessfulIteration;
+  PRELINKED_VTABLE        *CurrentVtable;
+
   //
   // LinkBuffer is at least as big as __LINKEDIT, so it can store all symbols.
   //
@@ -611,7 +610,7 @@ InternalPatchByVtables64 (
 
   MachoContext = &Kext->Context.MachContext;
 
-  MachHeader = MachoGetMachHeader64 (MachoContext);
+  MachHeader = MachoGetMachHeader (MachoContext);
   ASSERT (MachHeader != NULL);
   //
   // Retrieve all SMCPs.
@@ -622,11 +621,11 @@ InternalPatchByVtables64 (
 
   for (
     Index = 0;
-    (Smcp = MachoGetSymbolByIndex64 (MachoContext, Index)) != NULL;
+    (Smcp = MachoGetSymbolByIndex (MachoContext, Index)) != NULL;
     ++Index
     ) {
-    Name = MachoGetSymbolName64 (MachoContext, Smcp);
-    if (((Smcp->Type & MACH_N_TYPE_STAB) == 0)
+    Name = MachoGetSymbolName (MachoContext, Smcp);
+    if ((((Context->Is32Bit ? Smcp->Symbol32.Type : Smcp->Symbol64.Type) & MACH_N_TYPE_STAB) == 0)
      && MachoSymbolNameIsSmcp (MachoContext, Name)) {
       if (MaxSize < sizeof (*EntryWalker)) {
         return FALSE;
@@ -637,7 +636,7 @@ InternalPatchByVtables64 (
       // number of vtables we're expecting, because every pointer will have a
       // class vtable and a MetaClass vtable.
       //
-      Result = MachoGetVtableSymbolsFromSmcp64 (
+      Result = MachoGetVtableSymbolsFromSmcp (
                  MachoContext,
                  Name,
                  &EntryWalker->Vtable,
@@ -715,7 +714,7 @@ InternalPatchByVtables64 (
         continue;
       }
 
-      Name = MachoGetSymbolName64 (MachoContext, Smcp);
+      Name = MachoGetSymbolName (MachoContext, Smcp);
       //
       // We walk over the super metaclass pointer symbols because classes
       // with them are the only ones that need patching.  Then we double the
@@ -749,7 +748,7 @@ InternalPatchByVtables64 (
       //
       // Find the SMCP's meta class symbol
       //
-      MetaClass = MachoGetMetaclassSymbolFromSmcpSymbol64 (
+      MetaClass = MachoGetMetaclassSymbolFromSmcpSymbol (
                     MachoContext,
                     Smcp
                     );
@@ -761,7 +760,7 @@ InternalPatchByVtables64 (
       //
       Result = MachoGetClassNameFromMetaClassPointer (
                  MachoContext,
-                 MachoGetSymbolName64 (MachoContext, MetaClass),
+                 MachoGetSymbolName (MachoContext, MetaClass),
                  sizeof (SuperClassName),
                  SuperClassName
                  );
@@ -815,7 +814,7 @@ InternalPatchByVtables64 (
         return FALSE;
       }
 
-      SymbolDummy = MachoGetLocalDefinedSymbolByName64 (
+      SymbolDummy = MachoGetLocalDefinedSymbolByName (
                   MachoContext,
                   FinalSymbolName
                   );
@@ -825,7 +824,7 @@ InternalPatchByVtables64 (
       //
       // Patch the class's vtable
       //
-      Result = InternalInitializeVtableByEntriesAndRelocations64 (
+      Result = InternalInitializeVtableByEntriesAndRelocations (
                  Context,
                  Kext,
                  SuperVtable,
@@ -879,7 +878,7 @@ InternalPatchByVtables64 (
       // case, we just reduce the expect number of vtables by 1.
       // Only i386 does not support strict patchting.
       //
-      Result = InternalInitializeVtableByEntriesAndRelocations64 (
+      Result = InternalInitializeVtableByEntriesAndRelocations (
                  Context,
                  Kext,
                  SuperVtable,
