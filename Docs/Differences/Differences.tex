@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Sep 26 20:43:38 2020
-%DIF ADD ../Configuration.tex        Mon Sep 28 15:42:12 2020
+%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
+%DIF ADD ../Configuration.tex        Fri Oct  2 03:37:52 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2588,9 +2588,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \hline
   10.5 & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend (V1) & NO \DIFaddbegin \DIFadd{(V1) }\DIFaddend & --- & --- & --- & --- \\
   \hline
-  10.6 & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend (V2) & NO \DIFaddbegin \DIFadd{(V2) }\DIFaddend & YES & YES (V2) & YES \DIFaddbegin \DIFadd{(V2) }\DIFaddend & --- \\
+  10.6 & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend (V2) & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES (V2) }\DIFaddend & YES & YES (V2) & YES \DIFaddbegin \DIFadd{(V2) }\DIFaddend & --- \\
   \hline
-  10.7 & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend & --- & NO \DIFaddbegin \DIFadd{(V3) }\DIFaddend & YES & --- & YES \DIFaddbegin \DIFadd{(V3) }\DIFaddend & --- \\
+  10.7 & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES }\DIFaddend & --- & \DIFdelbegin \DIFdel{NO }\DIFdelend \DIFaddbegin \DIFadd{YES (V3) }\DIFaddend & YES & --- & YES \DIFaddbegin \DIFadd{(V3) }\DIFaddend & --- \\
   \hline
   10.8-10.9 & --- & --- & --- & YES & --- & YES \DIFaddbegin \DIFadd{(V3) }\DIFaddend & --- \\
   \hline
@@ -2601,8 +2601,12 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \end{tabular}
   \end{center}
 
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: First version (V1) of 32-bit }\texttt{\DIFadd{prelinkedkernel}} \DIFadd{is unsupported
+  due to kext symbol tables being corrupted by the tools. This also makes
+  }\texttt{\DIFadd{keepsyms=1}} \DIFadd{for kext frames broken on these systems.
+}
 
-\end{enumerate}
+\DIFaddend \end{enumerate}
 
 
 \section{Misc}\label{misc}

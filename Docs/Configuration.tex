@@ -2528,9 +2528,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \hline
   10.5 & YES & YES (V1) & NO (V1) & --- & --- & --- & --- \\
   \hline
-  10.6 & YES & YES (V2) & NO (V2) & YES & YES (V2) & YES (V2) & --- \\
+  10.6 & YES & YES (V2) & YES (V2) & YES & YES (V2) & YES (V2) & --- \\
   \hline
-  10.7 & YES & --- & NO (V3) & YES & --- & YES (V3) & --- \\
+  10.7 & YES & --- & YES (V3) & YES & --- & YES (V3) & --- \\
   \hline
   10.8-10.9 & --- & --- & --- & YES & --- & YES (V3) & --- \\
   \hline
@@ -2541,6 +2541,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \end{tabular}
   \end{center}
 
+  \emph{Note}: First version (V1) of 32-bit \texttt{prelinkedkernel} is unsupported
+  due to kext symbol tables being corrupted by the tools. This also makes
+  \texttt{keepsyms=1} for kext frames broken on these systems.
 
 \end{enumerate}
 
