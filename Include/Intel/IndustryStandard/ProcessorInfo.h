@@ -144,6 +144,11 @@ enum {
 #define K10_COFVID_STATUS  0xC0010071
 #define K10_PSTATE_STATUS  0xC0010064
 
+#define CPU_MODEL_WILLAMETTE     0x01  ///< Willamette, Foster
+#define CPU_MODEL_NORTHWOOD      0x02  ///< Northwood, Prestonia, Gallatin
+#define CPU_MODEL_PRESCOTT       0x03  ///< Prescott, Nocona, Cranford, Potomac
+#define CPU_MODEL_PRESCOTT_2M    0x04  ///< Prescott 2M, Smithfield, Irwindale, Paxville
+#define CPU_MODEL_CEDAR_MILL     0x06  ///< Cedar Mill, Presler, Tusla, Dempsey
 #define CPU_MODEL_DOTHAN         0x0D  ///< Dothan
 #define CPU_MODEL_YONAH          0x0E  ///< Sossaman, Yonah
 #define CPU_MODEL_MEROM          0x0F  ///< Allendale, Conroe, Kentsfield, Woodcrest, Clovertown, Tigerton, Merom

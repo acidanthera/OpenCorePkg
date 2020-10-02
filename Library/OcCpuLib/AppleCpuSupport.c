@@ -117,30 +117,47 @@ InternalDetectAppleMajorType (
 
 UINT16
 InternalDetectAppleProcessorType (
-  IN UINT8  Model,
-  IN UINT8  Stepping,
-  IN UINT8  AppleMajorType,
-  IN UINT16 CoreCount
+  IN UINT8   Model,
+  IN UINT8   Stepping,
+  IN UINT8   AppleMajorType,
+  IN UINT16  CoreCount,
+  IN BOOLEAN Is64Bit
   )
 {
   switch (Model) {
     //
-    // Yonah: https://en.wikipedia.org/wiki/Yonah_(microprocessor)#Models_and_brand_names
+    // Willamette: https://en.wikipedia.org/wiki/Pentium_4#Willamette
+    // Northwood:  same page.
+    // Yonah:      https://en.wikipedia.org/wiki/Yonah_(microprocessor)#Models_and_brand_names
     //
     // Used by Apple:
     //   Core Duo, Core Solo
     //
-    // NOT used by Apple:
+    // Not used by Apple:
     //   Pentium, Celeron
     //
     // All 0x0201.
     //
-    case CPU_MODEL_DOTHAN: // 0x0D
-    case CPU_MODEL_YONAH:  // 0x0E
+    case CPU_MODEL_WILLAMETTE: // 0x01
+    case CPU_MODEL_NORTHWOOD:  // 0x02
+    case CPU_MODEL_DOTHAN:     // 0x0D
+    case CPU_MODEL_YONAH:      // 0x0E
       // IM41  (T2400/T2500), MM11 (Solo T1200 / Duo T2300/T2400),
       // MBP11 (L2400/T2400/T2500/T2600), MBP12 (T2600),
       // MB11  (T2400/T2500)
       return AppleProcessorTypeCoreSolo; // 0x0201
+
+    //
+    // Prescott:    https://en.wikipedia.org/wiki/Pentium_4#Prescott
+    // Prescott-2M: same page.
+    // Cedar Mill:  same page.
+    //
+    // Not used by Apple.
+    //
+    case CPU_MODEL_PRESCOTT:    // 0x03
+    case CPU_MODEL_PRESCOTT_2M: // 0x04
+    case CPU_MODEL_CEDAR_MILL:  // 0x06
+      return Is64Bit ? AppleProcessorTypeCore2DuoType1 : AppleProcessorTypeCoreSolo; // 0x0301 if 64-bit, otherwise 0x0201
 
     //
     // Merom:  https://en.wikipedia.org/wiki/Merom_(microprocessor)#Variants

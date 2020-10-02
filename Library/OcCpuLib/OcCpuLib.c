@@ -279,7 +279,13 @@ ScanIntelProcessorApple (
   UINT8  AppleMajorType;
 
   AppleMajorType = InternalDetectAppleMajorType (Cpu->BrandString);
-  Cpu->AppleProcessorType = InternalDetectAppleProcessorType (Cpu->Model, Cpu->Stepping, AppleMajorType, Cpu->CoreCount);
+  Cpu->AppleProcessorType = InternalDetectAppleProcessorType (
+                              Cpu->Model,
+                              Cpu->Stepping,
+                              AppleMajorType,
+                              Cpu->CoreCount,
+                              (Cpu->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
+                              );
 
   DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
 }
