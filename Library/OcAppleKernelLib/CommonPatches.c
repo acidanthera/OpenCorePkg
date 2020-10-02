@@ -1603,7 +1603,7 @@ PatchSegmentJettison (
 
 STATIC
 UINT8
-mBTFeatureFlagsRepleace[] = {
+mBTFeatureFlagsReplace[] = {
   0x55,            // push rbp
   0x83, 0xCE, 0x0F // or esi, 0x0F
 };
@@ -1615,9 +1615,9 @@ mBTFeatureFlagsPatchV1 = {
   .Base        = "__ZN25IOBluetoothHostController25SetControllerFeatureFlagsEj",
   .Find        = NULL,
   .Mask        = NULL,
-  .Replace     = mBTFeatureFlagsRepleace,
+  .Replace     = mBTFeatureFlagsReplace,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mBTFeatureFlagsRepleace),
+  .Size        = sizeof (mBTFeatureFlagsReplace),
   .Count       = 1,
   .Skip        = 0
 };
@@ -1629,9 +1629,9 @@ mBTFeatureFlagsPatchV2 = {
   .Base        = "__ZN24IOBluetoothHCIController25SetControllerFeatureFlagsEj",
   .Find        = NULL,
   .Mask        = NULL,
-  .Replace     = mBTFeatureFlagsRepleace,
+  .Replace     = mBTFeatureFlagsReplace,
   .ReplaceMask = NULL,
-  .Size        = sizeof (mBTFeatureFlagsRepleace),
+  .Size        = sizeof (mBTFeatureFlagsReplace),
   .Count       = 1,
   .Skip        = 0
 };
