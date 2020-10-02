@@ -1601,6 +1601,76 @@ PatchSegmentJettison (
   return EFI_NOT_FOUND;
 }
 
+STATIC
+UINT8
+mBTFeatureFlagsReplace[] = {
+  0x55,            // push rbp
+  0x83, 0xCE, 0x0F // or esi, 0x0F
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mBTFeatureFlagsPatchV1 = {
+  .Comment     = DEBUG_POINTER ("BTFeatureFlagsV1"),
+  .Base        = "__ZN25IOBluetoothHostController25SetControllerFeatureFlagsEj",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mBTFeatureFlagsReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mBTFeatureFlagsReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mBTFeatureFlagsPatchV2 = {
+  .Comment     = DEBUG_POINTER ("BTFeatureFlagsV2"),
+  .Base        = "__ZN24IOBluetoothHCIController25SetControllerFeatureFlagsEj",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mBTFeatureFlagsReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mBTFeatureFlagsReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
+EFI_STATUS
+PatchBTFeatureFlags (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS Status;
+
+  ASSERT (Patcher != NULL);
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  Status = PatcherApplyGenericPatch (
+    Patcher,
+    &mBTFeatureFlagsPatchV1
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v1 - %r, trying v2\n", Status));
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mBTFeatureFlagsPatchV2
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v2 - %r\n", Status));
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
 //
 // Quirks table.
 //
@@ -1624,6 +1694,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkXhciPortLimit2] = { "com.apple.driver.usb.AppleUSBXHCI", PatchUsbXhciPortLimit2 },
   [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
   [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
+  [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
 };
 
 EFI_STATUS

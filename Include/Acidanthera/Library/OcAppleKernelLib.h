@@ -531,6 +531,10 @@ typedef enum {
   //
   KernelQuirkDummyPowerManagement,
   //
+  // Apply feature flags patches to IOBluetoothFamily kext to ensure full Bluetooth functionality.
+  //
+  KernelQuirkExtendBTFeatureFlags,
+  //
   // Apply icon type patches to IOAHCIPort kext to force internal disk icons.
   //
   KernelQuirkExternalDiskIcons,

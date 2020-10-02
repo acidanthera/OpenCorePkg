@@ -258,6 +258,7 @@
   _(BOOLEAN                     , DisableLinkeditJettison     ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableRtcChecksum          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DummyPowerManagement        ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ExtendBTFeatureFlags        ,     , FALSE  , ()) \
   _(BOOLEAN                     , ExternalDiskIcons           ,     , FALSE  , ()) \
   _(BOOLEAN                     , IncreasePciBarSize          ,     , FALSE  , ()) \
   _(BOOLEAN                     , LapicKernelPanic            ,     , FALSE  , ()) \
