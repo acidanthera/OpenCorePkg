@@ -249,6 +249,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.DummyPowerManagement) {
       OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
     }
+
+    if (Config->Kernel.Quirks.ExtendBTFeatureFlags) {
+      OcKernelApplyQuirk (KernelQuirkExtendBTFeatureFlags, CacheType, DarwinVersion, Context, NULL);
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, DarwinVersion, NULL, &KernelPatcher);

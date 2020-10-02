@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
-%DIF ADD ../Configuration.tex        Fri Oct  2 03:37:52 2020
+%DIF DEL PreviousConfiguration.tex   Thu Sep 24 19:29:02 2020
+%DIF ADD ../Configuration.tex        Fri Oct  2 09:04:03 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2371,7 +2371,20 @@ blocking.
   management driver in macOS.
 
 \item
-  \texttt{ExternalDiskIcons}\\
+  \DIFaddbegin \texttt{\DIFadd{ExtendBTFeatureFlags}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set }\texttt{\DIFadd{FeatureFlags}} \DIFadd{to }\texttt{\DIFadd{0x0F}} \DIFadd{for full
+  functionality of Bluetooth, including Continuity.
+  }
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option is a substitution for BT4LEContinuityFixup.kext,
+  which does not function properly due to late patching progress.
+}
+
+\item
+  \DIFaddend \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: \DIFdelbegin \DIFdel{10.6 (64-bit)}\DIFdelend \DIFaddbegin \DIFadd{10.4}\DIFaddend \\
