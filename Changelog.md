@@ -17,6 +17,12 @@ OpenCore Changelog
 - Added `SystemMemoryStatus` to override memory replacement on some models
 - Added older Pentium CPU recognition in SMBIOS 
 - Added `ExtendBTFeatureFlags` to properly set `FeatureFlags` for Bluetooth (which substitutes BT4LEContinuityFixup) 
+- Added `MinKernel`/`MaxKernel` to CPUID emulation and `DummyPowerManagement`
+- Fixed `-legacy` not being added in `KernelArch` `Auto` mode
+- Fixed `i386-user32` not forcing `i386` on macOS 10.7 on X64 firmwares
+- Fixed `i386-user32` being incorrectly enabled in macOS 10.4, 10.5, and 10.7
+- Disabled prelinked boot for macOS 10.4 and 10.5 in `KernelCache` `Auto` mode
+- Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
