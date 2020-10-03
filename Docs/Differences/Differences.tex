@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Sep 24 19:29:02 2020
-%DIF ADD ../Configuration.tex        Sat Oct  3 11:24:40 2020
+%DIF ADD ../Configuration.tex        Sat Oct  3 13:41:05 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -190,12 +190,12 @@ contain errors.
 Third-party articles, utilities, books, and alike may be more useful for a wider audience as
 they could provide guide-like material. However, they are prone to their authors' preferences,
 tastes, this document misinterpretation, and essential obsolescence.
-In case you use these sources, for example, \href{https://dortania.github.io}{Dortania}'s
+In case \DIFdelbegin \DIFdel{you use }\DIFdelend \DIFaddbegin \DIFadd{one uses }\DIFaddend these sources, for example, \href{https://dortania.github.io}{Dortania}'s
 \href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
 and \href{https://dortania.github.io/getting-started}{related material},
 please ensure to follow this document for every made decision and judge its consequences.
 
-Be warned that regardless of the sources used you are required to fully understand every
+Be warned that regardless of the sources used \DIFdelbegin \DIFdel{you are }\DIFdelend \DIFaddbegin \DIFadd{one is }\DIFaddend required to fully understand every
 dedicated OpenCore configuration option and concept prior to reporting any issues in
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
@@ -634,7 +634,7 @@ utilised.
 
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
-for legacy systems. To run OpenCore on such a legacy system you can install
+for legacy systems. To run OpenCore on such a legacy system \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend can install
 \texttt{OpenDuetPkg} with a dedicated tool --- BootInstall (bundled with OpenCore).
 \href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
 perform this on systems different from macOS.
@@ -679,7 +679,7 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to your UDK root:
+Add \texttt{.clang\_complete} file with similar content to \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -730,7 +730,7 @@ Just like any other project we have conventions that we follow during the develo
 All third-party contributors are highly recommended to read and follow the conventions
 listed below before submitting their patches. In general it is also recommended to firstly
 discuss the issue in \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
-before sending the patch to ensure no double work and to avoid your patch being rejected.
+before sending the patch to ensure no double work and to avoid \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend patch being rejected.
 
 \textbf{Organisation}. The codebase is contained in \texttt{OpenCorePkg} repository,
 which is the primary EDK II package.
@@ -1150,9 +1150,9 @@ Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/I
 source file may help understanding ACPI opcodes.
 
 \emph{Note}: Patches of different \texttt{Find} and \texttt{Replace} lengths
-are unsupported as they may corrupt ACPI tables and make you system unstable
-due to area relocation. If you need such changes you may utilise ``proxy''
-patching or \texttt{NOP} the remaining area.
+are unsupported as they may corrupt ACPI tables and make \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend system unstable
+due to area relocation. If \DIFdelbegin \DIFdel{you need such changes you may utilise }\DIFdelend \DIFaddbegin \DIFadd{such changes are needed, the utilisation of }\DIFaddend ``proxy''
+patching or \DIFaddbegin \DIFadd{the padding of }\DIFaddend \texttt{NOP} \DIFaddbegin \DIFadd{to }\DIFaddend the remaining area \DIFaddbegin \DIFadd{might be taken into account}\DIFaddend .
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
 
@@ -1242,48 +1242,52 @@ of these features were originally implemented as a part of
 which is no longer maintained. See \hyperref[troubleshootingtricks]{Tips and Tricks}
 section for migration steps.
 
-If you are using this for the first time on a customised firmware, there is a
-list of checks to do first. Prior to starting please ensure that you have:
+If \DIFdelbegin \DIFdel{you are using this }\DIFdelend \DIFaddbegin \DIFadd{this is used }\DIFaddend for the first time on a customised firmware, there is a
+list of checks to do first. Prior to starting\DIFdelbegin \DIFdel{please ensure that you have}\DIFdelend \DIFaddbegin \DIFadd{, the following requirements should be fulfilled}\DIFaddend :
 
 \begin{itemize}
 \tightlist
-\item Most up-to-date UEFI firmware (check your motherboard vendor website).
+\item Most up-to-date UEFI firmware (check \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend motherboard vendor website).
 \item \texttt{Fast Boot} and \texttt{Hardware Fast Boot} disabled in firmware
   settings if present.
 \item \texttt{Above 4G Decoding} or similar enabled in firmware
   settings if present. Note, that on some motherboards (notably ASUS WS-X299-PRO) this
   option causes adverse effects, and must be disabled. While no other motherboards
-  with the same issue are known, consider this option to be first to check if you
-  have erratic boot failures.
+  with the same issue are known, consider this option to be first to check if \DIFdelbegin \DIFdel{you
+  have }\DIFdelend \DIFaddbegin \DIFadd{one
+  encounters }\DIFaddend erratic boot failures.
 \item \texttt{DisableIoMapper} quirk enabled, or \texttt{VT-d} disabled in
   firmware settings if present, or ACPI DMAR table deleted.
 \item \textbf{No} `slide` boot argument present in NVRAM or anywhere else.
-  It is not necessary unless you cannot boot at all or see
-  \texttt{No slide values are usable! Use custom slide!} message in the log.
+  It is not necessary unless \DIFdelbegin \DIFdel{you cannot boot }\DIFdelend \DIFaddbegin \DIFadd{the system cannot be booted }\DIFaddend at all or
+  \DIFdelbegin \DIFdel{see
+  }\DIFdelend \texttt{No slide values are usable! Use custom slide!} message \DIFaddbegin \DIFadd{can be seen }\DIFaddend in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
   firmware settings if present. Consider
 \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
-  if you have enough skills and no option is available. See
+  if \DIFdelbegin \DIFdel{you have enough skills and }\DIFdelend no option is available \DIFaddbegin \DIFadd{(for sophisticated users only)}\DIFaddend . See
 \hyperref[kernelpropsquirks]{VerifyMsrE2}
   notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
-  if present. You may need to flash GOP ROM on NVIDIA 6xx/AMD 2xx or older. Use
+  if present. \DIFdelbegin \DIFdel{You may need to flash GOP ROM on }\DIFdelend \DIFaddbegin \DIFadd{On }\DIFaddend NVIDIA 6xx/AMD 2xx or older\DIFaddbegin \DIFadd{, GOP ROM may have to be flashed first}\DIFaddend . Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
   (see the second post) or \href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
-  in case you are not sure how.
+  in case \DIFdelbegin \DIFdel{you are not sure how}\DIFdelend \DIFaddbegin \DIFadd{of any potential confusion}\DIFaddend .
 \item \texttt{EHCI/XHCI Hand-off} enabled in firmware settings \texttt{only} if boot
   stalls unless USB devices are disconnected.
 \item \texttt{VT-x}, \texttt{Hyper Threading}, \texttt{Execute Disable Bit} enabled
   in firmware settings if present.
-\item While it may not be required, sometimes you have to disable
-  \texttt{Thunderbolt support}, \texttt{Intel SGX}, and \texttt{Intel Platform Trust}
-  in firmware settings present.
+\item While it may not be required, sometimes
+  \DIFdelbegin \DIFdel{you have to disable
+  }\DIFdelend \texttt{Thunderbolt support}, \texttt{Intel SGX}, and \texttt{Intel Platform Trust}
+  \DIFaddbegin \DIFadd{may have to be disabled }\DIFaddend in firmware settings present.
 \end{itemize}
 
-When debugging sleep issues you may want to (temporarily) disable Power Nap and
-automatic power off, which appear to sometimes cause wake to black screen or boot loop
-issues on older platforms. The particular issues may vary, but in general you should
-check ACPI tables first. Here is an example of a bug found in some
+When debugging sleep issues \DIFdelbegin \DIFdel{you may want to (temporarily) disable }\DIFdelend Power Nap and automatic power off \DIFaddbegin \DIFadd{may be (temporarily) disabled}\DIFaddend ,
+which appear to sometimes cause wake to black screen or boot loop
+issues on older platforms. The particular issues may vary, but in general \DIFdelbegin \DIFdel{you should
+check ACPI tables }\DIFdelend \DIFaddbegin \DIFadd{ACPI tables should be looked up }\DIFaddend first.
+Here is an example of a bug found in some
 \href{http://www.insanelymac.com/forum/topic/329624-need-cmos-reset-after-sleep-only-after-login/#entry2534645}{Z68 motherboards}.
 To turn Power Nap and the others off run the following commands in Terminal:
 \begin{lstlisting}[label=powernap, style=ocbash]
@@ -1423,8 +1427,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
   and is now considered rare legacy. Examples of such hardware are Ivy Bridge laptops
-  with Insyde firmware, like Acer V3-571G. Do not use this unless you fully understand
-  the consequences.
+  with Insyde firmware, like Acer V3-571G. Do not use this unless \DIFdelbegin \DIFdel{you fully understand
+  the consequences }\DIFdelend \DIFaddbegin \DIFadd{a complete understanding of
+  the consequences can be ensured}\DIFaddend .
 
 \item
   \texttt{EnableSafeModeSlide}\\
@@ -1454,7 +1459,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   protocol implemented in \texttt{OpenRuntime.efi}.
 
   \emph{Note}: This quirk may potentially weaken firmware security, please use
-  \texttt{RebuildAppleMemoryMap} if your firmware supports memory attributes table (MAT).
+  \texttt{RebuildAppleMemoryMap} if \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend firmware supports memory attributes table (MAT).
   Refer to \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
@@ -1467,7 +1472,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   key argument by obtaining current memory map and retrying \texttt{ExitBootServices} call.
 
   \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware. Do not use this unless you fully understand the consequences.
+  of the firmware. Do not use this unless \DIFdelbegin \DIFdel{you fully understand the consequences }\DIFdelend \DIFaddbegin \DIFadd{a complete understanding of the consequences can be ensured}\DIFaddend .
 
 \item
   \texttt{ProtectMemoryRegions}\\
@@ -1525,7 +1530,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide custom KASLR slide on low memory.
 
-  This option performs memory map analysis of your firmware and checks whether
+  This option performs memory map analysis of \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend firmware and checks whether
   all slides (from \texttt{1} to \texttt{255}) can be used. As \texttt{boot.efi}
   generates this value randomly with \texttt{rdrand} or pseudo randomly \texttt{rdtsc},
   there is a chance of boot failure when it chooses a conflicting slide. In case
@@ -2034,8 +2039,9 @@ blocking.
   \begin{itemize}
     \tightlist
     \item Consumer Ivy Bridge (\texttt{0x0306A9}) as Apple disabled XCPM for Ivy Bridge
-      and recommends legacy power management for these CPUs. You will need to manually
-      patch \texttt{\_xcpm\_bootstrap} to force XCPM on these CPUs instead of using this option.
+      and recommends legacy power management for these CPUs. \DIFdelbegin \DIFdel{You will need to manually
+      patch }\DIFdelend \texttt{\_xcpm\_bootstrap} 
+      \DIFdelbegin \DIFdel{to force }\DIFdelend \DIFaddbegin \DIFadd{should manually be patched to enforce }\DIFaddend XCPM on these CPUs instead of \DIFdelbegin \DIFdel{using }\DIFdelend this option.
     \item Low-end CPUs (e.g. Haswell+ Pentium) as they are not supported properly by macOS.
       Legacy hacks for older models can be found in the \texttt{Special NOTES} section of
       \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
@@ -2298,8 +2304,8 @@ blocking.
     \tightlist
     \item Download \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool} and
       \href{https://github.com/LongSoft/Universal-IFR-Extractor/releases}{IFR-Extractor}.
-    \item Open your firmware image in UEFITool and find \texttt{CFG Lock} unicode string.
-      If it is not present, your firmware may not have this option and you should stop.
+    \item Open \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend firmware image in UEFITool and find \texttt{CFG Lock} unicode string.
+      If it is not present, \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend firmware may not have this option and \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend should stop.
     \item Extract the \texttt{Setup.bin} PE32 Image Section (the one UEFITool found) through
       \texttt{Extract Body} menu option.
     \item Run IFR-Extractor on the extracted file (e.g. \texttt{./ifrextract Setup.bin Setup.txt}).
@@ -2310,7 +2316,7 @@ blocking.
       \href{https://github.com/datasone/grub-mod-setup_var}{a newer version} by
       \href{https://github.com/datasone}{datasone}.
     \item Enter \texttt{setup\_var 0x123 0x00} command, where \texttt{0x123} should be replaced by
-      your actual offset, and reboot.
+      \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend actual offset, and reboot.
   \end{enumerate}
 
   \textbf{Warning}: Variable offsets are unique not only to each motherboard but even to its firmware
@@ -2748,7 +2754,7 @@ The boot process is as follows:
 \emph{Note 1}: This process is meant to work reliably only when \texttt{RequestBootVarRouting}
 option is enabled or the firmware does not control UEFI boot options (\texttt{OpenDuetPkg} or
 custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
-overwrite OpenCore, make sure to enable it if you plan to use them.
+overwrite OpenCore, make sure to enable it \DIFdelbegin \DIFdel{if you plan }\DIFdelend \DIFaddbegin \DIFadd{when planning }\DIFaddend to use them.
 
 \emph{Note 2}: UEFI variable boot options' boot arguments will be removed if present as they
 may contain arguments compromising the operating system, which is undesired once secure boot
@@ -2870,7 +2876,7 @@ entry choice will update till next manual reconfiguration.
 
   \begin{itemize}
   \tightlist
-    \item \texttt{None} --- Avoid hibernation for your own good.
+    \item \texttt{None} --- Avoid hibernation \DIFdelbegin \DIFdel{for your own good}\DIFdelend \DIFaddbegin \DIFadd{(Recommended)}\DIFaddend .
     \item \texttt{Auto} --- Use RTC and NVRAM detection.
     \item \texttt{RTC} --- Use RTC detection.
     \item \texttt{NVRAM} --- Use NVRAM detection.
@@ -3115,8 +3121,10 @@ entry choice will update till next manual reconfiguration.
   Development and debug kernels produce more helpful kernel panics.
   Consider downloading and installing \texttt{KernelDebugKit} from
   \href{https://developer.apple.com}{developer.apple.com} when debugging a problem.
-  To activate a development kernel you will need to add a \texttt{kcsuffix=development}
-  boot argument. Use \texttt{uname -a} command to ensure that your current loaded
+  To activate a development kernel \DIFdelbegin \DIFdel{you will need to add a }\texttt{\DIFdel{kcsuffix=development}}
+  %DIFAUXCMD
+\DIFdel{boot argument }\DIFdelend \DIFaddbegin \DIFadd{the boot argument }\texttt{\DIFadd{kcsuffix=development}} \DIFadd{should be added}\DIFaddend .
+  Use \texttt{uname -a} command to ensure that \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend current loaded
   kernel is a development (or a debug) kernel.
 
   In case OpenCore kernel panic saving mechanism was not used, kernel panics may
@@ -3195,7 +3203,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   unless it is already present. The directory will contain ACPI and SMBIOS dumps.
 
   \emph{Note}: For security reasons \texttt{SysReport} option is \textbf{not} available
-  in \texttt{RELEASE} builds. Use a \texttt{DEBUG} build if you need this option.
+  in \texttt{RELEASE} builds. Use a \texttt{DEBUG} build if \DIFdelbegin \DIFdel{you need this option }\DIFdelend \DIFaddbegin \DIFadd{this option is needed}\DIFaddend .
 
 \item
   \texttt{Target}\\
@@ -3251,7 +3259,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   and time from the firmware). Please be warned that some file system drivers present
   in firmwares are not reliable, and may corrupt data when writing files through UEFI.
   Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
-  \texttt{DisableWatchDog} is set to \texttt{true} when you use a slow drive. Try to
+  \texttt{DisableWatchDog} is set to \texttt{true} when \DIFdelbegin \DIFdel{you use }\DIFdelend a slow drive \DIFaddbegin \DIFadd{is used}\DIFaddend . Try to
   avoid frequent use of this option when dealing with flash drives as large I/O
   amounts may speedup memory wear and render this flash drive unusable in shorter time.
 
@@ -3359,17 +3367,17 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Description}: Apple Enclave Identifier.
 
   Setting this value to any non-zero 64-bit integer will allow using
-  personalised Apple Secure Boot identifiers. If you want to use this setting,
+  personalised Apple Secure Boot identifiers. \DIFdelbegin \DIFdel{If you want to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend use this setting,
   make sure to generate a random 64-bit number with a cryptographically secure
   random number generator. With this value set and \texttt{SecureBootModel} valid
   and not \texttt{Disabled} it is possible to achieve
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
   Secure Boot.
 
-  To start using personalised Apple Secure Boot you will have to reinstall the
-  operating system or personalise it. Until your operating system is personalised
-  you will only be able to load macOS DMG recovery. If you do not have DMG recovery
-  you could always download it with \texttt{macrecovery} utility and put to
+  To start using personalised Apple Secure Boot \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend will have to reinstall the
+  operating system or personalise it. Until \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend operating system is personalised
+  \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend will only be able to load macOS DMG recovery. If \DIFdelbegin \DIFdel{you do not have DMG recovery you could always download it }\DIFdelend \DIFaddbegin \DIFadd{DMG recovery is missing,
+  it can be downloaded }\DIFaddend with \texttt{macrecovery} utility and put to
   \texttt{com.apple.recovery.boot} as explained in
   \hyperref[reinstallmacos]{Tips and Tricks} section. Keep in mind that
   \hyperref[securedmgloading]{DMG loading} needs to be set to \texttt{Signed}
@@ -3440,7 +3448,7 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 
   \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
-  Use at your own risk on boards known to be compatible.
+  \DIFdelbegin \DIFdel{Use at your own risk on }\DIFdelend \DIFaddbegin \DIFadd{This option should be used without any warranty exclusively on the }\DIFaddend boards known to be compatible.
 
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
@@ -3571,8 +3579,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:oem-board   # SMBIOS Type2 ProductNam
 
   \texttt{vault.sig} file should contain a raw 256 byte RSA-2048 signature from SHA-256
   hash of \texttt{vault.plist}. The signature is verified against the public
-  key embedded into \texttt{OpenCore.efi}. To embed the public key you should
-  do either of the following:
+  key embedded into \texttt{OpenCore.efi}. To embed the public key \DIFdelbegin \DIFdel{you should
+  do }\DIFdelend either of the following \DIFaddbegin \DIFadd{should be performed}\DIFaddend :
 
   \begin{itemize}
   \tightlist
@@ -3607,11 +3615,11 @@ dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
 
-  \emph{Note 1}: While it may appear obvious, but you have to use an external
-  method to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
-  secure boot path. For this you are recommended to at least enable UEFI SecureBoot
+  \emph{Note 1}: While it may appear obvious, but \DIFdelbegin \DIFdel{you have to use }\DIFdelend an external
+  method \DIFaddbegin \DIFadd{is required }\DIFaddend to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
+  secure boot path. For this \DIFdelbegin \DIFdel{you are }\DIFdelend \DIFaddbegin \DIFadd{one is }\DIFaddend recommended to at least enable UEFI SecureBoot
   with a custom certificate, and sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
-  with your custom key. More details on customising secure boot on modern firmwares
+  with \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{user's }\DIFaddend custom key. More details on customising secure boot on modern firmwares
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
@@ -3740,16 +3748,16 @@ rm vault.pub
 
   \begin{enumerate}
     \tightlist
-    \item Just like on T2 Macs you will not be able to install any unsigned kernel
+    \item Just like on T2 Macs \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend will not be able to install any unsigned kernel
       drivers and several signed kernel drivers including NVIDIA Web Drivers.
     \item The list of cached drivers may be different, resulting in the need
       to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
       For example, \texttt{IO80211Family} cannot be injected in this case.
     \item System volume alterations on operating systems with sealing, like
       macOS~11, may result in the operating system being unbootable. Do not
-      try to disable system volume encryption unless you disable Apple Secure Boot.
-    \item If your platform requires certain settings, but they were not enabled,
-      because the obvious issues did not trigger before, you may get boot failure.
+      try to disable system volume encryption unless \DIFdelbegin \DIFdel{you disable }\DIFdelend Apple Secure Boot \DIFaddbegin \DIFadd{is disabled}\DIFaddend .
+    \item If \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend platform requires certain settings, but they were not enabled,
+      because the obvious issues did not trigger before, \DIFdelbegin \DIFdel{you may get boot failure }\DIFdelend \DIFaddbegin \DIFadd{boot failure might occur}\DIFaddend .
       Be extra careful with \texttt{IgnoreInvalidFlexRatio} or \texttt{HashServices}.
     \item Operating systems released before Apple Secure Boot landed (e.g.
       macOS~10.12 or earlier) will still boot until UEFI Secure Boot is enabled.
@@ -3763,13 +3771,14 @@ rm vault.pub
   \end{enumerate}
 
   Sometimes the already installed operating system may have outdated Apple Secure
-  Boot manifests on the \texttt{Preboot} partition causing boot failure. If you
-  see the ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
-  it is likely the case. When this happens you can either reinstall the operating
+  Boot manifests on the \texttt{Preboot} partition causing boot failure. If \DIFdelbegin \DIFdel{you
+  see the }\DIFdelend \DIFaddbegin \DIFadd{there is
+  }\DIFaddend ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
+  it is likely the case. When this happens \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend can either reinstall the operating
   system or copy the manifests (files with \texttt{.im4m} extension, like
   \texttt{boot.efi.j137.im4m}) from \texttt{/usr/standalone/i386} to
   \texttt{/Volumes/Preboot/<UUID>/System/Library/CoreServices}. Here \texttt{<UUID>}
-  is your system volume identifier. \DIFaddbegin \DIFadd{On HFS+ installations the manifests should be
+  is \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend system volume identifier. \DIFaddbegin \DIFadd{On HFS+ installations the manifests should be
   copied to }\texttt{\DIFadd{/System/Library/CoreServices}} \DIFadd{on the system volume.
 }\DIFaddend 
 
@@ -3937,8 +3946,9 @@ use.
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with OpenCore EFI partition UUID.
 
-  \textbf{Warning}: This feature is very dangerous as it passes unprotected data to your
-  firmware variable services. Use it only when no hardware NVRAM implementation is provided
+  \textbf{Warning}: This feature is very dangerous as it passes unprotected data to
+  \DIFdelbegin \DIFdel{your
+  }\DIFdelend firmware variable services. Use it only when no hardware NVRAM implementation is provided
   by the firmware or it is incompatible.
 
 \item
@@ -3956,7 +3966,7 @@ use.
   (\texttt{plist\ dict}) of GUIDs to an array (\texttt{plist\ array}) of
   variable names in \texttt{plist\ string} format.
 
-  You can use \texttt{*} value to accept all variables for select GUID.
+  \DIFdelbegin \DIFdel{You can use }\DIFdelend \texttt{*} value \DIFaddbegin \DIFadd{can be used }\DIFaddend to accept all variables for select GUID.
 
   \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
@@ -4057,7 +4067,7 @@ improvements:
   \texttt{ru:252} or \texttt{ru:0} (U.S. keyboard, compatible with 10.9). Full decoded
   keyboard list from \texttt{AppleKeyboardLayouts-L.dat} can be found
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/AppleKeyboardLayouts}{here}. Using non-latin keyboard on 10.14
-  will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case you need 10.14.
+  will not enable ABC keyboard, unlike previous and subsequent macOS versions, and is thus not recommended in case \DIFdelbegin \DIFdel{you need }\DIFdelend 10.14 \DIFaddbegin \DIFadd{is needed}\DIFaddend .
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:security-mode}
   \break
@@ -5018,7 +5028,7 @@ and supplementary utilities can be used.
 \subsection{Drivers}\label{uefidrivers}
 
 Depending on the firmware a different set of drivers may be required.
-Loading an incompatible driver may lead your system to unbootable state or
+Loading an incompatible driver may lead \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
 \begin{tabular}{p{1.3in}p{5.55in}}
@@ -5092,8 +5102,9 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \end{tabular}
 
 Driver marked with \textbf{*} are bundled with OpenCore.
-To compile the drivers from UDK (EDK II) use the same command you normally use
-for OpenCore compilation, but choose a corresponding package:
+To compile the drivers from UDK (EDK II) \DIFdelbegin \DIFdel{use }\DIFdelend the same command \DIFdelbegin \DIFdel{you normally use
+}\DIFdelend \DIFaddbegin \DIFadd{used }\DIFaddend for
+OpenCore compilation \DIFaddbegin \DIFadd{can be taken}\DIFaddend , but choose a corresponding package:
 \begin{lstlisting}[label=compileudk, style=ocbash]
 git clone https://github.com/acidanthera/audk UDK
 cd UDK
@@ -5124,12 +5135,16 @@ sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
   --folder /Volumes/VOLNAME/DIR/ --setBoot
 \end{lstlisting}
 
-\emph{Note 1}: You may have to copy \texttt{/System/Library/CoreServices/BridgeVersion.bin}
-  to \texttt{/Volumes/VOLNAME/DIR}. \\
-\emph{Note 2}: To be able to use \texttt{bless} you may have to
-  \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}. \\
-\emph{Note 3}: To be able to boot you may have to \href{https://support.apple.com/HT208330}{disable Secure Boot}
-  if present.
+\emph{Note 1}: \DIFdelbegin \DIFdel{You may have to copy }\DIFdelend \texttt{/System/Library/CoreServices/BridgeVersion.bin} \DIFaddbegin \DIFadd{should be copied
+  }\DIFaddend to \texttt{/Volumes/VOLNAME/DIR}. \\
+\emph{Note 2}: To be able to use \texttt{bless}
+  \DIFdelbegin \DIFdel{you may have to
+  }%DIFDELCMD < \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}%%%
+\DIFdelend \DIFaddbegin \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disabling System Integrity Protection} \DIFadd{is necessary}\DIFaddend . \\
+\emph{Note 3}: To be able to boot \DIFdelbegin \DIFdel{you may have to }%DIFDELCMD < \href{https://support.apple.com/HT208330}{disable Secure Boot}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://support.apple.com/HT208330}{Secure Boot}
+  \DIFadd{might be disabled }\DIFaddend if present.
 
 Some of the known tools are listed below (builtin tools are marked with \textbf{*}):
 
@@ -5176,7 +5191,7 @@ similar to the builtin text interface.
 
 OpenCanopy requires graphical resources located in \texttt{Resources} directory to run.
 Sample resources (fonts and images) can be found in
-\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. You can find customised icons over the internet
+\href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}. \DIFdelbegin \DIFdel{You can find customised icons }\DIFdelend \DIFaddbegin \DIFadd{Customised icons can be found }\DIFaddend over the internet
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
@@ -5421,7 +5436,7 @@ functioning. Feature highlights:
 
   APFS driver date connects APFS driver with the calendar
   release date. Older versions of APFS drivers may contain unpatched
-  vulnerabilities, which can be used to inflict harm on your computer.
+  vulnerabilities, which can be used to inflict harm \DIFdelbegin \DIFdel{on your }\DIFdelend \DIFaddbegin \DIFadd{to the }\DIFaddend computer.
   This option permits restricting APFS drivers to only recent releases.
 
   \begin{itemize}
@@ -5444,7 +5459,7 @@ functioning. Feature highlights:
   APFS driver version connects APFS driver with the macOS
   release. APFS drivers from older macOS releases will become
   unsupported and thus may contain unpatched vulnerabilities, which
-  can be used to inflict harm on your computer. This option permits
+  can be used to inflict harm \DIFdelbegin \DIFdel{on your }\DIFdelend \DIFaddbegin \DIFadd{to the }\DIFaddend computer. This option permits
   restricting APFS drivers to only modern macOS versions.
 
   \begin{itemize}
@@ -5593,7 +5608,7 @@ functioning. Feature highlights:
   we use a timeout to remove once pressed keys from the buffer once the timeout
   expires and no new submission of this key happened.
 
-  This option allows to set this timeout based on your platform. The recommended
+  This option allows to set this timeout based on \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend platform. The recommended
   value that works on the majority of the platforms is \texttt{5} milliseconds.
   For reference, holding one key on VMware will repeat it roughly every \texttt{2}
   milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus
@@ -5696,7 +5711,7 @@ functioning. Feature highlights:
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
   ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
-  You may leave it as \texttt{0} in case there are issues.
+  \DIFdelbegin \DIFdel{You may leave it as }\DIFdelend \DIFaddbegin \DIFadd{In case of issues, this option can be left as }\DIFaddend \texttt{0}\DIFdelbegin \DIFdel{in case there are issues}\DIFdelend .
 
 \end{enumerate}
 
@@ -6157,7 +6172,7 @@ functioning. Feature highlights:
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{OpenRuntime.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
-  Simply said, you are required to enable this quirk to be able to reliably
+  Simply said, \DIFdelbegin \DIFdel{you are }\DIFdelend \DIFaddbegin \DIFadd{one is }\DIFaddend required to enable this quirk to be able to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in a firmware that is not compatible with macOS boot entries by design.
 
@@ -6213,7 +6228,7 @@ functioning. Feature highlights:
 
   \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Some firmwares may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
-  and enabled you could find these areas in the lower memory and fix them up by doing the reservation.
+  and enabled, these areas can be found in the lower memory and can be fixed up by doing the reservation.
   See }\texttt{\DIFadd{Sample.plist}} \DIFadd{for more details.
 }
 
@@ -6318,12 +6333,12 @@ older macOS operating systems.
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
     \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here},
-    assuming that you legally own macOS~10.6. Read \texttt{DIGEST.txt}
+    assuming that \DIFdelbegin \DIFdel{you legally own }\DIFdelend \DIFaddbegin \DIFadd{one legally owns }\DIFaddend macOS~10.6. Read \texttt{DIGEST.txt}
     for more details. Keep in mind, that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
 \end{itemize}
 
-  You can also patch out model checking yourself by editing \texttt{OSInstall.mpkg}
+  \DIFdelbegin \DIFdel{You can also patch out model checking yourself }\DIFdelend \DIFaddbegin \DIFadd{Model checking may also be erased }\DIFaddend by editing \texttt{OSInstall.mpkg}
   with e.g. \texttt{Flat Package Editor} by making \texttt{Distribution}
   script to always return \texttt{true} in \texttt{hwbeModelCheck} function.
   Since updating the only file in the image and not corrupting other files
@@ -6354,8 +6369,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
 
 \subsection{UEFI Secure Boot}\label{uefisecureboot}
 
-OpenCore is designed to provide a secure boot chain between your firmware
-and your operating system. On most x86 platforms trusted loading is implemented
+OpenCore is designed to provide a secure boot chain between \DIFdelbegin \DIFdel{your firmware
+and your }\DIFdelend \DIFaddbegin \DIFadd{firmware
+and }\DIFaddend operating system. On most x86 platforms trusted loading is implemented
 via \href{https://en.wikipedia.org/wiki/UEFI_Secure_Boot}{UEFI Secure Boot} model.
 Not only OpenCore fully supports this model, but it also extends its capabilities
 to ensure sealed configuration via \hyperref[securevaulting]{vaulting} and
@@ -6364,45 +6380,48 @@ such as \hyperref[secureapplesb]{Apple Secure Boot}. Proper secure boot chain
 requires several steps and careful configuration of select settings as explained below:
 
 \begin{enumerate}
-\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} if you need to
+\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} if \DIFdelbegin \DIFdel{you need }\DIFdelend \DIFaddbegin \DIFadd{one needs }\DIFaddend to
   run macOS. Note, that not every macOS is compatible with Apple Secure Boot and
   there are several other restrictions as explained in
   \hyperref[secureapplesb]{Apple Secure Boot} section.
 \item Disable DMG loading by setting \texttt{DmgLoading} to \texttt{Disabled}
-  if you are concerned of loading old vulnerable DMG recoveries. This is
+  if \DIFdelbegin \DIFdel{you are concerned }\DIFdelend \DIFaddbegin \DIFadd{users have concerns }\DIFaddend of loading old vulnerable DMG recoveries. This is
   \textbf{not} required, but recommended. For the actual tradeoffs
   see the details in \hyperref[securedmgloading]{DMG loading} section.
 \item Make sure that APFS JumpStart functionality restricts the loading
   of old vulnerable drivers by setting \texttt{MinDate} and \texttt{MinVersion}
   to \texttt{0}. More details are provided in \hyperref[uefiapfsprops]{APFS JumpStart}
   section. An alternative is to install \texttt{apfs.efi} driver manually.
-\item Make sure that you do not need \texttt{Force} driver loading and can
-  still boot all the operating systems you need.
+\item Make sure that \DIFdelbegin \DIFdel{you do not need }\DIFdelend \texttt{Force} driver loading \DIFdelbegin \DIFdel{and can
+  still boot }\DIFdelend \DIFaddbegin \DIFadd{is not needed and
+  }\DIFaddend all the operating systems \DIFdelbegin \DIFdel{you need}\DIFdelend \DIFaddbegin \DIFadd{are still bootable}\DIFaddend .
 \item Make sure that \texttt{ScanPolicy} restricts loading from undesired
   devices. It is a good idea to prohibit all removable drivers or unknown
   filesystems.
-\item Sign all the installed drivers and tools with your private key. Do not sign
-  tools that provide administrative access to your computer, like UEFI Shell.
-\item Vault your configuration as explained \hyperref[securevaulting]{Vaulting}
+\item Sign all the installed drivers and tools with \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend private key. Do not sign
+  tools that provide administrative access to \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend computer, like UEFI Shell.
+\item Vault \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend configuration as explained \hyperref[securevaulting]{Vaulting}
   section.
 \item Sign all OpenCore binaries (\texttt{BOOTX64.efi}, \texttt{BOOTIa32.efi},
   \texttt{Bootstrap.efi}, \texttt{OpenCore.efi}) used on this system with
   the same private key.
 \item Sign all third-party operating system (not made by Microsoft or Apple)
-  bootloaders if you need them. For Linux there is an option to install
+  bootloaders if \DIFdelbegin \DIFdel{you need them}\DIFdelend \DIFaddbegin \DIFadd{needed}\DIFaddend . For Linux there is an option to install
   Microsoft-signed Shim bootloader as explained on e.g.
   \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}.
-\item Enable UEFI Secure Boot in your firmware preferences and install the
-  certificate with a private key you own. Details on how to generate a certificate
+\item Enable UEFI Secure Boot in \DIFdelbegin \DIFdel{your }\DIFdelend firmware preferences and install the
+  certificate with a private key \DIFdelbegin \DIFdel{you own}\DIFdelend \DIFaddbegin \DIFadd{one owns}\DIFaddend . Details on how to generate a certificate
   can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
-  and are out of the scope of this document. If you need to launch Windows you
-  will also need to add the
+  and are out of the scope of this document. If \DIFdelbegin \DIFdel{you need to launch Windows you
+  }\DIFdelend \DIFaddbegin \DIFadd{Windows is needed one
+  }\DIFaddend will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
-  If you need to launch option ROMs or decided to use signed Linux drivers
-  you will also need the
-  \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}.
+  If \DIFdelbegin \DIFdel{you need }\DIFdelend \DIFaddbegin \DIFadd{one needs }\DIFaddend to launch option ROMs or decided to use signed Linux drivers
+  \DIFdelbegin \DIFdel{you will also need the
+  }%DIFDELCMD < \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}%%%
+\DIFdelend \DIFaddbegin \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA} \DIFadd{will also be needed}\DIFaddend .
 \item Password-protect changing firmware settings to ensure that UEFI Secure Boot
-  cannot be disabled without your knowledge.
+  cannot be disabled without \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the user's }\DIFaddend knowledge.
 \end{enumerate}
 
 \subsection{Windows support}\label{troubleshootingwin}
@@ -6425,7 +6444,7 @@ requires several steps and careful configuration of select settings as explained
   for this, it is highly recommend not to rely on it and install properly.
   \item Windows may need to be reactivated. To avoid it consider
   setting SystemUUID to the original firmware UUID. Be warned,
-  on old firmwares it may be invalid, i.e. not random. In case you still have issues,
+  on old firmwares it may be invalid, i.e. not random. \DIFdelbegin \DIFdel{In case you still have }\DIFdelend \DIFaddbegin \DIFadd{If there still are }\DIFaddend issues,
   consider using HWID or KMS38 license or making the use \texttt{Custom}
   \texttt{UpdateSMBIOSMode}. Other nuances of Windows activation are out of the
   scope of this document and can be found online.
@@ -6434,25 +6453,28 @@ requires several steps and careful configuration of select settings as explained
   \textbf{What additional software do I need?}
 
   To enable operating system switching and install relevant drivers in the majority of
-  cases you will need Windows support software from
-  \href{https://support.apple.com/boot-camp}{Boot Camp}. For simplicity of the download
+  cases \DIFdelbegin \DIFdel{you will need }\DIFdelend Windows support software from
+  \href{https://support.apple.com/boot-camp}{Boot Camp} \DIFaddbegin \DIFadd{is required}\DIFaddend . For simplicity of the download
   process or when configuring an already installed Windows version a third-party utility,
   \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
-  Note, that you may have to download and install \href{https://www.7-zip.org}{7-Zip}
-  prior to using Brigadier.
+  Note, that \DIFdelbegin \DIFdel{you may have to download and install }%DIFDELCMD < \href{https://www.7-zip.org}{7-Zip}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://www.7-zip.org}{7-Zip} \DIFadd{may be downloaded and installed
+  }\DIFaddend prior to using Brigadier.
 
   Remember to always use the latest version of Windows support software from Boot Camp,
   as versions prior to 6.1 do not support APFS, and thus will not function correctly.
   To download newest software pass most recent Mac model to Brigadier, for example
   \texttt{./brigadier.exe -m iMac19,1}. To install Boot Camp on an unsupported Mac model
   afterwards run PowerShell as Administrator and enter \texttt{msiexec /i BootCamp.msi}.
-  In case you already have a previous version of Boot Camp installed you will have to
-  remove it first by running \texttt{msiexec /x BootCamp.msi} command. \texttt{BootCamp.msi}
+  \DIFdelbegin \DIFdel{In case you already have }\DIFdelend \DIFaddbegin \DIFadd{If there is }\DIFaddend a previous version of Boot Camp installed \DIFdelbegin \DIFdel{you will have to
+  remove it }\DIFdelend \DIFaddbegin \DIFadd{it should be
+  removed }\DIFaddend first by running \texttt{msiexec /x BootCamp.msi} command. \texttt{BootCamp.msi}
   file is located in \texttt{BootCamp/Drivers/Apple} directory and can be reached through
   Windows Explorer.
 
   While Windows support software from Boot Camp solves most of compatibility problems,
-  sometimes you may have to address some of them manually:
+  \DIFdelbegin \DIFdel{sometimes you may have to address some of them }\DIFdelend \DIFaddbegin \DIFadd{the rest may still have to be addressed }\DIFaddend manually:
 
   \begin{itemize}
   \item To invert mouse wheel scroll direction \texttt{FlipFlopWheel} must be set
@@ -6472,7 +6494,7 @@ requires several steps and careful configuration of select settings as explained
   \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Startup Disk control panel?}
 
   Boot Camp control panel uses GPT partition table to obtain each boot option name.
-  After installing Windows separately you will have to relabel the partition manually.
+  After installing Windows separately \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{the partition }\DIFaddend will have to \DIFdelbegin \DIFdel{relabel the partition }\DIFdelend \DIFaddbegin \DIFadd{be relabelled }\DIFaddend manually.
   This can be done with many utilities including open-source
   \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
 
@@ -6534,26 +6556,28 @@ The use of \texttt{NOOPT} or \texttt{DEBUG} build modes instead of \texttt{RELEA
 can produce a lot more debug output. With \texttt{NOOPT} source level debugging with
 GDB or IDA Pro is also available. For GDB check
 \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Debug}{OpenCore Debug}
-page. For IDA Pro you will need IDA Pro 7.3 or newer, refer to
-\href{https://www.hex-rays.com/products/ida/support/tutorials/index.shtml}{Debugging the XNU Kernel with IDA Pro}
-for more details.
+page. For IDA Pro\DIFdelbegin \DIFdel{you will need IDA Pro }\DIFdelend \DIFaddbegin \DIFadd{, version }\DIFaddend 7.3 or newer \DIFdelbegin \DIFdel{, refer to
+}\DIFdelend \DIFaddbegin \DIFadd{is needed, and
+}\DIFaddend \href{https://www.hex-rays.com/products/ida/support/tutorials/index.shtml}{Debugging the XNU Kernel with IDA Pro}
+\DIFdelbegin \DIFdel{for more details}\DIFdelend \DIFaddbegin \DIFadd{may also help}\DIFaddend .
 
-To obtain the log during boot you can make the use of serial port debugging. Serial port
+To obtain the log during boot \DIFdelbegin \DIFdel{you can make the use of }\DIFdelend serial port debugging \DIFaddbegin \DIFadd{can be used}\DIFaddend . Serial port
 debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. To
 initialise serial within OpenCore use \texttt{SerialInit} configuration option.
-For macOS your best choice are CP2102-based UART devices. Connect motherboard \texttt{TX}
+For macOS \DIFdelbegin \DIFdel{your best choice are }\DIFdelend \DIFaddbegin \DIFadd{the best choice is }\DIFaddend CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
 \href{https://freeware.the-meiers.org}{CoolTerm}.
 
 \emph{Note}: On several motherboards (and possibly USB UART dongles) PIN naming may be
-incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus you have
-to connect motherboard ``\texttt{TX}'' to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
+incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus \DIFdelbegin \DIFdel{you have
+}\DIFdelend \DIFaddbegin \DIFadd{one has
+}\DIFaddend to connect motherboard ``\texttt{TX}'' to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
 to USB UART \texttt{RX}.
 
 Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
 than 1 meter to avoid output corruption. To additionally enable XNU kernel serial output
-you will need \texttt{debug=0x8} boot argument.
+\DIFdelbegin \DIFdel{you will need }\DIFdelend \texttt{debug=0x8} boot argument \DIFaddbegin \DIFadd{is needed}\DIFaddend .
 
 \subsection{Tips and Tricks}\label{troubleshootingtricks}
 
@@ -6565,7 +6589,7 @@ you will need \texttt{debug=0x8} boot argument.
   ensure that:
   \begin{itemize}
   \tightlist
-  \item You have a \texttt{DEBUG} or \texttt{NOOPT} version of OpenCore.
+  \item \DIFdelbegin \DIFdel{You have a }\DIFdelend \DIFaddbegin \DIFadd{A }\DIFaddend \texttt{DEBUG} or \texttt{NOOPT} version of OpenCore \DIFaddbegin \DIFadd{is used}\DIFaddend .
   \item Logging is enabled (\texttt{1}) and shown onscreen (\texttt{2}):
   \texttt{Misc} $\rightarrow$ \texttt{Debug} $\rightarrow$ \texttt{Target}
   $=$ \texttt{3}.
@@ -6598,8 +6622,9 @@ you will need \texttt{debug=0x8} boot argument.
     \texttt{-v}, and similar.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
-  \item Consider using serial port to inspect early kernel boot failures. For this you may
-    need \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} \DIFaddbegin \DIFadd{boot }\DIFaddend arguments.
+  \item Consider using serial port to inspect early kernel boot failures. For this
+    \DIFdelbegin \DIFdel{you may
+    need }\DIFdelend \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} \DIFdelbegin \DIFdel{arguments}\DIFdelend \DIFaddbegin \DIFadd{boot arguments are needed}\DIFaddend .
     Refer to the patches in Sample.plist when dying before serial init.
   \item Always read the logs carefully.
   \end{itemize}
@@ -6621,8 +6646,8 @@ you will need \texttt{debug=0x8} boot argument.
   \href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} Control Panel.
   Since choosing OpenCore's \texttt{BOOTx64.EFI} as a primary boot option limits this
   functionality in addition to several firmwares deleting incompatible boot options,
-  potentially including those created by macOS, you are strongly encouraged to use the
-  \texttt{RequestBootVarRouting} quirk, which will preserve your selection made in
+  potentially including those created by macOS, \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{users }\DIFaddend are strongly encouraged to use the
+  \texttt{RequestBootVarRouting} quirk, which will preserve \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend selection made in
   the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
   requires a separate driver for functioning.
 
@@ -6634,9 +6659,11 @@ you will need \texttt{debug=0x8} boot argument.
   Load OpenCore Boot Picker and choose the entry, it will have a \texttt{(dmg)} suffix.
   Custom name may be created by providing \texttt{.contentDetails} file.
 
-  To download recovery online you may use
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py}{macrecovery.py},
-  builtin tool.
+  To download recovery online
+  \DIFdelbegin \DIFdel{you may use
+  }\DIFdelend \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/macrecovery/macrecovery.py}{macrecovery.py}
+  \DIFdelbegin \DIFdel{,
+  builtin tool}\DIFdelend \DIFaddbegin \DIFadd{can be used}\DIFaddend .
 
   For offline installation refer to
   \href{https://support.apple.com/HT201372}{How to create a bootable installer for macOS}
@@ -6672,7 +6699,7 @@ you will need \texttt{debug=0x8} boot argument.
   These quirks originate from \texttt{AptioMemoryFix} driver but provide a wider
   set of changes specific to modern systems. Note, that \texttt{OpenRuntime}
   driver is required for most configurations. To get a configuration similar
-  to \texttt{AptioMemoryFix} you may try enabling the following set of quirks:
+  to \texttt{AptioMemoryFix} \DIFdelbegin \DIFdel{you may try enabling }\DIFdelend the following set of quirks \DIFaddbegin \DIFadd{should be enabled}\DIFaddend :
   \begin{itemize}
   \tightlist
   \item \texttt{ProvideConsoleGop} (UEFI quirk)
