@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Sep 24 19:29:02 2020
-%DIF ADD ../Configuration.tex        Fri Oct  2 09:04:03 2020
+%DIF ADD ../Configuration.tex        Sat Oct  3 09:38:10 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1997,20 +1997,27 @@ blocking.
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values to replace \texttt{CPUID (1)} call in XNU kernel.
 
-  This property serves for two needs:
+  This property \DIFdelbegin \DIFdel{serves for two }\DIFdelend \DIFaddbegin \DIFadd{primarily serves for three }\DIFaddend needs:
 
   \begin{itemize}
     \tightlist
-    \item Enabling support of an unsupported CPU model.
-    \item Enabling XCPM support for an unsupported CPU variant.
+    \item Enabling support of an unsupported CPU model \DIFdelbegin \DIFdel{.
+    }\DIFdelend \DIFaddbegin \DIFadd{(e.g. Intel Pentium).
+    }\DIFaddend \item Enabling \DIFaddbegin \DIFadd{support of a CPU model that is not yet supported by a specific version of macOS which usually are old.
+    }\item \DIFadd{Enabling }\DIFaddend XCPM support for an unsupported CPU variant.
   \end{itemize}
 
-  Normally it is only the value of \texttt{EAX} that needs to be taken care of,
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: It may also be the case that the CPU model is supported but there is no power management supported
+  (e.g. virtual machines). In this case, }\texttt{\DIFadd{MinKernel}} \DIFadd{and }\texttt{\DIFadd{MaxKernel}} \DIFadd{can be set to restrict CPU virtualisation and dummy power
+  management patches to the particular macOS kernel version.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend Normally it is only the value of \texttt{EAX} that needs to be taken care of,
   since it represents the full CPUID. The remaining bytes are to be left as zeroes.
   Byte order is Little Endian, so for example, \texttt{C3 06 03 00} stands for CPUID
   \texttt{0x0306C3} (Haswell).
 
-  For XCPM support it is recommended to use the following combinations.
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: }\DIFaddend For XCPM support it is recommended to use the following combinations.
 
   \begin{itemize}
     \tightlist
@@ -2022,7 +2029,7 @@ blocking.
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
-  Keep in mind, that the following configurations are unsupported (at least out of the box):
+  \DIFaddbegin \emph{\DIFadd{Note 4}}\DIFadd{: }\DIFaddend Keep in mind, that the following configurations are unsupported \DIFaddbegin \DIFadd{by XCPM }\DIFaddend (at least out of the box):
 
   \begin{itemize}
     \tightlist
@@ -2043,7 +2050,40 @@ blocking.
   When each \texttt{Cpuid1Mask} bit is set to 0, the original CPU bit is used,
   otherwise set bits take the value of \texttt{Cpuid1Data}.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{DummyPowerManagement}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.4}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disables }\texttt{\DIFadd{AppleIntelCpuPowerManagement}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option is a preferred alternative to
+  }\texttt{\DIFadd{NullCpuPowerManagement.kext}} \DIFadd{for CPUs without native power
+  management driver in macOS.
+}
+
+\item
+  \texttt{\DIFadd{MaxKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Emulates CPUID and apply }\texttt{\DIFadd{DummyPowerManagement}} \DIFadd{on specified macOS version or older.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Refer to }\hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} \DIFadd{for matching logic.
+}
+
+\item
+  \texttt{\DIFadd{MinKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Emulates CPUID and apply }\texttt{\DIFadd{DummyPowerManagement}} \DIFadd{on specified macOS version or newer.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Refer to }\hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} \DIFadd{for matching logic.
+  }
+
+\DIFaddend \end{enumerate}
 
 \subsection{Force Properties}\label{kernelpropsforce}
 
@@ -2360,31 +2400,22 @@ blocking.
   description if this is desired.
 
 \item
-  \texttt{DummyPowerManagement}\\
+  \texttt{\DIFdelbegin \DIFdel{DummyPowerManagement}\DIFdelend \DIFaddbegin \DIFadd{ExtendBTFeatureFlags}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: \DIFdelbegin \DIFdel{10.6 (64-bit)}\DIFdelend \DIFaddbegin \DIFadd{10.4}\DIFaddend \\
-  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
+  \textbf{Requirement}: \DIFdelbegin \DIFdel{10.6 (64-bit)}\DIFdelend \DIFaddbegin \DIFadd{10.8}\DIFaddend \\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Disables }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend \texttt{\DIFdelbegin \DIFdel{AppleIntelCpuPowerManagement}\DIFdelend \DIFaddbegin \DIFadd{FeatureFlags}\DIFaddend } \DIFaddbegin \DIFadd{to }\texttt{\DIFadd{0x0F}} \DIFadd{for full
+  functionality of Bluetooth, including Continuity}\DIFaddend .
 
-  \emph{Note}: This option is a preferred alternative to
-  \texttt{NullCpuPowerManagement.kext} for CPUs without native power
-  management driver in macOS.
-
-\item
-  \DIFaddbegin \texttt{\DIFadd{ExtendBTFeatureFlags}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Set }\texttt{\DIFadd{FeatureFlags}} \DIFadd{to }\texttt{\DIFadd{0x0F}} \DIFadd{for full
-  functionality of Bluetooth, including Continuity.
-  }
-
-  \emph{\DIFadd{Note}}\DIFadd{: This option is a substitution for BT4LEContinuityFixup.kext,
+  \emph{Note}: This option is a \DIFdelbegin \DIFdel{preferred alternative to
+  }\texttt{\DIFdel{NullCpuPowerManagement.kext}} %DIFAUXCMD
+\DIFdel{for CPUs without native power
+  management driver in macOS.}\DIFdelend \DIFaddbegin \DIFadd{substitution for BT4LEContinuityFixup.kext,
   which does not function properly due to late patching progress.
-}
+}\DIFaddend 
 
 \item
-  \DIFaddend \texttt{ExternalDiskIcons}\\
+  \texttt{ExternalDiskIcons}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: \DIFdelbegin \DIFdel{10.6 (64-bit)}\DIFdelend \DIFaddbegin \DIFadd{10.4}\DIFaddend \\

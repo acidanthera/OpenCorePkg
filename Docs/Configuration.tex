@@ -1937,20 +1937,25 @@ blocking.
   \textbf{Description}: Sequence of \texttt{EAX}, \texttt{EBX}, \texttt{ECX},
   \texttt{EDX} values to replace \texttt{CPUID (1)} call in XNU kernel.
 
-  This property serves for two needs:
+  This property primarily serves for three needs:
 
   \begin{itemize}
     \tightlist
-    \item Enabling support of an unsupported CPU model.
+    \item Enabling support of an unsupported CPU model (e.g. Intel Pentium).
+    \item Enabling support of a CPU model that is not yet supported by a specific version of macOS which usually are old.
     \item Enabling XCPM support for an unsupported CPU variant.
   \end{itemize}
+  
+  \emph{Note 1}: It may also be the case that the CPU model is supported but there is no power management supported
+  (e.g. virtual machines). In this case, \texttt{MinKernel} and \texttt{MaxKernel} can be set to restrict CPU virtualisation and dummy power
+  management patches to the particular macOS kernel version.
 
-  Normally it is only the value of \texttt{EAX} that needs to be taken care of,
+  \emph{Note 2}: Normally it is only the value of \texttt{EAX} that needs to be taken care of,
   since it represents the full CPUID. The remaining bytes are to be left as zeroes.
   Byte order is Little Endian, so for example, \texttt{C3 06 03 00} stands for CPUID
   \texttt{0x0306C3} (Haswell).
 
-  For XCPM support it is recommended to use the following combinations.
+  \emph{Note 3}: For XCPM support it is recommended to use the following combinations.
 
   \begin{itemize}
     \tightlist
@@ -1962,7 +1967,7 @@ blocking.
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
-  Keep in mind, that the following configurations are unsupported (at least out of the box):
+  \emph{Note 4}: Keep in mind, that the following configurations are unsupported by XCPM (at least out of the box):
 
   \begin{itemize}
     \tightlist
@@ -1983,6 +1988,33 @@ blocking.
   When each \texttt{Cpuid1Mask} bit is set to 0, the original CPU bit is used,
   otherwise set bits take the value of \texttt{Cpuid1Data}.
 
+\item
+  \texttt{DummyPowerManagement}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.4\\
+  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
+
+  \emph{Note}: This option is a preferred alternative to
+  \texttt{NullCpuPowerManagement.kext} for CPUs without native power
+  management driver in macOS.
+
+\item
+  \texttt{MaxKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Emulates CPUID and apply \texttt{DummyPowerManagement} on specified macOS version or older.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+
+\item
+  \texttt{MinKernel}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Emulates CPUID and apply \texttt{DummyPowerManagement} on specified macOS version or newer.
+
+  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  
 \end{enumerate}
 
 \subsection{Force Properties}\label{kernelpropsforce}
@@ -2298,17 +2330,6 @@ blocking.
   \emph{Note 2}: This option will not protect areas from being overwritten
   at firmware stage (e.g. macOS bootloader), see \texttt{AppleRtcRam} protocol
   description if this is desired.
-
-\item
-  \texttt{DummyPowerManagement}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.4\\
-  \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
-
-  \emph{Note}: This option is a preferred alternative to
-  \texttt{NullCpuPowerManagement.kext} for CPUs without native power
-  management driver in macOS.
 
 \item
   \texttt{ExtendBTFeatureFlags}\\
