@@ -40,7 +40,7 @@ dd if=/dev/random of=newbs skip=496 seek=496 bs=1 count=14 conv=notrunc
 sudo dd if=newbs of=/dev/rdisk"${N}"s1
 diskutil mount disk"${N}"s1
 
-cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')"
+cp -v "boot${ARCHS}" "$(diskutil info  disk"${N}"s1 |  sed -n 's/.*Mount Point: *//p')/boot"
 
 if [ "$(diskutil info  disk"${N}" |  sed -n 's/.*Content (IOContent): *//p')" == "FDisk_partition_scheme" ]
 then
