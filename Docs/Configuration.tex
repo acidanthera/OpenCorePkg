@@ -112,31 +112,31 @@
 
 This document provides information on
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
-configuration file format used to setup the correct functioning of macOS
+configuration file format used to setup the correct functioning of the macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
-shall be considered documentation or implementation bugs, and are requested to be
-reported through \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
-Errata sheet is available in
+shall be considered to be documentation or implementation bugs which should be
+reported via the \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+An errata sheet is available in
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}.
 
-This document is structured as a specification, and is not meant to provide a step by
-step algorithm for configuring end-user board support package (BSP). The intended audience
-of the document are programmers and engineers with basic understanding of macOS internals
-and UEFI functioning. For these reasons this document is available exclusively in English,
+This document is structured as a specification and is not meant to provide a step-by-step
+guide to configuring an end-user Board Support Package (BSP). The intended audience
+of the document is anticipated to be programmers and engineers with a basic understanding of macOS internals
+and UEFI functionality. For these reasons, this document is available exclusively in English,
 and all other sources or translations of this document are unofficial and may
 contain errors.
 
-Third-party articles, utilities, books, and alike may be more useful for a wider audience as
-they could provide guide-like material. However, they are prone to their authors' preferences,
-tastes, this document misinterpretation, and essential obsolescence.
-In case one uses these sources, for example, \href{https://dortania.github.io}{Dortania}'s
+Third-party articles, utilities, books, and alike, may be more useful for a wider audience as
+they could provide guide-like material. However, they are subject to their authors' preferences,
+tastes, misinterpretations of this document, and unavoidable obsolescence.
+In cases of using such sources, such as \href{https://dortania.github.io}{Dortania}'s
 \href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
 and \href{https://dortania.github.io/getting-started}{related material},
-please ensure to follow this document for every made decision and judge its consequences.
+please refer back to this document on every decision made and re-evaluate potential consequences.
 
-Be warned that regardless of the sources used one is required to fully understand every
-dedicated OpenCore configuration option and concept prior to reporting any issues in
+Please note that regardless of the sources used, users are required to fully understand every
+OpenCore configuration option, and the principles behind them, before posting issues to the
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 
 \subsection{Generic Terms}\label{generic-terms}
@@ -574,10 +574,10 @@ utilised.
 
 For BIOS booting a third-party UEFI environment provider will have to
 be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
-for legacy systems. To run OpenCore on such a legacy system one can install
-\texttt{OpenDuetPkg} with a dedicated tool --- BootInstall (bundled with OpenCore).
+for legacy systems. To run OpenCore on such a legacy system, \texttt{OpenDuetPkg}
+can be installed with a dedicated tool --- BootInstall (bundled with OpenCore).
 \href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
-perform this on systems different from macOS.
+perform this on systems other than macOS.
 
 For upgrade purposes refer to \texttt{Differences.pdf} document, providing
 the information about the changes affecting the configuration compared
@@ -1193,8 +1193,8 @@ list of checks to do first. Prior to starting, the following requirements should
 \item \texttt{Above 4G Decoding} or similar enabled in firmware
   settings if present. Note, that on some motherboards (notably ASUS WS-X299-PRO) this
   option causes adverse effects, and must be disabled. While no other motherboards
-  with the same issue are known, consider this option to be first to check if one
-  encounters erratic boot failures.
+  with the same issue are known, this option should be checked first whenever erratic boot
+  failures are encountered.
 \item \texttt{DisableIoMapper} quirk enabled, or \texttt{VT-d} disabled in
   firmware settings if present, or ACPI DMAR table deleted.
 \item \textbf{No} `slide` boot argument present in NVRAM or anywhere else.
@@ -1203,7 +1203,7 @@ list of checks to do first. Prior to starting, the following requirements should
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
   firmware settings if present. Consider
 \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
-  if no option is available (for sophisticated users only). See
+  if no option is available (for advanced users only). See
 \hyperref[kernelpropsquirks]{VerifyMsrE2}
   notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
@@ -1329,11 +1329,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disable single user mode.
 
-  This is a security option allowing one to restrict single user mode usage
+  This is a security option that restricts the activation of single user mode
   by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Read \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article}
-  to understand how to use single user mode with this quirk enabled.
+  behaviour. Refer to \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article} to understand how to use single user mode with this quirk enabled.
 
 \item
   \texttt{DisableVariableWrite}\\
@@ -1341,7 +1340,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect from macOS NVRAM write access.
 
-  This is a security option allowing one to restrict NVRAM access in macOS.
+  This is a security option that restricts NVRAM access in macOS.
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{OpenRuntime.efi}.
 
@@ -1407,7 +1406,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   key argument by obtaining current memory map and retrying \texttt{ExitBootServices} call.
 
   \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware. Do not use this unless a complete understanding of the consequences can be ensured.
+  of the firmware. Do not use this without a full understanding of the consequences.
 
 \item
   \texttt{ProtectMemoryRegions}\\
@@ -1495,7 +1494,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
   debug log may contain messages like \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
   To find the optimal value, manually append \texttt{slide=X} to \texttt{boot-args}
-  and log the largest one that won't cause boot failure.
+  and log the largest one that will not result in boot failures.
 
 \item
   \texttt{RebuildAppleMemoryMap}\\
@@ -1713,9 +1712,9 @@ blocking.
   order follows the item order in the array, thus the dependencies should be written
   prior to their consumers.
 
-  To track the dependency order one can inspect the \texttt{OSBundleLibraries} key
+  To track the dependency order, inspect the \texttt{OSBundleLibraries} key
   in the \texttt{Info.plist} of the kext. Any kext mentioned in the
-  \texttt{OSBundleLibraries} of the other kext must be precede this kext.
+  \texttt{OSBundleLibraries} of the other kext must precede this kext.
 
   \emph{Note}: Kexts may have inner kexts (\texttt{Plug-Ins}) in their bundle. Each
   inner kext must be added separately.
@@ -1945,7 +1944,7 @@ blocking.
     \item Enabling support of a CPU model that is not yet supported by a specific version of macOS which usually is old.
     \item Enabling XCPM support for an unsupported CPU variant.
   \end{itemize}
-  
+
   \emph{Note 1}: It may also be the case that the CPU model is supported but there is no power management supported
   (e.g. virtual machines). In this case, \texttt{MinKernel} and \texttt{MaxKernel} can be set to restrict CPU virtualisation and dummy power
   management patches to the particular macOS kernel version.
@@ -1967,12 +1966,12 @@ blocking.
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
-  \emph{Note 4}: Keep in mind, that the following configurations are unsupported by XCPM (at least out of the box):
+  \emph{Note 4}: Note that the following configurations are unsupported by XCPM (at least out of the box):
 
   \begin{itemize}
     \tightlist
     \item Consumer Ivy Bridge (\texttt{0x0306A9}) as Apple disabled XCPM for Ivy Bridge
-      and recommends legacy power management for these CPUs. \texttt{\_xcpm\_bootstrap} 
+      and recommends legacy power management for these CPUs. \texttt{\_xcpm\_bootstrap}
       should manually be patched to enforce XCPM on these CPUs instead of this option.
     \item Low-end CPUs (e.g. Haswell+ Pentium) as they are not supported properly by macOS.
       Legacy hacks for older models can be found in the \texttt{Special NOTES} section of
@@ -1998,10 +1997,10 @@ blocking.
   \emph{Note 1}: This option is a preferred alternative to
   \texttt{NullCpuPowerManagement.kext} for CPUs without native power
   management driver in macOS.
-  
+
   \emph{Note 2}: While this option is usually needed to disable \texttt{AppleIntelCpuPowerManagement}
-  merely on unsupported platforms, it can still be enabled if one wishes to
-  disable this kext per se regardless of other situations (e.g. with \texttt{Cpuid1Data} left blank).
+  on unsupported platforms, it can also be used to disable this kext in other situations
+  (e.g. with \texttt{Cpuid1Data} left blank).
 
 \item
   \texttt{MaxKernel}\\
@@ -2018,7 +2017,7 @@ blocking.
   \textbf{Description}: Emulates CPUID and applies \texttt{DummyPowerManagement} on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
-  
+
 \end{enumerate}
 
 \subsection{Force Properties}\label{kernelpropsforce}
@@ -2216,9 +2215,9 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  Certain firmwares lock \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register. To check its
-  state one can use bundled \texttt{VerifyMsrE2} tool. Select firmwares have this
-  register locked on some cores only.
+  Certain firmwares lock \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register. The bundled
+  \texttt{VerifyMsrE2} tool can be used to check its state. Some firmware have this
+  register locked only on some cores.
 
   As modern firmwares provide \texttt{CFG Lock} setting, which allows configuring
   \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
@@ -2230,8 +2229,8 @@ blocking.
     \item Download \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool} and
       \href{https://github.com/LongSoft/Universal-IFR-Extractor/releases}{IFR-Extractor}.
     \item Open the firmware image in UEFITool and find \texttt{CFG Lock} unicode string.
-      If it is not present, the firmware may not have this option and one should stop.
-    \item Extract the \texttt{Setup.bin} PE32 Image Section (the one UEFITool found) through
+      If it is not present, the firmware may not have this option and the proccess should therefore be discontinued.
+    \item Extract the \texttt{Setup.bin} PE32 Image Section (the UEFITool found) through the
       \texttt{Extract Body} menu option.
     \item Run IFR-Extractor on the extracted file (e.g. \texttt{./ifrextract Setup.bin Setup.txt}).
     \item Find \texttt{CFG Lock, VarStoreInfo (VarOffset/VarName):} in \texttt{Setup.txt} and
@@ -2342,7 +2341,7 @@ blocking.
   \textbf{Requirement}: 10.8\\
   \textbf{Description}: Set \texttt{FeatureFlags} to \texttt{0x0F} for full
   functionality of Bluetooth, including Continuity.
-  
+
   \emph{Note}: This option is a substitution for BT4LEContinuityFixup.kext,
   which does not function properly due to late patching progress.
 
@@ -2549,9 +2548,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \texttt{Mkext}, \texttt{Prelinked}) when available.
 
   Different variants of macOS support different kernel caching variants designed to improve
-  boot performance. This setting allows to prevent using faster kernel caching variants
-  if slower variants are available for debugging and stability reasons. I.e. by
-  specifying \texttt{Mkext} one will disable \texttt{Prelinked} for e.g. 10.6 but not 10.7.
+  boot performance. This setting prevents the use of faster kernel caching variants
+  if slower variants are available for debugging and stability reasons. I.e., by
+  specifying \texttt{Mkext}, \texttt{Prelinked} will be disabled for e.g. 10.6 but not for 10.7.
 
   The list of available kernel caching types and its current support in OpenCore is listed below.
 
@@ -3182,7 +3181,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   amounts may speedup memory wear and render this flash drive unusable in shorter time.
 
   When interpreting the log, note that the lines are prefixed with a tag describing
-  the relevant location (module) of the log line allowing one to better attribute the line
+  the relevant location (module) of the log line allowing better attribution of the line
   to the functionality. The list of currently used tags is provided below.
 
   \textbf{Drivers and tools}:
@@ -3288,12 +3287,12 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
   Secure Boot.
 
-  To start using personalised Apple Secure Boot one will have to reinstall the
-  operating system or personalise it. Until the operating system is personalised
-  one will only be able to load macOS DMG recovery. If DMG recovery is missing,
+  To start using personalised Apple Secure Boot, the operating system will have
+  to be reinstalled or personalised. Unless the operating system is personalised,
+  macOS DMG recovery cannot be loaded. If DMG recovery is missing,
   it can be downloaded with \texttt{macrecovery} utility and put to
   \texttt{com.apple.recovery.boot} as explained in
-  \hyperref[reinstallmacos]{Tips and Tricks} section. Keep in mind that
+  \hyperref[reinstallmacos]{Tips and Tricks} section. Note that
   \hyperref[securedmgloading]{DMG loading} needs to be set to \texttt{Signed}
   to use any DMG with Apple Secure Boot.
 
@@ -3306,7 +3305,7 @@ bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
-  When reinstalling the operating system, keep in mind that current versions
+  When reinstalling the operating system, note that current versions
   of macOS Installer, tested as of 10.15.6, will usually run out of free memory
   on the \texttt{/var/tmp} partition when trying to install macOS
   with the personalised Apple Secure Boot. Soon after downloading the macOS installer
@@ -3330,9 +3329,8 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   \textbf{Description}: Enable \texttt{VirtualSMC}-compatible authenticated restart.
 
   Authenticated restart is a way to reboot FileVault 2 enabled macOS without entering
-  the password. To perform authenticated restart one can use a dedicated terminal
-  command: \texttt{sudo fdesetup authrestart}. It is also used when installing
-  operating system updates.
+  the password. A dedicated terminal command can be used to perform authenticated restarts:
+  \texttt{sudo fdesetup authrestart}. It is also used when installing operating system updates.
 
   VirtualSMC performs authenticated restart by saving disk encryption key split in
   NVRAM and RTC, which despite being removed as soon as OpenCore starts, may be
@@ -3528,11 +3526,11 @@ dd of=OpenCore.efi if=vault.pub bs=1 seek=$off count=528 conv=notrunc
 rm vault.pub
 \end{lstlisting}
 
-  \emph{Note 1}: While it may appear obvious, but an external
+  \emph{Note 1}: While it may appear obvious, an external
   method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
-  secure boot path. For this one is recommended to at least enable UEFI SecureBoot
-  with a custom certificate, and sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
-  with user's custom key. More details on customising secure boot on modern firmwares
+  secure boot path. For this, it is recommended to enable UEFI SecureBoot
+  using a custom certificate and to sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
+  with a custom key. More details on customising secure boot on modern firmwares
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
@@ -3653,16 +3651,16 @@ rm vault.pub
   allowing to enabling Apple Secure Boot with any SMBIOS. Setting
   \texttt{SecureBootModel} to any valid value but \texttt{Disabled} is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
-  of Apple Secure Boot. To achieve \texttt{Full Security} one will need to
-  also specify \texttt{ApECID} value.
+  of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
+  achieve \texttt{Full Security}.
 
   Enabling Apple Secure Boot is more demanding to incorrect configurations,
-  buggy macOS installations, and unsupported setups. Things to keep in mind:
+  buggy macOS installations, and unsupported setups. Things to consider:
 
   \begin{enumerate}
     \tightlist
-    \item Just like on T2 Macs one will not be able to install any unsigned kernel
-      drivers and several signed kernel drivers including NVIDIA Web Drivers.
+    \item As with T2 Macs, unsigned kernel drivers and several signed kernel
+    drivers, including NVIDIA Web Drivers, cannot be installed.
     \item The list of cached drivers may be different, resulting in the need
       to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
       For example, \texttt{IO80211Family} cannot be injected in this case.
@@ -3686,8 +3684,8 @@ rm vault.pub
   Sometimes the already installed operating system may have outdated Apple Secure
   Boot manifests on the \texttt{Preboot} partition causing boot failure. If there is
   ``OCB: Apple Secure Boot prohibits this boot entry, enforcing!'' message,
-  it is likely the case. When this happens one can either reinstall the operating
-  system or copy the manifests (files with \texttt{.im4m} extension, like
+  it is likely the case. When this happens, either reinstall the operating
+  system or copy the manifests (files with \texttt{.im4m} extension, such as
   \texttt{boot.efi.j137.im4m}) from \texttt{/usr/standalone/i386} to
   \texttt{/Volumes/Preboot/<UUID>/System/Library/CoreServices}. Here \texttt{<UUID>}
   is the system volume identifier. On HFS+ installations the manifests should be
@@ -3894,8 +3892,8 @@ use.
 
 \end{enumerate}
 
-To read NVRAM variable value from macOS one could use \texttt{nvram}
-by concatenating variable GUID and name separated by \texttt{:} symbol.
+To read NVRAM variable value from macOS, \texttt{nvram} could be used
+by concatenating GUID and name variables separated by a \texttt{:} symbol.
 For example, \texttt{nvram 7C436110-AB2A-4BBB-A880-FE41995C9F82:boot-args}.
 
 A continuously updated variable list can be found in a corresponding document:
@@ -4224,7 +4222,7 @@ names conform to EDK2
 header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:
-manual, where one specifies all the values (the default), and semi-automatic,
+manual, where all the values are specified (the default), and semi-automatic,
 where (\texttt{Automatic}) only select values are specified, and later used
 for system configuration.
 
@@ -6021,10 +6019,10 @@ functioning. Feature highlights:
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
   it impossible to boot without resetting NVRAM.
 
-  To trigger the bug one should have some valid boot options (e.g. OpenCore) and then
-  install Windows with \texttt{RequestBootVarRouting} enabled. As Windows bootloader
-  option will not be created by Windows installer, the firmware will attempt to create it
-  itself, and then corrupt its boot option list.
+  To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
+  install Windows with \texttt{RequestBootVarRouting} enabled. As the Windows bootloader
+  option will not be created by the Windows installer, the firmware will attempt to create
+  this itself, leading to a corruption of its boot option list.
 
   This quirk removes all duplicates in \texttt{BootOrder} variable attempting to resolve
   the consequences of the bugs upon OpenCore loading. It is recommended to use this key
@@ -6073,9 +6071,9 @@ functioning. Feature highlights:
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{OpenRuntime.efi}. The quirk lets default boot entry
   preservation at times when firmwares delete incompatible boot entries.
-  Simply said, one is required to enable this quirk to be able to reliably
+  Simply said, this quirk is required to reliably
   use \href{https://support.apple.com/HT202796}{Startup Disk} preference
-  pane in a firmware that is not compatible with macOS boot entries by design.
+  pane in firmware that is not compatible with macOS boot entries by design.
 
 \item
   \texttt{TscSyncTimeout}\\
@@ -6187,7 +6185,7 @@ functioning. Feature highlights:
 Older operating systems may be more complicated to install, but sometimes can
 be necessary to use for all kinds of reasons. While a compatible board identifier
 and CPUID are the obvious requiremenets for proper functioning of an older
-operating system, there are many other less obvious things to keep in mind.
+operating system, there are many other less obvious things to consider.
 This section tries to cover a common set of issues relevant to installing
 older macOS operating systems.
 
@@ -6201,7 +6199,7 @@ older macOS operating systems.
     without DMG loading avoiding the need for \texttt{PartitionDxe}.
   \item Cached kernel images often do not contain family drivers
     for networking (\texttt{IONetworkingFamily}) or audio
-    (\texttt{IOAudioFamily}) requiring one to use \texttt{Force}
+    (\texttt{IOAudioFamily}) requiring the use of \texttt{Force}
     loading in order to inject networking or audio drivers.
 \end{itemize}
 
@@ -6232,8 +6230,8 @@ older macOS operating systems.
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
     \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here},
-    assuming that one legally owns macOS~10.6. Read \texttt{DIGEST.txt}
-    for more details. Keep in mind, that these are the earliest tested
+    assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
+    for more details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
 \end{itemize}
 
@@ -6278,7 +6276,7 @@ such as \hyperref[secureapplesb]{Apple Secure Boot}. Proper secure boot chain
 requires several steps and careful configuration of select settings as explained below:
 
 \begin{enumerate}
-\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} if one needs to
+\item Enable Apple Secure Boot by setting \texttt{SecureBootModel} to
   run macOS. Note, that not every macOS is compatible with Apple Secure Boot and
   there are several other restrictions as explained in
   \hyperref[secureapplesb]{Apple Secure Boot} section.
@@ -6307,12 +6305,12 @@ requires several steps and careful configuration of select settings as explained
   Microsoft-signed Shim bootloader as explained on e.g.
   \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}.
 \item Enable UEFI Secure Boot in firmware preferences and install the
-  certificate with a private key one owns. Details on how to generate a certificate
+  certificate with a private key. Details on how to generate a certificate
   can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
   and are out of the scope of this document. If Windows is needed one
   will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
-  If one needs to launch option ROMs or decided to use signed Linux drivers
+  To launch option ROMs or to use signed Linux drivers,
   \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA} will also be needed.
 \item Password-protect changing firmware settings to ensure that UEFI Secure Boot
   cannot be disabled without the user's knowledge.
@@ -6325,7 +6323,7 @@ requires several steps and careful configuration of select settings as explained
   While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
   above) prepared with Boot Camp are supposed to work. Third-party UEFI installations
   as well as systems partially supporting UEFI boot, like Windows 7, might work with
-  some extra precautions. Things to keep in mind:
+  some extra precautions. Things to consider:
 
   \begin{itemize}
   \item MBR (Master Boot Record) installations are legacy and will not be supported.
@@ -6372,7 +6370,7 @@ requires several steps and careful configuration of select settings as explained
   to \texttt{1} as explained on \href{https://superuser.com/a/364353}{SuperUser}.
   \item \texttt{RealTimeIsUniversal} must be set to \texttt{1} to avoid time
   desync between Windows and macOS as explained on
-  \href{https://superuser.com/q/494432}{SuperUser} (this one is usually not needed).
+  \href{https://superuser.com/q/494432}{SuperUser} (this is usually not needed).
   \item To access Apple filesystems like HFS and APFS separate software may need to
   be installed. Some of the known utilities are:
   \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/}{Apple HFS+ driver}
@@ -6460,8 +6458,8 @@ to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. 
 \href{https://freeware.the-meiers.org}{CoolTerm}.
 
 \emph{Note}: On several motherboards (and possibly USB UART dongles) PIN naming may be
-incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus one has
-to connect motherboard ``\texttt{TX}'' to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
+incorrect. It is very common to have \texttt{GND} swapped with \texttt{RX}, thus,
+motherboard ``\texttt{TX}'' must be connected to USB UART \texttt{GND}, and motherboard ``\texttt{GND}''
 to USB UART \texttt{RX}.
 
 Remember to enable \texttt{COM} port in firmware settings, and never use USB cables longer
