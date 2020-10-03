@@ -157,6 +157,16 @@ OcMain (
     );
 }
 
+/*
+ * Leave a signature that wouldn't be stripped in release version
+ */
+static const char* opencore_revision __attribute__((used)) = "OpenCore revision: " OPEN_CORE_VERSION;
+/*
+ * Leave a marker for BootloaderChooser, to prevent confusion (an efi file from a folder EFI\OCXXX that would use file from EFI\OC)
+ */
+static const char* path_independant __attribute__((used)) = "path_independant";
+
+
 STATIC
 EFI_STATUS
 EFIAPI
@@ -175,12 +185,42 @@ OcBootstrapRerun (
   if (This->NestedCount == 1) {
     mOpenCoreVaultKey = OcGetVaultKey (This);
 
+
+    EFI_LOADED_IMAGE_PROTOCOL* LoadedImage = NULL;
+    Status = gBS->HandleProtocol (
+      gImageHandle,
+      &gEfiLoadedImageProtocolGuid,
+      (VOID **) &LoadedImage
+      );
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to locate loaded image - %r\n", Status));
+      return EFI_NOT_FOUND;
+    }
+
+    // Extract dirname from LoadedImage->FilePath
+    CHAR16* UnicodeDevicePath = NULL;
+    if ( LoadedImage->FilePath ) {
+      UnicodeDevicePath = ConvertDevicePathToText(LoadedImage->FilePath, FALSE, FALSE);
+      CHAR16* p = UnicodeDevicePath + StrLen(UnicodeDevicePath);
+      while ( p > UnicodeDevicePath  &&  *p != L'\\' ) {
+        p -= 1;
+      }
+      *p = 0;
+    }
+    // If not dirname is found (LoadedImage->FilePath can be NULL), use OPEN_CORE_ROOT_PATH as before.
+    if ( !UnicodeDevicePath  ||  !*UnicodeDevicePath ) UnicodeDevicePath = OPEN_CORE_ROOT_PATH;
+
     Status = OcStorageInitFromFs (
       &mOpenCoreStorage,
       FileSystem,
-      OPEN_CORE_ROOT_PATH,
+      UnicodeDevicePath,
       mOpenCoreVaultKey
       );
+
+    if ( UnicodeDevicePath ) FreePool (UnicodeDevicePath);
+
+
 
     if (!EFI_ERROR (Status)) {
       OcMain (&mOpenCoreStorage, LoadPath);
