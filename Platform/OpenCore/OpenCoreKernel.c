@@ -91,20 +91,6 @@ OcKernelConfigureCapabilities (
   }
 
   //
-  // Determine requested arch.
-  //
-  KernelArch = OC_BLOB_GET (&mOcConfiguration->Kernel.Scheme.KernelArch);
-  if (AsciiStrCmp (KernelArch, "x86_64") == 0) {
-    RequestedArch = OC_KERN_CAPABILITY_K64_U64;
-  } else if (AsciiStrCmp (KernelArch, "i386") == 0) {
-    RequestedArch = OC_KERN_CAPABILITY_K32_U64;
-  } else if (AsciiStrCmp (KernelArch, "i386-user32") == 0) {
-    RequestedArch = OC_KERN_CAPABILITY_K32_U32;
-  } else {
-    RequestedArch = 0;
-  }
-
-  //
   // Determine the current operating system.
   //
   IsSnowLeo = FALSE;
@@ -123,9 +109,41 @@ OcKernelConfigureCapabilities (
   }
 
   //
+  // Determine requested arch.
+  //
+  // There are issues with booting with -legacy on 10.4 and 10.5, and EFI64.
+  // We can only use this on 10.6, or on 10.4/10.5 if on EFI32.
+  //
+  // i386-user32 is not supported on 10.7, fallback to i386.
+  //
+  KernelArch = OC_BLOB_GET (&mOcConfiguration->Kernel.Scheme.KernelArch);
+  if (AsciiStrCmp (KernelArch, "x86_64") == 0) {
+    RequestedArch = OC_KERN_CAPABILITY_K64_U64;
+  } else if (AsciiStrCmp (KernelArch, "i386") == 0) {
+    RequestedArch = OC_KERN_CAPABILITY_K32_U64;
+  } else if (AsciiStrCmp (KernelArch, "i386-user32") == 0
+#if defined(MDE_CPU_X64)
+    && (IsSnowLeo || IsLion)
+#endif
+    ) {
+    if (!IsLion) {
+      RequestedArch = OC_KERN_CAPABILITY_K32_U32;
+    } else {
+      DEBUG ((DEBUG_INFO, "OC: Requested arch i386-user32 is not supported on 10.7, falling back to i386\n"));
+      RequestedArch = OC_KERN_CAPABILITY_K32_U64;
+    }
+  } else {
+    RequestedArch = 0;
+  }
+
+  //
   // In automatic mode, if we do not support SSSE3 and can downgrade to U32, do it.
+  // See also note above regarding 10.4 and 10.5.
   //
   if (RequestedArch == 0
+#if defined(MDE_CPU_X64)
+    && IsSnowLeo
+#endif
     && (mOcCpuInfo->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
     && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0
     && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
@@ -1061,8 +1079,10 @@ OcKernelFileOpen (
     MaxCacheTypeAllowed = CacheTypeCacheless;
   } else if (AsciiStrCmp (ForceCacheType, "Mkext") == 0) {
     MaxCacheTypeAllowed = CacheTypeMkext;
-  } else {
+  } else if (AsciiStrCmp (ForceCacheType, "Prelinked") == 0) {
     MaxCacheTypeAllowed = CacheTypePrelinked;
+  } else {
+    MaxCacheTypeAllowed = CacheTypeNone;
   }
 
   //
@@ -1173,9 +1193,11 @@ OcKernelFileOpen (
     if (!EFI_ERROR (Status)) {
       //
       // Disable prelinked if forcing mkext or cacheless, but only on appropriate versions.
+      // We also disable prelinked on 10.5 or older due to prelinked on those versions being unsupported.
       //
       if ((OcStriStr (FileName, L"kernelcache") != NULL || OcStriStr (FileName, L"prelinkedkernel") != NULL)
-        && ((MaxCacheTypeAllowed == CacheTypeMkext && mOcDarwinVersion <= KERNEL_VERSION_SNOW_LEOPARD_MAX)
+        && ((MaxCacheTypeAllowed == CacheTypeNone && mOcDarwinVersion <= KERNEL_VERSION_LEOPARD_MAX)
+        || (MaxCacheTypeAllowed == CacheTypeMkext && mOcDarwinVersion <= KERNEL_VERSION_SNOW_LEOPARD_MAX)
         || (MaxCacheTypeAllowed == CacheTypeCacheless && mOcDarwinVersion <= KERNEL_VERSION_MAVERICKS_MAX))) {
         DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
 

@@ -2465,11 +2465,11 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
     \item \texttt{Auto} --- Choose the preferred architecture automatically.
     \item \texttt{i386} --- Use \texttt{i386} (32-bit) kernel when available.
     \item \texttt{i386-user32} --- Use \texttt{i386} (32-bit) kernel when available
-      and force the use of 32-bit userspace on 64-bit capable processors.
-      On macOS 64-bit capable processors are assumed to support \texttt{SSSE3}.
-      This is not the case for older 64-bit capable Pentium processors, which
-      cause some applications to crash on macOS~10.6. The behaviour corresponds
-      to \texttt{-legacy} kernel boot argument.
+      and force the use of 32-bit userspace on 64-bit capable processors if supported
+      by the operating system. On macOS 64-bit capable processors are assumed to
+      support \texttt{SSSE3}. This is not the case for older 64-bit capable Pentium
+      processors, which cause some applications to crash on macOS~10.6. The behaviour
+      corresponds to \texttt{-legacy} kernel boot argument.
     \item \texttt{x86\_64} --- Use \texttt{x86\_64} (64-bit) kernel when available.
   \end{itemize}
 
@@ -2578,8 +2578,9 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \end{center}
 
   \emph{Note}: First version (V1) of 32-bit \texttt{prelinkedkernel} is unsupported
-  due to kext symbol tables being corrupted by the tools. This also makes
-  \texttt{keepsyms=1} for kext frames broken on these systems.
+  due to kext symbol tables being corrupted by the tools. On these versions \texttt{Auto}
+  will block \texttt{prelinkedkernel} booting. This also makes \texttt{keepsyms=1} for kext frames
+  broken on these systems.
 
 \end{enumerate}
 
