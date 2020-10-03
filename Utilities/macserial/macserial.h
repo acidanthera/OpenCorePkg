@@ -1,7 +1,8 @@
 //
 // Decode mac serial number
 //
-// Copyright (c) 2018 vit9696
+// Copyright (c) 2018-2020 vit9696
+// Copyright (c) 2020 Matis Schotte
 //
 
 #ifndef GENSERIAL_H
@@ -10,7 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define PROGRAM_VERSION "2.1.5"
+#define PROGRAM_VERSION "2.1.6"
 
 #ifdef __GNUC__
 uint32_t arc4random(void) __attribute__((weak));

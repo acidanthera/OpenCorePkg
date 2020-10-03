@@ -1,7 +1,8 @@
 //
 // Decode mac serial number
 //
-// Copyright (c) 2018 vit9696
+// Copyright (c) 2018-2020 vit9696
+// Copyright (c) 2020 Matis Schotte
 //
 
 #include <limits.h>
