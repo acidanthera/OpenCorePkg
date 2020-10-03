@@ -1995,9 +1995,13 @@ blocking.
   \textbf{Requirement}: 10.4\\
   \textbf{Description}: Disables \texttt{AppleIntelCpuPowerManagement}.
 
-  \emph{Note}: This option is a preferred alternative to
+  \emph{Note 1}: This option is a preferred alternative to
   \texttt{NullCpuPowerManagement.kext} for CPUs without native power
   management driver in macOS.
+  
+  \emph{Note 2}: While this option is usually needed to disable \texttt{AppleIntelCpuPowerManagement}
+  merely on unsupported platforms, it can still be enabled if one wishes to
+  disable this kext per se regardless of other situations (e.g. with \texttt{Cpuid1Data} left blank).
 
 \item
   \texttt{MaxKernel}\\
