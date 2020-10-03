@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Sep 24 19:29:02 2020
-%DIF ADD ../Configuration.tex        Sat Oct  3 13:08:09 2020
+%DIF ADD ../Configuration.tex        Sat Oct  3 13:41:05 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1269,7 +1269,7 @@ list of checks to do first. Prior to starting\DIFdelbegin \DIFdel{please ensure 
 \hyperref[kernelpropsquirks]{VerifyMsrE2}
   notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
-  if present. \DIFdelbegin \DIFdel{You may need to flash GOP ROM on }\DIFdelend \DIFaddbegin \DIFadd{On }\DIFaddend NVIDIA 6xx/AMD 2xx or older\DIFaddbegin \DIFadd{, GOP ROM might be flashed first}\DIFaddend . Use
+  if present. \DIFdelbegin \DIFdel{You may need to flash GOP ROM on }\DIFdelend \DIFaddbegin \DIFadd{On }\DIFaddend NVIDIA 6xx/AMD 2xx or older\DIFaddbegin \DIFadd{, GOP ROM may have to be flashed first}\DIFaddend . Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
   (see the second post) or \href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
   in case \DIFdelbegin \DIFdel{you are not sure how}\DIFdelend \DIFaddbegin \DIFadd{of any potential confusion}\DIFaddend .
@@ -1283,7 +1283,7 @@ list of checks to do first. Prior to starting\DIFdelbegin \DIFdel{please ensure 
   \DIFaddbegin \DIFadd{may have to be disabled }\DIFaddend in firmware settings present.
 \end{itemize}
 
-When debugging sleep issues \DIFdelbegin \DIFdel{you may want to (temporarily) disable }\DIFdelend Power Nap and automatic power off \DIFaddbegin \DIFadd{may be disabled}\DIFaddend ,
+When debugging sleep issues \DIFdelbegin \DIFdel{you may want to (temporarily) disable }\DIFdelend Power Nap and automatic power off \DIFaddbegin \DIFadd{may be (temporarily) disabled}\DIFaddend ,
 which appear to sometimes cause wake to black screen or boot loop
 issues on older platforms. The particular issues may vary, but in general \DIFdelbegin \DIFdel{you should
 check ACPI tables }\DIFdelend \DIFaddbegin \DIFadd{ACPI tables should be looked up }\DIFaddend first.
@@ -2041,7 +2041,7 @@ blocking.
     \item Consumer Ivy Bridge (\texttt{0x0306A9}) as Apple disabled XCPM for Ivy Bridge
       and recommends legacy power management for these CPUs. \DIFdelbegin \DIFdel{You will need to manually
       patch }\DIFdelend \texttt{\_xcpm\_bootstrap} 
-      \DIFdelbegin \DIFdel{to force }\DIFdelend \DIFaddbegin \DIFadd{should be patched to enforce }\DIFaddend XCPM on these CPUs instead of \DIFdelbegin \DIFdel{using }\DIFdelend this option.
+      \DIFdelbegin \DIFdel{to force }\DIFdelend \DIFaddbegin \DIFadd{should manually be patched to enforce }\DIFaddend XCPM on these CPUs instead of \DIFdelbegin \DIFdel{using }\DIFdelend this option.
     \item Low-end CPUs (e.g. Haswell+ Pentium) as they are not supported properly by macOS.
       Legacy hacks for older models can be found in the \texttt{Special NOTES} section of
       \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
@@ -2754,7 +2754,7 @@ The boot process is as follows:
 \emph{Note 1}: This process is meant to work reliably only when \texttt{RequestBootVarRouting}
 option is enabled or the firmware does not control UEFI boot options (\texttt{OpenDuetPkg} or
 custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
-overwrite OpenCore, make sure to enable it if \DIFdelbegin \DIFdel{you plan }\DIFdelend \DIFaddbegin \DIFadd{one plans }\DIFaddend to use them.
+overwrite OpenCore, make sure to enable it \DIFdelbegin \DIFdel{if you plan }\DIFdelend \DIFaddbegin \DIFadd{when planning }\DIFaddend to use them.
 
 \emph{Note 2}: UEFI variable boot options' boot arguments will be removed if present as they
 may contain arguments compromising the operating system, which is undesired once secure boot
@@ -2876,7 +2876,7 @@ entry choice will update till next manual reconfiguration.
 
   \begin{itemize}
   \tightlist
-    \item \texttt{None} --- Avoid hibernation\DIFdelbegin \DIFdel{for your own good}\DIFdelend .
+    \item \texttt{None} --- Avoid hibernation \DIFdelbegin \DIFdel{for your own good}\DIFdelend \DIFaddbegin \DIFadd{(Recommended)}\DIFaddend .
     \item \texttt{Auto} --- Use RTC and NVRAM detection.
     \item \texttt{RTC} --- Use RTC detection.
     \item \texttt{NVRAM} --- Use NVRAM detection.
@@ -3448,7 +3448,7 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 
   \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
-  Use at \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{user's }\DIFaddend own risk on boards known to be compatible.
+  \DIFdelbegin \DIFdel{Use at your own risk on }\DIFdelend \DIFaddbegin \DIFadd{This option should be used without any warranty exclusively on the }\DIFaddend boards known to be compatible.
 
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
@@ -6398,7 +6398,7 @@ requires several steps and careful configuration of select settings as explained
 \item Make sure that \texttt{ScanPolicy} restricts loading from undesired
   devices. It is a good idea to prohibit all removable drivers or unknown
   filesystems.
-\item Sign all the installed drivers and tools with \DIFdelbegin \DIFdel{your }\DIFdelend private key. Do not sign
+\item Sign all the installed drivers and tools with \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend private key. Do not sign
   tools that provide administrative access to \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend computer, like UEFI Shell.
 \item Vault \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend configuration as explained \hyperref[securevaulting]{Vaulting}
   section.

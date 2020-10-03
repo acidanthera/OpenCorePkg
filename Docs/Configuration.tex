@@ -1207,7 +1207,7 @@ list of checks to do first. Prior to starting, the following requirements should
 \hyperref[kernelpropsquirks]{VerifyMsrE2}
   notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
-  if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM might be flashed first. Use
+  if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
   (see the second post) or \href{http://www.insanelymac.com/forum/topic/299614-asus-eah6450-video-bios-uefi-gop-upgrade-and-gop-uefi-binary-in-efi-for-many-ati-cards/page-1#entry2042163}{AMD UEFI GOP MAKER}
   in case of any potential confusion.
@@ -1220,7 +1220,7 @@ list of checks to do first. Prior to starting, the following requirements should
   may have to be disabled in firmware settings present.
 \end{itemize}
 
-When debugging sleep issues Power Nap and automatic power off may be disabled,
+When debugging sleep issues Power Nap and automatic power off may be (temporarily) disabled,
 which appear to sometimes cause wake to black screen or boot loop
 issues on older platforms. The particular issues may vary, but in general ACPI tables should be looked up first.
 Here is an example of a bug found in some
@@ -1973,7 +1973,7 @@ blocking.
     \tightlist
     \item Consumer Ivy Bridge (\texttt{0x0306A9}) as Apple disabled XCPM for Ivy Bridge
       and recommends legacy power management for these CPUs. \texttt{\_xcpm\_bootstrap} 
-      should be patched to enforce XCPM on these CPUs instead of this option.
+      should manually be patched to enforce XCPM on these CPUs instead of this option.
     \item Low-end CPUs (e.g. Haswell+ Pentium) as they are not supported properly by macOS.
       Legacy hacks for older models can be found in the \texttt{Special NOTES} section of
       \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
@@ -2674,7 +2674,7 @@ The boot process is as follows:
 \emph{Note 1}: This process is meant to work reliably only when \texttt{RequestBootVarRouting}
 option is enabled or the firmware does not control UEFI boot options (\texttt{OpenDuetPkg} or
 custom BDS). Without \texttt{BootProtect} it also is possible that other operating systems
-overwrite OpenCore, make sure to enable it if one plans to use them.
+overwrite OpenCore, make sure to enable it when planning to use them.
 
 \emph{Note 2}: UEFI variable boot options' boot arguments will be removed if present as they
 may contain arguments compromising the operating system, which is undesired once secure boot
@@ -2796,7 +2796,7 @@ entry choice will update till next manual reconfiguration.
 
   \begin{itemize}
   \tightlist
-    \item \texttt{None} --- Avoid hibernation.
+    \item \texttt{None} --- Avoid hibernation (Recommended).
     \item \texttt{Auto} --- Use RTC and NVRAM detection.
     \item \texttt{RTC} --- Use RTC detection.
     \item \texttt{NVRAM} --- Use NVRAM detection.
@@ -3362,7 +3362,7 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 
   \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
-  Use at user's own risk on boards known to be compatible.
+  This option should be used without any warranty exclusively on the boards known to be compatible.
 
   \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
@@ -6295,7 +6295,7 @@ requires several steps and careful configuration of select settings as explained
 \item Make sure that \texttt{ScanPolicy} restricts loading from undesired
   devices. It is a good idea to prohibit all removable drivers or unknown
   filesystems.
-\item Sign all the installed drivers and tools with private key. Do not sign
+\item Sign all the installed drivers and tools with the private key. Do not sign
   tools that provide administrative access to the computer, like UEFI Shell.
 \item Vault the configuration as explained \hyperref[securevaulting]{Vaulting}
   section.
