@@ -72,14 +72,23 @@ def base34_to_num(str):
     for i in str:
       num *= 34
       num += apple_base34.index(i)
+    # 0XXX is essentially the way to encode 10XXX.
+    if len(str) == 4 and str.startswith('0'):
+      num += 34**4
     return num
 
 def num_to_base34(num):
+    # 0XXX is essentially the way to encode 10XXX.
+    if num >= 34**4:
+      num -= 34**4
+      fill = 4
+    else:
+      fill = 3
     str = ''
     while num > 0:
       num, r = divmod(num, 34)
       str    = apple_base34[r] + str
-    return str.zfill(3)
+    return str.zfill(fill)
 
 def load_products(path='Products.zjson'):
   try:
@@ -230,7 +239,7 @@ def update_products(database, start_from, end_with, database_path, force = False
 def main():
   parser = argparse.ArgumentParser(description='Update product database')
   parser.add_argument('start', default='000', nargs='?', help='Starting product ID')
-  parser.add_argument('end', default='ZZZZ', nargs='?', help='Ending product ID')
+  parser.add_argument('end', default='0ZZZ', nargs='?', help='Ending product ID')
   parser.add_argument('--force', action='store_true', help='Recheck all products')
   parser.add_argument('--retention', type=int, default=90, help='Check products older than N days')
   parser.add_argument('--savenum', type=int, default=2048, help='Save every N products while invalid')
