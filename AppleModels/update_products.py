@@ -74,12 +74,12 @@ def base34_to_num(str):
       num += apple_base34.index(i)
     return num
 
-def num_to_base34(num):
+def num_to_base34(num, digit_len):
     str = ''
     while num > 0:
       num, r = divmod(num, 34)
       str    = apple_base34[r] + str
-    return str.zfill(3)
+    return str.zfill(digit_len)
 
 def load_products(path='Products.zjson'):
   try:
@@ -210,11 +210,18 @@ def merge_products(database, database_path, filename):
   save_database(database, database_path)
 
 def update_products(database, start_from, end_with, database_path, force = False, retention = 45, savenum = 2048):
+  start_len = len(start_from)
+  end_len = len(end_with)
   start     = base34_to_num(start_from)
-  end       = base34_to_num(end_with)
+  end       = 39303 if start_len < end_len else base34_to_num(end_with)
   countdown = savenum
   while start <= end:
-    new    = update_product(database, num_to_base34(start), database_path, force, retention)
+    new    = update_product(database, num_to_base34(start, start_len), database_path, force, retention)
+    # 39303 equals 'ZZZ', 39303+1 = '1000', '0001' ..., => we are actually missing/not checking 3-len numbers with trailing zero 0000-0999, so reset counter
+    if start_len == 3 and end_len == 4 and start == 39303:
+      start_len = 4
+      end = base34_to_num(end_with) # reset to real end
+      start = -1 # to account for the following increment to get a real zero for the next run
     start += 1
     if new == ADD_NEW:
       countdown  = savenum
