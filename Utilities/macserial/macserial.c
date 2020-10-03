@@ -352,7 +352,9 @@ static bool get_serial_info(const char *serial, SERIALINFO *info, bool print) {
     // New encoding started in 2010.
     info->decodedYear = alpha_to_value(info->year[0], AppleTblYear, AppleYearBlacklist);
     // Since year can be encoded ambiguously, check the model code for 2010/2020 difference.
-    if (info->decodedYear == 0 && info->model[0] >= 'H') {
+    // Old check relies on first letter of model to be greater than or equal to H, which breaks compatibility with iMac20,2 (=0).
+    // Added logic checks provided model years `AppleModelYear` first year greater than or equal to 2020.
+    if (AppleModelYear[info->modelIndex][0] >= 2020 || (info->decodedYear == 0 && info->model[0] >= 'H')) {
       info->decodedYear += 2020;
     } else if (info->decodedYear >= 0) {
       info->decodedYear += 2010;
