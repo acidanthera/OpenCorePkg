@@ -26,6 +26,7 @@ Utilities/TestRsaPreprocess/RsaPreprocess
 Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
 *.o
+*.o.tmp
 *.exe
 DICT
 fuzz-*.log

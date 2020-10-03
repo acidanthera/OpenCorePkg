@@ -210,6 +210,9 @@ OcKernelApplyPatches (
       ));
   }
 
+  //
+  // Handle Quirks/Emulate here...
+  //
   if (!IsKernelPatch) {
     if (Config->Kernel.Quirks.AppleCpuPmCfgLock) {
       OcKernelApplyQuirk (KernelQuirkAppleCpuPmCfgLock, CacheType, DarwinVersion, Context, NULL);
@@ -246,12 +249,26 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, DarwinVersion, Context, NULL);
     }
 
-    if (Config->Kernel.Quirks.DummyPowerManagement) {
-      OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
-    }
-
     if (Config->Kernel.Quirks.ExtendBTFeatureFlags) {
       OcKernelApplyQuirk (KernelQuirkExtendBTFeatureFlags, CacheType, DarwinVersion, Context, NULL);
+    }
+
+    if (Config->Kernel.Emulate.DummyPowerManagement) {
+      MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
+      MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
+      if (OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+        OcKernelApplyQuirk (KernelQuirkDummyPowerManagement, CacheType, DarwinVersion, Context, NULL);
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: %a patcher skips DummyPowerManagement patch due to version %u <= %u <= %u\n",
+          PRINT_KERNEL_CACHE_TYPE (CacheType),
+          Target,
+          MinKernel,
+          DarwinVersion,
+          MaxKernel
+          ));
+      }
     }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
@@ -274,13 +291,27 @@ OcKernelApplyPatches (
       || Config->Kernel.Emulate.Cpuid1Data[1] != 0
       || Config->Kernel.Emulate.Cpuid1Data[2] != 0
       || Config->Kernel.Emulate.Cpuid1Data[3] != 0) {
-      PatchKernelCpuId (
-        &KernelPatcher,
-        CpuInfo,
-        Config->Kernel.Emulate.Cpuid1Data,
-        Config->Kernel.Emulate.Cpuid1Mask,
-        DarwinVersion
-        );
+      MaxKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MaxKernel));
+      MinKernel   = OcParseDarwinVersion (OC_BLOB_GET (&Config->Kernel.Emulate.MinKernel));
+      if (OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
+        PatchKernelCpuId (
+          &KernelPatcher,
+          CpuInfo,
+          Config->Kernel.Emulate.Cpuid1Data,
+          Config->Kernel.Emulate.Cpuid1Mask,
+          DarwinVersion
+          );
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: %a patcher skips CPUID patch due to version %u <= %u <= %u\n",
+          PRINT_KERNEL_CACHE_TYPE (CacheType),
+          Target,
+          MinKernel,
+          DarwinVersion,
+          MaxKernel
+          ));
+      }
     }
 
     if (Config->Kernel.Quirks.LapicKernelPanic) {
