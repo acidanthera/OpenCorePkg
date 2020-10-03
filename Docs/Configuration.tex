@@ -2467,8 +2467,11 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
       and force the use of 32-bit userspace on 64-bit capable processors if supported
       by the operating system. On macOS 64-bit capable processors are assumed to
       support \texttt{SSSE3}. This is not the case for older 64-bit capable Pentium
-      processors, which cause some applications to crash on macOS~10.6. The behaviour
-      corresponds to \texttt{-legacy} kernel boot argument.
+      processors, which cause some applications to crash on macOS~10.6. This behaviour
+      corresponds to \texttt{-legacy} kernel boot argument. This option is unavailable
+      for 10.4 and 10.5 when running on 64-bit firmware due to an uninitialised 64-bit
+      segment in the XNU kernel, which causes AppleEFIRuntime to incorrectly execute
+      64-bit code as 16-bit code.
     \item \texttt{x86\_64} --- Use \texttt{x86\_64} (64-bit) kernel when available.
   \end{itemize}
 
@@ -2483,7 +2486,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
       and \texttt{i386-user32} mode for the 32-bit firmware variant.
     \item Determined EfiBoot version restricts architecture choice:
       \begin{itemize}
-      \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32}
+      \item 10.4-10.5 --- \texttt{i386} or \texttt{i386-user32} (only on 32-bit firmware)
       \item 10.6 --- \texttt{i386}, \texttt{i386-user32}, or \texttt{x86\_64}
       \item 10.7 --- \texttt{i386} or \texttt{x86\_64}
       \item 10.8 or newer --- \texttt{x86\_64}

@@ -146,10 +146,14 @@ OcKernelConfigureCapabilities (
 #endif
     && (mOcCpuInfo->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
     && (mOcCpuInfo->Features & CPUID_FEATURE_SSSE3) == 0
-    && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0
-    && (Capabilities & OC_KERN_CAPABILITY_K32_K64_U64) != 0) {
+    && (Capabilities & OC_KERN_CAPABILITY_K32_U32) != 0) {
+    //
+    // Should be guaranteed that we support 32-bit kernel with a 64-bit userspace.
+    //
+    ASSERT ((Capabilities & OC_KERN_CAPABILITY_K32_U64) != 0);
+
     DEBUG ((DEBUG_INFO, "OC: Missing SSSE3 disables U64 capabilities %u\n", Capabilities));
-    Capabilities &= ~(OC_KERN_CAPABILITY_K32_K64_U64);
+    Capabilities = OC_KERN_CAPABILITY_K32_U32;
   }
 
   //
@@ -193,7 +197,7 @@ OcKernelConfigureCapabilities (
   // Pass legacy argument when we are booting i386.
   //
   if (Capabilities == OC_KERN_CAPABILITY_K32_U32
-    && OcCheckArgumentFromEnv (LoadedImage, gRT->GetVariable, "-legacy", L_STR_LEN ("-legacy"), NULL)) {
+    && !OcCheckArgumentFromEnv (LoadedImage, gRT->GetVariable, "-legacy", L_STR_LEN ("-legacy"), NULL)) {
     NewArguments[ArgumentCount++] = "-legacy";
   }
 
