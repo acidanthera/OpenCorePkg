@@ -72,14 +72,23 @@ def base34_to_num(str):
     for i in str:
       num *= 34
       num += apple_base34.index(i)
+    # 0XXX is essentially the way to encode 10XXX.
+    if len(str) == 4 and str.startswith('0'):
+      num += 34**4
     return num
 
-def num_to_base34(num, digit_len):
+def num_to_base34(num):
+    # 0XXX is essentially the way to encode 10XXX.
+    if num >= 34**4:
+      num -= 34**4
+      fill = 4
+    else:
+      fill = 3
     str = ''
     while num > 0:
       num, r = divmod(num, 34)
       str    = apple_base34[r] + str
-    return str.zfill(digit_len)
+    return str.zfill(fill)
 
 def load_products(path='Products.zjson'):
   try:
@@ -210,18 +219,11 @@ def merge_products(database, database_path, filename):
   save_database(database, database_path)
 
 def update_products(database, start_from, end_with, database_path, force = False, retention = 45, savenum = 2048):
-  start_len = len(start_from)
-  end_len = len(end_with)
   start     = base34_to_num(start_from)
-  end       = 39303 if start_len < end_len else base34_to_num(end_with)
+  end       = base34_to_num(end_with)
   countdown = savenum
   while start <= end:
-    new    = update_product(database, num_to_base34(start, start_len), database_path, force, retention)
-    # 39303 equals 'ZZZ', 39303+1 = '1000', '0001' ..., => we are actually missing/not checking 3-len numbers with trailing zero 0000-0999, so reset counter
-    if start_len == 3 and end_len == 4 and start == 39303:
-      start_len = 4
-      end = base34_to_num(end_with) # reset to real end
-      start = -1 # to account for the following increment to get a real zero for the next run
+    new    = update_product(database, num_to_base34(start), database_path, force, retention)
     start += 1
     if new == ADD_NEW:
       countdown  = savenum
@@ -237,7 +239,7 @@ def update_products(database, start_from, end_with, database_path, force = False
 def main():
   parser = argparse.ArgumentParser(description='Update product database')
   parser.add_argument('start', default='000', nargs='?', help='Starting product ID')
-  parser.add_argument('end', default='ZZZZ', nargs='?', help='Ending product ID')
+  parser.add_argument('end', default='0ZZZ', nargs='?', help='Ending product ID')
   parser.add_argument('--force', action='store_true', help='Recheck all products')
   parser.add_argument('--retention', type=int, default=90, help='Check products older than N days')
   parser.add_argument('--savenum', type=int, default=2048, help='Save every N products while invalid')
