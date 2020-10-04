@@ -1684,7 +1684,8 @@ typedef struct {
   //
   UINT32  CodeLength;
   //
-  // Put at this address (_COMM_PAGE_BCOPY, etc).
+  // Address to place this function at.
+  //
   UINT32  CommpageAddress;
   //
   // CPU capability bits we must have.
@@ -1709,7 +1710,8 @@ typedef struct {
   //
   UINT32  CodeLength;
   //
-  // Put at this address (_COMM_PAGE_BCOPY, etc).
+  // Address to place this function at.
+  //
   UINT32  CommpageAddress;
   //
   // CPU capability bits we must have.
