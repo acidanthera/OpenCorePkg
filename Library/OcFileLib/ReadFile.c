@@ -163,6 +163,9 @@ ReadFileFromFile (
   UINT32                Size;
   UINT8                 *FileBuffer;
 
+  ASSERT (RootFile != NULL);
+  ASSERT (FilePath != NULL);
+
   Status = SafeFileOpen (
     RootFile,
     &File,

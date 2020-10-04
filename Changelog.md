@@ -23,6 +23,7 @@ OpenCore Changelog
 - Fixed `i386-user32` being incorrectly enabled in macOS 10.4, 10.5, and 10.7
 - Disabled prelinked boot for macOS 10.4 and 10.5 in `KernelCache` `Auto` mode
 - Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
+- Added `LegacyCommpage` quirk to improve pre-SSSE3 userspace compatibility
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash

@@ -42,7 +42,7 @@ VirtualFileOpen (
   EFI_STATUS         Status;
   VIRTUAL_FILE_DATA  *Data;
 
-  if (This == NULL) {
+  if (This == NULL || NewHandle == NULL || FileName == NULL) {
     return EFI_INVALID_PARAMETER;
   }
 

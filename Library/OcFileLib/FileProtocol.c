@@ -251,6 +251,9 @@ SetFileData (
   EFI_FILE_PROTOCOL  *File;
   UINTN              WrittenSize;
 
+  ASSERT (FileName != NULL);
+  ASSERT (Buffer != NULL);
+
   if (WritableFs == NULL) {
     Status = FindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {

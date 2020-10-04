@@ -226,6 +226,10 @@ OcStorageInitFromFs (
   UINT32             DataSize;
   UINT32             SignatureSize;
 
+  ASSERT (Context != NULL);
+  ASSERT (FileSystem != NULL);
+  ASSERT (Path != NULL);
+
   ZeroMem (Context, sizeof (*Context));
 
   Context->FileSystem = FileSystem;
