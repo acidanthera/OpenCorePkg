@@ -22,6 +22,10 @@
 BITS     64
 DEFAULT  REL
 
+;------------------------------------------------------------------------------
+; void bcopy(const void *src, void *dst, size_t len);
+; src, dst, len ~ rdi, rsi, rdx
+;------------------------------------------------------------------------------
 global AsmLegacyBcopy64
 AsmLegacyBcopy64:
   xchg       rsi, rdi

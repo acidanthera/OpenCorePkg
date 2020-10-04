@@ -1732,7 +1732,7 @@ typedef union {
 #define kHasSupplementalSSE3  0x00000100
 
 STATIC CONST UINT8 mAsmLegacyBcopy64[] = {
-  #include <LegacyBcopy.h>
+  #include "LegacyBcopy.h"
 };
 
 STATIC
