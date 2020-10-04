@@ -1728,16 +1728,11 @@ typedef union {
   COMMPAGE_DESCRIPTOR_64  Desc64;
 } COMMPAGE_DESCRIPTOR_ANY;
 
-#define COMM_PAGE_BCOPY   0xFFFF0780
-#define kHasSupplementalSSE3		0x00000100
+#define COMM_PAGE_BCOPY       0xFFFF0780
+#define kHasSupplementalSSE3  0x00000100
 
-STATIC UINT8 bcopyImplementation[74] = {
-    0x48, 0x87, 0xFE, 0x48, 0x89, 0xD1, 0x48, 0x89, 0xF8, 0x48, 0x29, 0xF0, 0x48, 0x39, 0xC8, 0x72,
-    0x12, 0x48, 0xC1, 0xE9, 0x03, 0xFC, 0xF3, 0x48, 0xA5, 0x48, 0x89, 0xD1, 0x48, 0x83, 0xE1, 0x07,
-    0xF3, 0xA4, 0xC3, 0x48, 0x01, 0xCF, 0x48, 0x01, 0xCE, 0x48, 0xFF, 0xCF, 0x48, 0xFF, 0xCE, 0x48,
-    0x83, 0xE1, 0x07, 0xFD, 0xF3, 0xA4, 0x48, 0x89, 0xD1, 0x48, 0xC1, 0xE9, 0x03, 0x48, 0x83, 0xEE,
-    0x07, 0x48, 0x83, 0xEF, 0x07, 0xF3, 0x48, 0xA5, 0xFC, 0xC3 
-};
+extern CONST UINT8 AsmLegacyBcopy64[];
+extern CONST UINTN AsmLegacyBcopy64Size;
 
 STATIC
 EFI_STATUS
@@ -1802,17 +1797,17 @@ PatchLegacyCommpage (
 
       Target = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
       if (Target == NULL
-        || MaxSize < sizeof (bcopyImplementation)
-        || CommpageCodeLength < sizeof (bcopyImplementation)) {
+        || MaxSize < AsmLegacyBcopy64Size
+        || CommpageCodeLength < AsmLegacyBcopy64Size) {
         break;
       }
 
-      CopyMem (Target, bcopyImplementation, sizeof (bcopyImplementation));
+      CopyMem (Target, AsmLegacyBcopy64, AsmLegacyBcopy64Size);
       if (Patcher->Is32Bit) {
-        Commpage->Desc32.CodeLength = sizeof (bcopyImplementation);
+        Commpage->Desc32.CodeLength = AsmLegacyBcopy64Size;
         Commpage->Desc32.MustHave  &= ~kHasSupplementalSSE3;
       } else {
-        Commpage->Desc64.CodeLength = sizeof (bcopyImplementation);
+        Commpage->Desc64.CodeLength = AsmLegacyBcopy64Size;
         Commpage->Desc64.MustHave  &= ~kHasSupplementalSSE3;
       }
 
