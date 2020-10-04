@@ -1672,6 +1672,164 @@ PatchBTFeatureFlags (
 }
 
 //
+// 32-bit commpage_descriptor structure from XNU.
+//
+typedef struct {
+  //
+  // Address of code.
+  //
+  UINT32  CodeAddress;
+  //
+  // Length of code in bytes.
+  //
+  UINT32  CodeLength;
+  //
+  // Put at this address (_COMM_PAGE_BCOPY, etc).
+  UINT32  CommpageAddress;
+  //
+  // CPU capability bits we must have.
+  //
+  UINT32  MustHave;
+  //
+  // CPU capability bits we can't have.
+  //
+  UINT32  CantHave;
+} COMMPAGE_DESCRIPTOR;
+
+//
+// 64-bit commpage_descriptor structure from XNU.
+//
+typedef struct {
+  //
+  // Address of code.
+  //
+  UINT64  CodeAddress;
+  //
+  // Length of code in bytes.
+  //
+  UINT32  CodeLength;
+  //
+  // Put at this address (_COMM_PAGE_BCOPY, etc).
+  UINT32  CommpageAddress;
+  //
+  // CPU capability bits we must have.
+  //
+  UINT32  MustHave;
+  //
+  // CPU capability bits we can't have.
+  //
+  UINT32  CantHave;
+} COMMPAGE_DESCRIPTOR_64;
+
+typedef union {
+  COMMPAGE_DESCRIPTOR     Desc32;
+  COMMPAGE_DESCRIPTOR_64  Desc64;
+} COMMPAGE_DESCRIPTOR_ANY;
+
+#define COMM_PAGE_BCOPY   0xFFFF0780
+#define kHasSupplementalSSE3		0x00000100
+
+STATIC UINT8 bcopyImplementation[74] = {
+    0x48, 0x87, 0xFE, 0x48, 0x89, 0xD1, 0x48, 0x89, 0xF8, 0x48, 0x29, 0xF0, 0x48, 0x39, 0xC8, 0x72,
+    0x12, 0x48, 0xC1, 0xE9, 0x03, 0xFC, 0xF3, 0x48, 0xA5, 0x48, 0x89, 0xD1, 0x48, 0x83, 0xE1, 0x07,
+    0xF3, 0xA4, 0xC3, 0x48, 0x01, 0xCF, 0x48, 0x01, 0xCE, 0x48, 0xFF, 0xCF, 0x48, 0xFF, 0xCE, 0x48,
+    0x83, 0xE1, 0x07, 0xFD, 0xF3, 0xA4, 0x48, 0x89, 0xD1, 0x48, 0xC1, 0xE9, 0x03, 0x48, 0x83, 0xEE,
+    0x07, 0x48, 0x83, 0xEF, 0x07, 0xF3, 0x48, 0xA5, 0xFC, 0xC3 
+};
+
+STATIC
+EFI_STATUS
+PatchLegacyCommpage (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS                Status;
+  UINT8                     *Start;
+  UINT8                     *Last;
+  UINT8                     *CommpageRoutines;
+  UINT8                     *Target;
+  UINT64                    Address;
+  UINT32                    MaxSize;
+
+  COMMPAGE_DESCRIPTOR_ANY   *Commpage;
+  UINT32                    CommpageCodeLength;
+  UINT32                    CommpageAddress;
+  UINT32                    CommpageMustHave;
+
+  ASSERT (Patcher != NULL);
+
+  Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
+  Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2 - (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64));
+
+  //
+  // This is a table of pointers to commpage entries.
+  //
+  Status = PatcherGetSymbolAddress (Patcher, "_commpage_64_routines", (UINT8 **) &CommpageRoutines);
+  if (EFI_ERROR (Status) || CommpageRoutines >= Last) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _commpage_64_routines (%p) - %r\n", CommpageRoutines, Status));
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Iterate through table looking for bcopy_sse4_64 (on 10.4) or bcopy_sse3x_64 (10.5+) entry.
+  //
+  Address = Patcher->Is32Bit ? *((UINT32 *) CommpageRoutines) : *((UINT64 *) CommpageRoutines);
+  while (Address > 0) {
+    Commpage = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
+    if (Commpage == NULL
+      || MaxSize < (Patcher->Is32Bit ? sizeof (COMMPAGE_DESCRIPTOR) : sizeof (COMMPAGE_DESCRIPTOR_64))) {
+      break;
+    }
+
+    //
+    // Locate the bcopy commpage entry that requires SSSE3 and replace it with our own implementation.
+    //
+    CommpageAddress  = Patcher->Is32Bit ? Commpage->Desc32.CommpageAddress : Commpage->Desc64.CommpageAddress;
+    CommpageMustHave = Patcher->Is32Bit ? Commpage->Desc32.MustHave : Commpage->Desc64.MustHave;
+    if (CommpageAddress == COMM_PAGE_BCOPY
+      && (CommpageMustHave & kHasSupplementalSSE3) == kHasSupplementalSSE3) {
+      Address            = Patcher->Is32Bit ? Commpage->Desc32.CodeAddress : Commpage->Desc64.CodeAddress;
+      CommpageCodeLength = Patcher->Is32Bit ? Commpage->Desc32.CodeLength : Commpage->Desc64.CodeLength;
+      DEBUG ((
+        DEBUG_VERBOSE,
+        "OCAK: Found 64-bit _COMM_PAGE_BCOPY function @ 0x%llx (0x%X bytes)\n",
+        Address, 
+        CommpageCodeLength
+        ));
+
+      Target = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
+      if (Target == NULL
+        || MaxSize < sizeof (bcopyImplementation)
+        || CommpageCodeLength < sizeof (bcopyImplementation)) {
+        break;
+      }
+
+      CopyMem (Target, bcopyImplementation, sizeof (bcopyImplementation));
+      if (Patcher->Is32Bit) {
+        Commpage->Desc32.CodeLength = sizeof (bcopyImplementation);
+        Commpage->Desc32.MustHave  &= ~kHasSupplementalSSE3;
+      } else {
+        Commpage->Desc64.CodeLength = sizeof (bcopyImplementation);
+        Commpage->Desc64.MustHave  &= ~kHasSupplementalSSE3;
+      }
+
+      return EFI_SUCCESS;
+    }
+
+    CommpageRoutines += Patcher->Is32Bit ? sizeof (UINT32) : sizeof (UINT64);
+    if (CommpageRoutines >= Last) {
+      break;
+    }
+    Address = Patcher->Is32Bit ? *((UINT32 *) CommpageRoutines) : *((UINT64 *) CommpageRoutines);
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to find 64-bit _COMM_PAGE_BCOPY function\n"));
+
+  return EFI_NOT_FOUND;
+}
+
+//
 // Quirks table.
 //
 KERNEL_QUIRK gKernelQuirks[] = {
@@ -1695,6 +1853,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
   [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
   [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
+  [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage }
 };
 
 EFI_STATUS

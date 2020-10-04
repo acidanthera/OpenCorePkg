@@ -551,6 +551,10 @@ typedef enum {
   //
   KernelQuirkPanicNoKextDump,
   //
+  // Replaces the 64-bit commpage bcopy implementation with one that does not use SSSE3.
+  //
+  KernelQuirkLegacyCommpage,
+  //
   // Disable power state change timeout kernel panic (10.15+).
   //
   KernelQuirkPowerTimeoutKernelPanic,

@@ -325,6 +325,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.DisableLinkeditJettison) {
       OcKernelApplyQuirk (KernelQuirkSegmentJettison, CacheType, DarwinVersion, NULL, &KernelPatcher);     
     }
+
+    if (Config->Kernel.Quirks.LegacyCommpage) {
+      OcKernelApplyQuirk (KernelQuirkLegacyCommpage, CacheType, DarwinVersion, NULL, &KernelPatcher);     
+    }
   }
 }
 

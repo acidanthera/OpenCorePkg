@@ -2374,6 +2374,16 @@ blocking.
   \textbf{Description}: Disables kernel panic on LAPIC interrupts.
 
 \item
+  \texttt{LegacyCommpage}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.4\\
+  \textbf{Description}: Replaces the default 64-bit commpage bcopy implementation with
+  one that does not require SSSE3, useful for legacy platforms. This prevents a
+  \texttt{commpage no match for last} panic due to no available 64-bit bcopy functions
+  that do not require SSSE3.
+
+\item
   \texttt{PanicNoKextDump}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
