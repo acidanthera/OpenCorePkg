@@ -1731,8 +1731,8 @@ typedef union {
 #define COMM_PAGE_BCOPY       0xFFFF0780
 #define kHasSupplementalSSE3  0x00000100
 
-extern CONST UINT8 AsmLegacyBcopy64[];
-extern CONST UINTN AsmLegacyBcopy64Size;
+extern CONST UINT8  AsmLegacyBcopy64[];
+extern CONST UINT32 AsmLegacyBcopy64Size;
 
 STATIC
 EFI_STATUS

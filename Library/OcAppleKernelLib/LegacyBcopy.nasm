@@ -53,4 +53,4 @@ ASM_PFX(AsmLegacyBcopy64End)
 
 global ASM_PFX(AsmLegacyBcopy64Size)
 ASM_PFX(AsmLegacyBcopy64Size):
-  dq ASM_PFX(AsmLegacyBcopy64End) - ASM_PFX(AsmLegacyBcopy64)
+  dd ASM_PFX(AsmLegacyBcopy64End) - ASM_PFX(AsmLegacyBcopy64)
