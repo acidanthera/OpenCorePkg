@@ -264,7 +264,7 @@ GuiClearScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContet,
+  IN OC_PICKER_CONTEXT  *PickerContext,
   IN UINT32             CursorDefaultX,
   IN UINT32             CursorDefaultY
   );

@@ -956,7 +956,7 @@ GuiRedrawAndFlushScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContet,
+  IN OC_PICKER_CONTEXT  *PickerContext,
   IN UINT32             CursorDefaultX,
   IN UINT32             CursorDefaultY
   )
@@ -976,7 +976,7 @@ GuiLibConstruct (
   CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
 
   mPointerContext = GuiPointerConstruct (
-    PickerContet,
+    PickerContext,
     CursorDefaultX,
     CursorDefaultY,
     OutputInfo->HorizontalResolution,
@@ -986,7 +986,7 @@ GuiLibConstruct (
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
   }
 
-  mKeyContext = GuiKeyConstruct (PickerContet);
+  mKeyContext = GuiKeyConstruct (PickerContext);
   if (mKeyContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
