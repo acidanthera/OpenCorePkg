@@ -1731,8 +1731,9 @@ typedef union {
 #define COMM_PAGE_BCOPY       0xFFFF0780
 #define kHasSupplementalSSE3  0x00000100
 
-extern CONST UINT8  AsmLegacyBcopy64[];
-extern CONST UINT32 AsmLegacyBcopy64Size;
+STATIC CONST UINT8 mAsmLegacyBcopy64[] = {
+  #include <LegacyBcopy.h>
+};
 
 STATIC
 EFI_STATUS
@@ -1797,17 +1798,17 @@ PatchLegacyCommpage (
 
       Target = MachoGetFilePointerByAddress (&Patcher->MachContext, Address, &MaxSize);
       if (Target == NULL
-        || MaxSize < AsmLegacyBcopy64Size
-        || CommpageCodeLength < AsmLegacyBcopy64Size) {
+        || MaxSize < sizeof (mAsmLegacyBcopy64)
+        || CommpageCodeLength < sizeof (mAsmLegacyBcopy64)) {
         break;
       }
 
-      CopyMem (Target, AsmLegacyBcopy64, AsmLegacyBcopy64Size);
+      CopyMem (Target, mAsmLegacyBcopy64, sizeof (mAsmLegacyBcopy64));
       if (Patcher->Is32Bit) {
-        Commpage->Desc32.CodeLength = AsmLegacyBcopy64Size;
+        Commpage->Desc32.CodeLength = sizeof (mAsmLegacyBcopy64);
         Commpage->Desc32.MustHave  &= ~kHasSupplementalSSE3;
       } else {
-        Commpage->Desc64.CodeLength = AsmLegacyBcopy64Size;
+        Commpage->Desc64.CodeLength = sizeof (mAsmLegacyBcopy64);
         Commpage->Desc64.MustHave  &= ~kHasSupplementalSSE3;
       }
 

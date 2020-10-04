@@ -15,11 +15,15 @@
 ;  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;------------------------------------------------------------------------------
 
+;------------------------------------------------------------------------------
+; nasm LegacyBcopy.nasm -o /dev/stdout | xxd -i > LegacyBcopy.h
+;------------------------------------------------------------------------------
+
 BITS     64
 DEFAULT  REL
 
-global ASM_PFX(AsmLegacyBcopy64)
-ASM_PFX(AsmLegacyBcopy64):
+global AsmLegacyBcopy64
+AsmLegacyBcopy64:
   xchg       rsi, rdi
   mov        rcx, rdx
   mov        rax, rdi
@@ -49,8 +53,3 @@ AsmLegacyBcopy64Backwards:
   movsq
   cld
   ret
-ASM_PFX(AsmLegacyBcopy64End)
-
-global ASM_PFX(AsmLegacyBcopy64Size)
-ASM_PFX(AsmLegacyBcopy64Size):
-  dd ASM_PFX(AsmLegacyBcopy64End) - ASM_PFX(AsmLegacyBcopy64)

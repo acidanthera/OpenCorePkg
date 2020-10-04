@@ -31,7 +31,6 @@
 [Sources]
   KernelReader.c
   KextPatcher.c
-  LegacyBcopy.nasm
   Link.c
   CommonPatches.c
   KernelCollection.c
