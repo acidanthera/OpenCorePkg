@@ -23,6 +23,9 @@
 
 #include <File.h>
 
+CONST UINT8 AsmLegacyBcopy64[2] = {0x0F, 0x0B};
+CONST UINT32 AsmLegacyBcopy64Size = 2;
+
 /*
  for fuzzing (TODO):
  clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Library/OcAppleKernelLib/KernelReader.c ../../Library/OcCompressionLib/lzss/lzss.c ../../Library/OcCompressionLib/lzvn/lzvn.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c -o Prelinked
