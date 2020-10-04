@@ -27,7 +27,7 @@ DebugPrintDevicePath (
 
   CHAR16 *TextDevicePath;
 
-  TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+  TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
   DEBUG ((ErrorLevel, "%a - %s\n", Message, OC_HUMAN_STRING (TextDevicePath)));
   if (TextDevicePath != NULL) {
     FreePool (TextDevicePath);

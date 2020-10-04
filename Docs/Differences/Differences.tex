@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Sep 13 11:48:11 2020
-%DIF ADD ../Configuration.tex        Sat Oct  3 19:49:01 2020
+%DIF DEL PreviousConfiguration.tex   Tue Sep  8 21:12:21 2020
+%DIF ADD ../Configuration.tex        Sun Oct  4 05:06:43 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1128,7 +1128,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   brightness keys. The conventional process to find these keys usually involves
   massive modification on DSDT and SSDTs and the debug kext is not stable on
   newer systems. Please switch to built-in brightness key discovery of
-  }\href{https://github.com/acidanthera/VoodooPS2}{\DIFadd{VoodooPS2}} \DIFadd{instead.
+  }\href{https://github.com/acidanthera/VoodooPS2}{VoodooPS2} \DIFadd{instead.
 }\item
   \DIFaddend Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
@@ -3696,7 +3696,7 @@ rm vault.pub
     \item \texttt{0x00080000} (bit \texttt{19}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_NVME}, allow
     scanning NVMe devices.
     \item \texttt{0x00100000} (bit \texttt{20}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_ATAPI}, allow
-    scanning CD/DVD devices.
+    scanning CD/DVD devices \DIFaddbegin \DIFadd{and old SATA}\DIFaddend .
     \item \texttt{0x00200000} (bit \texttt{21}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_USB}, allow
     scanning USB devices.
     \item \texttt{0x00400000} (bit \texttt{22}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_FIREWIRE}, allow
@@ -5021,12 +5021,12 @@ Apple ROM Version
 
   \DIFadd{Automatic value generation tries to provide most accurate value for
   the currently installed CPU. When this fails please make sure to create
-  an }\href{https://github.com/acidanthera/bugtracker/issues}{\DIFadd{issue}} \DIFadd{and
+  an }\href{https://github.com/acidanthera/bugtracker/issues}{issue} \DIFadd{and
   provide }\texttt{\DIFadd{sysctl machdep.cpu}} \DIFadd{and
-  }\href{https://github.com/acidanthera/dmidecode}{\texttt{\DIFadd{dmidecode}}} \DIFadd{output.
+  }\href{https://github.com/acidanthera/dmidecode}{\texttt{dmidecode}} \DIFadd{output.
   For a full list of available values and their limitations (the value will
   only apply if the CPU core count matches) refer to Apple SMBIOS definitions header
-  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{\DIFadd{here}}\DIFadd{.
+  }\href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}\DIFadd{.
 }\DIFaddend \item
   \texttt{MemoryFormFactor}\\
   \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
@@ -5161,9 +5161,12 @@ sudo bless --verbose --file /Volumes/VOLNAME/DIR/OpenShell.efi \
   }\DIFaddend to \texttt{/Volumes/VOLNAME/DIR}. \\
 \emph{Note 2}: To be able to use \texttt{bless}
   \DIFdelbegin \DIFdel{you may have to
-  }\DIFdelend \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{\DIFdelbegin \DIFdel{disable }\DIFdelend \DIFaddbegin \DIFadd{disabling }\DIFaddend System Integrity Protection} \DIFaddbegin \DIFadd{is necessary}\DIFaddend . \\
-\emph{Note 3}: To be able to boot \DIFdelbegin \DIFdel{you may have to }\DIFdelend \href{https://support.apple.com/HT208330}{\DIFdelbegin \DIFdel{disable }\DIFdelend Secure Boot}
-  \DIFaddbegin \DIFadd{might be disabled }\DIFaddend if present.
+  }%DIFDELCMD < \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disable System Integrity Protection}%%%
+\DIFdelend \DIFaddbegin \href{https://developer.apple.com/library/archive/documentation/Security/Conceptual/System_Integrity_Protection_Guide/ConfiguringSystemIntegrityProtection/ConfiguringSystemIntegrityProtection.html}{disabling System Integrity Protection} \DIFadd{is necessary}\DIFaddend . \\
+\emph{Note 3}: To be able to boot \DIFdelbegin \DIFdel{you may have to }%DIFDELCMD < \href{https://support.apple.com/HT208330}{disable Secure Boot}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://support.apple.com/HT208330}{Secure Boot}
+  \DIFadd{might be disabled }\DIFaddend if present.
 
 Some of the known tools are listed below (builtin tools are marked with \textbf{*}):
 
@@ -6438,9 +6441,9 @@ requires several steps and careful configuration of select settings as explained
   }\DIFaddend will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
   \DIFdelbegin \DIFdel{If you need to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend launch option ROMs or \DIFdelbegin \DIFdel{decided }\DIFdelend to use signed Linux drivers\DIFdelbegin \DIFdel{you will also need the
-  }\href{http://go.microsoft.com/fwlink/?LinkId=321194}{\DIFdel{Microsoft UEFI Driver Signing CA}}%DIFAUXCMD
+  }%DIFDELCMD < \href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA}%%%
 \DIFdelend \DIFaddbegin \DIFadd{,
-  }\href{http://go.microsoft.com/fwlink/?LinkId=321194}{\DIFadd{Microsoft UEFI Driver Signing CA}} \DIFadd{will also be needed}\DIFaddend .
+  }\href{http://go.microsoft.com/fwlink/?LinkId=321194}{Microsoft UEFI Driver Signing CA} \DIFadd{will also be needed}\DIFaddend .
 \item Password-protect changing firmware settings to ensure that UEFI Secure Boot
   cannot be disabled without \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the user's }\DIFaddend knowledge.
 \end{enumerate}
@@ -6478,9 +6481,9 @@ requires several steps and careful configuration of select settings as explained
   \href{https://support.apple.com/boot-camp}{Boot Camp} \DIFaddbegin \DIFadd{is required}\DIFaddend . For simplicity of the download
   process or when configuring an already installed Windows version a third-party utility,
   \href{https://github.com/timsutton/brigadier}{Brigadier}, can be used successfully.
-  Note, that \DIFdelbegin \DIFdel{you may have to download and install }\href{https://www.7-zip.org}{\DIFdel{7-Zip}}
-  %DIFAUXCMD
-\DIFdelend \DIFaddbegin \href{https://www.7-zip.org}{\DIFadd{7-Zip}} \DIFadd{may be downloaded and installed
+  Note, that \DIFdelbegin \DIFdel{you may have to download and install }%DIFDELCMD < \href{https://www.7-zip.org}{7-Zip}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \href{https://www.7-zip.org}{7-Zip} \DIFadd{may be downloaded and installed
   }\DIFaddend prior to using Brigadier.
 
   Remember to always use the latest version of Windows support software from Boot Camp,

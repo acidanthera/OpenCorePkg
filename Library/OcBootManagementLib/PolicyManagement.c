@@ -51,6 +51,7 @@ OcGetDevicePolicyType (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePathWalker;
   ACPI_HID_DEVICE_PATH      *Acpi;
+  HARDDRIVE_DEVICE_PATH     *HardDrive;
   UINT8                     SubType;
 
   if (External != NULL) {
@@ -82,6 +83,23 @@ OcGetDevicePolicyType (
         case MSG_NVME_NAMESPACE_DP:
           return OC_SCAN_ALLOW_DEVICE_NVME;
         case MSG_ATAPI_DP:
+          //
+          // Check if this ATA Bus has HDD connected.
+          // DVD will have NO_DISK_SIGNATURE at least for our DuetPkg.
+          //
+          DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+          HardDrive = (HARDDRIVE_DEVICE_PATH *) DevicePathWalker;
+          if (!IsDevicePathEnd (DevicePathWalker)
+            && DevicePathType (DevicePathWalker) == MEDIA_DEVICE_PATH
+            && DevicePathSubType (DevicePathWalker) == MEDIA_HARDDRIVE_DP
+            && (HardDrive->SignatureType == SIGNATURE_TYPE_MBR
+              || HardDrive->SignatureType == SIGNATURE_TYPE_GUID)) {
+            return OC_SCAN_ALLOW_DEVICE_ATAPI;
+          }
+
+          //
+          // Assume this is DVD/CD.
+          //
           if (External != NULL) {
             *External = TRUE;
           }

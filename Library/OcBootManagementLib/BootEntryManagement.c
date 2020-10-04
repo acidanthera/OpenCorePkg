@@ -263,7 +263,7 @@ RegisterBootOption (
   DEBUG_CODE_BEGIN ();
 
   if (BootEntry->DevicePath != NULL) {
-    TextDevicePath = ConvertDevicePathToText (BootEntry->DevicePath, TRUE, FALSE);
+    TextDevicePath = ConvertDevicePathToText (BootEntry->DevicePath, FALSE, FALSE);
   } else {
     TextDevicePath = NULL;
   }
@@ -364,7 +364,7 @@ AddBootEntryOnFileSystem (
 
   DEBUG_CODE_BEGIN ();
 
-  TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+  TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
 
   DEBUG ((
     DEBUG_INFO,
@@ -1329,7 +1329,7 @@ AddFileSystemEntry (
     (VOID **) &DevicePath
     );
   if (!EFI_ERROR (TmpStatus)) {
-    TextDevicePath = ConvertDevicePathToText (DevicePath, TRUE, FALSE);
+    TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
   } else {
     TextDevicePath = NULL;
   }
