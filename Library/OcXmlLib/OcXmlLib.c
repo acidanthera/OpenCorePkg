@@ -715,11 +715,6 @@ XmlParseTagOpen (
     // NOTE: This inner loop is created mainly for code simplification.
     //
     while (Parser->Position < Parser->Length) {
-      //
-      // Consume each byte normally.
-      //
-      XmlParserConsume (Parser, 1);
-      
       if (IsComment) {
         //
         // Scan "-->" for comments and break if matched.
@@ -737,6 +732,11 @@ XmlParseTagOpen (
           break;
         }
       }
+
+      //
+      // Consume each byte normally.
+      //
+      XmlParserConsume (Parser, 1);
     }
     //
     // For comments, "-->" should all be consumed, which takes 3 bytes.
