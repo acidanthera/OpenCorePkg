@@ -71,6 +71,11 @@
 
 \newcommand{\sectionbreak}{\clearpage}
 
+% Fix spacing for subsections in table of contents.
+\makeatletter
+\renewcommand{\l@subsection}{\@dottedtocline{2}{1.5em}{2.8em}}
+\makeatother
+
 \begin{document}
 
 \begin{titlepage}
@@ -112,7 +117,7 @@
 
 This document provides information on
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
-configuration file format used to setup the correct functioning of the macOS
+configuration file format used to set up the correct functioning of the macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered to be documentation or implementation bugs which should be
@@ -548,7 +553,7 @@ entries include:
 
 \emph{Note}: It is not guaranteed that paths longer than
 \texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
-\texttt{\\0}-termnator) will be accessible within OpenCore.
+\texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
 
@@ -1598,7 +1603,7 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   cat /tmp/device-properties.plist
 \end{lstlisting}
 
-Device propertties are part of the \texttt{IODeviceTree} (\texttt{gIODT})
+Device properties are part of the \texttt{IODeviceTree} (\texttt{gIODT})
 plane of macOS I/O Registry. This plane has several construction stages
 relevant for the platform initialisation. While the early construction
 stage is performed by the XNU kernel in the \texttt{IODeviceTreeAlloc}
@@ -1641,7 +1646,7 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets device properties from a map (\texttt{plist\ dict})
-  of deivce paths to a map (\texttt{plist\ dict}) of variable names and their values
+  of device paths to a map (\texttt{plist\ dict}) of variable names and their values
   in \texttt{plist\ metadata} format. Device paths must be provided in canonic string
   format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
   be set if not present and not deleted.
@@ -1653,7 +1658,7 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \texttt{Delete}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Removes device properties from a map (\texttt{plist\ dict})
-  of deivce paths to an array (\texttt{plist\ array}) of variable names in
+  of device paths to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
 
 \end{enumerate}
@@ -2229,7 +2234,7 @@ blocking.
     \item Download \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool} and
       \href{https://github.com/LongSoft/Universal-IFR-Extractor/releases}{IFR-Extractor}.
     \item Open the firmware image in UEFITool and find \texttt{CFG Lock} unicode string.
-      If it is not present, the firmware may not have this option and the proccess should therefore be discontinued.
+      If it is not present, the firmware may not have this option and the process should therefore be discontinued.
     \item Extract the \texttt{Setup.bin} PE32 Image Section (the UEFITool found) through the
       \texttt{Extract Body} menu option.
     \item Run IFR-Extractor on the extracted file (e.g. \texttt{./ifrextract Setup.bin Setup.txt}).
@@ -2714,7 +2719,7 @@ entry choice will update till next manual reconfiguration.
   Designed to be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders, for example,
   \texttt{\textbackslash EFI\textbackslash debian\textbackslash grubx64.efi}
-  for Debian bootloader. This allows unusual boot paths to be automaticlly
+  for Debian bootloader. This allows unusual boot paths to be automatically
   discovered by the boot picker. Designwise they are equivalent to predefined blessed path, such as
   \texttt{\textbackslash System\textbackslash Library\textbackslash CoreServices\textbackslash boot.efi}
   or \texttt{\textbackslash EFI\textbackslash Microsoft\textbackslash Boot\textbackslash bootmgfw.efi},
@@ -2927,7 +2932,7 @@ entry choice will update till next manual reconfiguration.
   To workaround this problem this option allows registering select hotkeys in a more
   permissive manner from within boot picker. Such extensions include the support
   of tapping on keys in addition to holding and pressing \texttt{Shift} along with
-  other keys instead of just \texttt{Shift} alone, which is not detectible on many
+  other keys instead of just \texttt{Shift} alone, which is not detectable on many
   PS/2 keyboards. This list of known \texttt{modifier hotkeys} includes:
   \begin{itemize}
   \tightlist
@@ -3370,9 +3375,9 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   This option provides integration with third-party operating system installation and upgrade
   at the times they overwrite \texttt{\textbackslash EFI\textbackslash BOOT\textbackslash BOOTx64.efi}
   file. By creating a custom option in \texttt{Bootstrap} mode this file path becomes no longer
-  used for bootstraping OpenCore.
+  used for bootstrapping OpenCore.
 
-  \emph{Note 1}: Some firmewares may have broken NVRAM, no boot option support, or various other
+  \emph{Note 1}: Some firmwares may have broken NVRAM, no boot option support, or various other
   incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
   This option should be used without any warranty exclusively on the boards known to be compatible.
 
@@ -4327,29 +4332,29 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
   \emph{Note}: A side effect of using \texttt{Custom} approach is making
-  SMBIOS updates exclusive to macOS, avoiding a collission with existing
+  SMBIOS updates exclusive to macOS, avoiding a collision with existing
   Windows activation and custom OEM software but potentially breaking
   Apple-specific tools.
 \item
   \texttt{Generic}\\
-  \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
   \textbf{Description}: Update all fields. This section is read only
   when \texttt{Automatic} is active.
 \item
   \texttt{DataHub}\\
-  \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
   \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update Data Hub fields. This section is read
   only when \texttt{Automatic} is not active.
 \item
   \texttt{PlatformNVRAM}\\
-  \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
   \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update platform NVRAM fields. This section is
   read only when \texttt{Automatic} is not active.
 \item
   \texttt{SMBIOS}\\
-  \textbf{Type}: \texttt{plist\ dictonary}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
   \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update SMBIOS fields. This section is read only
   when \texttt{Automatic} is not active.
@@ -4534,10 +4539,10 @@ be used. Version with macOS specific enhancements can be downloaded from
     \texttt{0x00080000} --- Shutdown was ME Induced event (Same as
     \texttt{PRSTS} bit 3 \texttt{ME\_HOST\_PWRDN})
   \item
-    \texttt{0x00100000} --- Global reset ME Wachdog Timer event (Same as
+    \texttt{0x00100000} --- Global reset ME Watchdog Timer event (Same as
     \texttt{PRSTS} bit 6)
   \item
-    \texttt{0x00200000} --- Global reset PowerManagment Wachdog Timer
+    \texttt{0x00200000} --- Global reset PowerManagement Watchdog Timer
     event (Same as \texttt{PRSTS} bit 15)
   \end{itemize}
 \item
@@ -5040,7 +5045,7 @@ separately either directly or from \texttt{Shell}.
 
 To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
 under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
-on a FAT32 partition. In general it is unimportant whether the partitition scheme
+on a FAT32 partition. In general it is unimportant whether the partition scheme
 is \texttt{GPT} or \texttt{MBR}.
 
 While the previous approach works both on Macs and other computers,
@@ -5242,7 +5247,7 @@ functioning. Feature highlights:
   performing automatic connection, and may slightly slowdown the boot.
 
   \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
-  drive to speedup the boot process. Enable this option to be able to see all the
+  drive to speed up the boot process. Enable this option to be able to see all the
   boot options when having multiple drives.
 
 \item
@@ -6198,7 +6203,7 @@ functioning. Feature highlights:
 
 Older operating systems may be more complicated to install, but sometimes can
 be necessary to use for all kinds of reasons. While a compatible board identifier
-and CPUID are the obvious requiremenets for proper functioning of an older
+and CPUID are the obvious requirements for proper functioning of an older
 operating system, there are many other less obvious things to consider.
 This section tries to cover a common set of issues relevant to installing
 older macOS operating systems.
