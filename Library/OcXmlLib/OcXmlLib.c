@@ -722,6 +722,10 @@ XmlParseTagOpen (
         if (XmlParserPeek (Parser, CURRENT_CHARACTER) == '-'
             && XmlParserPeek (Parser, NEXT_CHARACTER) == '-'
             && XmlParserPeek (Parser, 2) == '>') {
+          //
+          // "-->" should all be consumed, which takes 3 bytes.
+          //
+          XmlParserConsume (Parser, 3);
           break;
         }
       } else {
@@ -729,6 +733,7 @@ XmlParseTagOpen (
         // For non-comments, simply match '>'.
         //
         if (XmlParserPeek (Parser, CURRENT_CHARACTER) == '>') {
+          XmlParserConsume (Parser, 1);
           break;
         }
       }
@@ -738,11 +743,6 @@ XmlParseTagOpen (
       //
       XmlParserConsume (Parser, 1);
     }
-    //
-    // For comments, "-->" should all be consumed, which takes 3 bytes.
-    // Otherwise, consume the 1-byte '>' only.
-    //
-    XmlParserConsume (Parser, IsComment ? 3 : 1);
   } while (Parser->Position < Parser->Length);
 
   //
