@@ -100,6 +100,8 @@ AppleModelCode:
   - "JLD2"
   - "MC9H"
   - "M0XV"
+  - "0833"
+  - "0832"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "JG36"

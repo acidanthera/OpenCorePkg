@@ -82,6 +82,7 @@ AppleModelCode:
   - "ML7M"
   - "ML7J"
   - "ML88"
+  - "0DHT"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"

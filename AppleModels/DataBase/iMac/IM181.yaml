@@ -101,6 +101,11 @@ AppleModelCode:
   - "H7K0"
   - "H7VG"
   - "JFRR"
+  - "07F0"
+  - "07DW"
+  - "07DY"
+  - "07DX"
+  - "0LX3"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "H69F"

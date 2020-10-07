@@ -80,6 +80,10 @@ Specifications:
 # Note, first model code is used by macserial
 AppleModelCode:
   - "MD6T"
+  - "03T9"
+  - "0DH8"
+  - "0051"
+  - "05J5"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"

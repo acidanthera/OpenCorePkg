@@ -81,6 +81,8 @@ AppleModelCode:
   - "P3Y1"
   - "P3Y2"
   - "P3YW"
+  - "049N"
+  - "0056"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "0000"

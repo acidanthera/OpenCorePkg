@@ -126,6 +126,10 @@ AppleModelCode:
   - "NY2G"
   - "P1WV"
   - "MMTC"
+  - "0H1M"
+  - "0H1L"
+  - "0H1K"
+  - "0H1J"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "LNV9"
