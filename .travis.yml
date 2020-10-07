@@ -86,7 +86,7 @@ matrix:
 
     script:
     - HAS_OPENSSL_BUILD=0
-    - choco install python
+    - choco install python --version=3.8.6 # Expected by ocbuild.
     - choco install microsoft-build-tools visualcpp-build-tools make nasm zip
     - choco install iasl --version=2017.11.10
     - "./build_duet.tool"
