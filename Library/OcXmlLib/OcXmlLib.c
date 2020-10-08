@@ -651,7 +651,9 @@ XmlParseTagOpen (
   CONST CHAR8 **Attributes
   )
 {
-  CHAR8  Current;
+  CHAR8   Current;
+  CHAR8   Next;
+  BOOLEAN IsComment;
 
   XML_PARSER_INFO (Parser, "tag_open");
 
@@ -682,15 +684,65 @@ XmlParseTagOpen (
     if (Current != '?' && Current != '!') {
       break;
     }
+    
+    //
+    // A crazy XML comment may look like this:
+    // <!-- som>>><<<<ething -->
+    //
+    // '<' has already been consumed a bit earlier, now continue to check '!',
+    // and then the two '-'.
+    //
+    IsComment = FALSE;
+    if (Current == '!') {
+      //
+      // Consume one more byte to check the two '-'.
+      // Now "<!--" is guaranteed.
+      //
+      XmlParserConsume (Parser, 1);
+      Current   = XmlParserPeek (Parser, CURRENT_CHARACTER);
+      Next      = XmlParserPeek (Parser, NEXT_CHARACTER);
+      if (Current == '-' && Next == '-') {
+        //
+        // Now consume Current and Next which take up 2 bytes.
+        //
+        XmlParserConsume (Parser, 2);
+        IsComment = TRUE;
+      }
+    }
 
     //
     // Skip the control sequence.
+    // NOTE: This inner loop is created mainly for code simplification.
     //
-    do {
-      XmlParserConsume (Parser, 1);
-    } while (XmlParserPeek (Parser, CURRENT_CHARACTER) != '>' && Parser->Position < Parser->Length);
-    XmlParserConsume (Parser, 1);
+    while (Parser->Position < Parser->Length) {
+      if (IsComment) {
+        //
+        // Scan "-->" for comments and break if matched.
+        //
+        if (XmlParserPeek (Parser, CURRENT_CHARACTER) == '-'
+            && XmlParserPeek (Parser, NEXT_CHARACTER) == '-'
+            && XmlParserPeek (Parser, 2) == '>') {
+          //
+          // "-->" should all be consumed, which takes 3 bytes.
+          //
+          XmlParserConsume (Parser, 3);
+          break;
+        }
+      } else {
+        //
+        // For non-comments, simply match '>'.
+        //
+        if (XmlParserPeek (Parser, CURRENT_CHARACTER) == '>') {
+          XmlParserConsume (Parser, 1);
+          break;
+        }
+      }
 
+      //
+      // Consume each byte normally.
+      //
+      XmlParserConsume (Parser, 1);
+    }
   } while (Parser->Position < Parser->Length);
 
   //
