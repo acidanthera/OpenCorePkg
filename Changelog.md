@@ -25,6 +25,7 @@ OpenCore Changelog
 - Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
 - Added `LegacyCommpage` quirk to improve pre-SSSE3 userspace compatibility
 - Fixed legacy SATA HDDs displaying as external drives in the picker
+- Added support for xml comments in plist files
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
