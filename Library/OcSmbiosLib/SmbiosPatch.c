@@ -661,7 +661,6 @@ PatchMemoryDevice (
 {
   UINT8    MinLength;
   UINT8    StringIndex;
-  BOOLEAN  IsEmpty;
 
   *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type17);
@@ -686,22 +685,11 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Speed, Original, NULL, NULL);
 
   //
-  // Empty modules should have 0 Size according to the spec.
-  // Original OC implementation relies on TotalWidth, which may be a workaround for some FW.
+  // Assign the parent memory array handle.
+  // Do not support memory error information. 0xFFFF indicates no errors previously detected.
   //
-  IsEmpty = Table->CurrentPtr.Standard.Type17->Size == 0
-    || Table->CurrentPtr.Standard.Type17->TotalWidth == 0;
-
-  if (!IsEmpty) {
-    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = MemoryArrayHandle;
-    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
-  } else {
-    //
-    // Empty slots should have no physical memory array handle.
-    //
-    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = 0xFFFF;
-    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
-  }
+  Table->CurrentPtr.Standard.Type17->MemoryArrayHandle            = MemoryArrayHandle;
+  Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
 
   //
   // Some machines may have NULL values for these fields, which will cause SPMemoryReporter
