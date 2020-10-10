@@ -696,10 +696,14 @@ PatchMemoryDevice (
     Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
   }
 
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, NULL);
+  //
+  // Some machines may have NULL values for these fields, which will cause SPMemoryReporter
+  // crashes or ??? to be displayed in About This Mac. Fallback to "Unknown" for such fields.
+  //
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, "Unknown");
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, "Unknown");
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, "Unknown");
+  SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, "Unknown");
 
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Attributes, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->ExtendedSize, Original, NULL, NULL);
