@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.6.3
 - Added support for xml comments in plist files
+- Updated underlying EDK II package to edk2-stable202008
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
