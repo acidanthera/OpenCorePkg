@@ -57,7 +57,7 @@ enum {
   OcSmbiosBiosLanguageInformationHandle,
   OcSmbiosGroupAssociationsHandle,
   OcSmbiosSystemEventLogHandle,
-  OcSmbiosPhysicalMemoryArrayHandle,
+  /* OcSmbiosPhysicalMemoryArrayHandle, */
   /* OcSmbiosMemoryDeviceHandle, */
   OcSmbios32BitMemoryErrorInformationHandle,
   /* OcSmbiosMemoryArrayMappedAddressHandle, */
