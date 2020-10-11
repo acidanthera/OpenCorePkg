@@ -112,8 +112,8 @@ package() {
     cp "${arch}/OpenCore.efi" "${dstdir}/${arch}/EFI/OC" || exit 1
 
     local suffix="${arch}"
-    if [ "${suffix}" = "IA32" ]; then
-      suffix="Ia32"
+    if [ "${suffix}" = "X64" ]; then
+      suffix="x64"
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/OC/Bootstrap"/ || exit 1
