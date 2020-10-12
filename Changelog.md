@@ -18,11 +18,11 @@ OpenCore Changelog
 - Added workaround to displaying `Preboot` instead of `Macintosh HD`
 - Added prelinkedkernel 32-bit kext injection (10.6-10.7)
 - Added `SystemMemoryStatus` to override memory replacement on some models
-- Added older Pentium CPU recognition in SMBIOS 
-- Added `ExtendBTFeatureFlags` to properly set `FeatureFlags` for Bluetooth (which substitutes BT4LEContinuityFixup) 
+- Added older Pentium CPU recognition in SMBIOS
+- Added `ExtendBTFeatureFlags` to properly set `FeatureFlags` for Bluetooth (which substitutes BT4LEContinuityFixup)
 - Added `MinKernel`/`MaxKernel` to CPUID emulation and `DummyPowerManagement`
 - Fixed `-legacy` not being added in `KernelArch` `Auto` mode
-- Fixed `i386-user32` not forcing `i386` on macOS 10.7 on X64 firmwares
+- Fixed `i386-user32` not forcing `i386` on macOS 10.7 on X64 firmware
 - Fixed `i386-user32` being incorrectly enabled in macOS 10.4, 10.5, and 10.7
 - Disabled prelinked boot for macOS 10.4 and 10.5 in `KernelCache` `Auto` mode
 - Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
@@ -144,7 +144,7 @@ OpenCore Changelog
 - Added prebuilt version of `CrScreenshotDxe` driver
 - Fixed Hyper-V frequency detection compatibility
 - Added `SysReport` option for DEBUG builds to dump system info
-- Fixed crashes on some AMD firmwares when performing keyboard input
+- Fixed crashes on some AMD firmware when performing keyboard input
 
 #### v0.5.8
 - Fixed invalid CPU object reference in SSDT-PLUG
@@ -202,8 +202,8 @@ OpenCore Changelog
 
 #### v0.5.6
 - Various improvements to builtin text renderer
-- Fixed locating DMG recovery in APTIO IV firmwares on FAT32
-- Fixed loading DMG recovery in APTIO IV firmwares on FAT32
+- Fixed locating DMG recovery in APTIO IV firmware on FAT32
+- Fixed loading DMG recovery in APTIO IV firmware on FAT32
 - Removed `AvoidHighAlloc` quirk due to removed I/O over 4GB
 - Moved `ConsoleMode`, `Resolution` options to `Output` section
 - Moved console-related UEFI quirks to `Output` section
@@ -221,7 +221,7 @@ OpenCore Changelog
 - Added `HideAuxiliary` and `Auxiliary` options
 - Fixed picker timeout and log timestamps for VMware
 - Fixed NULL parent DeviceHandle for launched tools
-- Added bundled HiiDatabase driver for very old firmwares
+- Added bundled HiiDatabase driver for very old firmware
 - Added SSE2 support in memory intrinsics for better performance
 - Improved ACPI PM timer CPU frequency calculation performance
 - Improved LapicKernelPanic compatibility with newer macOS versions
