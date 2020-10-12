@@ -339,7 +339,7 @@ OcReconnectConsole (
 
   //
   // When we change the GOP mode on some types of firmware, we need to reconnect the
-  // drivers that produce simple text outas otherwise, they will not produce text
+  // drivers that produce simple text out as otherwise, they will not produce text
   // at the new resolution.
   //
   // Needy reports that boot.efi seems to work fine without this block of code.
