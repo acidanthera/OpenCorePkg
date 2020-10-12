@@ -30,7 +30,7 @@ OcConsoleControlEntryModeConstructor (
 
   if (FixedPcdGet8 (PcdConsoleControlEntryMode) < EfiConsoleControlScreenMaxValue) {
     //
-    // On several firmwares we need to use legacy console control protocol to
+    // On several types of firmware, we need to use legacy console control protocol to
     // switch to text mode, otherwise a black screen will be shown.
     //
     Status = gBS->HandleProtocol (

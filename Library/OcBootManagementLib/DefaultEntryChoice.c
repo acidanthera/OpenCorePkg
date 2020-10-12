@@ -193,7 +193,7 @@ InternalDebugBootEnvironment (
   }
 
   DEBUG ((DEBUG_INFO, "OCB: Dumping BootOrder\n"));
-  
+
   for (Predefined = 0; Predefined < 2; ++Predefined) {
     for (Index = 0; Index < BootOrderCount; ++Index) {
       UefiDevicePath = InternalGetBootOptionData (
@@ -1080,7 +1080,7 @@ InternalLoadBootEntry (
           ));
 
         //
-        // Some fragile firmwares fail to properly set LoadedImage file source
+        // Some fragile firmware fail to properly set LoadedImage file source
         // fields to our custom device path, so we fix it up here.
         // REF: https://github.com/acidanthera/bugtracker/issues/712
         //

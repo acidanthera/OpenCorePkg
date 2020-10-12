@@ -58,7 +58,7 @@ OcConnectController (
   // REF: https://bugzilla.tianocore.org/show_bug.cgi?id=2460
   //
   // Doing this reduces the amount of needless work during device
-  // connection and resolves issues with firmwares that freeze
+  // connection and resolves issues with firmware that freeze
   // when connecting handles without device paths.
   //
   Status = gBS->HandleProtocol (

@@ -179,7 +179,7 @@ typedef struct UEFI_SERVICES_POINTERS_ {
   ///
   /// Original virtual address mapping function. We override
   /// it to perform runtime area protection to prevent boot.efi
-  /// defragmentation and setup virtual memory for firmwares
+  /// defragmentation and setup virtual memory for firmware
   /// accessing it after exit boot services.
   ///
   EFI_SET_VIRTUAL_ADDRESS_MAP SetVirtualAddressMap;

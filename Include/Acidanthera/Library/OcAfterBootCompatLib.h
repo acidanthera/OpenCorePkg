@@ -21,22 +21,22 @@
 typedef struct OC_ABC_SETTINGS_ {
   ///
   /// Protect from boot.efi from defragmenting runtime memory. This fixes UEFI runtime services
-  /// (date and time, NVRAM, power control, etc.) support on many firmwares.
+  /// (date and time, NVRAM, power control, etc.) support on many types of firmware.
   /// Needed basically by everyone that uses SMM implementation of variable services.
   ///
   BOOLEAN  AvoidRuntimeDefrag;
   ///
-  /// Setup virtual memory mapping after SetVirtualAddresses call. This fixes crashes in many
-  /// firmwares at early boot as they accidentally access virtual addresses after ExitBootServices.
+  /// Setup virtual memory mapping after SetVirtualAddresses call. This fixes crashes in many types
+  /// of firmware at early boot as they accidentally access virtual addresses after ExitBootServices.
   ///
   BOOLEAN  SetupVirtualMap;
   ///
-  /// Provide custom Apple KASLR slide calculation for firmwares with polluted low memory ranges.
+  /// Provide custom Apple KASLR slide calculation for firmware with polluted low memory ranges.
   /// This also ensures that slide= argument is never passed to the operating system.
   ///
   BOOLEAN  ProvideCustomSlide;
   ///
-  /// Provide max KASLR slide for firmwares with polluted higher memory ranges.
+  /// Provide max KASLR slide for firmware with polluted higher memory ranges.
   ///
   UINT8    ProvideMaxSlide;
   ///
@@ -61,7 +61,7 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   /// Attempt to protect certain memory regions from being incorrectly mapped:
   /// - CSM region could get used by the kernel due to being BS data,
-  ///   which caused caused wake issues on older firmwares.
+  ///   which caused caused wake issues on older firmware.
   /// - MMIO regions can be marked as reserved memory and be thus unmapped,
   ///   which caused boot failures when accessing NVRAM.
   ///
@@ -87,7 +87,7 @@ typedef struct OC_ABC_SETTINGS_ {
   BOOLEAN  ProtectSecureBoot;
   ///
   /// Permit writing to executable memory in UEFI runtime services. Fixes crashes
-  /// on many APTIO V firmwares.
+  /// on many types of APTIO V firmware.
   ///
   BOOLEAN  EnableWriteUnprotector;
   ///
@@ -130,7 +130,7 @@ typedef struct OC_ABC_SETTINGS_ {
 
 /**
   Initialize Apple Boot Compatibility layer. This layer is needed on partially
-  incompatible firmwares to prevent boot failure and UEFI services breakage.
+  incompatible firmware to prevent boot failure and UEFI services breakage.
 
   @param[in]  Settings  Compatibility layer configuration.
 

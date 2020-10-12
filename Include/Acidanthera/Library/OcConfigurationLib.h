@@ -587,7 +587,7 @@ typedef enum {
   OC_DECLARE (OC_UEFI_PROTOCOL_OVERRIDES)
 
 ///
-/// Quirks is a set of hacks for different firmwares.
+/// Quirks is a set of hacks for different types of firmware.
 ///
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \

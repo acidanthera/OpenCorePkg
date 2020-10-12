@@ -279,8 +279,8 @@ BITS 64
   ; Done transitioning to 64-bit code.
   ;
 
-  ; Set other segment selectors. In most firmwares all segment registers but cs
-  ; point to the same selector, but we must not rely on it.
+  ; Set other segment selectors. In most types of firmware, all segment registers
+  ; apart from cs point to the same selector, but we must not rely on it.
   mov   ax, word [rbx + ASM_SUPPORT_STATE.SavedDS]
   mov   ds, ax
   mov   ax, word [rbx + ASM_SUPPORT_STATE.SavedES]

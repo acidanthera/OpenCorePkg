@@ -119,9 +119,9 @@ typedef enum OC_SMBIOS_UPDATE_MODE_ {
   OcSmbiosUpdateOverwrite    = 2,
   //
   // Writes first SMBIOS table (gEfiSmbiosTableGuid) to gOcCustomSmbiosTableGuid to workaround
-  // firmwares overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent to
-  // OcSmbiosUpdateCreate. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext to read
-  // from another GUID: "EB9D2D31" -> "EB9D2D35" (in ASCII).
+  // some types of firmware overwriting SMBIOS contents at ExitBootServices. Otherwise equivalent
+  // to OcSmbiosUpdateCreate. Requires patching AppleSmbios.kext and AppleACPIPlatform.kext 
+  // to read from another GUID: "EB9D2D31" -> "EB9D2D35" (in ASCII).
   //
   OcSmbiosUpdateCustom       = 3,
 } OC_SMBIOS_UPDATE_MODE;

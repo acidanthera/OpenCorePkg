@@ -116,7 +116,7 @@ ReadProvisioningDataFile (
   }
 
   //
-  // Implement fallback for our firmwares.
+  // Implement fallback for our firmware.
   //
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCPAVP: No %g in firmware, using default - %r\n", FvNameGuid, Status));

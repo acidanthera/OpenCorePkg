@@ -46,7 +46,7 @@ typedef struct OC_FWRT_CONFIG_ {
   BOOLEAN  WriteProtection;
   ///
   /// Make UEFI runtime services drop CR0 WP bit on calls to allow writing
-  /// to read only memory. This workarounds a bug in many APTIO firmwares
+  /// to read only memory. This workarounds a bug in many types of APTIO firmware
   /// that do not survive W^X.
   /// Latest Windows brings Virtualization-based security and monitors
   /// CR0 by launching itself under a hypevisor. Since we need WP disable

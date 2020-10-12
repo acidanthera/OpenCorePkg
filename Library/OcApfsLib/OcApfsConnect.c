@@ -142,7 +142,7 @@ ApfsVerifyDriverVersion (
         ));
     }
   }
-  
+
   for (Index = 0; Index < ARRAY_SIZE (mApfsBlacklistedVersions); ++Index) {
     if (RealVersion == mApfsBlacklistedVersions[Index]) {
       DEBUG ((
@@ -362,7 +362,7 @@ ApfsStartDriver (
 
   if (mDisconnectHandles) {
     //
-    // Unblock handles as some firmwares like that on HP EliteBook 840 G2
+    // Unblock handles as some types of firmware, such as that on the HP EliteBook 840 G2,
     // may automatically lock all volumes without filesystem drivers upon
     // any attempt to connect them.
     // REF: https://github.com/acidanthera/bugtracker/issues/1128

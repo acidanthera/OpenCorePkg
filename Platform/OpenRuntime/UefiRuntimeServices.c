@@ -161,7 +161,7 @@ WrapGetTime (
 
   if (!EFI_ERROR (Status)) {
     //
-    // On old AMI firmwares (like the one found in GA-Z87X-UD4H) there is a chance
+    // On old AMI firmware, such as found in the GA-Z87X-UD4H, there is a chance
     // of getting 2047 (EFI_UNSPECIFIED_TIMEZONE) from GetTime. This is valid,
     // yet is disliked by some software including but not limited to UEFI Shell.
     // See the patch: https://lists.01.org/pipermail/edk2-devel/2018-May/024534.html

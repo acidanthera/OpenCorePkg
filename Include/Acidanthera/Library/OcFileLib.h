@@ -339,7 +339,7 @@ OcOpenFileByRemainingDevicePath (
 /**
   Open a file or directory by device path. This is a modified
   version of EfiOpenFileByDevicePath function, which handles paths
-  with trailing slashes, that cause Open failure on old firmwares.
+  with trailing slashes, that cause Open failure on old firmware.
   EfiOpenFileByDevicePath is additionally not available in UDK.
 
   See more details at:

@@ -825,7 +825,7 @@ InternalEfiLoadImage (
   }
 
   //
-  // Some firmwares may not update loaded image protocol fields correctly
+  // Some types of firmware may not update loaded image protocol fields correctly
   // when loading via source buffer. Do it here.
   //
   if (!EFI_ERROR (Status) && SourceBuffer != NULL && DevicePath != NULL) {

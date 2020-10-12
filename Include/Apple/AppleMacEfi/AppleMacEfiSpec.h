@@ -19,13 +19,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define APPLE_EFI_FIRMWARE_VENDOR    L"Apple"
 
 //
-// Magic ID found at 0xFFFFFF80 address in newer firmwares like MBP12,1.
+// Magic ID found at 0xFFFFFF80 address in newer firmware such as MBP12,1.
 //
 #define APPLE_EFI_FIRMWARE_GEN2_ID_MAGIC  \
   { 0xA1, 0x7B, 0xE5, 0x98, 0x31, 0x22, 0x4F, 0x4E }
 
 //
-// Magic ID similar to APPLE_EFI_FIRMWARE_ID_MAGIC in T2-based firmwares.
+// Magic ID similar to APPLE_EFI_FIRMWARE_ID_MAGIC in T2-based firmware.
 //
 #define APPLE_EFI_FIRMWARE_GEN3_ID_MAGIC  \
   { 0xC6, 0x8A, 0x85, 0x99, 0xF5, 0xE2, 0x15, 0x4E }

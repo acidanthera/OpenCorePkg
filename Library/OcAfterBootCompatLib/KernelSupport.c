@@ -291,9 +291,9 @@ RestoreProtectedRtMemoryTypes (
     for (Index2 = 0; Index2 < RtReloc->NumEntries; ++Index2) {
       //
       // PhysicalStart match is enough, but just in case.
-      // Select firmwares, like Lenovo ThinkPad X240, have insane reserved areas.
-      // For example 0000000000000000-FFFFFFFFFFFFFFFF 0000000000000000 0000000000000000.
-      // Any fuzzy matching is prone to errors, so just do exact comparison.
+      // Some types of firmware, such as on the Lenovo ThinkPad X240, have unusual reserved areas.
+      // For example, 0000000000000000-FFFFFFFFFFFFFFFF 0000000000000000 0000000000000000.
+      // Execute exact comparisons as fuzzy matching often results in errors.
       //
       if (PhysicalStart == RtReloc->RelocInfo[Index2].PhysicalStart
         && PhysicalEnd == RtReloc->RelocInfo[Index2].PhysicalEnd)  {
@@ -433,15 +433,15 @@ AppleMapPrepareForHibernateWake (
   // At this step we have two routes.
   //
   // 1. Remove newly generated memory map from hibernate image to let XNU use the original mapping.
-  //    This is known to work well on most systems primarily because Windows requires UEFI firmwares
+  //    This is known to work well on most systems primarily because Windows requires UEFI firmware
   //    to preserve physical memory consistency at S4 wake. "On a UEFI platform, firmware runtime memory
   //    must be consistent across S4 sleep state transitions, in both size and location.", see:
   //    https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements
-  // 2. Recover memory map just as we do for normal booting. This was causing issues on some firmwares,
-  //    which provided very strange memory maps after S4 wake. In other cases this should not immediately
+  // 2. Recover memory map just as we do for normal booting. This created issues on some types of firmware
+  //    resulting in unusual memory maps after S4 wake. In other cases, this should not immediately
   //    break things. XNU will entirely remove efiRuntimeServicesPageStart/efiRuntimeServicesPageSize
-  //    mapping, and our new memory map entries will unconditionally overwrite previous ones. In case
-  //    no physical memory changes happened this should work fine.
+  //    mapping and our new memory map entries will unconditionally overwrite previous ones. In case
+  //    no physical memory changes happened, this should work fine.
   //
   Handoff = (IOHibernateHandoff *) EFI_PAGES_TO_SIZE ((UINTN) ImageHeader->handoffPages);
   while (Handoff->type != kIOHibernateHandoffTypeEnd) {
@@ -449,7 +449,7 @@ AppleMapPrepareForHibernateWake (
       if (BootCompat->Settings.DiscardHibernateMap) {
         //
         // Route 1. Discard the new memory map here, and let XNU use what it had.
-        // It is unknown whether there still are any firmwares that need this.
+        // It is unknown whether there are still examples of firmware that need this.
         //
         Handoff->type = kIOHibernateHandoffType;
       } else {
