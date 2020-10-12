@@ -608,17 +608,19 @@ PatchSystemSlots (
 STATIC
 VOID
 PatchMemoryArray (
-  IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+  IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
+  IN     UINT16                          Index,
+     OUT SMBIOS_HANDLE                   *Handle
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT8                           MinLength;
+  UINT8    MinLength;
 
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, 1);
+  *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type16);
 
-  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, 1))) {
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, Index))) {
     return;
   }
 
@@ -627,11 +629,16 @@ PatchMemoryArray (
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->MemoryErrorCorrection, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->MaximumCapacity, Original, NULL, NULL);
   //
-  // Do not support memory error information.
+  // Do not support memory error information. 0xFFFF indicates no errors previously detected.
   //
   Table->CurrentPtr.Standard.Type16->MemoryErrorInformationHandle = 0xFFFF;
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->NumberOfMemoryDevices, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->ExtendedMaximumCapacity, Original, NULL, NULL);
+ 
+  //
+  // Return assigned handle
+  //
+  *Handle = Table->CurrentPtr.Standard.Hdr->Handle;
 
   SmbiosFinaliseStruct (Table);
 }
@@ -646,6 +653,7 @@ VOID
 PatchMemoryDevice (
   IN OUT OC_SMBIOS_TABLE                 *Table,
   IN     OC_SMBIOS_DATA                  *Data,
+  IN     SMBIOS_HANDLE                   MemoryArrayHandle,
   IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
   IN     UINT16                          Index,
      OUT SMBIOS_HANDLE                   *Handle
@@ -653,10 +661,8 @@ PatchMemoryDevice (
 {
   UINT8    MinLength;
   UINT8    StringIndex;
-  BOOLEAN  IsEmpty;
 
   *Handle       = OcSmbiosInvalidHandle;
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, Index);
   MinLength     = sizeof (*Original.Standard.Type17);
   StringIndex   = 0;
 
@@ -679,22 +685,11 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Speed, Original, NULL, NULL);
 
   //
-  // Empty modules should have 0 Size according to the spec.
-  // Original OC implementation relies on TotalWidth, which may be a workaround for some FW.
+  // Assign the parent memory array handle.
+  // Do not support memory error information. 0xFFFF indicates no errors previously detected.
   //
-  IsEmpty = Table->CurrentPtr.Standard.Type17->Size == 0
-    || Table->CurrentPtr.Standard.Type17->TotalWidth == 0;
-
-  if (!IsEmpty) {
-    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = OcSmbiosPhysicalMemoryArrayHandle;
-    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
-  } else {
-    //
-    // Empty slots should have no physical memory array handle.
-    //
-    Table->CurrentPtr.Standard.Type17->MemoryArrayHandle = 0xFFFF;
-    Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
-  }
+  Table->CurrentPtr.Standard.Type17->MemoryArrayHandle            = MemoryArrayHandle;
+  Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
 
   //
   // Some machines may have NULL values for these fields, which will cause SPMemoryReporter
@@ -728,53 +723,42 @@ PatchMemoryDevice (
 STATIC
 VOID
 PatchMemoryMappedAddress (
-  IN OUT OC_SMBIOS_TABLE    *Table,
-  IN     OC_SMBIOS_DATA     *Data,
-  IN OUT OC_SMBIOS_MAPPING  *Mapping,
-  IN OUT UINT16             *MappingNum
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+  IN     SMBIOS_HANDLE                   MemoryArrayHandle,
+  IN     APPLE_SMBIOS_STRUCTURE_POINTER  Original,
+  IN     UINT16                          Index,
+  IN OUT OC_SMBIOS_MAPPING               *Mapping,
+  IN OUT UINT16                          *MappingNum
   )
 {
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT16                          NumberEntries;
-  UINT16                          EntryNo;
-  UINT8                           MinLength;
+  UINT8   MinLength;
 
-  *MappingNum = 0;
+  MinLength = sizeof (*Original.Standard.Type19);
 
-  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
-
-  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
-    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, EntryNo);
-    if (Original.Raw == NULL) {
-      continue;
-    }
-
-    MinLength     = sizeof (*Original.Standard.Type19);
-
-    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MinLength, EntryNo))) {
-      continue;
-    }
-
-    SMBIOS_OVERRIDE_V (Table, Standard.Type19->StartingAddress, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_V (Table, Standard.Type19->EndingAddress, Original, NULL, NULL);
-    Table->CurrentPtr.Standard.Type19->MemoryArrayHandle = OcSmbiosPhysicalMemoryArrayHandle;
-    SMBIOS_OVERRIDE_V (Table, Standard.Type19->PartitionWidth, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedStartingAddress, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedEndingAddress, Original, NULL, NULL);
-
-    if (*MappingNum < OC_SMBIOS_MAX_MAPPING) {
-      Mapping[*MappingNum].Old = Original.Standard.Hdr->Handle;
-      Mapping[*MappingNum].New = Table->CurrentPtr.Standard.Hdr->Handle;
-      (*MappingNum)++;
-    } else {
-      //
-      // The value is reasonably large enough for this to never happen, yet just in case.
-      //
-      DEBUG ((DEBUG_WARN, "OCSMB: OC_SMBIOS_MAX_MAPPING exceeded\n"));
-    }
-
-    SmbiosFinaliseStruct (Table);
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MinLength, Index))) {
+    return;
   }
+
+  SMBIOS_OVERRIDE_V (Table, Standard.Type19->StartingAddress, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type19->EndingAddress, Original, NULL, NULL);
+  Table->CurrentPtr.Standard.Type19->MemoryArrayHandle = MemoryArrayHandle;
+  SMBIOS_OVERRIDE_V (Table, Standard.Type19->PartitionWidth, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedStartingAddress, Original, NULL, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type19->ExtendedEndingAddress, Original, NULL, NULL);
+
+  if (*MappingNum < OC_SMBIOS_MAX_MAPPING) {
+    Mapping[*MappingNum].Old = Original.Standard.Hdr->Handle;
+    Mapping[*MappingNum].New = Table->CurrentPtr.Standard.Hdr->Handle;
+    (*MappingNum)++;
+  } else {
+    //
+    // The value is reasonably large enough for this to never happen, yet just in case.
+    //
+    DEBUG ((DEBUG_WARN, "OCSMB: OC_SMBIOS_MAX_MAPPING exceeded\n"));
+  }
+
+  SmbiosFinaliseStruct (Table);
 }
 
 /** Type 20
@@ -797,7 +781,6 @@ PatchMemoryMappedDevice (
   UINT8    MinLength;
   UINT16   MapIndex;
 
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, Index);
   MinLength     = sizeof (*Original.Standard.Type20);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MinLength, Index))) {
@@ -809,10 +792,10 @@ PatchMemoryMappedDevice (
   Table->CurrentPtr.Standard.Type20->MemoryDeviceHandle = MemoryDeviceHandle;
 
   Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = 0xFFFF;
-  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE(Original, Standard.Type20->MemoryArrayMappedAddressHandle)) {
+  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type20->MemoryArrayMappedAddressHandle)) {
     for (MapIndex = 0; MapIndex < MappingNum; MapIndex++) {
       if (Mapping[MapIndex].Old == Original.Standard.Type20->MemoryArrayMappedAddressHandle) {
-        Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = Mapping[Index].New;
+        Table->CurrentPtr.Standard.Type20->MemoryArrayMappedAddressHandle = Mapping[MapIndex].New;
         break;
       }
     }
@@ -1685,13 +1668,25 @@ OcSmbiosCreate (
   )
 {
   EFI_STATUS                      Status;
-  SMBIOS_HANDLE                   MemoryDeviceHandle;
+
+  APPLE_SMBIOS_STRUCTURE_POINTER  MemoryArray;
+  APPLE_SMBIOS_STRUCTURE_POINTER  MemoryArrayAddress;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceInfo;
   APPLE_SMBIOS_STRUCTURE_POINTER  MemoryDeviceAddress;
-  UINT16                          NumberMemoryDevices;
-  UINT16                          NumberMemoryMapped;
+  SMBIOS_HANDLE                   MemoryArrayHandle;
+  SMBIOS_HANDLE                   MemoryDeviceHandle;
+  UINT16                          NumMemoryArrays;
+  UINT16                          NumMemoryArrayMapped;
+  UINT16                          NumMemoryDevices;
+  UINT16                          NumMemoryDeviceMapped;
+  UINT16                          MemoryArrayNo;
+  UINT16                          MemoryArrayMappedNo;
   UINT16                          MemoryDeviceNo;
-  UINT16                          MemoryMappedNo;
+  UINT16                          MemoryDeviceMappedNo;
+  UINT16                          MemoryArrayNewIndex;
+  UINT16                          MemoryArrayMappedNewIndex;
+  UINT16                          MemoryDeviceNewIndex;
+  UINT16                          MemoryDeviceMappedNewIndex;
   OC_SMBIOS_MAPPING               *Mapping;
   UINT16                          MappingNum;
 
@@ -1702,6 +1697,7 @@ OcSmbiosCreate (
     DEBUG ((DEBUG_WARN, "OCSMB: Cannot allocate mapping table\n"));
     return EFI_OUT_OF_RESOURCES;
   }
+  MappingNum = 0;
 
   PatchBiosInformation (SmbiosTable, Data);
   PatchSystemInformation (SmbiosTable, Data);
@@ -1711,49 +1707,108 @@ OcSmbiosCreate (
   PatchCacheInformation (SmbiosTable, Data);
   PatchSystemPorts (SmbiosTable, Data);
   PatchSystemSlots (SmbiosTable, Data);
-  PatchMemoryArray (SmbiosTable, Data);
-  PatchMemoryMappedAddress (SmbiosTable, Data, Mapping, &MappingNum);
 
-  NumberMemoryDevices = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
-  NumberMemoryMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
+  //
+  // Patch memory information.
+  //
+  NumMemoryArrays       = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY);
+  NumMemoryArrayMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
+  NumMemoryDevices      = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
+  NumMemoryDeviceMapped = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
 
-  for (MemoryDeviceNo = 1; MemoryDeviceNo <= NumberMemoryDevices; MemoryDeviceNo++) {
-    MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
+  MemoryArrayNewIndex        = 1;
+  MemoryArrayMappedNewIndex  = 1;
+  MemoryDeviceNewIndex       = 1;
+  MemoryDeviceMappedNewIndex = 1;
 
-    if (MemoryDeviceInfo.Raw == NULL) {
+  for (MemoryArrayNo = 1; MemoryArrayNo <= NumMemoryArrays; MemoryArrayNo++) {
+    MemoryArray = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MemoryArrayNo);
+
+    //
+    // We want to exclude any non-system memory tables, such as system ROM flash areas.
+    //
+    if (MemoryArray.Raw == NULL
+      || MemoryArray.Standard.Type16->Use != MemoryArrayUseSystemMemory) {
       continue;
     }
 
     //
-    // For each memory device we must generate type 17
+    // Generate new type 16 table for memory array.
     //
-    PatchMemoryDevice (
+    PatchMemoryArray (
       SmbiosTable,
       Data,
-      MemoryDeviceInfo,
-      MemoryDeviceNo,
-      &MemoryDeviceHandle
-    );
+      MemoryArray,
+      MemoryArrayNewIndex,
+      &MemoryArrayHandle
+      );
+    MemoryArrayNewIndex++;
 
     //
-    // For each occupied memory device we must generate type 20
+    // Generate new memory mapped address tables (type 19) for this memory array.
     //
-    for (MemoryMappedNo = 1; MemoryMappedNo <= NumberMemoryMapped; MemoryMappedNo++) {
-      MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryMappedNo);
+    for (MemoryArrayMappedNo = 1; MemoryArrayMappedNo <= NumMemoryArrayMapped; MemoryArrayMappedNo++) {
+      MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo);
 
-      if (MemoryDeviceAddress.Raw != NULL
-        && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
-        && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-           MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
-          PatchMemoryMappedDevice (
-            SmbiosTable,
-            Data,
-            MemoryDeviceAddress,
-            MemoryMappedNo,
-            MemoryDeviceHandle,
-            Mapping,
-            MappingNum
-            );
+      if (MemoryArrayAddress.Raw == NULL
+        || MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+        continue;
+      }
+
+      PatchMemoryMappedAddress (
+        SmbiosTable,
+        Data,
+        MemoryArrayHandle,
+        MemoryArrayAddress,
+        MemoryArrayMappedNewIndex,
+        Mapping,
+        &MappingNum
+        );
+      MemoryArrayMappedNewIndex++;
+    }
+
+    //
+    // Generate new memory device tables (type 17) for this memory array.
+    //
+    for (MemoryDeviceNo = 1; MemoryDeviceNo <= NumMemoryDevices; MemoryDeviceNo++) {
+      MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
+
+      if (MemoryDeviceInfo.Raw == NULL
+        || MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+        continue;
+      }
+
+      PatchMemoryDevice (
+        SmbiosTable,
+        Data,
+        MemoryArrayHandle,
+        MemoryDeviceInfo,
+        MemoryDeviceNewIndex,
+        &MemoryDeviceHandle
+        );
+      MemoryDeviceNewIndex++;
+
+      //
+      // Generate a memory device mapping table (type 20) for each occupied memory device.
+      //
+      for (MemoryDeviceMappedNo = 1; MemoryDeviceMappedNo <= NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
+        MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo);
+
+        if (MemoryDeviceAddress.Raw != NULL
+          && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
+          && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+            MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
+            PatchMemoryMappedDevice (
+              SmbiosTable,
+              Data,
+              MemoryDeviceAddress,
+              MemoryDeviceMappedNewIndex,
+              MemoryDeviceHandle,
+              Mapping,
+              MappingNum
+              );
+            MemoryDeviceMappedNewIndex++;
+        }
       }
     }
   }
