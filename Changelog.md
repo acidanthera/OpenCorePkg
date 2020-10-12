@@ -5,6 +5,8 @@ OpenCore Changelog
 - Updated underlying EDK II package to edk2-stable202008
 - Provide fallbacks for NULL memory SMBIOS strings
 - Fixed `BOOTx64.efi` and `BOOTIA32.efi` convention
+- Fixed SMBIOS handling with multiple memory arrays
+- Fixed memory array handle assignment on empty slots
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
