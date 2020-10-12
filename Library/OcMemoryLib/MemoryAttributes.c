@@ -405,7 +405,7 @@ OcGetMemoryAttributes (
   OUT EFI_MEMORY_DESCRIPTOR  **MemoryAttributesEntry  OPTIONAL
   )
 {
-  EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable; 
+  EFI_MEMORY_ATTRIBUTES_TABLE  *MemoryAttributesTable;
   UINTN                        Index;
 
   for (Index = 0; Index < gST->NumberOfTableEntries; ++Index) {
@@ -510,7 +510,7 @@ OcRebuildAttributes (
   }
 
   //
-  // Some firmwares do not update MAT after loading runtime drivers after EndOfDxe.
+  // Some types of firmware do not update MAT after loading runtime drivers after EndOfDxe.
   // Since the memory used to allocate runtime driver resides in BINs, MAT has whatever
   // permissions designated for unused memory. Mark unused memory containing our driver
   // as executable here.

@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define APPLE_FILE_H
 
 //
-// ASCII content stored in legacy firmwares.
+// ASCII content stored in legacy firmware.
 //
 #define APPLE_FIRMWARE_INFO_FILE_GUID  \
   { 0x95C8C131, 0x4467, 0x4447,        \

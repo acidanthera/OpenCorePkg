@@ -44,7 +44,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // /System/Library/PrivateFrameworks/OSInstaller.framework/Versions/A/OSInstaller
 //
 // NOTE: There is an unconfirmed belief that Thunderbolt also has a bit.
-// NOTE: FirmwareFeatures enabling code is similar in all recent firmwares, T2 and not:
+// NOTE: FirmwareFeatures enabling code is similar in all recent firmware, T2 and not:
 // VOID SetPlatformFeatures (VOID) {
 //   UINT64 Mask     = 0xFF1FFF3FU; /* Model dependent */
 //   UINT64 Features = 0xFC07E136U; /* Model dependent */

@@ -81,7 +81,7 @@ typedef struct {
 
   //
   // Platform-dependent frequency for the Always Running Timer (ART), normally
-  // 24Mhz. Firmwares may choose to override this. Some CPUs like Xeon Scalable
+  // 24Mhz. The firmware may choose to override this. Some CPUs like Xeon Scalable
   // use a different frequency. CPUs report the frequency through CPUID.15H.ECX.
   // If unreported, the frequency is looked up based on the model and family.
   //
@@ -174,7 +174,7 @@ OcCpuCorrectFlexRatio (
   Synchronise TSC on all cores (needed on server chipsets and some laptops).
   This does not fully replace VoodooTscSync or TSCAdjustReset due to
   the need to sync on S3 as well and may also work far less reliably
-  due to the limitation of UEFI firmwares not letting us run MSR updates in
+  due to the limitation of UEFI firmware not permitting MSR update runs in
   parallel with BSP and AP cores. However, it lets debug kernels work
   most of the time till the time TSC kexts start.
 

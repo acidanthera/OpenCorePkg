@@ -26,7 +26,7 @@
 [LibraryClasses]
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   # We cannot use BaseMemoryLibOptDxe since it uses SSE instructions,
-  # and some firmwares fail to properly maintain MMX register contexts
+  # and some types of firmware fail to properly maintain MMX register contexts
   # across the timers. This results in exceptions when trying to execute
   # primitives like CopyMem in timers (e.g. AIKDataWriteEntry).
   # Reproduced on ASUS M5A97 with AMD FX8320 CPU.

@@ -1125,7 +1125,7 @@ AcpiFadtEnableReset (
   DEBUG ((DEBUG_INFO, "OCA: FADT reset got %u need %u\n", OldSize, RequiredSize));
 
   //
-  // One some firmwares the table is too small and does not include
+  // One some types of firmware, the table is too small and does not include
   // Reset Register area. We will reallocate in this case.
   // Interestingly EFI_ACPI_6_2_RESET_REG_SUP may be set.
   //

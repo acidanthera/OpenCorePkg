@@ -350,7 +350,7 @@
 
   Effective poly is 0x2001 due to a bitwise OR with BIT15.
   The change turns CRC16 into CRC14, making BIT14 and BIT15 always zero.
-  This modification is commonly found in legacy Phoenix firmwares,
+  This modification is commonly found in legacy Phoenix firmware,
   where it was used for password hashing as found by dogbert:
   http://sites.google.com/site/dogber1/blag/pwgen-5dec.py
 **/
