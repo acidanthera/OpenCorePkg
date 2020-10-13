@@ -60,7 +60,7 @@ details.
 - [Download-Fritz](https://github.com/Download-Fritz)
 - [Goldfish64](https://github.com/Goldfish64)
 - [nms42](https://github.com/nms42)
-- [PMHeart](https://github.com/PMHeart)
+- [PMheart](https://github.com/PMheart)
 - [savvamitrofanov](https://github.com/savvamitrofanov)
 - [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
