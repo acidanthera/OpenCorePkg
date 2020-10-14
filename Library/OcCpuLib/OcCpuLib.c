@@ -471,6 +471,13 @@ ScanIntelProcessor (
     Msr = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
     Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 19);
     Cpu->ThreadCount = (UINT16)BitFieldRead64 (Msr, 0,  15);
+  } else if (Cpu->Model == CPU_MODEL_BANIAS || Cpu->Model == CPU_MODEL_DOTHAN) {
+    //
+    // Banias and Dothan (Pentium M and Celeron M) never had
+    // multiple cores or threads, and do not support the MSR below.
+    //
+    Cpu->CoreCount   = 0;
+    Cpu->ThreadCount = 0;
   } else {
     Msr = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
     Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 31);

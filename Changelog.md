@@ -7,7 +7,8 @@ OpenCore Changelog
 - Fixed `BOOTx64.efi` and `BOOTIA32.efi` convention
 - Fixed SMBIOS handling with multiple memory arrays
 - Fixed memory array handle assignment on empty slots
-- Fixed CPUID patching on certain versions of macOS 10.4.10 and 10.4.11.
+- Fixed CPUID patching on certain versions of macOS 10.4.10 and 10.4.11
+- Fixed incorrect core/thread counts on Pentium M processors
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest

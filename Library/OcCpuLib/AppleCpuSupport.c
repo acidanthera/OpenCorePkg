@@ -140,6 +140,7 @@ InternalDetectAppleProcessorType (
     //
     case CPU_MODEL_WILLAMETTE: // 0x01
     case CPU_MODEL_NORTHWOOD:  // 0x02
+    case CPU_MODEL_BANIAS:     // 0x09
     case CPU_MODEL_DOTHAN:     // 0x0D
     case CPU_MODEL_YONAH:      // 0x0E
       // IM41  (T2400/T2500), MM11 (Solo T1200 / Duo T2300/T2400),
