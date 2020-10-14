@@ -6,8 +6,8 @@ Kexts
 | [AppleRTL8169Ethernet](https://www.realtek.com/en/directly-download) | — | — |
 | [AtherosE2200Ethernet.kext](https://github.com/Mieze/AtherosE2200Ethernet) | — | — |
 | [AtherosL1cEthernet.kext](https://github.com/al3xtjames/AtherosL1cEthernet) | — | — |
-| [IntelMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.9 | — |
-| [IntelSnowMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.6 (Not tested) | — |
+| [IntelMausi.kext](https://github.com/acidanthera/IntelMausi) | 13.0.0 | — |
+| [IntelSnowMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.0.0 (Not tested) | — |
 | [IntelMausiEthernet.kext](https://github.com/Mieze/IntelMausiEthernet) | — | — |
 | [NullEthernetInjector.kext](https://github.com/RehabMan/OS-X-Null-Ethernet) | — | — |
 | [RealtekR1000SL.kext](https://github.com/SergeySlice/RealtekLANv3) | — | — |
@@ -16,11 +16,11 @@ Kexts
 
 | Wi-Fi and bluetooth | MinKernel | MaxKernel |
 |---------------------|-----------|-----------|
-| [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) | 10.14 (From 10.13) | — |
-| [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 10.8 | — |
+| [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) | 18.0.0 (From 17.0.0) | — |
+| [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 | — |
 | [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup) | — | — |
-| [BrcmPatchRAM.kext](https://github.com/acidanthera/BrcmPatchRAM) | 10.10 | — |
-| [BT4LEContinuityFixup.kext](https://github.com/acidanthera/BT4LEContinuityFixup) | 10.10 | — |
+| [BrcmPatchRAM.kext](https://github.com/acidanthera/BrcmPatchRAM) | 15.0.0 | — |
+| [BT4LEContinuityFixup.kext](https://github.com/acidanthera/BT4LEContinuityFixup) | 15.0.0 | — |
 | [IntelBluetoothFirmware](https://github.com/zxystd/IntelBluetoothFirmware) | — | — |
 | [MT7610](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/MT7612_7610U_D5.0.1.25_SDK1.0.2.18_UI5.0.0.27_20151209.zip) | — | — |
 | [RT5370](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/RTUSB_D2870-4.2.9.2_UI-4.0.9.6_2013_11_29.zip) | — | — |
@@ -33,25 +33,25 @@ Kexts
 | [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | — | — |
 | [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse) | — | — |
 | [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C) | — | — |
-| [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2) | 10.11 | — |
-| [VoodooPS2Keyboard.kext](https://github.com/acidanthera/VoodooPS2) | 10.11 | — |
-| [VoodooPS2Mouse.kext](https://github.com/acidanthera/VoodooPS2) | 10.11 | — |
-| [VoodooPS2Trackpad.kext](https://github.com/acidanthera/VoodooPS2) | 10.11 | — |
-| [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 10.11 | — |
+| [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 | — |
+| [VoodooPS2Keyboard.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 | — |
+| [VoodooPS2Mouse.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 | — |
+| [VoodooPS2Trackpad.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 | — |
+| [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 15.0.0 | — |
 | [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus) | — | — |
 | [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | — | — |
 | [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB) | — | — |
 
 | Video and audio | MinKernel | MaxKernel |
 |-----------------|-----------|-----------|
-| [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 10.8 | — |
+| [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 12.0.0 | — |
 | [EMUUSBAudio.kext](https://github.com/Wouter1/EMU-driver) | — | — |
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — |
-| [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.6 | 10.13 |
-| [Nvidia Web-drivers](https://gfe.nvidia.com/mac-update) | 10.8 | 10.13 |
-| [SNBGraphicsMojaveInstaller](https://github.com/Andrej-Antipov/SNBGraphicsMojaveInstaller) | 10.14 (From 10.13) | — |
+| [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 | 17.0.0 |
+| [Nvidia Web-drivers](https://gfe.nvidia.com/mac-update) | 12.0.0 | 17.0.0 |
+| [SNBGraphicsMojaveInstaller](https://github.com/Andrej-Antipov/SNBGraphicsMojaveInstaller) | 18.0.0 (From 17.0.0) | — |
 | [VoodooHDA.kext](https://sourceforge.net/projects/voodoohda/) | — | — |
-| [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 10.8 | — |
+| [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 12.0.0 | — |
 | [Polaris22Fixup.kext](https://github.com/osy86/Polaris22Fixup) | — | — |
 
 | CPU and SMC | MinKernel | MaxKernel |
@@ -59,27 +59,27 @@ Kexts
 | [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/) | — | — |
 | [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313) | — | — |
 | [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC) | — | — |
-| [CPUFriend.kext](https://github.com/acidanthera/CPUFriend) | 10.11 | — |
+| [CPUFriend.kext](https://github.com/acidanthera/CPUFriend) | 15.0.0 | — |
 | [HWPEnabler.kext](https://github.com/headkaze/HWPEnable) | — | — |
 | [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/) | — | — |
-| [telemetrap.kext](https://forums.macrumors.com/posts/28447707) | 10.14 | — |
+| [telemetrap.kext](https://forums.macrumors.com/posts/28447707) | 18.0.0 | — |
 | [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset) | — | — |
 | [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync) | — | — |
 | [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | — | — |
 | [FakeSMC.kext](https://github.com/CloverHackyColor/FakeSMC3_with_plugins) | — | — |
-| [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 10.6 | — |
-| [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.6 (Not tested) | — |
-| [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.6 (Not tested) | — |
-| [SMCBatteryManager.kext](https://github.com/acidanthera/VirtualSMC) | 10.6 (Not tested) | — |
-| [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 10.7 (Not tested) | — |
-| [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.7 (Not tested) | — |
+| [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 | — |
+| [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (Not tested) | — |
+| [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (Not tested) | — |
+| [SMCBatteryManager.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (Not tested) | — |
+| [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (Not tested) | — |
+| [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (Not tested) | — |
 
 | USB and other ports | MinKernel | MaxKernel |
 |---------------------|-----------|-----------|
 | [IOElectrify.kext](https://github.com/the-darkvoid/macOS-IOElectrify) | — | — |
-| [Legacy_InternalHub-EHCx.kext](https://applelife.ru/posts/537459) | 10.11 | — |
-| [Legacy_USB3.kext](https://applelife.ru/posts/537459) | 10.11 | — |
-| [NVMeFix.kext](https://github.com/acidanthera/NVMeFix) | 10.14 | — |
+| [Legacy_InternalHub-EHCx.kext](https://applelife.ru/posts/537459) | 15.0.0 | — |
+| [Legacy_USB3.kext](https://applelife.ru/posts/537459) | 15.0.0 | — |
+| [NVMeFix.kext](https://github.com/acidanthera/NVMeFix) | 18.0.0 | — |
 | [USBWakeFixup.kext](https://github.com/osy86/USBWakeFixup) | — | — |
 | [SASMegaRAID.kext](https://github.com/dukzcry/osx-goodies) | — | — |
 | [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387) | — | — |
@@ -90,7 +90,7 @@ Kexts
 | [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo) | — | — |
 | [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | — | — |
 | [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | — | — |
-| [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.6 | — |
+| [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.0.0 | — |
 | [LiluFriend.kext](https://github.com/PMheart/LiluFriend) | — | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | — | — |
 | [NightShiftEnabler.kext](https://github.com/cdf/NightShiftEnabler) | — | — |
