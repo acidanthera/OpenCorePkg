@@ -581,8 +581,8 @@ PatchKernelCpuIdLegacy (
     EndPointer - Start,
     Location - Start,
     LocationEnd - Start,
-    IsTiger ? LocationTsc - Start : 0,
-    IsTiger ? LocationTscEnd - Start : 0,
+    IsTigerOld ? LocationTsc - Start : 0,
+    IsTigerOld ? LocationTscEnd - Start : 0,
     StructAddr
     ));
 
@@ -695,7 +695,7 @@ PatchKernelCpuIdLegacy (
   // In 10.4, we need to replace a call to CPUID (1) with a call to
   // the patch area like above in _tsc_init.
   //
-  if (IsTiger) {
+  if (IsTigerOld) {
     Delta = (INT32) (StartPointer - (LocationTsc + 5));
     *LocationTsc++ = 0xE8;
     CopyMem (LocationTsc, &Delta, sizeof (Delta));
