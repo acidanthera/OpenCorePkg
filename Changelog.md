@@ -10,6 +10,7 @@ OpenCore Changelog
 - Fixed CPUID patching on certain versions of macOS 10.4.10 and 10.4.11
 - Fixed incorrect core/thread counts on Pentium M processors
 - Added `SSDT-UNC.dsl` ACPI sample to resolve X99 issues, thx @RemB
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
