@@ -1,8 +1,8 @@
 Kexts
 =====
 
-| Ethernet | MinKernel | MaxKernel |
-|----------|-----------|-----------|
+| Ethernet | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|----------|-----------------------|-----------------------|
 | [AppleRTL8169Ethernet](https://www.realtek.com/en/directly-download) | — | — |
 | [AtherosE2200Ethernet.kext](https://github.com/Mieze/AtherosE2200Ethernet) | — | — |
 | [AtherosL1cEthernet.kext](https://github.com/al3xtjames/AtherosL1cEthernet) | — | — |
@@ -14,8 +14,8 @@ Kexts
 | [RealtekRTL8100.kext](https://github.com/Mieze/RealtekRTL8100) | — | — |
 | [RealtekRTL8111.kext](https://github.com/Mieze/RTL8111_driver_for_OS_X) | — | — |
 
-| Wi-Fi and bluetooth | MinKernel | MaxKernel |
-|---------------------|-----------|-----------|
+| Wi-Fi and bluetooth | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|---------------------|-----------------------|-----------------------|
 | [AirPortAtheros40.kext](https://i.applelife.ru/2018/12/442854_AirPortAtheros40.kext.zip) | 18.0.0 (10.14) From 10.13 | — |
 | [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 (10.8) | — |
 | [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup) | — | — |
@@ -26,8 +26,8 @@ Kexts
 | [RT5370](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/RTUSB_D2870-4.2.9.2_UI-4.0.9.6_2013_11_29.zip) | — | — |
 | [RTL8192CU](https://drive.google.com/file/d/1ZtdMqlvKBbHULJhl1u9omuLOy6j0vx48/view?usp=sharing) | — | — |
 
-| Keyboard, trackpad and mouse | MinKernel | MaxKernel |
-|------------------------------|-----------|-----------|
+| Keyboard, trackpad and mouse | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|------------------------------|-----------------------|-----------------------|
 | [ApplePS2SmartTouchPad.kext](https://osxlatitude.com/forums/topic/1948-elan-focaltech-and-synaptics-smart-touchpad-driver-mac-os-x/) | — | — |
 | [GK701HIDDevice.kext](https://github.com/osy86/GK701HIDDevice) | — | — |
 | [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | — | — |
@@ -42,8 +42,8 @@ Kexts
 | [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | — | — |
 | [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB) | — | — |
 
-| Video and audio | MinKernel | MaxKernel |
-|-----------------|-----------|-----------|
+| Video and audio | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|-----------------|-----------------------|-----------------------|
 | [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 12.0.0 (10.8) | — |
 | [EMUUSBAudio.kext](https://github.com/Wouter1/EMU-driver) | — | — |
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — |
@@ -54,8 +54,8 @@ Kexts
 | [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 12.0.0 (10.8) | — |
 | [Polaris22Fixup.kext](https://github.com/osy86/Polaris22Fixup) | — | — |
 
-| CPU and SMC | MinKernel | MaxKernel |
-|-------------|-----------|-----------|
+| CPU and SMC | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|-------------|-----------------------|-----------------------|
 | [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/) | — | — |
 | [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313) | — | — |
 | [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC) | — | — |
@@ -74,8 +74,8 @@ Kexts
 | [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) Not tested | — |
 | [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) Not tested | — |
 
-| USB and other ports | MinKernel | MaxKernel |
-|---------------------|-----------|-----------|
+| USB and other ports | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|---------------------|-----------------------|-----------------------|
 | [IOElectrify.kext](https://github.com/the-darkvoid/macOS-IOElectrify) | — | — |
 | [Legacy_InternalHub-EHCx.kext](https://applelife.ru/posts/537459) | 15.0.0 (10.11) | — |
 | [Legacy_USB3.kext](https://applelife.ru/posts/537459) | 15.0.0 (10.11) | — |
@@ -85,8 +85,8 @@ Kexts
 | [Sinetek-rtsx.kext](https://www.insanelymac.com/forum/topic/321080-sineteks-driver-for-realtek-rtsx-sdhc-card-readers/?do=findComment&comment=2376387) | — | — |
 | [VoodooSDHC.kext](https://github.com/lvs1974/VoodooSDHCMod) | — | — |
 
-| Other kexts | MinKernel | MaxKernel |
-|-------------|-----------|-----------|
+| Other kexts | MinKernel (Min macOS) | MaxKernel (Max macOS) |
+|-------------|-----------------------|-----------------------|
 | [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo) | — | — |
 | [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | — | — |
 | [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | — | — |
