@@ -20,7 +20,6 @@ Kexts
 | [AirportBrcmFixup.kext](https://github.com/acidanthera/AirportBrcmFixup) | 12.0.0 (10.8) | — |
 | [ATH9KFixup.kext](https://github.com/chunnann/ATH9KFixup) | — | — |
 | [BrcmPatchRAM.kext](https://github.com/acidanthera/BrcmPatchRAM) | 14.0.0 (10.10) | — |
-| [BT4LEContinuityFixup.kext](https://github.com/acidanthera/BT4LEContinuityFixup) | 14.0.0 (10.10) | — |
 | [IntelBluetoothFirmware](https://github.com/zxystd/IntelBluetoothFirmware) | — | — |
 | [MT7610](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/MT7612_7610U_D5.0.1.25_SDK1.0.2.18_UI5.0.0.27_20151209.zip) | — | — |
 | [RT5370](https://d86o2zu8ugzlg.cloudfront.net/mediatek-craft/drivers/RTUSB_D2870-4.2.9.2_UI-4.0.9.6_2013_11_29.zip) | — | — |
@@ -30,16 +29,16 @@ Kexts
 |------------------------------|-----------------------|-----------------------|
 | [ApplePS2SmartTouchPad.kext](https://osxlatitude.com/forums/topic/1948-elan-focaltech-and-synaptics-smart-touchpad-driver-mac-os-x/) | — | — |
 | [GK701HIDDevice.kext](https://github.com/osy86/GK701HIDDevice) | — | — |
-| [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | — | — |
+| [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | 17.0.0 (10.13) | — |
 | [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse) | — | — |
-| [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C) | — | — |
+| [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C) | 16.0.0 (10.12) | — |
 | [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooPS2Keyboard.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooPS2Mouse.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooPS2Trackpad.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooInput.kext](https://github.com/acidanthera/VoodooInput) | 15.0.0 (10.11) | — |
-| [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus) | — | — |
-| [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | — | — |
+| [VoodooSMBus.kext](https://github.com/leo-labs/VoodooSMBus) | 18.0.0 (10.14) | — |
+| [VoodooRMI.kext](https://github.com/VoodooSMBus/VoodooRMI) | 15.0.0 (10.11) | — |
 | [AlpsT4USB.kext](https://github.com/blankmac/AlpsT4USB) | — | — |
 
 | Video and audio | MinKernel (Min macOS) | MaxKernel (Max macOS) |
@@ -52,11 +51,11 @@ Kexts
 | [SNBGraphicsMojaveInstaller](https://github.com/Andrej-Antipov/SNBGraphicsMojaveInstaller) | 18.0.0 (10.14) From 10.13 | — |
 | [VoodooHDA.kext](https://sourceforge.net/projects/voodoohda/) | — | — |
 | [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 12.0.0 (10.8) | — |
-| [Polaris22Fixup.kext](https://github.com/osy86/Polaris22Fixup) | — | — |
+| [Polaris22Fixup.kext](https://github.com/osy86/Polaris22Fixup) | 18.0.0 (10.14) | — |
 
 | CPU and SMC | MinKernel (Min macOS) | MaxKernel (Max macOS) |
 |-------------|-----------------------|-----------------------|
-| [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/) | — | — |
+| [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/) | 16.0.0 (10.12) | — |
 | [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313) | — | — |
 | [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC) | — | — |
 | [CPUFriend.kext](https://github.com/acidanthera/CPUFriend) | 15.0.0 (10.11) | — |
@@ -65,7 +64,7 @@ Kexts
 | [telemetrap.kext](https://forums.macrumors.com/posts/28447707) | 18.0.0 (10.14) | — |
 | [TSCAdjustReset.kext](https://github.com/interferenc/TSCAdjustReset) | — | — |
 | [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync) | — | — |
-| [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | — | — |
+| [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | — |
 | [FakeSMC.kext](https://github.com/CloverHackyColor/FakeSMC3_with_plugins) | — | — |
 | [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — |
 | [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) Not tested | — |
@@ -89,9 +88,8 @@ Kexts
 |-------------|-----------------------|-----------------------|
 | [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo) | — | — |
 | [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | — | — |
-| [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | — | — |
+| [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | 14.0.0 (10.10) | — |
 | [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.0.0 (10.6) | — |
-| [LiluFriend.kext](https://github.com/PMheart/LiluFriend) | — | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | — | — |
 | [NightShiftEnabler.kext](https://github.com/cdf/NightShiftEnabler) | — | — |
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — |
