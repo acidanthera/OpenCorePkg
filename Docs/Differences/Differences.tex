@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Oct  8 16:09:12 2020
-%DIF ADD ../Configuration.tex        Tue Oct 13 21:15:40 2020
+%DIF DEL PreviousConfiguration.tex   Wed Oct  7 12:20:52 2020
+%DIF ADD ../Configuration.tex        Fri Oct 16 00:30:59 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3462,6 +3462,9 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   incompatibilitiesof any kind}\DIFdelend \DIFaddbegin \DIFadd{other
   incompatibilities}\DIFaddend . While unlikely, the use of this option may even cause boot \DIFdelbegin \DIFdel{failure}\DIFdelend \DIFaddbegin \DIFadd{failures}\DIFaddend .
   This option should be used without any warranty exclusively on the boards known to be compatible.
+  \DIFaddbegin \DIFadd{Check }\href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
+  \DIFadd{for some known issues with Haswell and other boards.
+}\DIFaddend 
 
   \emph{Note 2}: Be \DIFdelbegin \DIFdel{warned }\DIFdelend \DIFaddbegin \DIFadd{aware }\DIFaddend that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
