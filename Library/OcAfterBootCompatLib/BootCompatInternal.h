@@ -97,8 +97,11 @@
 
 /**
   Assume the kernel is roughly 128 MBs.
+  And the recovery introduced with Big Sur has roughly 200 MBs.
+  See 11.0b10 EB.MM.AKMR function (EfiBoot.MemoryMap.AllocateKernelMemoryRecovery),
+  it has 0xC119 pages requested. This value is likely calculated from KC size.
 **/
-#define ESTIMATED_KERNEL_SIZE    ((UINTN) SIZE_128MB)
+#define ESTIMATED_KERNEL_SIZE    ((UINTN) (200 * SIZE_1MB))
 
 /**
   Preserved relocation entry.

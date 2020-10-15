@@ -11,6 +11,7 @@ OpenCore Changelog
 - Fixed incorrect core/thread counts on Pentium M processors
 - Added `SSDT-UNC.dsl` ACPI sample to resolve X99 issues, thx @RemB
 - Updated builtin firmware versions for SMBIOS and the rest
+- Increased slide allocation reserve to 200 MB for Big Sur beta 10
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
