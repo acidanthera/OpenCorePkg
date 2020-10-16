@@ -803,7 +803,7 @@ CreateMemoryDevice (
   // Sizes over 32GB-1MB need to be represented in the Extended Size field.
   // Both will be represented in MB.
   //
-  if ((*DeviceData->Size * SIZE_1MB) < SIZE_32GB - SIZE_1MB) {
+  if ((UINT64)(* DeviceData->Size) * SIZE_1MB < SIZE_32GB - SIZE_1MB) {
     Table->CurrentPtr.Standard.Type17->Size         = (UINT16)*DeviceData->Size;
     Table->CurrentPtr.Standard.Type17->ExtendedSize = 0;
   } else {
