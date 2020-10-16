@@ -442,6 +442,32 @@ typedef enum {
   _(UINT8                       , SmcPlatform         , [8] , {0}                              , () )
   OC_DECLARE (OC_PLATFORM_DATA_HUB_CONFIG)
 
+#define OC_PLATFORM_MEMORY_DEVICE_ENTRY_FIELDS(_, __) \
+  _(UINT32                      , Size                ,     , 0                                  , () )                   \
+  _(UINT16                      , Speed               ,     , 0                                  , () )                   \
+  _(OC_STRING                   , DeviceLocator       ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , BankLocator         ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Manufacturer        ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SerialNumber        ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , AssetTag            ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , PartNumber          ,     , OC_STRING_CONSTR ("Unknown", _, __), OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICE_ENTRY)
+
+#define OC_PLATFORM_MEMORY_DEVICES_ARRAY_FIELDS(_, __) \
+  OC_ARRAY (OC_PLATFORM_MEMORY_DEVICE_ENTRY, _, __)
+  OC_DECLARE (OC_PLATFORM_MEMORY_DEVICES_ARRAY)
+
+#define OC_PLATFORM_MEMORY_CONFIG_FIELDS(_, __) \
+  _(UINT8                           , FormFactor     ,     , 0x2                                                 , () ) \
+  _(UINT8                           , Type           ,     , 0x2                                                 , () ) \
+  _(UINT16                          , TypeDetail     ,     , 0x4                                                 , () ) \
+  _(UINT16                          , TotalWidth     ,     , 0xFFFF                                              , () ) \
+  _(UINT16                          , DataWidth      ,     , 0xFFFF                                              , () ) \
+  _(UINT8                           , ErrorCorrection,     , 0x3                                                 , () ) \
+  _(UINT64                          , MaxCapacity    ,     , 0                                                   , () ) \
+  _(OC_PLATFORM_MEMORY_DEVICES_ARRAY, Devices        ,     , OC_CONSTR3 (OC_PLATFORM_MEMORY_DEVICES_ARRAY, _, __), OC_DESTR (OC_PLATFORM_MEMORY_DEVICES_ARRAY))
+  OC_DECLARE (OC_PLATFORM_MEMORY_CONFIG)
+
 #define OC_PLATFORM_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_STRING                   , Bid                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Mlb                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
@@ -477,18 +503,19 @@ typedef enum {
   _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
   _(UINT8                        , SmcVersion            , [16] , {0}                          , ()                   ) \
-  _(UINT16                       , ProcessorType         ,  , 0                                , ()                   ) \
-  _(UINT8                        , MemoryFormFactor      ,  , 0                                , ()                   )
+  _(UINT16                       , ProcessorType         ,  , 0                                , ()                   )
   OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
 
 #define OC_PLATFORM_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , Automatic        ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , CustomMemory     ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
   _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
   _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
   _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
   _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_MEMORY_CONFIG   , Memory           ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
   _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
   _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)

@@ -62,6 +62,9 @@ OC_STRUCTORS       (OC_NVRAM_CONFIG, ())
 
 OC_STRUCTORS       (OC_PLATFORM_GENERIC_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_DATA_HUB_CONFIG, ())
+OC_STRUCTORS       (OC_PLATFORM_MEMORY_DEVICE_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_PLATFORM_MEMORY_DEVICES_ARRAY)
+OC_STRUCTORS       (OC_PLATFORM_MEMORY_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_NVRAM_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_SMBIOS_CONFIG, ())
 OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
@@ -511,6 +514,36 @@ mPlatformConfigurationGenericSchema[] = {
 
 STATIC
 OC_SCHEMA
+mPlatformConfigurationMemoryDeviceEntry[] = {
+  OC_SCHEMA_STRING_IN  ("AssetTag",      OC_PLATFORM_MEMORY_DEVICE_ENTRY, AssetTag),
+  OC_SCHEMA_STRING_IN  ("BankLocator",   OC_PLATFORM_MEMORY_DEVICE_ENTRY, BankLocator),
+  OC_SCHEMA_STRING_IN  ("DeviceLocator", OC_PLATFORM_MEMORY_DEVICE_ENTRY, DeviceLocator),
+  OC_SCHEMA_STRING_IN  ("Manufacturer",  OC_PLATFORM_MEMORY_DEVICE_ENTRY, Manufacturer),
+  OC_SCHEMA_STRING_IN  ("PartNumber",    OC_PLATFORM_MEMORY_DEVICE_ENTRY, PartNumber),
+  OC_SCHEMA_STRING_IN  ("SerialNumber",  OC_PLATFORM_MEMORY_DEVICE_ENTRY, SerialNumber),
+  OC_SCHEMA_INTEGER_IN ("Size",          OC_PLATFORM_MEMORY_DEVICE_ENTRY, Size),
+  OC_SCHEMA_INTEGER_IN ("Speed",         OC_PLATFORM_MEMORY_DEVICE_ENTRY, Speed)
+};
+
+STATIC
+OC_SCHEMA
+mPlatformConfigurationMemoryDevicesSchema = OC_SCHEMA_DICT (NULL, mPlatformConfigurationMemoryDeviceEntry);
+
+STATIC
+OC_SCHEMA
+mPlatformConfigurationMemorySchema[] = {
+  OC_SCHEMA_INTEGER_IN ("DataWidth",       OC_GLOBAL_CONFIG, PlatformInfo.Memory.DataWidth),
+  OC_SCHEMA_ARRAY_IN   ("Devices",         OC_GLOBAL_CONFIG, PlatformInfo.Memory.Devices, &mPlatformConfigurationMemoryDevicesSchema),
+  OC_SCHEMA_INTEGER_IN ("ErrorCorrection", OC_GLOBAL_CONFIG, PlatformInfo.Memory.ErrorCorrection),
+  OC_SCHEMA_INTEGER_IN ("FormFactor",      OC_GLOBAL_CONFIG, PlatformInfo.Memory.FormFactor),
+  OC_SCHEMA_INTEGER_IN ("MaxCapacity",     OC_GLOBAL_CONFIG, PlatformInfo.Memory.MaxCapacity),
+  OC_SCHEMA_INTEGER_IN ("TotalWidth",      OC_GLOBAL_CONFIG, PlatformInfo.Memory.TotalWidth),
+  OC_SCHEMA_INTEGER_IN ("Type",            OC_GLOBAL_CONFIG, PlatformInfo.Memory.Type),
+  OC_SCHEMA_INTEGER_IN ("TypeDetail",      OC_GLOBAL_CONFIG, PlatformInfo.Memory.TypeDetail)
+};
+
+STATIC
+OC_SCHEMA
 mPlatformConfigurationNvramSchema[] = {
   OC_SCHEMA_STRING_IN ("BID",                  OC_GLOBAL_CONFIG, PlatformInfo.Nvram.Bid),
   OC_SCHEMA_DATAF_IN  ("FirmwareFeatures",     OC_GLOBAL_CONFIG, PlatformInfo.Nvram.FirmwareFeatures),
@@ -539,7 +572,6 @@ mPlatformConfigurationSmbiosSchema[] = {
   OC_SCHEMA_STRING_IN  ("ChassisVersion",         OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ChassisVersion),
   OC_SCHEMA_DATAF_IN   ("FirmwareFeatures",       OC_GLOBAL_CONFIG, PlatformInfo.Smbios.FirmwareFeatures),
   OC_SCHEMA_DATAF_IN   ("FirmwareFeaturesMask",   OC_GLOBAL_CONFIG, PlatformInfo.Smbios.FirmwareFeaturesMask),
-  OC_SCHEMA_INTEGER_IN ("MemoryFormFactor",       OC_GLOBAL_CONFIG, PlatformInfo.Smbios.MemoryFormFactor),
   OC_SCHEMA_INTEGER_IN ("PlatformFeature",        OC_GLOBAL_CONFIG, PlatformInfo.Smbios.PlatformFeature),
   OC_SCHEMA_INTEGER_IN ("ProcessorType",          OC_GLOBAL_CONFIG, PlatformInfo.Smbios.ProcessorType),
   OC_SCHEMA_DATAF_IN   ("SmcVersion",             OC_GLOBAL_CONFIG, PlatformInfo.Smbios.SmcVersion),
@@ -556,8 +588,10 @@ STATIC
 OC_SCHEMA
 mPlatformConfigurationSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("Automatic",        OC_GLOBAL_CONFIG, PlatformInfo.Automatic),
+  OC_SCHEMA_BOOLEAN_IN ("CustomMemory",     OC_GLOBAL_CONFIG, PlatformInfo.CustomMemory),
   OC_SCHEMA_DICT_OPT   ("DataHub",          mPlatformConfigurationDataHubSchema),
   OC_SCHEMA_DICT       ("Generic",          mPlatformConfigurationGenericSchema),
+  OC_SCHEMA_DICT_OPT   ("Memory",           mPlatformConfigurationMemorySchema),
   OC_SCHEMA_DICT_OPT   ("PlatformNVRAM",    mPlatformConfigurationNvramSchema),
   OC_SCHEMA_DICT_OPT   ("SMBIOS",           mPlatformConfigurationSmbiosSchema),
   OC_SCHEMA_BOOLEAN_IN ("UpdateDataHub",    OC_GLOBAL_CONFIG, PlatformInfo.UpdateDataHub),

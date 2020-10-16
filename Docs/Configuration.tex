@@ -4282,6 +4282,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   cases not using \texttt{Automatic} may lead to hard to debug errors.
 
 \item
+  \texttt{CustomMemory}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use custom memory configuration defined in the
+  \texttt{Memory} section. This completely replaces any existing memory
+  configuration in SMBIOS, and is only active when \texttt{UpdateSMBIOS}
+  is set to \texttt{true}.
+
+\item
   \texttt{UpdateDataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4353,6 +4362,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update Data Hub fields. This section is read
   only when \texttt{Automatic} is not active.
+\item
+  \texttt{Memory}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Optional}: When \texttt{CustomMemory} is \texttt{false}\\
+  \textbf{Description}: Define custom memory configuration.
 \item
   \texttt{PlatformNVRAM}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
@@ -4621,6 +4635,221 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
   key.
+\end{enumerate}
+
+\subsection{Memory Properties}\label{platforminfomemory}
+
+\begin{enumerate}
+\item
+  \texttt{DataWidth}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0xFFFF} (unknown)\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Data Width\\
+  \textbf{Description}: Specifies the data width, in bits, of the
+  memory. A \texttt{DataWidth} of \texttt{0} and a \texttt{TotalWidth} of \texttt{8}
+  indicates that the device is being used solely to provide 8
+  error-correction bits.
+
+\item
+  \texttt{Devices}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Specifies the custom memory devices to be added.
+
+  Designed to be filled with \texttt{plist\ dictionary} values, describing each
+  memory device. See \hyperref[platforminfomemorydevice]{Memory Devices Properties}
+  section below. This should include all memory slots, even if unpopulated.
+
+\item
+  \texttt{ErrorCorrection}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x03}\\
+  \textbf{SMBIOS}: Physical Memory Array (Type 16) --- Memory Error Correction\\
+  \textbf{Description}: Specifies the primary hardware error correction or
+  detection method supported by the memory.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x03} --- None
+  \item
+    \texttt{0x04} --- Parity
+  \item
+    \texttt{0x05} --- Single-bit ECC
+  \item
+    \texttt{0x06} --- Multi-bit ECC
+  \item
+    \texttt{0x07} --- CRC
+  \end{itemize}
+
+\item
+  \texttt{FormFactor}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x02}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Form Factor\\
+  \textbf{Description}: Specifies the form factor of the memory.
+  On Macs this should usually be DIMM or SODIMM. Commonly used form
+  factors are listed below.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x09} --- DIMM
+  \item
+    \texttt{0x0D} --- SODIMM
+  \item
+    \texttt{0x0F} --- FB-DIMM
+  \end{itemize}
+
+\item
+  \texttt{MaxCapacity}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Physical Memory Array (Type 16) --- Maximum Capacity\\
+  \textbf{Description}: Specifies the maximum amount of memory, in bytes,
+  supported by the system.
+
+\item
+  \texttt{TotalWidth}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0xFFFF} (unknown)\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Total Width\\
+  \textbf{Description}: Specifies the total width, in bits, of the
+  memory, including any check or error-correction bits. If there are
+  no error-correction bits, this value should be equal to \texttt{DataWidth}.
+
+\item
+  \texttt{Type}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x02}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Memory Type\\
+  \textbf{Description}: Specifies the memory type. Commonly used types are listed below.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x0F} --- SDRAM
+  \item
+    \texttt{0x12} --- DDR
+  \item
+    \texttt{0x13} --- DDR2
+  \item
+    \texttt{0x14} --- DDR2 FB-DIMM
+  \item
+    \texttt{0x18} --- DDR3
+  \item
+    \texttt{0x1A} --- DDR4
+  \item
+    \texttt{0x1B} --- LPDDR
+  \item
+    \texttt{0x1C} --- LPDDR2
+  \item
+    \texttt{0x1D} --- LPDDR3
+  \item
+    \texttt{0x1E} --- LPDDR4
+  \end{itemize}
+
+\item
+  \texttt{TypeDetail}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0x4}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Type Detail\\
+  \textbf{Description}: Specifies additional memory type information.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Bit 0} --- Reserved, set to 0
+  \item
+    \texttt{Bit 1} --- Other
+  \item
+    \texttt{Bit 2} --- Unknown
+  \item
+    \texttt{Bit 7} --- Synchronous
+  \item
+    \texttt{Bit 13} --- Registered (buffered)
+  \item
+    \texttt{Bit 14} --- Unbuffered (unregistered)
+  \end{itemize}
+
+\end{enumerate}
+
+\subsubsection{Memory Device Properties}\label{platforminfomemorydevice}
+
+\begin{enumerate}
+\item
+  \texttt{AssetTag}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Asset Tag\\
+  \textbf{Description}: Specifies the asset tag of this memory device.
+
+\item
+  \texttt{BankLocator}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Bank Locator\\
+  \textbf{Description}: Specifies the physically labeled bank where the
+  memory device is located.
+
+\item
+  \texttt{DeviceLocator}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Device Locator\\
+  \textbf{Description}: Specifies the physically-labeled socket or
+  board position where the memory device is located.
+
+\item
+  \texttt{Manufacturer}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Manufacturer\\
+  \textbf{Description}: Specifies the manufacturer of this memory device.
+
+\item
+  \texttt{PartNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Part Number\\
+  \textbf{Description}: Specifies the part number of this memory device.
+
+\item
+  \texttt{SerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Serial Number\\
+  \textbf{Description}: Specifies the serial number of this memory device.
+
+\item
+  \texttt{Size}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Size\\
+  \textbf{Description}: Specifies the size of the memory device, in megabytes.
+  \texttt{0} indicates this slot is not populated.
+
+\item
+  \texttt{Speed}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Speed\\
+  \textbf{Description}: Specifies the maximum capable speed of the device,
+  in megatransfers per second (MT/s), or MHz in older versions (3.0 and earlier)
+  of the SMBIOS specification. \texttt{0} indicates an unknown speed.
+
 \end{enumerate}
 
 \subsection{PlatformNVRAM Properties}\label{platforminfonvram}
@@ -4935,13 +5164,6 @@ Apple ROM Version
   For a full list of available values and their limitations (the value will
   only apply if the CPU core count matches) refer to Apple SMBIOS definitions header
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}.
-\item
-  \texttt{MemoryFormFactor}\\
-  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
-  \textbf{Failsafe}: OEM specified\\
-  \textbf{SMBIOS}: Memory Device (Type 17) --- Form Factor\\
-  \textbf{Description}: Memory form factor. On Macs it should be DIMM or
-  SODIMM.
 \end{enumerate}
 
 \section{UEFI}\label{uefi}
