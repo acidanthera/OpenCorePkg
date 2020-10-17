@@ -46,8 +46,8 @@ Kexts
 | [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 12.0.0 (10.8) | — |
 | [EMUUSBAudio.kext](https://github.com/Wouter1/EMU-driver) | — | — |
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — |
-| [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 (10.6) | 17.0.0 (10.13) |
-| [Nvidia Web-drivers](https://gfe.nvidia.com/mac-update) | 12.0.0 (10.8) | 17.0.0 (10.13) |
+| [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 (10.6) | 17.9.9 (10.13) |
+| [Nvidia Web-drivers](https://gfe.nvidia.com/mac-update) | 12.0.0 (10.8) | 17.9.9 (10.13) |
 | [SNBGraphicsMojaveInstaller](https://github.com/Andrej-Antipov/SNBGraphicsMojaveInstaller) | 18.0.0 (10.14) From 10.13 | — |
 | [VoodooHDA.kext](https://sourceforge.net/projects/voodoohda/) | — | — |
 | [WhateverGreen.kext](https://github.com/acidanthera/WhateverGreen) | 12.0.0 (10.8) | — |
