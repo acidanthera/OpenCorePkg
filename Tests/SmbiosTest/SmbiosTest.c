@@ -90,7 +90,7 @@ TestSmbios (
   OcCpuScanProcessor (&CpuInfo);
   Status = OcSmbiosTablePrepare (&SmbiosTable);
   if (!EFI_ERROR (Status)) {
-    OcSmbiosCreate (&SmbiosTable, &Data, OcSmbiosUpdateCreate, &CpuInfo);
+    OcSmbiosCreate (&SmbiosTable, &Data, OcSmbiosUpdateCreate, &CpuInfo, FALSE);
     OcSmbiosTableFree (&SmbiosTable);
   }
 

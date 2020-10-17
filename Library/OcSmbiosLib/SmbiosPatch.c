@@ -643,6 +643,56 @@ PatchMemoryArray (
   SmbiosFinaliseStruct (Table);
 }
 
+/** Type 16
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+**/
+STATIC
+VOID
+CreateMemoryArray (
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+     OUT SMBIOS_HANDLE                   *Handle
+  )
+{
+  UINT8    MinLength;
+
+  *Handle       = OcSmbiosInvalidHandle;
+  MinLength     = sizeof (*Table->CurrentPtr.Standard.Type16);
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MinLength, 1))) {
+    return;
+  }
+  Table->CurrentPtr.Standard.Type16->Location               = MemoryArrayLocationSystemBoard;
+  Table->CurrentPtr.Standard.Type16->Use                    = MemoryArrayUseSystemMemory;
+  Table->CurrentPtr.Standard.Type16->MemoryErrorCorrection  = *Data->MemoryErrorCorrection;
+  //
+  // Do not support memory error information. 0xFFFF indicates no errors previously detected.
+  //
+  Table->CurrentPtr.Standard.Type16->MemoryErrorInformationHandle = 0xFFFF;
+  Table->CurrentPtr.Standard.Type16->NumberOfMemoryDevices        = Data->MemoryDevicesCount;
+
+  //
+  // Sizes over 2TB need to use the Extended Maximum Capacity field which is represented in bytes.
+  // Maximum Capacity is represented in KB.
+  //
+  if (*Data->MemoryMaxCapacity < SIZE_2TB) {
+    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = (UINT16)(*Data->MemoryMaxCapacity / SIZE_1KB);
+    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = 0;
+  } else {
+    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = SIZE_2TB / SIZE_1KB;
+    Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = *Data->MemoryMaxCapacity;
+  }
+ 
+  //
+  // Return assigned handle
+  //
+  *Handle = Table->CurrentPtr.Standard.Hdr->Handle;
+
+  SmbiosFinaliseStruct (Table);
+}
+
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -706,6 +756,80 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->MinimumVoltage, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->MaximumVoltage, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->ConfiguredVoltage, Original, NULL, NULL);
+
+  //
+  // Return assigned handle
+  //
+  *Handle = Table->CurrentPtr.Standard.Hdr->Handle;
+
+  SmbiosFinaliseStruct (Table);
+}
+
+/** Type 17
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+**/
+STATIC
+VOID
+CreateMemoryDevice (
+  IN OUT OC_SMBIOS_TABLE                 *Table,
+  IN     OC_SMBIOS_DATA                  *Data,
+  IN     OC_SMBIOS_MEMORY_DEVICE_DATA    *DeviceData,
+  IN     SMBIOS_HANDLE                   MemoryArrayHandle,
+  IN     UINT16                          Index,
+     OUT SMBIOS_HANDLE                   *Handle
+  )
+{
+  UINT8    MinLength;
+  UINT8    StringIndex;
+
+  *Handle       = OcSmbiosInvalidHandle;
+  MinLength     = sizeof (*Table->CurrentPtr.Standard.Type17);
+  StringIndex   = 0;
+
+  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE, MinLength, Index))) {
+    return;
+  }
+
+  Table->CurrentPtr.Standard.Type17->TotalWidth = *Data->MemoryTotalWidth;
+  Table->CurrentPtr.Standard.Type17->DataWidth  = *Data->MemoryDataWidth;
+  Table->CurrentPtr.Standard.Type17->FormFactor = *Data->MemoryFormFactor;
+  Table->CurrentPtr.Standard.Type17->MemoryType = *Data->MemoryType;
+  Table->CurrentPtr.Standard.Type17->TypeDetail = *((MEMORY_DEVICE_TYPE_DETAIL *)Data->MemoryTypeDetail);
+  Table->CurrentPtr.Standard.Type17->Speed      = *DeviceData->Speed;
+
+  //
+  // Sizes over 32GB-1MB need to be represented in the Extended Size field.
+  // Both will be represented in MB.
+  //
+  if ((UINT64)(* DeviceData->Size) * SIZE_1MB < SIZE_32GB - SIZE_1MB) {
+    Table->CurrentPtr.Standard.Type17->Size         = (UINT16)*DeviceData->Size;
+    Table->CurrentPtr.Standard.Type17->ExtendedSize = 0;
+  } else {
+    Table->CurrentPtr.Standard.Type17->Size         = 0x7FFF;
+    Table->CurrentPtr.Standard.Type17->ExtendedSize = *DeviceData->Size;
+  }
+
+  SmbiosOverrideString (Table, DeviceData->AssetTag, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->AssetTag       = StringIndex;
+  SmbiosOverrideString (Table, DeviceData->BankLocator, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->BankLocator    = StringIndex;
+  SmbiosOverrideString (Table, DeviceData->DeviceLocator, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->DeviceLocator  = StringIndex;
+  SmbiosOverrideString (Table, DeviceData->Manufacturer, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->Manufacturer   = StringIndex;
+  SmbiosOverrideString (Table, DeviceData->PartNumber, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->PartNumber     = StringIndex;
+  SmbiosOverrideString (Table, DeviceData->SerialNumber, &StringIndex);
+  Table->CurrentPtr.Standard.Type17->SerialNumber   = StringIndex;
+
+  //
+  // Assign the parent memory array handle.
+  // Do not support memory error information. 0xFFFF indicates no errors previously detected.
+  //
+  Table->CurrentPtr.Standard.Type17->MemoryArrayHandle            = MemoryArrayHandle;
+  Table->CurrentPtr.Standard.Type17->MemoryErrorInformationHandle = 0xFFFF;
 
   //
   // Return assigned handle
@@ -1664,7 +1788,8 @@ OcSmbiosCreate (
   IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
   IN     OC_SMBIOS_DATA         *Data,
   IN     OC_SMBIOS_UPDATE_MODE  Mode,
-  IN     OC_CPU_INFO            *CpuInfo
+  IN     OC_CPU_INFO            *CpuInfo,
+  IN     BOOLEAN                UseCustomMemory
   )
 {
   EFI_STATUS                      Status;
@@ -1709,105 +1834,129 @@ OcSmbiosCreate (
   PatchSystemSlots (SmbiosTable, Data);
 
   //
-  // Patch memory information.
+  // Create new memory tables if custom memory is desired.
+  // Otherwise we'll patch the existing memory information.
   //
-  NumMemoryArrays       = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY);
-  NumMemoryArrayMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
-  NumMemoryDevices      = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
-  NumMemoryDeviceMapped = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
-
-  MemoryArrayNewIndex        = 1;
-  MemoryArrayMappedNewIndex  = 1;
-  MemoryDeviceNewIndex       = 1;
-  MemoryDeviceMappedNewIndex = 1;
-
-  for (MemoryArrayNo = 1; MemoryArrayNo <= NumMemoryArrays; MemoryArrayNo++) {
-    MemoryArray = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MemoryArrayNo);
-
-    //
-    // We want to exclude any non-system memory tables, such as system ROM flash areas.
-    //
-    if (MemoryArray.Raw == NULL
-      || MemoryArray.Standard.Type16->Use != MemoryArrayUseSystemMemory) {
-      continue;
-    }
-
-    //
-    // Generate new type 16 table for memory array.
-    //
-    PatchMemoryArray (
+  if (UseCustomMemory) {
+    CreateMemoryArray (
       SmbiosTable,
       Data,
-      MemoryArray,
-      MemoryArrayNewIndex,
       &MemoryArrayHandle
       );
-    MemoryArrayNewIndex++;
+    
+      //
+      // Generate new memory device tables (type 17) for this memory array.
+      //
+      for (MemoryDeviceNo = 0; MemoryDeviceNo < Data->MemoryDevicesCount; MemoryDeviceNo++) {
+        CreateMemoryDevice (
+          SmbiosTable,
+          Data,
+          &Data->MemoryDevices[MemoryDeviceNo],
+          MemoryArrayHandle,
+          MemoryDeviceNo + 1,
+          &MemoryDeviceHandle
+          );
+      }
 
-    //
-    // Generate new memory mapped address tables (type 19) for this memory array.
-    //
-    for (MemoryArrayMappedNo = 1; MemoryArrayMappedNo <= NumMemoryArrayMapped; MemoryArrayMappedNo++) {
-      MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo);
+  } else {
+    NumMemoryArrays       = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY);
+    NumMemoryArrayMapped  = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS);
+    NumMemoryDevices      = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE);
+    NumMemoryDeviceMapped = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS);
 
-      if (MemoryArrayAddress.Raw == NULL
-        || MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+    MemoryArrayNewIndex        = 1;
+    MemoryArrayMappedNewIndex  = 1;
+    MemoryDeviceNewIndex       = 1;
+    MemoryDeviceMappedNewIndex = 1;
+
+    for (MemoryArrayNo = 0; MemoryArrayNo < NumMemoryArrays; MemoryArrayNo++) {
+      MemoryArray = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MemoryArrayNo + 1);
+
+      //
+      // We want to exclude any non-system memory tables, such as system ROM flash areas.
+      //
+      if (MemoryArray.Raw == NULL
+        || MemoryArray.Standard.Type16->Use != MemoryArrayUseSystemMemory) {
         continue;
       }
 
-      PatchMemoryMappedAddress (
+      //
+      // Generate new type 16 table for memory array.
+      //
+      PatchMemoryArray (
         SmbiosTable,
         Data,
-        MemoryArrayHandle,
-        MemoryArrayAddress,
-        MemoryArrayMappedNewIndex,
-        Mapping,
-        &MappingNum
+        MemoryArray,
+        MemoryArrayNewIndex,
+        &MemoryArrayHandle
         );
-      MemoryArrayMappedNewIndex++;
-    }
+      MemoryArrayNewIndex++;
 
-    //
-    // Generate new memory device tables (type 17) for this memory array.
-    //
-    for (MemoryDeviceNo = 1; MemoryDeviceNo <= NumMemoryDevices; MemoryDeviceNo++) {
-      MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
+      //
+      // Generate new memory mapped address tables (type 19) for this memory array.
+      //
+      for (MemoryArrayMappedNo = 0; MemoryArrayMappedNo < NumMemoryArrayMapped; MemoryArrayMappedNo++) {
+        MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo + 1);
 
-      if (MemoryDeviceInfo.Raw == NULL
-        || MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
-        continue;
+        if (MemoryArrayAddress.Raw == NULL
+          || MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+          continue;
+        }
+
+        PatchMemoryMappedAddress (
+          SmbiosTable,
+          Data,
+          MemoryArrayHandle,
+          MemoryArrayAddress,
+          MemoryArrayMappedNewIndex,
+          Mapping,
+          &MappingNum
+          );
+        MemoryArrayMappedNewIndex++;
       }
 
-      PatchMemoryDevice (
-        SmbiosTable,
-        Data,
-        MemoryArrayHandle,
-        MemoryDeviceInfo,
-        MemoryDeviceNewIndex,
-        &MemoryDeviceHandle
-        );
-      MemoryDeviceNewIndex++;
-
       //
-      // Generate a memory device mapping table (type 20) for each occupied memory device.
+      // Generate new memory device tables (type 17) for this memory array.
       //
-      for (MemoryDeviceMappedNo = 1; MemoryDeviceMappedNo <= NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
-        MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo);
+      for (MemoryDeviceNo = 0; MemoryDeviceNo < NumMemoryDevices; MemoryDeviceNo++) {
+        MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo + 1);
 
-        if (MemoryDeviceAddress.Raw != NULL
-          && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
-          && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
-            MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
-            PatchMemoryMappedDevice (
-              SmbiosTable,
-              Data,
-              MemoryDeviceAddress,
-              MemoryDeviceMappedNewIndex,
-              MemoryDeviceHandle,
-              Mapping,
-              MappingNum
-              );
-            MemoryDeviceMappedNewIndex++;
+        if (MemoryDeviceInfo.Raw == NULL
+          || MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
+          continue;
+        }
+
+        PatchMemoryDevice (
+          SmbiosTable,
+          Data,
+          MemoryArrayHandle,
+          MemoryDeviceInfo,
+          MemoryDeviceNewIndex,
+          &MemoryDeviceHandle
+          );
+        MemoryDeviceNewIndex++;
+
+        //
+        // Generate a memory device mapping table (type 20) for each occupied memory device.
+        //
+        for (MemoryDeviceMappedNo = 0; MemoryDeviceMappedNo < NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
+          MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo + 1);
+
+          if (MemoryDeviceAddress.Raw != NULL
+            && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
+            && MemoryDeviceAddress.Standard.Type20->MemoryDeviceHandle ==
+              MemoryDeviceInfo.Standard.Type17->Hdr.Handle) {
+              PatchMemoryMappedDevice (
+                SmbiosTable,
+                Data,
+                MemoryDeviceAddress,
+                MemoryDeviceMappedNewIndex,
+                MemoryDeviceHandle,
+                Mapping,
+                MappingNum
+                );
+              MemoryDeviceMappedNewIndex++;
+          }
         }
       }
     }

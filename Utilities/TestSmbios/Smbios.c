@@ -109,7 +109,7 @@ int main(int argc, char** argv) {
   OC_SMBIOS_TABLE  SmbiosTable;
   Status = OcSmbiosTablePrepare (&SmbiosTable);
   if (!EFI_ERROR (Status)) {
-    Status = OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo);
+    Status = OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo, FALSE);
     if (!EFI_ERROR (Status)) {
       SMBIOS_TABLE_3_0_ENTRY_POINT *patchedTablePtr = NULL;
       Status = EfiGetSystemConfigurationTable (&gEfiSmbios3TableGuid, (VOID **) &patchedTablePtr);
@@ -154,7 +154,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
       OC_SMBIOS_TABLE  SmbiosTable;
       Status = OcSmbiosTablePrepare (&SmbiosTable);
       if (!EFI_ERROR (Status)) {
-        OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo);
+        OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo, FALSE);
         OcSmbiosTableFree (&SmbiosTable);
       }
 
