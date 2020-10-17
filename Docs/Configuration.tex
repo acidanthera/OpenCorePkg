@@ -4695,6 +4695,9 @@ be used. Version with macOS specific enhancements can be downloaded from
   On Macs this should usually be DIMM or SODIMM. Commonly used form
   factors are listed below.
 
+  When \texttt{CustomMemory} is \texttt{false}, this value is automatically set
+  based on Mac product name.
+
   \begin{itemize}
   \tightlist
   \item
@@ -4847,8 +4850,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{SMBIOS}: Memory Device (Type 17) --- Speed\\
   \textbf{Description}: Specifies the maximum capable speed of the device,
-  in megatransfers per second (MT/s), or MHz in older versions (3.0 and earlier)
-  of the SMBIOS specification. \texttt{0} indicates an unknown speed.
+  in megatransfers per second (MT/s). \texttt{0} indicates an unknown speed.
 
 \end{enumerate}
 
