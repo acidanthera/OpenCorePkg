@@ -1847,13 +1847,13 @@ OcSmbiosCreate (
       //
       // Generate new memory device tables (type 17) for this memory array.
       //
-      for (MemoryDeviceNo = 1; MemoryDeviceNo <= Data->MemoryDevicesCount; MemoryDeviceNo++) {
+      for (MemoryDeviceNo = 0; MemoryDeviceNo < Data->MemoryDevicesCount; MemoryDeviceNo++) {
         CreateMemoryDevice (
           SmbiosTable,
           Data,
-          &Data->MemoryDevices[MemoryDeviceNo - 1],
+          &Data->MemoryDevices[MemoryDeviceNo],
           MemoryArrayHandle,
-          MemoryDeviceNo,
+          MemoryDeviceNo + 1,
           &MemoryDeviceHandle
           );
       }
@@ -1869,8 +1869,8 @@ OcSmbiosCreate (
     MemoryDeviceNewIndex       = 1;
     MemoryDeviceMappedNewIndex = 1;
 
-    for (MemoryArrayNo = 1; MemoryArrayNo <= NumMemoryArrays; MemoryArrayNo++) {
-      MemoryArray = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MemoryArrayNo);
+    for (MemoryArrayNo = 0; MemoryArrayNo < NumMemoryArrays; MemoryArrayNo++) {
+      MemoryArray = SmbiosGetOriginalStructure (SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY, MemoryArrayNo + 1);
 
       //
       // We want to exclude any non-system memory tables, such as system ROM flash areas.
@@ -1895,8 +1895,8 @@ OcSmbiosCreate (
       //
       // Generate new memory mapped address tables (type 19) for this memory array.
       //
-      for (MemoryArrayMappedNo = 1; MemoryArrayMappedNo <= NumMemoryArrayMapped; MemoryArrayMappedNo++) {
-        MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo);
+      for (MemoryArrayMappedNo = 0; MemoryArrayMappedNo < NumMemoryArrayMapped; MemoryArrayMappedNo++) {
+        MemoryArrayAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS, MemoryArrayMappedNo + 1);
 
         if (MemoryArrayAddress.Raw == NULL
           || MemoryArrayAddress.Standard.Type19->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
@@ -1918,8 +1918,8 @@ OcSmbiosCreate (
       //
       // Generate new memory device tables (type 17) for this memory array.
       //
-      for (MemoryDeviceNo = 1; MemoryDeviceNo <= NumMemoryDevices; MemoryDeviceNo++) {
-        MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo);
+      for (MemoryDeviceNo = 0; MemoryDeviceNo < NumMemoryDevices; MemoryDeviceNo++) {
+        MemoryDeviceInfo = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE, MemoryDeviceNo + 1);
 
         if (MemoryDeviceInfo.Raw == NULL
           || MemoryDeviceInfo.Standard.Type17->MemoryArrayHandle != MemoryArray.Standard.Type16->Hdr.Handle) {
@@ -1939,8 +1939,8 @@ OcSmbiosCreate (
         //
         // Generate a memory device mapping table (type 20) for each occupied memory device.
         //
-        for (MemoryDeviceMappedNo = 1; MemoryDeviceMappedNo <= NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
-          MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo);
+        for (MemoryDeviceMappedNo = 0; MemoryDeviceMappedNo < NumMemoryDeviceMapped; MemoryDeviceMappedNo++) {
+          MemoryDeviceAddress = SmbiosGetOriginalStructure (SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS, MemoryDeviceMappedNo + 1);
 
           if (MemoryDeviceAddress.Raw != NULL
             && SMBIOS_ACCESSIBLE (MemoryDeviceAddress, Standard.Type20->MemoryDeviceHandle)
