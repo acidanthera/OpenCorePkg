@@ -402,6 +402,11 @@ OcUseDirectGop (
     return Status;
   }
 
+  if (Gop->Mode->Info->PixelFormat == PixelBltOnly) {
+    DEBUG ((DEBUG_INFO, "OCC: This GOP does not support direct rendering\n"));
+    return EFI_UNSUPPORTED;
+  }
+
   mFramebufferContext = DirectGopFromTarget (Gop->Mode->FrameBufferBase, Gop->Mode->Info);
   if (mFramebufferContext == NULL) {
     DEBUG ((DEBUG_INFO, "OCC: Delaying direct GOP configuration...\n"));
