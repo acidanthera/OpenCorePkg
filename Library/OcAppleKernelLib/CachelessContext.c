@@ -75,7 +75,7 @@ AddKextDependency (
   DEPEND_KEXT       *DependKext;
   LIST_ENTRY        *KextLink;
 
-  KextLink          = GetFirstNode (Dependencies);
+  KextLink = GetFirstNode (Dependencies);
   while (!IsNull (Dependencies, KextLink)) {
     DependKext = GET_DEPEND_KEXT_FROM_LINK (KextLink);
 
@@ -556,6 +556,8 @@ ScanDependencies (
   DEPEND_KEXT     *DependKext;
   LIST_ENTRY      *KextLink;
 
+  DEBUG ((DEBUG_VERBOSE, "OCAK: Scanning dependencies for %a\n", Identifier));
+
   BuiltinKext = LookupBuiltinKextForIdentifier (Context, Identifier);
   if (BuiltinKext == NULL || BuiltinKext->OSBundleRequiredValue == KEXT_OSBUNDLE_REQUIRED_VALID) {
     //
@@ -567,8 +569,9 @@ ScanDependencies (
 
   BuiltinKext->PatchValidOSBundleRequired = TRUE;
 
-  if (!AddKextDependency (&Context->InjectedDependencies, Identifier)) {
-    return EFI_INVALID_PARAMETER;
+  Status = AddKextDependency (&Context->InjectedDependencies, Identifier);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   KextLink = GetFirstNode (&BuiltinKext->Dependencies);
@@ -1380,7 +1383,9 @@ CachelessContextHookBuiltin (
 
       KextLink = GetNextNode (&Context->InjectedDependencies, KextLink);
     }
+
     Context->BuiltInKextsValid = TRUE;
+    DEBUG ((DEBUG_INFO, "OCAK: Built-in kext cache successfully built\n"));
   }
 
   //
