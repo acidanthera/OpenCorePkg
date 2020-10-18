@@ -278,7 +278,7 @@ MACH_X (InternalMachoExpandImage) (
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
   IN  BOOLEAN            Strip,
-  OUT MACH_UINT_X        *FileOffset OPTIONAL
+  OUT UINT64             *FileOffset OPTIONAL
   )
 {
   MACH_HEADER_X             *Header;

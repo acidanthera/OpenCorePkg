@@ -264,7 +264,7 @@ InternalMachoExpandImage32 (
   OUT UINT8              *Destination,
   IN  UINT32             DestinationSize,
   IN  BOOLEAN            Strip,
-  OUT UINT32             *FileOffset OPTIONAL
+  OUT UINT64             *FileOffset OPTIONAL
   );
 
 /**

@@ -655,7 +655,7 @@ MachoExpandImage (
   ASSERT (Context != NULL);
 
   return Context->Is32Bit ?
-    InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, (UINT32 *) FileOffset) :
+    InternalMachoExpandImage32 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset) :
     InternalMachoExpandImage64 (Context, FALSE, Destination, DestinationSize, Strip, FileOffset);
 }
 
