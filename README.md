@@ -14,6 +14,7 @@ OpenCore bootloader with development SDK.
 - [KVM-OpenCore](https://github.com/Leoyzen/KVM-Opencore) in English, KVM configuration
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
+- [HackintoshLife](https://t.me/HackintoshLife_it) Italian telegram group 
 
 ## Libraries
 
