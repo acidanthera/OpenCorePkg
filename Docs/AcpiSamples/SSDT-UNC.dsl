@@ -21,7 +21,12 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "UNC", 0x00000000)
     {
         Method (_INI, 0, NotSerialized)
         {
-            PRBM = 0
+            // In most cases this patch does benefit all operating systems,
+            // yet on select pre-Windows 10 it may cause issues.
+            // Remove If (_OSI ("Darwin")) in case you have none.
+            If (_OSI ("Darwin")) {
+                PRBM = 0
+            }
         }
     }
 }
