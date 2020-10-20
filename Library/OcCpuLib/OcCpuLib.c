@@ -365,7 +365,8 @@ ScanIntelProcessor (
 
     if (Cpu->Model >= CPU_MODEL_NEHALEM
       && Cpu->Model != CPU_MODEL_NEHALEM_EX
-      && Cpu->Model != CPU_MODEL_WESTMERE_EX) {
+      && Cpu->Model != CPU_MODEL_WESTMERE_EX
+      && Cpu->Model != CPU_MODEL_ATOM) {
       TurboLimit.Uint64 = AsmReadMsr64 (MSR_NEHALEM_TURBO_RATIO_LIMIT);
       Cpu->TurboBusRatio1 = (UINT8) TurboLimit.Bits.Maximum1C;
       Cpu->TurboBusRatio2 = (UINT8) TurboLimit.Bits.Maximum2C;
