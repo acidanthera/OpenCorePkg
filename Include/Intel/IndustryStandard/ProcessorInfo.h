@@ -154,16 +154,18 @@ enum {
 #define CPU_MODEL_YONAH          0x0E  ///< Sossaman, Yonah
 #define CPU_MODEL_MEROM          0x0F  ///< Allendale, Conroe, Kentsfield, Woodcrest, Clovertown, Tigerton, Merom
 #define CPU_MODEL_PENRYN         0x17  ///< Wolfdale, Yorkfield, Harpertown, Penryn
-#define CPU_MODEL_NEHALEM        0x1A  ///< Bloomfield. Nehalem-EP, Nehalem-WS, Gainestown
-#define CPU_MODEL_ATOM           0x1C  ///< Atom
+#define CPU_MODEL_NEHALEM        0x1A  ///< Bloomfield, Nehalem-EP, Nehalem-WS, Gainestown
+#define CPU_MODEL_BONNELL        0x1C  ///< Bonnell, Silverthorne, Diamondville, Pineview
 #define CPU_MODEL_FIELDS         0x1E  ///< Lynnfield, Clarksfield, Jasper Forest
 #define CPU_MODEL_DALES          0x1F  ///< Havendale, Auburndale
 #define CPU_MODEL_NEHALEM_EX     0x2E  ///< Beckton
 #define CPU_MODEL_DALES_32NM     0x25  ///< Clarkdale, Arrandale
+#define CPU_MODEL_BONNELL_MID    0x26  ///< Bonnell, Lincroft
 #define CPU_MODEL_WESTMERE       0x2C  ///< Gulftown, Westmere-EP, Westmere-WS
 #define CPU_MODEL_WESTMERE_EX    0x2F
 #define CPU_MODEL_SANDYBRIDGE    0x2A  ///< Sandy Bridge
 #define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon E5, Core i7 Extreme
+#define CPU_MODEL_SALTWELL       0x36  ///< Saltwell, Cedarview
 #define CPU_MODEL_IVYBRIDGE      0x3A  ///< Ivy Bridge
 #define CPU_MODEL_IVYBRIDGE_EP   0x3E
 #define CPU_MODEL_CRYSTALWELL    0x46

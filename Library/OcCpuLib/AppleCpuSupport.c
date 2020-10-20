@@ -152,12 +152,17 @@ InternalDetectAppleProcessorType (
     // Prescott:    https://en.wikipedia.org/wiki/Pentium_4#Prescott
     // Prescott-2M: same page.
     // Cedar Mill:  same page.
+    // Bonnell:     https://en.wikipedia.org/wiki/Bonnell_(microarchitecture)
+    // Saltwell:    same page.        
     //
     // Not used by Apple.
     //
     case CPU_MODEL_PRESCOTT:    // 0x03
     case CPU_MODEL_PRESCOTT_2M: // 0x04
     case CPU_MODEL_CEDAR_MILL:  // 0x06
+    case CPU_MODEL_BONNELL:     // 0x1C
+    case CPU_MODEL_BONNELL_MID: // 0x26
+    case CPU_MODEL_SALTWELL:    // 0x36
       return Is64Bit ? AppleProcessorTypeCore2DuoType1 : AppleProcessorTypeCoreSolo; // 0x0301 if 64-bit, otherwise 0x0201
 
     //
