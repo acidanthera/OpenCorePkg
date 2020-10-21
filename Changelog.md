@@ -16,6 +16,7 @@ OpenCore Changelog
 - Added support for custom memory properties
 - Fixed intermittent 32-bit prelinking failures caused by improper Mach-O expansion
 - Fixed failures in cacheless injection dependency resolution
+- Fixed detection issues with older Atom CPUs
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
