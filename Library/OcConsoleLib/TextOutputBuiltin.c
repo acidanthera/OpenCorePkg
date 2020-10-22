@@ -367,7 +367,7 @@ RenderResync (
 
   if (Info->HorizontalResolution < TGT_CHAR_WIDTH * 3
     || Info->VerticalResolution < TGT_CHAR_HEIGHT * 3) {
-    return EFI_DEVICE_ERROR;
+    return EFI_LOAD_ERROR;
   }
 
   if (mCharacterBuffer != NULL) {
@@ -376,7 +376,7 @@ RenderResync (
 
   mCharacterBuffer = AllocatePool (TGT_CHAR_AREA * sizeof (mCharacterBuffer[0]));
   if (mCharacterBuffer == NULL) {
-    return EFI_DEVICE_ERROR;
+    return EFI_OUT_OF_RESOURCES;
   }
 
   mConsoleGopMode          = mGraphicsOutput->Mode->Mode;
@@ -406,9 +406,10 @@ RenderResync (
 STATIC
 EFI_STATUS
 EFIAPI
-AsciiTextReset (
+AsciiTextResetEx (
   IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN BOOLEAN                         ExtendedVerification
+  IN BOOLEAN                         ExtendedVerification,
+  IN BOOLEAN                         Debug
   )
 {
   EFI_STATUS                            Status;
@@ -424,6 +425,11 @@ AsciiTextReset (
 
   if (EFI_ERROR (Status)) {
     gBS->RestoreTPL (OldTpl);
+    if (Debug) {
+      DEBUG ((DEBUG_INFO, "OCC: ASCII Text Reset [HandleProtocolFallback] - %r\n", Status));
+      return Status;
+    }
+
     return EFI_DEVICE_ERROR;
   }
 
@@ -433,13 +439,31 @@ AsciiTextReset (
   mForegroundColor.Raw     = mGraphicsEfiColors[ARRAY_SIZE (mGraphicsEfiColors) / 2 - 1];
 
   Status = RenderResync (This);
+  gBS->RestoreTPL (OldTpl);
   if (EFI_ERROR (Status)) {
-    gBS->RestoreTPL (OldTpl);
-    return Status;
+    if (Debug) {
+      DEBUG ((DEBUG_INFO, "OCC: ASCII Text Reset [RenderResync] - %r\n", Status));
+      return Status;
+    }
+
+    return EFI_DEVICE_ERROR;
   }
 
-  gBS->RestoreTPL (OldTpl);
   return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+AsciiTextReset (
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
+  IN BOOLEAN                         ExtendedVerification
+  )
+{
+  EFI_STATUS                            Status;
+
+  Status = AsciiTextResetEx (This, ExtendedVerification, FALSE);
+  return Status;
 }
 
 STATIC
@@ -470,7 +494,7 @@ AsciiTextOutputString (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -591,7 +615,7 @@ AsciiTextQueryMode (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -628,7 +652,7 @@ AsciiTextSetMode (
     Status = RenderResync (This);
     gBS->RestoreTPL (OldTpl);
     if (EFI_ERROR (Status)) {
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -658,7 +682,7 @@ AsciiTextSetAttribute (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -705,7 +729,7 @@ AsciiTextClearScreen (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -763,7 +787,7 @@ AsciiTextSetCursorPosition (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -802,7 +826,7 @@ AsciiTextEnableCursor (
     Status = RenderResync (This);
     if (EFI_ERROR (Status)) {
       gBS->RestoreTPL (OldTpl);
-      return Status;
+      return EFI_DEVICE_ERROR;
     }
   }
 
@@ -942,7 +966,7 @@ OcUseBuiltinTextOutput (
 
   DEBUG ((DEBUG_INFO, "OCC: Using builtin text renderer with %d scale\n", mFontScale));
 
-  Status = AsciiTextReset (&mAsciiTextOutputProtocol, TRUE);
+  Status = AsciiTextResetEx (&mAsciiTextOutputProtocol, TRUE, TRUE);
 
   if (!EFI_ERROR (Status)) {
     OcConsoleControlSetMode (Mode);
