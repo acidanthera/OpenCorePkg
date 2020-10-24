@@ -1,3 +1,4 @@
+From: Goldfish64 <goldfishnet@aol.com>
 Subject: MdeModulePkg/AtaAtapiPassThru: Reduce IDE drive detection timeout
 
 This reduces the timeout for a drive response during IDE drive detection in DuetPkg,
