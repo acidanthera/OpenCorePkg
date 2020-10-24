@@ -45,7 +45,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
 
+#include <Library/OcMemoryLib.h>
+#include <Library/OcMiscLib.h>
+
 #include <IndustryStandard/Pci.h>
+#include <IndustryStandard/Edid.h>
 
 #include "VesaBiosExtensions.h"
 
@@ -54,6 +58,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Legacy region base is now 0x0C0000 instead of 0x100000.
 //
 #define LEGACY_REGION_BASE 0x0C0000
+#define LEGACY_REGION_SIZE 0x10000
 
 
 //

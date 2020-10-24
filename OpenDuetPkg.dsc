@@ -97,6 +97,12 @@
   HobLib|MdePkg/Library/DxeHobLib/DxeHobLib.inf
   CpuExceptionHandlerLib|MdeModulePkg/Library/CpuExceptionHandlerLibNull/CpuExceptionHandlerLibNull.inf
   ExtractGuidedSectionLib|MdePkg/Library/DxeExtractGuidedSectionLib/DxeExtractGuidedSectionLib.inf
+  OcDevicePathLib|OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf
+  OcFileLib|OpenCorePkg/Library/OcFileLib/OcFileLib.inf
+  OcGuardLib|OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
+  OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
+  OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
+  OcStringLib|OpenCorePkg/Library/OcStringLib/OcStringLib.inf
   #
   # To save size, use NULL library for DebugLib and ReportStatusCodeLib.
   # If need status code output, do library instance overriden.
@@ -225,10 +231,10 @@
   MSFT:DEBUG_*_*_CC_FLAGS        = /FAcs -Dinline=__inline -DMDEPKG_NDEBUG
   MSFT:RELEASE_*_*_CC_FLAGS      = /FAcs -Dinline=__inline -DMDEPKG_NDEBUG
 
-  XCODE:NOOPT_*_*_CC_FLAGS   = -fno-unwind-tables -O0
-  XCODE:DEBUG_*_*_CC_FLAGS   = -fno-unwind-tables -flto -Os -DMDEPKG_NDEBUG
-  XCODE:RELEASE_*_*_CC_FLAGS = -fno-unwind-tables -flto -Os -DMDEPKG_NDEBUG
+  XCODE:NOOPT_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1  -fno-unwind-tables -O0
+  XCODE:DEBUG_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1  -fno-unwind-tables -flto -Os -DMDEPKG_NDEBUG
+  XCODE:RELEASE_*_*_CC_FLAGS = -D OC_TARGET_RELEASE=1  -fno-unwind-tables -flto -Os -DMDEPKG_NDEBUG
 
-  GCC:NOOPT_*_*_CC_FLAGS     = -Wno-unused-but-set-variable
-  GCC:DEBUG_*_*_CC_FLAGS     = -DMDEPKG_NDEBUG -Wno-unused-but-set-variable
-  GCC:RELEASE_*_*_CC_FLAGS   = -DMDEPKG_NDEBUG -Wno-unused-but-set-variable
+  GCC:NOOPT_*_*_CC_FLAGS     = -D OC_TARGET_RELEASE=1  -Wno-unused-but-set-variable
+  GCC:DEBUG_*_*_CC_FLAGS     = -D OC_TARGET_RELEASE=1 -DMDEPKG_NDEBUG -Wno-unused-but-set-variable
+  GCC:RELEASE_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1 -DMDEPKG_NDEBUG -Wno-unused-but-set-variable

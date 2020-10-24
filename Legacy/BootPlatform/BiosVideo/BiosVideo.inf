@@ -36,6 +36,8 @@
   MemoryAllocationLib
   UefiDriverEntryPoint
   DevicePathLib
+  OcMemoryLib
+  OcMiscLib
 
 [Sources]
   BiosVideo.h
@@ -43,6 +45,8 @@
   ComponentName.c
   VesaBiosExtensions.h
   LegacyBiosThunk.c
+  VideoBiosPatch.h
+  VideoBiosPatch.c
 
 [Protocols]
   gEfiPciIoProtocolGuid
