@@ -80,6 +80,7 @@ OcGetDevicePolicyType (
           return OC_SCAN_ALLOW_DEVICE_SASEX;
         case MSG_SCSI_DP:
           return OC_SCAN_ALLOW_DEVICE_SCSI;
+        case MSG_APPLE_NVME_NAMESPACE_DP:
         case MSG_NVME_NAMESPACE_DP:
           return OC_SCAN_ALLOW_DEVICE_NVME;
         case MSG_ATAPI_DP:

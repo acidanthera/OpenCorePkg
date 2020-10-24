@@ -16,6 +16,14 @@
 #define OC_DEVICE_PATH_LIB_H
 
 /**
+  Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
+  Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
+  Here we replace it with the "right" value.
+  Reference: https://forums.macrumors.com/posts/28169441.
+**/
+#define MSG_APPLE_NVME_NAMESPACE_DP 0x22
+
+/**
   Append file name to device path.
 
   @param[in] DevicePath  The device path which to append the file path.

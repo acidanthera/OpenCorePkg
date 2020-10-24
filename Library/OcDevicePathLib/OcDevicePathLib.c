@@ -484,16 +484,13 @@ OcFixAppleBootDevicePathNode (
 
       case MSG_NVME_NAMESPACE_DP:
         //
-        // Apple MacPro5,1 includes NVMe driver, however, it contains a typo in MSG_SASEX_DP.
-        // Instead of 0x16 aka 22 (SasEx) it uses 0x22 aka 34 (Unspecified).
-        // Here we replace it with the "right" value.
-        // Reference: https://forums.macrumors.com/posts/28169441.
+        // Workaround for MacPro5,1 using custom NVMe type.
         //
         if (RestoreContext != NULL) {
           RestoreContext->Types.SasExNvme.SubType = Node.DevPath->SubType;
         }
 
-        Node.NvmeNamespace->Header.SubType = 0x22;
+        Node.NvmeNamespace->Header.SubType = MSG_APPLE_NVME_NAMESPACE_DP;
         return 1;
 
       default:
