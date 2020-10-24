@@ -270,6 +270,28 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
 
   \end{itemize}
 
+\item
+  \textbf{Identifier}: \texttt{ERR062-1} \\
+  \textbf{Published}: 2020-10-25 01:22 MSK \\
+  \textbf{Updated}: 2020-10-25 01:22 MSK \\
+  \textbf{Affected versions}: 0.6.1 and newer \\
+  \textbf{Resolved in}: --- \\
+  \textbf{Description}:
+
+  Booting Big Sur beta 10 will cause a kernel panic in \texttt{apfs.kext} with the
+  \texttt{Rooting from the live fs of a sealed volume is not allowed on a RELEASE build}
+  message. Reference:
+  \href{https://github.com/acidanthera/bugtracker/issues/1235}{acidanthera/bugtracker\#1235}.
+
+  \textbf{Possible workarounds}:
+  \begin{itemize}
+    \tightlist
+
+    \item Set \texttt{SecureBootModel} to \texttt{Disabled}
+
+  \end{itemize}
+
+
 \end{itemize}
 
 \end{document}
