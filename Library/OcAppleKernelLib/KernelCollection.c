@@ -224,10 +224,6 @@ KcRebuildMachHeader (
     return EFI_INVALID_PARAMETER;
   }
 
-  if (FilesetSize == 0) {
-    return EFI_SUCCESS; ///< Just in case.
-  }
-
   if (CurrentSize + RequiredSize > TextSegment->FileSize) {
     //
     // We do not have enough memory in the header, free some memory by merging
