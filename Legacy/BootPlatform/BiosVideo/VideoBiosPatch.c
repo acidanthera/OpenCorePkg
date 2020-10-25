@@ -15,6 +15,66 @@
 #include "BiosVideo.h"
 
 STATIC
+BOOLEAN
+GetEdidMaxResolution (
+  IN  BIOS_VIDEO_DEV    *BiosVideoPrivate,
+  OUT UINT16            *X,
+  OUT UINT16            *Y
+  )
+{
+  UINT8         Checksum;
+  UINT16        MaxX;
+  UINT16        MaxY;
+  UINT16        DtdX;
+  UINT16        DtdY;
+  UINT32        Index;
+
+  VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK  *Edid;
+  EDID_DTD                              *Dtds;
+
+  Edid = (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK *) BiosVideoPrivate->EdidActive.Edid;
+  if (Edid == NULL) {
+    return FALSE;
+  }
+
+  //
+  // Ensure checksum matches.
+  //
+  Checksum = CalculateCheckSum8 (
+               (UINT8 *) Edid,
+               sizeof (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK)
+               );
+  if (Checksum != 0) {
+    return FALSE;
+  }
+
+  Dtds = (EDID_DTD *) Edid->DetailedTimingDescriptions;
+  MaxX = 0;
+  MaxY = 0;
+
+  //
+  // Pull maximum supported resolution from detailed timing descriptors.
+  //
+  for (Index = 0; Index < VESA_BIOS_EXTENSIONS_DETAILED_TIMING_DESCRIPTOR_COUNT; Index++) {
+    DtdX = Dtds[Index].HorzActivePixelsLsb | (Dtds[Index].HorzActivePixelsMsb << 8);
+    DtdY = Dtds[Index].VertActivePixelsLsb | (Dtds[Index].VertActivePixelsMsb << 8);
+
+    if (DtdX > MaxX && DtdY > MaxY) {
+      MaxX = DtdX;
+      MaxY = DtdY;
+    }
+  }
+
+  if (MaxX == 0 || MaxY == 0) {
+    return FALSE;
+  }
+
+  *X = MaxX;
+  *Y = MaxY;
+  return TRUE;
+}
+
+STATIC
 VOID
 CalculateGtfTimings (
   IN  UINT16      X,
@@ -190,14 +250,23 @@ BiosVideoVbiosPatchSetResolution (
 
   UINT8                   *Vbios;
 
+  BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS (This);
+
+  //
+  // If X and Y are zero, try to get max from EDID.
+  //
+  if (ScreenX == 0 && ScreenY == 0) {
+    if (!GetEdidMaxResolution (BiosVideoPrivate, &ScreenX, &ScreenY)) {
+      return EFI_UNSUPPORTED;
+    }
+  }
+
   //
   // We cannot support resolutions under 640x480.
   //
   if (ScreenX < 640 || ScreenY < 480) {
     return EFI_INVALID_PARAMETER;
   }
-
-  BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS (This);
 
   //
   // Unlock VBIOS region.

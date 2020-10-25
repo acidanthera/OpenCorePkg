@@ -29,6 +29,8 @@ typedef struct OC_VBIOS_PATCH_PROTOCOL_ OC_VBIOS_PATCH_PROTOCOL;
 
 /**
   Patch legacy VBIOS for specified resolution and reconnect the controller.
+  Specifying zero for ScreenX and ScreenY will pull the maximum
+  supported resolution by the EDID instead.
 
   @param[in,out] This         Protocol instance.
   @param[in]     ScreenY      Desired screen width.
