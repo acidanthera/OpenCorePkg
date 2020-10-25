@@ -52,6 +52,7 @@
   gEfiPciIoProtocolGuid
   gEfiVgaMiniPortProtocolGuid
   gEfiLegacy8259ProtocolGuid
-  gEfiEdidDiscoveredProtocolGuid
   gEfiEdidActiveProtocolGuid
+  gEfiEdidDiscoveredProtocolGuid
+  gEfiEdidOverrideProtocolGuid
   gOcVbiosPatchProtocolGuid

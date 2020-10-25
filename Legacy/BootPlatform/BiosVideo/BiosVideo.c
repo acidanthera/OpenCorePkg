@@ -650,9 +650,25 @@ BiosVideoGetVbeData (
   UINT32                                 HighestVerticalResolution;
   UINTN                                  HighestResolutionMode;
 
+  EFI_EDID_OVERRIDE_PROTOCOL             *EdidOverride;
+  UINT32                                 EdidOverrideAttributes;
+  UINTN                                  EdidOverrideSize;
+  UINT8                                  *EdidOverrideData;
+
   HighestHorizontalResolution = 0;
   HighestVerticalResolution   = 0;
   HighestResolutionMode       = 0;
+
+  if (BiosVideoPrivate->EdidDiscovered.Edid != NULL) {
+    gBS->FreePool (BiosVideoPrivate->EdidDiscovered.Edid);
+  }
+  if (BiosVideoPrivate->EdidActive.Edid != NULL) {
+    gBS->FreePool (BiosVideoPrivate->EdidActive.Edid);
+  }
+  BiosVideoPrivate->EdidDiscovered.SizeOfEdid = 0;
+  BiosVideoPrivate->EdidDiscovered.Edid       = NULL;
+  BiosVideoPrivate->EdidActive.SizeOfEdid     = 0;
+  BiosVideoPrivate->EdidActive.Edid           = NULL;
 
   //
   // Test to see if the Video Adapter is compliant with VBE 3.0
@@ -696,13 +712,7 @@ BiosVideoGetVbeData (
     return Status;
   }
 
-  BiosVideoPrivate->EdidDiscovered.SizeOfEdid = 0;
-  BiosVideoPrivate->EdidDiscovered.Edid = NULL;
-
-  BiosVideoPrivate->EdidActive.SizeOfEdid = 0;
-  BiosVideoPrivate->EdidActive.Edid = NULL;
-
-//
+  //
   // Walk through the mode list to see if there is at least one mode the is compatible with the EDID mode
   //
   ModeNumberPtr = (UINT16 *)
@@ -916,6 +926,102 @@ BiosVideoGetVbeData (
         break;
       }
     }
+  }
+
+  //
+  // Read EDID information
+  //
+  // INT 10 - VESA VBE/DC (Display Data Channel) - READ EDID
+  //
+  //    AX = 4F15h
+  //    BL = 01h
+  //    CX = 0000h  -- port number? =0 - main display
+  //    DX = 0000h  -- block
+  //    ES:DI -> 128-byte buffer for EDID record (see #00127)
+  // Return: AL = 4Fh if function supported
+  //    AH = status
+  //        00h successful
+  //    ES:DI buffer filled
+  //    01h failed (e.g. non-DDC monitor)
+  //
+  ZeroMem (&Regs, sizeof (Regs));
+  Regs.X.AX = VESA_BIOS_EXTENSIONS_EDID;
+  Regs.X.BX = 1;
+  Regs.X.CX = 0;
+  Regs.X.DX = 0;
+  ZeroMem (BiosVideoPrivate->VbeEdidDataBlock, sizeof (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK));
+  Regs.E.ES = EFI_SEGMENT ((UINTN) BiosVideoPrivate->VbeEdidDataBlock);
+  Regs.X.DI = EFI_OFFSET ((UINTN) BiosVideoPrivate->VbeEdidDataBlock);
+  
+  LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
+
+  //
+  // If the call succeed, populate Discovered EDID protocol.
+  //
+  if (Regs.X.AX == VESA_BIOS_EXTENSIONS_STATUS_SUCCESS) {
+    Status = gBS->AllocatePool (
+                    EfiBootServicesData,
+                    sizeof (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK),
+                    (VOID **) &BiosVideoPrivate->EdidDiscovered.Edid
+                    );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    BiosVideoPrivate->EdidDiscovered.SizeOfEdid = sizeof (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK);
+    CopyMem (
+      BiosVideoPrivate->EdidDiscovered.Edid,
+      BiosVideoPrivate->VbeEdidDataBlock,
+      BiosVideoPrivate->EdidDiscovered.SizeOfEdid
+      );
+  }
+
+  //
+  // Try to locate EDID Override protocol. If present, EDID Active will be populated with the
+  // overriden EDID instead of the EDID Discovered.
+  //
+  Status = gBS->LocateProtocol (
+                  &gEfiEdidOverrideProtocolGuid,
+                  NULL,
+                  (VOID **) &EdidOverride
+                  );
+  if (!EFI_ERROR (Status)) {
+    Status = EdidOverride->GetEdid (
+                             EdidOverride,
+                             BiosVideoPrivate->Handle,
+                             &EdidOverrideAttributes,
+                             &EdidOverrideSize,
+                             &EdidOverrideData
+                             );
+    if (!EFI_ERROR (Status)
+      && EdidOverrideAttributes == 0
+      && EdidOverrideSize != 0
+      && EdidOverrideData != NULL) {
+      BiosVideoPrivate->EdidActive.SizeOfEdid = (UINT32) EdidOverrideSize;
+      BiosVideoPrivate->EdidActive.Edid       = EdidOverrideData;
+    }
+  }
+
+  //
+  // Copy EDID Discovered data if EDID Active is not yet populated.
+  //
+  if (BiosVideoPrivate->EdidActive.Edid == NULL
+    && BiosVideoPrivate->EdidDiscovered.Edid != NULL) {
+    Status = gBS->AllocatePool (
+                    EfiBootServicesData,
+                    sizeof (VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK),
+                    (VOID **) &BiosVideoPrivate->EdidActive.Edid
+                    );
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    BiosVideoPrivate->EdidActive.SizeOfEdid = BiosVideoPrivate->EdidDiscovered.SizeOfEdid;
+    CopyMem (
+      BiosVideoPrivate->EdidActive.Edid,
+      BiosVideoPrivate->EdidDiscovered.Edid,
+      BiosVideoPrivate->EdidActive.SizeOfEdid
+      );
   }
 
   return Status;
