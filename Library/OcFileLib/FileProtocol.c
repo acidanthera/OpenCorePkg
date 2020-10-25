@@ -109,8 +109,8 @@ GetFileData (
     }
 
     Position += (UINT32) ReadSize;
-    Buffer   += (UINT32) ReadSize;
-    Size     -= ReadSize;
+    Buffer   += ReadSize;
+    Size     -= (UINT32) ReadSize;
   }
 
   File->SetPosition (File, 0);
