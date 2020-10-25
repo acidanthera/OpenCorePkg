@@ -142,7 +142,7 @@ CalculateDtd (
   VertSyncOffset              = VSyncStart - Y;
   VertSyncPulseWidth          = VSyncEnd - VSyncStart;
 
-  Dtd->PixelClock             = ClockHz / 10;
+  Dtd->PixelClock             = (UINT16)(ClockHz / 10);
 
   Dtd->HorzActivePixelsLsb    = X & 0xFF;
   Dtd->HorzActivePixelsMsb    = (X >> 8) & 0xF;
