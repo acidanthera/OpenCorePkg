@@ -18,6 +18,7 @@ OpenCore Changelog
 - Fixed failures in cacheless injection dependency resolution
 - Fixed detection issues with older Atom CPUs
 - Fixed `ScanPolicy` NVMe handling on MacPro5,1
+- Fixed I/O issues on platforms incapable of reading over 1MB at once
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest

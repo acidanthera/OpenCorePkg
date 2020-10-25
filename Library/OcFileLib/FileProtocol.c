@@ -83,22 +83,37 @@ GetFileData (
 {
   EFI_STATUS  Status;
   UINTN       ReadSize;
+  UINTN       RequestedSize;
 
-  Status = File->SetPosition (File, Position);
-  if (EFI_ERROR (Status)) {
-    return Status;
+  while (Size > 0) {
+    Status = File->SetPosition (File, Position);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    //
+    // We are required to read in 1 MB portions, because otherwise some
+    // systems namely MacBook7,1 will not read file data from APFS volumes
+    // but will pretend they did. Repeoduced with BootKernelExtensions.kc.
+    //
+    ReadSize = RequestedSize = MIN (Size, BASE_1MB);
+    Status = File->Read (File, &ReadSize, Buffer);
+    if (EFI_ERROR (Status)) {
+      File->SetPosition (File, 0);
+      return Status;
+    }
+
+    if (ReadSize != RequestedSize) {
+      File->SetPosition (File, 0);
+      return EFI_BAD_BUFFER_SIZE;
+    }
+
+    Position += ReadSize;
+    Buffer   += ReadSize;
+    Size     -= ReadSize;
   }
 
-  ReadSize = Size;
-  Status = File->Read (File, &ReadSize, Buffer);
   File->SetPosition (File, 0);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  if (ReadSize != Size) {
-    return EFI_BAD_BUFFER_SIZE;
-  }
 
   return EFI_SUCCESS;
 }
