@@ -956,7 +956,7 @@ BiosVideoGetVbeData (
   LegacyBiosInt86 (BiosVideoPrivate, 0x10, &Regs);
 
   //
-  // If the call succeed, populate Discovered EDID protocol.
+  // If the call succeed, populate EDID Discovered protocol.
   //
   if (Regs.X.AX == VESA_BIOS_EXTENSIONS_STATUS_SUCCESS) {
     Status = gBS->AllocatePool (
@@ -978,7 +978,7 @@ BiosVideoGetVbeData (
 
   //
   // Try to locate EDID Override protocol. If present, EDID Active will be populated with the
-  // overriden EDID instead of the EDID Discovered.
+  // overridden EDID instead of the EDID Discovered.
   //
   Status = gBS->LocateProtocol (
                   &gEfiEdidOverrideProtocolGuid,
