@@ -531,11 +531,25 @@ PrelinkedInjectPrepare (
     }
 
     ASSERT (Context->PrelinkedLastAddress == Context->PrelinkedLastLoadAddress);
+    //
+    // Ensured by PrelinkedContextInit().
+    //
+    ASSERT (Context->PrelinkedSize % MACHO_PAGE_SIZE == 0);
+    STATIC_ASSERT (
+      MACHO_PAGE_SIZE % OC_ALIGNOF (MACH_DYLD_CHAINED_STARTS_IN_SEGMENT) == 0,
+      "KextsFixupChains may be unaligned"
+      );
 
-    Context->KextsFixupChains = (VOID *) (Context->Prelinked +
-      Context->LinkEditSegment->Segment64.FileOffset + Context->LinkEditSegment->Segment64.FileSize);
+    Context->KextsFixupChains = (VOID *) (Context->Prelinked + Context->PrelinkedSize);
 
     AlignedExpansion = MACHO_ALIGN (LinkedExpansion);
+    //
+    // Zero the expansion to account for padding.
+    //
+    ZeroMem (
+      Context->Prelinked + Context->PrelinkedSize,
+      AlignedExpansion
+      );
 
     Context->PrelinkedSize                        += AlignedExpansion;
     Context->PrelinkedLastAddress                 += AlignedExpansion;
