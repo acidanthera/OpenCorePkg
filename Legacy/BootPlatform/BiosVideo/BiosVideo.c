@@ -1016,6 +1016,8 @@ BiosVideoGetVbeData (
     }
   }
 
+  Status = EFI_SUCCESS;
+
   //
   // Copy EDID Discovered data if EDID Active is not yet populated.
   //
