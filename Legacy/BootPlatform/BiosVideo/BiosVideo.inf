@@ -24,6 +24,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenDuetPkg.dec
+  OpenCorePkg/OpenCorePkg.dec
   OvmfPkg/OvmfPkg.dec
 
 [LibraryClasses]
@@ -45,7 +46,6 @@
   ComponentName.c
   VesaBiosExtensions.h
   LegacyBiosThunk.c
-  VideoBiosPatch.h
   VideoBiosPatch.c
 
 [Protocols]
@@ -54,3 +54,4 @@
   gEfiLegacy8259ProtocolGuid
   gEfiEdidDiscoveredProtocolGuid
   gEfiEdidActiveProtocolGuid
+  gOcVbiosPatchProtocolGuid

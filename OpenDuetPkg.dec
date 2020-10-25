@@ -22,10 +22,7 @@
   PACKAGE_VERSION                = 0.4
 
 [Includes]
-  Include/Acidanthera
   Include/Duet
-  Include/Generic
-  Include/Intel
 
 [Guids]
   ## Include/Duet/Guid/PciExpressBaseAddress.h

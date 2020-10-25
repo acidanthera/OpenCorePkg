@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "VideoBiosPatch.h"
+#include "BiosVideo.h"
 
 STATIC
 VOID
@@ -110,12 +110,13 @@ CalculateDtd (
   Dtd->Features               = 0x18;
 }
 
+STATIC
 BOOLEAN
 PatchIntelVbiosCustom (
   IN UINT8      *Vbios,
   IN UINTN      VbiosSize,
-  IN UINT16     Height,
-  IN UINT16     Width
+  IN UINT16     X,
+  IN UINT16     Y
   )
 {
   UINT32      ClockHz;
@@ -138,8 +139,8 @@ PatchIntelVbiosCustom (
     };
 
   CalculateGtfTimings (
-    Width,
-    Height,
+    X,
+    Y,
     60,
     &ClockHz,
     &HSyncStart,
@@ -151,8 +152,8 @@ PatchIntelVbiosCustom (
     );
   
   CalculateDtd (
-    Width,
-    Height,
+    X,
+    Y,
     ClockHz,
     HSyncStart,
     HSyncEnd,
@@ -162,7 +163,7 @@ PatchIntelVbiosCustom (
     VBlank,
     &Dtd
     );
-
+  
   return ApplyPatch (
     IntelDtd1024,
     NULL,
@@ -174,4 +175,51 @@ PatchIntelVbiosCustom (
     0,
     0
     ) != 0;
+}
+
+EFI_STATUS
+EFIAPI
+BiosVideoVbiosPatchSetResolution (
+  IN OUT OC_VBIOS_PATCH_PROTOCOL      *This,
+  IN     UINT16                       ScreenX,
+  IN     UINT16                       ScreenY
+  )
+{
+  EFI_STATUS              Status;
+  BIOS_VIDEO_DEV          *BiosVideoPrivate;
+
+  UINT8                   *Vbios;
+
+  //
+  // We cannot support resolutions under 640x480.
+  //
+  if (ScreenX < 640 || ScreenY < 480) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS (This);
+
+  //
+  // Unlock VBIOS region.
+  //
+  LegacyRegionUnlock (LEGACY_REGION_BASE, LEGACY_REGION_SIZE);
+  Vbios = (UINT8 *) LEGACY_REGION_BASE;
+
+  PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, ScreenX, ScreenY);
+  
+  //
+  // Refresh VBE data.
+  //
+  Status = BiosVideoGetVbeData (BiosVideoPrivate);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Reconnect protocols as drivers like ConSplitter will consume our GOP.
+  //
+  gBS->DisconnectController (BiosVideoPrivate->Handle, NULL, NULL);
+  gBS->ConnectController (BiosVideoPrivate->Handle, NULL, NULL, TRUE);
+
+  return EFI_SUCCESS;
 }

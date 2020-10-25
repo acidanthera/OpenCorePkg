@@ -35,6 +35,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/EdidOverride.h>
 #include <Protocol/DevicePath.h>
 
+#include <Protocol/OcVbiosPatch.h>
+
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
@@ -114,6 +116,7 @@ typedef struct {
   EFI_EDID_DISCOVERED_PROTOCOL                EdidDiscovered;
   EFI_EDID_ACTIVE_PROTOCOL                    EdidActive;
   EFI_VGA_MINI_PORT_PROTOCOL                  VgaMiniPort;
+  OC_VBIOS_PATCH_PROTOCOL                     OcVbiosPatch;
 
   //
   // General fields
@@ -143,6 +146,7 @@ typedef struct {
   VESA_BIOS_EXTENSIONS_CRTC_INFORMATION_BLOCK *VbeCrtcInformationBlock; // 59 bytes.  Must be allocated below 1MB
   UINTN                                       VbeSaveRestorePages;      // Number of 4KB pages in VbeSaveRestoreBuffer
   EFI_PHYSICAL_ADDRESS                        VbeSaveRestoreBuffer;     // Must be allocated below 1MB
+
   //
   // Status code
   //
@@ -153,6 +157,7 @@ typedef struct {
 #define BIOS_VIDEO_DEV_FROM_PCI_IO_THIS(a)      CR (a, BIOS_VIDEO_DEV, PciIo, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_GRAPHICS_OUTPUT_THIS(a)      CR (a, BIOS_VIDEO_DEV, GraphicsOutput, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_VGA_MINI_PORT_THIS(a) CR (a, BIOS_VIDEO_DEV, VgaMiniPort, BIOS_VIDEO_DEV_SIGNATURE)
+#define BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS(a) CR (a, BIOS_VIDEO_DEV, OcVbiosPatch, BIOS_VIDEO_DEV_SIGNATURE)
 
 #define GRAPHICS_OUTPUT_INVALIDE_MODE_NUMBER  0xffff
 
@@ -286,6 +291,19 @@ BiosVideoDeviceReleaseResource (
 //
 // Private worker functions
 //
+/**
+  Get VBE data from VBIOS.
+
+  @param BiosVideoPrivate - Pointer to BIOS_VIDEO_DEV structure
+
+  @retval EFI_SUCCESS VBE device found
+
+**/
+EFI_STATUS
+BiosVideoGetVbeData (
+  IN OUT BIOS_VIDEO_DEV  *BiosVideoPrivate
+  );
+
 /**
   Check for VBE device.
 
@@ -487,8 +505,7 @@ BiosVideoVgaMiniPortSetMode (
 BOOLEAN
 BiosVideoIsVga (
   IN  EFI_PCI_IO_PROTOCOL       *PciIo
-  )
-;
+  );
 
 //
 // Standard VGA Definitions
@@ -575,6 +592,23 @@ LegacyBiosInt86 (
   IN  BIOS_VIDEO_DEV                 *BiosDev,
   IN  UINT8                           BiosInt,
   IN  IA32_REGISTER_SET           *Regs
+  );
+
+/**
+  Patch legacy VBIOS for specified resolution and reconnect the controller.
+
+  @param[in,out] This         Protocol instance.
+  @param[in]     ScreenY      Desired screen width.
+  @param[in]     ScreenX      Desired screen height.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+EFIAPI
+BiosVideoVbiosPatchSetResolution (
+  IN OUT OC_VBIOS_PATCH_PROTOCOL      *This,
+  IN     UINT16                       ScreenX,
+  IN     UINT16                       ScreenY
   );
 
 #endif
