@@ -108,8 +108,8 @@ GetFileData (
       return EFI_BAD_BUFFER_SIZE;
     }
 
-    Position += ReadSize;
-    Buffer   += ReadSize;
+    Position += (UINT32) ReadSize;
+    Buffer   += (UINT32) ReadSize;
     Size     -= ReadSize;
   }
 
