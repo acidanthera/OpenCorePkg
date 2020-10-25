@@ -44,6 +44,7 @@
   DebugLib
   DevicePathLib
   MemoryAllocationLib
+  OcDebugLogLib
   OcFileLib
   UefiBootServicesTableLib
 
