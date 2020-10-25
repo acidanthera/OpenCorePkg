@@ -64,6 +64,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 
 //
+// Vendor IDs.
+//
+#define PCI_VENDOR_INTEL      0x8086
+#define PCI_VENDOR_NVIDIA     0x10DE
+#define PCI_VENDOR_AMD        0x1022
+#define PCI_VENDOR_ATI        0x1002
+
+
+//
 // Packed format support: The number of bits reserved for each of the colors and the actual
 // position of RGB in the frame buffer is specified in the VBE Mode information
 //
@@ -123,6 +132,7 @@ typedef struct {
   //
   BOOLEAN                                     VgaCompatible;
   BOOLEAN                                     ProduceGraphicsOutput;
+  UINT16                                      PciVendorId;
 
   //
   // Graphics Output Protocol related fields

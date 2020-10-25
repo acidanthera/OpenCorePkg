@@ -246,6 +246,7 @@ BiosVideoVbiosPatchSetResolution (
   )
 {
   EFI_STATUS              Status;
+  BOOLEAN                 Result;
   BIOS_VIDEO_DEV          *BiosVideoPrivate;
 
   UINT8                   *Vbios;
@@ -262,7 +263,8 @@ BiosVideoVbiosPatchSetResolution (
   }
 
   //
-  // We cannot support resolutions under 640x480.
+  // We cannot support resolutions under 640x480 due to checks
+  // elsewhere in the driver.
   //
   if (ScreenX < 640 || ScreenY < 480) {
     return EFI_INVALID_PARAMETER;
@@ -274,7 +276,19 @@ BiosVideoVbiosPatchSetResolution (
   LegacyRegionUnlock (LEGACY_REGION_BASE, LEGACY_REGION_SIZE);
   Vbios = (UINT8 *) LEGACY_REGION_BASE;
 
-  PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, ScreenX, ScreenY);
+  //
+  // Patch VBIOS according to vendor specific patching.
+  //
+  Result = FALSE;
+  switch (BiosVideoPrivate->PciVendorId) {
+    case PCI_VENDOR_INTEL:
+      Result = PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, ScreenX, ScreenY);
+      break;
+  }
+
+  if (!Result) {
+    return EFI_UNSUPPORTED;
+  }
   
   //
   // Refresh VBE data.

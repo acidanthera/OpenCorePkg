@@ -399,6 +399,20 @@ BiosVideoChildHandleInstall (
   BiosVideoPrivate->PciIo = ParentPciIo;
 
   //
+  // Get vendor ID from PCI
+  //
+  Status = BiosVideoPrivate->PciIo->Pci.Read (
+                        BiosVideoPrivate->PciIo,
+                        EfiPciIoWidthUint16,
+                        PCI_VENDOR_ID_OFFSET,
+                        1,
+                        &BiosVideoPrivate->PciVendorId
+                        );
+  if (EFI_ERROR (Status)) {
+    goto Done;
+  }
+
+  //
   // Check for VESA BIOS Extensions for modes that are compatible with Graphics Output
   //
   Status = BiosVideoCheckForVbe (BiosVideoPrivate);
