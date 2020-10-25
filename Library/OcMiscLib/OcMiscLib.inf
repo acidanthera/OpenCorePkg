@@ -38,6 +38,7 @@
 
 [LibraryClasses]
   BaseLib
+  IoLib
   UefiLib
   OcFileLib
   OcGuardLib
