@@ -169,6 +169,7 @@ InternalKcWriteCommandHeaders (
   // Must choose a different name to avoid collisions.
   //
   CopyMem (Context->PrelinkedInfoSegment->Segment64.SegmentName, "__KREMLIN_START", sizeof ("__KREMLIN_START"));
+  CopyMem (Context->PrelinkedInfoSection->Section64.SegmentName, "__KREMLIN_START", sizeof ("__KREMLIN_START"));
   CopyMem (Context->PrelinkedInfoSection->Section64.SectionName, "__kremlin_start", sizeof ("__kremlin_start"));
 
   //
