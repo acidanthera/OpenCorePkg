@@ -49,12 +49,12 @@ CalculateGtfTimings (
   Hbl   = (Hbl + 500) / 1000 * 16;
 
   *ClockHz    = (X + Hbl) * VFreq / 1000;
-  *HSyncStart = X + Hbl / 2 - (X + Hbl + 50) / 100 * 8 - 1;
-  *HSyncEnd   = X + Hbl / 2 - 1;
-  *HBlank     = X + Hbl - 1;
+  *HSyncStart = (UINT16)(X + Hbl / 2 - (X + Hbl + 50) / 100 * 8 - 1);
+  *HSyncEnd   = (UINT16)(X + Hbl / 2 - 1);
+  *HBlank     = (UINT16)(X + Hbl - 1);
   *VSyncStart = Y;
-  *VSyncEnd   = Y + 3;
-  *VBlank     = Vbl - 1;
+  *VSyncEnd   = (UINT16)Y + 3;
+  *VBlank     = (UINT16)(Vbl - 1);
 }
 
 STATIC
@@ -114,7 +114,7 @@ STATIC
 BOOLEAN
 PatchIntelVbiosCustom (
   IN UINT8      *Vbios,
-  IN UINTN      VbiosSize,
+  IN UINT32     VbiosSize,
   IN UINT16     X,
   IN UINT16     Y
   )
