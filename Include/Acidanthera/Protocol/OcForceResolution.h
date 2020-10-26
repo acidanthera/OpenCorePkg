@@ -44,8 +44,8 @@ typedef
 EFI_STATUS
 (EFIAPI* OC_FORCE_RESOLUTION_SET_RESOLUTION) (
   IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
-  IN     UINT32                       Width,
-  IN     UINT32                       Height
+  IN     UINT32                       Width   OPTIONAL,
+  IN     UINT32                       Height  OPTIONAL
   );
 
 struct OC_FORCE_RESOLUTION_PROTOCOL_ {

@@ -621,8 +621,8 @@ EFI_STATUS
 EFIAPI
 BiosVideoForceResolutionSetResolution (
   IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
-  IN     UINT32                       Width,
-  IN     UINT32                       Height
+  IN     UINT32                       Width   OPTIONAL,
+  IN     UINT32                       Height  OPTIONAL
   );
 
 #endif
