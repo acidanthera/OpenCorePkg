@@ -29,12 +29,12 @@ typedef struct OC_FORCE_RESOLUTION_PROTOCOL_ OC_FORCE_RESOLUTION_PROTOCOL;
 
 /**
   Force the specified resolution and reconnect the controller.
-  Specifying zero for ScreenX and ScreenY will pull the maximum
+  Specifying zero for Width and Height will pull the maximum
   supported resolution by the EDID instead.
 
   @param[in,out] This         Protocol instance.
-  @param[in]     ScreenY      Desired screen width.
-  @param[in]     ScreenX      Desired screen height.
+  @param[in]     Width        Desired screen width.
+  @param[in]     Height       Desired screen height.
 
   @retval EFI_SUCCESS         Resolution successfully forced.
   @retval EFI_UNSUPPORTED     The video adapter or the display are not supported.
@@ -44,8 +44,8 @@ typedef
 EFI_STATUS
 (EFIAPI* OC_FORCE_RESOLUTION_SET_RESOLUTION) (
   IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
-  IN     UINT16                       ScreenX,
-  IN     UINT16                       ScreenY
+  IN     UINT32                       Width,
+  IN     UINT32                       Height
   );
 
 struct OC_FORCE_RESOLUTION_PROTOCOL_ {

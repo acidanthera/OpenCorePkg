@@ -18,15 +18,15 @@ STATIC
 BOOLEAN
 GetEdidMaxResolution (
   IN  BIOS_VIDEO_DEV    *BiosVideoPrivate,
-  OUT UINT16            *X,
-  OUT UINT16            *Y
+  OUT UINT32            *Width,
+  OUT UINT32            *Height
   )
 {
   UINT8         Checksum;
-  UINT16        MaxX;
-  UINT16        MaxY;
-  UINT16        DtdX;
-  UINT16        DtdY;
+  UINT16        MaxWidth;
+  UINT16        MaxHeight;
+  UINT16        DtdWidth;
+  UINT16        DtdHeight;
   UINT32        Index;
 
   VESA_BIOS_EXTENSIONS_EDID_DATA_BLOCK  *Edid;
@@ -48,37 +48,37 @@ GetEdidMaxResolution (
     return FALSE;
   }
 
-  Dtds = (EDID_DTD *) Edid->DetailedTimingDescriptions;
-  MaxX = 0;
-  MaxY = 0;
+  Dtds      = (EDID_DTD *) Edid->DetailedTimingDescriptions;
+  MaxWidth  = 0;
+  MaxHeight = 0;
 
   //
   // Pull maximum supported resolution from detailed timing descriptors.
   //
   for (Index = 0; Index < VESA_BIOS_EXTENSIONS_DETAILED_TIMING_DESCRIPTOR_COUNT; Index++) {
-    DtdX = Dtds[Index].HorzActivePixelsLsb | (Dtds[Index].HorzActivePixelsMsb << 8);
-    DtdY = Dtds[Index].VertActivePixelsLsb | (Dtds[Index].VertActivePixelsMsb << 8);
+    DtdWidth  = Dtds[Index].HorzActivePixelsLsb | (Dtds[Index].HorzActivePixelsMsb << 8);
+    DtdHeight = Dtds[Index].VertActivePixelsLsb | (Dtds[Index].VertActivePixelsMsb << 8);
 
-    if (DtdX > MaxX && DtdY > MaxY) {
-      MaxX = DtdX;
-      MaxY = DtdY;
+    if (DtdWidth > MaxWidth && DtdHeight > MaxHeight) {
+      MaxWidth  = DtdWidth;
+      MaxHeight = DtdHeight;
     }
   }
 
-  if (MaxX == 0 || MaxY == 0) {
+  if (MaxWidth == 0 || MaxHeight == 0) {
     return FALSE;
   }
 
-  *X = MaxX;
-  *Y = MaxY;
+  *Width  = MaxWidth;
+  *Height = MaxHeight;
   return TRUE;
 }
 
 STATIC
 VOID
 CalculateGtfTimings (
-  IN  UINT16      X,
-  IN  UINT16      Y,
+  IN  UINT16      Width,
+  IN  UINT16      Height,
   IN  UINT16      Frequency,
   OUT UINT32      *ClockHz,
   OUT UINT16      *HSyncStart,
@@ -98,30 +98,30 @@ CalculateGtfTimings (
   UINT32 Hbl;
 
   Tmp1  = 11 * Frequency;
-  Vbl   = Y + (Y + 1) / (((20000 + Tmp1 / 2) / Tmp1) - 1) + 1;
+  Vbl   = Height + (Height + 1) / (((20000 + Tmp1 / 2) / Tmp1) - 1) + 1;
   VFreq = Vbl * Frequency;
 
   Tmp1  = ((300000 * 1000) + VFreq / 2) / VFreq;
   Tmp2  = ((30 * 1000) - Tmp1) * 1000;
   Tmp3  = (70 * 1000) + Tmp1;
-  Hbl   = X * ((Tmp2 + Tmp3 / 2) / Tmp3);
+  Hbl   = Width * ((Tmp2 + Tmp3 / 2) / Tmp3);
   Hbl   = (Hbl + 16 / 2) / 16;
   Hbl   = (Hbl + 500) / 1000 * 16;
 
-  *ClockHz    = (X + Hbl) * VFreq / 1000;
-  *HSyncStart = (UINT16)(X + Hbl / 2 - (X + Hbl + 50) / 100 * 8 - 1);
-  *HSyncEnd   = (UINT16)(X + Hbl / 2 - 1);
-  *HBlank     = (UINT16)(X + Hbl - 1);
-  *VSyncStart = Y;
-  *VSyncEnd   = (UINT16)Y + 3;
+  *ClockHz    = (Width + Hbl) * VFreq / 1000;
+  *HSyncStart = (UINT16)(Width + Hbl / 2 - (Width + Hbl + 50) / 100 * 8 - 1);
+  *HSyncEnd   = (UINT16)(Width + Hbl / 2 - 1);
+  *HBlank     = (UINT16)(Width + Hbl - 1);
+  *VSyncStart = Height;
+  *VSyncEnd   = (UINT16)Height + 3;
   *VBlank     = (UINT16)(Vbl - 1);
 }
 
 STATIC
 VOID
 CalculateDtd (
-  IN  UINT16      X,
-  IN  UINT16      Y,
+  IN  UINT16      Width,
+  IN  UINT16      Height,
   IN  UINT32      ClockHz,
   IN  UINT16      HSyncStart,
   IN  UINT16      HSyncEnd,
@@ -137,20 +137,20 @@ CalculateDtd (
   UINT16        VertSyncOffset;
   UINT16        VertSyncPulseWidth;
 
-  HorzSyncOffset              = HSyncStart - X;
+  HorzSyncOffset              = HSyncStart - Width;
   HorzSyncPulseWidth          = HSyncEnd - HSyncStart;
-  VertSyncOffset              = VSyncStart - Y;
+  VertSyncOffset              = VSyncStart - Height;
   VertSyncPulseWidth          = VSyncEnd - VSyncStart;
 
   Dtd->PixelClock             = (UINT16)(ClockHz / 10);
 
-  Dtd->HorzActivePixelsLsb    = X & 0xFF;
-  Dtd->HorzActivePixelsMsb    = (X >> 8) & 0xF;
-  Dtd->HorzBlankPixels        = HBlank - X;
+  Dtd->HorzActivePixelsLsb    = Width & 0xFF;
+  Dtd->HorzActivePixelsMsb    = (Width >> 8) & 0xF;
+  Dtd->HorzBlankPixels        = HBlank - Width;
   
-  Dtd->VertActivePixelsLsb    = Y & 0xFF;
-  Dtd->VertActivePixelsMsb    = (Y >> 8) & 0xF;
-  Dtd->VertBlankPixels        = VBlank - Y;
+  Dtd->VertActivePixelsLsb    = Height & 0xFF;
+  Dtd->VertActivePixelsMsb    = (Height >> 8) & 0xF;
+  Dtd->VertBlankPixels        = VBlank - Height;
 
   Dtd->HorzSyncOffsetLsb      = HorzSyncOffset & 0xFF;
   Dtd->HorzSyncPulseWidthLsb  = HorzSyncPulseWidth & 0xFF;
@@ -175,8 +175,8 @@ BOOLEAN
 PatchIntelVbiosCustom (
   IN UINT8      *Vbios,
   IN UINT32     VbiosSize,
-  IN UINT16     X,
-  IN UINT16     Y
+  IN UINT16     Width,
+  IN UINT16     Height
   )
 {
   UINT32      ClockHz;
@@ -199,8 +199,8 @@ PatchIntelVbiosCustom (
     };
 
   CalculateGtfTimings (
-    X,
-    Y,
+    Width,
+    Height,
     60,
     &ClockHz,
     &HSyncStart,
@@ -212,8 +212,8 @@ PatchIntelVbiosCustom (
     );
   
   CalculateDtd (
-    X,
-    Y,
+    Width,
+    Height,
     ClockHz,
     HSyncStart,
     HSyncEnd,
@@ -241,8 +241,8 @@ EFI_STATUS
 EFIAPI
 BiosVideoForceResolutionSetResolution (
   IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
-  IN     UINT16                       ScreenX,
-  IN     UINT16                       ScreenY
+  IN     UINT32                       Width,
+  IN     UINT32                       Height
   )
 {
   EFI_STATUS              Status;
@@ -260,10 +260,10 @@ BiosVideoForceResolutionSetResolution (
   }
 
   //
-  // If X and Y are zero, try to get max from EDID.
+  // If height/width are zero, try to get max from EDID.
   //
-  if (ScreenX == 0 && ScreenY == 0) {
-    if (!GetEdidMaxResolution (BiosVideoPrivate, &ScreenX, &ScreenY)) {
+  if (Width == 0 && Height == 0) {
+    if (!GetEdidMaxResolution (BiosVideoPrivate, &Width, &Height)) {
       return EFI_UNSUPPORTED;
     }
   }
@@ -272,7 +272,7 @@ BiosVideoForceResolutionSetResolution (
   // We cannot support resolutions under 640x480 due to checks
   // elsewhere in the driver.
   //
-  if (ScreenX < 640 || ScreenY < 480) {
+  if (Width < 640 || Height < 480) {
     return EFI_INVALID_PARAMETER;
   }
 
@@ -281,8 +281,8 @@ BiosVideoForceResolutionSetResolution (
   //
   for (ModeIndex = 0; ModeIndex < BiosVideoPrivate->GraphicsOutput.Mode->MaxMode; ModeIndex++) {
     ModeData = &BiosVideoPrivate->ModeData[ModeIndex];
-    if (ModeData->HorizontalResolution == ScreenX
-      && ModeData->VerticalResolution == ScreenY) {
+    if (ModeData->HorizontalResolution == Width
+      && ModeData->VerticalResolution == Height) {
       return EFI_ALREADY_STARTED;
     }
   }
@@ -299,7 +299,7 @@ BiosVideoForceResolutionSetResolution (
   Result = FALSE;
   switch (BiosVideoPrivate->PciVendorId) {
     case PCI_VENDOR_INTEL:
-      Result = PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, ScreenX, ScreenY);
+      Result = PatchIntelVbiosCustom (Vbios, LEGACY_REGION_SIZE, (UINT16)Width, (UINT16)Height);
       break;
   }
 
