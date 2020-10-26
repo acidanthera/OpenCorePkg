@@ -12,23 +12,23 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_VBIOS_PATCH_PROTOCOL_H
-#define OC_VBIOS_PATCH_PROTOCOL_H
+#ifndef OC_FORCE_RESOLUTION_PROTOCOL_H
+#define OC_FORCE_RESOLUTION_PROTOCOL_H
 
 #include <Uefi.h>
 
 //
-// OC_VBIOS_PATCH_PROTOCOL_GUID
+// OC_FORCE_RESOLUTION_PROTOCOL_GUID
 // BC7EC589-2390-4DA3-8025-77DAD34F3609
 //
-#define OC_VBIOS_PATCH_PROTOCOL_GUID  \
+#define OC_FORCE_RESOLUTION_PROTOCOL_GUID  \
   { 0xBC7EC589, 0x2390, 0x4DA3, \
     { 0x80, 0x25, 0x77, 0xDA, 0xD3, 0x4F, 0x36, 0x09 } }
 
-typedef struct OC_VBIOS_PATCH_PROTOCOL_ OC_VBIOS_PATCH_PROTOCOL;
+typedef struct OC_FORCE_RESOLUTION_PROTOCOL_ OC_FORCE_RESOLUTION_PROTOCOL;
 
 /**
-  Patch legacy VBIOS for specified resolution and reconnect the controller.
+  Force the specified resolution and reconnect the controller.
   Specifying zero for ScreenX and ScreenY will pull the maximum
   supported resolution by the EDID instead.
 
@@ -40,16 +40,16 @@ typedef struct OC_VBIOS_PATCH_PROTOCOL_ OC_VBIOS_PATCH_PROTOCOL;
 **/
 typedef
 EFI_STATUS
-(EFIAPI* OC_VBIOS_PATCH_SET_RESOLUTION) (
-  IN OUT OC_VBIOS_PATCH_PROTOCOL      *This,
+(EFIAPI* OC_FORCE_RESOLUTION_SET_RESOLUTION) (
+  IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
   IN     UINT16                       ScreenX,
   IN     UINT16                       ScreenY
   );
 
-struct OC_VBIOS_PATCH_PROTOCOL_ {
-  OC_VBIOS_PATCH_SET_RESOLUTION     SetResolution;
+struct OC_FORCE_RESOLUTION_PROTOCOL_ {
+  OC_FORCE_RESOLUTION_SET_RESOLUTION  SetResolution;
 };
 
-extern EFI_GUID gOcVbiosPatchProtocolGuid;
+extern EFI_GUID gOcForceResolutionProtocolGuid;
 
 #endif

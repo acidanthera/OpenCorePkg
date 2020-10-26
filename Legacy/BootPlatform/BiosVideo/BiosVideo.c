@@ -378,9 +378,9 @@ BiosVideoChildHandleInstall (
   BiosVideoPrivate->VgaMiniPort.CrtcDataRegisterBar       = EFI_PCI_IO_PASS_THROUGH_BAR;
 
   //
-  // Fill in OC VBIOS Patch Protocol fields
+  // Fill in OC Force Resolution Protocol fields
   //
-  BiosVideoPrivate->OcVbiosPatch.SetResolution  = BiosVideoVbiosPatchSetResolution;
+  BiosVideoPrivate->OcForceResolution.SetResolution  = BiosVideoForceResolutionSetResolution;
 
   //
   // Assume that Graphics Output Protocol will be produced until proven otherwise
@@ -468,8 +468,8 @@ BiosVideoChildHandleInstall (
                     &BiosVideoPrivate->EdidDiscovered,
                     &gEfiEdidActiveProtocolGuid,
                     &BiosVideoPrivate->EdidActive,
-                    &gOcVbiosPatchProtocolGuid,
-                    &BiosVideoPrivate->OcVbiosPatch,
+                    &gOcForceResolutionProtocolGuid,
+                    &BiosVideoPrivate->OcForceResolution,
                     NULL
                     );
 

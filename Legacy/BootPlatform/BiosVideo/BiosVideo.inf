@@ -55,4 +55,4 @@
   gEfiEdidActiveProtocolGuid
   gEfiEdidDiscoveredProtocolGuid
   gEfiEdidOverrideProtocolGuid
-  gOcVbiosPatchProtocolGuid
+  gOcForceResolutionProtocolGuid

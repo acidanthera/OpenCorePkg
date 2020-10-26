@@ -35,7 +35,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/EdidOverride.h>
 #include <Protocol/DevicePath.h>
 
-#include <Protocol/OcVbiosPatch.h>
+#include <Protocol/OcForceResolution.h>
 
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
@@ -125,7 +125,7 @@ typedef struct {
   EFI_EDID_DISCOVERED_PROTOCOL                EdidDiscovered;
   EFI_EDID_ACTIVE_PROTOCOL                    EdidActive;
   EFI_VGA_MINI_PORT_PROTOCOL                  VgaMiniPort;
-  OC_VBIOS_PATCH_PROTOCOL                     OcVbiosPatch;
+  OC_FORCE_RESOLUTION_PROTOCOL                OcForceResolution;
 
   //
   // General fields
@@ -167,7 +167,7 @@ typedef struct {
 #define BIOS_VIDEO_DEV_FROM_PCI_IO_THIS(a)      CR (a, BIOS_VIDEO_DEV, PciIo, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_GRAPHICS_OUTPUT_THIS(a)      CR (a, BIOS_VIDEO_DEV, GraphicsOutput, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_VGA_MINI_PORT_THIS(a) CR (a, BIOS_VIDEO_DEV, VgaMiniPort, BIOS_VIDEO_DEV_SIGNATURE)
-#define BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS(a) CR (a, BIOS_VIDEO_DEV, OcVbiosPatch, BIOS_VIDEO_DEV_SIGNATURE)
+#define BIOS_VIDEO_DEV_FROM_OC_FORCE_RESOLUTION_THIS(a) CR (a, BIOS_VIDEO_DEV, OcForceResolution, BIOS_VIDEO_DEV_SIGNATURE)
 
 #define GRAPHICS_OUTPUT_INVALIDE_MODE_NUMBER  0xffff
 
@@ -605,7 +605,7 @@ LegacyBiosInt86 (
   );
 
 /**
-  Patch legacy VBIOS for specified resolution and reconnect the controller.
+  Force the specified resolution and reconnect the controller.
   Specifying zero for ScreenX and ScreenY will pull the maximum
   supported resolution by the EDID instead.
 
@@ -617,8 +617,8 @@ LegacyBiosInt86 (
 **/
 EFI_STATUS
 EFIAPI
-BiosVideoVbiosPatchSetResolution (
-  IN OUT OC_VBIOS_PATCH_PROTOCOL      *This,
+BiosVideoForceResolutionSetResolution (
+  IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
   IN     UINT16                       ScreenX,
   IN     UINT16                       ScreenY
   );

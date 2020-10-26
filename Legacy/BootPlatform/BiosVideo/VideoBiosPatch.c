@@ -239,8 +239,8 @@ PatchIntelVbiosCustom (
 
 EFI_STATUS
 EFIAPI
-BiosVideoVbiosPatchSetResolution (
-  IN OUT OC_VBIOS_PATCH_PROTOCOL      *This,
+BiosVideoForceResolutionSetResolution (
+  IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
   IN     UINT16                       ScreenX,
   IN     UINT16                       ScreenY
   )
@@ -251,7 +251,7 @@ BiosVideoVbiosPatchSetResolution (
 
   UINT8                   *Vbios;
 
-  BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_VBIOS_PATCH_THIS (This);
+  BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_FORCE_RESOLUTION_THIS (This);
 
   //
   // If X and Y are zero, try to get max from EDID.
