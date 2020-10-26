@@ -72,6 +72,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define PCI_VENDOR_ATI        0x1002
 
 
+#define PCI_DEVICE_ENABLED  (EFI_PCI_COMMAND_IO_SPACE | EFI_PCI_COMMAND_MEMORY_SPACE)
+
+
 //
 // Packed format support: The number of bits reserved for each of the colors and the actual
 // position of RGB in the frame buffer is specified in the VBE Mode information

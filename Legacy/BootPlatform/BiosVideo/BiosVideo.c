@@ -1126,9 +1126,6 @@ BiosVideoDeviceReleaseResource (
   gBS->FreePool (BiosVideoPrivate);
 }
 
-#define PCI_DEVICE_ENABLED  (EFI_PCI_COMMAND_IO_SPACE | EFI_PCI_COMMAND_MEMORY_SPACE)
-
-
 /**
   Judge whether this device is VGA device.
 
@@ -1171,9 +1168,8 @@ BiosVideoIsVga (
       // Base Class 0x00 Sub-Class 0x01 - Backward compatible VGA device
       //
       VgaCompatible = TRUE;
-    }
 
-    if (Pci.Hdr.ClassCode[2] == PCI_CLASS_DISPLAY && Pci.Hdr.ClassCode[1] == PCI_CLASS_DISPLAY_VGA && Pci.Hdr.ClassCode[0] == 0x00) {
+    } else if (Pci.Hdr.ClassCode[2] == PCI_CLASS_DISPLAY && Pci.Hdr.ClassCode[1] == PCI_CLASS_DISPLAY_VGA && Pci.Hdr.ClassCode[0] == 0x00) {
       //
       // Base Class 3 Sub-Class 0 Programming interface 0 - VGA compatible Display controller
       //

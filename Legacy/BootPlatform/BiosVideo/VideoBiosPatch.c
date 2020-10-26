@@ -1,7 +1,7 @@
 /** @file
   Copyright (C) 2020, Goldfish64. All rights reserved.
 
-  All rights reserved.
+  Based on 915resolution and related projects.
 
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -97,6 +97,11 @@ CalculateGtfTimings (
   UINT32 VFreq;
   UINT32 Hbl;
 
+  //
+  // Below is based on 915resolution. GTF is the original VESA standard for timing calculation.
+  //
+  // The VESA GTF standard can be found here: https://glenwing.github.io/docs/VESA-GTF-1.1.pdf.
+  //
   Tmp1  = 11 * Frequency;
   Vbl   = Height + (Height + 1) / (((20000 + Tmp1 / 2) / Tmp1) - 1) + 1;
   VFreq = Vbl * Frequency;
@@ -193,7 +198,7 @@ PatchIntelVbiosCustom (
   // DTD entry for 1024x768 resolution for the Intel VBIOS.
   // This will be replaced with our custom resolution.
   //
-  CONST UINT8 IntelDtd1024[] = {
+  STATIC CONST UINT8 IntelDtd1024[] = {
     0x64, 0x19, 0x00, 0x40, 0x41, 0x00, 0x26, 0x30, 0x18, 
     0x88, 0x36, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x18
     };
