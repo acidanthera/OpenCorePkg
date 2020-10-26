@@ -36,6 +36,7 @@
   gEfiGraphicsOutputProtocolGuid
   gEfiSimpleTextOutProtocolGuid
   gEfiUgaDrawProtocolGuid
+  gOcForceResolutionProtocolGuid
 
 [Sources]
   ConsoleControl.c

@@ -248,10 +248,16 @@ BiosVideoForceResolutionSetResolution (
   EFI_STATUS              Status;
   BOOLEAN                 Result;
   BIOS_VIDEO_DEV          *BiosVideoPrivate;
+  BIOS_VIDEO_MODE_DATA    *ModeData;
+  UINT32                  ModeIndex;
 
   UINT8                   *Vbios;
 
   BiosVideoPrivate = BIOS_VIDEO_DEV_FROM_OC_FORCE_RESOLUTION_THIS (This);
+  
+  if (!BiosVideoPrivate->ProduceGraphicsOutput) {
+    return EFI_UNSUPPORTED;
+  }
 
   //
   // If X and Y are zero, try to get max from EDID.
@@ -268,6 +274,17 @@ BiosVideoForceResolutionSetResolution (
   //
   if (ScreenX < 640 || ScreenY < 480) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Check to see if resolution is already supported.
+  //
+  for (ModeIndex = 0; ModeIndex < BiosVideoPrivate->GraphicsOutput.Mode->MaxMode; ModeIndex++) {
+    ModeData = &BiosVideoPrivate->ModeData[ModeIndex];
+    if (ModeData->HorizontalResolution == ScreenX
+      && ModeData->VerticalResolution == ScreenY) {
+      return EFI_ALREADY_STARTED;
+    }
   }
 
   //

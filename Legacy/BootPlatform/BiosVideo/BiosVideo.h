@@ -613,7 +613,9 @@ LegacyBiosInt86 (
   @param[in]     ScreenY      Desired screen width.
   @param[in]     ScreenX      Desired screen height.
 
-  @retval EFI_SUCCESS on success.
+  @retval EFI_SUCCESS         Resolution successfully forced.
+  @retval EFI_UNSUPPORTED     The video adapter or the display are not supported.
+  @retval EFI_ALREADY_STARTED The specified resolution is already supported.
 **/
 EFI_STATUS
 EFIAPI

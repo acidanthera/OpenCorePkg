@@ -36,7 +36,9 @@ typedef struct OC_FORCE_RESOLUTION_PROTOCOL_ OC_FORCE_RESOLUTION_PROTOCOL;
   @param[in]     ScreenY      Desired screen width.
   @param[in]     ScreenX      Desired screen height.
 
-  @retval EFI_SUCCESS on success.
+  @retval EFI_SUCCESS         Resolution successfully forced.
+  @retval EFI_UNSUPPORTED     The video adapter or the display are not supported.
+  @retval EFI_ALREADY_STARTED The specified resolution is already supported.
 **/
 typedef
 EFI_STATUS
