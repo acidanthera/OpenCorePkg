@@ -5967,6 +5967,20 @@ functioning. Feature highlights:
   set to \texttt{true}.
 
 \item
+  \texttt{ForceResolution}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forces \texttt{Resolution} to be set in cases where the desired
+  resolution is not available by default, such as on legacy Intel GMA and first
+  generation Intel HD Graphics (Ironlake/Arrandale). Setting \texttt{Resolution} to
+  \texttt{Max} will try to pull the largest available resolution from the connected
+  display's EDID.
+
+  \emph{Note}: This option depends on the \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h}{\texttt{OC\_FORCE\_RESOLUTION\_PROTOCOL}}
+  protocol being present. This protocol is currently only supported by \texttt{OpenDuetPkg}. The
+  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs.
+
+\item
   \texttt{ClearScreenOnModeSwitch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

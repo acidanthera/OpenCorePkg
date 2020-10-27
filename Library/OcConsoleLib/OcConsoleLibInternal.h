@@ -32,8 +32,8 @@ typedef struct {
 EFI_STATUS
 OcSetConsoleResolutionForProtocol (
   IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
-  IN  UINT32                          Width,
-  IN  UINT32                          Height,
+  IN  UINT32                          Width  OPTIONAL,
+  IN  UINT32                          Height OPTIONAL,
   IN  UINT32                          Bpp    OPTIONAL
   );
 

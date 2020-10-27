@@ -105,14 +105,17 @@ OcParseConsoleMode (
   @param[in]  Width      Resolution width or 0 for Max.
   @param[in]  Height     Resolution height or 0 for Max.
   @param[in]  Bpp        Resolution bpp or 0 for automatic.
+  @param[in]  Force      Force the specified resolution using
+                         the OC_FORCE_RESOLUTION protocol.
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 OcSetConsoleResolution (
-  IN  UINT32              Width,
-  IN  UINT32              Height,
-  IN  UINT32              Bpp    OPTIONAL
+  IN  UINT32              Width  OPTIONAL,
+  IN  UINT32              Height OPTIONAL,
+  IN  UINT32              Bpp    OPTIONAL,
+  IN  BOOLEAN             Force
   );
 
 /**

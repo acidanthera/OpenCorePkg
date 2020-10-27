@@ -35,6 +35,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/EdidOverride.h>
 #include <Protocol/DevicePath.h>
 
+#include <Protocol/OcForceResolution.h>
+
 #include <Library/UefiLib.h>
 #include <Library/DebugLib.h>
 #include <Library/PrintLib.h>
@@ -45,7 +47,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
 
+#include <Library/OcMemoryLib.h>
+#include <Library/OcMiscLib.h>
+
 #include <IndustryStandard/Pci.h>
+#include <IndustryStandard/Edid.h>
 
 #include "VesaBiosExtensions.h"
 
@@ -54,6 +60,19 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Legacy region base is now 0x0C0000 instead of 0x100000.
 //
 #define LEGACY_REGION_BASE 0x0C0000
+#define LEGACY_REGION_SIZE 0x10000
+
+
+//
+// Vendor IDs.
+//
+#define PCI_VENDOR_INTEL      0x8086
+#define PCI_VENDOR_NVIDIA     0x10DE
+#define PCI_VENDOR_AMD        0x1022
+#define PCI_VENDOR_ATI        0x1002
+
+
+#define PCI_DEVICE_ENABLED  (EFI_PCI_COMMAND_IO_SPACE | EFI_PCI_COMMAND_MEMORY_SPACE)
 
 
 //
@@ -109,12 +128,14 @@ typedef struct {
   EFI_EDID_DISCOVERED_PROTOCOL                EdidDiscovered;
   EFI_EDID_ACTIVE_PROTOCOL                    EdidActive;
   EFI_VGA_MINI_PORT_PROTOCOL                  VgaMiniPort;
+  OC_FORCE_RESOLUTION_PROTOCOL                OcForceResolution;
 
   //
   // General fields
   //
   BOOLEAN                                     VgaCompatible;
   BOOLEAN                                     ProduceGraphicsOutput;
+  UINT16                                      PciVendorId;
 
   //
   // Graphics Output Protocol related fields
@@ -138,6 +159,7 @@ typedef struct {
   VESA_BIOS_EXTENSIONS_CRTC_INFORMATION_BLOCK *VbeCrtcInformationBlock; // 59 bytes.  Must be allocated below 1MB
   UINTN                                       VbeSaveRestorePages;      // Number of 4KB pages in VbeSaveRestoreBuffer
   EFI_PHYSICAL_ADDRESS                        VbeSaveRestoreBuffer;     // Must be allocated below 1MB
+
   //
   // Status code
   //
@@ -148,6 +170,7 @@ typedef struct {
 #define BIOS_VIDEO_DEV_FROM_PCI_IO_THIS(a)      CR (a, BIOS_VIDEO_DEV, PciIo, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_GRAPHICS_OUTPUT_THIS(a)      CR (a, BIOS_VIDEO_DEV, GraphicsOutput, BIOS_VIDEO_DEV_SIGNATURE)
 #define BIOS_VIDEO_DEV_FROM_VGA_MINI_PORT_THIS(a) CR (a, BIOS_VIDEO_DEV, VgaMiniPort, BIOS_VIDEO_DEV_SIGNATURE)
+#define BIOS_VIDEO_DEV_FROM_OC_FORCE_RESOLUTION_THIS(a) CR (a, BIOS_VIDEO_DEV, OcForceResolution, BIOS_VIDEO_DEV_SIGNATURE)
 
 #define GRAPHICS_OUTPUT_INVALIDE_MODE_NUMBER  0xffff
 
@@ -281,6 +304,19 @@ BiosVideoDeviceReleaseResource (
 //
 // Private worker functions
 //
+/**
+  Get VBE data from VBIOS.
+
+  @param BiosVideoPrivate - Pointer to BIOS_VIDEO_DEV structure
+
+  @retval EFI_SUCCESS VBE device found
+
+**/
+EFI_STATUS
+BiosVideoGetVbeData (
+  IN OUT BIOS_VIDEO_DEV  *BiosVideoPrivate
+  );
+
 /**
   Check for VBE device.
 
@@ -482,8 +518,7 @@ BiosVideoVgaMiniPortSetMode (
 BOOLEAN
 BiosVideoIsVga (
   IN  EFI_PCI_IO_PROTOCOL       *PciIo
-  )
-;
+  );
 
 //
 // Standard VGA Definitions
@@ -570,6 +605,27 @@ LegacyBiosInt86 (
   IN  BIOS_VIDEO_DEV                 *BiosDev,
   IN  UINT8                           BiosInt,
   IN  IA32_REGISTER_SET           *Regs
+  );
+
+/**
+  Force the specified resolution and reconnect the controller.
+  Specifying zero for Width and Height will pull the maximum
+  supported resolution by the EDID instead.
+
+  @param[in,out] This         Protocol instance.
+  @param[in]     Width        Desired screen width.
+  @param[in]     Height       Desired screen height.
+
+  @retval EFI_SUCCESS         Resolution successfully forced.
+  @retval EFI_UNSUPPORTED     The video adapter or the display are not supported.
+  @retval EFI_ALREADY_STARTED The specified resolution is already supported.
+**/
+EFI_STATUS
+EFIAPI
+BiosVideoForceResolutionSetResolution (
+  IN OUT OC_FORCE_RESOLUTION_PROTOCOL *This,
+  IN     UINT32                       Width   OPTIONAL,
+  IN     UINT32                       Height  OPTIONAL
   );
 
 #endif
