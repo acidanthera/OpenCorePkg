@@ -103,6 +103,9 @@ matrix:
     - cd AppleModels || exit 1
     - python2 ./update_generated.py  || exit 1
     - if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
+    - cd - || exit 1
+    - plutil -lint Docs/Sample.plist || exit 1
+    - plutil -lint Docs/SampleCustom.plist || exit 1
 
   - os: osx
     name: "Analyze Coverity"
