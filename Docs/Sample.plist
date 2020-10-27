@@ -1042,7 +1042,7 @@
 			<string></string>
 			<key>DirectGopRendering</key>
 			<false/>
-			<key>ForceResolution<key>
+			<key>ForceResolution</key>
 			<false/>
 			<key>IgnoreTextInGraphics</key>
 			<false/>
