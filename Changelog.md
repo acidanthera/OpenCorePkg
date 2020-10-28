@@ -21,6 +21,7 @@ OpenCore Changelog
 - Fixed I/O issues on platforms incapable of reading over 1MB at once
 - Fixed plist-only kext injection in Big Sur
 - Add `ForceResolution` option for enabling non-default resolutions
+- Fixed Ps2MouseDxe not properly loading under OpenDuetPkg
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest

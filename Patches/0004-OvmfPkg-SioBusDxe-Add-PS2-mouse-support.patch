@@ -1,0 +1,23 @@
+From: Goldfish64 <goldfishnet@aol.com>
+Subject: OvmfPkg/SioBusDxe: Add PS/2 mouse support
+
+SioBusDxe by default does not create a device for PS/2 mice, this patch adds that device.
+
+diff --git a/OvmfPkg/SioBusDxe/SioService.c b/OvmfPkg/SioBusDxe/SioService.c
+index 407132ddcd6667498362e122fff6df6677fe6877..d5a87219d7cdd83a30e642cd1e6cad56d6312cff 100644
+--- a/OvmfPkg/SioBusDxe/SioService.c
++++ b/OvmfPkg/SioBusDxe/SioService.c
+@@ -67,7 +67,12 @@ SIO_DEVICE_INFO mDevicesInfo[] = {
+     EISA_PNP_ID(0x303),
+     0,
+     { (ACPI_SMALL_RESOURCE_HEADER *) &mPs2KeyboardDeviceResources }
+-  }   // PS/2 Keyboard Controller
++  },  // PS/2 Keyboard Controller
++  {
++    EISA_PNP_ID(0xF13),
++    0,
++    { (ACPI_SMALL_RESOURCE_HEADER *) &mPs2KeyboardDeviceResources }
++  }   // PS/2 Mouse Controller
+ };
+ 
+ //
