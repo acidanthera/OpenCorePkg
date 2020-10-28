@@ -79,6 +79,11 @@ OcStartImage (
 
   OldMode = OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
 
+  if((Chosen->Type & OC_BOOT_APPLE_ANY) && mOpenCoreConfiguration.Acpi.Quirks.OnlyForMacOS){
+    DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport only for macOS...\n"));
+    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  }
+    
   Status = gBS->StartImage (
     ImageHandle,
     ExitDataSize,
@@ -123,8 +128,10 @@ OcMain (
   OcMiscMiddleInit (Storage, &mOpenCoreConfiguration, LoadPath, &mLoadHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
-  DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport...\n"));
-  OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  if(!mOpenCoreConfiguration.Acpi.Quirks.OnlyForMacOS){
+    DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport for any OS...\n"));
+    OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
+  }
   DEBUG ((DEBUG_INFO, "OC: OcLoadPlatformSupport...\n"));
   OcLoadPlatformSupport (&mOpenCoreConfiguration, &mOpenCoreCpuInfo);
   DEBUG ((DEBUG_INFO, "OC: OcLoadDevPropsSupport...\n"));

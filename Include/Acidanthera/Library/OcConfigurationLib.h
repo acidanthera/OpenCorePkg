@@ -80,6 +80,7 @@
 #define OC_ACPI_QUIRKS_FIELDS(_, __) \
   _(BOOLEAN                     , FadtEnableReset     ,     , FALSE  , ()) \
   _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
+  _(BOOLEAN                     , OnlyForMacOS        ,     , FALSE  , ()) \
   _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ResetHwSig          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ())

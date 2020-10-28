@@ -211,6 +211,8 @@
 			<false/>
 			<key>NormalizeHeaders</key>
 			<false/>
+			<key>OnlyForMacOS</key>
+			<false/>
 			<key>RebaseRegions</key>
 			<false/>
 			<key>ResetHwSig</key>
