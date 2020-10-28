@@ -2014,8 +2014,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0xD,
   .PlatformFeature = 0x3,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xF803F537ULL,
-  .FirmwareFeaturesMask = 0xF803FF37ULL,
+  .FirmwareFeatures = 0xE00DE137ULL,
+  .FirmwareFeaturesMask = 0xFF1FFF3FULL,
  },
  {
   .SystemProductName = "Macmini8,1",

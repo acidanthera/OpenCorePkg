@@ -24,10 +24,10 @@ ChassisType: 0x10
 ChassisVersion: "Mac-35C5E08120C7EEAF"
 ChassisAssetTag: ""
 PlatformFeature: 0x3
-FirmwareFeatures: 0xF803F537
-FirmwareFeaturesMask: 0xF803FF37
-ExtendedFirmwareFeatures: 0x00000000F803F537
-ExtendedFirmwareFeaturesMask: 0x00000000F803FF37
+FirmwareFeatures: 0xE00DE137
+FirmwareFeaturesMask: 0xFF1FFF3F
+ExtendedFirmwareFeatures: 0x00000000E00DE137
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
