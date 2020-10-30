@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "162.0.0.0.0"
-BIOSLegacyVersion: "MBP111.88Z.F000.B00.2006101815"
-BIOSReleaseDate: "06/10/2020"
+BIOSVersion: "424.0.0.0.0"
+BIOSLegacyVersion: "MBP111.88Z.F000.B00.2010070054"
+BIOSReleaseDate: "10/07/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,1"
 SystemVersion: "1.0"
@@ -75,13 +75,13 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP111
-    EFI Version:  162.0.0.0.0
-    Built by:     root@saumon
-    Date:         Wed Jun 10 18:15:07 PDT 2020
-    Revision:     162 (B&I)
+    EFI Version:  424.0.0.0.0
+    Built by:     root@manhattan42
+    Date:         Wed Oct  7 00:54:29 PDT 2020
+    Revision:     424 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+    Compiler:     clang-1200.0.30.4
 Specifications:
   CPUCodename:
     - "Haswell"
