@@ -39,12 +39,14 @@ SafeFileOpen (
 
   DEBUG_CODE_BEGIN ();
   ASSERT (FileName != NULL);
+  ASSERT (NewHandle != NULL);
   Length = StrLen (FileName);
   if (Length > 0 && FileName[Length - 1] == L'\\') {
     DEBUG ((DEBUG_INFO, "OCFS: Filename %s has trailing slash\n", FileName));
   }
   DEBUG_CODE_END ();
 
+  *NewHandle = NULL;
   Status = Protocol->Open (
     Protocol,
     NewHandle,
@@ -52,6 +54,24 @@ SafeFileOpen (
     OpenMode,
     Attributes
     );
+  //
+  // Some boards like ASUS ROG RAMPAGE VI EXTREME may have malfunctioning FS
+  // drivers that report write protection violation errors for read-only
+  // operations but otherwise function as expected.
+  //
+  // REF: https://github.com/acidanthera/bugtracker/issues/1242
+  //
+  if (Status == EFI_WRITE_PROTECTED
+   && OpenMode == EFI_FILE_MODE_READ
+   && Attributes == 0
+   && *NewHandle != NULL) {
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCFS: Avoid invalid WP error for Filename %s\n",
+      FileName
+      ));
+    Status = EFI_SUCCESS;
+  }
 
   return Status;
 }
