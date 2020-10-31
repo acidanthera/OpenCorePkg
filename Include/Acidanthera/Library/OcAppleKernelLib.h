@@ -573,6 +573,10 @@ typedef enum {
   // Remove kernel __LINKEDIT jetisson.
   //
   KernelQuirkSegmentJettison,
+  //
+  // Activate SecureBoot support for all CPUs.
+  //
+  KernelQuirkSecureBootSupport,
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;

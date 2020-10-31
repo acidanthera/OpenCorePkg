@@ -1827,6 +1827,67 @@ PatchLegacyCommpage (
   return EFI_NOT_FOUND;
 }
 
+STATIC
+EFI_STATUS
+PatchSecureBootSupport (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS   Status;
+  UINT8        *Last;
+  UINT8        *SelectAp;
+  UINT8        *HybridAp;
+  UINT32       Diff;
+
+  ASSERT (Patcher != NULL);
+
+  //
+  // This code is for debugging APFS snapshot verification for Big Sur.
+  // macOS chooses verification scheme based on the hardware:
+  // - __img4_chip_x86_software_8012 (software x86 8012)
+  //   for CPUs with VMM flag enabled via cpuid_features.
+  // - __img4_chip_x86 (x86)
+  //   for platforms with no or v1 (0x10000) coprocessor (apple-coprocessor-version).
+  // - __img4_chip_ap_hybrid_medium (medium-security hybrid arm/x86 ap)
+  //   for platforms with v2 (0x20000) coprocessor and medium (1) policy (AppleSecureBootPolicy).
+  // - __img4_chip_ap_hybrid_relaxed (relaxed hybrid arm/x86 ap)
+  //   for platforms with v2 coprocessor and relaxed (0) policy.
+  // - __img4_chip_ap_hybrid (hybrid arm/x86 ap)
+  //   for platfirms with v2 or newer coprocessor and personalised policy (2).
+  //
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping SecureBootSupport on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  Last = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
+    + MachoGetFileSize (&Patcher->MachContext) - 64);
+
+  Status = PatcherGetSymbolAddress (Patcher, "_img4_chip_select_effective_ap", &SelectAp);
+  if (EFI_ERROR (Status) || SelectAp > Last) {
+    DEBUG ((DEBUG_INFO, "OCAK: Missing _img4_chip_select_effective_ap - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  Status = PatcherGetSymbolAddress (Patcher, "__img4_chip_ap_hybrid_medium", &HybridAp);
+  if (EFI_ERROR (Status) || HybridAp > Last) {
+    DEBUG ((DEBUG_INFO, "OCAK: Missing __img4_chip_ap_hybrid_medium - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Enabling SecureBootSupport on %u\n", KernelVersion));
+
+  SelectAp[0] = 0x48;
+  SelectAp[1] = 0x8D;
+  SelectAp[2] = 0x05;
+  Diff = (UINT32) (HybridAp - SelectAp - 7);
+  CopyMem (&SelectAp[3], &Diff, sizeof (Diff));
+  SelectAp[7] = 0xC3;
+  return EFI_SUCCESS;
+}
+
 //
 // Quirks table.
 //
@@ -1851,7 +1912,8 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
   [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
   [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
-  [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage }
+  [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage },
+  [KernelQuirkSecureBootSupport] = { "com.apple.security.AppleImage4", PatchSecureBootSupport },
 };
 
 EFI_STATUS
