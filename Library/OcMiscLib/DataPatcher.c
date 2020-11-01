@@ -36,7 +36,7 @@ FindPattern (
     return -1;
   }
 
-  while (DataOff + PatternSize < DataSize) {
+  while (DataOff + PatternSize <= DataSize) {
     Matches = TRUE;
     for (Index = 0; Index < PatternSize; ++Index) {
       if ((PatternMask == NULL && Data[DataOff + Index] != Pattern[Index])
