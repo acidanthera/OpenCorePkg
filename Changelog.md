@@ -23,7 +23,8 @@ OpenCore Changelog
 - Add `ForceResolution` option for enabling non-default resolutions
 - Fixed Ps2MouseDxe not properly loading under OpenDuetPkg
 - Added workaround for read-only errors on some X299 boards
-- Added support for `x86legacy` secure boot model
+- Added support for `x86legacy` Secure Boot model
+- Added missing Secure Boot NVRAM variables required by 11.0
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest

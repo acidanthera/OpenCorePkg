@@ -40,6 +40,7 @@ typedef struct OC_SB_MODEL_DESC_ {
   UINT32       BoardId;
 } OC_SB_MODEL_DESC;
 
+STATIC CHAR8 mCryptoDigestMethod[16] = "sha2-384";
 STATIC DERImg4Environment mEnvInfo;
 STATIC CONST CHAR8 *mModelDefault = "j137";
 ///
@@ -362,6 +363,7 @@ OcAppleImg4BootstrapValues (
   mEnvInfo.effectiveSecurityMode      = 1;
   mEnvInfo.internalUseOnlyUnit        = FALSE;
   mEnvInfo.xugs                       = 1;
+  mEnvInfo.allowMixNMatch             = FALSE;
 
   //
   // Expose all the variables via NVRAM.
@@ -383,6 +385,17 @@ OcAppleImg4BootstrapValues (
     EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
     sizeof (mEnvInfo.chipId),
     &mEnvInfo.chipId
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gRT->SetVariable (
+    L"CertificateEpoch",
+    &gAppleSecureBootVariableGuid,
+    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+    sizeof (mEnvInfo.certificateEpoch),
+    &mEnvInfo.certificateEpoch
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -464,6 +477,30 @@ OcAppleImg4BootstrapValues (
   if (EFI_ERROR (Status)) {
     return Status;
   }
+
+  Status = gRT->SetVariable (
+    L"ApMixNMatchPreventionStatus",
+    &gAppleSecureBootVariableGuid,
+    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+    sizeof (mEnvInfo.allowMixNMatch),
+    &mEnvInfo.allowMixNMatch
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gRT->SetVariable (
+    L"CryptoDigestMethod",
+    &gAppleSecureBootVariableGuid,
+    EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
+    sizeof (mCryptoDigestMethod),
+    &mCryptoDigestMethod
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  
 
   return EFI_SUCCESS;
 }
