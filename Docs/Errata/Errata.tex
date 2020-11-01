@@ -274,11 +274,11 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
   \textbf{Identifier}: \texttt{ERR062-1} \\
   \textbf{Published}: 2020-10-25 01:22 MSK \\
   \textbf{Updated}: 2020-10-25 01:22 MSK \\
-  \textbf{Affected versions}: 0.6.1 and newer \\
-  \textbf{Resolved in}: --- \\
+  \textbf{Affected versions}: 0.6.1-0.6.2 \\
+  \textbf{Resolved in}: 0.6.3 (\href{https://github.com/acidanthera/OpenCorePkg/commit/1b0041493d4693f9505aa6415d93079ea59f7ab0}{1b004149}) \\
   \textbf{Description}:
 
-  Booting Big Sur beta 10 will cause a kernel panic in \texttt{apfs.kext} with the
+  Booting Big Sur beta 10 or newer will cause a kernel panic in \texttt{apfs.kext} with the
   \texttt{Rooting from the live fs of a sealed volume is not allowed on a RELEASE build}
   message. Reference:
   \href{https://github.com/acidanthera/bugtracker/issues/1235}{acidanthera/bugtracker\#1235}.
@@ -287,6 +287,7 @@ can be found at \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bug
   \begin{itemize}
     \tightlist
 
+    \item Update to master version \texttt{OR}
     \item Set \texttt{SecureBootModel} to \texttt{Disabled}
 
   \end{itemize}

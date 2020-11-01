@@ -479,7 +479,7 @@ OcAppleImg4BootstrapValues (
   }
 
   Status = gRT->SetVariable (
-    L"ApMixNMatchPreventionStatus",
+    L"MixNMatchPreventionStatus",
     &gAppleSecureBootVariableGuid,
     EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
     sizeof (mEnvInfo.allowMixNMatch),

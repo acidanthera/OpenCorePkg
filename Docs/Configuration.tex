@@ -3306,7 +3306,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Setting this value to any non-zero 64-bit integer will allow using
   personalised Apple Secure Boot identifiers. To use this setting,
   make sure to generate a random 64-bit number with a cryptographically secure
-  random number generator. With this value set and \texttt{SecureBootModel} valid
+  random number generator. As an alternative, first 8 bytes of \texttt{SystemUUID}
+  can be used for \texttt{ApECID}, this is found in macOS 11.0 for Macs without
+  the T2 chip.
+
+  With this value set and \texttt{SecureBootModel} valid
   and not \texttt{Disabled} it is possible to achieve
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
   Secure Boot.
@@ -3329,8 +3333,10 @@ bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
-  When reinstalling the operating system, note that current versions
-  of macOS Installer, tested as of 10.15.6, will usually run out of free memory
+  Before macOS 11.0, which introduced a dedicated \texttt{x86legacy}
+  model for models without the T2 chip, personalised Apple Secure Boot
+  may not work as expected. When reinstalling the operating system, macOS Installer
+  from macOS 10.15 and older, will usually run out of free memory
   on the \texttt{/var/tmp} partition when trying to install macOS
   with the personalised Apple Secure Boot. Soon after downloading the macOS installer
   image an \texttt{Unable to verify macOS} error message will appear. To workaround
@@ -3674,9 +3680,11 @@ rm vault.pub
   \item \texttt{x86legacy} --- \texttt{Macs and VMs without T2 chip minimum macOS 11.0}
   \end{itemize}
 
-  \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
-  allowing to enabling Apple Secure Boot with any SMBIOS. Setting
-  \texttt{SecureBootModel} to any valid value but \texttt{Disabled} is equivalent to
+  Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
+  Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
+  Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
+  is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
   achieve \texttt{Full Security}.
