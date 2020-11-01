@@ -577,12 +577,7 @@ OcPlatformUpdateNvram (
   // system-id is only visible in BS scope and may be used by EfiBoot
   // in macOS 11.0 to generate x86legacy ApECID from the first 8 bytes.
   //
-  if (AsciiUuid[0] != '\0') {
-    Status = AsciiStrToGuid (AsciiUuid, &Uuid);
-  } else {
-    Status = EFI_INVALID_PARAMETER;
-  }
-
+  Status = AsciiStrToGuid (AsciiUuid, &Uuid);
   if (!EFI_ERROR (Status)) {
     Status = gRT->SetVariable (
       L"system-id",
