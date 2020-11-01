@@ -53,7 +53,7 @@ OpenCore Changelog
 - Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
 - Added `LegacyCommpage` quirk to improve pre-SSSE3 userspace compatibility
 - Fixed legacy SATA HDDs displaying as external drives in the picker
-- Fixed `FindPattern` on last byte of data
+- Fixed kernel and ACPI patches failing to replace last bytes of memory
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
