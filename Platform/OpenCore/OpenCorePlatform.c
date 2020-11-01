@@ -452,6 +452,8 @@ OcPlatformUpdateNvram (
   UINTN        MlbSize;
   CONST  UINT8 *Rom;
   UINTN        RomSize;
+  CONST CHAR8  *AsciiUuid;
+  EFI_GUID     Uuid;
   UINT64       ExFeatures;
   UINT64       ExFeaturesMask;
   UINT32       Features;
@@ -464,6 +466,7 @@ OcPlatformUpdateNvram (
     MlbSize        = Config->PlatformInfo.Nvram.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Nvram.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Nvram.Rom);
+    AsciiUuid      = OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid);
     ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
     ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
   } else {
@@ -473,6 +476,7 @@ OcPlatformUpdateNvram (
     MlbSize        = Config->PlatformInfo.Generic.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Generic.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Generic.Rom);
+    AsciiUuid      = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid);
     ExFeatures     = MacInfo->Smbios.FirmwareFeatures;
     ExFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
 
@@ -565,6 +569,32 @@ OcPlatformUpdateNvram (
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Setting MLB %a - %r\n",
       Mlb,
+      Status
+      ));
+  }
+
+  //
+  // system-id is only visible in BS scope and may be used by EfiBoot
+  // in macOS 11.0 to generate x86legacy ApECID from the first 8 bytes.
+  //
+  if (AsciiUuid[0] != '\0') {
+    Status = AsciiStrToGuid (AsciiUuid, &Uuid);
+  } else {
+    Status = EFI_INVALID_PARAMETER;
+  }
+
+  if (!EFI_ERROR (Status)) {
+    Status = gRT->SetVariable (
+      L"system-id",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS,
+      sizeof (Uuid),
+      &Uuid
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting system-id %g - %r\n",
+      &Uuid,
       Status
       ));
   }

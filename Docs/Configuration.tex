@@ -4506,7 +4506,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{system-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
-  \texttt{SystemUUID}.
+  \texttt{SystemUUID} (with swapped byte order).
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -4912,6 +4912,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeaturesMask}
   \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeaturesMask}
   \end{itemize}
+
+\item
+  \texttt{SystemUUID}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Not installed\\
+  \textbf{Description}: Specifies the value of NVRAM variable
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:system-id}
+  for boot services only. Value found on Macs is equal to SMBIOS
+  \texttt{SystemUUID}.
 
 \end{enumerate}
 
