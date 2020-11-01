@@ -2367,6 +2367,16 @@ blocking.
   usually have compatible AHCI controllers.
 
 \item
+  \texttt{ForceSecureBootScheme}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 11.0\\
+  \textbf{Description}: Force \texttt{x86} scheme for IMG4 verification.
+
+  \emph{Note}: This option is required on virtual machines when using
+  \texttt{SecureBootModel} different from \texttt{x86legacy}.
+
+\item
   \texttt{IncreasePciBarSize}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3687,7 +3697,8 @@ rm vault.pub
   is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
-  achieve \texttt{Full Security}.
+  achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
+  when using Apple Secure Boot on a virtual machine.
 
   Enabling Apple Secure Boot is more demanding to incorrect configurations,
   buggy macOS installations, and unsupported setups. Things to consider:
@@ -3695,7 +3706,7 @@ rm vault.pub
   \begin{enumerate}
     \tightlist
     \item As with T2 Macs, unsigned kernel drivers and several signed kernel
-    drivers, including NVIDIA Web Drivers, cannot be installed.
+      drivers, including NVIDIA Web Drivers, cannot be installed.
     \item The list of cached drivers may be different, resulting in the need
       to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
       For example, \texttt{IO80211Family} cannot be injected in this case.

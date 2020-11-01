@@ -26,6 +26,7 @@ OpenCore Changelog
 - Added support for `x86legacy` Secure Boot model
 - Added missing Secure Boot NVRAM variables required by 11.0
 - Added setting of `system-id` NVRAM variable
+- Added `ForceSecureBootScheme` quirk for virtual machines
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest

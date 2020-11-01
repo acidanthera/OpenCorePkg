@@ -574,9 +574,9 @@ typedef enum {
   //
   KernelQuirkSegmentJettison,
   //
-  // Activate SecureBoot support for all CPUs.
+  // Force SecureBoot support for all CPUs.
   //
-  KernelQuirkSecureBootSupport,
+  KernelQuirkForceSecureBootScheme,
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;

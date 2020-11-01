@@ -1829,7 +1829,7 @@ PatchLegacyCommpage (
 
 STATIC
 EFI_STATUS
-PatchSecureBootSupport (
+PatchForceSecureBootScheme (
   IN OUT PATCHER_CONTEXT    *Patcher,
   IN     UINT32             KernelVersion
   )
@@ -1858,7 +1858,7 @@ PatchSecureBootSupport (
   //
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping SecureBootSupport on %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
@@ -1871,13 +1871,13 @@ PatchSecureBootSupport (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherGetSymbolAddress (Patcher, "__img4_chip_ap_hybrid_medium", &HybridAp);
+  Status = PatcherGetSymbolAddress (Patcher, "__img4_chip_x86", &HybridAp);
   if (EFI_ERROR (Status) || HybridAp > Last) {
-    DEBUG ((DEBUG_INFO, "OCAK: Missing __img4_chip_ap_hybrid_medium - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Missing __img4_chip_x86 - %r\n", Status));
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Enabling SecureBootSupport on %u\n", KernelVersion));
+  DEBUG ((DEBUG_INFO, "OCAK: Forcing sb scheme on %u\n", KernelVersion));
 
   SelectAp[0] = 0x48;
   SelectAp[1] = 0x8D;
@@ -1913,7 +1913,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
   [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
   [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage },
-  [KernelQuirkSecureBootSupport] = { "com.apple.security.AppleImage4", PatchSecureBootSupport },
+  [KernelQuirkForceSecureBootScheme] = { "com.apple.security.AppleImage4", PatchForceSecureBootScheme },
 };
 
 EFI_STATUS

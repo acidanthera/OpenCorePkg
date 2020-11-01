@@ -379,6 +379,22 @@ ApplyKextPatches (
   } else {
     DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkCustomSmbiosGuid2\n"));
   }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkExtendBTFeatureFlags, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkExtendBTFeatureFlags - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkExtendBTFeatureFlags\n"));
+  }
+
+  Status = PrelinkedContextApplyQuirk (Context, KernelQuirkForceSecureBootScheme, KernelVersion);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkForceSecureBootScheme - %r\n", Status));
+    FailedToProcess = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "[OK] Success KernelQuirkForceSecureBootScheme\n"));
+  }
 }
 
 VOID
