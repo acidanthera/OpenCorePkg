@@ -27,6 +27,7 @@ OpenCore Changelog
 - Added missing Secure Boot NVRAM variables required by 11.0
 - Added setting of `system-id` NVRAM variable
 - Added `ForceSecureBootScheme` quirk for virtual machines
+- Fixed kernel and ACPI patches failing to replace last bytes of memory
 
 #### v0.6.2
 - Updated builtin firmware versions for SMBIOS and the rest
@@ -53,7 +54,6 @@ OpenCore Changelog
 - Fixed `macserial` compatibility with iMac20,x serials and other models from 2020
 - Added `LegacyCommpage` quirk to improve pre-SSSE3 userspace compatibility
 - Fixed legacy SATA HDDs displaying as external drives in the picker
-- Fixed kernel and ACPI patches failing to replace last bytes of memory
 
 #### v0.6.1
 - Improved recognition of early pressed hotkeys, thx @varahash
