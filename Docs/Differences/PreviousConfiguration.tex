@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6.2)
+       Reference Manual (0.6.3)
 
        \vspace{0.2in}
 
@@ -132,7 +132,7 @@ and UEFI functionality. For these reasons, this document is available exclusivel
 and all other sources or translations of this document are unofficial and may
 contain errors.
 
-Third-party articles, utilities, books, and alike, may be more useful for a wider audience as
+Third-party articles, utilities, books, and similar, may be more useful for a wider audience as
 they could provide guide-like material. However, they are subject to their authors' preferences,
 tastes, misinterpretations of this document, and unavoidable obsolescence.
 In cases of using such sources, such as \href{https://dortania.github.io}{Dortania}'s
@@ -143,6 +143,11 @@ please refer back to this document on every decision made and re-evaluate potent
 Please note that regardless of the sources used, users are required to fully understand every
 OpenCore configuration option, and the principles behind them, before posting issues to the
 \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
+
+\emph{Note}: Creating this document would not have been possible without the invaluable
+contributions from other people: Andrey1970, Goldfish64, dakanji, PMheart, and several others,
+with the full list available in
+\href{https://github.com/acidanthera/OpenCorePkg/commits/master/Docs}{OpenCorePkg history}.
 
 \subsection{Generic Terms}\label{generic-terms}
 
@@ -500,7 +505,7 @@ entries include:
   \texttt{BootProtect} for more details.
 \item
   \texttt{boot} \\
-  Duet bootstrap loader, which initialises UEFI environment on legacy BIOS firmwares
+  Duet bootstrap loader, which initialises UEFI environment on legacy BIOS firmware
   and loads \texttt{OpenCore.efi} similarly to other bootstrap loaders. Modern Duet
   bootstrap loader will default to \texttt{OpenCore.efi} on the same partition when
   present.
@@ -561,7 +566,7 @@ To install OpenCore reflect the
 \hyperref[configuration-structure]{Configuration Structure} described
 in the previous section on a EFI volume of a GPT partition. While
 corresponding sections of this document do provide some information
-in regards to external resources like ACPI tables, UEFI drivers,
+regarding external resources such as ACPI tables, UEFI drivers,
 or kernel extensions (kexts), completeness of the matter is out of
 the scope of this document. Information about kernel extensions may
 be found in a separate
@@ -671,13 +676,14 @@ all possible means.
 
 \subsection{Coding conventions}\label{configuration-conv}
 
-Just like any other project we have conventions that we follow during the development.
-All third-party contributors are highly recommended to read and follow the conventions
-listed below before submitting their patches. In general it is also recommended to firstly
-discuss the issue in \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
-before sending the patch to ensure no double work and to avoid the patch being rejected.
+As with any other project, we have conventions that we follow during development.
+All third-party contributors are advised to adhere to the conventions listed below
+before submitting patches. To minimise abortive work and the potential rejection of
+submissions, third-party contributors should initially raise issues to the
+\href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}
+for feedback before submitting patches.
 
-\textbf{Organisation}. The codebase is contained in \texttt{OpenCorePkg} repository,
+\textbf{Organisation}. The codebase is contained in the \texttt{OpenCorePkg} repository,
 which is the primary EDK II package.
 \begin{itemize}
 \tightlist
@@ -774,7 +780,7 @@ for extensive messages that should not appear in NVRAM log that is heavily limit
 When trying to find the problematic change it is useful to rely on
 \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
 There also are some unofficial resources that provide per-commit binary
-builds of OpenCore, like \href{https://dortania.github.io/builds}{Dortania}.
+builds of OpenCore, such as \href{https://dortania.github.io/builds}{Dortania}.
 
 \section{ACPI}\label{acpi}
 
@@ -1059,10 +1065,10 @@ In the majority of the cases ACPI patches are not useful and harmful:
 \item
   Try to avoid patching \texttt{\_OSI} to support a higher level of feature sets
   whenever possible. Commonly this enables a number of hacks on APTIO
-  firmwares, which result in the need to add more patches. Modern firmwares
-  generally do not need it at all, and those that do are fine with much
+  firmware, which result in the need to add more patches. Modern firmware
+  generally does not need it, and those that do are fine with much
   smaller patches. However, laptop vendors usually rely on this method to
-  determine the availability of functions like modern I2C input support, thermal
+  determine the availability of functions such as modern I2C input support, thermal
   adjustment and custom feature additions.
 \item
   Avoid patching embedded controller event \texttt{\_Qxx} just for enabling
@@ -1071,7 +1077,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   newer systems. Please switch to built-in brightness key discovery of
   \href{https://github.com/acidanthera/BrightnessKeys}{BrightnessKeys} instead.
 \item
-  Try to avoid hacky changes like renaming \texttt{\_PRW} or \texttt{\_DSM}
+  Try to avoid hacky changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
@@ -1159,7 +1165,7 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
   \textbf{Description}: Reset \texttt{FACS} table \texttt{HardwareSignature}
   value to \texttt{0}.
 
-  This works around firmwares that fail to maintain hardware signature across
+  This works around firmware that fail to maintain hardware signature across
   the reboots and cause issues with waking from hibernation.
 
 \item
@@ -1169,7 +1175,7 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
   \textbf{Description}: Reset \texttt{BGRT} table \texttt{Displayed}
   status field to \texttt{false}.
 
-  This works around firmwares that provide \texttt{BGRT} table but
+  This works around firmware that provide a \texttt{BGRT} table but
   fail to handle screen updates afterwards.
 
 \end{enumerate}
@@ -1181,7 +1187,7 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
 
 This section allows to apply different kinds of UEFI modifications on
 Apple bootloader (\texttt{boot.efi}). The modifications currently provide
-various patches and environment alterations for different firmwares. Some
+various patches and environment alterations for different firmware. Some
 of these features were originally implemented as a part of
 \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
 which is no longer maintained. See \hyperref[troubleshootingtricks]{Tips and Tricks}
@@ -1304,10 +1310,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Protect from boot.efi runtime memory defragmentation.
 
   This option fixes UEFI runtime services (date, time, NVRAM, power control, etc.)
-  support on many firmwares using SMM backing for select services like variable
+  support on firmware that uses SMM backing for select services such as variable
   storage. SMM may try to access physical addresses, but they get moved by boot.efi.
 
-  \emph{Note}: Most but Apple and VMware firmwares need this quirk.
+  \emph{Note}: Most types of firmware, apart from Apple and VMware, need this quirk.
 
 \item
   \texttt{DevirtualiseMmio}\\
@@ -1323,10 +1329,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   is the only way to boot macOS, which otherwise fails with allocation
   error at bootloader stage.
 
-  This option is generally useful on all firmwares except some very old ones,
-  like Sandy Bridge. On select firmwares it may require a list of exceptional
-  addresses that still need to get their virtual addresses for proper NVRAM and
-  hibernation functioning. Use \texttt{MmioWhitelist} section to do this.
+  This option is generally useful on all types of firmware, except some very old ones
+  such as Sandy Bridge. On some types of firmware, a list of addresses that need virtual
+  addresses for proper NVRAM and hibernation functionality may be required.
+  Use the \texttt{MmioWhitelist} section for this.
 
 \item
   \texttt{DisableSingleUser}\\
@@ -1367,7 +1373,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
   and is now considered rare legacy. Examples of such hardware are Ivy Bridge laptops
-  with Insyde firmware, like Acer V3-571G. Do not use this unless a complete understanding of
+  with Insyde firmware, such as Acer V3-571G. Do not use this unless a complete understanding of
   the consequences can be ensured.
 
 \item
@@ -1419,7 +1425,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect memory regions from incorrect access.
 
-  Some firmwares incorrectly map select memory regions:
+  Some types of firmware incorrectly map select memory regions:
 
   \begin{itemize}
     \tightlist
@@ -1433,7 +1439,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   CSM or MMIO for MMIO.
 
   \emph{Note}: The necessity of this quirk is determined by artifacts, sleep
-  wake issues, and boot failures. In general only very old firmwares need
+  wake issues, and boot failures. Only very old firmware typically need
   this quirk.
 
 \item
@@ -1454,10 +1460,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect UEFI services from being overridden by the firmware.
 
-  Some modern firmwares including both hardware and virtual machines, like VMware,
+  Some modern firmware, including on virtual machines such as VMware,
   may update pointers to UEFI services during driver loading and related actions.
   Consequentially this directly breaks other quirks that affect memory management,
-  like \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
+  such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also break other quirks depending on the effects of these.
 
   \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
@@ -1489,15 +1495,14 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
   when \texttt{ProvideCustomSlide} is enabled.
-  It is believed that modern firmwares allocate pool memory from top to bottom, effectively resulting in
-  free memory at the time of slide scanning being later used as temporary
-  memory during kernel loading. In case those memory are unavailable, this
-  option can stop evaluating higher slides.
+  It is believed that modern firmware allocates pool memory from top to bottom, effectively resulting in
+  free memory when slide scanning is used later as temporary memory during kernel loading.
+  When such memory is not available, this option can stop the evaluation of higher slides.
 
   \emph{Note}: The necessity of this quirk is determined by random boot failure
   when \texttt{ProvideCustomSlide} is enabled and the randomized slide fall
   into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
-  debug log may contain messages like \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
+  debug log may contain messages such as \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
   To find the optimal value, manually append \texttt{slide=X} to \texttt{boot-args}
   and log the largest one that will not result in boot failures.
 
@@ -1512,8 +1517,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \begin{itemize}
   \tightlist
   \item Memory map size must not exceed 4096 bytes as Apple kernel maps
-    it as a single 4K page. Since some firmwares have very large memory maps
-    (approximately over 100 entries) Apple kernel will crash at boot.
+    it as a single 4K page. Since some types of firmware can have very large memory maps,
+    potentially over 100 entries, the Apple kernel will crash on boot.
   \item Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
     memory statically gets \texttt{RX} permissions, and all other memory types
     get \texttt{RW} permissions. Since some firmware drivers may write to global
@@ -1522,19 +1527,19 @@ To view their current state use \texttt{pmset -g} command in Terminal.
     type.
   \end{itemize}
 
-  To workaround these limitations this quirk applies memory attributes table
-  permissions to memory map passed to Apple kernel and optionally attempts
+  To workaround these limitations, this quirk applies memory attribute table
+  permissions to the memory map passed to the Apple kernel and optionally attempts
   to unify contiguous slots of similar types if the resulting memory map exceeds
   4 KB.
 
-  \emph{Note 1}: Since many firmwares come with incorrect memory protection
-  table this quirk often comes in pair with \texttt{SyncRuntimePermissions}.
+  \emph{Note 1}: Since several types of firmware come with incorrect memory protection
+  tables, this quirk often comes paired with \texttt{SyncRuntimePermissions}.
 
   \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
-  This quirk replaces \texttt{EnableWriteUnprotector} on firmwares supporting
-  memory attributes table (MAT). This quirk is generally unnecessary when using
-  \texttt{OpenDuetPkg}, but may be required to boot macOS 10.6 and earlier for
-  unclear reasons.
+  This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
+  Memory Attribute Tables (MAT). This quirk is usually unnecessary when using
+  \texttt{OpenDuetPkg}, but may be required to boot macOS 10.6, and earlier, for
+  reasons that are not clear.
 
 \item
   \texttt{SetupVirtualMap}\\
@@ -1542,13 +1547,13 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Setup virtual memory at \texttt{SetVirtualAddresses}.
 
-  Select firmwares access memory by virtual addresses after \texttt{SetVirtualAddresses}
-  call, which results in early boot crashes. This quirk workarounds the problem by
+  Some types of firmware access memory by virtual addresses after a \texttt{SetVirtualAddresses}
+  call, resulting in early boot crashes. This quirk workarounds the problem by
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures. Currently
-  new firmwares with memory protection support (like OVMF) do not support this quirk due to
+  \emph{Note}: The necessity of this quirk is determined by early boot failures. Currently,
+  new firmware with memory protection support (such as OVMF) do not support this quirk. See
   \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
 
 \item
@@ -1557,7 +1562,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Report macOS being loaded through OS Info for any OS.
 
-  This quirk is useful on Mac firmwares, which behave differently in different OS.
+  This quirk is useful on Mac firmware, which behaves differently in different OS.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
 
@@ -1567,7 +1572,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update memory permissions for runtime environment.
 
-  Some firmwares either fail to properly handle runtime permissions:
+  Some types of firmware fail to properly handle runtime permissions:
   \begin{itemize}
     \tightlist
     \item They incorrectly mark \texttt{OpenRuntime} as not executable in the memory map.
@@ -1580,8 +1585,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   This quirk tries to update memory map and memory attributes table to correct this.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures either in
-  macOS or in Linux/Windows. In general only firmwares released in 2018 or later are affected.
+  \emph{Note}: The need for this quirk is indicated by early boot failures.
+  Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
 
@@ -1633,7 +1638,7 @@ The second stage applies to all devices much later after the PCI configuration
 and may repeat the first stage if the device was not present in ACPI.
 
 For all kernel drivers, which may inspect the \texttt{IODeviceTree} plane without
-probing (e.g. \texttt{Lilu} and its plugins like \texttt{WhateverGreen}) it is particularly
+probing (e.g. \texttt{Lilu} and its plugins such as \texttt{WhateverGreen}) it is particularly
 important to ensure device presence in the ACPI tables. Failing to do so may result
 \textbf{in all kinds of erratic behaviour} caused by ignoring the injected device properties
 as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
@@ -1749,7 +1754,7 @@ blocking.
   See \hyperref[kernelpropsforce]{Force Properties} section below.
   This section resolves the problem of injecting drivers that depend on other
   drivers, which are not cached otherwise. The issue normally affects older
-  operating systems, where various dependency kexts, like \texttt{IOAudioFamily}
+  operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
   or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
   Kernel driver load order follows the item order in the array, thus the dependencies
   should be written prior to their consumers. \texttt{Force} happens before
@@ -2220,14 +2225,14 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  Certain firmwares lock \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register. The bundled
-  \texttt{VerifyMsrE2} tool can be used to check its state. Some firmware have this
-  register locked only on some cores.
+  Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register and the bundled
+  \texttt{VerifyMsrE2} tool can be used to check its state. Note that some types of firmware only
+  have this register locked on some cores.
 
-  As modern firmwares provide \texttt{CFG Lock} setting, which allows configuring
+  As modern firmware provide a \texttt{CFG Lock} setting that allows configuring the
   \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
-  whenever possible. For several APTIO firmwares not displaying \texttt{CFG Lock} setting
-  in the GUI it is possible to access the option directly:
+  whenever possible. On APTIO firmware that do not provide a \texttt{CFG Lock}
+  setting in the GUI, it is possible to access the option directly:
 
   \begin{enumerate}
     \tightlist
@@ -2358,8 +2363,18 @@ blocking.
   \textbf{Description}: Apply icon type patches to AppleAHCIPort.kext to force
   internal disk icons for all AHCI disks.
 
-  \emph{Note}: This option should be avoided whenever possible. Modern firmwares
+  \emph{Note}: This option should be avoided whenever possible. Modern firmware
   usually have compatible AHCI controllers.
+
+\item
+  \texttt{ForceSecureBootScheme}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 11.0\\
+  \textbf{Description}: Force \texttt{x86} scheme for IMG4 verification.
+
+  \emph{Note}: This option is required on virtual machines when using
+  \texttt{SecureBootModel} different from \texttt{x86legacy}.
 
 \item
   \texttt{IncreasePciBarSize}\\
@@ -2455,8 +2470,8 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \textbf{Description}: Use \texttt{kernelcache} with different checksums when available.
 
   On macOS 10.6 and earlier \texttt{kernelcache} filename has a checksum, which essentially
-  is \texttt{adler32} from SMBIOS product name and EfiBoot device path. On certain firmwares
-  EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics,
+  is \texttt{adler32} from SMBIOS product name and EfiBoot device path. On some types of firmware,
+  the EfiBoot device path differs between UEFI and macOS due to ACPI or hardware specifics,
   rendering \texttt{kernelcache} checksum as always different.
 
   This setting allows matching the latest \texttt{kernelcache} with a suitable architecture
@@ -2528,7 +2543,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   of them all is complicated and not practical, because several point releases had genuine
   bugs and failed to properly perform the server detection in the first place.
   For this reason OpenCore on macOS~10.6 will fallback to \texttt{x86\_64}
-  architecture whenever it is supported by the board at all, just like on macOS~10.7.
+  architecture whenever it is supported by the board at all, as on macOS~10.7.
   As a reference here is the 64-bit Mac model compatibility corresponding to actual
   EfiBoot behaviour on macOS 10.6.8 and 10.7.5.
 
@@ -2928,9 +2943,9 @@ entry choice will update till next manual reconfiguration.
   handled by operating system bootloader, namely \texttt{boot.efi}. These keys
   allow to change operating system behaviour by providing different boot modes.
 
-  On some firmwares it may be problematic to use modifier keys due to driver incompatibilities.
-  To workaround this problem this option allows registering select hotkeys in a more
-  permissive manner from within boot picker. Such extensions include the support
+  On some types of firmware, it may be problematic to use modifier keys due to driver
+  incompatibilities. To workaround this problem this option allows registering select hotkeys
+  in a more permissive manner from within boot picker. Such extensions include the support
   of tapping on keys in addition to holding and pressing \texttt{Shift} along with
   other keys instead of just \texttt{Shift} alone, which is not detectable on many
   PS/2 keyboards. This list of known \texttt{modifier hotkeys} includes:
@@ -3020,16 +3035,16 @@ entry choice will update till next manual reconfiguration.
   \end{itemize}
 
   \emph{Note 1}: Activated \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar driver is required
-  for key handling to work. On many firmwares it is not possible to get all the keys function.
+  for key handling to work. On several types of firmware, it is not possible to get all the key functions.
 
   \emph{Note 2}: In addition to \texttt{OPT} OpenCore supports \texttt{Escape} key to display picker when
-  \texttt{ShowPicker} is disabled. This key exists for \texttt{Apple} picker mode and for
-  firmwares with PS/2 keyboards that fail to report held \texttt{OPT} key and require continual
-  presses of \texttt{Escape} key to enter the boot menu.
+  \texttt{ShowPicker} is disabled. This key exists for the \texttt{Apple} picker mode and for
+  firmware with PS/2 keyboards that fail to report held \texttt{OPT} keys and requiring continual
+  presses of the \texttt{Escape} key to access the boot menu.
 
-  \emph{Note 3}: On Macs with problematic GOP it may be difficult to access Apple BootPicker.
-  \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
-  OpenCore. On some Macs \texttt{BootKicker} will not run from OpenCore.
+  \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple BootPicker.
+  The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
+  OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
 
 \end{enumerate}
 
@@ -3078,9 +3093,9 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \texttt{DisableWatchDog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares may not succeed in quickly booting
-  the operating system, especially in debug mode, which results in watch dog
-  timer aborting the process. This option turns off watch dog timer.
+  \textbf{Description}: Some types of firmware may not succeed in booting
+  the operating system quickly, especially in debug mode, which results in the watchdog
+  timer aborting the process. This option turns off the watchdog timer.
 
 \item
   \texttt{DisplayDelay}\\
@@ -3173,7 +3188,7 @@ ioreg -lw0 -p IODeviceTree | grep boot-log | sort | sed 's/.*<\(.*\)>.*/\1/' | x
 \end{lstlisting}
 
   UEFI variable log does not include some messages and has no performance data. For safety
-  reasons log size is limited to 32 kilobytes. Some firmwares may truncate it much earlier
+  reasons log size is limited to 32 kilobytes. Some types of firmware may truncate it much earlier
   or drop completely if they have no memory. Using non-volatile flag will write the log to
   NVRAM flash after every printed line. To obtain UEFI variable log use the following command
   in macOS:
@@ -3182,7 +3197,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   awk '{gsub(/%0d%0a%00/,"");gsub(/%0d%0a/,"\n")}1'
 \end{lstlisting}
 
-  \textbf{Warning}: Some firmwares are reported to have broken NVRAM garbage collection.
+  \textbf{Warning}: Some types of firmware appear to have flawed NVRAM garbage collection.
   This means that they may not be able to always free space after variable deletion.
   Do not use non-volatile NVRAM logging without extra need on such devices.
 
@@ -3193,11 +3208,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   File logging will create a file named \texttt{opencore-YYYY-MM-DD-HHMMSS.txt} at EFI
   volume root with log contents (the upper case letter sequence is replaced with date
   and time from the firmware). Please be warned that some file system drivers present
-  in firmwares are not reliable, and may corrupt data when writing files through UEFI.
-  Log is attempted to be written in the safest manner, and thus is very slow. Ensure that
+  in firmware are not reliable and may corrupt data when writing files through UEFI.
+  Log writing is attempted in the safest manner and thus, is very slow. Ensure that
   \texttt{DisableWatchDog} is set to \texttt{true} when a slow drive is used. Try to
   avoid frequent use of this option when dealing with flash drives as large I/O
-  amounts may speedup memory wear and render this flash drive unusable in shorter time.
+  amounts may speedup memory wear and render the flash drive unusable quicker.
 
   When interpreting the log, note that the lines are prefixed with a tag describing
   the relevant location (module) of the log line allowing better attribution of the line
@@ -3301,7 +3316,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Setting this value to any non-zero 64-bit integer will allow using
   personalised Apple Secure Boot identifiers. To use this setting,
   make sure to generate a random 64-bit number with a cryptographically secure
-  random number generator. With this value set and \texttt{SecureBootModel} valid
+  random number generator. As an alternative, first 8 bytes of \texttt{SystemUUID}
+  can be used for \texttt{ApECID}, this is found in macOS 11.0 for Macs without
+  the T2 chip.
+
+  With this value set and \texttt{SecureBootModel} valid
   and not \texttt{Disabled} it is possible to achieve
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Full Security}} of Apple
   Secure Boot.
@@ -3324,8 +3343,10 @@ bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
-  When reinstalling the operating system, note that current versions
-  of macOS Installer, tested as of 10.15.6, will usually run out of free memory
+  Before macOS 11.0, which introduced a dedicated \texttt{x86legacy}
+  model for models without the T2 chip, personalised Apple Secure Boot
+  may not work as expected. When reinstalling the operating system, macOS Installer
+  from macOS 10.15 and older, will usually run out of free memory
   on the \texttt{/var/tmp} partition when trying to install macOS
   with the personalised Apple Secure Boot. Soon after downloading the macOS installer
   image an \texttt{Unable to verify macOS} error message will appear. To workaround
@@ -3377,11 +3398,13 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   file. By creating a custom option in \texttt{Bootstrap} mode this file path becomes no longer
   used for bootstrapping OpenCore.
 
-  \emph{Note 1}: Some firmwares may have broken NVRAM, no boot option support, or various other
-  incompatibilities of any kind. While unlikely, the use of this option may even cause boot failure.
+  \emph{Note 1}: Some types of firmware may have faulty NVRAM, no boot option support, or other
+  incompatibilities. While unlikely, the use of this option may even cause boot failures.
   This option should be used without any warranty exclusively on the boards known to be compatible.
+  Check \href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
+  for some known issues with Haswell and other boards.
 
-  \emph{Note 2}: Be warned that while NVRAM reset executed from OpenCore should not erase the boot
+  \emph{Note 2}: Be aware that while NVRAM reset executed from OpenCore should not erase the boot
   option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
 
 \item \label{securedmgloading}
@@ -3414,7 +3437,7 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable password protection to allow sensitive operations.
 
-  Password protection ensures that sensitive operations like booting a non-default
+  Password protection ensures that sensitive operations such as booting a non-default
   operating system (e.g. macOS recovery or a tool), resetting NVRAM storage,
   trying to boot into a non-default mode (e.g. verbose mode or safe mode) are not
   allowed without explicit user authentication by a custom password. Currently
@@ -3549,7 +3572,7 @@ rm vault.pub
   method is required to verify \texttt{OpenCore.efi} and \texttt{BOOTx64.efi} for
   secure boot path. For this, it is recommended to enable UEFI SecureBoot
   using a custom certificate and to sign \texttt{OpenCore.efi} and \texttt{BOOTx64.efi}
-  with a custom key. More details on customising secure boot on modern firmwares
+  with a custom key. More details on customising secure boot on modern firmware
   can be found in \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
@@ -3664,14 +3687,18 @@ rm vault.pub
   \item \texttt{j215} --- \texttt{MacBookPro16,4 (June 2020) minimum macOS 10.15.5 (19F96)}
   \item \texttt{j185} --- \texttt{iMac20,1 (August 2020) minimum macOS 10.15.6 (19G2005)}
   \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020) minimum macOS 10.15.6 (19G2005)}
+  \item \texttt{x86legacy} --- \texttt{Macs and VMs without T2 chip minimum macOS 11.0}
   \end{itemize}
 
-  \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
-  allowing to enabling Apple Secure Boot with any SMBIOS. Setting
-  \texttt{SecureBootModel} to any valid value but \texttt{Disabled} is equivalent to
+  Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
+  Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
+  Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
+  is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
-  achieve \texttt{Full Security}.
+  achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
+  when using Apple Secure Boot on a virtual machine.
 
   Enabling Apple Secure Boot is more demanding to incorrect configurations,
   buggy macOS installations, and unsupported setups. Things to consider:
@@ -3679,11 +3706,11 @@ rm vault.pub
   \begin{enumerate}
     \tightlist
     \item As with T2 Macs, unsigned kernel drivers and several signed kernel
-    drivers, including NVIDIA Web Drivers, cannot be installed.
+      drivers, including NVIDIA Web Drivers, cannot be installed.
     \item The list of cached drivers may be different, resulting in the need
       to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
       For example, \texttt{IO80211Family} cannot be injected in this case.
-    \item System volume alterations on operating systems with sealing, like
+    \item System volume alterations on operating systems with sealing, such as
       macOS~11, may result in the operating system being unbootable. Do not
       try to disable system volume encryption unless Apple Secure Boot is disabled.
     \item If the platform requires certain settings, but they were not enabled,
@@ -3692,7 +3719,7 @@ rm vault.pub
     \item Operating systems released before Apple Secure Boot landed (e.g.
       macOS~10.12 or earlier) will still boot until UEFI Secure Boot is enabled.
       This is so, because from Apple Secure Boot point they are treated as incompatible
-      and are assumed to be handled by the firmware just like Microsoft Windows is.
+      and are assumed to be handled by the firmware as Microsoft Windows is.
     \item On older CPUs (e.g. before Sandy Bridge) enabling Apple Secure Boot
       might cause slightly slower loading by up to 1 second.
     \item Since \texttt{Default} value will increase with time to support the latest
@@ -3905,9 +3932,9 @@ use.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enables writing to flash memory for all added variables.
 
-  \emph{Note}: This value is recommended to be enabled on most firmwares, but is
-  left configurable for firmwares that may have issues with NVRAM variable storage
-  garbage collection or alike.
+  \emph{Note}: It is recommended to have this value enabled on most types of firmware but it is
+  left configurable for firmware that may have issues with NVRAM variable storage
+  garbage collection or similar.
 
 \end{enumerate}
 
@@ -4271,8 +4298,17 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   \textbf{Warning}: It is strongly discouraged set this option to \texttt{false}
   when intending to update platform information. The only reason to do that is
-  when doing minor correction of the SMBIOS present and alike. In all other
+  when doing minor correction of the SMBIOS present and similar. In all other
   cases not using \texttt{Automatic} may lead to hard to debug errors.
+
+\item
+  \texttt{CustomMemory}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use custom memory configuration defined in the
+  \texttt{Memory} section. This completely replaces any existing memory
+  configuration in SMBIOS, and is only active when \texttt{UpdateSMBIOS}
+  is set to \texttt{true}.
 
 \item
   \texttt{UpdateDataHub}\\
@@ -4313,7 +4349,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item
     \texttt{TryOverwrite} --- \texttt{Overwrite} if new size is \textless{}= than
     the page-aligned original and there are no issues with legacy region
-    unlock. \texttt{Create} otherwise. Has issues with some firmwares.
+    unlock. \texttt{Create} otherwise. Has issues on some types of firmware.
   \item
     \texttt{Create} --- Replace the tables with newly allocated
     EfiReservedMemoryType at AllocateMaxAddress without any fallbacks.
@@ -4324,7 +4360,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item
     \texttt{Custom} --- Write SMBIOS tables
     (\texttt{gEfiSmbios(3)TableGuid}) to \texttt{gOcCustomSmbios(3)TableGuid}
-    to workaround firmwares overwriting SMBIOS contents at
+    to workaround firmware overwriting SMBIOS contents at
     ExitBootServices. Otherwise equivalent to \texttt{Create}. Requires
     patching AppleSmbios.kext and AppleACPIPlatform.kext to read from
     another GUID: \texttt{"EB9D2D31"} - \texttt{"EB9D2D35"} (in ASCII),
@@ -4346,6 +4382,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Optional}: When \texttt{Automatic} is \texttt{true}\\
   \textbf{Description}: Update Data Hub fields. This section is read
   only when \texttt{Automatic} is not active.
+\item
+  \texttt{Memory}\\
+  \textbf{Type}: \texttt{plist\ dictionary}\\
+  \textbf{Optional}: When \texttt{CustomMemory} is \texttt{false}\\
+  \textbf{Description}: Define custom memory configuration.
 \item
   \texttt{PlatformNVRAM}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
@@ -4370,7 +4411,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
 
   It is dangerous to use Apple in SMBIOS vendor fields for reasons given
-  in \texttt{SystemManufacturer} description. However, certain firmwares
+  in \texttt{SystemManufacturer} description. However, certain firmware
   may not provide valid values otherwise, which could break some software.
 
 \item
@@ -4476,7 +4517,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Not installed\\
   \textbf{Description}: Sets \texttt{system-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
-  \texttt{SystemUUID}.
+  \texttt{SystemUUID} (with swapped byte order).
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -4574,7 +4615,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{gEfiProcessorSubClassGuid}.
 
   This value contains CPU ART frequency, also known as crystal clock frequency.
-  Its existence is exclusive to Skylake generation and newer. The value is specified
+  Its existence is exclusive to the Skylake generation and newer. The value is specified
   in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
 
@@ -4614,6 +4655,223 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
   key.
+\end{enumerate}
+
+\subsection{Memory Properties}\label{platforminfomemory}
+
+\begin{enumerate}
+\item
+  \texttt{DataWidth}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0xFFFF} (unknown)\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Data Width\\
+  \textbf{Description}: Specifies the data width, in bits, of the
+  memory. A \texttt{DataWidth} of \texttt{0} and a \texttt{TotalWidth} of \texttt{8}
+  indicates that the device is being used solely to provide 8
+  error-correction bits.
+
+\item
+  \texttt{Devices}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Specifies the custom memory devices to be added.
+
+  Designed to be filled with \texttt{plist\ dictionary} values, describing each
+  memory device. See \hyperref[platforminfomemorydevice]{Memory Devices Properties}
+  section below. This should include all memory slots, even if unpopulated.
+
+\item
+  \texttt{ErrorCorrection}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x03}\\
+  \textbf{SMBIOS}: Physical Memory Array (Type 16) --- Memory Error Correction\\
+  \textbf{Description}: Specifies the primary hardware error correction or
+  detection method supported by the memory.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x03} --- None
+  \item
+    \texttt{0x04} --- Parity
+  \item
+    \texttt{0x05} --- Single-bit ECC
+  \item
+    \texttt{0x06} --- Multi-bit ECC
+  \item
+    \texttt{0x07} --- CRC
+  \end{itemize}
+
+\item
+  \texttt{FormFactor}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x02}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Form Factor\\
+  \textbf{Description}: Specifies the form factor of the memory.
+  On Macs this should usually be DIMM or SODIMM. Commonly used form
+  factors are listed below.
+
+  When \texttt{CustomMemory} is \texttt{false}, this value is automatically set
+  based on Mac product name.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x09} --- DIMM
+  \item
+    \texttt{0x0D} --- SODIMM
+  \item
+    \texttt{0x0F} --- FB-DIMM
+  \end{itemize}
+
+\item
+  \texttt{MaxCapacity}\\
+  \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Physical Memory Array (Type 16) --- Maximum Capacity\\
+  \textbf{Description}: Specifies the maximum amount of memory, in bytes,
+  supported by the system.
+
+\item
+  \texttt{TotalWidth}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0xFFFF} (unknown)\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Total Width\\
+  \textbf{Description}: Specifies the total width, in bits, of the
+  memory, including any check or error-correction bits. If there are
+  no error-correction bits, this value should be equal to \texttt{DataWidth}.
+
+\item
+  \texttt{Type}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
+  \textbf{Failsafe}: \texttt{0x02}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Memory Type\\
+  \textbf{Description}: Specifies the memory type. Commonly used types are listed below.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{0x01} --- Other
+  \item
+    \texttt{0x02} --- Unknown
+  \item
+    \texttt{0x0F} --- SDRAM
+  \item
+    \texttt{0x12} --- DDR
+  \item
+    \texttt{0x13} --- DDR2
+  \item
+    \texttt{0x14} --- DDR2 FB-DIMM
+  \item
+    \texttt{0x18} --- DDR3
+  \item
+    \texttt{0x1A} --- DDR4
+  \item
+    \texttt{0x1B} --- LPDDR
+  \item
+    \texttt{0x1C} --- LPDDR2
+  \item
+    \texttt{0x1D} --- LPDDR3
+  \item
+    \texttt{0x1E} --- LPDDR4
+  \end{itemize}
+
+\item
+  \texttt{TypeDetail}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0x4}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Type Detail\\
+  \textbf{Description}: Specifies additional memory type information.
+
+  \begin{itemize}
+  \tightlist
+  \item
+    \texttt{Bit 0} --- Reserved, set to 0
+  \item
+    \texttt{Bit 1} --- Other
+  \item
+    \texttt{Bit 2} --- Unknown
+  \item
+    \texttt{Bit 7} --- Synchronous
+  \item
+    \texttt{Bit 13} --- Registered (buffered)
+  \item
+    \texttt{Bit 14} --- Unbuffered (unregistered)
+  \end{itemize}
+
+\end{enumerate}
+
+\subsubsection{Memory Device Properties}\label{platforminfomemorydevice}
+
+\begin{enumerate}
+\item
+  \texttt{AssetTag}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Asset Tag\\
+  \textbf{Description}: Specifies the asset tag of this memory device.
+
+\item
+  \texttt{BankLocator}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Bank Locator\\
+  \textbf{Description}: Specifies the physically labeled bank where the
+  memory device is located.
+
+\item
+  \texttt{DeviceLocator}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Device Locator\\
+  \textbf{Description}: Specifies the physically-labeled socket or
+  board position where the memory device is located.
+
+\item
+  \texttt{Manufacturer}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Manufacturer\\
+  \textbf{Description}: Specifies the manufacturer of this memory device.
+
+\item
+  \texttt{PartNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Part Number\\
+  \textbf{Description}: Specifies the part number of this memory device.
+
+\item
+  \texttt{SerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Unknown}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Serial Number\\
+  \textbf{Description}: Specifies the serial number of this memory device.
+
+\item
+  \texttt{Size}\\
+  \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Size\\
+  \textbf{Description}: Specifies the size of the memory device, in megabytes.
+  \texttt{0} indicates this slot is not populated.
+
+\item
+  \texttt{Speed}\\
+  \textbf{Type}: \texttt{plist\ integer}, 16-bit\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{SMBIOS}: Memory Device (Type 17) --- Speed\\
+  \textbf{Description}: Specifies the maximum capable speed of the device,
+  in megatransfers per second (MT/s). \texttt{0} indicates an unknown speed.
+
 \end{enumerate}
 
 \subsection{PlatformNVRAM Properties}\label{platforminfonvram}
@@ -4666,6 +4924,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeaturesMask}
   \end{itemize}
 
+\item
+  \texttt{SystemUUID}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Not installed\\
+  \textbf{Description}: Specifies the value of NVRAM variable
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:system-id}
+  for boot services only. Value found on Macs is equal to SMBIOS
+  \texttt{SystemUUID}.
+
 \end{enumerate}
 
 \subsection{SMBIOS Properties}\label{platforminfosmbios}
@@ -4686,10 +4953,10 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Firmware version. This value gets updated and
   takes part in update delivery configuration and macOS version
   compatibility. This value could look like
-  \texttt{MM71.88Z.0234.B00.1809171422} in older firmwares, and is
+  \texttt{MM71.88Z.0234.B00.1809171422} in older firmware and is
   described in
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Guid/BiosId.h}{BiosId.h}.
-  In newer firmwares it should look like \texttt{236.0.0.0.0} or
+  In newer firmware, it should look like \texttt{236.0.0.0.0} or
   \texttt{220.230.16.0.0\ (iBridge:\ 16.16.2542.0.0,0)}. iBridge version
   is read from \texttt{BridgeOSVersion} variable, and is only present on
   macs with T2.
@@ -4726,7 +4993,7 @@ Apple ROM Version
   the operating system, such as firmware updates, eficheck, as well as
   kernel extensions developed in Acidanthera, such as Lilu and its
   plugins. In addition it will also make some operating systems
-  like Linux unbootable.
+  such as Linux unbootable.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -4928,13 +5195,6 @@ Apple ROM Version
   For a full list of available values and their limitations (the value will
   only apply if the CPU core count matches) refer to Apple SMBIOS definitions header
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}.
-\item
-  \texttt{MemoryFormFactor}\\
-  \textbf{Type}: \texttt{plist\ integer}, 8-bit\\
-  \textbf{Failsafe}: OEM specified\\
-  \textbf{SMBIOS}: Memory Device (Type 17) --- Form Factor\\
-  \textbf{Description}: Memory form factor. On Macs it should be DIMM or
-  SODIMM.
 \end{enumerate}
 
 \section{UEFI}\label{uefi}
@@ -4956,7 +5216,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 
 \begin{tabular}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
-& HDA audio support driver in UEFI firmwares for most Intel and some other analog audio controllers.
+& HDA audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
@@ -4966,25 +5226,25 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   driver by \href{https://github.com/NikolajSchlej}{Nikolaj Schlej}. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ExFatDxe}}
 & Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
+  firmware. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
 & Proprietary HFS file system driver with bless support commonly found in Apple
-  firmwares. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
+  firmware. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
 \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\textbf{*}
 & HII services support driver from \texttt{MdeModulePkg}. This driver is included in
-  most firmwares starting with Ivy Bridge generation. Some applications with the GUI
-  like UEFI Shell may need this driver to work properly. \\
+  most types of firmware starting with the Ivy Bridge generation. Some applications with GUI,
+  such as UEFI Shell, may need this driver to work properly. \\
 \href{https://github.com/acidanthera/audk}{\texttt{EnhancedFatDxe}}
 & FAT filesystem driver from \texttt{FatPkg}. This driver is embedded in all
-  UEFI firmwares, and cannot be used from OpenCore. It is known that multiple firmwares
-  have a bug in their FAT support implementation, which leads to corrupted filesystems
-  on write attempt. Embedding this driver within the firmware may be required in case
-  writing to EFI partition is needed during the boot process. \\
+  UEFI firmware and cannot be used from OpenCore. Sevaral firmware
+  have a flawed FAT support implementation that may lead to corrupted filesystems
+  on write attempts. Embedding this driver within the firmware may be required in case
+  writing to the EFI partition is needed during the boot process. \\
   \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
 & NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
-  firmwares starting with Broadwell generation. For Haswell and earlier embedding it
+  firmware starting with the Broadwell generation. For Haswell and earlier, embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenCanopy}}\textbf{*}
 & \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
@@ -4996,32 +5256,32 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
 & Proprietary partition management driver with Apple Partitioning Scheme support
-  commonly found in Apple firmwares. This driver can be used to support loading
+  commonly found in Apple firmware. This driver can be used to support loading
   older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
   For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
-& PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some firmwares
+& PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
   support and thus requires \texttt{KeySupport} to be enabled. \\
   \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
-& PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmwares
-  may not include this driver, but it is necessary for touchpad to work
-  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
+& PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
+  may not include this driver but it is necessary for the touchpad to work
+  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
   \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
-& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmwares
-  like OVMF may not include this driver, but it is necessary for mouse to work
-  in UEFI graphical interfaces, such as \texttt{OpenCanopy}. \\
+& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
+  such as OVMF may not include this driver but it is necessary for the mouse to work
+  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
 & HFS file system driver with bless support. This driver is an alternative to
-  a closed source \texttt{HfsPlus} driver commonly found in Apple firmwares. While
+  a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
 \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
 & XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
-  included in most firmwares starting with Sandy Bridge generation. For earlier firmwares
-  or legacy systems it may be used to support external USB 3.0 PCI cards.
+  included in most types of firmware starting with the Sandy Bridge generation. For earlier firmware
+  or legacy systems, it may be used to support external USB 3.0 PCI cards.
 \end{tabular}
 
 Driver marked with \textbf{*} are bundled with OpenCore.
@@ -5087,7 +5347,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   when launching from OpenCore. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenShell}}\textbf{*}
 & OpenCore-configured \href{http://github.com/tianocore/edk2}{\texttt{UEFI Shell}} for compatibility
-  with a broad range of firmwares. \\
+  with a broad range of firmware. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{PavpProvision}}
 & Perform EPID provisioning (requires certificate data configuration). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{*}
@@ -5176,7 +5436,7 @@ functioning. Feature highlights:
   \item NVRAM namespaces, allowing to isolate operating systems from accessing select
   variables (e.g. \texttt{RequestBootVarRouting} or \texttt{ProtectSecureBoot}).
   \item Read-only and write-only NVRAM variables, enhancing the security of OpenCore,
-  Lilu, and Lilu plugins, like VirtualSMC, which implements \texttt{AuthRestart} support.
+  Lilu, and Lilu plugins, such as VirtualSMC, which implements \texttt{AuthRestart} support.
   \item NVRAM isolation, allowing to protect all variables from being written from
   an untrusted operating system (e.g. \texttt{DisableVariableWrite}).
   \item UEFI Runtime Services memory protection management to workaround read-only
@@ -5246,9 +5506,9 @@ functioning. Feature highlights:
   or audio drivers. While effective, this option may not be necessary for drivers
   performing automatic connection, and may slightly slowdown the boot.
 
-  \emph{Note}: Some firmwares, made by Apple in particular, only connect the boot
+  \emph{Note}: Some types of firmware, particularly those made by Apple, only connect the boot
   drive to speed up the boot process. Enable this option to be able to see all the
-  boot options when having multiple drives.
+  boot options when running multiple drives.
 
 \item
   \texttt{Drivers}\\
@@ -5325,8 +5585,8 @@ functioning. Feature highlights:
 
   Instead of partition handle connection normally used for APFS driver loading
   every handle is connected recursively. This may take more time than usual
-  but can be the only way to access APFS partitions on some firmwares like
-  those found on older HP laptops.
+  but can be the only way to access APFS partitions on some types of firmware such as
+  those on older HP laptops.
 
 \item
   \texttt{HideVerbose}\\
@@ -5508,7 +5768,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable keyboard input sanity checking.
 
-  Apparently some boards like GA Z77P-D3 may return uninitialised data
+  Apparently some boards such as the GA Z77P-D3 may return uninitialised data
   in \texttt{EFI\_INPUT\_KEY} with all input protocols.
   This option discards keys that are neither ASCII, nor are defined
   in the UEFI specification (see tables 107 and 108 in version 2.8).
@@ -5651,8 +5911,8 @@ functioning. Feature highlights:
   a different set of options. It is recommended to use \texttt{Builtin}
   renderer, as it supports HiDPI mode and uses full screen resolution.
 
-  UEFI firmwares generally support \texttt{ConsoleControl} with two
-  rendering modes: \texttt{Graphics} and \texttt{Text}. Some firmwares
+  UEFI firmware generally supports \texttt{ConsoleControl} with two
+  rendering modes: \texttt{Graphics} and \texttt{Text}. Some types of firmware
   do not support \texttt{ConsoleControl} and rendering modes. OpenCore
   and macOS expect text to only be shown in \texttt{Graphics} mode and
   graphics to be drawn in any mode. Since this is not required by UEFI
@@ -5682,7 +5942,7 @@ functioning. Feature highlights:
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
   set \texttt{Resolution} to \texttt{Max}. \texttt{BuiltinText} variant is
   an alternative \texttt{BuiltinGraphics} for some very old and buggy laptop
-  firmwares, which can only draw in \texttt{Text} mode.
+  firmware, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.
@@ -5708,7 +5968,7 @@ functioning. Feature highlights:
   \texttt{Builtin} text renderer supports only one console mode, so
   this option is ignored.
 
-  \emph{Note}: This field is best to be left empty on most firmwares.
+  \emph{Note}: This field is best left empty on most types of firmware.
 
 \item
   \texttt{Resolution}\\
@@ -5736,11 +5996,25 @@ functioning. Feature highlights:
   set to \texttt{true}.
 
 \item
+  \texttt{ForceResolution}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Forces \texttt{Resolution} to be set in cases where the desired
+  resolution is not available by default, such as on legacy Intel GMA and first
+  generation Intel HD Graphics (Ironlake/Arrandale). Setting \texttt{Resolution} to
+  \texttt{Max} will try to pull the largest available resolution from the connected
+  display's EDID.
+
+  \emph{Note}: This option depends on the \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcForceResolution.h}{\texttt{OC\_FORCE\_RESOLUTION\_PROTOCOL}}
+  protocol being present. This protocol is currently only supported by \texttt{OpenDuetPkg}. The
+  \texttt{OpenDuetPkg} implementation currently only supports Intel iGPUs.
+
+\item
   \texttt{ClearScreenOnModeSwitch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares clear only part of screen when switching
-  from graphics to text mode, leaving a fragment of previously drawn image visible.
+  \textbf{Description}: Some types of firmware only clear part of the screen when switching
+  from graphics to text mode, leaving a fragment of previously drawn images visible.
   This option fills the entire graphics screen with black colour before switching to
   text mode.
 
@@ -5752,27 +6026,27 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Use builtin graphics output protocol renderer for console.
 
-  On some firmwares this may provide better performance or even fix rendering issues,
-  like on \texttt{MacPro5,1}. However, it is recommended not to use this option unless
-  there is an obvious benefit as it may even result in slower scrolling.
+  On some types of firmware, such as on the \texttt{MacPro5,1}, this may provide better
+  performance or fix rendering issues. However, this option is not recommended unless
+  there is an obvious benefit as it may result in issues such as slower scrolling.
 
 \item
   \texttt{IgnoreTextInGraphics}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares output text onscreen in both graphics and
-  text mode. This is normally unexpected, because random text may appear over
+  \textbf{Description}: Some types of firmware output text onscreen in both graphics and
+  text mode. This is typically unexpected as random text may appear over
   graphical images and cause UI corruption. Setting this option to \texttt{true} will
-  discard all text output when console control is in mode different from \texttt{Text}.
+  discard all text output when console control is in a different mode from \texttt{Text}.
 
-  \emph{Note}: This option only applies to \texttt{System} renderer.
+  \emph{Note}: This option only applies to the \texttt{System} renderer.
 
 \item
   \texttt{ReplaceTabWithSpace}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares do not print tab characters or even everything
-  that follows them, causing difficulties or inability to use the UEFI Shell builtin
+  \textbf{Description}: Some types of firmware do not print tab characters or everything
+  that follows them, causing difficulties in using the UEFI Shell's builtin
   text editor to edit property lists and other documents. This option makes the console
   output spaces instead of tabs.
 
@@ -5798,9 +6072,9 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reconnect console controllers after changing screen resolution.
 
-  On some firmwares when screen resolution is changed via GOP, it is required to reconnect
-  the controllers, which produce the console protocols (simple text out). Otherwise they
-  will not produce text based on the new resolution.
+  On some types of firmware, the controllers that produce the console protocols
+  (simple text out) must be reconnected when the screen resolution is changed via GOP.
+  Otherwise they will not produce text based on the new resolution.
 
   \emph{Note}: On several boards this logic may result in black screen when launching
   OpenCore from Shell and thus it is optional. In versions prior to 0.5.2 this option
@@ -5810,8 +6084,8 @@ functioning. Feature highlights:
   \texttt{SanitiseClearScreen}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares reset screen resolution to a failsafe
-  value (like \texttt{1024x768}) on the attempts to clear screen contents
+  \textbf{Description}: Some types of firmware reset screen resolutions to a failsafe
+  value (such as \texttt{1024x768}) on the attempts to clear screen contents
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
@@ -5825,8 +6099,8 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide UGA protocol instances on top of GOP protocol.
 
-  Some firmwares do not implement legacy UGA protocol, but it may be required
-  for screen output by older EFI applications like EfiBoot from 10.4.
+  Some types of firmware do not implement the legacy UGA protocol but this may be required
+  for screen output by older EFI applications such as EfiBoot from 10.4.
 
 \end{enumerate}
 
@@ -5887,7 +6161,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
-  to improve compatibility with legacy EfiBoot like the one in macOS 10.4.
+  to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
 
 \item
   \texttt{AppleImageConversion}\\
@@ -6030,11 +6304,11 @@ functioning. Feature highlights:
   or anyhow corrupted.
   \end{itemize}
 
-  However, some firmwares do their own boot option scanning upon startup by checking
-  file presence on the available disks. Quite often this scanning includes non-standard
-  locations, such as Windows Bootloader paths. Normally it is not an issue, but some
-  firmwares, ASUS firmwares on APTIO V in particular, have bugs. For them scanning is
-  implemented improperly, and firmware preferences may get accidentally corrupted
+  However, some types of firmware do their own boot option scanning on startup by checking
+  for file presence on the available disks. This scanning often includes non-standard
+  locations such as Windows Bootloader paths. This is typically not an issue but some
+  firmware, such as ASUS firmware on the APTIO V, have bugs. On such, scanning is
+  implemented improperly and firmware preferences may get accidentally corrupted
   due to \texttt{BootOrder} entry duplication (each option will be added twice) making
   it impossible to boot without resetting NVRAM.
 
@@ -6054,31 +6328,31 @@ functioning. Feature highlights:
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
   event.
 
-  This is a very ugly quirk to circumvent "Still waiting for root device" message
-  on select APTIO IV firmwares, namely ASUS Z87-Pro, when using FileVault 2 in particular.
-  It seems that for some reason they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
-  which results in SATA controller being inaccessible from macOS. A better approach should be
-  found in some future. Expect 3-5 seconds to be enough in case the quirk is needed.
+  This is a very rough workaround to circumvent the \texttt{Still\ waiting\ for\ root\ device} message
+  on some APTIO IV firmware (ASUS Z87-Pro) particularly when using FileVault 2.
+  It appears that for some reason, they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
+  which results in the SATA controller being inaccessible from macOS. A better approach should be
+  found in some future. Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Select firmwares, namely APTIO IV, may contain invalid values in
+  \textbf{Description}: Some types of firmware (such as APTIO IV) may contain invalid values in the
   \texttt{MSR\_FLEX\_RATIO} (\texttt{0x194}) MSR register. These values may cause
-  macOS boot failure on Intel platforms.
+  macOS boot failures on Intel platforms.
 
-  \emph{Note}: While the option is not supposed to induce harm on unaffected firmwares,
-  its usage is not recommended when it is not required.
+  \emph{Note}: While the option is not expected to harm unaffected firmware,
+  its use is only recommended when it is specifically required.
 
 \item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to detach USB controller ownership from
-  the firmware driver. While most firmwares manage to properly do that,
-  or at least have an option for, select firmwares do not. As a result,
-  operating system may freeze upon boot. Not recommended unless required.
+  the firmware driver. While most types of firmware manage to do that properly,
+  or at least have an option for this, some do not. As a result,
+  the operating system may freeze upon boot. Not recommended unless required.
 
 \item
   \texttt{RequestBootVarRouting}\\
@@ -6089,9 +6363,9 @@ functioning. Feature highlights:
 
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{OpenRuntime.efi}. The quirk lets default boot entry
-  preservation at times when firmwares delete incompatible boot entries.
-  Simply said, this quirk is required to reliably
-  use \href{https://support.apple.com/HT202796}{Startup Disk} preference
+  preservation at times when the firmware deletes incompatible boot entries.
+  In summary, this quirk is required to reliably
+  use the \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in firmware that is not compatible with macOS boot entries by design.
 
 \item
@@ -6108,23 +6382,23 @@ functioning. Feature highlights:
 
   This is an experimental quirk, which should only be used for the aforementioned problem.
   In all other cases the quirk may render the operating system unstable and is not recommended.
-  The recommended solution in the other cases is to install a kernel driver like
+  The recommended solution in the other cases is to install a kernel driver such as
   \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
   \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
   or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
   variant of VoodooTSCSync for newer laptops).
 
   \emph{Note}: The reason this quirk cannot replace the kernel driver is
-  because it cannot operate in ACPI S3 mode (sleep wake) and because the UEFI firmwares
-  provide very limited multicore support preventing the precise update of the MSR
+  because it cannot operate in ACPI S3 mode (sleep wake) and because the UEFI firmware
+  provides very limited multicore support preventing the precise update of the MSR
   registers.
 
 \item
   \texttt{UnblockFsConnect}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Some firmwares block partition handles by opening them
-  in By Driver mode, which results in File System protocols being unable to install.
+  \textbf{Description}: Some types of firmware block partition handles by opening them
+  in \texttt{By\ Driver} mode, resulting in being unable to install File System protocols.
 
   \emph{Note}: The quirk is mostly relevant for select HP laptops with no drives listed.
 
@@ -6144,7 +6418,7 @@ functioning. Feature highlights:
   The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
   type, and page-aligned (4 KBs).
 
-  \emph{Note}: Some firmwares may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
+  \emph{Note}: Some types of firmware may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
   and enabled, these areas can be found in the lower memory and can be fixed up by doing the reservation.
   See \texttt{Sample.plist} for more details.
@@ -6242,7 +6516,7 @@ Since it is not always accurate, the latest versions are listed below.
     unsupported on macOS~10.7 and older as they require newer
     kernel APIs, which are not part of the macOS~10.7 SDK.
   \item Prior to macOS~10.8 KASLR sliding is not supported, which
-    will result in memory allocation failures on firmwares
+    will result in memory allocation failures on firmware
     that utilise lower memory for their own purposes. Refer to
     \href{https://github.com/acidanthera/bugtracker/issues/1125}{acidanthera/bugtracker\#1125}
     for tracking.
@@ -6327,7 +6601,7 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
   \item Last released installer images for macOS~10.4 are macOS~10.4.10
     builds \texttt{8R4061a} (for \texttt{MacBookPro3,1}) and
     \texttt{8R4088} (for \texttt{iMac7,1})). These images are limited
-    to their target model identifiers just like the newer macOS versions.
+    to their target model identifiers as on newer macOS versions.
     Modified \texttt{8R4088} images (with \texttt{ACDT} suffix) without
     model restrictions can be found
     \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{here},
@@ -6366,7 +6640,7 @@ requires several steps and careful configuration of select settings as explained
   devices. It is a good idea to prohibit all removable drivers or unknown
   filesystems.
 \item Sign all the installed drivers and tools with the private key. Do not sign
-  tools that provide administrative access to the computer, like UEFI Shell.
+  tools that provide administrative access to the computer, such as UEFI Shell.
 \item Vault the configuration as explained \hyperref[securevaulting]{Vaulting}
   section.
 \item Sign all OpenCore binaries (\texttt{BOOTX64.efi}, \texttt{BOOTIa32.efi},
@@ -6378,7 +6652,7 @@ requires several steps and careful configuration of select settings as explained
   \href{https://wiki.debian.org/SecureBoot}{Debian Wiki}.
 \item Enable UEFI Secure Boot in firmware preferences and install the
   certificate with a private key. Details on how to generate a certificate
-  can be found in various articles, like \href{https://habr.com/en/post/273497}{this one},
+  can be found in various articles, such as \href{https://habr.com/en/post/273497}{this one},
   and are out of the scope of this document. If Windows is needed one
   will also need to add the
   \href{http://go.microsoft.com/fwlink/?LinkID=321192}{Microsoft Windows Production CA 2011}.
@@ -6394,7 +6668,7 @@ requires several steps and careful configuration of select settings as explained
 
   While no official Windows support is provided, 64-bit UEFI Windows installations (Windows 8 and
   above) prepared with Boot Camp are supposed to work. Third-party UEFI installations
-  as well as systems partially supporting UEFI boot, like Windows 7, might work with
+  as well as systems partially supporting UEFI boot, such as Windows 7, might work with
   some extra precautions. Things to consider:
 
   \begin{itemize}
@@ -6407,8 +6681,8 @@ requires several steps and careful configuration of select settings as explained
   \href{https://github.com/acidanthera/bugtracker/issues/327}{workaround}
   for this, it is highly recommend not to rely on it and install properly.
   \item Windows may need to be reactivated. To avoid it consider
-  setting SystemUUID to the original firmware UUID. Be warned,
-  on old firmwares it may be invalid, i.e. not random. If there still are issues,
+  setting SystemUUID to the original firmware UUID. Be aware that it may be invalid
+  on old firmware, i.e., not random. If there still are issues,
   consider using HWID or KMS38 license or making the use \texttt{Custom}
   \texttt{UpdateSMBIOSMode}. Other nuances of Windows activation are out of the
   scope of this document and can be found online.
@@ -6443,7 +6717,7 @@ requires several steps and careful configuration of select settings as explained
   \item \texttt{RealTimeIsUniversal} must be set to \texttt{1} to avoid time
   desync between Windows and macOS as explained on
   \href{https://superuser.com/q/494432}{SuperUser} (this is usually not needed).
-  \item To access Apple filesystems like HFS and APFS separate software may need to
+  \item To access Apple filesystems such as HFS+ and APFS, separate software may need to
   be installed. Some of the known utilities are:
   \href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/}{Apple HFS+ driver}
   (\href{https://forums.macrumors.com/threads/apple-hfs-windows-driver-download.1368010/post-24180079}{hack for Windows 10}),
@@ -6557,7 +6831,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \texttt{DEBUG\_INFO} (\texttt{0x00000040}) levels are visible onscreen:
   \texttt{Misc} $\rightarrow$ \texttt{Debug} $\rightarrow$ \texttt{DisplayLevel}
   $=$ \texttt{0x80000042}.
-  \item Critical error messages, like \texttt{DEBUG\_ERROR}, stop booting:
+  \item Critical error messages, such as \texttt{DEBUG\_ERROR}, stop booting:
   \texttt{Misc} $\rightarrow$ \texttt{Security}
   $\rightarrow$ \texttt{HaltLevel} $=$ \texttt{0x80000000}.
   \item Watch Dog is disabled to prevent automatic reboot:
@@ -6577,7 +6851,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
 
   \begin{itemize}
   \tightlist
-  \item Refer to \texttt{boot-args} values like \texttt{debug=0x100}, \texttt{keepsyms=1},
+  \item Refer to \texttt{boot-args} values such as \texttt{debug=0x100}, \texttt{keepsyms=1},
     \texttt{-v}, and similar.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
@@ -6603,7 +6877,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \href{https://support.apple.com/HT202796}{Startup Disk} preference, or the Windows
   \href{https://support.apple.com/guide/bootcamp-control-panel/start-up-your-mac-in-windows-or-macos-bcmp29b8ac66/mac}{Boot Camp} Control Panel.
   Since choosing OpenCore's \texttt{BOOTx64.EFI} as a primary boot option limits this
-  functionality in addition to several firmwares deleting incompatible boot options,
+  functionality in addition to several types of firmware deleting incompatible boot options,
   potentially including those created by macOS, users are strongly encouraged to use the
   \texttt{RequestBootVarRouting} quirk, which will preserve the selection made in
   the operating system within the OpenCore variable space. Note, that \texttt{RequestBootVarRouting}
@@ -6670,13 +6944,13 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \item \texttt{SetupVirtualMap}
   \end{itemize}
 
-  However, as of today such set is strongly discouraged as some of these quirks
+  However, as of today, such set is strongly discouraged as some of these quirks
   are not necessary to be enabled or need additional quirks. For example,
   \texttt{DevirtualiseMmio} and \texttt{ProtectUefiServices} are often required,
   while \texttt{DiscardHibernateMap} and \texttt{ForceExitBootServices} are rarely
   necessary.
 
-  Unfortunately for some quirks like \texttt{RebuildAppleMemoryMap},
+  Unfortunately for some quirks such as \texttt{RebuildAppleMemoryMap},
   \texttt{EnableWriteUnprotector}, \texttt{ProtectMemoryRegions},
   \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
   is no definite approach even on similar systems, so trying all their
