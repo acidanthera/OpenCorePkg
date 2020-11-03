@@ -132,6 +132,35 @@ AcpiFindRsdp (
 }
 
 /**
+  Extract and verify ACPI signature from common header.
+
+  @param Common      ACPI common header.
+
+  @return Signature.
+**/
+STATIC
+UINT32
+AcpiReadSignature (
+  IN  CONST EFI_ACPI_COMMON_HEADER  *Common
+  )
+{
+  UINT32   Result;
+  CHAR8    *Walker;
+  UINT32   Index;
+
+  Result = Common->Signature;
+
+  Walker = (CHAR8 *) &Common->Signature;
+  for (Index = 0; Index < sizeof (Common->Signature); Index++) {
+    if (!IsAsciiPrint (Walker[Index])) {
+      Walker[Index] = '?';
+    }
+  }
+
+  return Result;
+}
+
+/**
   Extract and verify ACPI OemTableId from common header.
 
   @param Common      ACPI common header.
@@ -429,7 +458,7 @@ AcpiNormalizeTableHeaders (
   )
 {
   BOOLEAN  Modified;
-  UINT8    *Walker;
+  CHAR8    *Walker;
   UINT32   Index;
 
   if (Table->Length < sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
@@ -438,33 +467,33 @@ AcpiNormalizeTableHeaders (
 
   Modified = FALSE;
 
-  Walker = (UINT8 *) &Table->Signature;
+  Walker = (CHAR8 *) &Table->Signature;
   for (Index = 0; Index < sizeof (Table->Signature); ++Index) {
-    if (Walker[Index] & 0x80) {
+    if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
       Modified = TRUE;
     }
   }
 
-  Walker = (UINT8 *) &Table->OemId;
+  Walker = (CHAR8 *) &Table->OemId;
   for (Index = 0; Index < sizeof (Table->OemId); ++Index) {
-    if (Walker[Index] & 0x80) {
+    if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
       Modified = TRUE;
     }
   }
 
-  Walker = (UINT8 *) &Table->OemTableId;
+  Walker = (CHAR8 *) &Table->OemTableId;
   for (Index = 0; Index < sizeof (Table->OemTableId); ++Index) {
-    if (Walker[Index] & 0x80) {
+    if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
       Modified = TRUE;
     }
   }
 
-  Walker = (UINT8 *) &Table->CreatorId;
+  Walker = (CHAR8 *) &Table->CreatorId;
   for (Index = 0; Index < sizeof (Table->CreatorId); ++Index) {
-    if (Walker[Index] & 0x80) {
+    if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
       Modified = TRUE;
     }
@@ -488,6 +517,7 @@ AcpiInitContext (
 {
   UINT32  Index;
   UINT32  DstIndex;
+  UINT32  TablePrintSignature;
 
   ZeroMem (Context, sizeof (*Context));
 
@@ -552,9 +582,12 @@ AcpiInitContext (
       continue;
     }
 
+    TablePrintSignature = AcpiReadSignature (Context->Tables[DstIndex]);
+
     DEBUG ((
       DEBUG_INFO,
-      "OCA: Detected table %08x (%016Lx) at %p of %u bytes at index %u\n",
+      "OCA: Detected table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
+      (CHAR8 *) &TablePrintSignature,
       Context->Tables[DstIndex]->Signature,
       AcpiReadOemTableId (Context->Tables[DstIndex]),
       Context->Tables[DstIndex],
@@ -568,7 +601,8 @@ AcpiInitContext (
     if ((UINTN)Context->Tables[DstIndex] < BASE_1MB) {
       DEBUG ((
         DEBUG_INFO,
-        "OCA: Unlocking table %08x at %p\n",
+        "OCA: Unlocking table %.4a (%08x) at %p\n",
+        (CHAR8 *) &TablePrintSignature,
         Context->Tables[DstIndex]->Signature,
         Context->Tables[DstIndex]
         ));
@@ -583,6 +617,13 @@ AcpiInitContext (
       } else {
         Context->Dsdt = (EFI_ACPI_DESCRIPTION_HEADER *)(UINTN) Context->Fadt->Dsdt;
       }
+      DEBUG ((
+        DEBUG_INFO,
+        "OCA: Detected DSDT at %p of %u bytes at index %u\n",
+        Context->Dsdt,
+        Context->Dsdt->Length,
+        Index
+        ));
     }
 
     ++DstIndex;
@@ -631,6 +672,7 @@ AcpiApplyContext (
   UINT32                Index;
   UINT32                Size;
   EFI_PHYSICAL_ADDRESS  Table;
+  UINT32                TablePrintSignature;
 
   XsdtSize = Context->Xsdt == NULL ? 0 : sizeof (*Context->Xsdt) + sizeof (Context->Xsdt->Tables[0]) * Context->NumberOfTables;
   RsdtSize = Context->Rsdt == NULL ? 0 : sizeof (*Context->Rsdt) + sizeof (Context->Rsdt->Tables[0]) * Context->NumberOfTables;
@@ -657,9 +699,12 @@ AcpiApplyContext (
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
       Context->Xsdt->Tables[Index] = (UINT64)(UINTN) Context->Tables[Index];
 
+      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
       DEBUG ((
         DEBUG_INFO,
-        "OCA: Exposing XSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        "OCA: Exposing XSDT table table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
+        (CHAR8 *) &TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -686,9 +731,12 @@ AcpiApplyContext (
     for (Index = 0; Index < Context->NumberOfTables; ++Index) {
       Context->Rsdt->Tables[Index] = (UINT32)(UINTN) Context->Tables[Index];
 
+      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
       DEBUG ((
         Context->Xsdt != NULL ? DEBUG_BULK_INFO : DEBUG_INFO,
-        "OCA: Exposing RSDT table %08x (%016Lx) at %p of %u bytes at index %u\n",
+        "OCA: Exposing RSDT table table %.4a (%08x) (OEM %016Lx) at %p of %u bytes at index %u\n",
+        (CHAR8 *) &TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index],
@@ -738,6 +786,7 @@ AcpiDeleteTable (
   UINT32   Index;
   UINT64   CurrOemTableId;
   BOOLEAN  Found;
+  UINT32   TablePrintSignature;
 
   Index = 0;
   Found = FALSE;
@@ -753,9 +802,12 @@ AcpiDeleteTable (
       }
 
       if (OemTableId == 0 || CurrOemTableId == OemTableId) {
+        TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
         DEBUG ((
           DEBUG_INFO,
-          "OCA: Deleting table %08x (%016Lx) of %u bytes with %016Lx ID at index %u\n",
+          "OCA: Deleting table %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID at index %u\n",
+          (CHAR8 *) &TablePrintSignature,
           Context->Tables[Index]->Signature,
           AcpiReadOemTableId (Context->Tables[Index]),
           Context->Tables[Index]->Length,
@@ -801,6 +853,7 @@ AcpiInsertTable (
   EFI_PHYSICAL_ADDRESS      Table;
   EFI_ACPI_COMMON_HEADER    **NewTables;
   BOOLEAN                   ReplaceDsdt;
+  UINT32                    TablePrintSignature;
 
   if (Length < sizeof (EFI_ACPI_COMMON_HEADER)) {
     DEBUG ((DEBUG_WARN, "OCA: Inserted ACPI table is only %u bytes, ignoring\n", Length));
@@ -869,9 +922,12 @@ AcpiInsertTable (
       );
 
   } else {
+    TablePrintSignature = AcpiReadSignature (Common);
+
     DEBUG ((
       DEBUG_INFO,
-      "OCA: Inserted table %08x (%016Lx) of %u bytes into ACPI at index %u\n",
+      "OCA: Inserted table %.4a (%08x) (OEM %016Lx) of %u bytes into ACPI at index %u\n",
+      (CHAR8 *) &TablePrintSignature,
       Common->Signature,
       AcpiReadOemTableId (Common),
       Common->Length,
@@ -891,6 +947,7 @@ AcpiNormalizeHeaders (
   )
 {
   UINT32  Index;
+  UINT32  TablePrintSignature;
 
   if (Context->Dsdt != NULL) {
     if (AcpiNormalizeTableHeaders (Context->Dsdt)) {
@@ -900,9 +957,12 @@ AcpiNormalizeHeaders (
 
   for (Index = 0; Index < Context->NumberOfTables; ++Index) {
     if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Tables[Index])) {
+      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
       DEBUG ((
         DEBUG_INFO,
-        "OCA: Normalized %08x (%08Lx) of %u bytes headers at index %u\n",
+        "OCA: Normalized %.4a (%08x) (OEM %016Lx) of %u bytes headers at index %u\n",
+        (CHAR8 *) &TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
@@ -922,6 +982,7 @@ AcpiApplyPatch (
   UINT64  CurrOemTableId;
   UINT32  ReplaceCount;
   UINT32  ReplaceLimit;
+  UINT32  TablePrintSignature;
 
   DEBUG ((DEBUG_INFO, "OCA: Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
 
@@ -1001,9 +1062,12 @@ AcpiApplyPatch (
         Patch->Skip
         );
 
+      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
       DEBUG ((
         ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
-        "OCA: Patching %08x (%016Lx, %u) with %016Lx ID at %u replaced %u of %u\n",
+        "OCA: Patching %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID at %u replaced %u of %u\n",
+        (CHAR8 *) &TablePrintSignature,
         Context->Tables[Index]->Signature,
         AcpiReadOemTableId (Context->Tables[Index]),
         Context->Tables[Index]->Length,
