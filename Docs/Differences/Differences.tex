@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Nov  2 14:00:40 2020
-%DIF ADD ../Configuration.tex        Mon Nov  2 23:46:58 2020
+%DIF DEL PreviousConfiguration.tex   Tue Nov  3 14:21:51 2020
+%DIF ADD ../Configuration.tex        Tue Nov  3 14:25:08 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4131,7 +4131,8 @@ troubleshooting:
   \item \texttt{debug=VALUE} (debug mask)
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
   \item \texttt{keepsyms=1} (show panic log debug symbols)
-  \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
+  \item \texttt{kextlog=VALUE} (kernel extension loading debug mask\DIFaddbegin \DIFadd{)
+  }\item \texttt{\DIFadd{nvram-log=1}} \DIFadd{(enables AppleEFINVRAM logs}\DIFaddend )
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
