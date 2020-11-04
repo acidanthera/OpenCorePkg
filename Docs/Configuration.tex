@@ -3377,6 +3377,17 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   considered a security risk and thus is optional.
 
 \item
+  \texttt{BlacklistAppleUpdate}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ignore boot options trying to update Apple peripheral firmware
+  (e.g. \texttt{MultiUpdater.efi}).
+
+  \emph{Note}: This option exists due to some operating systems, namely macOS Big Sur,
+  being \href{https://github.com/acidanthera/bugtracker/issues/1255}{incapable} of
+  disabling firmware updates with the NVRAM variable (\texttt{run-efi-updater}).
+
+\item
   \texttt{BootProtect}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\

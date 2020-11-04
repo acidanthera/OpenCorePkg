@@ -1680,6 +1680,7 @@ OcScanForBootEntries (
   if (Context->BootOrder == NULL) {
     Context->BootOrder = InternalGetBootOrderForBooting (
       BootContext->BootVariableGuid,
+      Context->BlacklistAppleUpdate,
       &Context->BootOrderCount
       );
   }
@@ -1770,6 +1771,7 @@ OcScanForDefaultBootEntry (
   if (Context->BootOrder == NULL) {
     Context->BootOrder = InternalGetBootOrderForBooting (
       BootContext->BootVariableGuid,
+      Context->BlacklistAppleUpdate,
       &Context->BootOrderCount
       );
   }

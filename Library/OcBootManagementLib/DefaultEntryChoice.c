@@ -163,6 +163,7 @@ InternalDebugBootEnvironment (
 
   STATIC CONST CHAR16 *AppleDebugVariables[] = {
     L"efi-boot-device-data",
+    L"efi-boot-next-data",
     L"efi-backup-boot-device-data",
     L"efi-apple-recovery-data"
   };
@@ -315,6 +316,131 @@ InternalGetBootEntryByDevicePath (
   }
 
   return NULL;
+}
+
+STATIC
+VOID
+InternalClearNextVariables (
+  IN  EFI_GUID  *BootVariableGuid,
+  IN  BOOLEAN   ClearApplePayload
+  )
+{
+  CHAR16  VariableName[32];
+  UINTN   Index;
+
+  //
+  // Next variable data specified by UEFI spec.
+  // For now we do not bother dropping the variable it points to.
+  //
+  gRT->SetVariable (
+    EFI_BOOT_NEXT_VARIABLE_NAME,
+    BootVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+    0,
+    NULL
+    );
+
+  //
+  // Next variable string (in xml format) specified by Apple macOS.
+  //
+  gRT->SetVariable (
+    L"efi-boot-next",
+    &gAppleBootVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+    0,
+    NULL
+    );
+
+  //
+  // Next variable blob (in DevicePath format) specified by Apple macOS.
+  //
+  gRT->SetVariable (
+    L"efi-boot-next-data",
+    &gAppleBootVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+    0,
+    NULL
+    );
+
+  if (ClearApplePayload) {
+    for (Index = 0; Index <= 3; ++Index) {
+      UnicodeSPrint (
+        VariableName,
+        sizeof (VariableName),
+        L"efi-apple-payload%u%a",
+        (UINT32) Index,
+        "-data"
+        );
+
+      gRT->SetVariable (
+        VariableName,
+        &gAppleBootVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+        0,
+        NULL
+        );
+
+      UnicodeSPrint (
+        VariableName,
+        sizeof (VariableName),
+        L"efi-apple-payload%u%a",
+        (UINT32) Index,
+        ""
+        );
+
+      gRT->SetVariable (
+        VariableName,
+        &gAppleBootVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+        0,
+        NULL
+        );
+    }
+  }
+}
+
+STATIC
+BOOLEAN
+InternalHasFirmwareUpdateAsNext (
+  IN EFI_GUID  *BootVariableGuid
+  )
+{
+  EFI_STATUS                       Status;
+  UINT32                           VariableAttributes;
+  UINT16                           BootNext;
+  UINTN                            VariableSize;
+  OC_BOOT_ENTRY_TYPE               EntryType;
+  EFI_DEVICE_PATH_PROTOCOL         *UefiDevicePath;
+
+  VariableSize = sizeof (BootNext);
+  Status = gRT->GetVariable (
+    EFI_BOOT_NEXT_VARIABLE_NAME,
+    BootVariableGuid,
+    &VariableAttributes,
+    &VariableSize,
+    &BootNext
+    );
+  if (EFI_ERROR (Status) || VariableSize != sizeof (BootNext)) {
+    return FALSE;
+  }
+
+  UefiDevicePath = InternalGetBootOptionData (
+    BootNext,
+    BootVariableGuid,
+    NULL,
+    NULL,
+    NULL
+    );
+
+  if (UefiDevicePath == NULL) {
+    return FALSE;
+  }
+
+  EntryType = OcGetBootDevicePathType (UefiDevicePath, NULL, NULL);
+  DEBUG ((DEBUG_INFO, "OCB: Found BootNext %04x of type %u\n", BootNext, EntryType));
+  FreePool (UefiDevicePath);
+
+  return EntryType == OC_BOOT_APPLE_FW_UPDATE;
 }
 
 BOOLEAN
@@ -471,15 +597,26 @@ OcGetBootOrder (
 UINT16 *
 InternalGetBootOrderForBooting (
   IN  EFI_GUID  *BootVariableGuid,
+  IN  BOOLEAN   BlacklistAppleUpdate,
   OUT UINTN     *BootOrderCount
   )
 {
   UINT16                           *BootOrder;
+  BOOLEAN                          HasFwBootNext;
   BOOLEAN                          HasBootNext;
+
+  //
+  // Precede variable with boot next unless we were forced to ignore it.
+  //
+  if (BlacklistAppleUpdate) {
+    HasFwBootNext = InternalHasFirmwareUpdateAsNext (BootVariableGuid);
+  } else {
+    HasFwBootNext = FALSE;
+  }
 
   BootOrder = OcGetBootOrder (
     BootVariableGuid,
-    TRUE,
+    HasFwBootNext == FALSE,
     BootOrderCount,
     NULL,
     &HasBootNext
@@ -499,14 +636,8 @@ InternalGetBootOrderForBooting (
   InternalDebugBootEnvironment (BootOrder, BootVariableGuid, *BootOrderCount);
   DEBUG_CODE_END ();
 
-  if (HasBootNext) {
-    gRT->SetVariable (
-      EFI_BOOT_NEXT_VARIABLE_NAME,
-      BootVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-      0,
-      NULL
-      );
+  if (HasFwBootNext || HasBootNext) {
+    InternalClearNextVariables (BootVariableGuid, HasFwBootNext);
   }
 
   return BootOrder;

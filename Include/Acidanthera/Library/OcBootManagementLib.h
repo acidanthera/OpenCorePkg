@@ -656,6 +656,10 @@ struct OC_PICKER_CONTEXT_ {
   //
   BOOLEAN                    ApplePickerUnsupported;
   //
+  // Ignore Apple peripheral firmware updates.
+  //
+  BOOLEAN                    BlacklistAppleUpdate;
+  //
   // Recommended audio protocol, optional.
   //
   OC_AUDIO_PROTOCOL          *OcAudio;
