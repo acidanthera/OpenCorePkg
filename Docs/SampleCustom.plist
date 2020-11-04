@@ -1132,7 +1132,7 @@
 			<key>PlatformFeature</key>
 			<integer>32</integer>
 			<key>ProcessorType</key>
-			<integer>4105</integer>
+			<integer>0</integer>
 			<key>SmcVersion</key>
 			<data>Mi40NkYwMTIAAAAAAAAAAA==</data>
 			<key>SystemFamily</key>
