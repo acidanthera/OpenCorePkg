@@ -1,0 +1,70 @@
+## @file
+#  Console support on graphic devices.
+#
+#  This driver will install Simple Text Output protocol by consuming Graphices Output
+#  protocol or UGA Draw protocol on graphic devices.
+#
+#  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+#  Copyright (c) 2020, ISP RAS. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = GraphicsConsoleDxe
+  MODULE_UNI_FILE                = GraphicsConsoleDxe.uni
+  FILE_GUID                      = CCCB0C28-4B24-11d5-9A5A-0090273FC14D
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InitializeGraphicsConsole
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+#  DRIVER_BINDING                =  gGraphicsConsoleDriverBinding
+#  COMPONENT_NAME                =  gGraphicsConsoleComponentName
+#  COMPONENT_NAME2               =  gGraphicsConsoleComponentName2
+#
+
+[Sources]
+  ComponentName.c
+  LaffStd.c
+  GraphicsConsole.c
+  GraphicsConsole.h
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  UefiLib
+  UefiDriverEntryPoint
+  DebugLib
+  PcdLib
+
+[Protocols]
+  gEfiDevicePathProtocolGuid                    ## TO_START
+  gEfiSimpleTextOutProtocolGuid                 ## BY_START
+  gEfiGraphicsOutputProtocolGuid                ## TO_START
+  gEfiUgaDrawProtocolGuid                       ## TO_START
+  ## TO_START
+  ## NOTIFY
+
+[FeaturePcd]
+  gEfiMdePkgTokenSpaceGuid.PcdUgaConsumeSupport ## CONSUMES
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoHorizontalResolution ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdVideoVerticalResolution   ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutRow                 ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdConOutColumn              ## SOMETIMES_CONSUMES
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  GraphicsConsoleDxeExtra.uni
