@@ -58,7 +58,6 @@ LoadOpenCore (
   BufferSize = 0;
 
   LoaderPath = OcCopyDevicePathFullName (LoaderDevicePath);
-  LoaderPathSize = StrSize (LoaderPath);
 
   *ImagePath = NULL;
 
@@ -66,6 +65,7 @@ LoadOpenCore (
   // Try relative path: EFI\\XXX\\Bootstrap\\Bootstrap.efi -> EFI\\XXX\\OpenCore.efi
   //
   if (LoaderPath != NULL) {
+    LoaderPathSize = StrSize (LoaderPath);
     if (UnicodeGetParentDirectory (LoaderPath)
       && UnicodeGetParentDirectory (LoaderPath)) {
       DEBUG ((DEBUG_INFO, "BS: Relative path - %s\n", LoaderPath));
