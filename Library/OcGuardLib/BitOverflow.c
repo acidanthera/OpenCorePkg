@@ -319,9 +319,13 @@ OcOverflowMulS64 (
   INT64  *Result
   )
 {
-#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
+  //
+  // Intel 32-bit architectures do not have hardware signed 64-bit
+  // multiplication with overflow.
+  //
+#if defined(OC_HAS_TYPE_GENERIC_BUILTINS) && !defined(MDE_CPU_IA32)
   return __builtin_mul_overflow(A, B, Result);
-#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS)
+#elif defined(OC_HAS_TYPE_SPECIFIC_BUILTINS) && !defined(MDE_CPU_IA32)
   return __builtin_smulll_overflow(A, B, Result);
 #else
   UINT64  AU;
