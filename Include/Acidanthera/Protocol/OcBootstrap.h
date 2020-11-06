@@ -42,7 +42,14 @@ typedef struct OC_BOOTSTRAP_PROTOCOL_ OC_BOOTSTRAP_PROTOCOL;
 
   @param[in] This           This protocol.
   @param[in] FileSystem     File system to bootstrap in.
-  @param[in] LoadPath       EFI device path to loaded image.
+  @param[in] LoadPath       EFI device path to loaded image, optional.
+
+  * LoadPath may point to OpenCore.efi driver itself when the image was loaded
+    normally. In this case parent directory is used as a root directory.
+  * LoadPath may point to file system when the image was loaded before rerun.
+    In this case the LoadPath means the path we should bootstrap ourselves in.
+  * LoadPath may be NULL when the image was loaded from unknown location.
+    In this case some features like registering Bootstrap.efi cannot be used.
 
   @retval EFI_ALREADY_STARTED if already started.
   @retval Does not return on success.

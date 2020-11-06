@@ -333,6 +333,25 @@ UnicodeUefiSlashes (
   );
 
 /**
+  Drop last path from string and normalise start path. Examples:
+  - "Path" -> ""
+  - "Path/" -> ""
+  - "Path1\\Path2\\" -> "Path1"
+  - "\\Path1\\Path2" -> "Path1"
+  - "\\/" -> "/" & FALSE
+  - "\\" -> "" & FALSE
+  - "" -> "" & FALSE
+
+  @param[in,out]  String      Path.
+
+  @retval TRUE on success
+**/
+BOOLEAN
+UnicodeGetParentDirectory (
+  IN OUT CHAR16  *String
+  );
+
+/**
   Filter string from unprintable characters.
 
   @param[in,out]  String      String to filter.

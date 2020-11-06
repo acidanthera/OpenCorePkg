@@ -5,6 +5,7 @@ OpenCore Changelog
 - Added `BlacklistAppleUpdate` to fix 11.0 broken update optout
 - Dropped HII services from OpenDuet improving size and performance
 - Fixed patching of injected kexts in mkext
+- Added support for launching from relative paths
 
 #### v0.6.3
 - Added support for xml comments in plist files

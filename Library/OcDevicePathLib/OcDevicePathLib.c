@@ -82,8 +82,8 @@ FindDevicePathNodeWithType (
   DevicePathNode = NULL;
 
   while (!IsDevicePathEnd (DevicePath)) {
-    if ((DevicePathType (DevicePath) == Type)
-     && ((SubType == 0) || (DevicePathSubType (DevicePath) == SubType))) {
+    if (DevicePathType (DevicePath) == Type
+     && (SubType == 0 || DevicePathSubType (DevicePath) == SubType)) {
       DevicePathNode = DevicePath;
 
       break;
@@ -148,7 +148,9 @@ TrailedBooterDevicePath (
           // Already appended, good. It should never be true with Apple entries though.
           //
           return NULL;
-        } else if (Length > 4 &&                      (FilePath->PathName[Length - 4] != '.'
+        }
+
+        if (Length > 4 && (FilePath->PathName[Length - 4] != '.'
           || (FilePath->PathName[Length - 3] != 'e' && FilePath->PathName[Length - 3] != 'E')
           || (FilePath->PathName[Length - 2] != 'f' && FilePath->PathName[Length - 2] != 'F')
           || (FilePath->PathName[Length - 1] != 'i' && FilePath->PathName[Length - 1] != 'I'))) {
@@ -1113,6 +1115,41 @@ OcFileDevicePathFullName (
     FilePath = (CONST FILEPATH_DEVICE_PATH *)NextDevicePathNode (FilePath);
   } while (!IsDevicePathEnd (FilePath));
   *PathName = CHAR_NULL;
+}
+
+CHAR16 *
+OcCopyDevicePathFullName (
+  IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath
+  )
+{
+  CHAR16                      *Path;
+  EFI_DEVICE_PATH_PROTOCOL    *CurrNode;
+  UINTN                       PathSize;
+
+  Path = NULL;
+
+  for (CurrNode = DevicePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
+    if ((DevicePathType (CurrNode) == MEDIA_DEVICE_PATH)
+     && (DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP)) {
+      //
+      // Perform copying of all the underlying nodes due to potential unaligned access.
+      //
+      PathSize = OcFileDevicePathFullNameSize (CurrNode);
+      if (PathSize == 0) {
+        return NULL;
+      }
+
+      Path = AllocatePool (PathSize);
+      if (Path == NULL) {
+        return NULL;
+      }
+
+      OcFileDevicePathFullName (Path, (FILEPATH_DEVICE_PATH *) CurrNode, PathSize);
+      break;
+    }
+  }
+
+  return Path;
 }
 
 EFI_DEVICE_PATH_PROTOCOL *

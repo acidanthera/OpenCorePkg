@@ -587,6 +587,7 @@ EFI_STATUS
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
+  IN  CONST CHAR16              *RootPath  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
   OUT EFI_HANDLE                *LoadHandle
   )
@@ -594,6 +595,8 @@ OcMiscMiddleInit (
   EFI_STATUS   Status;
   CONST CHAR8  *BootProtect;
   UINT32       BootProtectFlag;
+  CHAR16       *BootstrapPath;
+  UINTN        BootstrapSize;
   EFI_HANDLE   OcHandle;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
@@ -617,8 +620,15 @@ OcMiscMiddleInit (
   BootProtectFlag = Config->Uefi.Quirks.RequestBootVarRouting ? OC_BOOT_PROTECT_VARIABLE_NAMESPACE : 0;
 
   if (OcHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
-    OcRegisterBootOption (L"OpenCore", OcHandle, OPEN_CORE_BOOTSTRAP_PATH);
-    BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+    ASSERT (RootPath != NULL);
+    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_BOOTSTRAP_PATH);
+    BootstrapPath = AllocatePool (BootstrapSize);
+    if (BootstrapPath != NULL) {
+      UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
+      OcRegisterBootOption (L"OpenCore", OcHandle, BootstrapPath);
+      BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+      FreePool (BootstrapPath);
+    }
   }
 
   //
