@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1037.140.50.0.0"
-BIOSLegacyVersion: "IM191.88Z.F000.B00.2006151939"
-BIOSReleaseDate: "06/15/2020"
+BIOSVersion: "1554.50.2.0.0"
+BIOSLegacyVersion: "IM191.88Z.F000.B00.2010192009"
+BIOSReleaseDate: "10/19/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac19,1"
 SystemVersion: "1.0"
@@ -65,17 +65,17 @@ SmcPlatform:
 SmcEPCI: 0xF0D009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM191.88Z.F000.B00.2006151939
+    BIOS ID:      IM191.88Z.F000.B00.2010192009
     Model:        IM191
-    EFI Version:  1037.140.50.0.0
-    Built by:     _securitya@osx397
-    Date:         Mon Jun 15 19:39:43 2020
-    Revision:     1037.140.50 (B&I)
+    EFI Version:  1554.50.2.0.0
+    Built by:     root@osx414
+    Date:         Mon Oct 19 20:09:57 2020
+    Revision:     1554.50.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1103.0.29.20
-    UUID:         076BBB9C-306F-3F7A-8BBE-D613CF5793A4
-    UUID:         A1B797A6-3166-38DA-98EF-BB820338EC1A
+    Compiler:     clang-1200.0.30.4
+    UUID:         965D30B4-8F79-3074-BC74-4FEF8329C5FB
+    UUID:         0C2E8C49-0FE5-35AD-B9BA-8C5CAA0119EE
 Specifications:
   CPUCodename:
     - "Coffee Lake"

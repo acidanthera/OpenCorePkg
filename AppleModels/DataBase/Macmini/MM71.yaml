@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "424.0.0.0.0"
-BIOSLegacyVersion: "MM71.88Z.F000.B00.2010062241"
-BIOSReleaseDate: "10/06/2020"
+BIOSVersion: "426.0.0.0.0"
+BIOSLegacyVersion: "MM71.88Z.F000.B00.2010191958"
+BIOSReleaseDate: "10/19/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "Macmini7,1"
 SystemVersion: "1.0"
@@ -73,10 +73,10 @@ SmcEPCI: 0xF04008
 OEMStrings: |-
   Apple ROM Version
     Model:        MM71
-    EFI Version:  424.0.0.0.0
-    Built by:     root@manhattan40
-    Date:         Tue Oct  6 22:41:52 PDT 2020
-    Revision:     424 (B&I)
+    EFI Version:  426.0.0.0.0
+    Built by:     root@osx415
+    Date:         Mon Oct 19 19:58:54 PDT 2020
+    Revision:     426 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4

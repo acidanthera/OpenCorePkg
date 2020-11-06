@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "424.0.0.0.0"
-BIOSLegacyVersion: "IM151.88Z.F000.B00.2010062241"
-BIOSReleaseDate: "10/06/2020"
+BIOSVersion: "426.0.0.0.0"
+BIOSLegacyVersion: "IM151.88Z.F000.B00.2010192003"
+BIOSReleaseDate: "10/19/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac15,1"
 SystemVersion: "1.0"
@@ -65,10 +65,10 @@ SmcEPCI: 0xf00008
 OEMStrings: |-
   Apple ROM Version
     Model:        IM151
-    EFI Version:  424.0.0.0.0
-    Built by:     root@manhattan45
-    Date:         Tue Oct  6 22:41:42 PDT 2020
-    Revision:     424 (B&I)
+    EFI Version:  426.0.0.0.0
+    Built by:     root@osx414
+    Date:         Mon Oct 19 20:03:01 PDT 2020
+    Revision:     426 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4

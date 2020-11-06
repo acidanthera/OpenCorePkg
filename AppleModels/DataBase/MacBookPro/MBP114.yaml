@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "422.0.0.0.0"
-BIOSLegacyVersion: "MBP114.88Z.F000.B00.2010062244"
-BIOSReleaseDate: "10/06/2020"
+BIOSVersion: "424.0.0.0.0"
+BIOSLegacyVersion: "MBP114.88Z.F000.B00.2010191959"
+BIOSReleaseDate: "10/19/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,4"
 SystemVersion: "1.0"
@@ -72,10 +72,10 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP114
-    EFI Version:  422.0.0.0.0
-    Built by:     root@manhattan22
-    Date:         Tue Oct  6 22:44:16 PDT 2020
-    Revision:     422 (B&I)
+    EFI Version:  424.0.0.0.0
+    Built by:     root@osx415
+    Date:         Mon Oct 19 19:59:03 PDT 2020
+    Revision:     424 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4
