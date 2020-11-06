@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Nov  4 05:07:23 2020
-%DIF ADD ../Configuration.tex        Wed Nov  4 12:01:16 2020
+%DIF ADD ../Configuration.tex        Fri Nov  6 23:16:40 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -592,8 +592,13 @@ entries include:
   Directory used for storing supplemental tools.
 \item
   \texttt{OpenCore.efi} \\
-  Main booter driver responsible for operating system loading.
-\item
+  Main booter driver responsible for operating system loading. \DIFaddbegin \DIFadd{The directory
+  }\texttt{\DIFadd{OpenCore.efi}} \DIFadd{resides is called the }\texttt{\DIFadd{root directory}}\DIFadd{.
+  By default }\texttt{\DIFadd{root directory}} \DIFadd{is set to }\texttt{\DIFadd{EFI\textbackslash OC}}\DIFadd{,
+  however, when launching }\texttt{\DIFadd{OpenCore.efi}} \DIFadd{directly or through
+  }\texttt{\DIFadd{Bootstrap.efi}}\DIFadd{, other directories containing }\texttt{\DIFadd{OpenCore.efi}}
+  \DIFadd{can also be supported.
+}\DIFaddend \item
   \texttt{config.plist} \\
   \texttt{OC Config}.
 \item

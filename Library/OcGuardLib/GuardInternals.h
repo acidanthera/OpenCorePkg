@@ -8,8 +8,10 @@
 #ifndef OC_GUARD_INTERNALS_H
 #define OC_GUARD_INTERNALS_H
 
-#if defined(__has_builtin) && __has_builtin(__builtin_add_overflow) && __has_builtin(__builtin_sub_overflow) && __has_builtin(__builtin_mul_overflow)
-  #define OC_HAS_TYPE_GENERIC_BUILTINS 1
+#if defined(__has_builtin)
+  #if __has_builtin(__builtin_add_overflow) && __has_builtin(__builtin_sub_overflow) && __has_builtin(__builtin_mul_overflow)
+    #define OC_HAS_TYPE_GENERIC_BUILTINS 1
+  #endif
 #endif
 
 #if defined(__GNUC__) || defined(__clang__)

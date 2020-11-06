@@ -532,7 +532,12 @@ entries include:
   Directory used for storing supplemental tools.
 \item
   \texttt{OpenCore.efi} \\
-  Main booter driver responsible for operating system loading.
+  Main booter driver responsible for operating system loading. The directory
+  \texttt{OpenCore.efi} resides is called the \texttt{root directory}.
+  By default \texttt{root directory} is set to \texttt{EFI\textbackslash OC},
+  however, when launching \texttt{OpenCore.efi} directly or through
+  \texttt{Bootstrap.efi}, other directories containing \texttt{OpenCore.efi}
+  can also be supported.
 \item
   \texttt{config.plist} \\
   \texttt{OC Config}.
