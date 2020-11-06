@@ -223,6 +223,38 @@ UpdateMkextV2Plist (
   return ExportedInfoSize;
 }
 
+STATIC
+MKEXT_KEXT *
+InsertCachedMkextKext (
+  IN OUT MKEXT_CONTEXT      *Context,
+  IN     CONST CHAR8        *Identifier,
+  IN     UINT32             BinOffset,
+  IN     UINT32             BinSize
+  )
+{
+  MKEXT_KEXT      *MkextKext;
+
+  MkextKext = AllocateZeroPool (sizeof (*MkextKext));
+  if (MkextKext == NULL) {
+    return NULL;
+  }
+
+  MkextKext->Signature    = MKEXT_KEXT_SIGNATURE;
+  MkextKext->BinaryOffset = BinOffset;
+  MkextKext->BinarySize   = BinSize;
+  MkextKext->Identifier   = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
+  if (MkextKext->Identifier == NULL) {
+    FreePool (MkextKext);
+    return NULL;
+  }
+
+  InsertTailList (&Context->CachedKexts, &MkextKext->Link);
+
+  DEBUG ((DEBUG_VERBOSE, "OCAK: Inserted %a into mkext cache\n", Identifier));
+
+  return MkextKext;
+}
+
 MKEXT_KEXT *
 InternalCachedMkextKext (
   IN OUT MKEXT_CONTEXT      *Context,
@@ -437,23 +469,7 @@ InternalCachedMkextKext (
     return NULL;
   }
 
-  MkextKext = AllocateZeroPool (sizeof (*MkextKext));
-  if (MkextKext == NULL) {
-    return NULL;
-  }
-
-  MkextKext->Signature    = MKEXT_KEXT_SIGNATURE;
-  MkextKext->BinaryOffset = KextBinOffset;
-  MkextKext->BinarySize   = KextBinSize;
-  MkextKext->Identifier   = AllocateCopyPool (AsciiStrSize (Identifier), Identifier);
-  if (MkextKext->Identifier == NULL) {
-    FreePool (MkextKext);
-    return NULL;
-  }
-
-  InsertTailList (&Context->CachedKexts, &MkextKext->Link);
-
-  return MkextKext;
+  return InsertCachedMkextKext (Context, Identifier, KextBinOffset, KextBinSize);
 }
 
 EFI_STATUS
@@ -1147,6 +1163,10 @@ MkextInjectKext (
   XML_DOCUMENT          *PlistXml;
   XML_NODE              *PlistRoot;
   BOOLEAN               PlistFailed;
+  UINT32                PlistBundleIndex;
+  UINT32                PlistBundleCount;
+  CONST CHAR8           *PlistBundleKey;
+  XML_NODE              *PlistBundleKeyValue;
   
   CONST CHAR8           *TmpKeyValue;
   UINT32                FieldCount;
@@ -1172,10 +1192,74 @@ MkextInjectKext (
     }
   }
 
+  PlistBuffer = AllocateCopyPool (InfoPlistSize, InfoPlist);
+  if (PlistBuffer == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  PlistXml = XmlDocumentParse (PlistBuffer, InfoPlistSize, FALSE);
+  if (PlistXml == NULL) {
+    FreePool (PlistBuffer);
+    return EFI_INVALID_PARAMETER;
+  }
+
+  PlistRoot = PlistNodeCast (PlistDocumentRoot (PlistXml), PLIST_NODE_TYPE_DICT);
+  if (PlistRoot == NULL) {
+    XmlDocumentFree (PlistXml);
+    FreePool (PlistBuffer);
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
+  // However, to avoid certain users making this kind of mistake, we still provide some
+  // code in debug mode to diagnose it.
+  //
+  DEBUG_CODE_BEGIN ();
+  if (Executable == NULL) {
+    FieldCount = PlistDictChildren (PlistRoot);
+    for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
+      TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, NULL));
+      if (TmpKeyValue == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
+        DEBUG ((DEBUG_ERROR, "OCK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
+        ASSERT (FALSE);
+        CpuDeadLoop ();
+      }
+    }
+  }
+  DEBUG_CODE_END ();
+
+  Identifier = NULL;
+  PlistBundleCount = PlistDictChildren (PlistRoot);
+  for (PlistBundleIndex = 0; PlistBundleIndex < PlistBundleCount; PlistBundleIndex++) {
+    PlistBundleKey = PlistKeyValue (PlistDictChild (PlistRoot, PlistBundleIndex, &PlistBundleKeyValue));
+    if (PlistBundleKey == NULL || PlistBundleKeyValue == NULL) {
+      continue;
+    }
+    
+    if (AsciiStrCmp (PlistBundleKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+      Identifier = XmlNodeContent (PlistBundleKeyValue);
+      break;
+    }
+  }
+
+  if (Identifier == NULL) {
+    XmlDocumentFree (PlistXml);
+    FreePool (PlistBuffer);
+    return EFI_INVALID_PARAMETER;
+  }
+
   //
   // Mkext v1.
   //
   if (Context->MkextVersion == MKEXT_VERSION_V1) {
+    XmlDocumentFree (PlistXml);
+    FreePool (PlistBuffer);
+
     if (Context->NumKexts >= Context->NumMaxKexts) {
       return EFI_BUFFER_TOO_SMALL;
     }
@@ -1241,47 +1325,6 @@ MkextInjectKext (
   // Mkext v2.
   //
   } else if (Context->MkextVersion == MKEXT_VERSION_V2) {
-    PlistBuffer = AllocateCopyPool (InfoPlistSize, InfoPlist);
-    if (PlistBuffer == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    PlistXml = XmlDocumentParse (PlistBuffer, InfoPlistSize, FALSE);
-    if (PlistXml == NULL) {
-      FreePool (PlistBuffer);
-      return EFI_INVALID_PARAMETER;
-    }
-
-    PlistRoot = PlistNodeCast (PlistDocumentRoot (PlistXml), PLIST_NODE_TYPE_DICT);
-    if (PlistRoot == NULL) {
-      XmlDocumentFree (PlistXml);
-      FreePool (PlistBuffer);
-      return EFI_INVALID_PARAMETER;
-    }
-
-    //
-    // We are not supposed to check for this, it is XNU responsibility, which reliably panics.
-    // However, to avoid certain users making this kind of mistake, we still provide some
-    // code in debug mode to diagnose it.
-    //
-    DEBUG_CODE_BEGIN ();
-    if (Executable == NULL) {
-      FieldCount = PlistDictChildren (PlistRoot);
-      for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
-        TmpKeyValue = PlistKeyValue (PlistDictChild (PlistRoot, FieldIndex, NULL));
-        if (TmpKeyValue == NULL) {
-          continue;
-        }
-
-        if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_EXECUTABLE_KEY) == 0) {
-          DEBUG ((DEBUG_ERROR, "OCK: Plist-only kext has %a key\n", INFO_BUNDLE_EXECUTABLE_KEY));
-          ASSERT (FALSE);
-          CpuDeadLoop ();
-        }
-      }
-    }
-    DEBUG_CODE_END ();
-
     //
     // Executable, if present, will be placed at end of mkext and plist will be moved further out.
     //
@@ -1343,14 +1386,23 @@ MkextInjectKext (
       MkextExecutableEntry->CompressedSize = 0;
       MkextExecutableEntry->FullSize = SwapBytes32 (ExecutableSize);
       CopyMem (MkextExecutableEntry->Data, Executable, ExecutableSize);
+
+      BinOffset += OFFSET_OF (MKEXT_V2_FILE_ENTRY, Data);
     }
   
   //
   // Unsupported version.
   //
   } else {
+    XmlDocumentFree (PlistXml);
+    FreePool (PlistBuffer);
     return EFI_UNSUPPORTED;
   }
+
+  //
+  // Add kext to cache.
+  //
+  InsertCachedMkextKext (Context, Identifier, BinOffset, ExecutableSize);
 
   return EFI_SUCCESS;
 }
