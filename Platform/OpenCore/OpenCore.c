@@ -234,9 +234,10 @@ OcBootstrapRerun (
       mStoragePath = NULL;
     }
 
+    RemainingPath = LoadPath;
     gBS->LocateDevicePath (
       &gEfiSimpleFileSystemProtocolGuid,
-      &LoadPath,
+      &RemainingPath,
       &mStorageHandle
       );
 
