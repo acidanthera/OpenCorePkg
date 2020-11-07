@@ -1119,7 +1119,8 @@ OcFileDevicePathFullName (
 
 CHAR16 *
 OcCopyDevicePathFullName (
-  IN EFI_DEVICE_PATH_PROTOCOL        *DevicePath
+  IN   EFI_DEVICE_PATH_PROTOCOL        *DevicePath,
+  OUT  EFI_DEVICE_PATH_PROTOCOL        **FileDevicePath  OPTIONAL
   )
 {
   CHAR16                      *Path;
@@ -1128,9 +1129,17 @@ OcCopyDevicePathFullName (
 
   Path = NULL;
 
+  if (FileDevicePath != NULL) {
+    *FileDevicePath = NULL;
+  }
+
   for (CurrNode = DevicePath; !IsDevicePathEnd (CurrNode); CurrNode = NextDevicePathNode (CurrNode)) {
     if ((DevicePathType (CurrNode) == MEDIA_DEVICE_PATH)
      && (DevicePathSubType (CurrNode) == MEDIA_FILEPATH_DP)) {
+      if (FileDevicePath != NULL) {
+        *FileDevicePath = CurrNode;
+      }
+
       //
       // Perform copying of all the underlying nodes due to potential unaligned access.
       //

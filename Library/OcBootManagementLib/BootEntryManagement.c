@@ -29,6 +29,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcConsoleLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -594,6 +595,9 @@ AddBootEntryFromCustomEntry (
       return EFI_OUT_OF_RESOURCES;
     }
   }
+
+  BootEntry->LaunchInText = CustomEntry->TextMode;
+  BootEntry->ExposeDevicePath = CustomEntry->RealPath;
 
   BootEntry->LoadOptionsSize = (UINT32) AsciiStrLen (CustomEntry->Arguments);
   if (BootEntry->LoadOptionsSize > 0) {
@@ -1924,7 +1928,7 @@ OcLoadBootEntry (
     &DmgLoadContext
     );
   if (!EFI_ERROR (Status)) {
-    Status = Context->StartImage (BootEntry, EntryHandle, NULL, NULL);
+    Status = Context->StartImage (BootEntry, EntryHandle, NULL, NULL, BootEntry->LaunchInText);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "OCB: StartImage failed - %r\n", Status));
       //

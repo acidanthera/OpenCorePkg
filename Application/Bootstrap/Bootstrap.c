@@ -57,7 +57,7 @@ LoadOpenCore (
   Buffer = NULL;
   BufferSize = 0;
 
-  LoaderPath = OcCopyDevicePathFullName (LoaderDevicePath);
+  LoaderPath = OcCopyDevicePathFullName (LoaderDevicePath, NULL);
 
   *ImagePath = NULL;
 

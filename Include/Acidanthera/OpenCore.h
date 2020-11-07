@@ -282,17 +282,17 @@ OcMiscEarlyInit (
   @param[in]  Config     OpenCore configuration.
   @param[in]  RootPath   Root load path.
   @param[in]  LoadPath   OpenCore loading path.
-  @param[out] LoadHandle OpenCore loading handle.
+  @param[in]  LoadHandle OpenCore loading handle.
 
   @retval EFI_SUCCESS on success, informational.
 **/
-EFI_STATUS
+VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  CONST CHAR16              *RootPath  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  OUT EFI_HANDLE                *LoadHandle
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
   );
 
 /**

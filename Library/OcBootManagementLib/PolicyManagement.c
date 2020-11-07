@@ -296,7 +296,7 @@ OcGetBootDevicePathType (
     *IsFolder = FALSE;
   }
 
-  Path = OcCopyDevicePathFullName (DevicePath);
+  Path = OcCopyDevicePathFullName (DevicePath, NULL);
   if (Path == NULL) {
     return OC_BOOT_UNKNOWN;
   }

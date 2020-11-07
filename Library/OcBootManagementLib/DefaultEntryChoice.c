@@ -1082,8 +1082,8 @@ InternalLoadBootEntry (
   EFI_STATUS                 Status;
   EFI_STATUS                 OptionalStatus;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
-  EFI_HANDLE                 ParentDeviceHandle;
-  EFI_DEVICE_PATH_PROTOCOL   *ParentFilePath;
+  EFI_HANDLE                 StorageHandle;
+  EFI_DEVICE_PATH_PROTOCOL   *StoragePath;
   CHAR16                     *UnicodeDevicePath;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
   VOID                       *EntryData;
@@ -1104,10 +1104,10 @@ InternalLoadBootEntry (
 
   ZeroMem (DmgLoadContext, sizeof (*DmgLoadContext));
 
-  EntryData          = NULL;
-  EntryDataSize      = 0;
-  ParentDeviceHandle = NULL;
-  ParentFilePath     = NULL;
+  EntryData     = NULL;
+  EntryDataSize = 0;
+  StorageHandle = NULL;
+  StoragePath   = NULL;
 
   if (BootEntry->IsFolder) {
     if (Context->DmgLoading == OcDmgLoadingDisabled) {
@@ -1128,8 +1128,8 @@ InternalLoadBootEntry (
       &EntryData,
       &EntryDataSize,
       &DevicePath,
-      &ParentDeviceHandle,
-      &ParentFilePath
+      &StorageHandle,
+      &StoragePath
       );
 
     if (EFI_ERROR (Status)) {
@@ -1215,12 +1215,12 @@ InternalLoadBootEntry (
         // fields to our custom device path, so we fix it up here.
         // REF: https://github.com/acidanthera/bugtracker/issues/712
         //
-        if (LoadedImage->DeviceHandle == NULL && ParentDeviceHandle != NULL) {
+        if (LoadedImage->DeviceHandle == NULL && StorageHandle != NULL) {
           if (LoadedImage->FilePath != NULL) {
             FreePool (LoadedImage->FilePath);
           }
-          LoadedImage->DeviceHandle = ParentDeviceHandle;
-          LoadedImage->FilePath     = DuplicateDevicePath (ParentFilePath);
+          LoadedImage->DeviceHandle = StorageHandle;
+          LoadedImage->FilePath     = StoragePath;
         }
       }
     }

@@ -199,6 +199,14 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   SetDefault;
   //
+  // Should launch this entry in text mode.
+  //
+  BOOLEAN                   LaunchInText;
+  //
+  // Should expose real device path when dealing with custom entries.
+  //
+  BOOLEAN                   ExposeDevicePath;
+  //
   // Load option data (usually "boot args") size.
   //
   UINT32                    LoadOptionsSize;
@@ -403,7 +411,8 @@ EFI_STATUS
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   IN  EFI_HANDLE                  ImageHandle,
   OUT UINTN                       *ExitDataSize,
-  OUT CHAR16                      **ExitData    OPTIONAL
+  OUT CHAR16                      **ExitData    OPTIONAL,
+  IN  BOOLEAN                     LaunchInText
   );
 
 /**
@@ -417,9 +426,9 @@ EFI_STATUS
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath         OPTIONAL,
-  OUT EFI_HANDLE                  *ParentDeviceHandle  OPTIONAL,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath,
+  OUT EFI_HANDLE                  *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **StoragePath
   );
 
 /**
@@ -462,6 +471,14 @@ typedef struct {
   // Whether this entry is a tool.
   //
   BOOLEAN      Tool;
+  //
+  // Whether it should be started in text mode.
+  //
+  BOOLEAN      TextMode;
+  //
+  // Whether we should pass the actual device path (if possible).
+  //
+  BOOLEAN      RealPath;
 } OC_PICKER_ENTRY;
 
 /**

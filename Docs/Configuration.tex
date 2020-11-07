@@ -3812,8 +3812,31 @@ rm vault.pub
   Example: \texttt{OpenShell.efi}.
   \end{itemize}
 
-\end{enumerate}
+\item
+  \texttt{RealPath}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{plist\ boolean}\\
+  \textbf{Description}: Pass full path to the tool when launching.
 
+  Passing tool directory may be unsafe for tool accidentally trying to access
+  files without checking their integrity and thus should generally be disabled.
+  Reason to enable this property may include cases where tools cannot work
+  without external files.
+
+  \emph{Note}: This property is only valid for \texttt{Tools}. For \texttt{Entries}
+  this property cannot be specified and is always \texttt{true}.
+
+\item
+  \texttt{TextMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{plist\ boolean}\\
+  \textbf{Description}: Run the entry in text mode instead of graphics mode.
+
+  This setting may be benefitial to some older tools that require text output.
+  By default all the tools are launched in graphics mode. Read more about text
+  modes in \hyperref[uefioutputprops]{Output Properties} section below.
+
+\end{enumerate}
 
 \section{NVRAM}\label{nvram}
 

@@ -170,9 +170,9 @@ OcToolLoadEntry (
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath         OPTIONAL,
-  OUT EFI_HANDLE                  *ParentDeviceHandle  OPTIONAL,
-  OUT EFI_DEVICE_PATH_PROTOCOL    **ParentFilePath     OPTIONAL
+  OUT EFI_DEVICE_PATH_PROTOCOL    **DevicePath,
+  OUT EFI_HANDLE                  *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL    **StoragePath
   )
 {
   EFI_STATUS          Status;
@@ -211,16 +211,18 @@ OcToolLoadEntry (
     return EFI_NOT_FOUND;
   }
 
-  if (DevicePath != NULL) {
-    *DevicePath = Storage->DummyDevicePath;
-  }
-
-  if (ParentDeviceHandle != NULL) {
-    *ParentDeviceHandle = Storage->StorageHandle;
-  }
-
-  if (ParentFilePath != NULL) {
-    *ParentFilePath = Storage->DummyFilePath;
+  Status = OcStorageGetInfo (
+    Storage,
+    ToolPath,
+    DevicePath,
+    StorageHandle,
+    StoragePath,
+    ChosenEntry->ExposeDevicePath
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Returning tool %s\n", ToolPath));
+    DebugPrintDevicePath (DEBUG_INFO, "OC: Tool path", *DevicePath);
+    DebugPrintDevicePath (DEBUG_INFO, "OC: Storage path", *StoragePath);
   }
 
   return EFI_SUCCESS;
@@ -583,49 +585,36 @@ OcMiscEarlyInit (
   return EFI_SUCCESS;
 }
 
-EFI_STATUS
+VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  CONST CHAR16              *RootPath  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  OUT EFI_HANDLE                *LoadHandle
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
   )
 {
-  EFI_STATUS   Status;
   CONST CHAR8  *BootProtect;
   UINT32       BootProtectFlag;
   CHAR16       *BootstrapPath;
   UINTN        BootstrapSize;
-  EFI_HANDLE   OcHandle;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
   }
 
-  OcHandle = NULL;
-  if (LoadPath != NULL) {
-    Status = gBS->LocateDevicePath (
-      &gEfiSimpleFileSystemProtocolGuid,
-      &LoadPath,
-      &OcHandle
-      );
-  } else {
-    Status = EFI_UNSUPPORTED;
-  }
-
   BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
-  DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode - %r\n", OcHandle, BootProtect, Status));
+  DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode\n", LoadHandle, BootProtect));
 
   BootProtectFlag = Config->Uefi.Quirks.RequestBootVarRouting ? OC_BOOT_PROTECT_VARIABLE_NAMESPACE : 0;
 
-  if (OcHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
+  if (LoadHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
     ASSERT (RootPath != NULL);
     BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_BOOTSTRAP_PATH);
     BootstrapPath = AllocatePool (BootstrapSize);
     if (BootstrapPath != NULL) {
       UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
-      OcRegisterBootOption (L"OpenCore", OcHandle, BootstrapPath);
+      OcRegisterBootOption (L"OpenCore", LoadHandle, BootstrapPath);
       BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
       FreePool (BootstrapPath);
     }
@@ -642,15 +631,11 @@ OcMiscMiddleInit (
     &BootProtectFlag
     );
 
-  *LoadHandle = OcHandle;
-
   DEBUG_CODE_BEGIN ();
-  if (OcHandle != NULL && Config->Misc.Debug.SysReport) {
-    ProduceDebugReport (OcHandle);
+  if (LoadHandle != NULL && Config->Misc.Debug.SysReport) {
+    ProduceDebugReport (LoadHandle);
   }
   DEBUG_CODE_END ();
-
-  return Status;
 }
 
 EFI_STATUS
@@ -872,6 +857,8 @@ OcMiscBoot (
       Context->CustomEntries[EntryIndex].Arguments = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Arguments);
       Context->CustomEntries[EntryIndex].Auxiliary = Config->Misc.Entries.Values[Index]->Auxiliary;
       Context->CustomEntries[EntryIndex].Tool      = FALSE;
+      Context->CustomEntries[EntryIndex].TextMode  = Config->Misc.Entries.Values[Index]->TextMode;
+      Context->CustomEntries[EntryIndex].RealPath  = TRUE; ///< Always true for entries
       ++EntryIndex;
     }
   }
@@ -888,6 +875,8 @@ OcMiscBoot (
       Context->CustomEntries[EntryIndex].Arguments = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Arguments);
       Context->CustomEntries[EntryIndex].Auxiliary = Config->Misc.Tools.Values[Index]->Auxiliary;
       Context->CustomEntries[EntryIndex].Tool      = TRUE;
+      Context->CustomEntries[EntryIndex].TextMode  = Config->Misc.Tools.Values[Index]->TextMode;
+      Context->CustomEntries[EntryIndex].RealPath  = Config->Misc.Tools.Values[Index]->RealPath;
       ++EntryIndex;
     }
   }

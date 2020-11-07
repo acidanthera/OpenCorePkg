@@ -65,13 +65,25 @@ typedef struct {
   ///
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   ///
-  /// Storage root owned by context.
+  /// Real storage handle for loading.
   ///
-  EFI_FILE_PROTOCOL                *StorageRoot;
+  EFI_HANDLE                       StorageHandle;
+  ///
+  /// Real file path for file storage, can be missing.
+  ///
+  EFI_DEVICE_PATH_PROTOCOL         *StoragePath;
+  ///
+  /// Path to the root of file storage on StoragePage.
+  ///
+  CONST CHAR16                     *StorageRoot;
+  ///
+  /// Storage file instance owned by context.
+  ///
+  EFI_FILE_PROTOCOL                *Storage;
   ///
   /// Device handle with storage (dummy) device path for loading.
   ///
-  EFI_HANDLE                       StorageHandle;
+  EFI_HANDLE                       DummyStorageHandle;
   ///
   /// Dummy file path for file storage.
   ///
@@ -93,10 +105,12 @@ typedef struct {
 /**
   Create storage context from UEFI file system at specified path.
 
-  @param[out]  Context     Resulting storage context.
-  @param[in]   FileSystem  Storage file system.
-  @param[in]   Path        Storage file system path (e.g. L"\\").
-  @param[in]   StorageKey         Storage signature verification key, optional.
+  @param[out]  Context         Resulting storage context.
+  @param[in]   FileSystem      Storage file system.
+  @param[in]   StorageHandle   Storage handle, optional.
+  @param[in]   StoragePath     Actual storage device path, optional.
+  @param[in]   StorageRoot     Storage file system root (e.g. L"\\").
+  @param[in]   StorageKey      Storage signature verification key, optional.
 
   @retval EFI_SUCCESS on success.
 **/
@@ -104,8 +118,10 @@ EFI_STATUS
 OcStorageInitFromFs (
   OUT OC_STORAGE_CONTEXT               *Context,
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *Path,
-  IN  OC_RSA_PUBLIC_KEY                *StorageKey OPTIONAL
+  IN  EFI_HANDLE                       StorageHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL         *StoragePath   OPTIONAL,
+  IN  CONST CHAR16                     *StorageRoot,
+  IN  OC_RSA_PUBLIC_KEY                *StorageKey    OPTIONAL
   );
 
 /**
@@ -150,6 +166,28 @@ OcStorageReadFileUnicode (
   IN  OC_STORAGE_CONTEXT               *Context,
   IN  CONST CHAR16                     *FilePath,
   OUT UINT32                           *FileSize OPTIONAL
+  );
+
+/**
+  Get information about the storage file when possible.
+
+  @param[in]  Context         Storage context.
+  @param[in]  FilePath        The full path to the file on the device.
+  @param[out] DevicePath      Full storage file device path.
+  @param[out] StorageHandle   Storage handle.
+  @param[out] StoragePath     Path on the storage.
+  @param[in]  RealPath        Provide real paths instead of dummy.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcStorageGetInfo (
+  IN  OC_STORAGE_CONTEXT               *Context,
+  IN  CONST CHAR16                     *FilePath,
+  OUT EFI_DEVICE_PATH_PROTOCOL         **DevicePath,
+  OUT EFI_HANDLE                       *StorageHandle,
+  OUT EFI_DEVICE_PATH_PROTOCOL         **StoragePath,
+  IN  BOOLEAN                          RealPath
   );
 
 #endif // OC_STORAGE_LIB_H
