@@ -191,6 +191,7 @@ OcBootstrapRerun (
     //
     // Calculate root path (never freed).
     //
+    RemainingPath = NULL;
     if (LoadPath != NULL) {
       ASSERT (mStorageRoot == NULL);
       mStorageRoot = OcCopyDevicePathFullName (LoadPath, &RemainingPath);
