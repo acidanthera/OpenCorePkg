@@ -3815,13 +3815,15 @@ rm vault.pub
 \item
   \texttt{RealPath}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Pass full path to the tool when launching.
 
   Passing tool directory may be unsafe for tool accidentally trying to access
   files without checking their integrity and thus should generally be disabled.
   Reason to enable this property may include cases where tools cannot work
-  without external files.
+  without external files or may need them for better function (e.g.
+  \texttt{memtest86} for logging and configuration or \texttt{Shell} for
+  automatic script execution).
 
   \emph{Note}: This property is only valid for \texttt{Tools}. For \texttt{Entries}
   this property cannot be specified and is always \texttt{true}.
@@ -3829,7 +3831,7 @@ rm vault.pub
 \item
   \texttt{TextMode}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Run the entry in text mode instead of graphics mode.
 
   This setting may be benefitial to some older tools that require text output.
