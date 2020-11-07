@@ -204,7 +204,7 @@ OcToolLoadEntry (
     );
   if (*Data == NULL) {
     DEBUG ((
-      DEBUG_ERROR,
+      DEBUG_WARN,
       "OC: Tool %s cannot be found!\n",
       ToolPath
       ));
