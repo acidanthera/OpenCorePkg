@@ -8,6 +8,7 @@ OpenCore Changelog
 - Added support for launching from relative paths
 - Added direct path passing for tools via `RealPath`
 - Allowed launching tools and entries in text mode via `TextMode`
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.6.3
 - Added support for xml comments in plist files
