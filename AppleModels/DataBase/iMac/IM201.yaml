@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.40.41.0.0"
-BIOSLegacyVersion: "IM201.88Z.F000.B00.2010150432"
-BIOSReleaseDate: "10/15/2020"
+BIOSVersion: "1554.50.3.0.0"
+BIOSLegacyVersion: "IM201.88Z.F000.B00.2010290037"
+BIOSReleaseDate: "10/29/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac20,1"
 SystemVersion: "1.0"
@@ -54,12 +54,12 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM201.88Z.F000.B00.2010150432
+    BIOS ID:      IM201.88Z.F000.B00.2010290037
     Model:        IM201
-    EFI Version:  1554.40.41.0.0
-    Built by:     root@bb-g8-pdb16
-    Date:         Thu Oct 15 04:32:11 2020
-    Revision:     1554.40.41 (B&I)
+    EFI Version:  1554.50.3.0.0
+    Built by:     root@bb-g8-pdb51
+    Date:         Thu Oct 29 00:37:12 2020
+    Revision:     1554.50.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1200.0.30.4
