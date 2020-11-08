@@ -367,7 +367,7 @@ OcAllocatePages (
     IsCallGateAlloc = TRUE;
   }
 
-  if (BootCompat->Settings.EnableRelocationBlock
+  if (BootCompat->Settings.AllowRelocationBlock
     && BootCompat->ServiceState.AppleBootNestedCount > 0
     && Type == AllocateAddress
     && MemoryType == EfiLoaderData) {

@@ -600,7 +600,9 @@ AppleMapPrepareKernelJump (
   //
   // There is no reason to patch the kernel when we do not need it.
   //
-  if (!BootCompat->Settings.AvoidRuntimeDefrag && !BootCompat->Settings.DiscardHibernateMap) {
+  if (!BootCompat->Settings.AvoidRuntimeDefrag
+    && !BootCompat->Settings.DiscardHibernateMap
+    && !BootCompat->Settings.AllowRelocationBlock) {
     return;
   }
 

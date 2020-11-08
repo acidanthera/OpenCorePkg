@@ -112,6 +112,7 @@
   OC_DECLARE (OC_BOOTER_WL_ARRAY)
 
 #define OC_BOOTER_QUIRKS_FIELDS(_, __) \
+  _(BOOLEAN                     , AllowRelocationBlock      ,     , FALSE  , ()) \
   _(BOOLEAN                     , AvoidRuntimeDefrag        ,     , FALSE  , ()) \
   _(BOOLEAN                     , DevirtualiseMmio          ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSingleUser         ,     , FALSE  , ()) \

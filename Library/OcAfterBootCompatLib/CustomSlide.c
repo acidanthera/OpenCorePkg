@@ -801,7 +801,7 @@ AppleSlideGetVariable (
         Data
         );
     } else if (StrCmp (VariableName, L"boot-args") == 0
-      && (!BootCompat->ServiceState.AppleCustomSlide || BootCompat->Settings.EnableRelocationBlock)
+      && (!BootCompat->ServiceState.AppleCustomSlide || BootCompat->Settings.AllowRelocationBlock)
       && ShouldUseCustomSlideOffset (&BootCompat->SlideSupport, GetMemoryMap, FilterMap, FilterMapContext)
       && !BootCompat->ServiceState.AppleCustomSlide) {
       //

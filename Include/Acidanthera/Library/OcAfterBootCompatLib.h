@@ -62,7 +62,7 @@ typedef struct OC_ABC_SETTINGS_ {
   /// Try to relocate memory to different address space when KASLR is disabled
   /// and lower memory is unavailable.
   ///
-  BOOLEAN  EnableRelocationBlock;
+  BOOLEAN  AllowRelocationBlock;
   ///
   /// Attempt to protect certain memory regions from being incorrectly mapped:
   /// - CSM region could get used by the kernel due to being BS data,
