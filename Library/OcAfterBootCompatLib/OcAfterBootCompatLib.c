@@ -111,7 +111,8 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    Settings->AllowRelocationBlock,
     Settings->AvoidRuntimeDefrag,
     Settings->DevirtualiseMmio,
     Settings->DisableSingleUser,
