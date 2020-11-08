@@ -65,12 +65,12 @@
 /**
   Kernel physical base address.
 **/
-#define KERNEL_BASE_PADDR        ((UINT32) KERNEL_HIB_VADDR)
+#define KERNEL_BASE_PADDR        ((UINT32) (KERNEL_HIB_VADDR & MAX_UINT32))
 
 /**
   Kernel physical base address.
 **/
-#define KERNEL_TEXT_PADDR        ((UINT32) KERNEL_TEXT_VADDR)
+#define KERNEL_TEXT_PADDR        ((UINT32) (KERNEL_TEXT_VADDR & MAX_UINT32))
 
 /**
   Slide offset per slide entry
