@@ -301,6 +301,24 @@ typedef struct KERNEL_SUPPORT_STATE_ {
   /// Virtual memory map descriptor size in bytes.
   ///
   UINTN                    VmMapDescSize;
+  ///
+  /// Relocation block is a scratch buffer allocated in lower 4GB to be used for
+  /// loading the kernel and related structures by EfiBoot on firmwares where
+  /// lower memory is otherwise occupied (assumed to be) non-runtime data.
+  /// Relocation block can be used when:
+  /// - no better slide exists (all the memory is used)
+  /// - slide=0 is forced (by an argument or safe mode)
+  /// - KASLR (slide) is unsupported (macOS 10.7 or older) 
+  /// Right before kernel startup the relocation block is copied back to lower
+  /// addresses. Similarly all the other addresses pointing to relocation block
+  /// are also carefully adjusted.
+  ///
+  EFI_PHYSICAL_ADDRESS     RelocationBlock;
+  ///
+  /// Real amount of memory used in the relocation block.
+  /// This value should match ksize in XNU BootArgs.
+  ///
+  UINTN                    RelocationBlockUsed;
 } KERNEL_SUPPORT_STATE;
 
 /**
@@ -352,16 +370,6 @@ typedef struct SLIDE_SUPPORT_STATE_ {
   /// Estimated size for kernel itself, device tree, memory map, and rt pages.
   ///
   UINTN                    EstimatedKernelArea;
-  ///
-  /// Area allocated in lower 4GB to be used as a kernel startup area for slide=0
-  /// and similar situations (e.g. when KASLR is unsupported or disabled).
-  /// Used on firmwares where lower memory (after 2MB) is occupied with custom data.
-  ///
-  EFI_PHYSICAL_ADDRESS     RelocationBlock;
-  ///
-  /// Real amount of memory used in the relocation block.
-  ///
-  UINTN                    RelocationBlockUsed;
 } SLIDE_SUPPORT_STATE;
 
 /**
@@ -546,6 +554,21 @@ AppleSlideRestore (
   );
 
 /**
+  Get calculated relocation block size for booting with slide=0
+  (e.g. Safe Mode) or without KASLR (older macOS) when it is
+  otherwise impossible.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+
+  @returns Size of the relocation block (maximum).
+  @retval 0 otherwise.
+**/
+UINTN
+AppleSlideGetRelocationSize (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  );
+
+/**
   Allocate memory from a relocation block when zero slide is unavailable.
   EfiLoaderData at address.
 
@@ -559,7 +582,7 @@ AppleSlideRestore (
   @retval EFI_UNSUPPORTED when zero slide is available.
 **/
 EFI_STATUS
-AppleSlideAllocateFromBlock (
+AppleRelocationAllocatePages (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN     EFI_GET_MEMORY_MAP    GetMemoryMap,
   IN     EFI_ALLOCATE_PAGES    AllocatePages,
@@ -576,8 +599,51 @@ AppleSlideAllocateFromBlock (
   @retval EFI_UNSUPPORTED when zero slide is available.
 **/
 EFI_STATUS
-AppleSlideReleaseBlock (
+AppleRelocationRelease (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  );
+
+/**
+  Transitions to virtual memory for the relocation block.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in,out]  BootArgs      Apple kernel boot arguments.
+**/
+EFI_STATUS
+AppleRelocationVirtualize (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS    *BA
+  );
+
+/**
+  Transition from relocation block address space to normal low
+  memory address space in the relevant XNU areas.
+
+  @param[in,out]  BootCompat    Boot compatibility context.
+  @param[in,out]  BootArgs      Apple kernel boot arguments.
+**/
+VOID
+AppleRelocationRebase (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS    *BA
+  );
+
+/**
+  Boot Apple Kernel through relocation block.
+
+  @param[in,out] BootCompat   Boot compatibility context.
+  @param[in]     Args         Case-specific kernel argument handle.
+  @param[in]     CallGate     Kernel call gate address.
+  @param[in]     EntryPoint   Case-specific kernel entry point.
+
+  @returns Case-specific value if any.
+**/
+UINTN
+AppleRelocationCallGate (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN     KERNEL_CALL_GATE     CallGate,
+  IN     UINTN                Args,
+  IN     UINTN                EntryPoint
   );
 
 #endif // BOOT_COMPAT_INTERNAL_H

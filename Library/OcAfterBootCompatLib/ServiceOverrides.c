@@ -371,7 +371,7 @@ OcAllocatePages (
     && BootCompat->ServiceState.AppleBootNestedCount > 0
     && Type == AllocateAddress
     && MemoryType == EfiLoaderData) {
-    Status = AppleSlideAllocateFromBlock (
+    Status = AppleRelocationAllocatePages (
       BootCompat,
       BootCompat->ServicePtrs.GetMemoryMap,
       BootCompat->ServicePtrs.AllocatePages,
@@ -782,7 +782,7 @@ OcStartImage (
     --BootCompat->ServiceState.AppleBootNestedCount;
 
     if (BootCompat->ServiceState.AppleBootNestedCount == 0) {
-      AppleSlideReleaseBlock (BootCompat);
+      AppleRelocationRelease (BootCompat);
     }
   }
 

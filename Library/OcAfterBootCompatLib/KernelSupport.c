@@ -316,172 +316,6 @@ RestoreProtectedRtMemoryTypes (
   }
 }
 
-STATIC
-EFI_STATUS
-AppleMapVirtualizeMap (
-  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
-  IN OUT OC_BOOT_ARGUMENTS    *BA
-  )
-{
-  EFI_STATUS               Status;
-  UINTN                    MemoryMapSize;
-  UINTN                    DescriptorSize;
-  UINT32                   DescriptorVersion;
-  EFI_MEMORY_DESCRIPTOR    *MemoryMap;
-  EFI_PHYSICAL_ADDRESS     KernelRTAddress;
-  UINTN                    NumEntries;
-  UINTN                    Index;
-  EFI_MEMORY_DESCRIPTOR    *Desc;
-  UINTN                    BlockSize;
-  UINT8                    *KernelRTBlock;
-
-  MemoryMapSize     = *BA->MemoryMapSize;
-  DescriptorSize    = *BA->MemoryMapDescriptorSize;
-  DescriptorVersion = *BA->MemoryMapDescriptorVersion;
-  MemoryMap         = (EFI_MEMORY_DESCRIPTOR *)(UINTN) *BA->MemoryMap;
-  KernelRTAddress   = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG)
-    - (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
-
-  //
-  // Assign virtual addresses to all runtime blocks (but reserved).
-  //
-  Desc = MemoryMap;
-  NumEntries = MemoryMapSize / DescriptorSize;
-
-  for (Index = 0; Index < NumEntries; ++Index) {
-    BlockSize = EFI_PAGES_TO_SIZE ((UINTN) Desc->NumberOfPages);
-
-    if (Desc->Type == EfiReservedMemoryType) {
-      Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
-    }
-
-    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
-      Desc->VirtualStart = KernelRTAddress + 0xffffff8000000000;
-      KernelRTAddress += BlockSize;
-    }
-
-    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
-  }
-
-  //
-  // Transition to virtual memory.
-  //
-  Status = gRT->SetVirtualAddressMap (
-    MemoryMapSize,
-    DescriptorSize,
-    DescriptorVersion,
-    MemoryMap
-    );
-
-  //
-  // Perform quick dirty defragmentation similarly to EfiBoot to make vaddr = paddr
-  // for critical areas like EFI_SYSTEM_TABLE.
-  //
-  Desc = MemoryMap;
-
-  for (Index = 0; Index < NumEntries; ++Index) {
-    if (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData) {
-      //
-      // Physical addr from virtual
-      //
-      KernelRTBlock = (UINT8 *)(UINTN) (Desc->VirtualStart & 0x7FFFFFFFFF);
-      BlockSize = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
-      CopyMem (
-        KernelRTBlock + (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR),
-        (VOID*)(UINTN) Desc->PhysicalStart,
-        BlockSize
-        );
-
-      ZeroMem ((VOID*)(UINTN) Desc->PhysicalStart, BlockSize);
-
-      //
-      // Sync changes to EFI_SYSTEM_TABLE location with boot args.
-      //
-      if (Desc->PhysicalStart <= *BA->SystemTableP
-        && *BA->SystemTableP <= LAST_DESCRIPTOR_ADDR (Desc)) {
-        *BA->SystemTableP = (UINT32)((UINTN) KernelRTBlock
-          + (*BA->SystemTableP - Desc->PhysicalStart)
-          + (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR));
-      }
-
-      //
-      // Mark old RT block in MemMap as free memory and remove RT attribute.
-      //
-      Desc->Type = EfiConventionalMemory;
-      Desc->Attribute = Desc->Attribute & (~EFI_MEMORY_RUNTIME);
-    }
-
-    Desc = NEXT_MEMORY_DESCRIPTOR(Desc, DescriptorSize);
-  }
-
-  return Status;
-}
-
-STATIC
-VOID
-AppleMapRestoreRelocation (
-  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
-  IN OUT OC_BOOT_ARGUMENTS    *BA
-  )
-{
-  EFI_STATUS                 Status;
-  DTEntry                    MemMap;
-  CHAR8                      *PropName;
-  DTMemMapEntry              *PropValue;
-  OpaqueDTPropertyIterator   OPropIter;
-  DTPropertyIterator         PropIter;
-  UINT32                     RelocDiff;
-
-  PropIter = &OPropIter;
-
-  RelocDiff = (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
-
-  DTInit ((DTEntry)(UINTN) *BA->DeviceTreeP, BA->DeviceTreeLength);
-  Status = DTLookupEntry (NULL, "/chosen/memory-map", &MemMap);
-
-  if (!EFI_ERROR (Status)) {
-    Status = DTCreatePropertyIterator (MemMap, &OPropIter);
-    if (!EFI_ERROR (Status)) {
-      while (!EFI_ERROR (DTIterateProperties (PropIter, &PropName))) {
-        //
-        // /chosen/memory-map props have DTMemMapEntry values (address, length).
-        // We need to correct the addresses in matching types.
-        //
-
-        //
-        // Filter entries with different size right away.
-        //
-        if (PropIter->CurrentProperty->Length != sizeof (DTMemMapEntry)) {
-          continue;
-        }
-
-        //
-        // Filter enteries out of the relocation range.
-        //
-        PropValue = (DTMemMapEntry*)((UINT8 *) PropIter->CurrentProperty + sizeof (DTProperty));
-        if (PropValue->Address < BootCompat->SlideSupport.RelocationBlock
-          || PropValue->Address >= BootCompat->SlideSupport.RelocationBlock + BootCompat->SlideSupport.RelocationBlockUsed) {
-          continue;
-        }
-
-        //
-        // Patch the addresses up.
-        //
-        PropValue->Address -= RelocDiff;
-      }
-    }
-  }
-
-  //
-  // TODO: Check efiRuntimeServicesVirtualPageStart
-  //
-  *BA->MemoryMap         -= RelocDiff;
-  *BA->KernelAddrP       -= RelocDiff;
-  *BA->SystemTableP      -= RelocDiff;
-  *BA->RuntimeServicesPG -= EFI_SIZE_TO_PAGES (RelocDiff);
-  *BA->DeviceTreeP       -= RelocDiff;
-}
-
 /**
   Prepare environment for normal booting. Called when boot.efi jumps to kernel.
 
@@ -532,14 +366,18 @@ AppleMapPrepareForBooting (
     }
   }
 
-  if (BootCompat->SlideSupport.RelocationBlock != 0) {
+  if (BootCompat->KernelState.RelocationBlock != 0) {
     //
-    // EfiBoot will not virtualize addresses since it no longer can assign 1:1
-    // mapping to any region due to relocation block being way farther than
-    // any XNU address. This will cause it simply skip the procedure.
-    // Here we assign virtual addresses instead of EfiBoot and call SetVirtualAddressMap.
+    // When using Relocation Block EfiBoot will not virtualize the addresses since they
+    // cannot be mapped 1:1 due to any region from the relocation block being outside
+    // of static XNU vaddr to paddr mapping. This causes a clean early exit in their
+    // SetVirtualAddressMap calling routine avoiding gRT->SetVirtualAddressMap.
     //
-    AppleMapVirtualizeMap (BootCompat, &BA);
+    // For this reason we need to perform it ourselves right here before we restored
+    // runtime memory protections as we also need to defragment EFI_SYSTEM_TABLE memory
+    // to be accessible from XNU.
+    //
+    AppleRelocationVirtualize (BootCompat, &BA);
   }
 
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
@@ -578,8 +416,8 @@ AppleMapPrepareForBooting (
     }
   }
 
-  if (BootCompat->SlideSupport.RelocationBlock != 0) {
-    AppleMapRestoreRelocation (BootCompat, &BA);
+  if (BootCompat->KernelState.RelocationBlock != 0) {
+    AppleRelocationRebase (BootCompat, &BA);
   }
 }
 
@@ -878,21 +716,18 @@ AppleMapPrepareKernelState (
       );
   }
 
-  if (BootCompatContext->SlideSupport.RelocationBlock != 0) {
-    Args -= (UINTN) (BootCompatContext->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
-
-    //
-    // TODO: Move to assembly!
-    //
-    CopyMem (
-      (VOID *)(UINTN) KERNEL_BASE_PADDR,
-      (VOID *)(UINTN) BootCompatContext->SlideSupport.RelocationBlock,
-      BootCompatContext->SlideSupport.RelocationBlockUsed
-      );
-  }
-
   CallGate = (KERNEL_CALL_GATE)(UINTN) (
     BootCompatContext->ServiceState.KernelCallGate + CALL_GATE_JUMP_SIZE
     );
+
+  if (BootCompatContext->KernelState.RelocationBlock != 0) {
+    return AppleRelocationCallGate (
+      BootCompatContext,
+      CallGate,
+      Args,
+      EntryPoint
+      );
+  }
+
   return CallGate (Args, EntryPoint);
 }
