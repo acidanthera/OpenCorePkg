@@ -343,7 +343,7 @@ AcpiAllocateCopyTable (
     DEBUG_INFO,
     "OCA: Allocated new table %.4a at %p\n",
     (CHAR8 *) &TablePrintSignature,
-    NewTable
+    *NewTable
     ));
 
   CopyMem (*NewTable, Table, Table->Length);
@@ -1520,7 +1520,7 @@ AcpiHandleHardwareSignature (
         if (IsXFirmwareCtrl) {
           Context->Fadt->XFirmwareCtrl = (UINT64)(UINTN) FacsNew;
         } else {
-          Context->Fadt->FirmwareCtrl = (UINTN) FacsNew;
+          Context->Fadt->FirmwareCtrl = (UINT32)(UINTN) FacsNew;
         }
         AcpiRefreshTableChecksum ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Fadt);
 
