@@ -46,12 +46,42 @@ DEFAULT REL
 ;   );
 ;------------------------------------------------------------------------------
 AsmRelocationCallGate:
+  ; Disable interrupts just in case UEFI timer kills us.
+  cli
+
   ; Perform copying with direction reset.
   cld
   mov rsi, r8
   mov edi, KERNEL_BASE_PADDR
   rep movsq
+
+  ; Update stack pointer to point to the relocation block (just in case).
+  mov rsp, rsi
+
+  ; Print K and die (useful for testing).
+;  mov        cl, 0x4b
+;  mov        dx, 0x3fd
+;ready1:
+;  in         al, dx
+;  test       al, 0x20
+;  je         ready1
+;  mov        dx, 0x3f8
+;  mov        al, cl
+;  out        dx, al
+;  mov        cl, 0xa
+;  mov        dx, 0x3fd
+;ready2:
+;  in         al, dx
+;  test       al, 0x20
+;  je         ready2
+;  mov        dx, 0x3f8
+;  mov        al, cl
+;  out        dx, al
+;freeze:
+;  jmp        freeze
+
   ; Move Args to the first argument.
   mov rcx, r9
-  ; Jump back.
+
+  ; Jump back to the Apple call gate.
   jmp AsmRelocationCallGate - ESTIMATED_CALL_GATE_SIZE
