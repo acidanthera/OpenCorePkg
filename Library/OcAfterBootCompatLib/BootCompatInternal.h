@@ -352,6 +352,16 @@ typedef struct SLIDE_SUPPORT_STATE_ {
   /// Estimated size for kernel itself, device tree, memory map, and rt pages.
   ///
   UINTN                    EstimatedKernelArea;
+  ///
+  /// Area allocated in lower 4GB to be used as a kernel startup area for slide=0
+  /// and similar situations (e.g. when KASLR is unsupported or disabled).
+  /// Used on firmwares where lower memory (after 2MB) is occupied with custom data.
+  ///
+  EFI_PHYSICAL_ADDRESS     RelocationBlock;
+  ///
+  /// Real amount of memory used in the relocation block.
+  ///
+  UINTN                    RelocationBlockUsed;
 } SLIDE_SUPPORT_STATE;
 
 /**
@@ -533,6 +543,41 @@ VOID
 AppleSlideRestore (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
   IN OUT OC_BOOT_ARGUMENTS     *BootArgs
+  );
+
+/**
+  Allocate memory from a relocation block when zero slide is unavailable.
+  EfiLoaderData at address.
+
+  @param[in,out]  BootCompat     Boot compatibility context.
+  @param[in]      GetMemoryMap   Unmodified GetMemoryMap pointer, optional.
+  @param[in]      AllocatePages  Unmodified AllocatePages pointer.
+  @param[in]      NumberOfPages  Number of pages to allocate.
+  @param[in,out]  Memory         Memory address to allocate, may be updated.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_UNSUPPORTED when zero slide is available.
+**/
+EFI_STATUS
+AppleSlideAllocateFromBlock (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap,
+  IN     EFI_ALLOCATE_PAGES    AllocatePages,
+  IN     UINTN                 NumberOfPages,
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  );
+
+/**
+  Release relocation block if present.
+
+  @param[in,out]  BootCompat     Boot compatibility context.
+
+  @retval EFI_SUCCESS on success.
+  @retval EFI_UNSUPPORTED when zero slide is available.
+**/
+EFI_STATUS
+AppleSlideReleaseBlock (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
   );
 
 #endif // BOOT_COMPAT_INTERNAL_H

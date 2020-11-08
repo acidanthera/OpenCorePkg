@@ -399,6 +399,39 @@ ShouldUseCustomSlideOffset (
     MaxAvailableSize
     );
 }
+/**
+  Check if booting with slide=0 (e.g. Safe Mode) or without KASLR
+  (older macOS) is supported.
+
+  @param[in]  SlideSupport  Slide support state.
+
+  @retval TRUE when supported.
+**/
+STATIC
+BOOLEAN
+CanUseZeroSlideOffset (
+  IN SLIDE_SUPPORT_STATE  *SlideSupport
+  )
+{
+  //
+  // When we could not have performed the analysis assume TRUE.
+  //
+  if (!SlideSupport->HasMemoryMapAnalysis) {
+    return TRUE;
+  }
+
+  //
+  // When we have no slides available we assume 0 is also unavailable.
+  //
+  if (SlideSupport->ValidSlideCount == 0) {
+    return FALSE;
+  }
+
+  //
+  // If the first slide is not zero, 
+  //
+  return SlideSupport->ValidSlides[0] == 0;
+}
 
 /**
   UEFI GetVariable override specific to csr-active-config.
@@ -853,4 +886,89 @@ AppleSlideRestore (
   // this is especially important.
   //
   HideSlideFromOs (SlideSupport, BootArgs);
+}
+
+EFI_STATUS
+AppleSlideAllocateFromBlock (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
+  IN     EFI_GET_MEMORY_MAP    GetMemoryMap,
+  IN     EFI_ALLOCATE_PAGES    AllocatePages,
+  IN     UINTN                 NumberOfPages,
+  IN OUT EFI_PHYSICAL_ADDRESS  *Memory
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       EssentialSize;
+
+  if (CanUseZeroSlideOffset (&BootCompat->SlideSupport)) {
+    return EFI_UNSUPPORTED;
+  }
+
+  if (*Memory == KERNEL_TEXT_PADDR && BootCompat->SlideSupport.RelocationBlock == 0) {
+    BootCompat->SlideSupport.RelocationBlock = BASE_4GB;
+    Status = OcAllocatePagesFromTop (
+      EfiLoaderData,
+      EFI_SIZE_TO_PAGES (BootCompat->SlideSupport.EstimatedKernelArea),
+      &BootCompat->SlideSupport.RelocationBlock, 
+      GetMemoryMap,
+      AllocatePages,
+      NULL
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCABC: Relocation block (0x%Lx) allocation failure - %r\n",
+        BootCompat->SlideSupport.EstimatedKernelArea,
+        Status
+        ));
+      return Status;
+    }
+    BootCompat->SlideSupport.RelocationBlockUsed = 0;
+  }
+
+  //
+  // Not our allocation.
+  //
+  if (BootCompat->SlideSupport.RelocationBlock == 0
+    || *Memory < KERNEL_BASE_PADDR
+    || *Memory >= KERNEL_BASE_PADDR + BootCompat->SlideSupport.RelocationBlock) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Track actually occupied memory.
+  //
+  EssentialSize = (UINTN) (*Memory - KERNEL_BASE_PADDR + EFI_PAGES_TO_SIZE (NumberOfPages));
+  if (EssentialSize > BootCompat->SlideSupport.RelocationBlockUsed) {
+    BootCompat->SlideSupport.RelocationBlockUsed = EssentialSize;
+  }
+
+  //
+  // Assume that EfiBoot does not try to reallocate memory.
+  //
+  *Memory = *Memory - KERNEL_BASE_PADDR + BootCompat->SlideSupport.RelocationBlock;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+AppleSlideReleaseBlock (
+  IN OUT BOOT_COMPAT_CONTEXT   *BootCompat
+  )
+{
+  EFI_STATUS  Status;
+
+  if (BootCompat->SlideSupport.RelocationBlock == 0) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = gBS->FreePages (
+    BootCompat->SlideSupport.RelocationBlock,
+    EFI_SIZE_TO_PAGES (BootCompat->SlideSupport.EstimatedKernelArea)
+    );
+
+  BootCompat->SlideSupport.RelocationBlock = 0;
+  BootCompat->SlideSupport.RelocationBlockUsed = 0;
+
+  return Status;
 }

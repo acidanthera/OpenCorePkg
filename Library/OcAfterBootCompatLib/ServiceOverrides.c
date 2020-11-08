@@ -367,12 +367,31 @@ OcAllocatePages (
     IsCallGateAlloc = TRUE;
   }
 
-  Status = BootCompat->ServicePtrs.AllocatePages (
-    Type,
-    MemoryType,
-    NumberOfPages,
-    Memory
-    );
+  if (BootCompat->Settings.EnableRelocationBlock
+    && BootCompat->ServiceState.AppleBootNestedCount > 0
+    && Type == AllocateAddress
+    && MemoryType == EfiLoaderData) {
+    Status = AppleSlideAllocateFromBlock (
+      BootCompat,
+      BootCompat->ServicePtrs.GetMemoryMap,
+      BootCompat->ServicePtrs.AllocatePages,
+      NumberOfPages,
+      Memory
+      );
+  } else {
+    Status = EFI_UNSUPPORTED;
+  }
+
+  if (EFI_ERROR (Status)) {
+    Status = BootCompat->ServicePtrs.AllocatePages (
+      Type,
+      MemoryType,
+      NumberOfPages,
+      Memory
+      );
+  }
+
+  DEBUG ((DEBUG_INFO, "OCABC: AllocPages %u 0x%Lx (%u) - %r\n", Type, *Memory, NumberOfPages, Status));
 
   if (!EFI_ERROR (Status)) {
     FixRuntimeAttributes (BootCompat, MemoryType);
@@ -761,6 +780,10 @@ OcStartImage (
     // We failed but other operating systems should be loadable.
     //
     --BootCompat->ServiceState.AppleBootNestedCount;
+
+    if (BootCompat->ServiceState.AppleBootNestedCount == 0) {
+      AppleSlideReleaseBlock (BootCompat);
+    }
   }
 
   return Status;

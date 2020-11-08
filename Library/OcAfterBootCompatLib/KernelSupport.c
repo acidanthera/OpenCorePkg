@@ -316,6 +316,63 @@ RestoreProtectedRtMemoryTypes (
   }
 }
 
+STATIC
+VOID
+AppleMapRestoreRelocation (
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS    *BA
+  )
+{
+  DTEntry             DevTree;
+  DTEntry             MemMap;
+  CHAR8               *PropName;
+  DTMemMapEntry       *PropValue;
+
+  OpaqueDTPropertyIterator OPropIter;
+  DTPropertyIterator  PropIter = &OPropIter;
+
+  DevTree = (DTEntry)(UINTN)(*BA->DeviceTreeP);
+  
+  DTInit (DevTree, BA->DeviceTreeLength);
+  if (!EFI_ERROR(DTLookupEntry(NULL, "/chosen/memory-map", &MemMap))) {
+
+    if (!EFI_ERROR(DTCreatePropertyIterator(MemMap, &OPropIter))) {
+
+      while (!EFI_ERROR(DTIterateProperties(PropIter, &PropName))) {
+        // all /chosen/memory-map props have DTMemMapEntry (address, length)
+        // values. we need to correct the address
+        
+        // basic check that value is 2 * UINT32
+        if (PropIter->CurrentProperty->Length != 2 * sizeof(UINT32)) {
+          // not DTMemMapEntry, usually "name" property
+          continue;
+        }
+        
+        // get value (Address and Length)
+        PropValue = (DTMemMapEntry*)(((UINT8*)PropIter->CurrentProperty) + sizeof(DTProperty));
+        
+        // second check - Address is in our reloc block
+        // (note: *BA->kaddr is not fixed yet and points to reloc block)
+        if ((PropValue->Address < *BA->KernelAddrP)
+          || (PropValue->Address >= *BA->KernelAddrP + BootCompat->SlideSupport.RelocationBlockUsed))
+        {
+          continue;
+        }
+        
+       
+        // fix address in mem map entry
+        PropValue->Address -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+      }
+    }
+  }
+
+  *BA->MemoryMap        -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+  *BA->KernelAddrP      -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+  *BA->SystemTableP     -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+  *BA->RuntimeServicesP -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+  *BA->DeviceTreeP      -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+}
+
 /**
   Prepare environment for normal booting. Called when boot.efi jumps to kernel.
 
@@ -400,6 +457,13 @@ AppleMapPrepareForBooting (
         sizeof (*BootCompat->KernelState.ConfigurationTable) * BA.SystemTable->NumberOfTableEntries
         );
     }
+  }
+
+  if (BootCompat->SlideSupport.RelocationBlock != 0) {
+    //
+    // TODO: Check if we need to fix efiRuntimeServicesVirtualPageStart.
+    //
+    AppleMapRestoreRelocation (BootCompat, &BA);
   }
 }
 
@@ -695,6 +759,19 @@ AppleMapPrepareKernelState (
     AppleMapPrepareForBooting (
       BootCompatContext,
       (VOID *) Args
+      );
+  }
+
+  if (BootCompatContext->SlideSupport.RelocationBlock != 0) {
+    Args -= BootCompatContext->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+
+    //
+    // TODO: Move to assembly!
+    //
+    CopyMem (
+      (VOID *)(UINTN) KERNEL_BASE_PADDR,
+      (VOID *)(UINTN) BootCompatContext->SlideSupport.RelocationBlock,
+      BootCompatContext->SlideSupport.RelocationBlockUsed
       );
   }
 
