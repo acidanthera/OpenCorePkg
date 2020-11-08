@@ -32,6 +32,10 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+STATIC CONST UINT8 mAsmRelocationCallGate[] = {
+  #include "RelocationCallGate.h"
+};
+
 EFI_STATUS
 AppleRelocationAllocatePages (
   IN OUT BOOT_COMPAT_CONTEXT   *BootCompat,
@@ -295,17 +299,29 @@ AppleRelocationCallGate (
   IN     UINTN                EntryPoint
   )
 {
+  UINT8                  *Payload;
+  RELOCATION_CALL_GATE   ReloGate;
 
+  //
+  // Shift kernel arguments back.
+  //
   Args -= (UINTN) (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR);
 
   //
-  // TODO: Move to assembly!
+  // Provide copying payload that will not be overwritten.
   //
-  CopyMem (
-    (VOID *)(UINTN) KERNEL_BASE_PADDR,
-    (VOID *)(UINTN) BootCompat->KernelState.RelocationBlock,
-    BootCompat->KernelState.RelocationBlockUsed
-    );
+  Payload  = (VOID*)(UINTN) CallGate;
+  Payload += ESTIMATED_CALL_GATE_SIZE;
+  CopyMem (Payload, mAsmRelocationCallGate, sizeof (mAsmRelocationCallGate));
 
-  return CallGate (Args, EntryPoint);
+  //
+  // Transition to payload.
+  //
+  ReloGate = (RELOCATION_CALL_GATE)(UINTN) Payload;
+  return ReloGate (
+    BootCompat->KernelState.RelocationBlockUsed / sizeof (UINT64),
+    EntryPoint,
+    BootCompat->KernelState.RelocationBlock,
+    Args
+    );
 }

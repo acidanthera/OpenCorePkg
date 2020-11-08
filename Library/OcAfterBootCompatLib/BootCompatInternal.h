@@ -108,6 +108,8 @@
 /**
   Assume call gate (normally a little over 100 bytes) can be up to 256 bytes.
   It is allocated in its own page and is relocatable.
+
+  WARNING: Keep this in sync with RelocationCallGate assembly!
 **/
 #define ESTIMATED_CALL_GATE_SIZE 256
 
@@ -136,6 +138,18 @@ UINTN
 (EFIAPI *KERNEL_CALL_GATE) (
   IN UINTN    Args,
   IN UINTN    EntryPoint
+  );
+
+/**
+  Relocation call gate prototype.
+**/
+typedef
+UINTN
+(EFIAPI *RELOCATION_CALL_GATE) (
+  IN UINTN                  QWordCount,
+  IN UINTN                  EntryPoint,
+  IN EFI_PHYSICAL_ADDRESS   Source,
+  IN UINTN                  Args
   );
 
 /**
