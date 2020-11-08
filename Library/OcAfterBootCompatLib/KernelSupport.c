@@ -323,54 +323,62 @@ AppleMapRestoreRelocation (
   IN OUT OC_BOOT_ARGUMENTS    *BA
   )
 {
-  DTEntry             DevTree;
-  DTEntry             MemMap;
-  CHAR8               *PropName;
-  DTMemMapEntry       *PropValue;
+  EFI_STATUS                 Status;
+  DTEntry                    MemMap;
+  CHAR8                      *PropName;
+  DTMemMapEntry              *PropValue;
+  OpaqueDTPropertyIterator   OPropIter;
+  DTPropertyIterator         PropIter;
+  UINT32                     RelocDiff;
 
-  OpaqueDTPropertyIterator OPropIter;
-  DTPropertyIterator  PropIter = &OPropIter;
+  PropIter = &OPropIter;
 
-  DevTree = (DTEntry)(UINTN)(*BA->DeviceTreeP);
-  
-  DTInit (DevTree, BA->DeviceTreeLength);
-  if (!EFI_ERROR(DTLookupEntry(NULL, "/chosen/memory-map", &MemMap))) {
+  RelocDiff = (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
 
-    if (!EFI_ERROR(DTCreatePropertyIterator(MemMap, &OPropIter))) {
+  DTInit ((DTEntry)(UINTN) *BA->DeviceTreeP, BA->DeviceTreeLength);
+  Status = DTLookupEntry (NULL, "/chosen/memory-map", &MemMap);
 
-      while (!EFI_ERROR(DTIterateProperties(PropIter, &PropName))) {
-        // all /chosen/memory-map props have DTMemMapEntry (address, length)
-        // values. we need to correct the address
-        
-        // basic check that value is 2 * UINT32
-        if (PropIter->CurrentProperty->Length != 2 * sizeof(UINT32)) {
-          // not DTMemMapEntry, usually "name" property
+  if (!EFI_ERROR (Status)) {
+    Status = DTCreatePropertyIterator (MemMap, &OPropIter);
+    if (!EFI_ERROR (Status)) {
+      while (!EFI_ERROR (DTIterateProperties (PropIter, &PropName))) {
+        //
+        // /chosen/memory-map props have DTMemMapEntry values (address, length).
+        // We need to correct the addresses in matching types.
+        //
+
+        //
+        // Filter entries with different size right away.
+        //
+        if (PropIter->CurrentProperty->Length != sizeof (DTMemMapEntry)) {
           continue;
         }
-        
-        // get value (Address and Length)
-        PropValue = (DTMemMapEntry*)(((UINT8*)PropIter->CurrentProperty) + sizeof(DTProperty));
-        
-        // second check - Address is in our reloc block
-        // (note: *BA->kaddr is not fixed yet and points to reloc block)
-        if ((PropValue->Address < *BA->KernelAddrP)
-          || (PropValue->Address >= *BA->KernelAddrP + BootCompat->SlideSupport.RelocationBlockUsed))
-        {
+
+        //
+        // Filter enteries out of the relocation range.
+        //
+        PropValue = (DTMemMapEntry*)((UINT8 *) PropIter->CurrentProperty + sizeof (DTProperty));
+        if (PropValue->Address < BootCompat->SlideSupport.RelocationBlock
+          || PropValue->Address >= BootCompat->SlideSupport.RelocationBlock + BootCompat->SlideSupport.RelocationBlockUsed) {
           continue;
         }
-        
-       
-        // fix address in mem map entry
-        PropValue->Address -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+
+        //
+        // Patch the addresses up.
+        //
+        PropValue->Address -= RelocDiff;
       }
     }
   }
 
-  *BA->MemoryMap        -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
-  *BA->KernelAddrP      -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
-  *BA->SystemTableP     -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
-  *BA->RuntimeServicesP -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
-  *BA->DeviceTreeP      -= BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+  //
+  // TODO: Check efiRuntimeServicesVirtualPageStart
+  //
+  *BA->MemoryMap         -= RelocDiff;
+  *BA->KernelAddrP       -= RelocDiff;
+  *BA->SystemTableP      -= RelocDiff;
+  *BA->RuntimeServicesPG -= EFI_SIZE_TO_PAGES (RelocDiff);
+  *BA->DeviceTreeP       -= RelocDiff;
 }
 
 /**
@@ -460,9 +468,6 @@ AppleMapPrepareForBooting (
   }
 
   if (BootCompat->SlideSupport.RelocationBlock != 0) {
-    //
-    // TODO: Check if we need to fix efiRuntimeServicesVirtualPageStart.
-    //
     AppleMapRestoreRelocation (BootCompat, &BA);
   }
 }
