@@ -231,14 +231,6 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   ///
   OC_FIRMWARE_RUNTIME_PROTOCOL  *FwRuntime;
   ///
-  /// Minimum address allocated by AlocatePages.
-  ///
-  EFI_PHYSICAL_ADDRESS          MinAllocatedAddr;
-  ///
-  /// Apple hibernate image address allocated by AlocatePages.
-  ///
-  EFI_PHYSICAL_ADDRESS          HibernateImageAddress;
-  ///
   /// Kernel call gate is an assembly function that takes boot arguments (rcx)
   /// and kernel entry point (rdx) and jumps to the kernel (pstart) in 32-bit mode.
   ///

@@ -390,23 +390,6 @@ OcAllocatePages (
         // New perf data, it can be reallocated multiple times.
         //
         OcAppleDebugLogPerfAllocated ((VOID *)(UINTN) *Memory, EFI_PAGES_TO_SIZE (NumberOfPages));
-      } else if (Type == AllocateAddress && MemoryType == EfiLoaderData) {
-        //
-        // Called from boot.efi.
-        // Store minimally allocated address to find kernel image start.
-        //
-        if (BootCompat->ServiceState.MinAllocatedAddr == 0
-          || *Memory < BootCompat->ServiceState.MinAllocatedAddr) {
-          BootCompat->ServiceState.MinAllocatedAddr = *Memory;
-        }
-      } else if (BootCompat->ServiceState.AppleHibernateWake
-        && Type == AllocateAnyPages && MemoryType == EfiLoaderData
-        && BootCompat->ServiceState.HibernateImageAddress == 0) {
-        //
-        // Called from boot.efi during hibernate wake,
-        // first such allocation is for hibernate image
-        //
-        BootCompat->ServiceState.HibernateImageAddress = *Memory;
       }
     }
   }
@@ -654,7 +637,6 @@ OcStartImage (
   //
   // Clear monitoring vars
   //
-  BootCompat->ServiceState.MinAllocatedAddr = 0;
   BootCompat->ServiceState.KernelCallGate = 0;
 
   if (AppleLoadedImage != NULL) {
