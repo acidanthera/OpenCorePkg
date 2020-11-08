@@ -249,6 +249,7 @@ OcGetCurrentMemoryMapAlloc (
         (UINTN) *TopMemory,
         &MemoryMapAlloc,
         GetMemoryMap,
+        NULL,
         NULL
         );
 

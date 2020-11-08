@@ -221,6 +221,7 @@ VOID
   @param[in]      Pages            Amount of pages to allocate.
   @param[in,out]  Memory           Top address for input, allocated address for output.
   @param[in]      GetMemoryMap     Custom GetMemoryMap implementation to use, optional.
+  @param[in]      AllocatePages    Custom AllocatePages implementation to use, optional.
   @param[in]      CheckRange       Handler allowing to not allocate select ranges, optional.
 
   @retval EFI_SUCCESS on successful allocation.
@@ -230,8 +231,9 @@ OcAllocatePagesFromTop (
   IN     EFI_MEMORY_TYPE         MemoryType,
   IN     UINTN                   Pages,
   IN OUT EFI_PHYSICAL_ADDRESS    *Memory,
-  IN     EFI_GET_MEMORY_MAP      GetMemoryMap  OPTIONAL,
-  IN     CHECK_ALLOCATION_RANGE  CheckRange  OPTIONAL
+  IN     EFI_GET_MEMORY_MAP      GetMemoryMap   OPTIONAL,
+  IN     EFI_ALLOCATE_PAGES      AllocatePages  OPTIONAL,
+  IN     CHECK_ALLOCATION_RANGE  CheckRange     OPTIONAL
   );
 
 /**

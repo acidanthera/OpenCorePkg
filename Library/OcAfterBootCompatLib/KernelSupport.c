@@ -536,6 +536,7 @@ AppleMapPrepareBooterState (
         EFI_SIZE_TO_PAGES (gST->Hdr.HeaderSize),
         &BootCompat->KernelState.SysTableRtArea,
         GetMemoryMap,
+        NULL,
         NULL
         );
       if (EFI_ERROR (Status)) {
