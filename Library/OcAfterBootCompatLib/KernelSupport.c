@@ -319,19 +319,32 @@ RestoreProtectedRtMemoryTypes (
 STATIC
 EFI_STATUS
 AppleMapVirtualizeMap (
-  IN UINTN                  MemoryMapSize,
-  IN UINTN                  DescriptorSize,
-  IN UINT32                 DescriptorVersion,
-  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
-  IN EFI_PHYSICAL_ADDRESS   KernelRTAddress
+  IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
+  IN OUT OC_BOOT_ARGUMENTS    *BA
   )
 {
-  EFI_STATUS             Status;
-  UINTN                  NumEntries;
-  UINTN                  Index;
-  EFI_MEMORY_DESCRIPTOR  *Desc;
-  UINTN                  BlockSize;
+  EFI_STATUS               Status;
+  UINTN                    MemoryMapSize;
+  UINTN                    DescriptorSize;
+  UINT32                   DescriptorVersion;
+  EFI_MEMORY_DESCRIPTOR    *MemoryMap;
+  EFI_PHYSICAL_ADDRESS     KernelRTAddress;
+  UINTN                    NumEntries;
+  UINTN                    Index;
+  EFI_MEMORY_DESCRIPTOR    *Desc;
+  UINTN                    BlockSize;
+  UINT8                    *KernelRTBlock;
 
+  MemoryMapSize     = *BA->MemoryMapSize;
+  DescriptorSize    = *BA->MemoryMapDescriptorSize;
+  DescriptorVersion = *BA->MemoryMapDescriptorVersion;
+  MemoryMap         = (EFI_MEMORY_DESCRIPTOR *)(UINTN) *BA->MemoryMap;
+  KernelRTAddress   = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG)
+    - (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
+
+  //
+  // Assign virtual addresses to all runtime blocks (but reserved).
+  //
   Desc = MemoryMap;
   NumEntries = MemoryMapSize / DescriptorSize;
 
@@ -350,12 +363,56 @@ AppleMapVirtualizeMap (
     Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
   }
 
+  //
+  // Transition to virtual memory.
+  //
   Status = gRT->SetVirtualAddressMap (
     MemoryMapSize,
     DescriptorSize,
     DescriptorVersion,
     MemoryMap
     );
+
+  //
+  // Perform quick dirty defragmentation similarly to EfiBoot to make vaddr = paddr
+  // for critical areas like EFI_SYSTEM_TABLE.
+  //
+  Desc = MemoryMap;
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    if (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData) {
+      //
+      // Physical addr from virtual
+      //
+      KernelRTBlock = (UINT8 *)(UINTN) (Desc->VirtualStart & 0x7FFFFFFFFF);
+      BlockSize = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
+      CopyMem (
+        KernelRTBlock + (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR),
+        (VOID*)(UINTN) Desc->PhysicalStart,
+        BlockSize
+        );
+
+      ZeroMem ((VOID*)(UINTN) Desc->PhysicalStart, BlockSize);
+
+      //
+      // Sync changes to EFI_SYSTEM_TABLE location with boot args.
+      //
+      if (Desc->PhysicalStart <= *BA->SystemTableP
+        && *BA->SystemTableP <= LAST_DESCRIPTOR_ADDR (Desc)) {
+        *BA->SystemTableP = (UINT32)((UINTN) KernelRTBlock
+          + (*BA->SystemTableP - Desc->PhysicalStart)
+          + (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR));
+      }
+
+      //
+      // Mark old RT block in MemMap as free memory and remove RT attribute.
+      //
+      Desc->Type = EfiConventionalMemory;
+      Desc->Attribute = Desc->Attribute & (~EFI_MEMORY_RUNTIME);
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR(Desc, DescriptorSize);
+  }
 
   return Status;
 }
@@ -482,13 +539,7 @@ AppleMapPrepareForBooting (
     // any XNU address. This will cause it simply skip the procedure.
     // Here we assign virtual addresses instead of EfiBoot and call SetVirtualAddressMap.
     //
-    AppleMapVirtualizeMap (
-      *BA.MemoryMapSize,
-      *BA.MemoryMapDescriptorSize,
-      *BA.MemoryMapDescriptorVersion,
-      (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap),
-      EFI_PAGES_TO_SIZE (*BA.RuntimeServicesPG) - (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR)
-      );
+    AppleMapVirtualizeMap (BootCompat, &BA);
   }
 
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
