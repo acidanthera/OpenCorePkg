@@ -160,10 +160,8 @@ AppleRelocationVirtualize (
 
     if (Desc->Type == EfiReservedMemoryType) {
       Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
-    }
-
-    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
-      Desc->VirtualStart = KernelRTAddress + 0xffffff8000000000;
+    } else if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+      Desc->VirtualStart = KernelRTAddress + KERNEL_STATIC_VADDR;
       KernelRTAddress += BlockSize;
     }
 
@@ -189,9 +187,9 @@ AppleRelocationVirtualize (
   for (Index = 0; Index < NumEntries; ++Index) {
     if (Desc->Type == EfiRuntimeServicesCode || Desc->Type == EfiRuntimeServicesData) {
       //
-      // Physical addr from virtual
+      // Get physical address from statically mapped virtual.
       //
-      KernelRTBlock = (UINT8 *)(UINTN) (Desc->VirtualStart & 0x7FFFFFFFFF);
+      KernelRTBlock = (UINT8 *)(UINTN) (Desc->VirtualStart & (BASE_1GB - 1));
       BlockSize = EFI_PAGES_TO_SIZE ((UINTN)Desc->NumberOfPages);
       CopyMem (
         KernelRTBlock + (BootCompat->KernelState.RelocationBlock - KERNEL_BASE_PADDR),
@@ -278,13 +276,14 @@ AppleRelocationRebase (
     }
   }
 
-  //
-  // TODO: Check efiRuntimeServicesVirtualPageStart
-  //
   *BA->MemoryMap         -= RelocDiff;
   *BA->KernelAddrP       -= RelocDiff;
   *BA->SystemTableP      -= RelocDiff;
   *BA->RuntimeServicesPG -= EFI_SIZE_TO_PAGES (RelocDiff);
+  //
+  // Note, this one does not seem to be used by XNU but we set it anyway.
+  //
+  *BA->RuntimeServicesV  = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG) + KERNEL_STATIC_VADDR;
   *BA->DeviceTreeP       -= RelocDiff;
 }
 

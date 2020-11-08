@@ -53,6 +53,11 @@
 #define RT_DESC_ENTRY_NUM        ((UINTN) 64)
 
 /**
+  Kernel static vaddr mapping base.
+**/
+#define KERNEL_STATIC_VADDR      ((UINT64) 0xFFFFFF8000000000ULL)
+
+/**
   Kernel __HIB segment virtual address.
 **/
 #define KERNEL_HIB_VADDR         ((UINTN) (0xFFFFFF8000100000ULL & MAX_UINTN))

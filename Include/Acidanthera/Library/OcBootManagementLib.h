@@ -1102,6 +1102,7 @@ typedef struct OC_BOOT_ARGUMENTS_ {
   UINT32            *KernelAddrP;
   UINT32            *SystemTableP;
   UINT32            *RuntimeServicesPG;
+  UINT64            *RuntimeServicesV;
   UINT32            *DeviceTreeP;
   UINT32            *DeviceTreeLength;
   UINT32            *CsrActiveConfig;

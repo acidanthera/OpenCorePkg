@@ -480,6 +480,11 @@ AppleMapPrepareForHibernateWake (
           return;
         }
 
+        //
+        // TODO: If we try to work on hibernation support with relocation block
+        // We will need to add a call similar to AppleRelocationVirtualize here.
+        //
+
         if (BootCompat->Settings.AvoidRuntimeDefrag) {
           //
           // I think we should not be there, but ideally all quirks are relatively independent.
@@ -498,6 +503,11 @@ AppleMapPrepareForHibernateWake (
 
     Handoff = (IOHibernateHandoff *) ((UINTN) Handoff + sizeof(Handoff) + Handoff->bytecount);
   }
+
+  //
+  // TODO: To support hibernation with relocation block we will need to add a call similar
+  // to AppleRelocationRebase here.
+  //
 }
 
 VOID
