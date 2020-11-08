@@ -317,6 +317,50 @@ RestoreProtectedRtMemoryTypes (
 }
 
 STATIC
+EFI_STATUS
+AppleMapVirtualizeMap (
+  IN UINTN                  MemoryMapSize,
+  IN UINTN                  DescriptorSize,
+  IN UINT32                 DescriptorVersion,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap,
+  IN EFI_PHYSICAL_ADDRESS   KernelRTAddress
+  )
+{
+  EFI_STATUS             Status;
+  UINTN                  NumEntries;
+  UINTN                  Index;
+  EFI_MEMORY_DESCRIPTOR  *Desc;
+  UINTN                  BlockSize;
+
+  Desc = MemoryMap;
+  NumEntries = MemoryMapSize / DescriptorSize;
+
+  for (Index = 0; Index < NumEntries; ++Index) {
+    BlockSize = EFI_PAGES_TO_SIZE ((UINTN) Desc->NumberOfPages);
+
+    if (Desc->Type == EfiReservedMemoryType) {
+      Desc->Attribute &= ~EFI_MEMORY_RUNTIME;
+    }
+
+    if ((Desc->Attribute & EFI_MEMORY_RUNTIME) != 0) {
+      Desc->VirtualStart = KernelRTAddress + 0xffffff8000000000;
+      KernelRTAddress += BlockSize;
+    }
+
+    Desc = NEXT_MEMORY_DESCRIPTOR (Desc, DescriptorSize);
+  }
+
+  Status = gRT->SetVirtualAddressMap (
+    MemoryMapSize,
+    DescriptorSize,
+    DescriptorVersion,
+    MemoryMap
+    );
+
+  return Status;
+}
+
+STATIC
 VOID
 AppleMapRestoreRelocation (
   IN OUT BOOT_COMPAT_CONTEXT  *BootCompat,
@@ -429,6 +473,22 @@ AppleMapPrepareForBooting (
         OcRemoveArgumentFromCmd (ArgsStr, "-s");
       }
     }
+  }
+
+  if (BootCompat->SlideSupport.RelocationBlock != 0) {
+    //
+    // EfiBoot will not virtualize addresses since it no longer can assign 1:1
+    // mapping to any region due to relocation block being way farther than
+    // any XNU address. This will cause it simply skip the procedure.
+    // Here we assign virtual addresses instead of EfiBoot and call SetVirtualAddressMap.
+    //
+    AppleMapVirtualizeMap (
+      *BA.MemoryMapSize,
+      *BA.MemoryMapDescriptorSize,
+      *BA.MemoryMapDescriptorVersion,
+      (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap),
+      EFI_PAGES_TO_SIZE (*BA.RuntimeServicesPG) - (UINT32) (BootCompat->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR)
+      );
   }
 
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
@@ -768,7 +828,7 @@ AppleMapPrepareKernelState (
   }
 
   if (BootCompatContext->SlideSupport.RelocationBlock != 0) {
-    Args -= BootCompatContext->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR;
+    Args -= (UINTN) (BootCompatContext->SlideSupport.RelocationBlock - KERNEL_BASE_PADDR);
 
     //
     // TODO: Move to assembly!
