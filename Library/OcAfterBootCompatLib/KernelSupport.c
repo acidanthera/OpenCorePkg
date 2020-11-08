@@ -521,14 +521,6 @@ AppleMapPrepareBooterState (
     BootCompat
     );
 
-  //
-  // This function may be called twice, do not redo in this case.
-  //
-  AppleMapPlatformSaveState (
-    &BootCompat->KernelState.AsmState,
-    &BootCompat->KernelState.KernelJump
-    );
-
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
     if (BootCompat->KernelState.SysTableRtArea == 0) {
       //
@@ -581,13 +573,10 @@ AppleMapPrepareBooterState (
 VOID
 AppleMapPrepareKernelJump (
   IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
-  IN     UINTN                  ImageAddress,
-  IN     BOOLEAN                AppleHibernateWake
+  IN     EFI_PHYSICAL_ADDRESS   CallGate
   )
 {
-  UINT64                   KernelEntryVaddr;
-  UINT32                   KernelEntry;
-  IOHibernateImageHeader   *ImageHeader;
+  CALL_GATE_JUMP           *CallGateJump;
 
   //
   // There is no reason to patch the kernel when we do not need it.
@@ -602,65 +591,27 @@ AppleMapPrepareKernelJump (
 #endif
 
   //
-  // Check whether we have image address and abort if not.
+  // Check whether we have address and abort if not.
   //
-  if (ImageAddress == 0) {
-    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Failed to find image address, hibernate %d\n", AppleHibernateWake));
+  if (CallGate == 0) {
+    RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Failed to find call gate address\n"));
     return;
   }
 
-  if (!AppleHibernateWake) {
-    //
-    // ImageAddress points to the first kernel segment, __HIB.
-    // Kernel image header is located in __TEXT, which follows __HIB.
-    //
-    ImageAddress += KERNEL_BASE_PADDR;
-
-    //
-    // Cut higher virtual address bits.
-    //
-    KernelEntryVaddr = MachoRuntimeGetEntryAddress (
-      (VOID*) ImageAddress
-      );
-    if (KernelEntryVaddr == 0) {
-      RUNTIME_DEBUG ((DEBUG_ERROR, "OCABC: Kernel entry point was not found!"));
-      return;
-    }
-
-    //
-    // Perform virtual to physical address conversion by subtracting __TEXT base
-    // and adding current physical kernel location.
-    //
-    KernelEntry = (UINT32) (KernelEntryVaddr - KERNEL_TEXT_VADDR + ImageAddress);
-  } else {
-    //
-    // Read kernel entry from hibernation image and patch it with jump.
-    // At this stage HIB section is not yet copied from sleep image to it's
-    // proper memory destination. so we'll patch entry point in sleep image.
-    // Note the virtual -> physical conversion through truncation.
-    //
-    ImageHeader = (IOHibernateImageHeader *) ImageAddress;
-    KernelEntry = ((UINT32)(UINTN) &ImageHeader->fileExtentMap[0])
-      + ImageHeader->fileExtentMapSize + ImageHeader->restore1CodeOffset;
-  }
+  CallGateJump = (VOID *)(UINTN) CallGate;
 
   //
-  // Save original kernel entry code.
+  // Move call gate jump bytes front.
   //
   CopyMem (
-    &BootCompat->KernelState.KernelOrg[0],
-    (VOID *)(UINTN) KernelEntry,
-    sizeof (BootCompat->KernelState.KernelOrg)
+    CallGateJump + 1,
+    CallGateJump,
+    ESTIMATED_CALL_GATE_SIZE
     );
 
-  //
-  // Copy kernel jump code to kernel entry address.
-  //
-  CopyMem (
-    (VOID *)(UINTN) KernelEntry,
-    &BootCompat->KernelState.KernelJump,
-    sizeof (BootCompat->KernelState.KernelJump)
-    );
+  CallGateJump->Command  = 0x25FF;
+  CallGateJump->Argument = 0x0;
+  CallGateJump->Address  = (UINTN) AppleMapPrepareKernelState;
 }
 
 EFI_STATUS
@@ -726,10 +677,11 @@ UINTN
 EFIAPI
 AppleMapPrepareKernelState (
   IN UINTN    Args,
-  IN BOOLEAN  ModeX64
+  IN UINTN    EntryPoint
   )
 {
   BOOT_COMPAT_CONTEXT    *BootCompatContext;
+  KERNEL_CALL_GATE       CallGate;
 
   BootCompatContext = GetBootCompatContext ();
 
@@ -745,14 +697,8 @@ AppleMapPrepareKernelState (
       );
   }
 
-  //
-  // Restore original kernel entry code.
-  //
-  CopyMem (
-    BootCompatContext->KernelState.AsmState.KernelEntry,
-    &BootCompatContext->KernelState.KernelOrg[0],
-    sizeof (BootCompatContext->KernelState.KernelOrg)
+  CallGate = (KERNEL_CALL_GATE)(UINTN) (
+    BootCompatContext->ServiceState.KernelCallGate + CALL_GATE_JUMP_SIZE
     );
-
-  return Args;
+  return CallGate (Args, EntryPoint);
 }

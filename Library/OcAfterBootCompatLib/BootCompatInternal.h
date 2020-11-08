@@ -27,14 +27,6 @@
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcFirmwareRuntime.h>
 
-#if defined(MDE_CPU_X64)
-#include "X64/ContextSwitch.h"
-#elif defined(MDE_CPU_IA32)
-#include <Ia32/ContextSwitch.h>
-#else
-#error "Unsupported architecture!"
-#endif
-
 //
 // The kernel is normally allocated at base 0x100000 + slide address.
 //
@@ -73,7 +65,12 @@
 /**
   Kernel physical base address.
 **/
-#define KERNEL_BASE_PADDR        (KERNEL_TEXT_VADDR - KERNEL_HIB_VADDR)
+#define KERNEL_BASE_PADDR        ((UINT32) KERNEL_HIB_VADDR)
+
+/**
+  Kernel physical base address.
+**/
+#define KERNEL_TEXT_PADDR        ((UINT32) KERNEL_TEXT_VADDR)
 
 /**
   Slide offset per slide entry
@@ -102,6 +99,39 @@
   it has 0xC119 pages requested. This value is likely calculated from KC size.
 **/
 #define ESTIMATED_KERNEL_SIZE    ((UINTN) (200 * SIZE_1MB))
+
+/**
+  Assume call gate (normally a little over 100 bytes) can be up to 256 bytes.
+  It is allocated in its own page and is relocatable.
+**/
+#define ESTIMATED_CALL_GATE_SIZE 256
+
+/**
+  Size of jump from call gate inserted before Call Gate to jump to our code.
+**/
+#define CALL_GATE_JUMP_SIZE      (sizeof (CALL_GATE_JUMP))
+
+/**
+  Command used to perform an absolute 64-bit jump from Call Gate to our code.  
+**/
+#pragma pack(push,1)
+typedef struct CALL_GATE_JUMP_ {
+  UINT16  Command;
+  UINT32  Argument;
+  UINT64  Address;
+} CALL_GATE_JUMP;
+STATIC_ASSERT (sizeof (CALL_GATE_JUMP) == 14, "Invalid CALL_GATE_JUMP size");
+#pragma pack(pop)
+
+/**
+  Kernel call gate prototype.
+**/
+typedef
+UINTN
+(EFIAPI *KERNEL_CALL_GATE) (
+  IN UINTN    Args,
+  IN UINTN    EntryPoint
+  );
 
 /**
   Preserved relocation entry.
@@ -209,6 +239,17 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   ///
   EFI_PHYSICAL_ADDRESS          HibernateImageAddress;
   ///
+  /// Kernel call gate is an assembly function that takes boot arguments (rcx)
+  /// and kernel entry point (rdx) and jumps to the kernel (pstart) in 32-bit mode.
+  ///
+  /// It is only used for normal booting, so for general interception we do not
+  /// use call gate but rather patch the kernel entry point. However, when it comes
+  /// to booting with relocation block (it does not support hibernation) we need
+  /// to update kernel entry point with the relocation block offset and that can
+  /// only be done in the call gate as it will otherwise jump to lower memory.
+  ///
+  EFI_PHYSICAL_ADDRESS          KernelCallGate;
+  ///
   /// Last descriptor size obtained from GetMemoryMap.
   ///
   UINTN                         MemoryMapDescriptorSize;
@@ -238,18 +279,6 @@ typedef struct SERVICES_OVERRIDE_STATE_ {
   Apple kernel support internal state..
 **/
 typedef struct KERNEL_SUPPORT_STATE_ {
-  ///
-  /// Assembly support internal state.
-  ///
-  ASM_SUPPORT_STATE        AsmState;
-  ///
-  /// Kernel jump trampoline.
-  ///
-  ASM_KERNEL_JUMP          KernelJump;
-  ///
-  /// Original kernel memory.
-  ///
-  UINT8                    KernelOrg[sizeof (ASM_KERNEL_JUMP)];
   ///
   /// Custom kernel UEFI System Table.
   ///
@@ -410,29 +439,15 @@ AppleMapPrepareBooterState (
   );
 
 /**
-  Save UEFI environment state in implementation specific way.
-
-  @param[in,out]  AsmState      Assembly state to update, can be preserved.
-  @param[out]     KernelJump    Kernel jump trampoline to fill.
-**/
-VOID
-AppleMapPlatformSaveState (
-  IN OUT ASM_SUPPORT_STATE  *AsmState,
-     OUT ASM_KERNEL_JUMP    *KernelJump
-  );
-
-/**
   Patch kernel entry point with KernelJump to later land in AppleMapPrepareKernelState.
 
   @param[in,out]  BootCompat          Boot compatibility context.
-  @param[in]      ImageAddress        Kernel or hibernation image address.
-  @param[in]      AppleHibernateWake  TRUE when ImageAddress points to hibernation image.
+  @param[in]      CallGate            Kernel call gate address.
 **/
 VOID
 AppleMapPrepareKernelJump (
   IN OUT BOOT_COMPAT_CONTEXT    *BootCompat,
-  IN     UINTN                  ImageAddress,
-  IN     BOOLEAN                AppleHibernateWake
+  IN     EFI_PHYSICAL_ADDRESS   CallGate
   );
 
 /**
@@ -455,18 +470,20 @@ AppleMapPrepareMemState (
 
 /**
   Prepare environment for Apple kernel bootloader in boot or wake cases.
-  This callback arrives when boot.efi jumps to kernel.
+  This callback arrives when boot.efi jumps to kernel call gate.
+  Should transfer control to kernel call gate + CALL_GATE_JUMP_SIZE
+  with the same arguments.
 
-  @param[in]  Args     Case-specific kernel argument handle.
-  @param[in]  ModeX64  Debug flag about kernel context type, TRUE when X64.
+  @param[in]  Args         Case-specific kernel argument handle.
+  @param[in]  EntryPoint   Case-specific kernel entry point.
 
-  @retval  Args must be returned with the necessary modifications if any.
+  @returns Case-specific value if any.
 **/
 UINTN
 EFIAPI
 AppleMapPrepareKernelState (
   IN UINTN    Args,
-  IN BOOLEAN  ModeX64
+  IN UINTN    EntryPoint
   );
 
 /**
