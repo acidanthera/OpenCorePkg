@@ -1106,6 +1106,8 @@ typedef struct OC_BOOT_ARGUMENTS_ {
   UINT32            *DeviceTreeP;
   UINT32            *DeviceTreeLength;
   UINT32            *CsrActiveConfig;
+  UINT64            *RootHashP;
+  UINT64            *ManifestP;
   EFI_SYSTEM_TABLE  *SystemTable;
 } OC_BOOT_ARGUMENTS;
 

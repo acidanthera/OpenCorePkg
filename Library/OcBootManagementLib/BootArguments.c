@@ -74,6 +74,11 @@ OcParseBootArgs (
     if (BA2->flags & kBootArgsFlagCSRActiveConfig) {
       Arguments->CsrActiveConfig = &BA2->csrActiveConfig;
     }
+
+    if (BA2->Revision >= kBootArgsRevision1) {
+      Arguments->RootHashP = &BA2->arvRootHashStart;
+      Arguments->ManifestP = &BA2->arvManifestStart;
+    }
   }
 }
 
