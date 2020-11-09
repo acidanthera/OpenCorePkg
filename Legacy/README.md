@@ -17,7 +17,7 @@ Acidanthera variant of DuetPkg. Specialties:
 
 1. `boot0` is loaded by BIOS from MBR at `7C00h`.
 2. `boot0` finds active MBR or ESP GPT partition.
-3. `boot0` loads `boot1` from found partition at `9000h`.
+3. `boot0` loads `boot1` from found partition at `E000h`.
 4. `boot1` finds `boot` file at partition root.
 5. `boot1` loads `boot` at `20000h` (begins with `StartX64` or `StartIA32`).
 6. `Start` enables paging (prebuilt for `X64` or generated for `IA32`).
@@ -31,7 +31,7 @@ Acidanthera variant of DuetPkg. Specialties:
 | Name      | PHYS        | VIRT        |
 |:----------|:------------|:------------|
 | `boot0`   | `7C00h`     |             |
-| `boot1`   | `9000h`     |             |
+| `boot1`   | `E000h`     |             |
 | `Start`   | `20000h`    | `20000h`    |
 | `EfiXX`   | `21000h`    | `21000h`    |
 | `EfiLdr`  | `22000h`    | `10000h`    |
