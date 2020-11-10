@@ -293,15 +293,6 @@ AppleRelocationRebase (
   //
   *BA->RuntimeServicesV  = EFI_PAGES_TO_SIZE (*BA->RuntimeServicesPG) + KERNEL_STATIC_VADDR;
   *BA->DeviceTreeP       -= RelocDiff;
-  //
-  // Note, these are specific to Big Sur.
-  //
-  if (BA->RootHashP != NULL) {
-    *BA->RootHashP       -= RelocDiff;
-  }
-  if (BA->ManifestP != NULL) {
-    *BA->ManifestP       -= RelocDiff;
-  }
 }
 
 UINTN
