@@ -1333,6 +1333,11 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Hibernation is not supported when booting with a relocation block
   (but relocation block is not always used when the quirk is enabled).
 
+  \emph{Note}: While this quirk is required to run older macOS versions
+  on platforms with used lower memory it is not compatible with some
+  hardware and macOS 11. In this case you may try to use
+  \texttt{EnableSafeModeSlide} instead.
+
 \item
   \texttt{AvoidRuntimeDefrag}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1420,7 +1425,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{ProvideCustomSlide} to be enabled.
 
   \emph{Note}: The necessity of this quirk is determined by safe mode availability. If
-  booting to safe mode fails, this option can be tried to be enabled.
+  booting to safe mode fails, this option can be tried to be enabled. Currently
+  this quirk is not compatible with macOS 11.
 
 \item
   \texttt{EnableWriteUnprotector}\\

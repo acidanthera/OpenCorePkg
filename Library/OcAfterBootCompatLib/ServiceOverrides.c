@@ -391,7 +391,7 @@ OcAllocatePages (
       );
   }
 
-  DEBUG ((DEBUG_INFO, "OCABC: AllocPages %u 0x%Lx (%u) - %r\n", Type, *Memory, NumberOfPages, Status));
+  DEBUG ((DEBUG_VERBOSE, "OCABC: AllocPages %u 0x%Lx (%u) - %r\n", Type, *Memory, NumberOfPages, Status));
 
   if (!EFI_ERROR (Status)) {
     FixRuntimeAttributes (BootCompat, MemoryType);
