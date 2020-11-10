@@ -53,11 +53,7 @@ AppleRelocationAllocatePages (
     return EFI_UNSUPPORTED;
   }
 
-  //
-  // Operating systems up to macOS 10.15 allocate starting with TEXT segment (2MB).
-  // macOS 11.0 allocates starting with HIB segment (1MB).
-  //
-  if (*Memory >= KERNEL_BASE_PADDR && *Memory <= KERNEL_TEXT_PADDR && BootCompat->KernelState.RelocationBlock == 0) {
+  if (*Memory == KERNEL_TEXT_PADDR && BootCompat->KernelState.RelocationBlock == 0) {
     BootCompat->KernelState.RelocationBlock = BASE_4GB;
     Status = OcAllocatePagesFromTop (
       EfiLoaderData,

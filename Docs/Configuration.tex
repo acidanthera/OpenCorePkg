@@ -1333,10 +1333,6 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Hibernation is not supported when booting with a relocation block
   (but relocation block is not always used when the quirk is enabled).
 
-  \emph{Note}: While this quirk is generally reliable and replaces
-  \texttt{EnableSafeModeSlide} in most of the cases, some boards
-  will not be compatible due to hardware mapped in lower memory.
-
 \item
   \texttt{AvoidRuntimeDefrag}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -1423,11 +1419,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   and let some other value (from \texttt{1} to \texttt{255}) be used. This quirk requires
   \texttt{ProvideCustomSlide} to be enabled.
 
-  \emph{Note}: This quirk is deprecated in favour of \texttt{AllowRelocationBlock}
-  and is not compatible with macOS 11.0 or macOS 10.7 and lower. The necessity of
-  this quirk is determined by safe mode availability. If booting to safe mode fails
-  and using \texttt{AllowRelocationBlock} does not help, this option can be tried
-  to be enabled.
+  \emph{Note}: The necessity of this quirk is determined by safe mode availability. If
+  booting to safe mode fails, this option can be tried to be enabled.
 
 \item
   \texttt{EnableWriteUnprotector}\\
