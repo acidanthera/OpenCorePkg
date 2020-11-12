@@ -636,6 +636,12 @@ AppleSlideUnlockForSafeMode (
   //   }
   // }
   //
+  // The even newer workaround for 11.0 a newer is to patch the test.
+  // if (State & BOOT_MODE_SAFE) {
+  //   * Do roughly nothing *
+  // } else {
+  //   * Setup KASLR *
+  //
 
   //
   // This is a reasonable maximum distance to expect between the instructions.
@@ -643,6 +649,8 @@ AppleSlideUnlockForSafeMode (
   STATIC CONST UINTN MaxDist         = 0x10;
   STATIC CONST UINT8 SearchSeqNew[]  = {0xF6, 0xC4, 0x40, 0x75};
   STATIC CONST UINT8 SearchSeqNew2[] = {0x0F, 0xBA, 0xE0, 0x0E, 0x72};
+  STATIC CONST UINT8 SearchSeqSur[]  = {0xF6, 0xC1, 0x01, 0x75};
+  STATIC CONST UINT8 SearchSeqSur2[] = {0xF6, 0xC1, 0x01, 0x74};
   STATIC CONST UINT8 SearchSeq[]     = {0x01, 0x40, 0x00, 0x00};
 
   UINT8       *StartOff;
@@ -651,6 +659,7 @@ AppleSlideUnlockForSafeMode (
   UINTN       SecondOff;
   UINTN       SearchSeqNewSize;
   BOOLEAN     NewWay;
+  UINT8       SurWay;
 
 
   StartOff = ImageBase;
@@ -658,9 +667,11 @@ AppleSlideUnlockForSafeMode (
 
   FirstOff  = 0;
   SecondOff = 0;
-  NewWay    = FALSE;
 
   do {
+    NewWay    = FALSE;
+    SurWay    = 0;
+
     while (StartOff + FirstOff <= EndOff) {
       if (StartOff + FirstOff <= EndOff - 1
        && CompareMem (StartOff + FirstOff, SearchSeqNew2, sizeof (SearchSeqNew2)) == 0) {
@@ -673,14 +684,20 @@ AppleSlideUnlockForSafeMode (
         break;
       } else if (CompareMem (StartOff + FirstOff, SearchSeq, sizeof (SearchSeq)) == 0) {
         break;
+      } else if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
+        SurWay = 1;
+        break;
+      } else if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
+        SurWay = 2;
+        break;
       }
       FirstOff++;
     }
 
     DEBUG ((
-      DEBUG_VERBOSE,
-      "OCABC: Found first %d at off %X\n",
-      (UINT32) NewWay,
+      DEBUG_INFO,
+      "OCABC: Found kaslr %a way at off %X\n",
+      SurWay ? "sur" : (NewWay ? "new" : "legacy"),
       (UINT32) FirstOff
       ));
 
@@ -690,6 +707,24 @@ AppleSlideUnlockForSafeMode (
         "OCABC: Failed to find first BOOT_MODE_SAFE | BOOT_MODE_ASLR sequence\n"
         ));
       break;
+    }
+
+    if (SurWay == 1) {
+      //
+      // Here we just patch the comparison code and the check by straight nopping.
+      //
+      DEBUG ((DEBUG_VERBOSE, "OCABC: Patching sur safe mode aslr check...\n"));
+      SetMem (StartOff + FirstOff, sizeof (SearchSeqSur) + 1, 0x90);
+      return;
+    }
+
+    if (SurWay == 2) {
+      //
+      // Here we just patch the comparison code and the check by straight nopping.
+      //
+      DEBUG ((DEBUG_VERBOSE, "OCABC: Patching sur safe mode aslr check v2...\n"));
+      *(StartOff + FirstOff + 3) = 0xEB;
+      return;
     }
 
     if (NewWay) {

@@ -10,6 +10,7 @@ OpenCore Changelog
 - Allowed launching tools and entries in text mode via `TextMode`
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed ACPI patches not applying if tables are in locked memory
+- Fixed `EnableSafeModeSlide` on macOS 11.0
 
 #### v0.6.3
 - Added support for xml comments in plist files
