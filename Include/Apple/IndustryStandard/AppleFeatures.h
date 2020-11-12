@@ -241,4 +241,77 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define PT_FEATURE_UNKNOWN_BIT30               0x40000000U // 30
 #define PT_FEATURE_UNKNOWN_BIT31               0x80000000U // 31
 
+//
+// EfiBoot Feature Bits.
+// These bits are not exposed usually and are internal to EfiBoot,
+// but can be used in patches and analysis.
+//
+
+//
+// Safe mode, enabled with -x boot argument or Shift hotkey.
+// Disables EB_FEATURE_ASLR.
+//
+#define EB_FEATURE_SAFE_MODE                    0x00000001U
+//
+// Verbose mode, enabled with -v boot argument or Cmd+V hotkey.
+//
+#define EB_FEATURE_VERBOSE                      0x00000002U
+#define EB_FEATURE_NETBOOT                      0x00000004U
+#define EB_FEATURE_ALT_KERNEL                   0x00000008U
+//
+// Single user mode, enabled with -s boot argument or Cmd+S hotkey.
+// Disallowed when Secure Boot is enabled.
+//
+#define EB_FEATURE_SINGLE_USER                  0x00000010U
+//
+// Graphics boot (with Apple log).
+// Disabled via missing GOP and -v.
+//
+#define EB_FEATURE_GRAPHICS_MODE                0x00000020U
+#define EB_FEATURE_FIRMWARE_PASSWORD            0x00000040U
+#define EB_FEATURE_DEBUG                        0x00000080U
+//
+// Core Storage boot
+//
+#define EB_FEATURE_BOOT_IS_NOT_ROOT             0x00000100U
+//
+// Boot (or wake) with File Vault 2 enabled.
+//
+#define EB_FEATURE_HAS_FILE_VAULT2_CONFIG       0x00000200U
+#define EB_FEATURE_X                            0x00000400U
+//
+// Recovery OS boot, triggered via NVRAM recovery-boot-mode as well.
+//
+#define EB_FEATURE_EFI_NVRAM_RECOVERY_BOOT_MODE 0x00000800U
+#define EB_FEATURE_FROM_RECOVER_BOOT_DIRECTORY  0x00001000U
+//
+// Hibernate-wake.
+//
+#define EB_FEATURE_WAKE_FROM_HIBERNATION        0x00002000U
+//
+// Generate random KASLR slide.
+//
+#define EB_FEATURE_KASLR_SLIDE                  0x00004000U
+#define EB_FEATURE_SKIP_BOARD_ID_CHECK          0x00008000U
+#define EB_FEATURE_SKIP_PANIC_DIALOG            0x00010000U
+//
+// #[EB.B.MN|BM:+FD]
+//
+#define EB_FEATURE_FD                           0x00020000U
+//
+// Well, probably...
+//
+#define EB_FEATURE_APFS_VOLUME_BOOT             0x00080000U
+//
+// Apple Secure Boot enabled configuration (detected via proto & policy).
+// 24B73556-2197-4702-82A8-3E1337DAFBF2 GUID.
+//
+#define EB_FEATURE_HAS_APPLE_SECURE_BOOT        0x00200000U
+//
+// Apple Trusted Boot enabled configuration (detected via proto & policy).
+// Some unfinished(?) variant of Secure Boot found in preview firmwares.
+// 24B73556-2197-4702-82A8-3E1337DAFBF3 GUID.
+//
+#define EB_FEATURE_HAS_APPLE_TRUSTED_BOOT       0x01000000U
+
 #endif // APPLE_FEATURES_H
