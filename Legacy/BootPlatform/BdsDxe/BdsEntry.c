@@ -198,11 +198,6 @@ BdsBootDeviceSelect (
   EFI_HANDLE                    ImageHandle;
 
   //
-  // Signal the EVT_SIGNAL_READY_TO_BOOT event
-  //
-  EfiSignalEventReadyToBoot ();
-
-  //
   // If there is simple file protocol which does not consume block Io protocol, create a boot option for it here.
   //
   Status = gBS->LocateHandleBuffer (
@@ -462,6 +457,11 @@ BdsEntry (
   // Setup some platform policy here
   //
   PlatformBdsPolicyBehavior ();
+
+  //
+  // Signal the EVT_SIGNAL_READY_TO_BOOT event
+  //
+  EfiSignalEventReadyToBoot ();
 
   //
   // BDS select the boot device to load OS
