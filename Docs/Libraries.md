@@ -1,3 +1,7 @@
+#### Languages
+- English (Current)
+- [简体中文](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Libraries_zh.md)
+
 #### Library Descriptions
 
 * OcAcpiLib — ACPI injector and patcher
