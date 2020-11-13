@@ -45,6 +45,10 @@ OcParseBootArgs (
 
     Arguments->CommandLine = &BA1->CommandLine[0];
 
+    Arguments->KernelAddrP = &BA1->kaddr;
+    Arguments->SystemTableP = &BA1->efiSystemTable;
+    Arguments->RuntimeServicesPG = &BA1->efiRuntimeServicesPageStart;
+    Arguments->RuntimeServicesV = &BA1->efiRuntimeServicesVirtualPageStart;
     Arguments->DeviceTreeP = &BA1->deviceTreeP;
     Arguments->DeviceTreeLength = &BA1->deviceTreeLength;
     Arguments->SystemTable = (EFI_SYSTEM_TABLE*)(UINTN) BA1->efiSystemTable;
@@ -59,6 +63,10 @@ OcParseBootArgs (
 
     Arguments->CommandLine = &BA2->CommandLine[0];
 
+    Arguments->KernelAddrP = &BA2->kaddr;
+    Arguments->SystemTableP = &BA2->efiSystemTable;
+    Arguments->RuntimeServicesPG = &BA2->efiRuntimeServicesPageStart;
+    Arguments->RuntimeServicesV = &BA2->efiRuntimeServicesVirtualPageStart;
     Arguments->DeviceTreeP = &BA2->deviceTreeP;
     Arguments->DeviceTreeLength = &BA2->deviceTreeLength;
     Arguments->SystemTable = (EFI_SYSTEM_TABLE*)(UINTN) BA2->efiSystemTable;

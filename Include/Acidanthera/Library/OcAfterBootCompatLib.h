@@ -59,6 +59,11 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  EnableSafeModeSlide;
   ///
+  /// Try to relocate memory to different address space when KASLR is disabled
+  /// and lower memory is unavailable.
+  ///
+  BOOLEAN  AllowRelocationBlock;
+  ///
   /// Attempt to protect certain memory regions from being incorrectly mapped:
   /// - CSM region could get used by the kernel due to being BS data,
   ///   which caused caused wake issues on older firmware.

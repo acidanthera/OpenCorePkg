@@ -1309,6 +1309,36 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \begin{enumerate}
 
 \item
+  \texttt{AllowRelocationBlock}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Allows booting macOS through a relocation block.
+
+  Relocation block is a scratch buffer allocated in lower 4 GB to be used for
+  loading the kernel and related structures by EfiBoot on firmwares where
+  lower memory is otherwise occupied by the (assumed to be) non-runtime data.
+  Right before kernel startup the relocation block is copied back to lower
+  addresses. Similarly all the other addresses pointing to relocation block
+  are also carefully adjusted. Relocation block can be used when:
+
+  \begin{itemize}
+    \tightlist
+    \item No better slide exists (all the memory is used)
+    \item \texttt{slide=0} is forced (by an argument or safe mode)
+    \item KASLR (slide) is unsupported (this is macOS 10.7 or older)
+  \end{itemize}
+
+  This quirk requires \texttt{ProvideCustomSlide} to also be enabled
+  and generally needs \texttt{AvoidRuntimeDefrag} to work correctly.
+  Hibernation is not supported when booting with a relocation block
+  (but relocation block is not always used when the quirk is enabled).
+
+  \emph{Note}: While this quirk is required to run older macOS versions
+  on platforms with used lower memory it is not compatible with some
+  hardware and macOS 11. In this case you may try to use
+  \texttt{EnableSafeModeSlide} instead.
+
+\item
   \texttt{AvoidRuntimeDefrag}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

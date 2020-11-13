@@ -366,6 +366,20 @@ AppleMapPrepareForBooting (
     }
   }
 
+  if (BootCompat->KernelState.RelocationBlock != 0) {
+    //
+    // When using Relocation Block EfiBoot will not virtualize the addresses since they
+    // cannot be mapped 1:1 due to any region from the relocation block being outside
+    // of static XNU vaddr to paddr mapping. This causes a clean early exit in their
+    // SetVirtualAddressMap calling routine avoiding gRT->SetVirtualAddressMap.
+    //
+    // For this reason we need to perform it ourselves right here before we restored
+    // runtime memory protections as we also need to defragment EFI_SYSTEM_TABLE memory
+    // to be accessible from XNU.
+    //
+    AppleRelocationVirtualize (BootCompat, &BA);
+  }
+
   if (BootCompat->Settings.AvoidRuntimeDefrag) {
     MemoryMapSize  = *BA.MemoryMapSize;
     MemoryMap      = (EFI_MEMORY_DESCRIPTOR *)(UINTN) (*BA.MemoryMap);
@@ -400,6 +414,10 @@ AppleMapPrepareForBooting (
         sizeof (*BootCompat->KernelState.ConfigurationTable) * BA.SystemTable->NumberOfTableEntries
         );
     }
+  }
+
+  if (BootCompat->KernelState.RelocationBlock != 0) {
+    AppleRelocationRebase (BootCompat, &BA);
   }
 }
 
@@ -462,6 +480,11 @@ AppleMapPrepareForHibernateWake (
           return;
         }
 
+        //
+        // TODO: If we try to work on hibernation support with relocation block
+        // We will need to add a call similar to AppleRelocationVirtualize here.
+        //
+
         if (BootCompat->Settings.AvoidRuntimeDefrag) {
           //
           // I think we should not be there, but ideally all quirks are relatively independent.
@@ -480,6 +503,11 @@ AppleMapPrepareForHibernateWake (
 
     Handoff = (IOHibernateHandoff *) ((UINTN) Handoff + sizeof(Handoff) + Handoff->bytecount);
   }
+
+  //
+  // TODO: To support hibernation with relocation block we will need to add a call similar
+  // to AppleRelocationRebase here.
+  //
 }
 
 VOID
@@ -582,7 +610,9 @@ AppleMapPrepareKernelJump (
   //
   // There is no reason to patch the kernel when we do not need it.
   //
-  if (!BootCompat->Settings.AvoidRuntimeDefrag && !BootCompat->Settings.DiscardHibernateMap) {
+  if (!BootCompat->Settings.AvoidRuntimeDefrag
+    && !BootCompat->Settings.DiscardHibernateMap
+    && !BootCompat->Settings.AllowRelocationBlock) {
     return;
   }
 
@@ -701,5 +731,15 @@ AppleMapPrepareKernelState (
   CallGate = (KERNEL_CALL_GATE)(UINTN) (
     BootCompatContext->ServiceState.KernelCallGate + CALL_GATE_JUMP_SIZE
     );
+
+  if (BootCompatContext->KernelState.RelocationBlock != 0) {
+    return AppleRelocationCallGate (
+      BootCompatContext,
+      CallGate,
+      Args,
+      EntryPoint
+      );
+  }
+
   return CallGate (Args, EntryPoint);
 }

@@ -35,6 +35,8 @@
   CustomSlide.c
   KernelSupport.c
   OcAfterBootCompatLib.c
+  RelocationBlock.c
+  RelocationCallGate.h
   ServiceOverrides.c
 
 [Packages]
