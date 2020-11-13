@@ -5,6 +5,9 @@
 
 OpenCore bootloader with development SDK.
 
+## Languages
+- English (Current)
+- [简体中文](README_zh.md)
 ## Discussion
 
 - [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
