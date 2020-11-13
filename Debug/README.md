@@ -1,5 +1,8 @@
 UEFI Debugging with GDB
 =======================
+#### Languages
+- English (Current)
+- [简体中文](https://github.com/acidanthera/OpenCorePkg/blob/master/Debug/README_zh.md)
 
 These scripts provide support for easier UEFI code debugging on virtual machines like VMware Fusion
 or QEMU. The code is based on [Andrei Warkentin](https://github.com/andreiw)'s
