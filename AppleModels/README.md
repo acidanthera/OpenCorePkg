@@ -4,6 +4,10 @@ Apple Models
 Various information about Apple hardware
 ([current database status](https://github.com/acidanthera/OpenCorePkg/blob/master/AppleModels/DataBase.md)).
 
+## Languages
+- English (Current)
+- [简体中文](https://github.com/acidanthera/OpenCorePkg/blob/master/AppleModels/README_zh.md)
+
 ## Improving database
 
 To add a new hardware board, please create a file in DataBase
