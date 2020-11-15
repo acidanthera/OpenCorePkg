@@ -24,6 +24,9 @@ High Sierra
 Mojave
 ./macrecovery.py -b Mac-7BA5B2DFE22DDD8C -m 00000000000KXPG00
 
+Catalina
+./macrecovery.py -b Mac-27AD2F918AE68F61 -m 00000000000K3F700
+
 Diagnostics
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000 -diag
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000GDVQ00 -diag
@@ -34,5 +37,5 @@ Default version
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m <real MLB> -os default  (newer)
 
 Latest version
-./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000
+./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000 -os latest
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m <real MLB> -os latest
