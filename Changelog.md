@@ -12,7 +12,7 @@ OpenCore Changelog
 - Fixed ACPI patches not applying if tables are in locked memory
 - Fixed `EnableSafeModeSlide` on macOS 11.0
 - Added `AllowRelocationBlock` quirk for older macOS and safe mode
-- Added AMD 19h support
+- Fixed CPU frequency calculation on AMD 19h family
 
 #### v0.6.3
 - Added support for xml comments in plist files
