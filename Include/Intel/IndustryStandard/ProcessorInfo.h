@@ -214,6 +214,7 @@ enum {
 #define AMD_CPU_EXT_FAMILY_15H  0x6
 #define AMD_CPU_EXT_FAMILY_16H  0x7
 #define AMD_CPU_EXT_FAMILY_17H  0x8
+#define AMD_CPU_EXT_FAMILY_19H  0xA
 
 // CPU_P_STATE_COORDINATION
 /// P-State Coordination

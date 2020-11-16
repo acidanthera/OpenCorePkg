@@ -559,6 +559,7 @@ ScanAmdProcessor (
 
     switch (Cpu->ExtFamily) {
       case AMD_CPU_EXT_FAMILY_17H:
+      case AMD_CPU_EXT_FAMILY_19H:
         if (Cpu->CPUFrequencyFromVMT == 0) {
           CofVid           = AsmReadMsr64 (K10_PSTATE_STATUS);
           CoreFrequencyID  = (UINT8)BitFieldRead64 (CofVid, 0, 7);
