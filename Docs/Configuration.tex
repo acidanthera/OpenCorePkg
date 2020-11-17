@@ -2356,7 +2356,7 @@ blocking.
   \texttt{DisableLinkeditJettison}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 11.0\\
+  \textbf{Requirement}: 11\\
   \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
 
   This option lets \texttt{Lilu.kext} and possibly some others function
@@ -2405,7 +2405,7 @@ blocking.
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 11.0\\
+  \textbf{Requirement}: 11\\
   \textbf{Description}: Force \texttt{x86} scheme for IMG4 verification.
 
   \emph{Note}: This option is required on virtual machines when using
@@ -2639,7 +2639,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \hline
   10.10-10.15 & --- & --- & --- & --- & --- & YES (V3) & --- \\
   \hline
-  11.0+ & --- & --- & --- & --- & --- & YES (V3) & YES \\
+  11+ & --- & --- & --- & --- & --- & YES (V3) & YES \\
   \hline
   \end{tabular}
   \end{center}
@@ -3352,7 +3352,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   personalised Apple Secure Boot identifiers. To use this setting,
   make sure to generate a random 64-bit number with a cryptographically secure
   random number generator. As an alternative, first 8 bytes of \texttt{SystemUUID}
-  can be used for \texttt{ApECID}, this is found in macOS 11.0 for Macs without
+  can be used for \texttt{ApECID}, this is found in macOS 11 for Macs without
   the T2 chip.
 
   With this value set and \texttt{SecureBootModel} valid
@@ -3378,7 +3378,7 @@ bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
-  Before macOS 11.0, which introduced a dedicated \texttt{x86legacy}
+  Before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot
   may not work as expected. When reinstalling the operating system, macOS Installer
   from macOS 10.15 and older, will usually run out of free memory
@@ -3733,7 +3733,7 @@ rm vault.pub
   \item \texttt{j215} --- \texttt{MacBookPro16,4 (June 2020) minimum macOS 10.15.5 (19F96)}
   \item \texttt{j185} --- \texttt{iMac20,1 (August 2020) minimum macOS 10.15.6 (19G2005)}
   \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020) minimum macOS 10.15.6 (19G2005)}
-  \item \texttt{x86legacy} --- \texttt{Macs and VMs without T2 chip minimum macOS 11.0}
+  \item \texttt{x86legacy} --- \texttt{Macs and VMs without T2 chip minimum macOS 11.0.1 (20B29)}
   \end{itemize}
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.

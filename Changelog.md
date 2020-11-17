@@ -2,7 +2,7 @@ OpenCore Changelog
 ==================
 
 #### v0.6.4
-- Added `BlacklistAppleUpdate` to fix 11.0 broken update optout
+- Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout
 - Dropped HII services from OpenDuet improving size and performance
 - Fixed patching of injected kexts in mkext
 - Added support for launching from relative paths
@@ -10,7 +10,7 @@ OpenCore Changelog
 - Allowed launching tools and entries in text mode via `TextMode`
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed ACPI patches not applying if tables are in locked memory
-- Fixed `EnableSafeModeSlide` on macOS 11.0
+- Fixed `EnableSafeModeSlide` on macOS 11
 - Added `AllowRelocationBlock` quirk for older macOS and safe mode
 - Fixed CPU frequency calculation on AMD 19h family
 
