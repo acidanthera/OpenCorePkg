@@ -13,6 +13,7 @@ OpenCore Changelog
 - Fixed `EnableSafeModeSlide` on macOS 11
 - Added `AllowRelocationBlock` quirk for older macOS and safe mode
 - Fixed CPU frequency calculation on AMD 19h family
+- Updated recovery_urls
 
 #### v0.6.3
 - Added support for xml comments in plist files
