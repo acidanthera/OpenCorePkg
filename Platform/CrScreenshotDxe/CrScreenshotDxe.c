@@ -406,13 +406,13 @@ CrScreenshotDxeEntry (
         continue;
       }
 
-      if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION) {
+      if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION_MINIMUM) {
         DEBUG ((
           DEBUG_INFO,
           "CRSCR: AppleEvent[%u] has outdated revision %u, expected %u\n",
           (UINT32) Index,
           (UINT32) AppleEvent->Revision,
-          (UINT32) APPLE_EVENT_PROTOCOL_REVISION
+          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));
         continue;
       }
