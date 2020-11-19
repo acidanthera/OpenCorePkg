@@ -54,8 +54,8 @@ endif
 
 ifeq ($(DIST),Darwin)
 	ifneq ($(FUZZ),1)
-		CFLAGS  += -mmacosx-version-min=10.6
-		LDFLAGS += -mmacosx-version-min=10.6
+		CFLAGS  += -mmacosx-version-min=10.6 --target=x86_64-apple-darwin
+		LDFLAGS += -mmacosx-version-min=10.6 --target=x86_64-apple-darwin
 	endif
 endif
 
