@@ -104,7 +104,9 @@ def validate_products(db, dbpd):
     name = knownproducts[product][update_products.KEY_NAME]
     if name.find('Mac') < 0 and name.find('Xserve') < 0:
       continue
-
+    if name.find('M1') >= 0:
+      continue
+      
     if len(product) > 3 and product not in usedproducts:
       print("WARN: Model %s (%s) is known but is not used in DataBase!" % (product, name))
 
