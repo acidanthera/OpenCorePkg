@@ -93,6 +93,7 @@ AppleModelCode:
   - "MNJ0"
   - "MLVD"
   - "MLVF"
+  - "Q72V"
 # Note, first board code is used by macserial
 # FIXME: check
 AppleBoardCode:
