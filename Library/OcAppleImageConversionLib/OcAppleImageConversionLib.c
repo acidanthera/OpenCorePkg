@@ -66,7 +66,7 @@ GetImageDims (
     return EFI_INVALID_PARAMETER;
   }
 
-  Status = GetPngDims (ImageBuffer, ImageSize, ImageWidth, ImageHeight);
+  Status = OcGetPngDims (ImageBuffer, ImageSize, ImageWidth, ImageHeight);
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCIC: Failed to obtain image dimensions for image\n"));
@@ -108,7 +108,7 @@ DecodeImageData (
     return EFI_INVALID_PARAMETER;
   }
 
-  Status = DecodePng (
+  Status = OcDecodePng (
     ImageBuffer,
     ImageSize,
     (VOID **) &RealImageData,
