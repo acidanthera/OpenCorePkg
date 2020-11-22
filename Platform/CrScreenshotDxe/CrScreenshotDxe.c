@@ -298,7 +298,7 @@ TakeScreenshot (
     Image[Index].Reserved = 0xFF;
   }
 
-  Status = EncodePng (
+  Status = OcEncodePng (
     Image,
     ScreenWidth,
     ScreenHeight,
@@ -307,7 +307,7 @@ TakeScreenshot (
     );
   gBS->FreePool (Image);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "CRSCR: EncodePng returned %r\n", Status));
+    DEBUG ((DEBUG_INFO, "CRSCR: OcEncodePng returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
     Fs->Close (Fs);
     return EFI_SUCCESS;
@@ -320,7 +320,7 @@ TakeScreenshot (
   gBS->FreePool (PngFile);
   Fs->Close (Fs);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "CRSCR: EncodePng returned %r\n", Status));
+    DEBUG ((DEBUG_INFO, "CRSCR: OcEncodePng returned %r\n", Status));
     ShowStatus (0xFF, 0x00, 0x00); ///< Red
     return EFI_SUCCESS;
   }

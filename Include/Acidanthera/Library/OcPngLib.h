@@ -32,7 +32,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   @return EFI_INVALID_PARAMETER Passed wrong parameter
 **/
 EFI_STATUS
-GetPngDims (
+OcGetPngDims (
   IN  VOID     *Buffer,
   IN  UINTN    Size,
   OUT UINT32   *Width,
@@ -55,7 +55,7 @@ GetPngDims (
   @return EFI_INVALID_PARAMETER  Passed wrong parameter
 **/
 EFI_STATUS
-DecodePng (
+OcDecodePng (
   IN   VOID     *Buffer,
   IN   UINTN    Size,
   OUT  VOID     **RawData,
@@ -77,7 +77,7 @@ DecodePng (
   @return EFI_INVALID_PARAMETER  Passed wrong parameter
 **/
 EFI_STATUS
-EncodePng (
+OcEncodePng (
   IN  VOID    *RawData,
   IN  UINT32  Width,
   IN  UINT32  Height,

@@ -1481,7 +1481,7 @@ GuiPngToImage (
   UINTN                            Index;
   UINT8                            TmpChannel;
 
-  Status = DecodePng (
+  Status = OcDecodePng (
     ImageData,
     ImageDataSize,
     (VOID **) &Image->Buffer,
