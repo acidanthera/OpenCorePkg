@@ -317,6 +317,15 @@ OcStorageFree (
   IN OUT OC_STORAGE_CONTEXT            *Context
   )
 {
+  if (Context->DummyStorageHandle != NULL) {
+    gBS->UninstallProtocolInterface (
+      Context->DummyStorageHandle,
+      &gEfiDevicePathProtocolGuid,
+      &mDummyBootDevicePath
+      );
+    Context->DummyStorageHandle = NULL;
+  }
+
   if (Context->Storage != NULL) {
     Context->Storage->Close (Context->Storage);
     Context->Storage = NULL;
