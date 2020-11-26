@@ -21,6 +21,8 @@ jobs:
     env:
       JOB_TYPE: BUILD
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: brew install openssl mingw-w64
         env:
@@ -30,7 +32,6 @@ jobs:
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
@@ -53,6 +54,8 @@ jobs:
     name: Build Linux CLANGPDB/GCC5
     runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: |
           sudo apt-get install nasm uuid-dev libssl-dev iasl
@@ -68,7 +71,6 @@ jobs:
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
@@ -85,6 +87,8 @@ jobs:
     env:
       TOOLCHAINS: CLANG38
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: |
           sudo apt-get install nasm uuid-dev iasl clang-8 llvm-8-dev doxygen texlive texlive-latex-extra
@@ -93,7 +97,6 @@ jobs:
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
@@ -121,6 +124,8 @@ jobs:
       run:
         shell: bash
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: |
           choco install microsoft-build-tools visualcpp-build-tools make nasm zip --no-progress
@@ -129,7 +134,6 @@ jobs:
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - run: ./build_duet.tool
       - run: ./build_oc.tool
@@ -146,16 +150,18 @@ jobs:
     env:
       JOB_TYPE: ANALYZE
     steps:
+      - uses: actions/checkout@v2
+
       - name: Install Dependencies
         run: |
           brew install shellcheck
           pip2 install pyyaml
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
+
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - name: Run shellcheck
         run: find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
@@ -179,10 +185,11 @@ jobs:
     env:
       JOB_TYPE: COVERITY
     steps:
+      - uses: actions/checkout@v2
+
       - name: CI Bootstrap
         run: |
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
-      - uses: actions/checkout@v2
 
       - run: ./build_oc.tool --skip-build --skip-package
 
