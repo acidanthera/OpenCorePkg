@@ -6,6 +6,16 @@
 #ifndef OC_USER_PCD_H
 #define OC_USER_PCD_H
 
+//
+// Workaround overrides to symbol visibility in ProcessorBind.h
+// breaking linkage with C standard library with GCC/BFD.
+//
+#if defined(__GNUC__)
+#pragma GCC visibility push(default)
+#include <Base.h>
+#pragma GCC visibility pop
+#endif
+
 #include <Uefi.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiLib.h>

@@ -67,12 +67,12 @@ typedef struct {
 __attribute__((packed, aligned(1)))
 efires_hdr_t;
 
-#if defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
+#if !defined(le16toh) && defined(__BYTE_ORDER__) && __BYTE_ORDER__ == __ORDER_LITTLE_ENDIAN__
 #define le16toh(x) (x)
 #define le32toh(x) (x)
 #define htole16(x) (x)
 #define htole32(x) (x)
-#elif defined(__APPLE__)
+#elif !defined(le16toh) && defined(__APPLE__)
 #include <libkern/OSByteOrder.h>
 #define le16toh(x) OSSwapLittleToHostInt16(x)
 #define le32toh(x) OSSwapLittleToHostInt32(x)
