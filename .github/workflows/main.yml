@@ -58,6 +58,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install nasm uuid-dev libssl-dev iasl
           file="clang+llvm-9.0.1-x86_64-linux-gnu-ubuntu-16.04"
           suf=".tar.xz"
@@ -91,6 +92,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
+          sudo apt-get update
           sudo apt-get install nasm uuid-dev iasl clang-8 llvm-8-dev doxygen texlive texlive-latex-extra
           echo "/usr/lib/llvm-8/bin" >> $GITHUB_PATH
 
