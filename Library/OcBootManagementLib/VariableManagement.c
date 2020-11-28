@@ -253,11 +253,12 @@ OcDeleteVariables (
   OC_FIRMWARE_RUNTIME_PROTOCOL *FwRuntime;
   OC_FWRT_CONFIG               Config;
   UINTN                        BootProtectSize;
-  EFI_GUID                     *BootProtectGuid;
   UINT32                       BootProtect;
-  UINT16                       BootOrder;
   VOID                         *BootOption;
   UINTN                        BootOptionSize;
+  CHAR16                       BootOptionVariable[L_STR_LEN (L"Boot####") + 1];
+  UINT16                       BootOptionIndex;
+  UINTN                        BootOptionIndexSize;
 
   DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup...\n"));
 
@@ -292,22 +293,40 @@ OcDeleteVariables (
   }
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootProtectGuid = (BootProtect & OC_BOOT_PROTECT_VARIABLE_NAMESPACE) != 0 ? &gOcVendorVariableGuid : &gEfiGlobalVariableGuid;
-    Status = GetVariable2 (
-      OC_BOOT_OPTION_VARIABLE_NAME,
-      BootProtectGuid,
-      &BootOption,
-      &BootOptionSize
+    BootOptionIndexSize = sizeof (BootOptionIndex);
+    Status = gRT->GetVariable (
+      OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      NULL,
+      &BootOptionIndexSize,
+      &BootOptionIndex
       );
     if (!EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCB: Found %g:%s for preservation of %u bytes\n",
-        BootProtectGuid,
-        OC_BOOT_OPTION_VARIABLE_NAME,
-        (UINT32) BootOptionSize
-        ));
-    } else {
+      UnicodeSPrint (
+        BootOptionVariable,
+        sizeof (BootOptionVariable),
+        L"Boot%04x",
+        BootOptionIndex
+        );
+      
+      Status = GetVariable2 (
+        BootOptionVariable,
+        &gEfiGlobalVariableGuid,
+        &BootOption,
+        &BootOptionSize
+        );
+      if (!EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Found %g:%s for preservation of %u bytes\n",
+          &gEfiGlobalVariableGuid,
+          BootOptionVariable,
+          (UINT32) BootOptionSize
+          ));
+      }
+    } 
+    
+    if (EFI_ERROR (Status)) {
       BootProtect = 0;
     }
   }
@@ -315,25 +334,55 @@ OcDeleteVariables (
   DeleteVariables ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
+    BootOptionIndex = 0;
     Status = gRT->SetVariable (
-      OC_BOOT_OPTION_VARIABLE_NAME,
-      BootProtectGuid,
+      L"Boot0000",
+      &gEfiGlobalVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
       BootOptionSize,
       BootOption
       );
-    BootOrder = OC_BOOT_OPTION;
+    if (!EFI_ERROR (Status)) {
+      Status = gRT->SetVariable (
+        OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
+        &gOcVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+        sizeof (BootOptionIndex),
+        &BootOptionIndex
+        );
+      if (EFI_ERROR (Status)) {
+        //
+        // Discard the inconsistent Bootstrap info to prevent duplication on
+        // next boot.
+        //
+        gRT->SetVariable (
+          OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
+          &gOcVendorVariableGuid,
+          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+          0,
+          NULL
+          );
+
+        gRT->SetVariable (
+          L"Boot0000",
+          &gEfiGlobalVariableGuid,
+          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
+          0,
+          NULL
+          );
+      }
+    }
     if (!EFI_ERROR (Status)) {
       Status = gRT->SetVariable (
         EFI_BOOT_ORDER_VARIABLE_NAME,
-        BootProtectGuid,
+        &gEfiGlobalVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-        sizeof (BootOrder),
-        &BootOrder
+        sizeof (BootOptionIndex),
+        &BootOptionIndex
         );
     }
 
-    DEBUG ((DEBUG_INFO, "OCB: Restored %s - %r\n", OC_BOOT_OPTION_VARIABLE_NAME, Status));
+    DEBUG ((DEBUG_INFO, "OCB: Restored %s - %r\n", BootOptionVariable, Status));
     FreePool (BootOption);
   }
 

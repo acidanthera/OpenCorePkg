@@ -47,7 +47,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // Boot protection guids.
 //
 #define OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP BIT0
-#define OC_BOOT_PROTECT_VARIABLE_NAMESPACE BIT1
 
 //
 // Variable used to report OpenCore version in the following format:

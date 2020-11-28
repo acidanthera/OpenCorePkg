@@ -855,13 +855,14 @@ EFI_STATUS
 InternalRegisterBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
-  IN CONST CHAR16    *FilePath
+  IN CONST CHAR16    *FilePath,
+  IN BOOLEAN         ShortForm
   )
 {
   EFI_STATUS                 Status;
   EFI_LOAD_OPTION            *Option;
   UINTN                      OptionNameSize;
-  UINTN                      DevicePathSize;
+  UINTN                      ReferencePathSize;
   UINTN                      OptionSize;
   EFI_DEVICE_PATH_PROTOCOL   *DevicePath;
   EFI_DEVICE_PATH_PROTOCOL   *CurrDevicePath;
@@ -869,8 +870,13 @@ InternalRegisterBootOption (
   UINT16                     *BootOrder;
   UINTN                      BootOrderSize;
   UINT32                     BootOrderAttributes;
-  UINT16                     NewBootOrder;
   BOOLEAN                    CurrOptionValid;
+  EFI_DEVICE_PATH_PROTOCOL   *ShortFormPath;
+  EFI_DEVICE_PATH_PROTOCOL   *ReferencePath;
+  CHAR16                     BootOptionVariable[L_STR_LEN (L"Boot####") + 1];
+  UINT16                     BootOptionIndex;
+  UINTN                      BootOptionIndexSize;
+  UINTN                      OrderIndex;
 
   Status = gBS->HandleProtocol (
     DeviceHandle,
@@ -888,12 +894,37 @@ InternalRegisterBootOption (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CurrDevicePath = InternalGetBootOptionData (OC_BOOT_OPTION, &gEfiGlobalVariableGuid, NULL, NULL, NULL);
-  if (CurrDevicePath != NULL) {
-    CurrOptionValid = IsDevicePathEqual (DevicePath, CurrDevicePath);
-    FreePool (CurrDevicePath);
-  } else {
-    CurrOptionValid = FALSE;
+  ReferencePath = DevicePath;
+
+  if (ShortForm) {
+    ShortFormPath = FindDevicePathNodeWithType (
+      DevicePath,
+      MEDIA_DEVICE_PATH,
+      MEDIA_HARDDRIVE_DP
+      );
+    if (ShortFormPath != NULL) {
+      ReferencePath = ShortFormPath;
+    }
+  }
+
+  BootOptionIndexSize = sizeof (BootOptionIndex);
+  Status = gRT->GetVariable (
+    OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
+    &gOcVendorVariableGuid,
+    NULL,
+    &BootOptionIndexSize,
+    &BootOptionIndex
+    );
+
+  CurrOptionValid = FALSE;
+  CurrDevicePath  = NULL;
+
+  if (!EFI_ERROR (Status)) {
+    CurrDevicePath = InternalGetBootOptionData (BootOptionIndex, &gEfiGlobalVariableGuid, NULL, NULL, NULL);
+    if (CurrDevicePath != NULL) {
+      CurrOptionValid = IsDevicePathEqual (ReferencePath, CurrDevicePath);
+      FreePool (CurrDevicePath);
+    }
   }
 
   DEBUG ((
@@ -902,44 +933,6 @@ InternalRegisterBootOption (
     CurrDevicePath != NULL,
     CurrOptionValid
     ));
-
-  if (!CurrOptionValid) {
-    OptionNameSize = StrSize (OptionName);
-    DevicePathSize = GetDevicePathSize (DevicePath);
-    OptionSize     = sizeof (EFI_LOAD_OPTION) + OptionNameSize + DevicePathSize;
-
-    DEBUG ((DEBUG_INFO, "OCB: Creating boot option %s of %u bytes\n", OptionName, (UINT32) OptionSize));
-
-    Option = AllocatePool (OptionSize);
-    if (Option == NULL) {
-      DEBUG ((DEBUG_INFO, "OCB: Failed to allocate boot option (%u)\n", (UINT32) OptionSize));
-      FreePool (DevicePath);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    Option->Attributes         = LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_BOOT;
-    Option->FilePathListLength = (UINT16) DevicePathSize;
-    CopyMem (Option + 1, OptionName, OptionNameSize);
-    CopyMem ((UINT8 *) (Option + 1) + OptionNameSize, DevicePath, DevicePathSize);
-
-    Status = gRT->SetVariable (
-      OC_BOOT_OPTION_VARIABLE_NAME,
-      &gEfiGlobalVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS
-        | EFI_VARIABLE_RUNTIME_ACCESS
-        | EFI_VARIABLE_NON_VOLATILE,
-      OptionSize,
-      Option
-      );
-
-    FreePool (Option);
-    FreePool (DevicePath);
-
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: Failed to store boot option - %r\n", Status));
-      return Status;
-    }
-  }
 
   BootOrderSize = 0;
   Status = gRT->GetVariable (
@@ -974,23 +967,114 @@ InternalRegisterBootOption (
 
     if (EFI_ERROR (Status) || BootOrderSize == 0 || BootOrderSize % sizeof (UINT16) != 0) {
       DEBUG ((DEBUG_INFO, "OCB: Failed to obtain boot order %u - %r\n", (UINT32) BootOrderSize, Status));
-      if (!EFI_ERROR (Status)) {
-        FreePool (BootOrder);
+      FreePool (BootOrder);
+      return EFI_OUT_OF_RESOURCES;
+    }
+  } else {
+    BootOrderSize = 0;
+  }
+
+  if (!CurrOptionValid) {
+    //
+    // High magic numbers cause entry purging on e.g. HP 15-ab237ne, InsydeH2O.
+    //
+    // Find the lowest unused Boot#### index. In the absolutely unrealistic case
+    // that all entries are occupied, always overwrite BootFFFF.
+    //
+    for (BootOptionIndex = 0; BootOptionIndex < 0xFFFF; ++BootOptionIndex) {
+      for (OrderIndex = 0; OrderIndex < BootOrderSize / sizeof (*BootOrder); ++OrderIndex) {
+        if (BootOrder[OrderIndex + 1] == BootOptionIndex) {
+          break;
+        }
       }
+
+      if (OrderIndex == BootOrderSize / sizeof (*BootOrder)) {
+        break;
+      }
+    }
+
+    UnicodeSPrint (
+      BootOptionVariable,
+      sizeof (BootOptionVariable),
+      L"Boot%04x",
+      BootOptionIndex
+      );
+
+    OptionNameSize    = StrSize (OptionName);
+    ReferencePathSize = GetDevicePathSize (ReferencePath);
+    OptionSize        = sizeof (EFI_LOAD_OPTION) + OptionNameSize + ReferencePathSize;
+
+    DEBUG ((DEBUG_INFO, "OCB: Creating boot option %s of %u bytes\n", OptionName, (UINT32) OptionSize));
+
+    Option = AllocatePool (OptionSize);
+    if (Option == NULL) {
+      DEBUG ((DEBUG_INFO, "OCB: Failed to allocate boot option (%u)\n", (UINT32) OptionSize));
+      FreePool (DevicePath);
       return EFI_OUT_OF_RESOURCES;
     }
 
-    if (BootOrder[1] == OC_BOOT_OPTION) {
+    Option->Attributes         = LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_BOOT;
+    Option->FilePathListLength = (UINT16) ReferencePathSize;
+    CopyMem (Option + 1, OptionName, OptionNameSize);
+    CopyMem ((UINT8 *) (Option + 1) + OptionNameSize, ReferencePath, ReferencePathSize);
+
+    Status = gRT->SetVariable (
+      BootOptionVariable,
+      &gEfiGlobalVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS
+        | EFI_VARIABLE_RUNTIME_ACCESS
+        | EFI_VARIABLE_NON_VOLATILE,
+      OptionSize,
+      Option
+      );
+
+    FreePool (Option);
+    FreePool (DevicePath);
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: Failed to store boot option - %r\n", Status));
+      return Status;
+    }
+
+    Status = gRT->SetVariable (
+      OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
+      &gOcVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS
+        | EFI_VARIABLE_NON_VOLATILE,
+      sizeof (BootOptionIndex),
+      &BootOptionIndex
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCB: Failed to cache boot option - %r\n", Status));
+      //
+      // Discard the Boot Option to prevent duplication on next boot.
+      //
+      gRT->SetVariable (
+        BootOptionVariable,
+        &gEfiGlobalVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS
+          | EFI_VARIABLE_RUNTIME_ACCESS
+          | EFI_VARIABLE_NON_VOLATILE,
+        0,
+        NULL
+        );
+
+      return Status;
+    }
+  }
+
+  if (BootOrderSize != 0) {
+    if (BootOrder[1] == BootOptionIndex) {
       DEBUG ((DEBUG_INFO, "OCB: Boot order has first option as the default option\n"));
       FreePool (BootOrder);
       return EFI_SUCCESS;
     }
 
-    BootOrder[0] = OC_BOOT_OPTION;
+    BootOrder[0] = BootOptionIndex;
 
     Index = 1;
     while (Index <= BootOrderSize / sizeof (UINT16)) {
-      if (BootOrder[Index] == OC_BOOT_OPTION) {
+      if (BootOrder[Index] == BootOptionIndex) {
         DEBUG ((DEBUG_INFO, "OCB: Moving boot option to the front from %u position\n", (UINT32) Index));
         CopyMem (
           &BootOrder[Index],
@@ -1015,7 +1099,6 @@ InternalRegisterBootOption (
 
     FreePool (BootOrder);
   } else {
-    NewBootOrder = OC_BOOT_OPTION;
     Status = gRT->SetVariable (
       EFI_BOOT_ORDER_VARIABLE_NAME,
       &gEfiGlobalVariableGuid,
@@ -1023,7 +1106,7 @@ InternalRegisterBootOption (
         | EFI_VARIABLE_RUNTIME_ACCESS
         | EFI_VARIABLE_NON_VOLATILE,
       sizeof (UINT16),
-      &NewBootOrder
+      &BootOptionIndex
       );
   }
 
@@ -1035,7 +1118,8 @@ EFI_STATUS
 OcRegisterBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
-  IN CONST CHAR16    *FilePath
+  IN CONST CHAR16    *FilePath,
+  IN BOOLEAN         ShortForm
   )
 {
   EFI_STATUS                    Status;
@@ -1060,7 +1144,8 @@ OcRegisterBootOption (
   Status = InternalRegisterBootOption (
     OptionName,
     DeviceHandle,
-    FilePath
+    FilePath,
+    ShortForm
     );
 
   if (FwRuntime != NULL) {

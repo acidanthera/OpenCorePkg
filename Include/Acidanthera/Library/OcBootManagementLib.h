@@ -101,10 +101,9 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM)
 
 /**
-  Default boot option numbers.
+  Cached Bootstrap Boot Option index.
 **/
-#define OC_BOOT_OPTION                0x9696
-#define OC_BOOT_OPTION_VARIABLE_NAME  L"Boot9696"
+#define OC_BOOTSTRAP_INDEX_VARIABLE_NAME  L"bootstrap-index"
 
 /**
   Picker mode.
@@ -1311,6 +1310,8 @@ OcGetBootOrder (
   @param[in]  OptionName    Option name to create.
   @param[in]  DeviceHandle  Device handle of the file system.
   @param[in]  FilePath      Bootloader path.
+  @param[in]  ShortForm     Whether the Device Path should be written in
+                            short-form.
 
   @retval EFI_SUCCESS on success.
 **/
@@ -1318,7 +1319,8 @@ EFI_STATUS
 OcRegisterBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
-  IN CONST CHAR16    *FilePath
+  IN CONST CHAR16    *FilePath,
+  IN BOOLEAN         ShortForm
   );
 
 /**

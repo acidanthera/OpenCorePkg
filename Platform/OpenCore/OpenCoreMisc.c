@@ -585,6 +585,53 @@ OcMiscEarlyInit (
   return EFI_SUCCESS;
 }
 
+/**
+  Registers Bootstrap according to the BootProtect mode.
+
+  @param[in]  RootPath     Root load path.
+  @param[in]  LoadHandle   OpenCore loading handle.
+  @param[in]  BootProtect  Value of the BootProtect config option.
+
+  @returns  BootProtect bitmask.
+**/
+STATIC
+UINT32
+RegisterBootstrap (
+  IN CONST CHAR16  *RootPath OPTIONAL,
+  IN  EFI_HANDLE   LoadHandle OPTIONAL,
+  IN CONST CHAR8   *BootProtect
+  )
+{
+  CHAR16  *BootstrapPath;
+  UINTN   BootstrapSize;
+  BOOLEAN ShortForm;
+
+  if (LoadHandle != NULL) {
+    //
+    // Full-form paths cause entry duplication on e.g. HP 15-ab237ne, InsydeH2O.
+    //
+    if (AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
+      ShortForm = FALSE;
+    } else if (AsciiStrCmp (BootProtect, "BootstrapShort") == 0) {
+      ShortForm = TRUE;
+    } else {
+      return 0;
+    }
+
+    ASSERT (RootPath != NULL);
+    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_BOOTSTRAP_PATH);
+    BootstrapPath = AllocatePool (BootstrapSize);
+    if (BootstrapPath != NULL) {
+      UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
+      OcRegisterBootOption (L"OpenCore", LoadHandle, BootstrapPath, ShortForm);
+      FreePool (BootstrapPath);
+      return OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+    }
+  }
+
+  return 0;
+}
+
 VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
@@ -596,8 +643,6 @@ OcMiscMiddleInit (
 {
   CONST CHAR8  *BootProtect;
   UINT32       BootProtectFlag;
-  CHAR16       *BootstrapPath;
-  UINTN        BootstrapSize;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
@@ -606,19 +651,7 @@ OcMiscMiddleInit (
   BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
   DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode\n", LoadHandle, BootProtect));
 
-  BootProtectFlag = Config->Uefi.Quirks.RequestBootVarRouting ? OC_BOOT_PROTECT_VARIABLE_NAMESPACE : 0;
-
-  if (LoadHandle != NULL && AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
-    ASSERT (RootPath != NULL);
-    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_BOOTSTRAP_PATH);
-    BootstrapPath = AllocatePool (BootstrapSize);
-    if (BootstrapPath != NULL) {
-      UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
-      OcRegisterBootOption (L"OpenCore", LoadHandle, BootstrapPath);
-      BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
-      FreePool (BootstrapPath);
-    }
-  }
+  BootProtectFlag = RegisterBootstrap (RootPath, LoadHandle, BootProtect);
 
   //
   // Inform about boot protection.
