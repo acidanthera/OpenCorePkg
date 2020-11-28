@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added `AllowRelocationBlock` quirk for older macOS and safe mode
 - Fixed CPU frequency calculation on AMD 19h family
 - Updated recovery_urls
+- Fixed `DisableSingleUser` quirk when Apple Secure Boot is enabled
 
 #### v0.6.3
 - Added support for xml comments in plist files

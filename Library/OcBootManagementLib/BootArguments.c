@@ -120,23 +120,31 @@ OcRemoveArgumentFromCmd (
   IN     CONST CHAR8  *Argument
   )
 {
-  CHAR8 *Match;
+  CHAR8  *Match;
+  CHAR8  *Updated;
+  UINTN  ArgumentLength;
 
-  Match = NULL;
+  ArgumentLength = AsciiStrLen (Argument);
+  Match = CommandLine;
 
   do {
-    Match = AsciiStrStr (CommandLine, Argument);
-    if (Match && (Match == CommandLine || *(Match - 1) == ' ')) {
+    Match = AsciiStrStr (Match, Argument);
+    if (Match != NULL && (Match == CommandLine || *(Match - 1) == ' ')
+      && (Match[ArgumentLength - 1] == '='
+        || Match[ArgumentLength] == ' '
+        || Match[ArgumentLength] == '\0')) {
       while (*Match != ' ' && *Match != '\0') {
         *Match++ = ' ';
       }
+    } else if (Match != NULL) {
+      ++Match;
     }
   } while (Match != NULL);
 
   //
   // Write zeroes to reduce data leak
   //
-  CHAR8 *Updated = CommandLine;
+  Updated = CommandLine;
 
   while (CommandLine[0] == ' ') {
     CommandLine++;
