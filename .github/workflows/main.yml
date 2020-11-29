@@ -20,6 +20,7 @@ jobs:
     runs-on: macos-latest
     env:
       JOB_TYPE: BUILD
+    if: github.repository == 'acidanthera/OpenCorePkg'
     steps:
       - uses: actions/checkout@v2
 
@@ -53,6 +54,7 @@ jobs:
   build-linux-clangpdb-gcc5:
     name: Build Linux CLANGPDB/GCC5
     runs-on: ubuntu-latest
+    if: github.repository == 'acidanthera/OpenCorePkg'
     steps:
       - uses: actions/checkout@v2
 
@@ -87,6 +89,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       TOOLCHAINS: CLANG38
+    if: github.repository == 'acidanthera/OpenCorePkg'
     steps:
       - uses: actions/checkout@v2
 
@@ -125,6 +128,7 @@ jobs:
     defaults:
       run:
         shell: bash
+    if: github.repository == 'acidanthera/OpenCorePkg'
     steps:
       - uses: actions/checkout@v2
 
@@ -151,6 +155,7 @@ jobs:
     runs-on: macos-latest
     env:
       JOB_TYPE: ANALYZE
+    if: github.repository == 'acidanthera/OpenCorePkg'
     steps:
       - uses: actions/checkout@v2
 
@@ -186,7 +191,7 @@ jobs:
     runs-on: macos-latest
     env:
       JOB_TYPE: COVERITY
-    if: github.event_name != 'pull_request'
+    if: github.repository == 'acidanthera/OpenCorePkg' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
 
