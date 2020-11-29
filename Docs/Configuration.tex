@@ -3437,6 +3437,9 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   \texttt{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}
   boot option (\texttt{Boot9696}) in UEFI variable storage at bootloader startup. For this option
   to work \texttt{RequestBootVarRouting} is required to be enabled.
+  \item \texttt{BootstrapShort} --- create a short boot option instead of a complete one,
+  otherwise equivalent to \texttt{Bootstrap}. This variant is useful for some Insyde firmwares,
+  which cannot handle full device paths.
   \end{itemize}
 
   This option provides integration with third-party operating system installation and upgrade

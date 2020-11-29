@@ -15,6 +15,8 @@ OpenCore Changelog
 - Fixed CPU frequency calculation on AMD 19h family
 - Updated recovery_urls
 - Fixed `DisableSingleUser` quirk when Apple Secure Boot is enabled
+- Added `BootstrapShort` to workaround buggy Insyde firmwares
+- Changed `Bootstrap` and `BootstrapShort` to choose entry in dynamic
 
 #### v0.6.3
 - Added support for xml comments in plist files
