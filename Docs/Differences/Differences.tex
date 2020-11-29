@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Nov  4 05:07:23 2020
-%DIF ADD ../Configuration.tex        Sun Nov 29 17:01:11 2020
+%DIF DEL PreviousConfiguration.tex   Sun Nov 29 23:41:31 2020
+%DIF ADD ../Configuration.tex        Mon Nov 30 00:28:48 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3815,7 +3815,12 @@ rm vault.pub
   achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
   when using Apple Secure Boot on a virtual machine.
 
-  Enabling Apple Secure Boot is more demanding to incorrect configurations,
+  \DIFaddbegin \DIFadd{Installing macOS with Apple Secure Boot enabled is not possible while using 
+  HFS+ target volume. This may include HFS+ formatted drives when no spare 
+  APFS drive is available.
+}
+
+  \DIFaddend Enabling Apple Secure Boot is more demanding to incorrect configurations,
   buggy macOS installations, and unsupported setups. Things to consider:
 
   \begin{enumerate}

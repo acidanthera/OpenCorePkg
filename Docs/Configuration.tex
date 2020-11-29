@@ -3748,6 +3748,10 @@ rm vault.pub
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
   achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
   when using Apple Secure Boot on a virtual machine.
+  
+  Installing macOS with Apple Secure Boot enabled is not possible while using 
+  HFS+ target volume. This may include HFS+ formatted drives when no spare 
+  APFS drive is available.
 
   Enabling Apple Secure Boot is more demanding to incorrect configurations,
   buggy macOS installations, and unsupported setups. Things to consider:
