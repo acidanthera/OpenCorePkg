@@ -660,82 +660,70 @@ AppleSlideUnlockForSafeMode (
   UINTN       SearchSeqNewSize;
   BOOLEAN     NewWay;
   BOOLEAN     IsSur;
-  UINT8       SurWay;
-
 
   StartOff = ImageBase;
   EndOff   = StartOff + ImageSize - sizeof (SearchSeq) - MaxDist;
 
-  FirstOff  = 0;
-  SecondOff = 0;
-
+  //
+  // Rebranding started with macOS 11. All the ones before had Mac OS X or none.
+  //
   IsSur = FindPattern (
-    (CONST UINT8 *)"Mac OS X 10.",
+    (CONST UINT8 *) "macOS ",
     NULL,
-    L_STR_LEN ("Mac OS X 10."),
+    L_STR_LEN ("macOS "),
     ImageBase,
     (UINT32) ImageSize,
     (INT32) (ImageSize / 2)
-    ) < 0;
+    ) >= 0;
+
+  if (IsSur) {
+    for (FirstOff = 0; StartOff + FirstOff <= EndOff; ++FirstOff) {
+      if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
+        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-1 at off %X\n", (UINT32) FirstOff));
+        SetMem (StartOff + FirstOff, sizeof (SearchSeqSur) + 1, 0x90);
+        return;
+      }
+
+      if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
+        DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode sur-2 at off %X\n", (UINT32) FirstOff));
+        *(StartOff + FirstOff + 3) = 0xEB;
+        return;
+      }
+    }
+
+    DEBUG ((DEBUG_INFO, "OCABC: Failed to find safe mode sur sequence\n"));
+    return;
+  }
+
+  FirstOff  = 0;
+  SecondOff = 0;
 
   do {
     NewWay    = FALSE;
-    SurWay    = 0;
 
     while (StartOff + FirstOff <= EndOff) {
-      if (IsSur) {
-        if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
-          SurWay = 1;
-          break;
-        } else if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
-          SurWay = 2;
-          break;
-        }
-      } else if (StartOff + FirstOff <= EndOff - 1
+      if (StartOff + FirstOff <= EndOff - 1
        && CompareMem (StartOff + FirstOff, SearchSeqNew2, sizeof (SearchSeqNew2)) == 0) {
         SearchSeqNewSize = sizeof (SearchSeqNew2);
         NewWay = TRUE;
         break;
-      } else if (CompareMem (StartOff + FirstOff, SearchSeqNew, sizeof (SearchSeqNew)) == 0) {
+      }
+
+      if (CompareMem (StartOff + FirstOff, SearchSeqNew, sizeof (SearchSeqNew)) == 0) {
         SearchSeqNewSize = sizeof (SearchSeqNew);
         NewWay = TRUE;
         break;
-      } else if (CompareMem (StartOff + FirstOff, SearchSeq, sizeof (SearchSeq)) == 0) {
+      }
+
+      if (CompareMem (StartOff + FirstOff, SearchSeq, sizeof (SearchSeq)) == 0) {
         break;
       }
+
       FirstOff++;
     }
 
-    DEBUG ((
-      DEBUG_INFO,
-      "OCABC: Found kaslr %a way at off %X\n",
-      SurWay ? "sur" : (NewWay ? "new" : "legacy"),
-      (UINT32) FirstOff
-      ));
-
     if (StartOff + FirstOff > EndOff) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OCABC: Failed to find first BOOT_MODE_SAFE | BOOT_MODE_ASLR sequence\n"
-        ));
-      break;
-    }
-
-    if (SurWay == 1) {
-      //
-      // Here we just patch the comparison code and the check by straight nopping.
-      //
-      DEBUG ((DEBUG_VERBOSE, "OCABC: Patching sur safe mode aslr check...\n"));
-      SetMem (StartOff + FirstOff, sizeof (SearchSeqSur) + 1, 0x90);
-      return;
-    }
-
-    if (SurWay == 2) {
-      //
-      // Here we just patch the comparison code and the check by straight nopping.
-      //
-      DEBUG ((DEBUG_VERBOSE, "OCABC: Patching sur safe mode aslr check v2...\n"));
-      *(StartOff + FirstOff + 3) = 0xEB;
+      DEBUG ((DEBUG_INFO, "OCABC: Failed to find safe mode sequence\n"));
       return;
     }
 
@@ -743,10 +731,12 @@ AppleSlideUnlockForSafeMode (
       //
       // Here we just patch the comparison code and the check by straight nopping.
       //
-      DEBUG ((DEBUG_VERBOSE, "OCABC: Patching new safe mode aslr check...\n"));
+      DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode new at off %X\n", (UINT32) FirstOff));
       SetMem (StartOff + FirstOff, SearchSeqNewSize + 1, 0x90);
       return;
     }
+
+    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p1 at off %X\n", (UINT32) FirstOff));
 
     SecondOff = FirstOff + sizeof (SearchSeq);
 
@@ -756,13 +746,14 @@ AppleSlideUnlockForSafeMode (
       SecondOff++;
     }
 
-    DEBUG ((DEBUG_VERBOSE, "OCABC: Found second at off %X\n", (UINT32) SecondOff));
-
     if (FirstOff + MaxDist < SecondOff) {
-      DEBUG ((DEBUG_VERBOSE, "OCABC: Trying next match...\n"));
+      DEBUG ((DEBUG_INFO, "OCABC: Trying safe mode next legacy match\n"));
       SecondOff = 0;
       FirstOff += sizeof (SearchSeq);
+      continue;
     }
+
+    DEBUG ((DEBUG_INFO, "OCABC: Found safe mode legacy p2 at off %X\n", (UINT32) SecondOff));
   } while (SecondOff == 0);
 
   if (SecondOff != 0) {
@@ -771,7 +762,7 @@ AppleSlideUnlockForSafeMode (
     // Since the state values are contradictive (e.g. safe & single at the same time)
     // We are allowed to use this instead of to simulate if (false).
     //
-    DEBUG ((DEBUG_VERBOSE, "OCABC: Patching safe mode aslr check...\n"));
+    DEBUG ((DEBUG_INFO, "OCABC: Patching safe mode legacy\n"));
     SetMem (StartOff + FirstOff, sizeof (SearchSeq), 0xFF);
     SetMem (StartOff + SecondOff, sizeof (SearchSeq), 0xFF);
   }
