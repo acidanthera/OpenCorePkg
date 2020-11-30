@@ -16,7 +16,7 @@ OpenCore Changelog
 - Updated recovery_urls
 - Fixed `DisableSingleUser` quirk when Apple Secure Boot is enabled
 - Added `BootstrapShort` to workaround buggy Insyde firmwares
-- Changed `Bootstrap` and `BootstrapShort` to choose entry in dynamic
+- Changed `Bootstrap(Short)` to choose dynamic entry (requires NVRAM reset)
 
 #### v0.6.3
 - Added support for xml comments in plist files
