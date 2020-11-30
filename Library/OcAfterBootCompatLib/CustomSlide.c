@@ -659,6 +659,7 @@ AppleSlideUnlockForSafeMode (
   UINTN       SecondOff;
   UINTN       SearchSeqNewSize;
   BOOLEAN     NewWay;
+  BOOLEAN     IsSur;
   UINT8       SurWay;
 
 
@@ -668,12 +669,29 @@ AppleSlideUnlockForSafeMode (
   FirstOff  = 0;
   SecondOff = 0;
 
+  IsSur = FindPattern (
+    (CONST UINT8 *)"Mac OS X 10.",
+    NULL,
+    L_STR_LEN ("Mac OS X 10."),
+    ImageBase,
+    ImageSize,
+    (INT32) (ImageSize / 2)
+    ) < 0;
+
   do {
     NewWay    = FALSE;
     SurWay    = 0;
 
     while (StartOff + FirstOff <= EndOff) {
-      if (StartOff + FirstOff <= EndOff - 1
+      if (IsSur) {
+        if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
+          SurWay = 1;
+          break;
+        } else if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
+          SurWay = 2;
+          break;
+        }
+      } else if (StartOff + FirstOff <= EndOff - 1
        && CompareMem (StartOff + FirstOff, SearchSeqNew2, sizeof (SearchSeqNew2)) == 0) {
         SearchSeqNewSize = sizeof (SearchSeqNew2);
         NewWay = TRUE;
@@ -683,12 +701,6 @@ AppleSlideUnlockForSafeMode (
         NewWay = TRUE;
         break;
       } else if (CompareMem (StartOff + FirstOff, SearchSeq, sizeof (SearchSeq)) == 0) {
-        break;
-      } else if (CompareMem (StartOff + FirstOff, SearchSeqSur, sizeof (SearchSeqSur)) == 0) {
-        SurWay = 1;
-        break;
-      } else if (CompareMem (StartOff + FirstOff, SearchSeqSur2, sizeof (SearchSeqSur2)) == 0) {
-        SurWay = 2;
         break;
       }
       FirstOff++;
