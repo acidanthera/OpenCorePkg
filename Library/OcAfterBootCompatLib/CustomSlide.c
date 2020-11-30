@@ -674,7 +674,7 @@ AppleSlideUnlockForSafeMode (
     NULL,
     L_STR_LEN ("Mac OS X 10."),
     ImageBase,
-    ImageSize,
+    (UINT32) ImageSize,
     (INT32) (ImageSize / 2)
     ) < 0;
 
