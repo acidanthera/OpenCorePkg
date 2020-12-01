@@ -17,7 +17,7 @@ if [ "$OCPath" = "" ]; then
   OCPath=../../EFI/OC
 fi
 
-KeyPath="${OCPath}/Keys"
+KeyPath="/tmp/Keys"
 OCBin="${OCPath}/OpenCore.efi"
 RootCA="${KeyPath}/ca.pem"
 PrivKey="${KeyPath}/privatekey.cer"
@@ -76,6 +76,11 @@ if [ "${off}" -le 16 ]; then
 fi
 
 /bin/dd of="${OCBin}" if="${PubKey}" bs=1 seek="${off}" count=528 conv=notrunc || abort "Failed to bin-patch ${OCBin}"
+
+echo "Cleaning up keys"
+if [ -d "${KeyPath}" ]; then
+  rm -rf "${KeyPath}" | abort "Failed to clean up keys ${KeyPath}!"
+fi
 
 echo "All done!"
 exit 0
