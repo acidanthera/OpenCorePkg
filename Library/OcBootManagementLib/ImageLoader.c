@@ -611,8 +611,6 @@ DetectCapabilities (
   //
   // Find Mac OS X version pattern.
   // This pattern started to appear with 10.7.
-  // We will look in the second half of the binary to optimise
-  // the search a little.
   //
   Result = FindPattern (
     (CONST UINT8 *)"Mac OS X 10.",
@@ -620,7 +618,7 @@ DetectCapabilities (
     L_STR_LEN ("Mac OS X 10."),
     SourceBuffer,
     SourceSize - sizeof (UINT32),
-    (INT32) (SourceSize / 2)
+    0
     );
 
 #ifdef MDE_CPU_IA32

@@ -673,7 +673,7 @@ AppleSlideUnlockForSafeMode (
     L_STR_LEN ("macOS "),
     ImageBase,
     (UINT32) ImageSize,
-    (INT32) (ImageSize / 2)
+    0
     ) >= 0;
 
   if (IsSur) {
