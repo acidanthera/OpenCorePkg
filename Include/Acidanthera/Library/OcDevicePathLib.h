@@ -377,4 +377,11 @@ OcGetNextLoadOptionDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *FullPath
   );
 
+BOOLEAN
+OcDevicePathHasFilePathSuffix (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN CHAR16                    *Suffix,
+  IN UINTN                     SuffixSize
+  );
+
 #endif // OC_DEVICE_PATH_LIB_H

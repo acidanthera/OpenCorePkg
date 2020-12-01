@@ -1231,3 +1231,49 @@ OcGetNumDevicePathInstances (
 
   return NumInstances;
 }
+
+BOOLEAN
+OcDevicePathHasFilePathSuffix (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN CHAR16                    *Suffix,
+  IN UINTN                     SuffixSize
+  )
+{
+  FILEPATH_DEVICE_PATH *FilePath;
+  UINTN                PathNameSize;
+  UINTN                PathNameAllocSize;
+  CHAR16               *PathName;
+  INTN                 Result;
+
+  FilePath = (FILEPATH_DEVICE_PATH *) FindDevicePathNodeWithType (
+    DevicePath,
+    MEDIA_DEVICE_PATH,
+    MEDIA_FILEPATH_DP
+    );
+  if (FilePath == NULL) {
+    return FALSE;
+  }
+
+  PathNameSize = OcFileDevicePathFullNameSize (&FilePath->Header);
+  if (PathNameSize < SuffixSize) {
+    return FALSE;
+  }
+
+  PathName = AllocatePool (PathNameSize);
+  if (PathName == NULL) {
+    return FALSE;
+  }
+
+  PathNameAllocSize = PathNameSize;
+
+  OcFileDevicePathFullName (PathName, FilePath, PathNameSize);
+
+  Result = OcStriCmp (
+    &PathName[PathNameSize - SuffixSize],
+    Suffix
+    );
+
+  FreePool (PathName);
+
+  return Result == 0;
+}
