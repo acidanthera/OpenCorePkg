@@ -248,7 +248,8 @@ DeleteVariables (
 
 VOID *
 InternalGetBootstrapBootData (
-  OUT UINTN  *OptionSize
+  OUT UINTN   *OptionSize,
+  OUT UINT16  *Option
   )
 {
   EFI_STATUS               Status;
@@ -302,6 +303,7 @@ InternalGetBootstrapBootData (
     BootOrder[0],
     &gEfiGlobalVariableGuid
     );
+  *Option = BootOrder[0];
 
   FreePool (BootOrder);
 
@@ -320,7 +322,6 @@ OcDeleteVariables (
   UINT32                       BootProtect;
   VOID                         *BootOption;
   UINTN                        BootOptionSize;
-  CHAR16                       BootOptionVariable[L_STR_LEN (L"Boot####") + 1];
   UINT16                       BootOptionIndex;
 
   DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup...\n"));
@@ -356,13 +357,13 @@ OcDeleteVariables (
   }
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootOption = InternalGetBootstrapBootData (&BootOptionSize);
+    BootOption = InternalGetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
     if (BootOption != NULL) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Found %g:%s for preservation of %u bytes\n",
+        "OCB: Found %g:Boot%04x for preservation of %u bytes\n",
         &gEfiGlobalVariableGuid,
-        BootOptionVariable,
+        BootOptionIndex,
         (UINT32) BootOptionSize
         ));
     } else {
@@ -391,7 +392,7 @@ OcDeleteVariables (
         );
     }
 
-    DEBUG ((DEBUG_INFO, "OCB: Restored %s - %r\n", BootOptionVariable, Status));
+    DEBUG ((DEBUG_INFO, "OCB: Set bootstrap option to Boot%04x - %r\n", BootOptionIndex, Status));
     FreePool (BootOption);
   }
 
