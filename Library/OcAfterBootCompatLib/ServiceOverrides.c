@@ -318,6 +318,19 @@ DevirtualiseMmio (
 }
 
 /**
+**/
+STATIC
+VOID
+ApplyBooterPatches (
+  // TODO
+  )
+{
+  //
+  // TODO
+  //
+}
+
+/**
   UEFI Boot Services AllocatePages override.
   Returns pages from free memory block to boot.efi for kernel boot image.
 **/
@@ -768,6 +781,11 @@ OcStartImage (
       &Config
       );
   }
+
+  //
+  // Apply customised booter patches.
+  //
+  // ApplyBooterPatches (TODO);
 
   Status = BootCompat->ServicePtrs.StartImage (
     ImageHandle,

@@ -16,6 +16,52 @@
 #define OC_AFTER_BOOT_COMPAT_LIB_H
 
 /**
+  Booter patch structure.
+**/
+typedef struct OC_BOOTER_PATCH_ {
+  //
+  // Target architecture.
+  //
+  CONST CHAR8  *Arch;
+  //
+  // Find bytes.
+  //
+  CONST UINT8  *Find;
+  //
+  // Replace bytes.
+  //
+  CONST UINT8  *Replace;
+  //
+  // Find mask or NULL.
+  //
+  CONST UINT8  *Mask;
+  //
+  // Replace mask or NULL.
+  //
+  CONST UINT8  *ReplaceMask;
+  //
+  // Patch size.
+  //
+  UINT32       Size;
+  //
+  // Replace count or 0 for all.
+  //
+  UINT32       Count;
+  //
+  // Skip count or 0 to start from 1 match.
+  //
+  UINT32       Skip;
+  //
+  // Limit replacement size to this value or 0, which assumes table size.
+  //
+  UINT32       Limit;
+  //
+  // Identifier for bootloader type. (e.g. boot.efi for Apple)
+  //
+  CONST CHAR8  *Identifier;
+} OC_BOOTER_PATCH;
+
+/**
   Apple Boot Compatibility layer configuration.
 **/
 typedef struct OC_ABC_SETTINGS_ {
@@ -123,6 +169,14 @@ typedef struct OC_ABC_SETTINGS_ {
   /// Size of list of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   UINTN                MmioWhitelistSize;
+  ///
+  /// List of booter patches.
+  ///
+  OC_BOOTER_PATCH      *BooterPatches;
+  ///
+  /// Size of list of booter patches.
+  ///
+  UINTN                BooterPatchesSize;
   ///
   /// List of NULL-terminated handlers for TPL_APPLICATION execution within ExitBootServices.
   ///
