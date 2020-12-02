@@ -202,7 +202,7 @@ InternalDebugBootEnvironment (
         FreePool (DevicePathText);
       }
 
-      FreePool (UefiDevicePath);
+      FreePool (LoadOption);
     }
 
     //
@@ -844,26 +844,41 @@ OcSetDefaultBootEntry (
   return Status;
 }
 
+/*
+  Retrieves the Bootstrap Load Option data, matching it from BootOrder by
+  finding a path ending with MatchSuffix.
+
+  @param[out] LoadOptionSize  The size, in bytes, of the Load Option data.
+  @param[out] BootOption      The index of the Boot Option.
+  @param[out] LoadPath        Pointer into the Load Option data to the
+                              Device Path.
+  @param[in] BootOptions      The list of Boot Option indices to match.
+  @param[in] NumBootOptions   The number of elements in BootOptions.
+  @param[in] MatchSuffix      The file Device Path suffix of a matching option.
+  @param[in] MatchSuffixLen   The length, in characters, of MatchSuffix.
+*/
 EFI_LOAD_OPTION *
 InternalGetBoostrapOptionData (
   OUT UINTN                    *LoadOptionSize,
   OUT UINT16                   *BootOption,
   OUT EFI_DEVICE_PATH_PROTOCOL **LoadPath,
   IN  UINT16                   *BootOptions,
-  IN  UINTN                    NumBootOptions
+  IN  UINTN                    NumBootOptions,
+  IN  CHAR16                   *MatchSuffix,
+  IN  UINTN                    MatchSuffixLen
   )
 {
-  UINTN                    BootIndex;
+  UINTN                    BootOptionIndex;
   EFI_LOAD_OPTION          *CurrLoadOption;
   EFI_DEVICE_PATH_PROTOCOL *CurrDevicePath;
   BOOLEAN                  IsBooptstrap;
   //
   // Check all boot options for trailing "\Bootstrap\Bootstrap.efi".
   //
-  for (BootIndex = 0; BootIndex < NumBootOptions; ++BootIndex) {
+  for (BootOptionIndex = 0; BootOptionIndex < NumBootOptions; ++BootOptionIndex) {
     CurrLoadOption = InternalGetBootOptionData (
       LoadOptionSize,
-      BootOptions[BootIndex],
+      BootOptions[BootOptionIndex],
       &gEfiGlobalVariableGuid
       );
     if (CurrLoadOption == NULL) {
@@ -881,8 +896,8 @@ InternalGetBoostrapOptionData (
 
     IsBooptstrap = OcDevicePathHasFilePathSuffix (
       CurrDevicePath,
-      OPEN_CORE_BOOTSTRAP_PATH,
-      L_STR_SIZE (OPEN_CORE_BOOTSTRAP_PATH)
+      MatchSuffix,
+      MatchSuffixLen
       );
     if (IsBooptstrap) {
       break;
@@ -891,25 +906,24 @@ InternalGetBoostrapOptionData (
     FreePool (CurrLoadOption);
   }
 
-  if (BootIndex == NumBootOptions) {
+  if (BootOptionIndex == NumBootOptions) {
     return NULL;
   }
 
-  if (LoadPath != NULL) {
-    *LoadPath   = CurrDevicePath;
-  }
-
-  *BootOption = BootIndex;
+  *LoadPath   = CurrDevicePath;
+  *BootOption = BootOptionIndex;
   return CurrLoadOption;
 }
 
 STATIC
 EFI_STATUS
-InternalRegisterBootOption (
+InternalRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm
+  IN BOOLEAN         ShortForm,
+  IN CHAR16          *MatchSuffix,
+  IN UINTN           MatchSuffixLen
   )
 {
   EFI_STATUS                 Status;
@@ -1005,7 +1019,9 @@ InternalRegisterBootOption (
       &BootOptionIndex,
       &CurrDevicePath,
       &BootOrder[1],
-      BootOrderSize / sizeof (*BootOrder)
+      BootOrderSize / sizeof (*BootOrder),
+      MatchSuffix,
+      MatchSuffixLen
       );
     CurrOptionExists = Option != NULL;
     if (CurrOptionExists) {
@@ -1089,32 +1105,6 @@ InternalRegisterBootOption (
       DEBUG ((DEBUG_INFO, "OCB: Failed to store boot option - %r\n", Status));
       return Status;
     }
-
-    Status = gRT->SetVariable (
-      OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-      &gOcVendorVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS
-        | EFI_VARIABLE_NON_VOLATILE,
-      sizeof (BootOptionIndex),
-      &BootOptionIndex
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCB: Failed to cache boot option - %r\n", Status));
-      //
-      // Discard the Boot Option to prevent duplication on next boot.
-      //
-      gRT->SetVariable (
-        BootOptionVariable,
-        &gEfiGlobalVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS
-          | EFI_VARIABLE_RUNTIME_ACCESS
-          | EFI_VARIABLE_NON_VOLATILE,
-        0,
-        NULL
-        );
-
-      return Status;
-    }
   }
 
   if (BootOrderSize != 0) {
@@ -1169,11 +1159,13 @@ InternalRegisterBootOption (
 }
 
 EFI_STATUS
-OcRegisterBootOption (
+OcRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm
+  IN BOOLEAN         ShortForm,
+  IN CHAR16          *MatchSuffix,
+  IN UINTN           MatchSuffixLen
   )
 {
   EFI_STATUS                    Status;
@@ -1195,11 +1187,13 @@ OcRegisterBootOption (
     DEBUG ((DEBUG_INFO, "OCB: Missing FW NVRAM, going on...\n"));
   }
 
-  Status = InternalRegisterBootOption (
+  Status = InternalRegisterBootstrapBootOption (
     OptionName,
     DeviceHandle,
     FilePath,
-    ShortForm
+    ShortForm,
+    MatchSuffix,
+    MatchSuffixLen
     );
 
   if (FwRuntime != NULL) {

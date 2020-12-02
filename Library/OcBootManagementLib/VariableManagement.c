@@ -254,7 +254,6 @@ InternalGetBootstrapBootData (
   EFI_STATUS               Status;
   UINTN                    BootOrderSize;
   UINT16                   *BootOrder;
-  UINT16                   OptionIndex;
   VOID                     *OptionData;
 
   BootOrderSize = 0;
@@ -295,13 +294,13 @@ InternalGetBootstrapBootData (
     FreePool (BootOrder);
     return NULL;
   }
-
-  OptionData = InternalGetBoostrapOptionData (
+  //
+  // OpenCore moved Bootstrap to BootOrder[0] on initialisation.
+  //
+  OptionData = InternalGetBootOptionData (
     OptionSize,
-    &OptionIndex,
-    NULL,
-    BootOrder,
-    BootOrderSize / sizeof (UINT16)
+    BootOrder[0],
+    &gEfiGlobalVariableGuid
     );
 
   FreePool (BootOrder);
@@ -382,36 +381,6 @@ OcDeleteVariables (
       BootOptionSize,
       BootOption
       );
-    if (!EFI_ERROR (Status)) {
-      Status = gRT->SetVariable (
-        OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-        sizeof (BootOptionIndex),
-        &BootOptionIndex
-        );
-      if (EFI_ERROR (Status)) {
-        //
-        // Discard the inconsistent Bootstrap info to prevent duplication on
-        // next boot.
-        //
-        gRT->SetVariable (
-          OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-          &gOcVendorVariableGuid,
-          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-          0,
-          NULL
-          );
-
-        gRT->SetVariable (
-          L"Boot0000",
-          &gEfiGlobalVariableGuid,
-          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-          0,
-          NULL
-          );
-      }
-    }
     if (!EFI_ERROR (Status)) {
       Status = gRT->SetVariable (
         EFI_BOOT_ORDER_VARIABLE_NAME,

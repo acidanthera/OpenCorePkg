@@ -623,7 +623,14 @@ RegisterBootstrap (
     BootstrapPath = AllocatePool (BootstrapSize);
     if (BootstrapPath != NULL) {
       UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
-      OcRegisterBootOption (L"OpenCore", LoadHandle, BootstrapPath, ShortForm);
+      OcRegisterBootstrapBootOption (
+        L"OpenCore",
+        LoadHandle,
+        BootstrapPath,
+        ShortForm,
+        OPEN_CORE_BOOTSTRAP_PATH,
+        L_STR_LEN (OPEN_CORE_BOOTSTRAP_PATH)
+        );
       FreePool (BootstrapPath);
       return OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
     }

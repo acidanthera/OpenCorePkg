@@ -169,13 +169,4 @@ InternalSystemActionResetNvram (
   VOID
   );
 
-EFI_LOAD_OPTION *
-InternalGetBoostrapOptionData (
-  OUT UINTN                    *LoadOptionSize,
-  OUT UINT16                   *BootOption,
-  OUT EFI_DEVICE_PATH_PROTOCOL **LoadPath,
-  IN  UINT16                   *BootOptions,
-  IN  UINTN                    NumBootOptions
-  );
-
 #endif // BOOT_MANAGEMENET_INTERNAL_H
