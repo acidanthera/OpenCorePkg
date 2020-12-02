@@ -911,7 +911,7 @@ InternalGetBoostrapOptionData (
   }
 
   *LoadPath   = CurrDevicePath;
-  *BootOption = BootOptionIndex;
+  *BootOption = BootOptions[BootOptionIndex];
   return CurrLoadOption;
 }
 
