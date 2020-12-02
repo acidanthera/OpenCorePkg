@@ -84,6 +84,5 @@ fi
 
 /bin/dd of="${OCBin}" if="${PubKey}" bs=1 seek="${off}" count=528 conv=notrunc || abort "Failed to bin-patch ${OCBin}"
 
-
 echo "All done!"
 exit 0
