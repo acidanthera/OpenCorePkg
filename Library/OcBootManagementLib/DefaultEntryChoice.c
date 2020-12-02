@@ -993,8 +993,10 @@ InternalRegisterBootstrapBootOption (
     Status
     ));
 
+  BootOrder = NULL;
+
   if (Status == EFI_BUFFER_TOO_SMALL && BootOrderSize > 0 && BootOrderSize % sizeof (UINT16) == 0) {
-    BootOrder = AllocatePool (BootOrderSize + sizeof (UINT16));
+    BootOrder = AllocateZeroPool (BootOrderSize + sizeof (UINT16));
     if (BootOrder == NULL) {
       DEBUG ((DEBUG_INFO, "OCB: Failed to allocate boot order\n"));
       return EFI_OUT_OF_RESOURCES;
@@ -1034,9 +1036,10 @@ InternalRegisterBootstrapBootOption (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Have existing option %d, valid %d\n",
-    CurrOptionExists,
-    CurrOptionValid
+    "OCB: %a existing option at Boot%04x, %a\n",
+    CurrOptionExists ? "Have" : "No",
+    BootOrder[1],
+    CurrOptionValid ? "valid" : "invalid"
     ));
 
   if (!CurrOptionValid) {
