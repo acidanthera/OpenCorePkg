@@ -25,6 +25,8 @@ OC_STRUCTORS       (OC_ACPI_CONFIG, ())
 
 OC_STRUCTORS       (OC_BOOTER_WL_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_BOOTER_WL_ARRAY)
+OC_STRUCTORS       (OC_BOOTER_PATCH_ENTRY, ())
+OC_ARRAY_STRUCTORS (OC_BOOTER_PATCH_ARRAY)
 OC_STRUCTORS       (OC_BOOTER_QUIRKS, ())
 OC_STRUCTORS       (OC_BOOTER_CONFIG, ())
 
@@ -194,8 +196,29 @@ mBooterQuirksSchema[] = {
 
 STATIC
 OC_SCHEMA
+mBooterPatchSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Arch",           OC_BOOTER_PATCH_ENTRY, Arch),
+  OC_SCHEMA_STRING_IN    ("Comment",        OC_BOOTER_PATCH_ENTRY, Comment),
+  OC_SCHEMA_INTEGER_IN   ("Count",          OC_BOOTER_PATCH_ENTRY, Count),
+  OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_BOOTER_PATCH_ENTRY, Enabled),
+  OC_SCHEMA_DATA_IN      ("Find",           OC_BOOTER_PATCH_ENTRY, Find),
+  OC_SCHEMA_STRING_IN    ("Identifier",     OC_BOOTER_PATCH_ENTRY, Identifier),
+  OC_SCHEMA_INTEGER_IN   ("Limit",          OC_BOOTER_PATCH_ENTRY, Limit),
+  OC_SCHEMA_DATA_IN      ("Mask",           OC_BOOTER_PATCH_ENTRY, Mask),
+  OC_SCHEMA_DATA_IN      ("Replace",        OC_BOOTER_PATCH_ENTRY, Replace),
+  OC_SCHEMA_DATA_IN      ("ReplaceMask",    OC_BOOTER_PATCH_ENTRY, ReplaceMask),
+  OC_SCHEMA_INTEGER_IN   ("Skip",           OC_BOOTER_PATCH_ENTRY, Skip)
+};
+
+STATIC
+OC_SCHEMA
+mBooterPatchSchema = OC_SCHEMA_DICT (NULL, mBooterPatchSchemaEntry);
+
+STATIC
+OC_SCHEMA
 mBooterConfigurationSchema[] = {
   OC_SCHEMA_ARRAY_IN   ("MmioWhitelist",   OC_GLOBAL_CONFIG, Booter.MmioWhitelist, &mBooterWhitelistSchema),
+  OC_SCHEMA_ARRAY_IN   ("Patch",           OC_GLOBAL_CONFIG, Booter.Patch, &mBooterPatchSchema),
   OC_SCHEMA_DICT       ("Quirks",          mBooterQuirksSchema),
 };
 
