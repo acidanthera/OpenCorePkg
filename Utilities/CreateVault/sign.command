@@ -50,7 +50,7 @@ if [ ! -x ./RsaTool ] || [ ! -x ./create_vault.sh ]; then
   fi
 fi
 
-trap cleanup EXIT ERR INT TERM
+trap cleanup EXIT INT TERM
 
 if [ ! -d "${KeyPath}" ]; then
   /bin/mkdir -p "${KeyPath}" || abort "Failed to create path ${KeyPath}"
@@ -83,7 +83,6 @@ if [ "${off}" -le 16 ]; then
 fi
 
 /bin/dd of="${OCBin}" if="${PubKey}" bs=1 seek="${off}" count=528 conv=notrunc || abort "Failed to bin-patch ${OCBin}"
-
 
 
 echo "All done!"
