@@ -783,9 +783,9 @@ OcStartImage (
   }
 
   //
-  // Apply customised booter patches.
+  // Apply customised booter patches. (TODO)
   //
-  // ApplyBooterPatches (TODO);
+  ApplyBooterPatches ();
 
   Status = BootCompat->ServicePtrs.StartImage (
     ImageHandle,
