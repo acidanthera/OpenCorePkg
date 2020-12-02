@@ -1026,7 +1026,7 @@ InternalRegisterBootstrapBootOption (
     CurrOptionExists = Option != NULL;
     if (CurrOptionExists) {
       CurrOptionValid  = IsDevicePathEqual (ReferencePath, CurrDevicePath);
-      FreePool (CurrDevicePath);
+      FreePool (Option);
     }
   } else {
     BootOrderSize = 0;
