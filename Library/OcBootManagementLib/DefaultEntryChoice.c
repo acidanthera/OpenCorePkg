@@ -1053,7 +1053,12 @@ InternalRegisterBootstrapBootOption (
       // Find the lowest unused Boot#### index. In the absolutely unrealistic case
       // that all entries are occupied, always overwrite BootFFFF.
       //
-      for (BootOptionIndex = 0; BootOptionIndex < 0xFFFF; ++BootOptionIndex) {
+      // Boot0000 is reserved on ASUS boards and is treated like a deleted entry.
+      // Setting Boot0000 will essentially cause entries to duplicate and eventual
+      // BIOS brick as ASUS boards simply zero removed boot entries instead of
+      // shrinking BootOrder size. Reproduced on ASUS ROG STRIX Z370-F GAMING.
+      //
+      for (BootOptionIndex = 1; BootOptionIndex < 0xFFFF; ++BootOptionIndex) {
         for (OrderIndex = 0; OrderIndex < BootOrderSize / sizeof (*BootOrder); ++OrderIndex) {
           if (BootOrder[OrderIndex + 1] == BootOptionIndex) {
             break;

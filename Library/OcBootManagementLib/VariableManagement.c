@@ -374,9 +374,9 @@ OcDeleteVariables (
   DeleteVariables ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootOptionIndex = 0;
+    BootOptionIndex = 1;
     Status = gRT->SetVariable (
-      L"Boot0000",
+      L"Boot0001",
       &gEfiGlobalVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
       BootOptionSize,
