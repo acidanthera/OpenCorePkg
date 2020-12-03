@@ -154,6 +154,21 @@ OcFileDevicePathNameLen (
   );
 
 /**
+  Retrieve the length of the full file path described by DevicePath.
+
+  @param[in] DevicePath  The Device Path to inspect.
+
+  @returns   The length of the full file path.
+  @retval 0  DevicePath does not start with a File Path node or contains
+             non-terminating nodes that are not File Path nodes.
+
+**/
+UINTN
+OcFileDevicePathFullNameLen (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  );
+
+/**
   Retrieve the size of the full file path described by DevicePath.
 
   @param[in] DevicePath  The Device Path to inspect.
@@ -375,6 +390,22 @@ EFI_DEVICE_PATH_PROTOCOL *
 OcGetNextLoadOptionDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *FilePath,
   IN EFI_DEVICE_PATH_PROTOCOL  *FullPath
+  );
+
+/*
+  Checks DevicePath for whether it ends with file path Suffix.
+
+  @param[in] DevicePath    The Device Path to check.
+  @param[in] Suffix        The suffix to check for.
+  @param[in] SuffixLen  Must be equal to StrLen(Suffix).
+
+  @returns  Whether DevicePath ends with Suffix.
+*/
+BOOLEAN
+OcDevicePathHasFilePathSuffix (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN CHAR16                    *Suffix,
+  IN UINTN                     SuffixLen
   );
 
 #endif // OC_DEVICE_PATH_LIB_H

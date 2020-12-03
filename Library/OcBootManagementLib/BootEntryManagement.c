@@ -1006,6 +1006,8 @@ AddBootEntryFromBootOption (
   INTN                       NumPatchedNodes;
   BOOLEAN                    IsAppleLegacy;
   BOOLEAN                    IsRoot;
+  EFI_LOAD_OPTION            *LoadOption;
+  UINTN                      LoadOptionSize;
 
   DEBUG ((DEBUG_INFO, "OCB: Building entry from Boot%04x\n", BootOption));
 
@@ -1014,16 +1016,28 @@ AddBootEntryFromBootOption (
   // Discard load options for security reasons.
   // Also discard boot name to avoid confusion.
   //
-  DevicePath = InternalGetBootOptionData (
+  LoadOption = InternalGetBootOptionData (
+    &LoadOptionSize,
     BootOption,
-    BootContext->BootVariableGuid,
-    NULL,
-    NULL,
-    NULL
+    BootContext->BootVariableGuid
     );
-  if (DevicePath == NULL) {
+  if (LoadOption == NULL) {
     return EFI_NOT_FOUND;
   }
+
+  DevicePath = InternalGetBootOptionPath (
+    LoadOption,
+    LoadOptionSize
+    );
+  if (DevicePath == NULL) {
+    FreePool (LoadOption);
+    return EFI_NOT_FOUND;
+  }
+  //
+  // Re-use the Load Option buffer for the Device Path.
+  //
+  CopyMem (LoadOption, DevicePath, LoadOption->FilePathListLength);
+  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) LoadOption;
 
   //
   // Get BootCamp device path stored in special variable.
