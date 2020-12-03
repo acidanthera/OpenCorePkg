@@ -61,7 +61,7 @@ RunShowMenu (
 
   if (!BootContext->PickerContext->ApplePickerUnsupported
     && BootContext->PickerContext->PickerMode == OcPickerModeApple) {
-    Status = OcRunAppleBootPicker ();
+    Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
     //
     // This should not return on success.
     //
@@ -540,7 +540,7 @@ OcRunBootPicker (
   }
 
   if (Context->PickerCommand == OcPickerShowPicker && Context->PickerMode == OcPickerModeApple) {
-    Status = OcRunAppleBootPicker ();
+    Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
     DEBUG ((DEBUG_INFO, "OCB: Apple BootPicker failed - %r, fallback to builtin\n", Status));
     Context->ApplePickerUnsupported = TRUE;
   }
@@ -707,8 +707,9 @@ OcRunBootPicker (
 }
 
 EFI_STATUS
-OcRunAppleBootPicker (
-  VOID
+OcRunFirmwareApplication (
+  IN EFI_GUID  *ApplicationGuid,
+  IN BOOLEAN   SetReason
   )
 {
   EFI_STATUS                           Status;
@@ -716,11 +717,11 @@ OcRunAppleBootPicker (
   EFI_DEVICE_PATH_PROTOCOL             *Dp;
   APPLE_PICKER_ENTRY_REASON            PickerEntryReason;
 
-  DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to find...\n"));
+  DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to find %g...\n", ApplicationGuid));
 
-  Dp = CreateFvFileDevicePath (&gAppleBootPickerFileGuid);
+  Dp = CreateFvFileDevicePath (ApplicationGuid);
   if (Dp != NULL) {
-    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to load...\n"));
+    DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to load %g...\n", ApplicationGuid));
     NewHandle = NULL;
     Status = gBS->LoadImage (
       FALSE,
@@ -738,16 +739,24 @@ OcRunAppleBootPicker (
   }
 
   if (!EFI_ERROR (Status)) {
-    PickerEntryReason = ApplePickerEntryReasonUnknown;
-    Status = gRT->SetVariable (
-      APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
-      &gAppleVendorVariableGuid,
-      EFI_VARIABLE_BOOTSERVICE_ACCESS,
-      sizeof (PickerEntryReason),
-      &PickerEntryReason
-      );
+    if (SetReason) {
+      PickerEntryReason = ApplePickerEntryReasonUnknown;
+      Status = gRT->SetVariable (
+        APPLE_PICKER_ENTRY_REASON_VARIABLE_NAME,
+        &gAppleVendorVariableGuid,
+        EFI_VARIABLE_BOOTSERVICE_ACCESS,
+        sizeof (PickerEntryReason),
+        &PickerEntryReason
+        );
+    }
 
-    DEBUG ((DEBUG_INFO, "OCB: OcRunAppleBootPicker attempting to start with var %r...\n", Status));
+    DEBUG ((
+      DEBUG_INFO,
+      "OCB: run fw app attempting to start %g (%d) %r...\n",
+      ApplicationGuid,
+      SetReason,
+      Status
+      ));
     Status = gBS->StartImage (
       NewHandle,
       NULL,

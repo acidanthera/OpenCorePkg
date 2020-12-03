@@ -1210,13 +1210,17 @@ OcDeleteVariables (
   );
 
 /**
-  Launch Apple BootPicker.
+  Launch firmware application.
+
+  @param[in] ApplicationGuid  Application GUID identifier in the firmware.
+  @param[in] SetReason        Pass enter reason (specific to Apple BootPicker).
 
   @retval error code, should not return. 
 **/
 EFI_STATUS
-OcRunAppleBootPicker (
-  VOID
+OcRunFirmwareApplication (
+  IN EFI_GUID  *ApplicationGuid,
+  IN BOOLEAN   SetReason
   );
 
 /**

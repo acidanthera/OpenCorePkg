@@ -61,7 +61,7 @@ UefiMain (
     return Status;
   }
 
-  Status = OcRunAppleBootPicker ();
+  Status = OcRunFirmwareApplication (&gAppleBootPickerFileGuid, TRUE);
 
   Pixel.Raw = 0x0;
   if (Status == EFI_NOT_FOUND) {
