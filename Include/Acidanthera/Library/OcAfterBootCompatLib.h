@@ -20,6 +20,10 @@
 **/
 typedef struct OC_BOOTER_PATCH_ {
   //
+  // Comment.
+  //
+  CHAR8        *Comment;
+  //
   // Target architecture.
   //
   CONST CHAR8  *Arch;
