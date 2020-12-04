@@ -20,7 +20,7 @@
 **/
 typedef struct OC_BOOTER_PATCH_ {
   //
-  // Comment.
+  // Comment from user.
   //
   CHAR8        *Comment;
   //
@@ -56,11 +56,11 @@ typedef struct OC_BOOTER_PATCH_ {
   //
   UINT32       Skip;
   //
-  // Limit replacement size to this value or 0, which assumes table size.
+  // Limit replacement size to this value or 0, which assumes booter file size.
   //
   UINT32       Limit;
   //
-  // Identifier for bootloader type. (e.g. boot.efi for Apple)
+  // Identifier for bootloader type. (e.g. Apple for boot.efi)
   //
   CONST CHAR8  *Identifier;
 } OC_BOOTER_PATCH;
