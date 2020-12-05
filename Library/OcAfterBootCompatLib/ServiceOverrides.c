@@ -351,7 +351,7 @@ ApplyBooterPatch (
     Patch->Replace,
     Patch->ReplaceMask,
     ImageBase,
-    ImageSize,
+    (UINT32) ImageSize,
     Patch->Count,
     Patch->Skip
     );

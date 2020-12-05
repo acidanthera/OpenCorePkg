@@ -180,7 +180,7 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   /// Size of list of booter patches.
   ///
-  UINTN                BooterPatchesSize;
+  UINT32               BooterPatchesSize;
   ///
   /// List of NULL-terminated handlers for TPL_APPLICATION execution within ExitBootServices.
   ///
