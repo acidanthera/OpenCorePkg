@@ -377,6 +377,11 @@ ApplyBooterPatch (
 
 /**
   Iterate through user booter patches and apply them.
+
+  @param[in]      ImageHandle      Loaded image handle to patch.
+  @param[in]      IsApple          Whether the booter is Apple-made.
+  @param[in]      Patches          Array of patches to be applied.
+  @param[in]      PatchesCount     Size of patches to be applied.
 **/
 STATIC
 VOID
