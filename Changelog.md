@@ -19,6 +19,7 @@ OpenCore Changelog
 - Changed `Bootstrap(Short)` to choose dynamic entry (requires NVRAM reset)
 - Avoided `Boot` prefix in `RequestBootVarRouting` to workaround AMI issues
 - Added bootloader patch support in `Booter` `Patch` section
+- Fixed startup hang on firmwares allowong reentrance for timer functions
 
 #### v0.6.3
 - Added support for xml comments in plist files
