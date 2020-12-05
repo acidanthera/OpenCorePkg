@@ -33,7 +33,7 @@ extern OC_FWRT_CONFIG  gOverrideConfig;
 **/
 extern OC_FWRT_CONFIG  *gCurrentConfig;
 
-#define OC_GL_BOOT_OPTION_START 0xF000
+#define OC_VARIABLE_NAME_SIZE 256
 
 VOID
 RedirectRuntimeServices (
