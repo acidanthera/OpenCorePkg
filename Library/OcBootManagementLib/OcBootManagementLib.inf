@@ -50,6 +50,7 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gAppleApfsContainerInfoGuid                   ## SOMETIMES_CONSUMES

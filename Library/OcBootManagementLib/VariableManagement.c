@@ -31,6 +31,8 @@
 #include <Library/UefiLib.h>
 #include <Protocol/OcFirmwareRuntime.h>
 
+#include "BootManagementInternal.h"
+
 STATIC
 EFI_GUID
 mOzmosisProprietary1Guid     = { 0x4D1FDA02, 0x38C7, 0x4A6A, { 0x9C, 0xC6, 0x4B, 0xCC, 0xA8, 0xB3, 0x01, 0x02 } };
@@ -244,6 +246,70 @@ DeleteVariables (
   }
 }
 
+VOID *
+InternalGetBootstrapBootData (
+  OUT UINTN   *OptionSize,
+  OUT UINT16  *Option
+  )
+{
+  EFI_STATUS               Status;
+  UINTN                    BootOrderSize;
+  UINT16                   *BootOrder;
+  VOID                     *OptionData;
+
+  BootOrderSize = 0;
+  Status = gRT->GetVariable (
+    EFI_BOOT_ORDER_VARIABLE_NAME,
+    &gEfiGlobalVariableGuid,
+    NULL,
+    &BootOrderSize,
+    NULL
+    );
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Have existing order of size %u - %r\n",
+    (UINT32) BootOrderSize,
+    Status
+    ));
+
+  if (Status != EFI_BUFFER_TOO_SMALL || BootOrderSize == 0 || BootOrderSize % sizeof (UINT16) != 0) {
+    return NULL;
+  }
+  
+  BootOrder = AllocatePool (BootOrderSize);
+  if (BootOrder == NULL) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to allocate boot order\n"));
+    return NULL;
+  }
+
+  Status = gRT->GetVariable (
+    EFI_BOOT_ORDER_VARIABLE_NAME,
+    &gEfiGlobalVariableGuid,
+    NULL,
+    &BootOrderSize,
+    BootOrder
+    );
+  if (EFI_ERROR (Status) || BootOrderSize == 0 || BootOrderSize % sizeof (UINT16) != 0) {
+    DEBUG ((DEBUG_INFO, "OCB: Failed to obtain boot order %u - %r\n", (UINT32) BootOrderSize, Status));
+    FreePool (BootOrder);
+    return NULL;
+  }
+  //
+  // OpenCore moved Bootstrap to BootOrder[0] on initialisation.
+  //
+  OptionData = InternalGetBootOptionData (
+    OptionSize,
+    BootOrder[0],
+    &gEfiGlobalVariableGuid
+    );
+  *Option = BootOrder[0];
+
+  FreePool (BootOrder);
+
+  return OptionData;
+}
+
 VOID
 OcDeleteVariables (
   VOID
@@ -256,9 +322,7 @@ OcDeleteVariables (
   UINT32                       BootProtect;
   VOID                         *BootOption;
   UINTN                        BootOptionSize;
-  CHAR16                       BootOptionVariable[L_STR_LEN (L"Boot####") + 1];
   UINT16                       BootOptionIndex;
-  UINTN                        BootOptionIndexSize;
 
   DEBUG ((DEBUG_INFO, "OCB: NVRAM cleanup...\n"));
 
@@ -293,40 +357,16 @@ OcDeleteVariables (
   }
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootOptionIndexSize = sizeof (BootOptionIndex);
-    Status = gRT->GetVariable (
-      OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-      &gOcVendorVariableGuid,
-      NULL,
-      &BootOptionIndexSize,
-      &BootOptionIndex
-      );
-    if (!EFI_ERROR (Status)) {
-      UnicodeSPrint (
-        BootOptionVariable,
-        sizeof (BootOptionVariable),
-        L"Boot%04x",
-        BootOptionIndex
-        );
-      
-      Status = GetVariable2 (
-        BootOptionVariable,
+    BootOption = InternalGetBootstrapBootData (&BootOptionSize, &BootOptionIndex);
+    if (BootOption != NULL) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCB: Found %g:Boot%04x for preservation of %u bytes\n",
         &gEfiGlobalVariableGuid,
-        &BootOption,
-        &BootOptionSize
-        );
-      if (!EFI_ERROR (Status)) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCB: Found %g:%s for preservation of %u bytes\n",
-          &gEfiGlobalVariableGuid,
-          BootOptionVariable,
-          (UINT32) BootOptionSize
-          ));
-      }
-    } 
-    
-    if (EFI_ERROR (Status)) {
+        BootOptionIndex,
+        (UINT32) BootOptionSize
+        ));
+    } else {
       BootProtect = 0;
     }
   }
@@ -334,44 +374,14 @@ OcDeleteVariables (
   DeleteVariables ();
 
   if ((BootProtect & OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP) != 0) {
-    BootOptionIndex = 0;
+    BootOptionIndex = 1;
     Status = gRT->SetVariable (
-      L"Boot0000",
+      L"Boot0001",
       &gEfiGlobalVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
       BootOptionSize,
       BootOption
       );
-    if (!EFI_ERROR (Status)) {
-      Status = gRT->SetVariable (
-        OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
-        EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-        sizeof (BootOptionIndex),
-        &BootOptionIndex
-        );
-      if (EFI_ERROR (Status)) {
-        //
-        // Discard the inconsistent Bootstrap info to prevent duplication on
-        // next boot.
-        //
-        gRT->SetVariable (
-          OC_BOOTSTRAP_INDEX_VARIABLE_NAME,
-          &gOcVendorVariableGuid,
-          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-          0,
-          NULL
-          );
-
-        gRT->SetVariable (
-          L"Boot0000",
-          &gEfiGlobalVariableGuid,
-          EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-          0,
-          NULL
-          );
-      }
-    }
     if (!EFI_ERROR (Status)) {
       Status = gRT->SetVariable (
         EFI_BOOT_ORDER_VARIABLE_NAME,
@@ -382,7 +392,7 @@ OcDeleteVariables (
         );
     }
 
-    DEBUG ((DEBUG_INFO, "OCB: Restored %s - %r\n", BootOptionVariable, Status));
+    DEBUG ((DEBUG_INFO, "OCB: Set bootstrap option to Boot%04x - %r\n", BootOptionIndex, Status));
     FreePool (BootOption);
   }
 

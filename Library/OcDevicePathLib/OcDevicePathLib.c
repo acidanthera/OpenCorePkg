@@ -1035,6 +1035,47 @@ OcFileDevicePathNameLen (
 }
 
 /**
+  Retrieve the length of the full file path described by DevicePath.
+
+  @param[in] DevicePath  The Device Path to inspect.
+
+  @returns   The length of the full file path.
+  @retval 0  DevicePath does not start with a File Path node or contains
+             non-terminating nodes that are not File Path nodes.
+
+**/
+UINTN
+OcFileDevicePathFullNameLen (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  UINTN                      PathLength;
+  CONST FILEPATH_DEVICE_PATH *FilePath;
+
+  ASSERT (DevicePath != NULL);
+  ASSERT (IsDevicePathValid (DevicePath, 0));
+
+  PathLength = 0;
+  do {
+    //
+    // On the first iteration, this ensures the path is not immediately
+    // terminated.
+    //
+    if (DevicePath->Type    != MEDIA_DEVICE_PATH
+     || DevicePath->SubType != MEDIA_FILEPATH_DP) {
+      return 0;
+    }
+
+    FilePath    = (FILEPATH_DEVICE_PATH *)DevicePath;
+    PathLength += OcFileDevicePathNameLen (FilePath);
+
+    DevicePath = NextDevicePathNode (DevicePath);
+  } while (!IsDevicePathEnd (DevicePath));
+
+  return PathLength;
+}
+
+/**
   Retrieve the size of the full file path described by DevicePath.
 
   @param[in] DevicePath  The Device Path to inspect.
@@ -1049,29 +1090,7 @@ OcFileDevicePathFullNameSize (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  UINTN                      PathSize;
-  CONST FILEPATH_DEVICE_PATH *FilePath;
-
-  ASSERT (DevicePath != NULL);
-  ASSERT (IsDevicePathValid (DevicePath, 0));
-
-  PathSize = 1;
-  do {
-    //
-    // On the first iteration, this ensures the path is not immediately
-    // terminated.
-    //
-    if (DevicePath->Type    != MEDIA_DEVICE_PATH
-     || DevicePath->SubType != MEDIA_FILEPATH_DP) {
-      return 0;
-    }
-
-    FilePath  = (FILEPATH_DEVICE_PATH *)DevicePath;
-    PathSize += OcFileDevicePathNameLen (FilePath);
-
-    DevicePath = NextDevicePathNode (DevicePath);
-  } while (!IsDevicePathEnd (DevicePath));
-  return PathSize * sizeof (*FilePath->PathName);
+  return (OcFileDevicePathFullNameLen (DevicePath) + 1) * sizeof (CHAR16);
 }
 
 /**
@@ -1230,4 +1249,54 @@ OcGetNumDevicePathInstances (
   }
 
   return NumInstances;
+}
+
+BOOLEAN
+OcDevicePathHasFilePathSuffix (
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
+  IN CHAR16                    *Suffix,
+  IN UINTN                     SuffixLen
+  )
+{
+  FILEPATH_DEVICE_PATH *FilePath;
+  UINTN                PathNameLen;
+  UINTN                PathNameSize;
+  CHAR16               *PathName;
+  INTN                 Result;
+  //
+  // OcStrinCmp will be needed in case of a mismatch.
+  //
+  ASSERT (SuffixLen == StrLen (Suffix));
+
+  FilePath = (FILEPATH_DEVICE_PATH *) FindDevicePathNodeWithType (
+    DevicePath,
+    MEDIA_DEVICE_PATH,
+    MEDIA_FILEPATH_DP
+    );
+  if (FilePath == NULL) {
+    return FALSE;
+  }
+
+  PathNameLen = OcFileDevicePathFullNameLen (&FilePath->Header);
+  if (PathNameLen < SuffixLen) {
+    return FALSE;
+  }
+
+  PathNameSize = (PathNameLen + 1) * sizeof (CHAR16);
+
+  PathName = AllocatePool (PathNameSize);
+  if (PathName == NULL) {
+    return FALSE;
+  }
+
+  OcFileDevicePathFullName (PathName, FilePath, PathNameSize);
+
+  Result = OcStriCmp (
+    &PathName[PathNameLen - SuffixLen],
+    Suffix
+    );
+
+  FreePool (PathName);
+
+  return Result == 0;
 }

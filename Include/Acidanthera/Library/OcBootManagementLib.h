@@ -101,11 +101,6 @@ typedef UINT32 OC_BOOT_ENTRY_TYPE;
 #define OC_BOOT_SYSTEM              (OC_BOOT_RESET_NVRAM)
 
 /**
-  Cached Bootstrap Boot Option index.
-**/
-#define OC_BOOTSTRAP_INDEX_VARIABLE_NAME  L"bootstrap-index"
-
-/**
   Picker mode.
 **/
 typedef enum OC_PICKER_MODE_ {
@@ -1215,13 +1210,17 @@ OcDeleteVariables (
   );
 
 /**
-  Launch Apple BootPicker.
+  Launch firmware application.
+
+  @param[in] ApplicationGuid  Application GUID identifier in the firmware.
+  @param[in] SetReason        Pass enter reason (specific to Apple BootPicker).
 
   @retval error code, should not return. 
 **/
 EFI_STATUS
-OcRunAppleBootPicker (
-  VOID
+OcRunFirmwareApplication (
+  IN EFI_GUID  *ApplicationGuid,
+  IN BOOLEAN   SetReason
   );
 
 /**
@@ -1316,11 +1315,13 @@ OcGetBootOrder (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-OcRegisterBootOption (
+OcRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm
+  IN BOOLEAN         ShortForm,
+  IN CHAR16          *MatchSuffix,
+  IN UINTN           MatchSuffixLen
   );
 
 /**
