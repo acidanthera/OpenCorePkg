@@ -419,7 +419,8 @@ ApplyBooterPatches (
     } else {
       UserIdentifierUnicode = AsciiStrCopyToUnicode (UserIdentifier, 0);
       if (UserIdentifierUnicode == NULL) {
-        return;
+        DEBUG ((DEBUG_INFO, "OCABC: Booter patch (%a) for %a is out of memory\n", Patches[Index].Comment, UserIdentifier));
+        continue;
       }
       UsePatch = OcDevicePathHasFilePathSuffix (LoadedImage->FilePath, UserIdentifierUnicode, StrLen (UserIdentifierUnicode));
       FreePool (UserIdentifierUnicode);
