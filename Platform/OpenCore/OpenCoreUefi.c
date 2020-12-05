@@ -450,7 +450,7 @@ OcLoadBooterUefiSupport (
   UINT32                 Index;
   UINT32                 NextIndex;
   OC_BOOTER_PATCH_ENTRY  *UserPatch;
-  OC_BOOTER_PATCH        Patch;
+  OC_BOOTER_PATCH        *Patch;
 
   ZeroMem (&AbcSettings, sizeof (AbcSettings));
 
@@ -510,7 +510,7 @@ OcLoadBooterUefiSupport (
     if (AbcSettings.BooterPatches != NULL) {
       NextIndex = 0;
       for (Index = 0; Index < Config->Booter.Patch.Count; ++Index) {
-        Patch = AbcSettings.BooterPatches[NextIndex];
+        Patch = &AbcSettings.BooterPatches[NextIndex];
         UserPatch = Config->Booter.Patch.Values[Index];
 
         if (!UserPatch->Enabled) {
@@ -534,14 +534,14 @@ OcLoadBooterUefiSupport (
         //
         // Also, ignore patch on mismatched architecture.
         //
-        Patch.Arch    = OC_BLOB_GET (&UserPatch->Arch);
-        if (Patch.Arch[0] != '\0' && AsciiStrCmp (Patch.Arch, "Any") != 0) {
+        Patch->Arch    = OC_BLOB_GET (&UserPatch->Arch);
+        if (Patch->Arch[0] != '\0' && AsciiStrCmp (Patch->Arch, "Any") != 0) {
 #if defined(MDE_CPU_X64)
-          if (AsciiStrCmp (Patch.Arch, "x86_64") != 0) {
+          if (AsciiStrCmp (Patch->Arch, "x86_64") != 0) {
             continue;
           }
 #elif defined(MDE_CPU_IA32)
-          if (AsciiStrCmp (Patch.Arch, "i386") != 0) {
+          if (AsciiStrCmp (Patch->Arch, "i386") != 0) {
             continue;
           }
 #else
@@ -553,25 +553,25 @@ OcLoadBooterUefiSupport (
         // Here we simply receive Identifier from user,
         // and it will be parsed by the internal patch function.
         //
-        Patch.Identifier = OC_BLOB_GET (&UserPatch->Identifier);
+        Patch->Identifier = OC_BLOB_GET (&UserPatch->Identifier);
 
-        Patch.Find       = OC_BLOB_GET (&UserPatch->Find);
-        Patch.Replace    = OC_BLOB_GET (&UserPatch->Replace);
+        Patch->Find       = OC_BLOB_GET (&UserPatch->Find);
+        Patch->Replace    = OC_BLOB_GET (&UserPatch->Replace);
 
-        Patch.Comment    = OC_BLOB_GET (&UserPatch->Comment);
+        Patch->Comment    = OC_BLOB_GET (&UserPatch->Comment);
         
         if (UserPatch->Mask.Size > 0) {
-          Patch.Mask     = OC_BLOB_GET (&UserPatch->Mask);
+          Patch->Mask     = OC_BLOB_GET (&UserPatch->Mask);
         }
 
         if (UserPatch->ReplaceMask.Size > 0) {
-          Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
+          Patch->ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
         }
 
-        Patch.Size          = UserPatch->Replace.Size;
-        Patch.Count         = UserPatch->Count;
-        Patch.Skip          = UserPatch->Skip;
-        Patch.Limit         = UserPatch->Limit;
+        Patch->Size          = UserPatch->Replace.Size;
+        Patch->Count         = UserPatch->Count;
+        Patch->Skip          = UserPatch->Skip;
+        Patch->Limit         = UserPatch->Limit;
 
         ++NextIndex;
       }
