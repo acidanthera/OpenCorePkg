@@ -231,7 +231,7 @@
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
-				<true/>
+				<false/>
 				<key>Find</key>
 				<data>bWFjT1M=</data>
 				<key>Identifier</key>
