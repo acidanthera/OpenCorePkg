@@ -18,6 +18,7 @@ OpenCore Changelog
 - Added `BootstrapShort` to workaround buggy Insyde firmwares
 - Changed `Bootstrap(Short)` to choose dynamic entry (requires NVRAM reset)
 - Avoided `Boot` prefix in `RequestBootVarRouting` to workaround AMI issues
+- Added bootloader patch support in `Booter` `Patch` section
 
 #### v0.6.3
 - Added support for xml comments in plist files

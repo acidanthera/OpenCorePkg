@@ -25,6 +25,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcDevicePathLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcOSInfoLib.h>
@@ -314,6 +315,124 @@ DevirtualiseMmio (
       EFI_PAGES_TO_SIZE (PagesSaved) / BASE_1KB
       ));
     ((BOOT_COMPAT_CONTEXT *) Context)->ServiceState.ReportedMmio = TRUE;
+  }
+}
+
+/**
+  Apply single booter patch.
+
+  @param[in,out]  ImageBase      Booter image to be patched.
+  @param[in]      ImageSize      Size of booter image.
+  @param[in]      Patch          Single patch to be applied to booter.
+**/
+STATIC
+VOID
+ApplyBooterPatch (
+  IN OUT UINT8            *ImageBase,
+  IN     UINTN            ImageSize,
+  IN     OC_BOOTER_PATCH  *Patch
+  )
+{
+  UINT32  ReplaceCount;
+
+  if (ImageSize < Patch->Size) {
+    DEBUG ((DEBUG_INFO, "OCABC: Image size is even smaller than patch size\n"));
+    return;
+  }
+
+  if (Patch->Limit > 0 && Patch->Limit < ImageSize) {
+    ImageSize = Patch->Limit;
+  }
+
+  ReplaceCount = ApplyPatch (
+    Patch->Find,
+    Patch->Mask,
+    Patch->Size,
+    Patch->Replace,
+    Patch->ReplaceMask,
+    ImageBase,
+    (UINT32) ImageSize,
+    Patch->Count,
+    Patch->Skip
+    );
+
+  if (ReplaceCount > 0 && Patch->Count > 0 && ReplaceCount != Patch->Count) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Booter patch (%a) performed only %u replacements out of %u\n",
+      Patch->Comment,
+      ReplaceCount,
+      Patch->Count
+      ));
+  } else if (ReplaceCount == 0) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Failed to apply Booter patch (%a) - not found\n",
+      Patch->Comment
+      ));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCABC: Booter patch (%a) replace count - %u\n", Patch->Comment, ReplaceCount));
+  }
+}
+
+/**
+  Iterate through user booter patches and apply them.
+
+  @param[in]      ImageHandle      Loaded image handle to patch.
+  @param[in]      IsApple          Whether the booter is Apple-made.
+  @param[in]      Patches          Array of patches to be applied.
+  @param[in]      PatchesCount     Size of patches to be applied.
+**/
+STATIC
+VOID
+ApplyBooterPatches (
+  IN  EFI_HANDLE       ImageHandle,
+  IN  BOOLEAN          IsApple,
+  IN  OC_BOOTER_PATCH  *Patches,
+  IN  UINT32           PatchCount
+  )
+{
+  EFI_STATUS                  Status;
+  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  UINT32                      Index;
+  BOOLEAN                     UsePatch;
+  CONST CHAR8                 *UserIdentifier;
+  CHAR16                      *UserIdentifierUnicode;
+
+  Status = gBS->HandleProtocol (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **)&LoadedImage
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCABC: Failed to handle LoadedImage protocol - %r", Status));
+    return;
+  }
+
+  for (Index = 0; Index < PatchCount; ++Index) {
+    UserIdentifier = Patches[Index].Identifier;
+
+    if (UserIdentifier[0] == '\0' || AsciiStrCmp (UserIdentifier, "Any") == 0) {
+      UsePatch = TRUE;
+    } else if (AsciiStrCmp (UserIdentifier, "Apple") == 0) {
+      UsePatch = IsApple;
+    } else {
+      UserIdentifierUnicode = AsciiStrCopyToUnicode (UserIdentifier, 0);
+      if (UserIdentifierUnicode == NULL) {
+        DEBUG ((DEBUG_INFO, "OCABC: Booter patch (%a) for %a is out of memory\n", Patches[Index].Comment, UserIdentifier));
+        continue;
+      }
+      UsePatch = OcDevicePathHasFilePathSuffix (LoadedImage->FilePath, UserIdentifierUnicode, StrLen (UserIdentifierUnicode));
+      FreePool (UserIdentifierUnicode);
+    }
+
+    if (UsePatch) {
+      ApplyBooterPatch (
+        (UINT8 *) LoadedImage->ImageBase,
+        (UINTN)LoadedImage->ImageSize,
+        &Patches[Index]
+        );
+    }
   }
 }
 
@@ -724,6 +843,16 @@ OcStartImage (
       }
     }
   }
+
+  //
+  // Apply customised booter patches.
+  //
+  ApplyBooterPatches (
+    ImageHandle,
+    AppleLoadedImage != NULL,
+    BootCompat->Settings.BooterPatches,
+    BootCompat->Settings.BooterPatchesSize
+    );
 
   if (BootCompat->ServiceState.FwRuntime != NULL) {
     BootCompat->ServiceState.FwRuntime->GetCurrent (&Config);

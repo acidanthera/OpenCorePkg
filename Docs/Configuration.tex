@@ -1262,6 +1262,15 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use. See \hyperref[booterpropsmmio]{MmioWhitelist Properties}
   section below.
+  
+\item
+  \texttt{Patch}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Perform binary patches in booter.
+  
+  Designed to be filled with \texttt{plist\ dictionary} values, describing each
+  patch. See \hyperref[booterpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1301,6 +1310,91 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: This address will be devirtualised unless set to \texttt{true}.
+
+\end{enumerate}
+
+\subsection{Patch Properties}\label{booterpropspatch}
+
+\begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Booter patch architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Count}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
+  the patch to all occurrences found.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This booter patch will not be used unless set to
+  \texttt{true}.
+
+\item
+  \texttt{Find}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data to find. This must equal to \texttt{Replace} in size.
+
+\item
+  \texttt{Identifier}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: \texttt{Apple} for macOS booter (generally \texttt{boot.efi});
+  or a name with suffix (e.g. \texttt{bootmgfw.efi}) for a specific booter;
+  or \texttt{Any} / empty string (failsafe) to match any booter.
+
+\item
+  \texttt{Limit}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Maximum number of bytes to search for. Can be set to
+  \texttt{0} to look through the whole booter.
+
+\item
+  \texttt{Mask}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data bitwise mask used during find comparison.
+  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
+  set to empty data to be ignored. Must equal to \texttt{Find} in size
+  otherwise.
+
+\item
+  \texttt{Replace}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Replacement data of one or more bytes.
+
+\item
+  \texttt{ReplaceMask}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data bitwise mask used during replacement.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
+  set to empty data to be ignored. Must equal to \texttt{Replace} in size
+  otherwise.
+
+\item
+  \texttt{Skip}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Number of found occurrences to be skipped before replacement
+  is done.
 
 \end{enumerate}
 
