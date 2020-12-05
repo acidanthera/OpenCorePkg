@@ -227,25 +227,25 @@
 				<key>Arch</key>
 				<string>Any</string>
 				<key>Comment</key>
-				<string>comment test</string>
+				<string>macOS to hacOS</string>
 				<key>Count</key>
 				<integer>1</integer>
 				<key>Enabled</key>
-				<false/>
+				<true/>
 				<key>Find</key>
-				<data>AAECAw==</data>
+				<data>bWFjT1M=</data>
 				<key>Identifier</key>
 				<string>Apple</string>
 				<key>Limit</key>
 				<integer>0</integer>
 				<key>Mask</key>
-				<data>/////w==</data>
+				<data></data>
 				<key>Replace</key>
-				<data>AKvN7w==</data>
+				<data>aGFjT1M=</data>
 				<key>ReplaceMask</key>
-				<data>////AA==</data>
+				<data></data>
 				<key>Skip</key>
-				<integer>1</integer>
+				<integer>0</integer>
 			</dict>
 		</array>
 		<key>MmioWhitelist</key>
