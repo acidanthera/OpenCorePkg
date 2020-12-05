@@ -412,8 +412,9 @@ ApplyBooterPatches (
   for (Index = 0; Index < PatchCount; ++Index) {
     UserIdentifier = Patches[Index].Identifier;
 
-    UsePatch = UserIdentifier[0] == '\0' || AsciiStrCmp (UserIdentifier, "Any") == 0;
-    if (AsciiStrCmp (UserIdentifier, "Apple") == 0) {
+    if (UserIdentifier[0] == '\0' || AsciiStrCmp (UserIdentifier, "Any") == 0) {
+      UsePatch = TRUE;
+    } else if (AsciiStrCmp (UserIdentifier, "Apple") == 0) {
       UsePatch = IsApple;
     } else {
       UserIdentifierUnicode = AsciiStrCopyToUnicode (UserIdentifier, 0);
