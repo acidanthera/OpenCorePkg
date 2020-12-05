@@ -60,7 +60,7 @@ typedef struct OC_BOOTER_PATCH_ {
   //
   UINT32       Limit;
   //
-  // Identifier for bootloader type. (e.g. Apple for boot.efi)
+  // Identifier for bootloader type. (e.g. Apple for boot.efi, or file name suffix for other possible booters)
   //
   CONST CHAR8  *Identifier;
 } OC_BOOTER_PATCH;
