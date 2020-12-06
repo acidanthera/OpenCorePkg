@@ -363,4 +363,17 @@ UnicodeFilterString (
   IN     BOOLEAN  SingleLine
   );
 
+/**
+  Check if string starts with GUID.
+
+  @param[in]  String  String to check.
+
+  @retval TRUE when string starts with GUID.
+  @retval FALSE otherwise.
+**/
+BOOLEAN
+HasValidGuidStringPrefix (
+  IN CONST CHAR16  *String
+  );
+
 #endif // OC_STRING_LIB_H

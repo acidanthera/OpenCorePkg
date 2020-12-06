@@ -3020,7 +3020,8 @@ entry choice will update till next manual reconfiguration.
     For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume directory for APFS (if present).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
 
