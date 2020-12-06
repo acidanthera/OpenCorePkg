@@ -64,17 +64,9 @@
   DebugLib
   PcdLib
   UefiUsbLib
-  HiiLib
   OcGuardLib
 
 [Guids]
-  #
-  # Event registered to EFI_HII_SET_KEYBOARD_LAYOUT_EVENT_GUID group,
-  # which will be triggered by EFI_HII_DATABASE_PROTOCOL.SetKeyboardLayout().
-  #
-  gEfiHiiKeyBoardLayoutGuid                     ## SOMETIMES_CONSUMES ## Event
-  gUsbKeyboardLayoutPackageGuid                 ## SOMETIMES_CONSUMES ## HII
-  gUsbKeyboardLayoutKeyGuid                     ## SOMETIMES_PRODUCES ## UNDEFINED
   gAppleKeyboardPlatformInfoGuid                ## SOMETIMES_CONSUMES
 
 [Protocols]
@@ -82,17 +74,11 @@
   gEfiDevicePathProtocolGuid                    ## TO_START
   gEfiSimpleTextInProtocolGuid                  ## BY_START
   gEfiSimpleTextInputExProtocolGuid             ## BY_START
-  #
-  # If HII Database Protocol exists, then keyboard layout from HII database is used.
-  # Otherwise, USB keyboard module tries to use its carried default layout.
-  #
-  gEfiHiiDatabaseProtocolGuid                   ## SOMETIMES_CONSUMES
   gAppleKeyMapDatabaseProtocolGuid              ## SOMETIMES_CONSUMES
   gApplePlatformInfoDatabaseProtocolGuid        ## SOMETMES_CONSUMES
   gEfiKeyboardInfoProtocolGuid                  ## SOMETIMES_PRODUCES
 
 [FeaturePcd]
-  gEfiMdeModulePkgTokenSpaceGuid.PcdDisableDefaultKeyboardLayoutInUsbKbDriver    ## CONSUMES
   gOpenCorePkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver ## CONSUMES
   gOpenCorePkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver                ## CONSUMES
   gOpenCorePkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence                       ## CONSUMES

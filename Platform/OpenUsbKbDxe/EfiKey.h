@@ -15,14 +15,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Protocol/SimpleTextIn.h>
 #include <Protocol/SimpleTextInEx.h>
-#include <Protocol/HiiDatabase.h>
 #include <Protocol/UsbIo.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/AppleKeyMapDatabase.h>
 #include <Protocol/ApplePlatformInfoDatabase.h>
-
-#include <Guid/HiiKeyBoardLayout.h>
-#include <Guid/UsbKeyBoardLayout.h>
 
 #include <Library/DebugLib.h>
 #include <Library/ReportStatusCodeLib.h>
@@ -34,7 +30,6 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/UefiUsbLib.h>
-#include <Library/HiiLib.h>
 
 #include <IndustryStandard/Usb.h>
 
@@ -156,7 +151,6 @@ typedef struct {
   LIST_ENTRY                        NsKeyList;
   USB_NS_KEY                        *CurrentNsKey;
   EFI_KEY_DESCRIPTOR                *KeyConvertionTable;
-  EFI_EVENT                         KeyboardLayoutEvent;
 
   APPLE_KEY_MAP_DATABASE_PROTOCOL   *KeyMapDb;
   UINTN                             KeyMapDbIndex;
