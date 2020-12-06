@@ -883,7 +883,9 @@ GuiFlushScreen (
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
 
-  GuiRedrawPointer (DrawContext);
+  if (mPointerContext != NULL) {
+    GuiRedrawPointer (DrawContext);
+  }
 
   NumValidDrawReqs = mNumValidDrawReqs;
   ASSERT (NumValidDrawReqs <= ARRAY_SIZE (mDrawRequests));
