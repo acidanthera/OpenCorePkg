@@ -5,14 +5,10 @@
   After DxeCore finish DXE phase, gEfiBdsArchProtocolGuid->BdsEntry will be invoked
   to enter BDS phase.
 
-Copyright (c) 2004 - 2014, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials
-are licensed and made available under the terms and conditions of the BSD License
-which accompanies this distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php
-
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+Copyright (c) 2004 - 2019, Intel Corporation. All rights reserved.<BR>
+(C) Copyright 2016-2019 Hewlett Packard Enterprise Development LP<BR>
+(C) Copyright 2015 Hewlett-Packard Development Company, L.P.<BR>
+SPDX-License-Identifier: BSD-2-Clause-Patent
 
 **/
 
@@ -49,11 +45,11 @@ EFI_BDS_ARCH_PROTOCOL  gBds = {
 /// The read-only variables defined in UEFI Spec.
 ///
 CHAR16  *mReadOnlyVariables[] = {
-  L"PlatformLangCodes",
-  L"LangCodes",
-  L"BootOptionSupport",
-  L"HwErrRecSupport",
-  L"OsIndicationsSupported"
+  EFI_PLATFORM_LANG_CODES_VARIABLE_NAME
+  EFI_LANG_CODES_VARIABLE_NAME,
+  EFI_BOOT_OPTION_SUPPORT_VARIABLE_NAME,
+  EFI_HW_ERR_REC_SUPPORT_VARIABLE_NAME,
+  EFI_OS_INDICATIONS_SUPPORT_VARIABLE_NAME
   };
 
 /**
@@ -264,10 +260,10 @@ BdsBootDeviceSelect (
 
 /**
 
-  Validate input console variable data. 
+  Validate input console variable data.
 
   If found the device path is not a valid device path, remove the variable.
-  
+
   @param VariableName             Input console variable name.
 
 **/
@@ -277,16 +273,12 @@ BdsFormalizeConsoleVariable (
   IN  CHAR16          *VariableName
   )
 {
-  EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   UINTN                     VariableSize;
+  EFI_STATUS                Status;
 
-  DevicePath = BdsLibGetVariableAndSize (
-                      VariableName,
-                      &gEfiGlobalVariableGuid,
-                      &VariableSize
-                      );
-  if ((DevicePath != NULL) && !IsDevicePathValid (DevicePath, VariableSize)) { 
+  GetEfiGlobalVariable2 (VariableName, (VOID **) &DevicePath, &VariableSize);
+  if ((DevicePath != NULL) && !IsDevicePathValid (DevicePath, VariableSize)) {
     Status = gRT->SetVariable (
                     VariableName,
                     &gEfiGlobalVariableGuid,
@@ -294,7 +286,14 @@ BdsFormalizeConsoleVariable (
                     0,
                     NULL
                     );
+    //
+    // Deleting variable with current variable implementation shouldn't fail.
+    //
     ASSERT_EFI_ERROR (Status);
+  }
+
+  if (DevicePath != NULL) {
+    FreePool (DevicePath);
   }
 }
 
@@ -309,7 +308,7 @@ BdsFormalizeConsoleVariable (
 
 **/
 STATIC
-VOID 
+VOID
 BdsFormalizeEfiGlobalVariable (
   VOID
   )
@@ -319,9 +318,9 @@ BdsFormalizeEfiGlobalVariable (
   //
   // Validate Console variable.
   //
-  BdsFormalizeConsoleVariable (L"ConIn");
-  BdsFormalizeConsoleVariable (L"ConOut");
-  BdsFormalizeConsoleVariable (L"ErrOut");
+  BdsFormalizeConsoleVariable (EFI_CON_IN_VARIABLE_NAME);
+  BdsFormalizeConsoleVariable (EFI_CON_OUT_VARIABLE_NAME);
+  BdsFormalizeConsoleVariable (EFI_ERR_OUT_VARIABLE_NAME);
 
   //
   // OS indicater support variable
@@ -330,7 +329,7 @@ BdsFormalizeEfiGlobalVariable (
                       | EFI_OS_INDICATIONS_FMP_CAPSULE_SUPPORTED;
 
   gRT->SetVariable (
-    L"OsIndicationsSupported",
+    EFI_OS_INDICATIONS_SUPPORT_VARIABLE_NAME,
     &gEfiGlobalVariableGuid,
     EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
     sizeof(UINT64),
@@ -405,7 +404,7 @@ BdsEntry (
   // Fixup Table CRC after we updated Firmware Vendor and Revision
   //
   gST->Hdr.CRC32 = 0;
-  gBS->CalculateCrc32 (gST, sizeof (EFI_SYSTEM_TABLE), &gST->Hdr.CRC32);
+  gBS->CalculateCrc32 ((VOID *) gST, sizeof (EFI_SYSTEM_TABLE), &gST->Hdr.CRC32);
 
   //
   // Validate Variable.
@@ -419,7 +418,7 @@ BdsEntry (
   Status = gBS->LocateProtocol (&gEdkiiVariableLockProtocolGuid, NULL, (VOID **) &VariableLock);
   DEBUG ((EFI_D_INFO, "[BdsDxe] Locate Variable Lock protocol - %r\n", Status));
   if (!EFI_ERROR (Status)) {
-    for (Index = 0; Index < sizeof (mReadOnlyVariables) / sizeof (mReadOnlyVariables[0]); Index++) {
+    for (Index = 0; Index < ARRAY_SIZE (mReadOnlyVariables); Index++) {
       Status = VariableLock->RequestToLock (VariableLock, mReadOnlyVariables[Index], &gEfiGlobalVariableGuid);
       ASSERT_EFI_ERROR (Status);
     }

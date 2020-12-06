@@ -1,28 +1,13 @@
 ## @file
+#  BdsDxe module is core driver for BDS phase.
 #
-#  BDSDxe module is core driver for BDS phase. 
-#  When DxeCore dispatching all DXE driver, this module will produce architecture protocol 
+#  When DxeCore dispatching all DXE driver, this module will produce architecture protocol
 #  gEfiBdsArchProtocolGuid. After DxeCore finish dispatching, DxeCore will invoke Entry
 #  interface of protocol gEfiBdsArchProtocolGuid, then BDS phase is entered.
 #
-#  Generally, this module take reposiblity to connect all necessary devices for platform boot, 
-#  these boot device path are hold in PlatformBdsLib library instance produced by platform.
-#  For legacy boot, BDS will transfer control to legacy BIOS after legacy boot device is select.
-#  For EFI boot, BDS will load boot loader file EFI\BOOT\BOOTIA32.EFI, EFI\BOOT\BOOTX64.EFI, 
-#  EFI\BOOT\BOOTIA64.EFI file from selected boot device and transfer control to boot loader.
+#  Copyright (c) 2008 - 2019, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
 #
-#  BDSDxe also maintain the UI for "Boot Manager, Boot Maintaince Manager, Device Manager" which
-#  is used for user to configure boot option or maintain hardware device.
-#  
-#  Copyright (c) 2008 - 2014, Intel Corporation. All rights reserved.<BR>
-#  This program and the accompanying materials
-#  are licensed and made available under the terms and conditions of the BSD License
-#  which accompanies this distribution.  The full text of the license may be found at
-#  http://opensource.org/licenses/bsd-license.php
-#  
-#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-#  
 ##
 
 [Defines]
@@ -31,13 +16,13 @@
   MODULE_UNI_FILE                = BdsDxe.uni
   FILE_GUID                      = FC5C7020-1A48-4198-9BE2-EAD5ABC8CF2F
   MODULE_TYPE                    = DXE_DRIVER
-  VERSION_STRING                 = 1.0 
+  VERSION_STRING                 = 1.0
   ENTRY_POINT                    = BdsInitialize
 
 #
 # The following information is for reference only and not required by the build tools.
 #
-#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
 #
 
 [Sources]
@@ -84,3 +69,6 @@
 
 [Depex]
   TRUE
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  BdsDxeExtra.uni
