@@ -323,6 +323,37 @@ OcAudioReleaseFile (
 }
 
 STATIC
+BOOLEAN
+OcShouldPlayChime (
+  IN CONST CHAR8  *Control
+  )
+{
+  EFI_STATUS  Status;
+  UINT8       Muted;
+  UINTN       Size;
+
+  if (Control[0] == '\0' || AsciiStrCmp (Control, "Auto") == 0) {
+    Muted = 0;
+    Size = sizeof (Muted);
+    Status = gRT->GetVariable (
+      APPLE_STARTUP_MUTE_VARIABLE_NAME,
+      &gAppleBootVariableGuid,
+      NULL,
+      &Size,
+      &Muted
+      );
+    DEBUG ((DEBUG_INFO, "OC: Using StartupMute %d for chime - %r\n", Muted, Status));
+    return Muted == 0;
+  }
+
+  if (AsciiStrCmp (Control, "Enabled") == 0) {
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+STATIC
 VOID
 EFIAPI
 OcAudioExitBootServices (
@@ -418,7 +449,8 @@ OcLoadUefiAudioSupport (
 
   OcSetVoiceOverLanguage (NULL);
 
-  if (Config->Uefi.Audio.PlayChime && VolumeLevel >= Config->Uefi.Audio.MinimumVolume && !Muted) {
+  if (OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))
+    && VolumeLevel >= Config->Uefi.Audio.MinimumVolume && !Muted) {
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,

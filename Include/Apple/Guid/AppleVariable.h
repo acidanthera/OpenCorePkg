@@ -162,7 +162,7 @@ typedef enum {
 
 ///
 /// System language.
-/// String starting with language code (e.g. ru-RU:252).
+/// CHAR8[] String starting with language code (e.g. ru-RU:252).
 /// gAppleBootVariableGuid
 ///
 #define APPLE_PREV_LANG_KBD_VARIABLE_NAME   L"prev-lang:kbd"
@@ -235,6 +235,13 @@ typedef enum {
 /// gAppleBootVariableGuid
 ///
 #define APPLE_RECOVERY_BOOT_MODE_VARIABLE_NAME L"recovery-boot-mode"
+
+///
+/// Startup sound configuration variable.
+/// UINT8: 00 (for unmuted, default) or 01 (for muted).
+/// gAppleBootVariableGuid
+///
+#define APPLE_STARTUP_MUTE_VARIABLE_NAME L"StartupMute"
 
 ///
 /// Recovery initiator device path. In general EfiBoot device path that called

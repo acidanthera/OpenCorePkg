@@ -21,6 +21,7 @@ OpenCore Changelog
 - Added bootloader patch support in `Booter` `Patch` section
 - Fixed startup hang on firmwares allowong reentrance for timer functions
 - Made pointer control optional for OpenCanopy via `PickerAttributes`
+- Added support for `StartupMute` variable in `PlayChime`
 
 #### v0.6.3
 - Added support for xml comments in plist files

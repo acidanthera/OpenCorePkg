@@ -5904,16 +5904,24 @@ functioning. Feature highlights:
 
 \item
   \texttt{PlayChime}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
   \textbf{Description}: Play chime sound at startup.
 
   Enabling this setting plays boot chime through builtin audio support. Volume level
   is determined by \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings and
-  \texttt{SystemAudioVolume} NVRAM variable.
+  \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
 
-  \emph{Note}: this setting is separate from \texttt{StartupMute} NVRAM variable
-  to avoid conflicts when the firmware is able to play boot chime.
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Auto} --- Enables chime when \texttt{StartupMute} NVRAM variable
+      is not present or set to \texttt{00}.
+    \item \texttt{Enabled} --- Enables chime unconditionally.
+    \item \texttt{Disabled} --- Disables chime unconditionally.
+  \end{itemize}
+
+  \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
+  NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
   \texttt{VolumeAmplifier}\\
