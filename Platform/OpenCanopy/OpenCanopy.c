@@ -1151,7 +1151,9 @@ GuiDrawLoop (
   //
   // Clear previous inputs.
   //
-  GuiPointerReset (mPointerContext);
+  if (mPointerContext != NULL) {
+    GuiPointerReset (mPointerContext);
+  }
   GuiKeyReset (mKeyContext);
   //
   // Main drawing loop, time and derieve sub-frequencies as required.
