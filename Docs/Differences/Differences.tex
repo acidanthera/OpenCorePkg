@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Dec  2 21:00:36 2020
-%DIF ADD ../Configuration.tex        Sat Dec  5 23:32:25 2020
+%DIF DEL PreviousConfiguration.tex   Wed Nov  4 05:07:23 2020
+%DIF ADD ../Configuration.tex        Sun Dec  6 03:33:13 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1324,7 +1324,18 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   section below.
 
 \item
-  \texttt{Quirks}\\
+  \DIFaddbegin \texttt{\DIFadd{Patch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ array}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform binary patches in booter.
+  }
+
+  \DIFadd{Designed to be filled with }\texttt{\DIFadd{plist\ dictionary}} \DIFadd{values, describing each
+  patch. See }\hyperref[booterpropspatch]{Patch Properties} \DIFadd{section below.
+}
+
+\item
+  \DIFaddend \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual booter quirks described
   in \hyperref[booterpropsquirks]{Quirks Properties} section below.
@@ -1364,7 +1375,103 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
 \end{enumerate}
 
-\subsection{Quirks Properties}\label{booterpropsquirks}
+\DIFaddbegin \subsection{\DIFadd{Patch Properties}}\label{booterpropspatch}
+
+\begin{enumerate}
+\item
+  \texttt{\DIFadd{Arch}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Any}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Booter patch architecture (}\texttt{\DIFadd{Any}}\DIFadd{, }\texttt{\DIFadd{i386}}\DIFadd{, }\texttt{\DIFadd{x86\_64}}\DIFadd{).
+}
+
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+}
+
+\item
+  \texttt{\DIFadd{Count}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Number of patch occurrences to apply. }\texttt{\DIFadd{0}} \DIFadd{applies
+  the patch to all occurrences found.
+}
+
+\item
+  \texttt{\DIFadd{Enabled}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: This booter patch will not be used unless set to
+  }\texttt{\DIFadd{true}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{Find}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty data}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Data to find. This must equal to }\texttt{\DIFadd{Replace}} \DIFadd{in size.
+}
+
+\item
+  \texttt{\DIFadd{Identifier}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty string}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: }\texttt{\DIFadd{Apple}} \DIFadd{for macOS booter (generally }\texttt{\DIFadd{boot.efi}}\DIFadd{);
+  or a name with suffix (e.g. }\texttt{\DIFadd{bootmgfw.efi}}\DIFadd{) for a specific booter;
+  or }\texttt{\DIFadd{Any}} \DIFadd{/ empty string (failsafe) to match any booter.
+}
+
+\item
+  \texttt{\DIFadd{Limit}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Maximum number of bytes to search for. Can be set to
+  }\texttt{\DIFadd{0}} \DIFadd{to look through the whole booter.
+}
+
+\item
+  \texttt{\DIFadd{Mask}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty data}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Data bitwise mask used during find comparison.
+  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
+  set to empty data to be ignored. Must equal to }\texttt{\DIFadd{Find}} \DIFadd{in size
+  otherwise.
+}
+
+\item
+  \texttt{\DIFadd{Replace}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty data}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Replacement data of one or more bytes.
+}
+
+\item
+  \texttt{\DIFadd{ReplaceMask}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ data}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty data}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Data bitwise mask used during replacement.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
+  set to empty data to be ignored. Must equal to }\texttt{\DIFadd{Replace}} \DIFadd{in size
+  otherwise.
+}
+
+\item
+  \texttt{\DIFadd{Skip}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Number of found occurrences to be skipped before replacement
+  is done.
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Quirks Properties}\label{booterpropsquirks}
 
 \begin{enumerate}
 
@@ -3012,7 +3119,10 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
     an alternate one if it is supported. For example, this could make a use of old-style icons
     with a custom background colour.
-  \end{itemize}
+  \DIFaddbegin \item \texttt{\DIFadd{0x0010}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_POINTER\_CONTROL}}\DIFadd{, enable pointer control
+  in the picker when available. For example, this could make use of mouse or trackpad to
+  control UI elements.
+  }\DIFaddend \end{itemize}
 
 \item
   \texttt{PickerAudioAssist}\\

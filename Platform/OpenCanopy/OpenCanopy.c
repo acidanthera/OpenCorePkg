@@ -975,15 +975,17 @@ GuiLibConstruct (
   CursorDefaultX = MIN (CursorDefaultX, OutputInfo->HorizontalResolution - 1);
   CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
 
-  mPointerContext = GuiPointerConstruct (
-    PickerContext,
-    CursorDefaultX,
-    CursorDefaultY,
-    OutputInfo->HorizontalResolution,
-    OutputInfo->VerticalResolution
-    );
-  if (mPointerContext == NULL) {
-    DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
+  if ((PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
+    mPointerContext = GuiPointerConstruct (
+      PickerContext,
+      CursorDefaultX,
+      CursorDefaultY,
+      OutputInfo->HorizontalResolution,
+      OutputInfo->VerticalResolution
+      );
+    if (mPointerContext == NULL) {
+      DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
+    }
   }
 
   mKeyContext = GuiKeyConstruct (PickerContext);
