@@ -24,6 +24,7 @@ OpenCore Changelog
 - Added support for `StartupMute` variable in `PlayChime`
 - Added support for per-volume icons for APFS on Preboot
 - Removed HII dependency from OpenUsbKbDxe driver
+- Fixed undefined behavior in OpenDuet
 
 #### v0.6.3
 - Added support for xml comments in plist files
