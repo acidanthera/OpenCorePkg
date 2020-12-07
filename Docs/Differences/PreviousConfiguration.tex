@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6.3)
+       Reference Manual (0.6.4)
 
        \vspace{0.2in}
 
@@ -532,7 +532,12 @@ entries include:
   Directory used for storing supplemental tools.
 \item
   \texttt{OpenCore.efi} \\
-  Main booter driver responsible for operating system loading.
+  Main booter driver responsible for operating system loading. The directory
+  \texttt{OpenCore.efi} resides is called the \texttt{root directory}.
+  By default \texttt{root directory} is set to \texttt{EFI\textbackslash OC},
+  however, when launching \texttt{OpenCore.efi} directly or through
+  \texttt{Bootstrap.efi}, other directories containing \texttt{OpenCore.efi}
+  can also be supported.
 \item
   \texttt{config.plist} \\
   \texttt{OC Config}.
@@ -1257,6 +1262,15 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use. See \hyperref[booterpropsmmio]{MmioWhitelist Properties}
   section below.
+  
+\item
+  \texttt{Patch}\\
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Perform binary patches in booter.
+  
+  Designed to be filled with \texttt{plist\ dictionary} values, describing each
+  patch. See \hyperref[booterpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1299,9 +1313,124 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
 \end{enumerate}
 
+\subsection{Patch Properties}\label{booterpropspatch}
+
+\begin{enumerate}
+\item
+  \texttt{Arch}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Any}\\
+  \textbf{Description}: Booter patch architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. It is implementation defined whether this value is
+  used.
+
+\item
+  \texttt{Count}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
+  the patch to all occurrences found.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: This booter patch will not be used unless set to
+  \texttt{true}.
+
+\item
+  \texttt{Find}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data to find. This must equal to \texttt{Replace} in size.
+
+\item
+  \texttt{Identifier}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty string\\
+  \textbf{Description}: \texttt{Apple} for macOS booter (generally \texttt{boot.efi});
+  or a name with suffix (e.g. \texttt{bootmgfw.efi}) for a specific booter;
+  or \texttt{Any} / empty string (failsafe) to match any booter.
+
+\item
+  \texttt{Limit}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Maximum number of bytes to search for. Can be set to
+  \texttt{0} to look through the whole booter.
+
+\item
+  \texttt{Mask}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data bitwise mask used during find comparison.
+  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
+  set to empty data to be ignored. Must equal to \texttt{Find} in size
+  otherwise.
+
+\item
+  \texttt{Replace}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Replacement data of one or more bytes.
+
+\item
+  \texttt{ReplaceMask}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: Empty data\\
+  \textbf{Description}: Data bitwise mask used during replacement.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
+  set to empty data to be ignored. Must equal to \texttt{Replace} in size
+  otherwise.
+
+\item
+  \texttt{Skip}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Number of found occurrences to be skipped before replacement
+  is done.
+
+\end{enumerate}
+
 \subsection{Quirks Properties}\label{booterpropsquirks}
 
 \begin{enumerate}
+
+\item
+  \texttt{AllowRelocationBlock}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Allows booting macOS through a relocation block.
+
+  Relocation block is a scratch buffer allocated in lower 4 GB to be used for
+  loading the kernel and related structures by EfiBoot on firmwares where
+  lower memory is otherwise occupied by the (assumed to be) non-runtime data.
+  Right before kernel startup the relocation block is copied back to lower
+  addresses. Similarly all the other addresses pointing to relocation block
+  are also carefully adjusted. Relocation block can be used when:
+
+  \begin{itemize}
+    \tightlist
+    \item No better slide exists (all the memory is used)
+    \item \texttt{slide=0} is forced (by an argument or safe mode)
+    \item KASLR (slide) is unsupported (this is macOS 10.7 or older)
+  \end{itemize}
+
+  This quirk requires \texttt{ProvideCustomSlide} to also be enabled
+  and generally needs \texttt{AvoidRuntimeDefrag} to work correctly.
+  Hibernation is not supported when booting with a relocation block
+  (but relocation block is not always used when the quirk is enabled).
+
+  \emph{Note}: While this quirk is required to run older macOS versions
+  on platforms with used lower memory it is not compatible with some
+  hardware and macOS 11. In this case you may try to use
+  \texttt{EnableSafeModeSlide} instead.
 
 \item
   \texttt{AvoidRuntimeDefrag}\\
@@ -2321,7 +2450,7 @@ blocking.
   \texttt{DisableLinkeditJettison}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 11.0\\
+  \textbf{Requirement}: 11\\
   \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
 
   This option lets \texttt{Lilu.kext} and possibly some others function
@@ -2370,7 +2499,7 @@ blocking.
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 11.0\\
+  \textbf{Requirement}: 11\\
   \textbf{Description}: Force \texttt{x86} scheme for IMG4 verification.
 
   \emph{Note}: This option is required on virtual machines when using
@@ -2604,7 +2733,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
   \hline
   10.10-10.15 & --- & --- & --- & --- & --- & YES (V3) & --- \\
   \hline
-  11.0+ & --- & --- & --- & --- & --- & YES (V3) & YES \\
+  11+ & --- & --- & --- & --- & --- & YES (V3) & YES \\
   \hline
   \end{tabular}
   \end{center}
@@ -2891,7 +3020,8 @@ entry choice will update till next manual reconfiguration.
     For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
     \begin{itemize}
     \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS.
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume directory for APFS (if present).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
 
@@ -2913,6 +3043,9 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
     an alternate one if it is supported. For example, this could make a use of old-style icons
     with a custom background colour.
+  \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
+  in the picker when available. For example, this could make use of mouse or trackpad to
+  control UI elements.
   \end{itemize}
 
 \item
@@ -3317,7 +3450,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   personalised Apple Secure Boot identifiers. To use this setting,
   make sure to generate a random 64-bit number with a cryptographically secure
   random number generator. As an alternative, first 8 bytes of \texttt{SystemUUID}
-  can be used for \texttt{ApECID}, this is found in macOS 11.0 for Macs without
+  can be used for \texttt{ApECID}, this is found in macOS 11 for Macs without
   the T2 chip.
 
   With this value set and \texttt{SecureBootModel} valid
@@ -3343,7 +3476,7 @@ bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
-  Before macOS 11.0, which introduced a dedicated \texttt{x86legacy}
+  Before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot
   may not work as expected. When reinstalling the operating system, macOS Installer
   from macOS 10.15 and older, will usually run out of free memory
@@ -3377,6 +3510,17 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   considered a security risk and thus is optional.
 
 \item
+  \texttt{BlacklistAppleUpdate}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Ignore boot options trying to update Apple peripheral firmware
+  (e.g. \texttt{MultiUpdater.efi}).
+
+  \emph{Note}: This option exists due to some operating systems, namely macOS Big Sur,
+  being \href{https://github.com/acidanthera/bugtracker/issues/1255}{incapable} of
+  disabling firmware updates with the NVRAM variable (\texttt{run-efi-updater}).
+
+\item
   \texttt{BootProtect}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{None}\\
@@ -3389,8 +3533,11 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   \item \texttt{None} --- do nothing.
   \item \texttt{Bootstrap} --- create or update top-priority
   \texttt{\textbackslash EFI\textbackslash OC\textbackslash Bootstrap\textbackslash Bootstrap.efi}
-  boot option (\texttt{Boot9696}) in UEFI variable storage at bootloader startup. For this option
+  boot option in UEFI variable storage at bootloader startup. For this option
   to work \texttt{RequestBootVarRouting} is required to be enabled.
+  \item \texttt{BootstrapShort} --- create a short boot option instead of a complete one,
+  otherwise equivalent to \texttt{Bootstrap}. This variant is useful for some older firmwares,
+  Insyde in particular, but possibly others, which cannot handle full device paths.
   \end{itemize}
 
   This option provides integration with third-party operating system installation and upgrade
@@ -3405,7 +3552,8 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
   for some known issues with Haswell and other boards.
 
   \emph{Note 2}: Be aware that while NVRAM reset executed from OpenCore should not erase the boot
-  option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it.
+  option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it. For significant implementation updates (e.g. in OpenCore 0.6.4) make sure to perform
+  NVRAM reset with \texttt{Bootstrap} disabled before reenabling.
 
 \item \label{securedmgloading}
   \texttt{DmgLoading}\\
@@ -3671,23 +3819,23 @@ rm vault.pub
   \tightlist
   \item \texttt{Default} --- Recent available model, currently set to \texttt{j137}.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
-  \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017) minimum macOS 10.13.2 (17C2111)}
-  \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018) minimum macOS 10.13.6 (17G2112)}
-  \item \texttt{j132} --- \texttt{MacBookPro15,2 (July 2018) minimum macOS 10.13.6 (17G2112)}
-  \item \texttt{j174} --- \texttt{Macmini8,1 (October 2018) minimum macOS 10.14 (18A2063)}
-  \item \texttt{j140k} --- \texttt{MacBookAir8,1 (October 2018) minimum macOS 10.14.1 (18B2084)}
-  \item \texttt{j780} --- \texttt{MacBookPro15,3 (May 2019)  minimum macOS 10.14.5 (18F132)}
-  \item \texttt{j213} --- \texttt{MacBookPro15,4 (July 2019) minimum macOS 10.14.5 (18F2058)}
-  \item \texttt{j140a} --- \texttt{MacBookAir8,2 (July 2019) minimum macOS 10.14.5 (18F2058)}
-  \item \texttt{j152f} --- \texttt{MacBookPro16,1 (November 2019) minimum macOS 10.15.1 (19B2093)}
-  \item \texttt{j160} --- \texttt{MacPro7,1 (December 2019) minimum macOS 10.15.1 (19B88)}
-  \item \texttt{j230k} --- \texttt{MacBookAir9,1 (March 2020) minimum macOS 10.15.3 (19D2064)}
-  \item \texttt{j214k} --- \texttt{MacBookPro16,2 (May 2020) minimum macOS 10.15.4 (19E2269)}
-  \item \texttt{j223} --- \texttt{MacBookPro16,3 (May 2020) minimum macOS 10.15.4 (19E2265)}
-  \item \texttt{j215} --- \texttt{MacBookPro16,4 (June 2020) minimum macOS 10.15.5 (19F96)}
-  \item \texttt{j185} --- \texttt{iMac20,1 (August 2020) minimum macOS 10.15.6 (19G2005)}
-  \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020) minimum macOS 10.15.6 (19G2005)}
-  \item \texttt{x86legacy} --- \texttt{Macs and VMs without T2 chip minimum macOS 11.0}
+  \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
+  \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
+  \item \texttt{j132} --- \texttt{MacBookPro15,2 (July 2018). Minimum macOS 10.13.6 (17G2112)}
+  \item \texttt{j174} --- \texttt{Macmini8,1 (October 2018). Minimum macOS 10.14 (18A2063)}
+  \item \texttt{j140k} --- \texttt{MacBookAir8,1 (October 2018). Minimum macOS 10.14.1 (18B2084)}
+  \item \texttt{j780} --- \texttt{MacBookPro15,3 (May 2019). Minimum macOS 10.14.5 (18F132)}
+  \item \texttt{j213} --- \texttt{MacBookPro15,4 (July 2019). Minimum macOS 10.14.5 (18F2058)}
+  \item \texttt{j140a} --- \texttt{MacBookAir8,2 (July 2019). Minimum macOS 10.14.5 (18F2058)}
+  \item \texttt{j152f} --- \texttt{MacBookPro16,1 (November 2019). Minimum macOS 10.15.1 (19B2093)}
+  \item \texttt{j160} --- \texttt{MacPro7,1 (December 2019). Minimum macOS 10.15.1 (19B88)}
+  \item \texttt{j230k} --- \texttt{MacBookAir9,1 (March 2020). Minimum macOS 10.15.3 (19D2064)}
+  \item \texttt{j214k} --- \texttt{MacBookPro16,2 (May 2020). Minimum macOS 10.15.4 (19E2269)}
+  \item \texttt{j223} --- \texttt{MacBookPro16,3 (May 2020). Minimum macOS 10.15.4 (19E2265)}
+  \item \texttt{j215} --- \texttt{MacBookPro16,4 (June 2020). Minimum macOS 10.15.5 (19F96)}
+  \item \texttt{j185} --- \texttt{iMac20,1 (August 2020). Minimum macOS 10.15.6 (19G2005)}
+  \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020). Minimum macOS 10.15.6 (19G2005)}
+  \item \texttt{x86legacy} --- \texttt{Macs without T2 chip and VMs. Minimum macOS 11.0.1 (20B29)}
   \end{itemize}
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
@@ -3699,7 +3847,7 @@ rm vault.pub
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
   achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
   when using Apple Secure Boot on a virtual machine.
-
+  
   Enabling Apple Secure Boot is more demanding to incorrect configurations,
   buggy macOS installations, and unsupported setups. Things to consider:
 
@@ -3725,6 +3873,8 @@ rm vault.pub
     \item Since \texttt{Default} value will increase with time to support the latest
       major release operating system, it is not recommended to use \texttt{ApECID}
       and \texttt{Default} value together.
+    \item Installing macOS with Apple Secure Boot enabled is not possible while using HFS+ 
+      target volume. This may include HFS+ formatted drives when no spare APFS drive is available.
   \end{enumerate}
 
   Sometimes the already installed operating system may have outdated Apple Secure
@@ -3796,8 +3946,33 @@ rm vault.pub
   Example: \texttt{OpenShell.efi}.
   \end{itemize}
 
-\end{enumerate}
+\item
+  \texttt{RealPath}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Pass full path to the tool when launching.
 
+  Passing tool directory may be unsafe for tool accidentally trying to access
+  files without checking their integrity and thus should generally be disabled.
+  Reason to enable this property may include cases where tools cannot work
+  without external files or may need them for better function (e.g.
+  \texttt{memtest86} for logging and configuration or \texttt{Shell} for
+  automatic script execution).
+
+  \emph{Note}: This property is only valid for \texttt{Tools}. For \texttt{Entries}
+  this property cannot be specified and is always \texttt{true}.
+
+\item
+  \texttt{TextMode}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Run the entry in text mode instead of graphics mode.
+
+  This setting may be benefitial to some older tools that require text output.
+  By default all the tools are launched in graphics mode. Read more about text
+  modes in \hyperref[uefioutputprops]{Output Properties} section below.
+
+\end{enumerate}
 
 \section{NVRAM}\label{nvram}
 
@@ -4072,6 +4247,7 @@ troubleshooting:
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
   \item \texttt{keepsyms=1} (show panic log debug symbols)
   \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
+  \item \texttt{nvram-log=1} (enables AppleEFINVRAM logs)
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
@@ -4229,8 +4405,7 @@ troubleshooting:
   \break
   Mute startup chime sound in firmware audio support. 8-bit integer.
   The value of \texttt{0x00} means unmuted. Missing variable or any
-  other value means muted. This variable only affects Gibraltar
-  machines (T2).
+  other value means muted.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolume}
   \break
@@ -5729,16 +5904,24 @@ functioning. Feature highlights:
 
 \item
   \texttt{PlayChime}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: empty string\\
   \textbf{Description}: Play chime sound at startup.
 
   Enabling this setting plays boot chime through builtin audio support. Volume level
   is determined by \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings and
-  \texttt{SystemAudioVolume} NVRAM variable.
+  \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
 
-  \emph{Note}: this setting is separate from \texttt{StartupMute} NVRAM variable
-  to avoid conflicts when the firmware is able to play boot chime.
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Auto} --- Enables chime when \texttt{StartupMute} NVRAM variable
+      is not present or set to \texttt{00}.
+    \item \texttt{Enabled} --- Enables chime unconditionally.
+    \item \texttt{Disabled} --- Disables chime unconditionally.
+  \end{itemize}
+
+  \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
+  NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
   \texttt{VolumeAmplifier}\\
