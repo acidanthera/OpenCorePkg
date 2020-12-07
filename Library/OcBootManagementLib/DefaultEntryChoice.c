@@ -51,7 +51,16 @@ InternalGetBootOptionData (
   UINTN           LoadOptionSize;
   EFI_LOAD_OPTION *LoadOption;
 
-  UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);
+  if (CompareGuid (BootGuid, &gOcVendorVariableGuid)) {
+    UnicodeSPrint (
+      BootVarName,
+      sizeof (BootVarName),
+      OC_VENDOR_BOOT_VARIABLE_PREFIX L"%04x",
+      BootOption
+      );
+  } else {
+    UnicodeSPrint (BootVarName, sizeof (BootVarName), L"Boot%04x", BootOption);   
+  }
 
   Status = GetVariable2 (
     BootVarName,
@@ -306,14 +315,21 @@ InternalClearNextVariables (
   )
 {
   CHAR16  VariableName[32];
+  CHAR16  *BootNextName;
   UINTN   Index;
+
+  if (CompareGuid (BootVariableGuid, &gOcVendorVariableGuid)) {
+    BootNextName = OC_VENDOR_BOOT_NEXT_VARIABLE_NAME;
+  } else {
+    BootNextName = EFI_BOOT_NEXT_VARIABLE_NAME;
+  }
 
   //
   // Next variable data specified by UEFI spec.
   // For now we do not bother dropping the variable it points to.
   //
   gRT->SetVariable (
-    EFI_BOOT_NEXT_VARIABLE_NAME,
+    BootNextName,
     BootVariableGuid,
     EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
     0,
@@ -388,15 +404,22 @@ InternalHasFirmwareUpdateAsNext (
   EFI_STATUS                       Status;
   UINT32                           VariableAttributes;
   UINT16                           BootNext;
+  CHAR16                           *BootNextName;
   UINTN                            VariableSize;
   OC_BOOT_ENTRY_TYPE               EntryType;
   EFI_DEVICE_PATH_PROTOCOL         *UefiDevicePath;
   EFI_LOAD_OPTION                  *LoadOption;
   UINTN                            LoadOptionSize;
 
+  if (CompareGuid (BootVariableGuid, &gOcVendorVariableGuid)) {
+    BootNextName = OC_VENDOR_BOOT_NEXT_VARIABLE_NAME;
+  } else {
+    BootNextName = EFI_BOOT_NEXT_VARIABLE_NAME;
+  }
+
   VariableSize = sizeof (BootNext);
   Status = gRT->GetVariable (
-    EFI_BOOT_NEXT_VARIABLE_NAME,
+    BootNextName,
     BootVariableGuid,
     &VariableAttributes,
     &VariableSize,
@@ -464,6 +487,8 @@ OcGetBootOrder (
   EFI_STATUS  Status;
   UINT32      VariableAttributes;
   UINT16      BootNext;
+  CHAR16      *BootOrderName;
+  CHAR16      *BootNextName;
   UINT16      *BootOrder;
   UINTN       VariableSize;
   UINTN       Index;
@@ -480,13 +505,21 @@ OcGetBootOrder (
     *HasBootNext = FALSE;
   }
 
+  if (CompareGuid (BootVariableGuid, &gOcVendorVariableGuid)) {
+    BootOrderName = OC_VENDOR_BOOT_ORDER_VARIABLE_NAME;
+    BootNextName = OC_VENDOR_BOOT_NEXT_VARIABLE_NAME;
+  } else {
+    BootOrderName = EFI_BOOT_ORDER_VARIABLE_NAME;
+    BootNextName = EFI_BOOT_NEXT_VARIABLE_NAME;
+  }
+
   //
   // Precede variable with boot next.
   //
   if (WithBootNext) {
     VariableSize = sizeof (BootNext);
     Status = gRT->GetVariable (
-      EFI_BOOT_NEXT_VARIABLE_NAME,
+      BootNextName,
       BootVariableGuid,
       &VariableAttributes,
       &VariableSize,
@@ -503,7 +536,7 @@ OcGetBootOrder (
 
   VariableSize = 0;
   Status = gRT->GetVariable (
-    EFI_BOOT_ORDER_VARIABLE_NAME,
+    BootOrderName,
     BootVariableGuid,
     &VariableAttributes,
     &VariableSize,
@@ -517,7 +550,7 @@ OcGetBootOrder (
     }
 
     Status = gRT->GetVariable (
-      EFI_BOOT_ORDER_VARIABLE_NAME,
+      BootOrderName,
       BootVariableGuid,
       &VariableAttributes,
       &VariableSize,
@@ -640,6 +673,8 @@ OcSetDefaultBootEntry (
   EFI_HANDLE       DeviceHandle;
   OC_BOOT_ENTRY    *MatchedEntry;
   EFI_GUID         *BootVariableGuid;
+  CHAR16           *BootOrderName;
+  CHAR16           *BootVariableName;
   UINT16           *BootOrder;
   UINT16           *NewBootOrder;
   UINT16           BootTmp;
@@ -667,8 +702,12 @@ OcSetDefaultBootEntry (
 
   if (Context->CustomBootGuid) {
     BootVariableGuid = &gOcVendorVariableGuid;
+    BootOrderName = OC_VENDOR_BOOT_ORDER_VARIABLE_NAME;
+    BootVariableName = OC_VENDOR_BOOT_VARIABLE_PREFIX L"0080";
   } else {
     BootVariableGuid = &gEfiGlobalVariableGuid;
+    BootOrderName = EFI_BOOT_ORDER_VARIABLE_NAME;
+    BootVariableName = L"Boot0080";
   }
 
   BootOrder = OcGetBootOrder (
@@ -755,7 +794,7 @@ OcSetDefaultBootEntry (
     CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
 
     Status = gRT->SetVariable (
-      L"Boot0080",
+      BootVariableName,
       BootVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS
         | EFI_VARIABLE_RUNTIME_ACCESS
@@ -822,7 +861,7 @@ OcSetDefaultBootEntry (
   }
 
   Status = gRT->SetVariable (
-    EFI_BOOT_ORDER_VARIABLE_NAME,
+    BootOrderName,
     BootVariableGuid,
     EFI_VARIABLE_BOOTSERVICE_ACCESS
       | EFI_VARIABLE_RUNTIME_ACCESS

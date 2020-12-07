@@ -80,6 +80,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_RTC_BLACKLIST_VARIABLE_NAME       L"rtc-blacklist"
 
 //
+// Boot prefix used instead of normal Boot in OC_VENDOR_VARIABLE_GUID
+//
+#define OC_VENDOR_BOOT_VARIABLE_PREFIX       L"OCBt"
+
+//
+// BootOrder variable name for OC_VENDOR_VARIABLE_GUID
+//
+#define OC_VENDOR_BOOT_ORDER_VARIABLE_NAME   OC_VENDOR_BOOT_VARIABLE_PREFIX L"Order"
+
+
+//
+// BootNext variable name for OC_VENDOR_VARIABLE_GUID
+//
+#define OC_VENDOR_BOOT_NEXT_VARIABLE_NAME   OC_VENDOR_BOOT_VARIABLE_PREFIX L"Next"
+
+//
 // 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102
 // This GUID is specifically used for normal variable access by Lilu kernel extension and its plugins.
 //

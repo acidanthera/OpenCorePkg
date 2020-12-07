@@ -158,11 +158,11 @@ IsEfiBootVar (
       return FALSE;
     }
 
-    CopyMem (&NewVariableName[0], L"OCBt", L_STR_SIZE_NT (L"OCBt"));
+    CopyMem (&NewVariableName[0], OC_VENDOR_BOOT_VARIABLE_PREFIX, L_STR_SIZE_NT (OC_VENDOR_BOOT_VARIABLE_PREFIX));
     CopyMem (
-      &NewVariableName[L_STR_LEN (L"OCBt")],
-      &VariableName[L_STR_LEN (L"OCBt")],
-      Size - L_STR_SIZE_NT (L"OCBt")
+      &NewVariableName[L_STR_LEN (OC_VENDOR_BOOT_VARIABLE_PREFIX)],
+      &VariableName[L_STR_LEN (OC_VENDOR_BOOT_VARIABLE_PREFIX)],
+      Size - L_STR_SIZE_NT (OC_VENDOR_BOOT_VARIABLE_PREFIX)
       );
   }
 
@@ -183,7 +183,7 @@ IsOcBootVar (
     return FALSE;
   }
 
-  if (StrnCmp (L"OCBt", VariableName, L_STR_LEN (L"OCBt")) != 0) {
+  if (StrnCmp (OC_VENDOR_BOOT_VARIABLE_PREFIX, VariableName, L_STR_LEN (OC_VENDOR_BOOT_VARIABLE_PREFIX)) != 0) {
     return FALSE;
   }
 
