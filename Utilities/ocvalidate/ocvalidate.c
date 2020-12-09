@@ -43,32 +43,155 @@ long long current_timestamp() {
     return milliseconds;
 }
 
+unsigned int check_ACPI(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_Booter(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_DeviceProperties(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_Kernel(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into Kernel checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_Misc(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into Misc checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_NVRAM(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into NVRAM checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_PlatformInfo(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into PlatformInfo checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int check_UEFI(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
+
+  if (ret != 0)
+    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+  return ret;
+}
+
+unsigned int (*checker_funcs[])(OC_GLOBAL_CONFIG *) = {
+  check_ACPI,
+  check_Booter,
+  check_DeviceProperties,
+  check_Kernel,
+  check_Misc,
+  check_NVRAM,
+  check_PlatformInfo,
+  check_UEFI
+};
+const size_t checker_funcs_size = sizeof(checker_funcs) / sizeof(checker_funcs[0]);
+
+unsigned int check_config(OC_GLOBAL_CONFIG *Config) {
+  unsigned int ret = 0;
+
+  //
+  // I don't think this is possible after OcConfigurationInit?
+  //
+  // if (!Config) {
+  //   DEBUG ((DEBUG_ERROR, "Failed to load config!\n"));
+  //   return 1;
+  // }
+
+  for (size_t i = 0; i < checker_funcs_size; i++) {
+    ret |= (*checker_funcs[i])(Config);
+  }
+
+  return ret;
+}
+
 int main(int argc, char** argv) {
-  uint32_t f;
-  uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "config.plist", &f)) == NULL) {
-    printf("Read fail\n");
+  uint32_t config_file_size;
+  uint8_t  *config_file_buffer;
+  if ((config_file_buffer = readFile(argc > 1 ? argv[1] : "config.plist", &config_file_size)) == NULL) {
+    DEBUG ((DEBUG_ERROR, "Failed to read %a\n", argc > 1 ? argv[1] : "config.plist"));
     return -1;
   }
 
   long long a = current_timestamp();
 
-  PcdGet8 (PcdDebugPropertyMask) |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
+  PcdGet8  (PcdDebugPropertyMask)         |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   OC_GLOBAL_CONFIG   Config;
   EFI_STATUS         Status;
-  Status = OcConfigurationInit (&Config, b, f);
+  Status = OcConfigurationInit (&Config, config_file_buffer, config_file_size);
 
   if (Status != EFI_SUCCESS) {
     printf("Invalid config\n");
     return -1;
   }
 
-  DEBUG ((DEBUG_ERROR, "Done checking %a in %llu ms\n", argc > 1 ? argv[1] : "./config.plist", current_timestamp() - a));
+  unsigned int ret = check_config(&Config);
+  if (ret == 0) {
+    DEBUG ((DEBUG_ERROR, "Done checking %a in %llu ms\n", argc > 1 ? argv[1] : "./config.plist", current_timestamp() - a));
+  } else {
+    DEBUG ((
+      DEBUG_ERROR,
+      "Done checking %a in %llu ms, but it has %u %a to be fixed\n",
+      argc > 1 ? argv[1] : "./config.plist",
+      current_timestamp() - a,
+      ret,
+      ret > 1 ? "errors" : "error"
+      ));
+  }
 
   OcConfigurationFree (&Config);
-
-  free(b);
+  free(config_file_buffer);
 
   return 0;
 }
