@@ -49,7 +49,7 @@ unsigned int check_ACPI(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -59,7 +59,7 @@ unsigned int check_Booter(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -69,7 +69,7 @@ unsigned int check_DeviceProperties(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -79,7 +79,7 @@ unsigned int check_Kernel(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into Kernel checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -89,7 +89,7 @@ unsigned int check_Misc(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into Misc checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -99,7 +99,7 @@ unsigned int check_NVRAM(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into NVRAM checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -109,7 +109,7 @@ unsigned int check_PlatformInfo(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into PlatformInfo checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
@@ -119,7 +119,7 @@ unsigned int check_UEFI(OC_GLOBAL_CONFIG *Config) {
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
   if (ret != 0)
-    DEBUG ((DEBUG_WARNING, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
   return ret;
 }
 
