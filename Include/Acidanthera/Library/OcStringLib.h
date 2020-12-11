@@ -235,6 +235,38 @@ OcStrniCmp (
   );
 
 /**
+  Returns the first occurrence of a Null-terminated ASCII sub-string
+  in a Null-terminated ASCII string through a case insensitive comparison.
+
+  This function scans the contents of the Null-terminated ASCII string
+  specified by String and returns the first occurrence of SearchString.
+  If SearchString is not found in String, then NULL is returned.  If
+  the length of SearchString is zero, then String is returned.
+
+  If String is NULL, then ASSERT().
+  If String is not aligned on a 8-bit boundary, then ASSERT().
+  If SearchString is NULL, then ASSERT().
+  If SearchString is not aligned on a 8-bit boundary, then ASSERT().
+
+  If PcdMaximumAsciiStringLength is not zero, and SearchString
+  or String contains more than PcdMaximumAsciiStringLength ASCII
+  characters, not including the Null-terminator, then ASSERT().
+
+  @param  String          The pointer to a Null-terminated ASCII string.
+  @param  SearchString    The pointer to a Null-terminated ASCII string to search for.
+
+  @retval NULL            If the SearchString does not appear in String.
+  @return others          If there is a match.
+
+**/
+CHAR8 *
+EFIAPI
+OcAsciiStriStr (
+  IN      CONST CHAR8              *String,
+  IN      CONST CHAR8              *SearchString
+  );
+
+/**
   Returns the first occurrence of a Null-terminated Unicode sub-string
   in a Null-terminated Unicode string through a case insensitive comparison.
 

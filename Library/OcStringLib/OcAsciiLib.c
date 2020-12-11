@@ -206,3 +206,44 @@ OcAsciiEndsWith (
   return StringLength >= SearchStringLength
     && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
+
+CHAR8 *
+EFIAPI
+OcAsciiStriStr (
+  IN      CONST CHAR8              *String,
+  IN      CONST CHAR8              *SearchString
+  )
+{
+  CONST CHAR8 *FirstMatch;
+  CONST CHAR8 *SearchStringTmp;
+
+  ASSERT (AsciiStrSize (String) != 0);
+  ASSERT (AsciiStrSize (SearchString) != 0);
+
+  if (*SearchString == '\0') {
+    return (CHAR8 *) String;
+  }
+
+  while (*String != '\0') {
+    SearchStringTmp = SearchString;
+    FirstMatch = String;
+
+    while ((AsciiCharToUpper (*String) == AsciiCharToUpper (*SearchStringTmp))
+            && (*String != '\0')) {
+      String++;
+      SearchStringTmp++;
+    }
+
+    if (*SearchStringTmp == '\0') {
+      return (CHAR8 *) FirstMatch;
+    }
+
+    if (*String == '\0') {
+      return NULL;
+    }
+
+    String = FirstMatch + 1;
+  }
+
+  return NULL;
+}
