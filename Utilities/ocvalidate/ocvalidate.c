@@ -25,6 +25,9 @@
 
 #include <File.h>
 #include <sys/time.h>
+#include <string.h>
+#include <ctype.h>
+#include <stdbool.h>
 
 /*
  for fuzzing (TODO):
@@ -43,10 +46,95 @@ long long current_timestamp() {
     return milliseconds;
 }
 
+const char *get_filename_suffix(const char *filename) {
+  // find the last dot by reverse order
+  const char *suffix_dot = strrchr(filename, '.');
+
+  // in some weird cases the filename can be crazily like
+  // "a.suffix." (note that '.') or "..." (extremely abnormal).
+  // we do not support such.
+  if (!suffix_dot || suffix_dot == filename)
+    return "";
+
+  // in most normal cases, return whatever following the dot.
+  return suffix_dot + 1;
+}
+
+bool str_has_all_legal_char(const char *str) {
+  // only 0-9, A-Z, a-z, '_', '-', '.', '/', and '\'
+  // are accepted.
+
+  for (size_t i = 0; i < strlen(str); i++) {
+    if (isdigit(str[i])) continue;
+    if (isalpha(str[i])) continue;
+    if (str[i] == '_')   continue;
+    if (str[i] == '-')   continue;
+    if (str[i] == '.')   continue;
+    if (str[i] == '/')   continue;
+    if (str[i] == '\\')  continue;
+
+    // return false when matching characters
+    // other than those ones,
+    // which are not accepted due to sanitising.
+    return false;
+  }
+
+  return true;
+}
+
+bool str_has_all_printable_char(const char *str) {
+  for (size_t i = 0; i < strlen(str); i++) {
+    if (isprint(str[i]) == 0) return false;
+  }
+
+  return true;
+}
+
 unsigned int check_ACPI(OC_GLOBAL_CONFIG *Config) {
-  unsigned int ret = 0;
+  unsigned int    ret = 0;
+  OC_ACPI_CONFIG  UserAcpi;
+  const char      *path;
+  const char      *comment;
+  bool            has_custom_dsdt = false;
+  // CHAR16          *PathUnicode;
 
   DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
+
+  UserAcpi = Config->Acpi;
+
+  for (uint32_t i = 0; i < UserAcpi.Add.Count; i++) {
+    path    = OC_BLOB_GET (&UserAcpi.Add.Values[i]->Path);
+    comment = OC_BLOB_GET (&UserAcpi.Add.Values[i]->Comment);
+
+    if (!str_has_all_legal_char(path)) {
+      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", i));
+      ret++;
+    }
+
+    if (!str_has_all_printable_char(comment)) {
+      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Comment contains illegal character!\n", i));
+      ret++;
+    }
+
+    if (strcmp(get_filename_suffix(path), "dsl") == 0) {
+      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has .dsl suffix!\n", i));
+      ret++;
+    }
+
+    if (OcAsciiStriStr (path, "DSDT") == 0) {
+      has_custom_dsdt = true;
+    }
+  }
+
+  // for (uint32_t i = 0; i < UserAcpi.Delete.Count; i++) {
+
+  // }
+
+  if (has_custom_dsdt && !UserAcpi.Quirks.RebaseRegions) {
+    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when there is a custom DSDT table!\n"));
+  }
+
+
 
   if (ret != 0)
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
