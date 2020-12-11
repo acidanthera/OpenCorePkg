@@ -132,9 +132,8 @@ unsigned int check_ACPI(OC_GLOBAL_CONFIG *Config) {
 
   if (has_custom_dsdt && !UserAcpi.Quirks.RebaseRegions) {
     DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when there is a custom DSDT table!\n"));
+    ret++;
   }
-
-
 
   if (ret != 0)
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ret, ret > 1 ? "errors" : "error"));
