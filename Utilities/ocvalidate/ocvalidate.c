@@ -399,7 +399,7 @@ CheckBooter (
     ++ErrorCount;
   }
   if (IsEnableSafeModeSlideEnabled && !IsProvideCustomSlideEnabled) {
-    DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n",));
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
     ++ErrorCount;
   }
 
