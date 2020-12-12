@@ -106,8 +106,8 @@ StringHasAllLegalCharacter (
     //
     // Skip allowed characters.
     //
-    if (isdigit (String[Index])
-      || isalpha (String[Index])
+    if (IsAsciiNumber (String[Index])
+      || isalpha (String[Index]) ///< TODO: Implement IsAsciiAlpha in OcStringLib
       || String[Index] == '_'
       || String[Index] == '-'
       || String[Index] == '.'
@@ -137,7 +137,7 @@ StringHasAllPrintableCharacter (
     //
     // Unprintable characters matched.
     //
-    if (isprint (String[Index]) == 0) {
+    if (IsAsciiPrint (String[Index]) == 0) {
       return FALSE;
     }
   }
