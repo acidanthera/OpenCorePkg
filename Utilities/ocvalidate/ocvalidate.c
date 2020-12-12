@@ -344,10 +344,7 @@ CheckConfig (
 
   ErrorCount = 0;
 
-  //
-  // TODO: Fix EDK II code style
-  //
-  CONFIG_CHECK ConfigCheckers[] = {
+  STATIC CONFIG_CHECK ConfigCheckers[] = {
     &CheckACPI,
     &CheckBooter,
     &CheckDeviceProperties,
