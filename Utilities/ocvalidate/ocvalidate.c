@@ -27,7 +27,6 @@
 #include <sys/time.h>
 #include <string.h>
 #include <ctype.h>
-#include <stdbool.h>
 
 /*
  for fuzzing (TODO):
@@ -165,8 +164,8 @@ CheckACPI (
 
   DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
 
-  UserAcpi      = Config->Acpi;
   ErrorCount    = 0;
+  UserAcpi      = Config->Acpi;
   HasCustomDSDT = FALSE;
 
   for (Index = 0; Index < UserAcpi.Add.Count; ++Index) {
@@ -183,7 +182,7 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (AsciiStrCmp (GetFilenameSuffix (Path), "dsl") == 0) {
+    if (AsciiStrCmp (GetFilenameSuffix (Path), "dsl") == 0) { ///< TODO: case insensitive check maybe?
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has .dsl suffix!\n", Index));
       ++ErrorCount;
     }
@@ -225,15 +224,32 @@ CheckACPI (
     //
 
     if (FindSize != ReplaceSize) {
-      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has different Find and Replace size (%u vs %u)!\n", Index, FindSize, ReplaceSize));
+      DEBUG ((
+        DEBUG_WARN,
+        "ACPI->Patch[%u] has different Find and Replace size (%u vs %u)!\n",
+        Index,
+        FindSize,
+        ReplaceSize
+        ));
       ++ErrorCount;
     }
     if (MaskSize > 0 && MaskSize != FindSize) {
-      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n", Index, MaskSize, FindSize));
+      DEBUG ((DEBUG_WARN,
+        "ACPI->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n",
+        Index,
+        MaskSize,
+        FindSize
+        ));
       ++ErrorCount;
     }
     if (ReplaceMaskSize > 0 && ReplaceMaskSize != FindSize) {
-      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n", Index, ReplaceMaskSize, FindSize));
+      DEBUG ((
+        DEBUG_WARN,
+        "ACPI->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n",
+        Index,
+        ReplaceMaskSize,
+        FindSize
+        ));
       ++ErrorCount;
     }
   }
@@ -255,11 +271,137 @@ CheckBooter (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount;
-
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_BOOTER_CONFIG  UserBooter;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *Identifier;
+  UINT32            FindSize;
+  UINT32            ReplaceSize;
+  UINT32            MaskSize;
+  UINT32            ReplaceMaskSize;
+  BOOLEAN           IsMmioWhitelistEnabled;
+  BOOLEAN           ShouldEnableDevirtualiseMmio;
+  BOOLEAN           IsAllowRelocationBlockEnabled;
+  BOOLEAN           IsProvideCustomSlideEnabled;
+  BOOLEAN           IsAvoidRuntimeDefragEnabled;
+  BOOLEAN           IsEnableSafeModeSlideEnabled;
+  
   DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
 
-  ErrorCount = 0;
+  ErrorCount                    = 0;
+  UserBooter                    = Config->Booter;
+  IsMmioWhitelistEnabled        = FALSE;
+  ShouldEnableDevirtualiseMmio  = FALSE;
+  IsAllowRelocationBlockEnabled = UserBooter.Quirks.AllowRelocationBlock;
+  IsProvideCustomSlideEnabled   = UserBooter.Quirks.ProvideCustomSlide;
+  IsAvoidRuntimeDefragEnabled   = UserBooter.Quirks.AvoidRuntimeDefrag;
+  IsEnableSafeModeSlideEnabled  = UserBooter.Quirks.EnableSafeModeSlide;
+  
+  for (Index = 0; Index < UserBooter.MmioWhitelist.Count; ++Index) {
+    Comment                = OC_BLOB_GET (&UserBooter.MmioWhitelist.Values[Index]->Comment);
+    IsMmioWhitelistEnabled = UserBooter.MmioWhitelist.Values[Index]->Enabled;
+
+    if (!StringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "Booter->MmioWhitelist[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (IsMmioWhitelistEnabled) {
+      ShouldEnableDevirtualiseMmio = TRUE;
+    }
+  }
+
+  for (Index = 0; Index < UserBooter.Patch.Count; ++Index) {
+    Comment         = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Comment);
+    Arch            = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Arch);
+    Identifier      = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Identifier);
+    FindSize        = UserBooter.Patch.Values[Index]->Find.Size;
+    ReplaceSize     = UserBooter.Patch.Values[Index]->Replace.Size;
+    MaskSize        = UserBooter.Patch.Values[Index]->Mask.Size;
+    ReplaceMaskSize = UserBooter.Patch.Values[Index]->ReplaceMask.Size;
+
+    if (!StringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (Arch[0] != '\0'
+      && AsciiStrCmp (Arch, "Any") != 0
+      && AsciiStrCmp (Arch, "i386") != 0
+      && AsciiStrCmp (Arch, "x86_64") != 0) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Booter->Patch[%u]->Arch has illegal value: %a (Can only be Empty string/Any, i386, and x86_64)\n",
+        Index,
+        Arch
+        ));
+      ++ErrorCount;
+    }
+
+    if (Identifier[0] != '\0'
+      && AsciiStrCmp (Identifier, "Any") != 0
+      && AsciiStrCmp (Identifier, "Apple") != 0
+      && AsciiStrCmp (GetFilenameSuffix (Identifier), "efi") != 0) { ///< TODO: case insensitive maybe?
+      DEBUG ((
+        DEBUG_WARN,
+        "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Empty string/Any, Apple, or a specified bootloader with .efi sufffix)\n",
+        Index,
+        Identifier
+        ));
+      ++ErrorCount;
+    }
+
+    if (FindSize != ReplaceSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Booter->Patch[%u] has different Find and Replace size (%u vs %u)!\n",
+        Index,
+        FindSize,
+        ReplaceSize
+        ));
+      ++ErrorCount;
+    }
+    if (MaskSize > 0 && MaskSize != FindSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Booter->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n",
+        Index,
+        MaskSize,
+        FindSize
+        ));
+      ++ErrorCount;
+    }
+    if (ReplaceMaskSize > 0 && ReplaceMaskSize != FindSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Booter->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n",
+        Index,
+        ReplaceMaskSize,
+        FindSize
+        ));
+      ++ErrorCount;
+    }
+  }
+
+  if (ShouldEnableDevirtualiseMmio && !UserBooter.Quirks.DevirtualiseMmio) {
+    DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
+    ++ErrorCount;
+  }
+  if (IsAllowRelocationBlockEnabled && (!IsProvideCustomSlideEnabled || !IsAvoidRuntimeDefragEnabled)) {
+    DEBUG ((
+      DEBUG_WARN,
+      "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide (%a) and AvoidRuntimeDefrag (%a) are not enabled altogether!\n",
+      IsProvideCustomSlideEnabled ? "enabled" : "disabled",
+      IsAvoidRuntimeDefragEnabled ? "enabled" : "disabled"
+      ));
+    ++ErrorCount;
+  }
+  if (IsEnableSafeModeSlideEnabled && !IsProvideCustomSlideEnabled) {
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n",));
+    ++ErrorCount;
+  }
 
   if (ErrorCount != 0) {
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
