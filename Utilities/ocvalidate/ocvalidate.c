@@ -26,7 +26,6 @@
 #include <File.h>
 #include <sys/time.h>
 #include <string.h>
-#include <ctype.h>
 
 /*
  for fuzzing (TODO):
@@ -107,7 +106,7 @@ StringHasAllLegalCharacter (
     // Skip allowed characters.
     //
     if (IsAsciiNumber (String[Index])
-      || isalpha (String[Index]) ///< TODO: Implement IsAsciiAlpha in OcStringLib
+      || IsAsciiAlpha (String[Index])
       || String[Index] == '_'
       || String[Index] == '-'
       || String[Index] == '.'
