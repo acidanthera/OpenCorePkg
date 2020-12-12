@@ -54,11 +54,22 @@ IsAsciiPrint (
   IN CHAR8  Char
   );
 
-/** Check if character is a white space character
+/** Check if character is alphabetical.
+
+  @param[in] Char  The ascii character to check if is alphabetical.
+
+  @retval  TRUE, if character is alphabetical.
+**/
+INTN
+IsAsciiAlpha (
+  IN CHAR8  Char
+  );
+
+/** Check if character is a white space character.
 
   @param[in] Char  The ascii character to check if is white space.
 
-  @retval  TRUE, if character is a white space character
+  @retval  TRUE, if character is a white space character.
 **/
 INTN
 IsAsciiSpace (
