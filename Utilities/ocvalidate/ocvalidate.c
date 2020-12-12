@@ -157,6 +157,10 @@ CheckACPI (
   OC_ACPI_CONFIG  UserAcpi;
   CONST CHAR8     *Path;
   CONST CHAR8     *Comment;
+  UINT32          FindSize;
+  UINT32          ReplaceSize;
+  UINT32          MaskSize;
+  UINT32          ReplaceMaskSize;
   BOOLEAN         HasCustomDSDT;
 
   DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
@@ -189,10 +193,49 @@ CheckACPI (
     }
   }
 
-  for (Index = 0; Index < UserAcpi.Delete.Count; Index++) {
+  for (Index = 0; Index < UserAcpi.Delete.Count; ++Index) {
+    Comment = OC_BLOB_GET (&UserAcpi.Delete.Values[Index]->Comment);
+
+    if (!StringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "ACPI->Delete[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
     //
-    // TODO
+    // Size of OemTableId and TableSignature cannot be checked,
+    // as serialisation kills it.
     //
+  }
+
+  for (Index = 0; Index < UserAcpi.Patch.Count; ++Index) {
+    Comment         = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->Comment);
+    FindSize        = UserAcpi.Patch.Values[Index]->Find.Size;
+    ReplaceSize     = UserAcpi.Patch.Values[Index]->Replace.Size;
+    MaskSize        = UserAcpi.Patch.Values[Index]->Mask.Size;
+    ReplaceMaskSize = UserAcpi.Patch.Values[Index]->ReplaceMask.Size;
+
+    if (!StringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    //
+    // Size of OemTableId and TableSignature cannot be checked,
+    // as serialisation kills it.
+    //
+
+    if (FindSize != ReplaceSize) {
+      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has different Find and Replace size (%u vs %u)!\n", Index, FindSize, ReplaceSize));
+      ++ErrorCount;
+    }
+    if (MaskSize > 0 && MaskSize != FindSize) {
+      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n", Index, MaskSize, FindSize));
+      ++ErrorCount;
+    }
+    if (ReplaceMaskSize > 0 && ReplaceMaskSize != FindSize) {
+      DEBUG ((DEBUG_WARN, "ACPI->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n", Index, ReplaceMaskSize, FindSize));
+      ++ErrorCount;
+    }
   }
 
   if (HasCustomDSDT && !UserAcpi.Quirks.RebaseRegions) {
