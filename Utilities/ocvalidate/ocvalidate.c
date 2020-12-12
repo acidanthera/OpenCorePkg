@@ -357,7 +357,7 @@ CheckConfig (
     &CheckPlatformInfo,
     &CheckUEFI
   };
-  ConfigCheckersSize = sizeof(ConfigCheckers) / sizeof(ConfigCheckers[0]);
+  ConfigCheckersSize = sizeof (ConfigCheckers) / sizeof (ConfigCheckers[0]);
 
   for (Index = 0; Index < ConfigCheckersSize; ++Index) {
     ErrorCount |= (*ConfigCheckers[Index]) (Config);
@@ -370,7 +370,7 @@ int main(int argc, const char *argv[]) {
   UINT8              *ConfigFileBuffer;
   UINT32             ConfigFileSize;
   CONST CHAR8        *ConfigFileName;
-  INT64              ExecTime;
+  INT64              ExecTimeStart;
   OC_GLOBAL_CONFIG   Config;
   EFI_STATUS         Status;
   UINT32             ErrorCount;
@@ -386,7 +386,7 @@ int main(int argc, const char *argv[]) {
     return -1;
   }
 
-  ExecTime = GetCurrentTimestamp ();
+  ExecTimeStart = GetCurrentTimestamp ();
 
   Status   = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize);
   if (EFI_ERROR (Status)) {
@@ -400,14 +400,14 @@ int main(int argc, const char *argv[]) {
       DEBUG_ERROR,
       "Done checking %a in %llu ms\n",
       ConfigFileName,
-      GetCurrentTimestamp () - ExecTime
+      GetCurrentTimestamp () - ExecTimeStart
       ));
   } else {
     DEBUG ((
       DEBUG_ERROR,
       "Done checking %a in %llu ms, but it has %u %a to be fixed\n",
       ConfigFileName,
-      GetCurrentTimestamp () - ExecTime,
+      GetCurrentTimestamp () - ExecTimeStart,
       ErrorCount,
       ErrorCount > 1 ? "errors" : "error"
       ));
