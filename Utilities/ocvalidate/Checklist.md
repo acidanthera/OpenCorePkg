@@ -26,7 +26,8 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] Quirks->EnableSafeModeSlide: When enabled, ProvideCustomSlide should be enabled altogether.
 - [ ] Quirks->ProvideMaxSlide: If set to a number greater than zero, ProvideCustomSlide should be enabled altogether.
 - [ ] Quirks->DisableVariableWrite/EnableWriteUnprotector: When either is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
-- [ ] Quirks->EnableWriteUnprotector/RebuildAppleMemoryMap: These two cannot be enabled simultaneously
+- [ ] Quirks->EnableWriteUnprotector/RebuildAppleMemoryMap: These two cannot be enabled simultaneously.
+- [ ] Quirks->RebuildAppleMemoryMap: When enabled, SyncRuntimePermissions is highly recommended to be enabled as well.
 
 ## DeviceProperties
 - [ ] TODO
