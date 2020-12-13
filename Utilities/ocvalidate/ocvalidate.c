@@ -93,7 +93,7 @@ GetFilenameSuffix (
 
 STATIC
 BOOLEAN
-StringHasAllLegalCharacter (
+AsciiStringHasAllLegalCharacter (
   IN  CONST CHAR8  *String
   )
 {
@@ -126,7 +126,7 @@ StringHasAllLegalCharacter (
 
 STATIC
 BOOLEAN
-StringHasAllPrintableCharacter (
+AsciiStringHasAllPrintableCharacter (
   IN  CONST CHAR8  *String
   )
 {
@@ -171,12 +171,12 @@ CheckACPI (
     Path    = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Path);
     Comment = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Comment);
 
-    if (!StringHasAllLegalCharacter (Path)) {
+    if (!AsciiStringHasAllLegalCharacter (Path)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", Index));
       ++ErrorCount;
     }
 
-    if (!StringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -194,7 +194,7 @@ CheckACPI (
   for (Index = 0; Index < UserAcpi.Delete.Count; ++Index) {
     Comment = OC_BLOB_GET (&UserAcpi.Delete.Values[Index]->Comment);
 
-    if (!StringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Delete[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -212,7 +212,7 @@ CheckACPI (
     MaskSize        = UserAcpi.Patch.Values[Index]->Mask.Size;
     ReplaceMaskSize = UserAcpi.Patch.Values[Index]->ReplaceMask.Size;
 
-    if (!StringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -317,7 +317,7 @@ CheckBooter (
     Comment                = OC_BLOB_GET (&UserBooter.MmioWhitelist.Values[Index]->Comment);
     IsMmioWhitelistEnabled = UserBooter.MmioWhitelist.Values[Index]->Enabled;
 
-    if (!StringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->MmioWhitelist[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -336,7 +336,7 @@ CheckBooter (
     MaskSize        = UserBooter.Patch.Values[Index]->Mask.Size;
     ReplaceMaskSize = UserBooter.Patch.Values[Index]->ReplaceMask.Size;
 
-    if (!StringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
