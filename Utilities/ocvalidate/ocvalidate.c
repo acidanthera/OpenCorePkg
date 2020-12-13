@@ -26,7 +26,6 @@
 
 #include <File.h>
 #include <sys/time.h>
-#include <string.h>
 
 /*
  for fuzzing (TODO):
@@ -75,7 +74,7 @@ GetFilenameSuffix (
   //
   // Find the last dot by reverse order.
   //
-  SuffixDot = strrchr (FileName, '.');
+  SuffixDot = OcAsciiStrrChr (FileName, '.');
 
   //
   // In some weird cases the filename can be crazily like
