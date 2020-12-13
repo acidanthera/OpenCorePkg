@@ -51,6 +51,7 @@ InstallProcessorSmbios (
   CHAR8                             *AString;
   CHAR16                            *UString;
   EFI_STRING_ID                     Token;
+  UINTN                             DestMax;
 
   //
   // Processor info (TYPE 4)
@@ -70,9 +71,10 @@ InstallProcessorSmbios (
   // Set ProcessorVersion string
   //
   AString = GetSmbiosString (SmbiosTable, SmbiosTable.Type4->ProcessorVersion);
-  UString = AllocateZeroPool ((AsciiStrLen(AString) + 1) * sizeof(CHAR16));
+  DestMax = AsciiStrLen (AString) + 1;
+  UString = AllocateZeroPool (DestMax * sizeof(CHAR16));
   ASSERT (UString != NULL);
-  AsciiStrToUnicodeStr (AString, UString);
+  AsciiStrToUnicodeStrS (AString, UString, DestMax);
 
   Token = HiiSetString (gStringHandle, 0, UString, NULL);
   if (Token == 0) {
@@ -123,6 +125,7 @@ InstallMiscSmbios (
   CHAR8                             *AString;
   CHAR16                            *UString;
   EFI_STRING_ID                     Token;
+  UINTN                             DestMax;
 
   //
   // BIOS information (TYPE 0)
@@ -137,10 +140,15 @@ InstallMiscSmbios (
   // Record Type 2
   //
   AString = GetSmbiosString (SmbiosTable, SmbiosTable.Type0->BiosVersion);
-  UString = AllocateZeroPool ((AsciiStrLen(AString) + 1) * sizeof(CHAR16) + sizeof(FIRMWARE_BIOS_VERSIONE));
+  DestMax = AsciiStrLen (AString) + 1;
+  UString = AllocateZeroPool (DestMax * sizeof(CHAR16) + sizeof (FIRMWARE_BIOS_VERSIONE));
   ASSERT (UString != NULL);
-  CopyMem (UString, FIRMWARE_BIOS_VERSIONE, sizeof(FIRMWARE_BIOS_VERSIONE));
-  AsciiStrToUnicodeStr (AString, UString + sizeof(FIRMWARE_BIOS_VERSIONE) / sizeof(CHAR16) - 1);
+  CopyMem (UString, FIRMWARE_BIOS_VERSIONE, sizeof (FIRMWARE_BIOS_VERSIONE));
+  AsciiStrToUnicodeStrS (
+    AString,
+    UString + sizeof (FIRMWARE_BIOS_VERSIONE) / sizeof(CHAR16) - 1,
+    DestMax
+    );
 
   Token = HiiSetString (gStringHandle, 0, UString, NULL);
   if (Token == 0) {
@@ -167,10 +175,15 @@ InstallMiscSmbios (
   // Record Type 3
   //
   AString = GetSmbiosString (SmbiosTable, SmbiosTable.Type1->ProductName);
-  UString = AllocateZeroPool ((AsciiStrLen(AString) + 1) * sizeof(CHAR16) + sizeof(FIRMWARE_PRODUCT_NAME));
+  DestMax = AsciiStrLen (AString) + 1;
+  UString = AllocateZeroPool (DestMax * sizeof (CHAR16) + sizeof (FIRMWARE_PRODUCT_NAME));
   ASSERT (UString != NULL);
-  CopyMem (UString, FIRMWARE_PRODUCT_NAME, sizeof(FIRMWARE_PRODUCT_NAME));
-  AsciiStrToUnicodeStr (AString, UString + sizeof(FIRMWARE_PRODUCT_NAME) / sizeof(CHAR16) - 1);
+  CopyMem (UString, FIRMWARE_PRODUCT_NAME, sizeof (FIRMWARE_PRODUCT_NAME));
+  AsciiStrToUnicodeStrS (
+    AString,
+    UString + sizeof (FIRMWARE_PRODUCT_NAME) / sizeof(CHAR16) - 1,
+    DestMax
+    );
 
   Token = HiiSetString (gStringHandle, 0, UString, NULL);
   if (Token == 0) {

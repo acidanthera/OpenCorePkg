@@ -90,6 +90,7 @@ Kexts
 | [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | 12.0.0 (10.8) | — |
 | [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | 14.0.0 (10.10) | — |
 | [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.0.0 (10.6) | — |
+| [RestrictEvents.kext](https://github.com/acidanthera/RestrictEvents) | 12.0.0 (10.8) | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | 12.0.0 (10.8) | — |
 | [NightShiftEnabler.kext](https://github.com/cdf/NightShiftEnabler) | 16.0.0 (10.12) | — |
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — |
