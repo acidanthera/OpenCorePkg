@@ -388,14 +388,15 @@ CheckBooter (
     DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
     ++ErrorCount;
   }
-  if (IsAllowRelocationBlockEnabled && (!IsProvideCustomSlideEnabled || !IsAvoidRuntimeDefragEnabled)) {
-    DEBUG ((
-      DEBUG_WARN,
-      "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide (%a) and AvoidRuntimeDefrag (%a) are not enabled altogether!\n",
-      IsProvideCustomSlideEnabled ? "enabled" : "disabled",
-      IsAvoidRuntimeDefragEnabled ? "enabled" : "disabled"
-      ));
-    ++ErrorCount;
+  if (IsAllowRelocationBlockEnabled) {
+    if (!IsProvideCustomSlideEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlideis not enabled altogether!\n"));
+      ++ErrorCount;
+    }
+
+    if (!IsAvoidRuntimeDefragEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, and AvoidRuntimeDefrag is highly recommended to be enabled as well\n"));
+    }
   }
   if (IsEnableSafeModeSlideEnabled && !IsProvideCustomSlideEnabled) {
     DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
