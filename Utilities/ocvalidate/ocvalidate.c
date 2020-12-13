@@ -282,6 +282,7 @@ CheckBooter (
   UINT32            ReplaceSize;
   UINT32            MaskSize;
   UINT32            ReplaceMaskSize;
+  UINT8             MaxSlide;
   BOOLEAN           IsMmioWhitelistEnabled;
   BOOLEAN           ShouldEnableDevirtualiseMmio;
   BOOLEAN           IsAllowRelocationBlockEnabled;
@@ -306,6 +307,7 @@ CheckBooter (
   IsDisableVariableWriteEnabled   = UserBooter.Quirks.DisableVariableWrite;
   IsEnableWriteUnprotectorEnabled = UserBooter.Quirks.EnableWriteUnprotector;
   HasOpenRuntimeEfiDriver         = FALSE;
+  MaxSlide                        = UserBooter.Quirks.ProvideMaxSlide;
   
   for (Index = 0; Index < UserBooter.MmioWhitelist.Count; ++Index) {
     Comment                = OC_BLOB_GET (&UserBooter.MmioWhitelist.Values[Index]->Comment);
@@ -415,9 +417,15 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, and AvoidRuntimeDefrag is highly recommended to be enabled as well\n"));
     }
   }
-  if (IsEnableSafeModeSlideEnabled && !IsProvideCustomSlideEnabled) {
-    DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
-    ++ErrorCount;
+  if (!IsProvideCustomSlideEnabled) {
+    if (IsEnableSafeModeSlideEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
+      ++ErrorCount;
+    }
+    if (MaxSlide > 0) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
+      ++ErrorCount;
+    }
   }
   if (!HasOpenRuntimeEfiDriver) {
     if (IsDisableVariableWriteEnabled) {
