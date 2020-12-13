@@ -255,9 +255,7 @@ OcStrniCmp (
   the length of SearchString is zero, then String is returned.
 
   If String is NULL, then ASSERT().
-  If String is not aligned on a 8-bit boundary, then ASSERT().
   If SearchString is NULL, then ASSERT().
-  If SearchString is not aligned on a 8-bit boundary, then ASSERT().
 
   If PcdMaximumAsciiStringLength is not zero, and SearchString
   or String contains more than PcdMaximumAsciiStringLength ASCII
@@ -275,6 +273,52 @@ EFIAPI
 OcAsciiStriStr (
   IN      CONST CHAR8              *String,
   IN      CONST CHAR8              *SearchString
+  );
+
+/**
+  Returns a pointer to the first occurrence of Char
+  in a Null-terminated ASCII string.
+
+  If String is NULL, then ASSERT().
+
+  If PcdMaximumAsciiStringLength is not zero, and String
+  contains more than PcdMaximumAsciiStringLength ASCII
+  characters, not including the Null-terminator, then ASSERT().
+
+  @param  String          The pointer to a Null-terminated ASCII string.
+  @param  Char            Character to be located.
+
+  @return                 A pointer to the first occurrence of Char in String.
+  @retval NULL            If Char cannot be found in String.
+**/
+CHAR8 *
+EFIAPI
+OcAsciiStrChr (
+  IN      CONST CHAR8              *String,
+  IN            CHAR8              Char
+  );
+
+/**
+  Returns a pointer to the last occurrence of Char
+  in a Null-terminated ASCII string.
+
+  If String is NULL, then ASSERT().
+
+  If PcdMaximumAsciiStringLength is not zero, and String
+  contains more than PcdMaximumAsciiStringLength ASCII
+  characters, not including the Null-terminator, then ASSERT().
+
+  @param  String          The pointer to a Null-terminated ASCII string.
+  @param  Char            Character to be located.
+
+  @return                 A pointer to the last occurrence of Char in String.
+  @retval NULL            If Char cannot be found in String.
+**/
+CHAR8 *
+EFIAPI
+OcAsciiStrrChr (
+  IN      CONST CHAR8              *String,
+  IN            CHAR8              Char
   );
 
 /**
