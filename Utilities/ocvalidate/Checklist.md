@@ -24,6 +24,7 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] Quirks->AllowRelocationBlock: When enabled, ProvideCustomSlide should be enabled altogether.
 - [ ] Quirks->AllowRelocationBlock: When enabled, AvoidRuntimeDefrag is highly recommended to be enabled as well.
 - [ ] Quirks->EnableSafeModeSlide: When enabled, ProvideCustomSlide should be enabled altogether.
+- [ ] Quirks->DisableVariableWrite/EnableWriteUnprotector: When either is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
 
 ## DeviceProperties
 - [ ] TODO
