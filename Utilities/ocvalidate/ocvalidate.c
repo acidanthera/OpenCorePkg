@@ -160,16 +160,19 @@ CheckACPI (
   UINT32          MaskSize;
   UINT32          ReplaceMaskSize;
   BOOLEAN         HasCustomDSDT;
+  BOOLEAN         IsAddEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
 
   ErrorCount    = 0;
   UserAcpi      = Config->Acpi;
   HasCustomDSDT = FALSE;
+  IsAddEnabled  = FALSE;
 
   for (Index = 0; Index < UserAcpi.Add.Count; ++Index) {
-    Path    = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Path);
-    Comment = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Comment);
+    Path         = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Path);
+    Comment      = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Comment);
+    IsAddEnabled = UserAcpi.Add.Values[Index]->Enabled;
 
     if (!AsciiStringHasAllLegalCharacter (Path)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", Index));
@@ -186,7 +189,7 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (OcAsciiStriStr (Path, "DSDT") == 0) {
+    if (OcAsciiStriStr (Path, "DSDT") != NULL && IsAddEnabled) {
       HasCustomDSDT = TRUE;
     }
   }
