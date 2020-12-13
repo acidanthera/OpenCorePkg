@@ -291,6 +291,7 @@ CheckBooter (
   BOOLEAN           IsEnableSafeModeSlideEnabled;
   BOOLEAN           IsDisableVariableWriteEnabled;
   BOOLEAN           IsEnableWriteUnprotectorEnabled;
+  BOOLEAN           IsRebuildAppleMemoryMapEnabled;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   
   DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
@@ -306,6 +307,7 @@ CheckBooter (
   IsEnableSafeModeSlideEnabled    = UserBooter.Quirks.EnableSafeModeSlide;
   IsDisableVariableWriteEnabled   = UserBooter.Quirks.DisableVariableWrite;
   IsEnableWriteUnprotectorEnabled = UserBooter.Quirks.EnableWriteUnprotector;
+  IsRebuildAppleMemoryMapEnabled  = UserBooter.Quirks.RebuildAppleMemoryMap;
   HasOpenRuntimeEfiDriver         = FALSE;
   MaxSlide                        = UserBooter.Quirks.ProvideMaxSlide;
   
@@ -436,6 +438,10 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
     }
+  }
+  if (IsEnableWriteUnprotectorEnabled && IsRebuildAppleMemoryMapEnabled) {
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector and RebuildAppleMemoryMap cannot be enabled simultaneously!\n"));
+    ++ErrorCount;
   }
 
   if (ErrorCount != 0) {
