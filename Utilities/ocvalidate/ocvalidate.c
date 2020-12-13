@@ -390,7 +390,7 @@ CheckBooter (
   }
   if (IsAllowRelocationBlockEnabled) {
     if (!IsProvideCustomSlideEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlideis not enabled altogether!\n"));
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
       ++ErrorCount;
     }
 
