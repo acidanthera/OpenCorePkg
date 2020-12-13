@@ -17,6 +17,7 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/DevicePathLib.h>
 
 #include <Library/OcTemplateLib.h>
 #include <Library/OcSerializeLib.h>
@@ -491,10 +492,30 @@ CheckDeviceProperties (
 
   DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
 
-  ErrorCount = 0;
+  ErrorCount  = 0;
+  UserDevProp = Config->DeviceProperties;
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
+  for (DeviceIndex = 0; DeviceIndex < UserDevProp.Delete.Count; ++DeviceIndex) {
+    AsciiDevicePath   = OC_BLOB_GET (UserDevProp.Delete.Keys[DeviceIndex]);
+    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+    DevicePath        = NULL;
+
+    //
+    // Should we sanitise AsciiDevicePath first? 
+    //
+
+    if (UnicodeDevicePath != NULL) {
+      DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
+      FreePool ((VOID *) UnicodeDevicePath);
+      // FreePool (UnicodeDevicePath);
+    }
+
+    if (DevicePath == NULL) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
+      ++ErrorCount;
+    }
+
+    FreePool (DevicePath);
   }
 
   return ReportError (__func__, ErrorCount);
