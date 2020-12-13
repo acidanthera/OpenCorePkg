@@ -45,4 +45,4 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] TODO
 
 ## UEFI
-- [ ] TODO
+- [ ] APFS->EnableJumpstart: When enabled, Misc->Security->ScanPolicy should have OC_SCAN_ALLOW_FS_APFS (bit 8) set.

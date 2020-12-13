@@ -562,11 +562,21 @@ CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount = 0;
+  UINT32            ErrorCount;
+  OC_UEFI_CONFIG    UserUefi;
+  OC_MISC_CONFIG    UserMisc;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
   ErrorCount = 0;
+  UserUefi   = Config->Uefi;
+  UserMisc   = Config->Misc;
+
+  if (UserUefi.Apfs.EnableJumpstart
+    && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
+    DEBUG ((DEBUG_WARN, "UEFI->APFS->EnableJumpstart is enabled, but Misc->Security->ScanPolicy does not allow APFS scanning!\n"));
+    ++ErrorCount;
+  }
 
   if (ErrorCount != 0) {
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
