@@ -563,18 +563,37 @@ CheckUEFI (
   )
 {
   UINT32            ErrorCount;
+  UINT32            Index;
   OC_UEFI_CONFIG    UserUefi;
   OC_MISC_CONFIG    UserMisc;
+  CONST CHAR8       *Driver;
+  BOOLEAN           HasOpenRuntimeEfiDriver;
+  BOOLEAN           IsRequestBootVarRoutingEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
-  ErrorCount = 0;
-  UserUefi   = Config->Uefi;
-  UserMisc   = Config->Misc;
+  ErrorCount                     = 0;
+  UserUefi                       = Config->Uefi;
+  UserMisc                       = Config->Misc;
+  HasOpenRuntimeEfiDriver        = FALSE;
+  IsRequestBootVarRoutingEnabled = UserUefi.Quirks.RequestBootVarRouting;
 
   if (UserUefi.Apfs.EnableJumpstart
     && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
     DEBUG ((DEBUG_WARN, "UEFI->APFS->EnableJumpstart is enabled, but Misc->Security->ScanPolicy does not allow APFS scanning!\n"));
+    ++ErrorCount;
+  }
+
+  for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
+    Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
+
+    if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
+      HasOpenRuntimeEfiDriver = TRUE;
+    }
+  }
+
+  if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
+    DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
     ++ErrorCount;
   }
 

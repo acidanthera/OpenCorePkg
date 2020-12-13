@@ -46,3 +46,4 @@ As of commit <TODO>, ocvalidate performs the following checks:
 
 ## UEFI
 - [ ] APFS->EnableJumpstart: When enabled, Misc->Security->ScanPolicy should have OC_SCAN_ALLOW_FS_APFS (bit 8) set.
+- [ ] Quirks->RequestBootVarRouting: When enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
