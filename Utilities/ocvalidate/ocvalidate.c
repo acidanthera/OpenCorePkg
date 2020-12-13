@@ -577,7 +577,7 @@ CheckConfig (
   ConfigCheckersSize = sizeof (ConfigCheckers) / sizeof (ConfigCheckers[0]);
 
   for (Index = 0; Index < ConfigCheckersSize; ++Index) {
-    ErrorCount |= ConfigCheckers[Index] (Config);
+    ErrorCount += ConfigCheckers[Index] (Config);
   }
 
   return ErrorCount;
