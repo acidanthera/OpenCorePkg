@@ -226,13 +226,12 @@ UefiMain (
         Print(L"\nBIOS Options:\n");
 
         EFI_STRING SearchString = AsciiStrCopyToUnicode ("cfg", 0);
-        
-        if (SearchString != NULL)
 
+        if (SearchString != NULL) {
             Status = SearchForString (SearchString);
             FreePool (SearchString);
         }
-    else {
+    } else {
         Print (L"Could not allocate memory. Function not available.\n");
     }
     
