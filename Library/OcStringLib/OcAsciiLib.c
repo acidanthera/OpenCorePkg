@@ -262,3 +262,53 @@ OcAsciiStriStr (
 
   return NULL;
 }
+
+CHAR8 *
+EFIAPI
+OcAsciiStrChr (
+  IN      CONST CHAR8              *String,
+  IN            CHAR8              Char
+  )
+{
+  ASSERT (AsciiStrSize (String) != 0);
+
+  while (*String != '\0') {
+    //
+    // Return immediately when matching first occurrence of Char.
+    //
+    if (*String == Char) {
+      return (CHAR8 *) String;
+    }
+
+    ++String;
+  }
+
+  return NULL;
+}
+
+CHAR8 *
+EFIAPI
+OcAsciiStrrChr (
+  IN      CONST CHAR8              *String,
+  IN            CHAR8              Char
+  )
+{
+  CHAR8 *Save;
+
+  ASSERT (AsciiStrSize (String) != 0);
+
+  Save = NULL;
+
+  while (*String != '\0') {
+    //
+    // Record the last occurrence of Char.
+    //
+    if (*String == Char) {
+      Save = (CHAR8 *) String;
+    }
+
+    ++String;
+  }
+
+  return Save;
+}
