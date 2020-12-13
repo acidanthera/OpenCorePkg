@@ -69,11 +69,11 @@ GetFilenameSuffix (
   IN  CONST CHAR8  *FileName
   )
 {
+  CONST CHAR8  *SuffixDot;
+
   //
   // Find the last dot by reverse order.
   //
-  CONST CHAR8  *SuffixDot;
-
   SuffixDot = strrchr (FileName, '.');
 
   //
@@ -142,6 +142,22 @@ AsciiStringHasAllPrintableCharacter (
   }
 
   return TRUE;
+}
+
+STATIC
+UINT32
+ReportError (
+  IN  CONST CHAR8  *FuncName,
+  IN  UINT32       ErrorCount
+  )
+{
+  if (ErrorCount != 0) {
+    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", FuncName, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
+  } else {
+    DEBUG ((DEBUG_INFO, "%a returns no errors!\n", FuncName));
+  }
+
+  return ErrorCount;
 }
 
 STATIC
@@ -261,10 +277,7 @@ CheckACPI (
     ++ErrorCount;
   }
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -460,10 +473,7 @@ CheckBooter (
     }
   }
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -472,7 +482,12 @@ CheckDeviceProperties (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount;
+  UINT32                    ErrorCount;
+  UINT32                    DeviceIndex;
+  OC_DEV_PROP_CONFIG        UserDevProp;
+  CONST CHAR8               *AsciiDevicePath;
+  CONST CHAR16              *UnicodeDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
 
   DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
 
@@ -481,7 +496,8 @@ CheckDeviceProperties (
   if (ErrorCount != 0) {
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   }
-  return ErrorCount;
+
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -496,10 +512,7 @@ CheckKernel (
 
   ErrorCount = 0;
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -514,10 +527,7 @@ CheckMisc (
 
   ErrorCount = 0;
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -532,10 +542,7 @@ CheckNVRAM (
 
   ErrorCount = 0;
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -550,10 +557,7 @@ CheckPlatformInfo (
 
   ErrorCount = 0;
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
@@ -597,10 +601,7 @@ CheckUEFI (
     ++ErrorCount;
   }
 
-  if (ErrorCount != 0) {
-    DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", __func__, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
-  }
-  return ErrorCount;
+  return ReportError (__func__, ErrorCount);
 }
 
 STATIC
