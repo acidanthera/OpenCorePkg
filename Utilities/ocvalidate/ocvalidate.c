@@ -273,9 +273,11 @@ CheckBooter (
   UINT32            ErrorCount;
   UINT32            Index;
   OC_BOOTER_CONFIG  UserBooter;
+  OC_UEFI_CONFIG    UserUefi;
   CONST CHAR8       *Comment;
   CONST CHAR8       *Arch;
   CONST CHAR8       *Identifier;
+  CONST CHAR8       *Driver;
   UINT32            FindSize;
   UINT32            ReplaceSize;
   UINT32            MaskSize;
@@ -286,17 +288,24 @@ CheckBooter (
   BOOLEAN           IsProvideCustomSlideEnabled;
   BOOLEAN           IsAvoidRuntimeDefragEnabled;
   BOOLEAN           IsEnableSafeModeSlideEnabled;
+  BOOLEAN           IsDisableVariableWriteEnabled;
+  BOOLEAN           IsEnableWriteUnprotectorEnabled;
+  BOOLEAN           HasOpenRuntimeEfiDriver;
   
   DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
 
-  ErrorCount                    = 0;
-  UserBooter                    = Config->Booter;
-  IsMmioWhitelistEnabled        = FALSE;
-  ShouldEnableDevirtualiseMmio  = FALSE;
-  IsAllowRelocationBlockEnabled = UserBooter.Quirks.AllowRelocationBlock;
-  IsProvideCustomSlideEnabled   = UserBooter.Quirks.ProvideCustomSlide;
-  IsAvoidRuntimeDefragEnabled   = UserBooter.Quirks.AvoidRuntimeDefrag;
-  IsEnableSafeModeSlideEnabled  = UserBooter.Quirks.EnableSafeModeSlide;
+  ErrorCount                      = 0;
+  UserBooter                      = Config->Booter;
+  UserUefi                        = Config->Uefi;
+  IsMmioWhitelistEnabled          = FALSE;
+  ShouldEnableDevirtualiseMmio    = FALSE;
+  IsAllowRelocationBlockEnabled   = UserBooter.Quirks.AllowRelocationBlock;
+  IsProvideCustomSlideEnabled     = UserBooter.Quirks.ProvideCustomSlide;
+  IsAvoidRuntimeDefragEnabled     = UserBooter.Quirks.AvoidRuntimeDefrag;
+  IsEnableSafeModeSlideEnabled    = UserBooter.Quirks.EnableSafeModeSlide;
+  IsDisableVariableWriteEnabled   = UserBooter.Quirks.DisableVariableWrite;
+  IsEnableWriteUnprotectorEnabled = UserBooter.Quirks.EnableWriteUnprotector;
+  HasOpenRuntimeEfiDriver         = FALSE;
   
   for (Index = 0; Index < UserBooter.MmioWhitelist.Count; ++Index) {
     Comment                = OC_BLOB_GET (&UserBooter.MmioWhitelist.Values[Index]->Comment);
@@ -384,6 +393,14 @@ CheckBooter (
     }
   }
 
+  for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
+    Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
+
+    if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
+      HasOpenRuntimeEfiDriver = TRUE;
+    }
+  }
+
   if (ShouldEnableDevirtualiseMmio && !UserBooter.Quirks.DevirtualiseMmio) {
     DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
     ++ErrorCount;
@@ -401,6 +418,16 @@ CheckBooter (
   if (IsEnableSafeModeSlideEnabled && !IsProvideCustomSlideEnabled) {
     DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
     ++ErrorCount;
+  }
+  if (!HasOpenRuntimeEfiDriver) {
+    if (IsDisableVariableWriteEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->DisableVariableWrite is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
+    if (IsEnableWriteUnprotectorEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
   }
 
   if (ErrorCount != 0) {
