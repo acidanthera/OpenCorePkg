@@ -98,13 +98,11 @@ AsciiStringHasAllLegalCharacter (
   IN  CONST CHAR8  *String
   )
 {
-  // only 0-9, A-Z, a-z, '_', '-', '.', '/', and '\'
-  // are accepted.
   UINTN  Index;
 
   for (Index = 0; Index < AsciiStrLen (String); ++Index) {
     //
-    // Skip allowed characters.
+    // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/', and '\').
     //
     if (IsAsciiNumber (String[Index])
       || IsAsciiAlpha (String[Index])
@@ -201,7 +199,7 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (AsciiStrCmp (GetFilenameSuffix (Path), "dsl") == 0) { ///< TODO: case insensitive check maybe?
+    if (AsciiStriCmp (GetFilenameSuffix (Path), "dsl") == 0) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has .dsl suffix!\n", Index));
       ++ErrorCount;
     }
@@ -374,7 +372,7 @@ CheckBooter (
     if (Identifier[0] != '\0'
       && AsciiStrCmp (Identifier, "Any") != 0
       && AsciiStrCmp (Identifier, "Apple") != 0
-      && AsciiStrCmp (GetFilenameSuffix (Identifier), "efi") != 0) { ///< TODO: case insensitive maybe?
+      && AsciiStriCmp (GetFilenameSuffix (Identifier), "efi") != 0) {
       DEBUG ((
         DEBUG_WARN,
         "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Empty string/Any, Apple, or a specified bootloader with .efi sufffix)\n",
