@@ -355,6 +355,16 @@ CheckBooter (
       ++ErrorCount;
     }
 
+    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
+      DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllPrintableCharacter (Identifier)) {
+      DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
     if (Arch[0] != '\0'
       && AsciiStrCmp (Arch, "Any") != 0
       && AsciiStrCmp (Arch, "i386") != 0
@@ -415,6 +425,11 @@ CheckBooter (
 
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
+
+    if (!AsciiStringHasAllPrintableCharacter (Driver)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
 
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
