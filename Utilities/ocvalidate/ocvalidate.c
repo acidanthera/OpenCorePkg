@@ -360,7 +360,7 @@ CheckBooter (
       ++ErrorCount;
     }
 
-    if (!AsciiStringHasAllPrintableCharacter (Identifier)) {
+    if (!AsciiStringHasAllLegalCharacter (Identifier)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -495,6 +495,9 @@ CheckDeviceProperties (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
+  //
+  // TODO: Confrim if this part of code really works.
+  //
   UINT32                    ErrorCount;
   UINT32                    DeviceIndex;
   OC_DEV_PROP_CONFIG        UserDevProp;
@@ -539,11 +542,117 @@ CheckKernel (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_KERNEL_CONFIG  UserKernel;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *BundlePath;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *ExecutablePath;
+  CONST CHAR8       *MaxKernel;
+  CONST CHAR8       *MinKernel;
+  CONST CHAR8       *PlistPath;
+  CONST CHAR8       *Identifier;
 
   DEBUG ((DEBUG_INFO, "config loaded into Kernel checker!\n"));
 
   ErrorCount = 0;
+  UserKernel = Config->Kernel;
+
+
+  for (Index = 0; Index < UserKernel.Add.Count; ++Index) {
+    Arch            = OC_BLOB_GET (&UserKernel.Add.Values[Index]->Arch);
+    BundlePath      = OC_BLOB_GET (&UserKernel.Add.Values[Index]->BundlePath);
+    Comment         = OC_BLOB_GET (&UserKernel.Add.Values[Index]->Comment);
+    ExecutablePath  = OC_BLOB_GET (&UserKernel.Add.Values[Index]->ExecutablePath);
+    MaxKernel       = OC_BLOB_GET (&UserKernel.Add.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&UserKernel.Add.Values[Index]->MinKernel);
+    PlistPath       = OC_BLOB_GET (&UserKernel.Add.Values[Index]->PlistPath);
+
+    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllLegalCharacter (BundlePath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllLegalCharacter (ExecutablePath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    //
+    // TODO: Sanitise MaxKernel and MinKernel, by calling OcParseDarwinVersion?
+    //
+
+    if (!AsciiStringHasAllLegalCharacter (PlistPath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (AsciiStrCmp (Arch, "Any") != 0
+      && AsciiStrCmp (Arch, "i386") != 0
+      && AsciiStrCmp (Arch, "x86_64") != 0) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Kernel->Add[%u]->Arch has illegal value: %a (Can only be Any, i386, and x86_64)\n",
+        Index,
+        Arch
+        ));
+      ++ErrorCount;
+    }
+  }
+
+  for (Index = 0; Index < UserKernel.Block.Count; ++Index) {
+    Arch            = OC_BLOB_GET (&UserKernel.Block.Values[Index]->Arch);
+    Comment         = OC_BLOB_GET (&UserKernel.Block.Values[Index]->Comment);
+    Identifier      = OC_BLOB_GET (&UserKernel.Block.Values[Index]->Identifier);
+    MaxKernel       = OC_BLOB_GET (&UserKernel.Block.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&UserKernel.Block.Values[Index]->MinKernel);
+    
+    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (!AsciiStringHasAllLegalCharacter (Identifier)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    //
+    // TODO: Sanitise MaxKernel and MinKernel, by calling OcParseDarwinVersion?
+    //
+
+    if (AsciiStrCmp (Arch, "Any") != 0
+      && AsciiStrCmp (Arch, "i386") != 0
+      && AsciiStrCmp (Arch, "x86_64") != 0) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Kernel->Block[%u]->Arch has illegal value: %a (Can only be Any, i386, and x86_64)\n",
+        Index,
+        Arch
+        ));
+      ++ErrorCount;
+    }
+  }
+
+  //
+  // TODO: Handle Emulate checks here...
+  //
 
   return ReportError (__func__, ErrorCount);
 }
