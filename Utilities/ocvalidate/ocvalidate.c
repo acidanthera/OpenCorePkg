@@ -626,8 +626,18 @@ CheckUEFI (
   IsTextRendererSystem             = FALSE;
   ConsoleMode                      = OC_BLOB_GET (&UserUefi.Output.ConsoleMode);
 
-  if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
-    IsTextRendererSystem = TRUE;
+  if (!AsciiStringHasAllPrintableCharacter (ConsoleMode)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode contains illegal character!\n"));
+    ++ErrorCount;
+  }
+
+  if (!AsciiStringHasAllPrintableCharacter (TextRenderer)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer contains illegal character!\n"));
+    ++ErrorCount;
+  } else {
+    if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
+      IsTextRendererSystem = TRUE;
+    }
   }
 
   if (UserUefi.Apfs.EnableJumpstart
@@ -638,6 +648,11 @@ CheckUEFI (
 
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
+
+    if (!AsciiStringHasAllPrintableCharacter (Driver)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
 
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
