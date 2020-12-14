@@ -49,3 +49,5 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] Quirks->RequestBootVarRouting: When enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
 - [ ] Quirks->DeduplicateBootOrder: When enabled, RequestBootVarRouting should be enabled altogether.
 - [ ] Driver OpenUsbKbDxe.efi: When in use, UEFI->Input->KeySupport should never be enabled altogether.
+- [ ] Driver Ps2KeyboardDxe.efi: When in use, UEFI->Input->KeySupport should be enabled altogether.
+- [ ] OpenUsbKbDxe.efi and Ps2KeyboardDxe.efi should never co-exist.

@@ -587,11 +587,13 @@ CheckUEFI (
   UINT32            ErrorCount;
   UINT32            Index;
   UINT32            IndexOpenUsbKbDxeEfiDriver;
+  UINT32            IndexPs2KeyboardDxeEfiDriver;
   OC_UEFI_CONFIG    UserUefi;
   OC_MISC_CONFIG    UserMisc;
   CONST CHAR8       *Driver;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   BOOLEAN           HasOpenUsbKbDxeEfiDriver;
+  BOOLEAN           HasPs2KeyboardDxeEfiDriver;
   BOOLEAN           IsRequestBootVarRoutingEnabled;
   BOOLEAN           IsDeduplicateBootOrderEnabled;
   BOOLEAN           IsKeySupportEnabled;
@@ -600,10 +602,12 @@ CheckUEFI (
 
   ErrorCount                     = 0;
   IndexOpenUsbKbDxeEfiDriver     = 0;
+  IndexPs2KeyboardDxeEfiDriver   = 0;
   UserUefi                       = Config->Uefi;
   UserMisc                       = Config->Misc;
   HasOpenRuntimeEfiDriver        = FALSE;
   HasOpenUsbKbDxeEfiDriver       = FALSE;
+  HasPs2KeyboardDxeEfiDriver     = FALSE;
   IsRequestBootVarRoutingEnabled = UserUefi.Quirks.RequestBootVarRouting;
   IsDeduplicateBootOrderEnabled  = UserUefi.Quirks.DeduplicateBootOrder;
   IsKeySupportEnabled            = UserUefi.Input.KeySupport;
@@ -625,6 +629,11 @@ CheckUEFI (
       HasOpenUsbKbDxeEfiDriver   = TRUE;
       IndexOpenUsbKbDxeEfiDriver = Index;
     }
+
+    if (AsciiStrCmp (Driver, "Ps2KeyboardDxe.efi") == 0) {
+      HasPs2KeyboardDxeEfiDriver   = TRUE;
+      IndexPs2KeyboardDxeEfiDriver = Index;
+    }
   }
 
   if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
@@ -637,6 +646,19 @@ CheckUEFI (
   }
   if (HasOpenUsbKbDxeEfiDriver && IsKeySupportEnabled) {
     DEBUG ((DEBUG_WARN, "OpenUsbKbDxe.efi at UEFI->Drivers[%u] should NEVER be used together with UEFI->Input->KeySupport!\n", IndexOpenUsbKbDxeEfiDriver));
+    ++ErrorCount;
+  }
+  if (HasPs2KeyboardDxeEfiDriver && !IsKeySupportEnabled) {
+    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupport should be enabled when Ps2KeyboardDxe.efi is in use!\n"));
+    ++ErrorCount;
+  }
+  if (HasOpenUsbKbDxeEfiDriver && HasPs2KeyboardDxeEfiDriver) {
+    DEBUG ((
+      DEBUG_WARN,
+      "OpenUsbKbDxe.efi at UEFI->Drivers[%u], and Ps2KeyboardDxe.efi at UEFI->Drivers[%u], should NEVER co-exist!\n",
+      IndexOpenUsbKbDxeEfiDriver,
+      IndexPs2KeyboardDxeEfiDriver
+      ));
     ++ErrorCount;
   }
 
