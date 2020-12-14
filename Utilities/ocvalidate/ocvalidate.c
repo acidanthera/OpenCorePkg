@@ -496,7 +496,7 @@ CheckDeviceProperties (
   )
 {
   //
-  // TODO: Confrim if this part of code really works.
+  // TODO: Confirm if this part of code really works.
   //
   UINT32                    ErrorCount;
   UINT32                    DeviceIndex;
@@ -520,6 +520,10 @@ CheckDeviceProperties (
     //
 
     if (UnicodeDevicePath != NULL) {
+      //
+      // TODO: Find alternatives to ConvertTextToDevicePath, which should
+      //       perform error checking.
+      //
       DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
       FreePool ((VOID *) UnicodeDevicePath);
       // FreePool (UnicodeDevicePath);
