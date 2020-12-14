@@ -1,20 +1,22 @@
 /** @file
- Control CFGLock BIOS Option
- 
- Copyright (c) 2020, Brumbaer. All rights reserved.<BR>
- This program and the accompanying materials
- are licensed and made available under the terms and conditions of the BSD License
- which accompanies this distribution.  The full text of the license may be found at
- http://opensource.org/licenses/bsd-license.php
- 
- THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
- WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
- 
- **/
+  Control CFGLock BIOS Option
 
-/*
-    Unless otherwise specified all data types are naturally aligned. Structures are aligned on boundaries equal to the largest internal datum of the structure and internal data are implicitly padded to achieve natural alignment.
-*/
+Copyright (c) 2020, Brumbaer. All rights reserved.<BR>
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
+**/
+
+/**
+  Unless otherwise specified all data types are naturally aligned. Structures are
+  aligned on boundaries equal to the largest internal datum of the structure and
+  internal data are implicitly padded to achieve natural alignment.
+**/
 
 #include <Uefi.h>
 #include <PiDxe.h>
@@ -46,41 +48,55 @@
 
 #define DONT_STOP_AT 0xFFFF
 
-/*
- Parameters to serch in a Form for
- ifrHeaders which contain a Description
- and to return the Varstore
- */
-typedef struct {
-    EFI_STRING                   searchText;    // Text that must be part of the options description
-    EFI_HII_HANDLE               efiHandle;     // Handle of the list the Form is part of
-    EFI_HII_PACKAGE_LIST_HEADER *listHeader;    // Ptr to the contents of the handle
-    EFI_HII_PACKAGE_HEADER      *pkgHeader;     // Ptr to the current package in the list
-    EFI_IFR_OP_HEADER           *firstIfrHeader; // Ptr to first IfrHeader in Package
-    EFI_IFR_VARSTORE            *ifrVarStore;   // Ptr to ifrHeader of corresponding varstore in same list
-    EFI_IFR_ONE_OF              *ifrOneOf;      // Ptr to ifrHeader of BIOS Option
-    UINT16                       stopAt;        // Used to find a certain BIOS Option
-    UINT16                       count;         // Running number of suitable BIOS Options
-    
-} OneOfContext;
+/**
+  Parameters to search in a Form for
+  IfrHeaders which contain a Description
+  and to return the Varstore
 
-/*
- Callback - What to do, when a ifrHeader with a defined OP_CODE is found
- ifrHeader   Current ifrHeader under scrutiny
- stop        Ptr to Stop flag. If true no further search for opcodes. Can be NULL.
- context     Ptr to Hanlder specific data
- */
-typedef VOID OpCodeHandler (EFI_IFR_OP_HEADER* ifrHeader, UINT8* stop, VOID* context);
+  @param SearchText        Text that must be part of the options description
+  @param EfiHandle         Handle of the list the Form is part of
+  @param ListHeader        Ptr to the contents of the handle
+  @param PkgHeader         Ptr to the current package in the list
+  @param FirstIfrHeader    Ptr to first IfrHeader in Package
+  @param IfrVarStore       Ptr to IfrHeader of corresponding varstore in same list
+  @param IfrOneOf          Ptr to IfrHeader of BIOS Option
+  @param StopAt            Used to find a certain BIOS Option
+  @param Count             Running number of suitable BIOS Options
+**/
+typedef struct ONE_OF_CONTEXT_ {
+  EFI_STRING                    SearchText;
+  EFI_HII_HANDLE                EfiHandle;
+  EFI_HII_PACKAGE_LIST_HEADER   *ListHeader;
+  EFI_HII_PACKAGE_HEADER        *PkgHeader;
+  EFI_IFR_OP_HEADER             *FirstIfrHeader;
+  EFI_IFR_VARSTORE              *IfrVarStore;
+  EFI_IFR_ONE_OF                *IfrOneOf;
+  UINT16                        StopAt;
+  UINT16                        Count;
+} ONE_OF_CONTEXT;
 
-/*
- Commandline Arguments
- */
+/**
+  Callback - What to do, when a IfrHeader with a defined OP_CODE is found
+
+  @param[in] IfrHeader   Current IfrHeader under scrutiny
+  @param[in] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
+  @param[in] Context     Ptr to Hanlder specific data
+**/
+typedef VOID OP_CODE_HANDLER (
+  IN EFI_IFR_OP_HEADER *IfrHeader,
+  IN UINT8             *Stop       OPTIONAL,
+  IN VOID              *Context
+  );
+
+/**
+  Commandline Arguments
+**/
 enum {
-    ARG_LOCK = 1,
-    ARG_UNLOCK = 2,
-    ARG_CHECK = 4,
-    ARG_INTERACTIVE = 8,
-    ARG_VERBOSE = 16
+  ARG_LOCK = 1,
+  ARG_UNLOCK = 2,
+  ARG_CHECK = 4,
+  ARG_INTERACTIVE = 8,
+  ARG_VERBOSE = 16
 };
 
 #define PADD(x,y) (void*)(((char*) x) + y)
@@ -95,10 +111,13 @@ enum {
 extern UINTN mFlags;
 
 // Check MsrE2 Status - original VerifyMSRE2
-extern EFI_STATUS EFIAPI VerifyMSRE2 (
-                                      IN EFI_HANDLE         ImageHandle,
-                                      IN EFI_SYSTEM_TABLE  *SystemTable
-                                      );
+extern
+EFI_STATUS
+EFIAPI
+VerifyMSRE2 (
+  IN EFI_HANDLE         ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  );
 
 
 // Wait for Keypress of Y or N. Ignores case.
@@ -108,26 +127,41 @@ extern CHAR16 ReadAnyKey ();
 
 // Parse commandline arguments
 extern UINTN InterpretArguments ();
-extern VOID  PrintUINT8Str (IN UINT8 n[1]);
+extern VOID  PrintUINT8Str (IN UINT8 *String);
 extern VOID  PrintGuid (IN EFI_GUID* Guid);
 // Displays SearchString and allows to change it
 extern EFI_STRING  ModifySearchString (EFI_STRING SearchString);
 
 // Copies Package Lists to Memory
-extern EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (EFI_HII_HANDLE h);
+extern
+EFI_HII_PACKAGE_LIST_HEADER
+*HiiExportPackageLists (
+  EFI_HII_HANDLE h
+  );
+
 // Callback to Handle IFR_ONE_OF_OP
-extern VOID HandleOneOf (
-                         IN EFI_IFR_OP_HEADER* ifrHeader,
-                         IN UINT8* stop,
-                         IN VOID* context
-                         );
+extern
+VOID
+HandleOneOf (
+  IN EFI_IFR_OP_HEADER   *IfrHeader,
+  IN UINT8               *Stop,
+  IN VOID                *Context
+  );
+
 // Displaying and Changing value of BIOS Option. Including UI
-extern VOID HandleOneVariable (IN OneOfContext* context);
+extern
+VOID
+HandleOneVariable (
+  IN ONE_OF_CONTEXT      *Context
+  );
+
 // Call Handler for each occurence of opCode, starting to search at header. Called recursively
-extern EFI_IFR_OP_HEADER* DoForEachOpCode (
-                                           IN EFI_IFR_OP_HEADER* header,
-                                           IN UINT8 opCode,
-                                           IN UINT8* stop,
-                                           IN void* context,
-                                           IN OpCodeHandler handler
-                                           );
+extern
+EFI_IFR_OP_HEADER
+*DoForEachOpCode (
+  IN EFI_IFR_OP_HEADER   *Header,
+  IN UINT8               OpCode,
+  IN UINT8               *Stop,
+  IN void                *Context,
+  IN OP_CODE_HANDLER     Handler
+  );
