@@ -586,21 +586,27 @@ CheckUEFI (
 {
   UINT32            ErrorCount;
   UINT32            Index;
+  UINT32            IndexOpenUsbKbDxeEfiDriver;
   OC_UEFI_CONFIG    UserUefi;
   OC_MISC_CONFIG    UserMisc;
   CONST CHAR8       *Driver;
   BOOLEAN           HasOpenRuntimeEfiDriver;
+  BOOLEAN           HasOpenUsbKbDxeEfiDriver;
   BOOLEAN           IsRequestBootVarRoutingEnabled;
   BOOLEAN           IsDeduplicateBootOrderEnabled;
+  BOOLEAN           IsKeySupportEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
   ErrorCount                     = 0;
+  IndexOpenUsbKbDxeEfiDriver     = 0;
   UserUefi                       = Config->Uefi;
   UserMisc                       = Config->Misc;
   HasOpenRuntimeEfiDriver        = FALSE;
+  HasOpenUsbKbDxeEfiDriver       = FALSE;
   IsRequestBootVarRoutingEnabled = UserUefi.Quirks.RequestBootVarRouting;
   IsDeduplicateBootOrderEnabled  = UserUefi.Quirks.DeduplicateBootOrder;
+  IsKeySupportEnabled            = UserUefi.Input.KeySupport;
 
   if (UserUefi.Apfs.EnableJumpstart
     && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
@@ -614,6 +620,11 @@ CheckUEFI (
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
+
+    if (AsciiStrCmp (Driver, "OpenUsbKbDxe.efi") == 0) {
+      HasOpenUsbKbDxeEfiDriver   = TRUE;
+      IndexOpenUsbKbDxeEfiDriver = Index;
+    }
   }
 
   if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
@@ -622,6 +633,10 @@ CheckUEFI (
   }
   if (IsDeduplicateBootOrderEnabled && !IsRequestBootVarRoutingEnabled) {
     DEBUG ((DEBUG_WARN, "UEFI->Quirks->DeduplicateBootOrder is enabled, but RequestBootVarRouting is not enabled altogether!\n"));
+    ++ErrorCount;
+  }
+  if (HasOpenUsbKbDxeEfiDriver && IsKeySupportEnabled) {
+    DEBUG ((DEBUG_WARN, "OpenUsbKbDxe.efi at UEFI->Drivers[%u] should NEVER be used together with UEFI->Input->KeySupport!\n", IndexOpenUsbKbDxeEfiDriver));
     ++ErrorCount;
   }
 
