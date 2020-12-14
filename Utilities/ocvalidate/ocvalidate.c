@@ -591,6 +591,7 @@ CheckUEFI (
   CONST CHAR8       *Driver;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   BOOLEAN           IsRequestBootVarRoutingEnabled;
+  BOOLEAN           IsDeduplicateBootOrderEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
@@ -599,6 +600,7 @@ CheckUEFI (
   UserMisc                       = Config->Misc;
   HasOpenRuntimeEfiDriver        = FALSE;
   IsRequestBootVarRoutingEnabled = UserUefi.Quirks.RequestBootVarRouting;
+  IsDeduplicateBootOrderEnabled  = UserUefi.Quirks.DeduplicateBootOrder;
 
   if (UserUefi.Apfs.EnableJumpstart
     && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
@@ -616,6 +618,10 @@ CheckUEFI (
 
   if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
     DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+    ++ErrorCount;
+  }
+  if (IsDeduplicateBootOrderEnabled && !IsRequestBootVarRoutingEnabled) {
+    DEBUG ((DEBUG_WARN, "UEFI->Quirks->DeduplicateBootOrder is enabled, but RequestBootVarRouting is not enabled altogether!\n"));
     ++ErrorCount;
   }
 
