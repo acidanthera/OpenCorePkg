@@ -591,26 +591,44 @@ CheckUEFI (
   OC_UEFI_CONFIG    UserUefi;
   OC_MISC_CONFIG    UserMisc;
   CONST CHAR8       *Driver;
+  CONST CHAR8       *TextRenderer;
+  CONST CHAR8       *ConsoleMode;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   BOOLEAN           HasOpenUsbKbDxeEfiDriver;
   BOOLEAN           HasPs2KeyboardDxeEfiDriver;
   BOOLEAN           IsRequestBootVarRoutingEnabled;
   BOOLEAN           IsDeduplicateBootOrderEnabled;
   BOOLEAN           IsKeySupportEnabled;
+  BOOLEAN           IsTextRendererSystem;
+  BOOLEAN           IsClearScreenOnModeSwitchEnabled;
+  BOOLEAN           IsIgnoreTextInGraphicsEnabled;
+  BOOLEAN           IsReplaceTabWithSpaceEnabled;
+  BOOLEAN           IsSanitiseClearScreenEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
-  ErrorCount                     = 0;
-  IndexOpenUsbKbDxeEfiDriver     = 0;
-  IndexPs2KeyboardDxeEfiDriver   = 0;
-  UserUefi                       = Config->Uefi;
-  UserMisc                       = Config->Misc;
-  HasOpenRuntimeEfiDriver        = FALSE;
-  HasOpenUsbKbDxeEfiDriver       = FALSE;
-  HasPs2KeyboardDxeEfiDriver     = FALSE;
-  IsRequestBootVarRoutingEnabled = UserUefi.Quirks.RequestBootVarRouting;
-  IsDeduplicateBootOrderEnabled  = UserUefi.Quirks.DeduplicateBootOrder;
-  IsKeySupportEnabled            = UserUefi.Input.KeySupport;
+  ErrorCount                       = 0;
+  IndexOpenUsbKbDxeEfiDriver       = 0;
+  IndexPs2KeyboardDxeEfiDriver     = 0;
+  UserUefi                         = Config->Uefi;
+  UserMisc                         = Config->Misc;
+  HasOpenRuntimeEfiDriver          = FALSE;
+  HasOpenUsbKbDxeEfiDriver         = FALSE;
+  HasPs2KeyboardDxeEfiDriver       = FALSE;
+  IsRequestBootVarRoutingEnabled   = UserUefi.Quirks.RequestBootVarRouting;
+  IsDeduplicateBootOrderEnabled    = UserUefi.Quirks.DeduplicateBootOrder;
+  IsKeySupportEnabled              = UserUefi.Input.KeySupport;
+  IsClearScreenOnModeSwitchEnabled = UserUefi.Output.ClearScreenOnModeSwitch;
+  IsIgnoreTextInGraphicsEnabled    = UserUefi.Output.IgnoreTextInGraphics;
+  IsReplaceTabWithSpaceEnabled     = UserUefi.Output.ReplaceTabWithSpace;
+  IsSanitiseClearScreenEnabled     = UserUefi.Output.SanitiseClearScreen;
+  TextRenderer                     = OC_BLOB_GET (&UserUefi.Output.TextRenderer);
+  IsTextRendererSystem             = FALSE;
+  ConsoleMode                      = OC_BLOB_GET (&UserUefi.Output.ConsoleMode);
+
+  if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
+    IsTextRendererSystem = TRUE;
+  }
 
   if (UserUefi.Apfs.EnableJumpstart
     && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
@@ -659,6 +677,29 @@ CheckUEFI (
       IndexOpenUsbKbDxeEfiDriver,
       IndexPs2KeyboardDxeEfiDriver
       ));
+    ++ErrorCount;
+  }
+
+  if (!IsTextRendererSystem) {
+    if (IsClearScreenOnModeSwitchEnabled) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ClearScreenOnModeSwitch is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+    if (IsIgnoreTextInGraphicsEnabled) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->IgnoreTextInGraphics is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+    if (IsReplaceTabWithSpaceEnabled) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->ReplaceTabWithSpace is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+    if (IsSanitiseClearScreenEnabled) {
+      DEBUG ((DEBUG_WARN, "UEFI->Output->SanitiseClearScreen is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
+      ++ErrorCount;
+    }
+  }
+  if (IsSanitiseClearScreenEnabled && ConsoleMode[0] != '\0') {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is not empty when SanitiseClearScreen is enabled!\n"));
     ++ErrorCount;
   }
 

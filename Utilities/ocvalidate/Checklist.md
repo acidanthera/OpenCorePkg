@@ -51,3 +51,5 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] Driver OpenUsbKbDxe.efi: When in use, UEFI->Input->KeySupport should never be enabled altogether.
 - [ ] Driver Ps2KeyboardDxe.efi: When in use, UEFI->Input->KeySupport should be enabled altogether.
 - [ ] OpenUsbKbDxe.efi and Ps2KeyboardDxe.efi should never co-exist.
+- [ ] Output->ClearScreenOnModeSwitch/IgnoreTextInGraphics/ReplaceTabWithSpace/SanitiseClearScreen: These only apply to `System` TextRenderer
+- [ ] Output->SanitiseClearScreen: When enabled, `ConsoleMode` should be empty.
