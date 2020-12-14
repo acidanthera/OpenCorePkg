@@ -57,7 +57,7 @@ ReadMsrE2 (
 
 EFI_STATUS
 EFIAPI
-UefiMain (
+VerifyMSRE2 (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )

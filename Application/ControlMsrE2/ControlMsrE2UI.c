@@ -26,8 +26,8 @@ UINTN           mFlags;
   When length - 1 characters are entered Readline will exit automatically.
 */
 UINT32 ReadLine (
-  OUT CHAR16* buffer,
-  IN UINT32 length
+  OUT CHAR16   *buffer,
+  IN  UINT32   length
   )
 {
   EFI_STATUS     Status;

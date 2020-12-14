@@ -176,8 +176,9 @@ EFI_STATUS WalkListHeaders (
 }
 
 EFI_STATUS SearchForString (
-              IN EFI_STRING SearchString
-              ) {
+  IN EFI_STRING SearchString
+  )
+{
   EFI_HII_HANDLE  *Handles;
   EFI_STATUS      Status;
 
@@ -223,9 +224,9 @@ EFI_STATUS SearchForString (
 EFI_STATUS
 EFIAPI
 UefiMain (
-      IN EFI_HANDLE    ImageHandle,
-      IN EFI_SYSTEM_TABLE  *SystemTable
-      )
+  IN EFI_HANDLE    ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  )
 {
   EFI_STATUS Status = InterpretArguments();
 
