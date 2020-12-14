@@ -33,7 +33,14 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] TODO
 
 ## Kernel
-- [ ] TODO
+- [ ] Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
+- [ ] Add->Entry[N]->BundlePath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- [ ] Add->Entry[N]->Comment: Only ASCII printable characters are accepted.
+- [ ] Add->Entry[N]->ExecutablePath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- [ ] Add->Entry[N]->PlistPath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- [ ] Delete->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
+- [ ] Delete->Entry[N]->Comment: Only ASCII printable characters are accepted.
+- [ ] Delete->Entry[N]->Identifier: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 
 ## Misc
 - [ ] TODO
@@ -53,3 +60,6 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - [ ] OpenUsbKbDxe.efi and Ps2KeyboardDxe.efi should never co-exist.
 - [ ] Output->ClearScreenOnModeSwitch/IgnoreTextInGraphics/ReplaceTabWithSpace/SanitiseClearScreen: These only apply to `System` TextRenderer
 - [ ] Output->SanitiseClearScreen: When enabled, `ConsoleMode` should be empty.
+- [ ] Output->ConsoleMode: Only ASCII printable characters are accepted.
+- [ ] Output->TextRenderer: Only ASCII printable characters are accepted.
+- [ ] Drivers[N]: Only ASCII printable characters are accepted.
