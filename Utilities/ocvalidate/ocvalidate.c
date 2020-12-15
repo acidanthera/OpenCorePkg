@@ -820,10 +820,6 @@ CheckUEFI (
       ++ErrorCount;
     }
   }
-  if (IsSanitiseClearScreenEnabled && ConsoleMode[0] != '\0') {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is not empty when SanitiseClearScreen is enabled!\n"));
-    ++ErrorCount;
-  }
 
   return ReportError (__func__, ErrorCount);
 }
