@@ -735,6 +735,7 @@ CheckUEFI (
 {
   UINT32            ErrorCount;
   UINT32            Index;
+  UINT32            Index2;
   UINT32            IndexOpenUsbKbDxeEfiDriver;
   UINT32            IndexPs2KeyboardDxeEfiDriver;
   OC_UEFI_CONFIG    UserUefi;
@@ -798,9 +799,22 @@ CheckUEFI (
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
 
-    if (!AsciiStringHasAllPrintableCharacter (Driver)) {
+    if (!AsciiStringHasAllLegalCharacter (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
+    }
+
+    for (Index2 = Index + 1; Index2 < UserUefi.Drivers.Count; ++Index2) {
+      if (AsciiStrCmp (Driver, OC_BLOB_GET (UserUefi.Drivers.Values[Index2])) == 0) {
+        DEBUG ((
+          DEBUG_WARN,
+          "UEFI->Drivers[%u] and UEFI->Drivers[%u] (%a) are duplicated!\n",
+          Index,
+          Index2,
+          Driver
+          ));
+        ++ErrorCount;
+      }
     }
 
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
