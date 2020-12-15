@@ -155,7 +155,11 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMiscLib targets.
 	#
-	OBJS    += Math.o ProtocolSupport.o
+	OBJS    += Math.o ProtocolSupport.o DataPatcher.o
+	#
+	# OcAppleKernelLib targets.
+	#
+	OBJS    += KernelVersion.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -183,7 +187,8 @@ ifneq ($(STANDALONE),1)
 				../../Library/OcMachoLib:$\
 				../../Library/OcAppleKeysLib:$\
 				../../Library/OcCpuLib:$\
-				../../Library/OcMiscLib
+				../../Library/OcMiscLib:$\
+				../../Library/OcAppleKernelLib
 endif
 
 #

@@ -6,6 +6,7 @@ As of commit <TODO>, ocvalidate performs the following checks:
 ## Global Rules
 - For all comments (Section `Comment` in all possible fields throughout the whole config) only ASCII printable characters are accepted.
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
+- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 
 ## ACPI
 - Add->Entry[N]->Path: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
