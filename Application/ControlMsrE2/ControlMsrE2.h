@@ -12,11 +12,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-/**
-  Unless otherwise specified all data types are naturally aligned. Structures are
-  aligned on boundaries equal to the largest internal datum of the structure and
-  internal data are implicitly padded to achieve natural alignment.
-**/
+///
+/// Unless otherwise specified all data types are naturally aligned. Structures are
+/// aligned on boundaries equal to the largest internal datum of the structure and
+/// internal data are implicitly padded to achieve natural alignment.
+///
 
 #include <Uefi.h>
 #include <PiDxe.h>
@@ -51,7 +51,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /**
   Parameters to search in a Form for
   IfrHeaders which contain a Description
-  and to return the Varstore
+  and to return the VarStore
 
   @param SearchText        Text that must be part of the options description
   @param EfiHandle         Handle of the list the Form is part of
@@ -110,7 +110,9 @@ enum {
 
 extern UINTN mFlags;
 
-// Check MsrE2 Status - original VerifyMSRE2
+/**
+  Check MsrE2 Status - original VerifyMSRE2
+**/
 extern
 EFI_STATUS
 EFIAPI
@@ -119,27 +121,66 @@ VerifyMSRE2 (
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
 
+/**
+  Wait for Keypress of Y or N. Ignores case.
+**/
+extern
+UINT32
+ReadYN ();
 
-// Wait for Keypress of Y or N. Ignores case.
-extern UINT32 ReadYN ();
-// Wait for any key press
-extern CHAR16 ReadAnyKey ();
+/**
+  Wait for any key press
+**/
+extern
+CHAR16
+ReadAnyKey ();
 
-// Parse commandline arguments
-extern UINTN InterpretArguments ();
-extern VOID  PrintUINT8Str (IN UINT8 *String);
-extern VOID  PrintGuid (IN EFI_GUID* Guid);
-// Displays SearchString and allows to change it
-extern EFI_STRING  ModifySearchString (EFI_STRING SearchString);
+/**
+  Parse commandline arguments
+**/
+extern
+UINTN
+InterpretArguments ();
 
-// Copies Package Lists to Memory
+/**
+  Print UINT8 String
+**/
+extern
+VOID
+PrintUINT8Str (
+  IN UINT8 *String
+  );
+
+/**
+  Print Guid
+**/
+extern
+VOID
+PrintGuid (
+  IN EFI_GUID* Guid
+  );
+
+/**
+  Displays SearchString and allows to change it
+**/
+extern
+EFI_STRING
+ModifySearchString (
+  EFI_STRING SearchString
+  );
+
+/**
+  Copies Package Lists to Memory
+**/
 extern
 EFI_HII_PACKAGE_LIST_HEADER
 *HiiExportPackageLists (
   EFI_HII_HANDLE h
   );
 
-// Callback to Handle IFR_ONE_OF_OP
+/**
+  Callback to Handle IFR_ONE_OF_OP
+**/
 extern
 VOID
 HandleOneOf (
@@ -148,14 +189,18 @@ HandleOneOf (
   IN VOID                *Context
   );
 
-// Displaying and Changing value of BIOS Option. Including UI
+/**
+  Displaying and Changing value of BIOS Option. Including UI
+**/
 extern
 VOID
 HandleOneVariable (
   IN ONE_OF_CONTEXT      *Context
   );
 
-// Call Handler for each occurence of opCode, starting to search at header. Called recursively
+/**
+  Call Handler for each occurence of opCode, starting to search at header. Called recursively
+**/
 extern
 EFI_IFR_OP_HEADER
 *DoForEachOpCode (

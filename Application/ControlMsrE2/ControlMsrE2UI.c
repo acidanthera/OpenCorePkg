@@ -148,7 +148,10 @@ EFI_STATUS InterpretArguments ()
 {
   UINTN       Argc;
   CHAR16      **Argv;
+  CHAR16      *Parameter;
   UINTN       ParameterCount;
+  CHAR16      *Token;
+  UINT16      TokenIndex;
 
   mFlags = 0;
 
@@ -159,46 +162,46 @@ EFI_STATUS InterpretArguments ()
 
   for (UINT32 i = 1; i < Argc; i++) {
 
-    CHAR16* token = AllocatePool (StrSize(Argv[i]));
+    Token = AllocatePool (StrSize(Argv[i]));
 
-    if (token) {
-      StrCpyS (token, StrLen(Argv[i]) + 1, Argv[i]);
+    if (Token) {
+      StrCpyS (Token, StrLen(Argv[i]) + 1, Argv[i]);
 
-      UINT16 tokenIndex = 0;;
+      TokenIndex = 0;
 
-      while (Argv[i][tokenIndex]) {
-        while (Argv[i][tokenIndex] == ' ') {
-          tokenIndex++;
+      while (Argv[i][TokenIndex]) {
+        while (Argv[i][TokenIndex] == ' ') {
+          TokenIndex++;
         }
 
-        if (Argv[i][tokenIndex]) {
-          CHAR16* s = &token[tokenIndex];
+        if (Argv[i][TokenIndex]) {
+          Parameter = &Token[TokenIndex];
 
-          while (token[tokenIndex] != 0 && token[tokenIndex] != ' ') {
-            tokenIndex++;
+          while (Token[TokenIndex] != 0 && Token[TokenIndex] != ' ') {
+            TokenIndex++;
           }
-          token[tokenIndex] = 0;
+          Token[TokenIndex] = 0;
 
-          if (!StrCmp (s, L"check")) {
+          if (!StrCmp (Parameter, L"check")) {
             mFlags |= ARG_CHECK;
             ParameterCount++;
-          } else if (!StrCmp (s, L"lock")) {
+          } else if (!StrCmp (Parameter, L"lock")) {
             mFlags |= ARG_LOCK;
             ParameterCount++;
-          } else if (!StrCmp (s, L"unlock")) {
+          } else if (!StrCmp (Parameter, L"unlock")) {
             mFlags |= ARG_UNLOCK;
             ParameterCount++;
-          } else if (!StrCmp (s, L"interactive")) {
+          } else if (!StrCmp (Parameter, L"interactive")) {
             mFlags |= ARG_INTERACTIVE;
             ParameterCount++;
-          } else if (!StrCmp (s, L"-v")) {
+          } else if (!StrCmp (Parameter, L"-v")) {
             mFlags |= ARG_VERBOSE;
           } else {
-            Print (L"Ignoring unknown command line argument: %s\n", s);
+            Print (L"Ignoring unknown command line argument: %s\n", Parameter);
           }
         }
       }  ///<  All Tokens parsed
-      FreePool (token);
+      FreePool (Token);
     } else {
       Print (L"Couldn't allocate memory.\n");
       return EFI_OUT_OF_RESOURCES;
@@ -235,9 +238,9 @@ ModifySearchString (
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
           Print (L"\nNo Input. Search string not changed.\n");
-          FreePool(Buffer);
+          FreePool (Buffer);
         } else {
-          FreePool(SearchString);
+          FreePool (SearchString);
           SearchString = Buffer;
         }
       } else {
