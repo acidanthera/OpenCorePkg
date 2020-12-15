@@ -455,6 +455,10 @@ CheckBooter (
     }
   }
   if (!HasOpenRuntimeEfiDriver) {
+    if (IsProvideCustomSlideEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideCustomSlide is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
     if (IsDisableVariableWriteEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->DisableVariableWrite is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
       ++ErrorCount;
