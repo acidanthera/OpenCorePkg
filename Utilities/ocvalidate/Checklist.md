@@ -9,9 +9,7 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Add->Entry[N]->Path: If a customised DSDT is added, remind to enable RebaseRegions in Quirks.
 - Add->Entry[N]->Comment: Only ASCII printable characters are accepted.
 - Delete->Entry[N]->Comment: Only ASCII printable characters are accepted.
-- Delete->Entry[N]->OemTableId/TableSignature: No size check for these two, as serialisation kills it.
 - Patch->Entry[N]->Comment: Only ASCII printable characters are accepted.
-- Patch->Entry[N]->OemTableId/TableSignature: No size check for these two, as serialisation kills it.
 - Patch->Entry[N]->Find/Replace/Mask/ReplaceMask: Identical size of these patterns guaranteed.
 
 ## Booter
