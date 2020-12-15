@@ -23,6 +23,7 @@
 #include <Library/OcSerializeLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcAppleKernelLib.h>
 
 #include <File.h>
 #include <sys/time.h>
@@ -572,9 +573,14 @@ CheckKernel (
       ++ErrorCount;
     }
 
-    //
-    // TODO: Sanitise MaxKernel and MinKernel, by calling OcParseDarwinVersion?
-    //
+    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
+      ++ErrorCount;
+    }
+    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
 
     if (!AsciiStringHasAllLegalCharacter (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
@@ -616,9 +622,14 @@ CheckKernel (
       ++ErrorCount;
     }
 
-    //
-    // TODO: Sanitise MaxKernel and MinKernel, by calling OcParseDarwinVersion?
-    //
+    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
+      ++ErrorCount;
+    }
+    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
 
     if (AsciiStrCmp (Arch, "Any") != 0
       && AsciiStrCmp (Arch, "i386") != 0
