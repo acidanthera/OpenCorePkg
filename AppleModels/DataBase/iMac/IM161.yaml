@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "424.0.0.0.0"
-BIOSLegacyVersion: "IM161.88Z.F000.B00.2010192003"
-BIOSReleaseDate: "10/19/2020"
+BIOSVersion: "425.0.0.0.0"
+BIOSLegacyVersion: "IM161.88Z.F000.B00.2011042254"
+BIOSReleaseDate: "11/04/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac16,1"
 SystemVersion: "1.0"
@@ -74,10 +74,10 @@ SmcEPCI: 0xF00008
 OEMStrings: |-
   Apple ROM Version
     Model:        IM161
-    EFI Version:  424.0.0.0.0
-    Built by:     root@osx414
-    Date:         Mon Oct 19 20:03:09 PDT 2020
-    Revision:     424 (B&I)
+    EFI Version:  425.0.0.0.0
+    Built by:     root@osx418
+    Date:         Wed Nov  4 22:54:32 PST 2020
+    Revision:     425 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4

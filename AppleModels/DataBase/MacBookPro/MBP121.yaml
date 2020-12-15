@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "424.0.0.0.0"
-BIOSLegacyVersion: "MBP121.88Z.F000.B00.2010192003"
-BIOSReleaseDate: "10/19/2020"
+BIOSVersion: "425.0.0.0.0"
+BIOSLegacyVersion: "MBP121.88Z.F000.B00.2011042258"
+BIOSReleaseDate: "11/04/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro12,1"
 SystemVersion: "1.0"
@@ -67,10 +67,10 @@ SmcEPCI: 0x00F01008
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP121
-    EFI Version:  424.0.0.0.0
-    Built by:     root@osx414
-    Date:         Mon Oct 19 20:03:11 PDT 2020
-    Revision:     424 (B&I)
+    EFI Version:  425.0.0.0.0
+    Built by:     root@osx418
+    Date:         Wed Nov  4 22:58:07 PST 2020
+    Revision:     425 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4
