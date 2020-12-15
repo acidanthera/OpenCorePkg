@@ -31,6 +31,7 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
 - Add->Entry[N]->BundlePath: `.kext` filename suffix should exist.
 - Add->Entry[N]->PlistPath: `.plist` filename suffix should exist.
+- Add->Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at Kernel->Quirks.
 - Delete->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
 - Delete->Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
 

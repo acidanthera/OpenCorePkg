@@ -528,6 +528,7 @@ CheckKernel (
 {
   UINT32            ErrorCount;
   UINT32            Index;
+  UINT32            LiluIndex;
   OC_KERNEL_CONFIG  UserKernel;
   CONST CHAR8       *Arch;
   CONST CHAR8       *BundlePath;
@@ -537,12 +538,16 @@ CheckKernel (
   CONST CHAR8       *MinKernel;
   CONST CHAR8       *PlistPath;
   CONST CHAR8       *Identifier;
+  BOOLEAN           HasLiluKext;
+  BOOLEAN           IsDisableLinkeditJettisonEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into Kernel checker!\n"));
 
-  ErrorCount = 0;
-  UserKernel = Config->Kernel;
-
+  ErrorCount                       = 0;
+  LiluIndex                        = 0;
+  UserKernel                       = Config->Kernel;
+  HasLiluKext                      = FALSE;
+  IsDisableLinkeditJettisonEnabled = UserKernel.Quirks.DisableLinkeditJettison;
 
   for (Index = 0; Index < UserKernel.Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel.Add.Values[Index]->Arch);
@@ -604,6 +609,12 @@ CheckKernel (
       ++ErrorCount;
     }
 
+    if (AsciiStrCmp (BundlePath, "Lilu.kext") == 0
+      && AsciiStrCmp (ExecutablePath, "Contents/MacOS/Lilu") == 0) {
+      HasLiluKext = TRUE;
+      LiluIndex   = Index;
+    }
+
     if (AsciiStriCmp (GetFilenameSuffix (PlistPath), "plist") != 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
       ++ErrorCount;
@@ -662,6 +673,11 @@ CheckKernel (
   //
   // TODO: Handle Emulate checks here...
   //
+
+  if (HasLiluKext && !IsDisableLinkeditJettisonEnabled) {
+    DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", LiluIndex));
+    ++ErrorCount;
+  }
 
   return ReportError (__func__, ErrorCount);
 }
