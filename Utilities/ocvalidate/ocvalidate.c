@@ -598,6 +598,16 @@ CheckKernel (
         ));
       ++ErrorCount;
     }
+
+    if (AsciiStriCmp (GetFilenameSuffix (BundlePath), "kext") != 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
+      ++ErrorCount;
+    }
+
+    if (AsciiStriCmp (GetFilenameSuffix (PlistPath), "plist") != 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
+      ++ErrorCount;
+    }
   }
 
   for (Index = 0; Index < UserKernel.Block.Count; ++Index) {
@@ -640,6 +650,11 @@ CheckKernel (
         Index,
         Arch
         ));
+      ++ErrorCount;
+    }
+
+    if (OcAsciiStrChr (Identifier, '.') == NULL) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier does not contain any dot character (thus it probably is not a real Identifier)!\n", Index));
       ++ErrorCount;
     }
   }

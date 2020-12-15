@@ -7,9 +7,9 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - For all comments (Section `Comment` in all possible fields throughout the whole config) only ASCII printable characters are accepted.
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
 - For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
+- For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 
 ## ACPI
-- Add->Entry[N]->Path: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - Add->Entry[N]->Path: `.dsl` filename suffix is not accepted.
 - Add->Entry[N]->Path: If a customised DSDT is added, remind to enable RebaseRegions in Quirks.
 
@@ -29,11 +29,10 @@ As of commit <TODO>, ocvalidate performs the following checks:
 
 ## Kernel
 - Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
-- Add->Entry[N]->BundlePath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
-- Add->Entry[N]->ExecutablePath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
-- Add->Entry[N]->PlistPath: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- Add->Entry[N]->BundlePath: `.kext` filename suffix should exist.
+- Add->Entry[N]->PlistPath: `.plist` filename suffix should exist.
 - Delete->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
-- Delete->Entry[N]->Identifier: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- Delete->Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
 
 ## Misc
 - TODO
