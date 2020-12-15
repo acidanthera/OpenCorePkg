@@ -748,7 +748,7 @@ CheckUEFI (
   }
 
   if (UserUefi.Apfs.EnableJumpstart
-    && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) { ///< FIXME: Can ScanPolicy be 0 to be failsafe?
+    && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) {
     DEBUG ((DEBUG_WARN, "UEFI->APFS->EnableJumpstart is enabled, but Misc->Security->ScanPolicy does not allow APFS scanning!\n"));
     ++ErrorCount;
   }
