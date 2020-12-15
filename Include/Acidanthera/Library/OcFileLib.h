@@ -482,4 +482,21 @@ CreateFvFileDevicePath (
   IN EFI_GUID  *FileGuid
   );
 
+/**
+  Reads firmware file section to pool-allocated buffer.
+
+  @param[in]  FileGuid      Firmware file GUID.
+  @param[in]  SectionType   Section type to read.
+  @param[out] FileSize      Size of the section read.
+
+  @return file contents allocated from pool.
+  @retval NULL on failure (e.g. when a file is not present).
+**/
+VOID *
+ReadFvFileSection (
+  IN  EFI_GUID          *FileGuid,
+  IN  UINT8             SectionType,
+  OUT UINT32            *FileSize
+  );
+
 #endif // OC_FILE_LIB_H
