@@ -305,8 +305,6 @@ CheckBooter (
   BOOLEAN           IsEnableSafeModeSlideEnabled;
   BOOLEAN           IsDisableVariableWriteEnabled;
   BOOLEAN           IsEnableWriteUnprotectorEnabled;
-  BOOLEAN           IsRebuildAppleMemoryMapEnabled;
-  BOOLEAN           IsSyncRuntimePermissionsEnabled;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   
   DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
@@ -322,8 +320,6 @@ CheckBooter (
   IsEnableSafeModeSlideEnabled    = UserBooter.Quirks.EnableSafeModeSlide;
   IsDisableVariableWriteEnabled   = UserBooter.Quirks.DisableVariableWrite;
   IsEnableWriteUnprotectorEnabled = UserBooter.Quirks.EnableWriteUnprotector;
-  IsRebuildAppleMemoryMapEnabled  = UserBooter.Quirks.RebuildAppleMemoryMap;
-  IsSyncRuntimePermissionsEnabled = UserBooter.Quirks.SyncRuntimePermissions;
   HasOpenRuntimeEfiDriver         = FALSE;
   MaxSlide                        = UserBooter.Quirks.ProvideMaxSlide;
   
@@ -466,18 +462,6 @@ CheckBooter (
     if (MaxSlide > 0) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
       ++ErrorCount;
-    }
-  }
-  if (IsRebuildAppleMemoryMapEnabled) {
-    if (IsEnableWriteUnprotectorEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector and RebuildAppleMemoryMap cannot be enabled simultaneously!\n"));
-      ++ErrorCount;
-    }
-    if (!IsSyncRuntimePermissionsEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->RebuildAppleMemoryMap is enabled, and SyncRuntimePermissions is highly recommended to be enabled as well\n"));
-      //
-      // This is not an error but a suggestion.
-      //
     }
   }
 
