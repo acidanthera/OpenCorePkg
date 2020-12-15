@@ -8,7 +8,6 @@ PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	CommonPatches.o \
 	CpuidPatches.o \
-	KernelVersion.o \
 	KextPatcher.o \
 	KxldState.o \
 	PrelinkedKext.o \
@@ -18,7 +17,6 @@ OBJS    = $(PROJECT).o \
 	Link.o \
 	KernelReader.o \
 	KernelCollection.o \
-	DataPatcher.o \
 	lzss.o \
 	lzvn.o \
 	adler32.o \
@@ -33,7 +31,6 @@ OBJS    = $(PROJECT).o \
 	uncompr.o \
 	zlib_uefi.o
 VPATH   = ../../Library/OcAppleKernelLib:$\
-	../../Library/OcMiscLib:$\
 	../../Library/OcCompressionLib/lzss:$\
 	../../Library/OcCompressionLib/lzvn:$\
 	../../Library/OcCompressionLib/zlib
