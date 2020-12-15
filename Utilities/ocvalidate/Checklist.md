@@ -5,18 +5,17 @@ As of commit <TODO>, ocvalidate performs the following checks:
 
 ## Global Rules
 - For all comments (Section `Comment` in all possible fields throughout the whole config) only ASCII printable characters are accepted.
+- For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
 
 ## ACPI
 - Add->Entry[N]->Path: Only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - Add->Entry[N]->Path: `.dsl` filename suffix is not accepted.
 - Add->Entry[N]->Path: If a customised DSDT is added, remind to enable RebaseRegions in Quirks.
-- Patch->Entry[N]->Find/Replace/Mask/ReplaceMask: Identical size of these patterns guaranteed.
 
 ## Booter
 - MmioWhitelist->Entry[N]->Enabled: When at least one entry is enabled, remind to enable DevirtualiseMmio in Quirks.
 - Patch->Entry[N]->Arch: Only `Empty string, Any, i386, x86_64` are accepted.
 - Patch->Entry[N]->Identifier: Only `Empty string, Any, Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
-- Patch->Entry[N]->Find/Replace/Mask/ReplaceMask: Identical size of these patterns guaranteed.
 - Quirks->AllowRelocationBlock: When enabled, ProvideCustomSlide should be enabled altogether.
 - Quirks->AllowRelocationBlock: When enabled, AvoidRuntimeDefrag is highly recommended to be enabled as well.
 - Quirks->EnableSafeModeSlide: When enabled, ProvideCustomSlide should be enabled altogether.
