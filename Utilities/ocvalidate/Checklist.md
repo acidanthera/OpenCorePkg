@@ -17,7 +17,6 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Patch->Entry[N]->Arch: Only `Empty string, Any, i386, x86_64` are accepted.
 - Patch->Entry[N]->Identifier: Only `Empty string, Any, Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
 - Quirks->AllowRelocationBlock: When enabled, ProvideCustomSlide should be enabled altogether.
-- Quirks->AllowRelocationBlock: When enabled, AvoidRuntimeDefrag is highly recommended to be enabled as well.
 - Quirks->EnableSafeModeSlide: When enabled, ProvideCustomSlide should be enabled altogether.
 - Quirks->ProvideMaxSlide: If set to a number greater than zero, ProvideCustomSlide should be enabled altogether.
 - Quirks->DisableVariableWrite/EnableWriteUnprotector: When either is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.

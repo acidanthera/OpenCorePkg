@@ -301,7 +301,6 @@ CheckBooter (
   BOOLEAN           ShouldEnableDevirtualiseMmio;
   BOOLEAN           IsAllowRelocationBlockEnabled;
   BOOLEAN           IsProvideCustomSlideEnabled;
-  BOOLEAN           IsAvoidRuntimeDefragEnabled;
   BOOLEAN           IsEnableSafeModeSlideEnabled;
   BOOLEAN           IsDisableVariableWriteEnabled;
   BOOLEAN           IsEnableWriteUnprotectorEnabled;
@@ -318,7 +317,6 @@ CheckBooter (
   ShouldEnableDevirtualiseMmio    = FALSE;
   IsAllowRelocationBlockEnabled   = UserBooter.Quirks.AllowRelocationBlock;
   IsProvideCustomSlideEnabled     = UserBooter.Quirks.ProvideCustomSlide;
-  IsAvoidRuntimeDefragEnabled     = UserBooter.Quirks.AvoidRuntimeDefrag;
   IsEnableSafeModeSlideEnabled    = UserBooter.Quirks.EnableSafeModeSlide;
   IsDisableVariableWriteEnabled   = UserBooter.Quirks.DisableVariableWrite;
   IsEnableWriteUnprotectorEnabled = UserBooter.Quirks.EnableWriteUnprotector;
@@ -444,13 +442,6 @@ CheckBooter (
     if (!IsProvideCustomSlideEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
       ++ErrorCount;
-    }
-
-    if (!IsAvoidRuntimeDefragEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, and AvoidRuntimeDefrag is highly recommended to be enabled as well\n"));
-      //
-      // This is not an error but a suggestion.
-      //
     }
   }
   if (!IsProvideCustomSlideEnabled) {
