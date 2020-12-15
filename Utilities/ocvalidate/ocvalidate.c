@@ -299,6 +299,7 @@ CheckBooter (
   UINT8             MaxSlide;
   BOOLEAN           IsMmioWhitelistEnabled;
   BOOLEAN           ShouldEnableDevirtualiseMmio;
+  BOOLEAN           IsDevirtualiseMmioEnabled;
   BOOLEAN           IsAllowRelocationBlockEnabled;
   BOOLEAN           IsProvideCustomSlideEnabled;
   BOOLEAN           IsEnableSafeModeSlideEnabled;
@@ -315,6 +316,7 @@ CheckBooter (
   UserUefi                        = Config->Uefi;
   IsMmioWhitelistEnabled          = FALSE;
   ShouldEnableDevirtualiseMmio    = FALSE;
+  IsDevirtualiseMmioEnabled       = UserBooter.Quirks.DevirtualiseMmio;
   IsAllowRelocationBlockEnabled   = UserBooter.Quirks.AllowRelocationBlock;
   IsProvideCustomSlideEnabled     = UserBooter.Quirks.ProvideCustomSlide;
   IsEnableSafeModeSlideEnabled    = UserBooter.Quirks.EnableSafeModeSlide;
@@ -434,25 +436,9 @@ CheckBooter (
     }
   }
 
-  if (ShouldEnableDevirtualiseMmio && !UserBooter.Quirks.DevirtualiseMmio) {
+  if (ShouldEnableDevirtualiseMmio && !IsDevirtualiseMmioEnabled) {
     DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
     ++ErrorCount;
-  }
-  if (IsAllowRelocationBlockEnabled) {
-    if (!IsProvideCustomSlideEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
-      ++ErrorCount;
-    }
-  }
-  if (!IsProvideCustomSlideEnabled) {
-    if (IsEnableSafeModeSlideEnabled) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
-      ++ErrorCount;
-    }
-    if (MaxSlide > 0) {
-      DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
-      ++ErrorCount;
-    }
   }
   if (!HasOpenRuntimeEfiDriver) {
     if (IsProvideCustomSlideEnabled) {
@@ -465,6 +451,20 @@ CheckBooter (
     }
     if (IsEnableWriteUnprotectorEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableWriteUnprotector is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
+  }
+  if (!IsProvideCustomSlideEnabled) {
+    if (IsAllowRelocationBlockEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
+      ++ErrorCount;
+    }
+    if (IsEnableSafeModeSlideEnabled) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->EnableSafeModeSlide is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
+      ++ErrorCount;
+    }
+    if (MaxSlide > 0) {
+      DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
       ++ErrorCount;
     }
   }
