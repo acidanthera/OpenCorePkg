@@ -127,12 +127,12 @@ struct GUI_DRAWING_CONTEXT_ {
   //
   // Scene objects
   //
-  GUI_OBJ              *Screen;
-  GUI_CURSOR_GET_IMAGE GetCursorImage;
-  GUI_EXIT_LOOP        ExitLoop;
-  LIST_ENTRY           Animations;
-  VOID                 *GuiContext;
-  UINT8                Scale;
+  GUI_OBJ                  *Screen;
+  GUI_CURSOR_GET_IMAGE     GetCursorImage;
+  GUI_EXIT_LOOP            ExitLoop;
+  LIST_ENTRY               Animations;
+  BOOT_PICKER_GUI_CONTEXT  *GuiContext;
+  UINT8                    Scale;
 };
 
 EFI_STATUS
@@ -247,6 +247,11 @@ GuiViewDeinitialize (
 
 CONST GUI_SCREEN_CURSOR *
 GuiViewCurrentCursor (
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  );
+
+VOID
+GuiRedrawAndFlushScreen (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   );
 

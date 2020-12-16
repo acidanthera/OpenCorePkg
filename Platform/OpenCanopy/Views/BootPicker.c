@@ -210,6 +210,7 @@ InternalBootPickerChangeEntry (
   //
   PrevEntry = This->SelectedEntry;
   InternalBootPickerSelectEntry (This, NewEntry);
+
   //
   // To redraw the entry *and* the selector, draw the entire height of the
   // Picker object. For this, the height just reach from the top of the entries
@@ -232,6 +233,12 @@ InternalBootPickerChangeEntry (
     This->Hdr.Obj.Height,
     TRUE
     );
+
+  //
+  // Set voice timeout to N frames from now.
+  //
+  DrawContext->GuiContext->AudioPlaybackTimeout = OC_VOICE_OVER_IDLE_TIMEOUT_MS;
+  DrawContext->GuiContext->BootEntry = This->SelectedEntry->Context;
 }
 
 VOID
@@ -288,7 +295,8 @@ InternalBootPickerKeyEvent (
   } else if (Key == OC_INPUT_CONTINUE) {
     ASSERT (Picker->SelectedEntry != NULL);
     Picker->SelectedEntry->Context->SetDefault = Modifier;
-    GuiContext->BootEntry = Picker->SelectedEntry->Context;
+    GuiContext->ReadyToBoot = TRUE;
+    ASSERT (GuiContext->BootEntry == Picker->SelectedEntry->Context);
   } else if (mBootPickerOpacity != 0xFF) {
     //
     // FIXME: Other keys are not allowed when boot picker is partially transparent.
@@ -299,8 +307,23 @@ InternalBootPickerKeyEvent (
   if (Key == OC_INPUT_MORE) {
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
+    DrawContext->GuiContext->PickerContext->PlayAudioFile (
+      DrawContext->GuiContext->PickerContext,
+      OcVoiceOverAudioFileShowAuxiliary,
+      FALSE
+      );
   } else if (Key == OC_INPUT_ABORTED) {
     GuiContext->Refresh = TRUE;
+    DrawContext->GuiContext->PickerContext->PlayAudioFile (
+      DrawContext->GuiContext->PickerContext,
+      OcVoiceOverAudioFileReloading,
+      FALSE
+      );
+  } else if (Key == OC_INPUT_VOICE_OVER) {
+    DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
+      DrawContext->GuiContext->PickerContext,
+      0
+      );
   }
 }
 
@@ -715,7 +738,7 @@ CopyLabel (
 EFI_STATUS
 BootPickerEntriesAdd (
   IN OC_PICKER_CONTEXT              *Context,
-  IN CONST BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN BOOT_PICKER_GUI_CONTEXT        *GuiContext,
   IN OC_BOOT_ENTRY                  *Entry,
   IN BOOLEAN                        Default
   )
@@ -935,6 +958,7 @@ BootPickerEntriesAdd (
 
   if (Default) {
     InternalBootPickerSelectEntry (&mBootPicker, VolumeEntry);
+    GuiContext->BootEntry = Entry;
   }
 
   return EFI_SUCCESS;
@@ -963,7 +987,7 @@ InternalBootPickerExitLoop (
 {
   ASSERT (Context != NULL);
 
-  return Context->BootEntry != NULL || Context->Refresh;
+  return Context->ReadyToBoot || Context->Refresh;
 }
 
 STATIC GUI_INTERPOLATION mBpAnimInfoOpacity;

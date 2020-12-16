@@ -5,6 +5,7 @@ OpenCore Changelog
 - Updated underlying EDK II package to edk2-stable202011
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed macrecovery server protocol compatibility
+- Added basic audio assistant support in OpenCanopy
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout
