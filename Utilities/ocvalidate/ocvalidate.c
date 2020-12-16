@@ -24,6 +24,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcAppleKernelLib.h>
+#include <Library/OcConsoleLib.h>
 
 #include <File.h>
 #include <sys/time.h>
@@ -757,6 +758,11 @@ CheckUEFI (
   BOOLEAN           IsReplaceTabWithSpaceEnabled;
   BOOLEAN           IsSanitiseClearScreenEnabled;
   BOOLEAN           IsPointerSupportEnabled;
+  CONST CHAR8       *Resolution;
+  UINT32            UserWidth;
+  UINT32            UserHeight;
+  UINT32            UserBpp;
+  BOOLEAN           UserSetMax;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
@@ -781,6 +787,7 @@ CheckUEFI (
   TextRenderer                     = OC_BLOB_GET (&UserUefi.Output.TextRenderer);
   IsTextRendererSystem             = FALSE;
   ConsoleMode                      = OC_BLOB_GET (&UserUefi.Output.ConsoleMode);
+  Resolution                       = OC_BLOB_GET (&UserUefi.Output.Resolution);
 
   if (!AsciiStringHasAllPrintableCharacter (PointerSupportMode)) {
     DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupportMode contains illegal character!\n"));
@@ -903,6 +910,23 @@ CheckUEFI (
       DEBUG ((DEBUG_WARN, "UEFI->Output->SanitiseClearScreen is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
+  }
+
+  //
+  // Parse Output->Resolution.
+  //
+  OcParseScreenResolution (
+    Resolution,
+    &UserWidth,
+    &UserHeight,
+    &UserBpp,
+    &UserSetMax
+    );
+  if (Resolution[0] != '\0'
+    && !UserSetMax
+    && (UserWidth == 0 || UserHeight == 0)) {
+    DEBUG ((DEBUG_WARN, "User->Output->Resolution is borked, please check Configurations.pdf!\n"));
+    ++ErrorCount;
   }
 
   return ReportError (__func__, ErrorCount);
