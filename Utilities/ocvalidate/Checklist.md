@@ -56,4 +56,5 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Output->ClearScreenOnModeSwitch/IgnoreTextInGraphics/ReplaceTabWithSpace/SanitiseClearScreen: These only apply to `System` TextRenderer
 - Output->ConsoleMode: Only ASCII printable characters are accepted.
 - Output->TextRenderer: Only ASCII printable characters are accepted.
+- Output->Resolution: Ensure correct format.
 - Drivers[N]: No driver should be loaded twice.
