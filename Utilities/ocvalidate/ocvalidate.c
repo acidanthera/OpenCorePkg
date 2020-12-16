@@ -801,6 +801,10 @@ CheckUEFI (
     DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode contains illegal character!\n"));
     ++ErrorCount;
   }
+  if (!AsciiStringHasAllPrintableCharacter (Resolution)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution contains illegal character!\n"));
+    ++ErrorCount;
+  }
   if (!AsciiStringHasAllPrintableCharacter (TextRenderer)) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer contains illegal character!\n"));
     ++ErrorCount;
