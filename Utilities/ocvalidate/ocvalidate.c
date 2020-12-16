@@ -782,11 +782,18 @@ CheckUEFI (
   IsTextRendererSystem             = FALSE;
   ConsoleMode                      = OC_BLOB_GET (&UserUefi.Output.ConsoleMode);
 
+  if (!AsciiStringHasAllPrintableCharacter (PointerSupportMode)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupportMode contains illegal character!\n"));
+    ++ErrorCount;
+  }
+  if (!AsciiStringHasAllPrintableCharacter (KeySupportMode)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupportMode contains illegal character!\n"));
+    ++ErrorCount;
+  }
   if (!AsciiStringHasAllPrintableCharacter (ConsoleMode)) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode contains illegal character!\n"));
     ++ErrorCount;
   }
-
   if (!AsciiStringHasAllPrintableCharacter (TextRenderer)) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer contains illegal character!\n"));
     ++ErrorCount;
