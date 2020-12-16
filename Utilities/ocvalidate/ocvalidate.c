@@ -743,6 +743,7 @@ CheckUEFI (
   CONST CHAR8       *Driver;
   CONST CHAR8       *TextRenderer;
   CONST CHAR8       *ConsoleMode;
+  CONST CHAR8       *PointerSupportMode;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   BOOLEAN           HasOpenUsbKbDxeEfiDriver;
   BOOLEAN           HasPs2KeyboardDxeEfiDriver;
@@ -754,6 +755,7 @@ CheckUEFI (
   BOOLEAN           IsIgnoreTextInGraphicsEnabled;
   BOOLEAN           IsReplaceTabWithSpaceEnabled;
   BOOLEAN           IsSanitiseClearScreenEnabled;
+  BOOLEAN           IsPointerSupportEnabled;
 
   DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
 
@@ -768,6 +770,8 @@ CheckUEFI (
   IsRequestBootVarRoutingEnabled   = UserUefi.Quirks.RequestBootVarRouting;
   IsDeduplicateBootOrderEnabled    = UserUefi.Quirks.DeduplicateBootOrder;
   IsKeySupportEnabled              = UserUefi.Input.KeySupport;
+  IsPointerSupportEnabled          = UserUefi.Input.PointerSupport;
+  PointerSupportMode               = OC_BLOB_GET (&UserUefi.Input.PointerSupportMode);
   IsClearScreenOnModeSwitchEnabled = UserUefi.Output.ClearScreenOnModeSwitch;
   IsIgnoreTextInGraphicsEnabled    = UserUefi.Output.IgnoreTextInGraphics;
   IsReplaceTabWithSpaceEnabled     = UserUefi.Output.ReplaceTabWithSpace;
@@ -833,6 +837,11 @@ CheckUEFI (
       HasPs2KeyboardDxeEfiDriver   = TRUE;
       IndexPs2KeyboardDxeEfiDriver = Index;
     }
+  }
+
+  if (IsPointerSupportEnabled && AsciiStrCmp (PointerSupportMode, "ASUS") != 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupport is enabled, but PointerSupportMode is not ASUS!\n"));
+    ++ErrorCount;
   }
 
   if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
