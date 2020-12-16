@@ -99,14 +99,6 @@ InternalBootPickerViewDraw (
   ASSERT (DrawContext != NULL);
   ASSERT (Context != NULL);
 
-  if (!Context->PlayedOnce && Context->PickerContext->PickerAudioAssist) {
-    Context->PickerContext->PlayAudioFile (
-      Context->PickerContext,
-      OcVoiceOverAudioFileChooseOS,
-      FALSE
-      );
-  }
-
   GuiDrawToBuffer (
     &mBackgroundImage,
     0xFF,
@@ -133,16 +125,6 @@ InternalBootPickerViewDraw (
     Height,
     FALSE
     );
-
-  if (!Context->PlayedOnce) {
-    Context->PickerContext->PlayAudioBeep (
-      Context->PickerContext,
-      OC_VOICE_OVER_SIGNALS_NORMAL,
-      OC_VOICE_OVER_SIGNAL_NORMAL_MS,
-      OC_VOICE_OVER_SILENCE_NORMAL_MS
-      );
-    Context->PlayedOnce = TRUE;
-  }
 }
 
 VOID

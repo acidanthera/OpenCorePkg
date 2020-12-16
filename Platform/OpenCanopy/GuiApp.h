@@ -84,7 +84,6 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   UINT32                               CursorDefaultX;
   UINT32                               CursorDefaultY;
   OC_PICKER_CONTEXT                    *PickerContext;
-  BOOLEAN                              PlayedOnce;
 } BOOT_PICKER_GUI_CONTEXT;
 
 EFI_STATUS

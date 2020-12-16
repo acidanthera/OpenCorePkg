@@ -1149,7 +1149,6 @@ GuiDrawLoop (
   mNumValidDrawReqs = 0;
   HoldObject        = NULL;
 
-  GuiRedrawAndFlushScreen (DrawContext);
   //
   // Clear previous inputs.
   //

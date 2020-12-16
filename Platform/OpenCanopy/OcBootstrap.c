@@ -68,6 +68,13 @@ OcShowMenuByOc (
   //
   gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
+  //
+  // Do not play intro animation for blind.
+  //
+  if (BootContext->PickerContext->PickerAudioAssist) {
+    mGuiContext.DoneIntroAnimation = TRUE;
+  }
+
   Status = BootPickerViewInitialize (
     &mDrawContext,
     &mGuiContext,
@@ -89,6 +96,35 @@ OcShowMenuByOc (
       GuiLibDestruct ();
       return Status;
     }
+  }
+
+  GuiRedrawAndFlushScreen (&mDrawContext);
+
+  if (BootContext->PickerContext->PickerAudioAssist) {
+    BootContext->PickerContext->PlayAudioFile (
+      BootContext->PickerContext,
+      OcVoiceOverAudioFileChooseOS,
+      FALSE
+      );
+    for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
+      BootContext->PickerContext->PlayAudioEntry (
+        BootContext->PickerContext,
+        BootEntries[Index]
+        );
+      if (BootContext->PickerContext->TimeoutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
+        BootContext->PickerContext->PlayAudioFile (
+          BootContext->PickerContext,
+          OcVoiceOverAudioFileDefault,
+          FALSE
+          );
+      }
+    }
+    BootContext->PickerContext->PlayAudioBeep (
+      BootContext->PickerContext,
+      OC_VOICE_OVER_SIGNALS_NORMAL,
+      OC_VOICE_OVER_SIGNAL_NORMAL_MS,
+      OC_VOICE_OVER_SILENCE_NORMAL_MS
+      );
   }
 
   GuiDrawLoop (&mDrawContext, BootContext->PickerContext->TimeoutSeconds);

@@ -251,6 +251,11 @@ GuiViewCurrentCursor (
   );
 
 VOID
+GuiRedrawAndFlushScreen (
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  );
+
+VOID
 GuiDrawLoop (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     UINT32               TimeoutSeconds
