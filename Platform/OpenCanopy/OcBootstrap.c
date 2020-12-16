@@ -50,9 +50,11 @@ OcShowMenuByOc (
 
   *ChosenBootEntry = NULL;
   mGuiContext.BootEntry = NULL;
+  mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
   mGuiContext.Refresh = FALSE;
   mGuiContext.PickerContext = BootContext->PickerContext;
+  mGuiContext.AudioPlaybackTimeout = -1;
 
   Status = GuiLibConstruct (
     BootContext->PickerContext,

@@ -37,12 +37,6 @@ typedef struct {
 } GUI_DRAW_REQUEST;
 
 //
-// Variables to assign the picked volume automatically once menu times out
-//
-extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
-extern GUI_VOLUME_PICKER mBootPicker;
-
-//
 // I/O contexts
 //
 STATIC GUI_OUTPUT_CONTEXT            *mOutputContext    = NULL;
@@ -1251,15 +1245,28 @@ GuiDrawLoop (
     //
     GuiFlushScreen (DrawContext);
 
+    if (DrawContext->GuiContext->AudioPlaybackTimeout >= 0
+      && DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
+      if (DrawContext->GuiContext->AudioPlaybackTimeout == 0) {
+        DrawContext->GuiContext->PickerContext->PlayAudioFile (
+          DrawContext->GuiContext->PickerContext,
+          OcVoiceOverAudioFileSelected,
+          FALSE
+          );
+        DrawContext->GuiContext->PickerContext->PlayAudioEntry (
+          DrawContext->GuiContext->PickerContext,
+          DrawContext->GuiContext->BootEntry
+          );
+      }
+      --DrawContext->GuiContext->AudioPlaybackTimeout;
+    }
+
     //
     // Exit early if reach timer timeout and timer isn't disabled due to key event
     //
     if (TimeOutSeconds > 0
       && GetTimeInNanoSecond (AsmReadTsc () - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
-      //
-      // FIXME: There should be view function or alike.
-      //
-      mGuiContext.BootEntry = mBootPicker.SelectedEntry->Context;
+      DrawContext->GuiContext->ReadyToBoot = TRUE;
       break;
     }
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
