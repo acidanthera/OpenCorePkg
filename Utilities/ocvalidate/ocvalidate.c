@@ -799,7 +799,10 @@ CheckUEFI (
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
 
-    if (!AsciiStringHasAllLegalCharacter (Driver)) {
+    //
+    // Skip '#' as it is treated as comments and thus is legal.
+    //
+    if (Driver[0] != '#' && !AsciiStringHasAllLegalCharacter (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
     }
