@@ -79,7 +79,7 @@ def mlb_from_eeee(eeee):
 
   return '00000000000' + eeee + '00'
 
-def get_session():
+def get_session(args):
   headers = {
     'Host'      : 'osrecovery.apple.com',
     'Connection': 'close',
@@ -87,6 +87,11 @@ def get_session():
   }
 
   headers, output = run_query('http://osrecovery.apple.com/', headers)
+
+  if args.verbose:
+    print('Session headers:')
+    for header in headers:
+      print('{}: {}'.format(header, headers[header]))
 
   for header in headers:
     if header.lower() == 'set-cookie':
@@ -104,7 +109,6 @@ def get_image_info(session, bid, mlb=MLB_ZERO, diag = False, os_type = 'default'
     'User-Agent'  : 'InternetRecovery/1.0',
     'Cookie'      : session,
     'Content-Type': 'text/plain',
-    'Expect'      : ''
   }
 
   post = {
@@ -197,7 +201,7 @@ def action_download(args):
   fg=B2E6AA07DB9088BE5BDB38DB2EA824FDDFB6C3AC5272203B32D89F9D8E3528DC
   """
 
-  session = get_session()
+  session = get_session(args)
   info    = get_image_info(session, bid=args.board_id, mlb=args.mlb,
     diag=args.diagnostics, os_type=args.os_type)
   if args.verbose:
@@ -226,7 +230,7 @@ def action_selfcheck(args):
   return default_recovery(ppp = ppp)              # Returns oldest.
   """
 
-  session = get_session()
+  session = get_session(args)
   valid_default    = get_image_info(session, bid=RECENT_MAC, mlb=MLB_VALID,
     diag=False, os_type='default')
   valid_latest     = get_image_info(session, bid=RECENT_MAC, mlb=MLB_VALID,
@@ -336,7 +340,7 @@ def action_guess(args):
 
   supported = {}
 
-  session = get_session()
+  session = get_session(args)
 
   generic_latest  = get_image_info(session, bid=RECENT_MAC, mlb=MLB_ZERO,
     diag=False, os_type='latest')
