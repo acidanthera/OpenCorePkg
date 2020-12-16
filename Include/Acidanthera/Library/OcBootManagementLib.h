@@ -541,6 +541,50 @@ INTN
      OUT BOOLEAN                            *SetDefault  OPTIONAL
   );
 
+
+/**
+  Play audio file for context.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_PLAY_AUDIO_FILE) (
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  UINT32             File,
+  IN  BOOLEAN            Fallback
+  );
+
+/**
+  Generate cycles of beep signals for context with silence afterwards, blocking.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_PLAY_AUDIO_BEEP) (
+  IN  OC_PICKER_CONTEXT        *Context,
+  IN  UINT32                   ToneCount,
+  IN  UINT32                   ToneLength,
+  IN  UINT32                   SilenceLength
+  );
+
+/**
+  Play audio entry for context.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *OC_PLAY_AUDIO_ENTRY) (
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  OC_BOOT_ENTRY      *Entry
+  );
+
+/**
+  Toggle VoiceOver support.
+**/
+typedef
+VOID
+(EFIAPI *OC_TOGGLE_VOICE_OVER) (
+  IN  OC_PICKER_CONTEXT  *Context,
+  IN  UINT32             File  OPTIONAL
+  );
+
 /**
   Picker behaviour action.
 **/
@@ -679,6 +723,22 @@ struct OC_PICKER_CONTEXT_ {
   // Recommended beeper protocol, optional.
   //
   APPLE_BEEP_GEN_PROTOCOL    *BeepGen;
+  //
+  // Play audio file function.
+  //
+  OC_PLAY_AUDIO_FILE         PlayAudioFile;
+  //
+  // Play audio beep function.
+  //
+  OC_PLAY_AUDIO_BEEP         PlayAudioBeep;
+  //
+  // Play audio entry function.
+  //
+  OC_PLAY_AUDIO_ENTRY        PlayAudioEntry;
+  //
+  // Toggle VoiceOver function.
+  //
+  OC_TOGGLE_VOICE_OVER       ToggleVoiceOver;
   //
   // Recovery initiator if present.
   //
@@ -1234,6 +1294,7 @@ OcRunFirmwareApplication (
   @retval EFI_SUCCESS on success or when unnecessary.
 **/
 EFI_STATUS
+EFIAPI
 OcPlayAudioFile (
   IN  OC_PICKER_CONTEXT  *Context,
   IN  UINT32             File,
@@ -1251,6 +1312,7 @@ OcPlayAudioFile (
   @retval EFI_SUCCESS on success or when unnecessary.
 **/
 EFI_STATUS
+EFIAPI
 OcPlayAudioBeep (
   IN  OC_PICKER_CONTEXT        *Context,
   IN  UINT32                   ToneCount,
@@ -1259,7 +1321,7 @@ OcPlayAudioBeep (
   );
 
 /**
-  Play audio file for context.
+  Play audio entry for context.
 
   @param[in]  Context   Picker context.
   @param[in]  Entry     Entry to play.
@@ -1267,6 +1329,7 @@ OcPlayAudioBeep (
   @retval EFI_SUCCESS on success or when unnecessary.
 **/
 EFI_STATUS
+EFIAPI
 OcPlayAudioEntry (
   IN  OC_PICKER_CONTEXT  *Context,
   IN  OC_BOOT_ENTRY      *Entry
@@ -1279,6 +1342,7 @@ OcPlayAudioEntry (
   @param[in]  File      File to play after enabling VoiceOver.
 **/
 VOID
+EFIAPI
 OcToggleVoiceOver (
   IN  OC_PICKER_CONTEXT  *Context,
   IN  UINT32             File  OPTIONAL
