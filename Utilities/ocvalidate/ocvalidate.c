@@ -744,6 +744,7 @@ CheckUEFI (
   CONST CHAR8       *TextRenderer;
   CONST CHAR8       *ConsoleMode;
   CONST CHAR8       *PointerSupportMode;
+  CONST CHAR8       *KeySupportMode;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   BOOLEAN           HasOpenUsbKbDxeEfiDriver;
   BOOLEAN           HasPs2KeyboardDxeEfiDriver;
@@ -772,6 +773,7 @@ CheckUEFI (
   IsKeySupportEnabled              = UserUefi.Input.KeySupport;
   IsPointerSupportEnabled          = UserUefi.Input.PointerSupport;
   PointerSupportMode               = OC_BLOB_GET (&UserUefi.Input.PointerSupportMode);
+  KeySupportMode                   = OC_BLOB_GET (&UserUefi.Input.KeySupportMode);
   IsClearScreenOnModeSwitchEnabled = UserUefi.Output.ClearScreenOnModeSwitch;
   IsIgnoreTextInGraphicsEnabled    = UserUefi.Output.IgnoreTextInGraphics;
   IsReplaceTabWithSpaceEnabled     = UserUefi.Output.ReplaceTabWithSpace;
@@ -841,6 +843,13 @@ CheckUEFI (
 
   if (IsPointerSupportEnabled && AsciiStrCmp (PointerSupportMode, "ASUS") != 0) {
     DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupport is enabled, but PointerSupportMode is not ASUS!\n"));
+    ++ErrorCount;
+  }
+  if (AsciiStrCmp (KeySupportMode, "Auto") != 0
+    && AsciiStrCmp (KeySupportMode, "V1") != 0
+    && AsciiStrCmp (KeySupportMode, "V2") != 0
+    && AsciiStrCmp (KeySupportMode, "AMI") != 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupportMode (currently set to %a) is illegal (Can only be Auto, V1, V2, AMI)!\n", KeySupportMode));
     ++ErrorCount;
   }
 
