@@ -476,15 +476,13 @@ CheckDeviceProperties (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  //
-  // TODO: Confirm if this part of code really works.
-  //
   UINT32                    ErrorCount;
   UINT32                    DeviceIndex;
   OC_DEV_PROP_CONFIG        UserDevProp;
   CONST CHAR8               *AsciiDevicePath;
-  CONST CHAR16              *UnicodeDevicePath;
+  CHAR16                    *UnicodeDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  CHAR16                    *TextualDevicePath;
 
   DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
 
@@ -495,24 +493,21 @@ CheckDeviceProperties (
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp.Delete.Keys[DeviceIndex]);
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
+    TextualDevicePath = NULL;
 
     //
     // Should we sanitise AsciiDevicePath first? 
     //
 
     if (UnicodeDevicePath != NULL) {
-      //
-      // TODO: Find alternatives to ConvertTextToDevicePath, which should
-      //       perform error checking.
-      //
       DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
       FreePool ((VOID *) UnicodeDevicePath);
-      // FreePool (UnicodeDevicePath);
-    }
 
-    if (DevicePath == NULL) {
-      DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
-      ++ErrorCount;
+      TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
+        DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
+        ++ErrorCount;
+      }
     }
 
     FreePool (DevicePath);
