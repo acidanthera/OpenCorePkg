@@ -237,7 +237,7 @@ InternalBootPickerChangeEntry (
   //
   // Set voice timeout to N frames from now.
   //
-  DrawContext->GuiContext->AudioPlaybackTimeout = OC_VOICE_OVER_IDLE_TIMEOUT_MS * 1000 / 60;
+  DrawContext->GuiContext->AudioPlaybackTimeout = OC_VOICE_OVER_IDLE_TIMEOUT_MS;
   DrawContext->GuiContext->BootEntry = This->SelectedEntry->Context;
 }
 

@@ -1137,6 +1137,8 @@ GuiDrawLoop (
   CONST LIST_ENTRY    *AnimEntry;
   CONST GUI_ANIMATION *Animation;
   UINT64              LoopStartTsc;
+  UINT64              LastTsc;
+  UINT64              NewLastTsc;
 
   ASSERT (DrawContext != NULL);
 
@@ -1153,7 +1155,7 @@ GuiDrawLoop (
   //
   // Main drawing loop, time and derieve sub-frequencies as required.
   //
-  LoopStartTsc = mStartTsc = AsmReadTsc ();
+  LastTsc = LoopStartTsc = mStartTsc = AsmReadTsc ();
   do {
     if (mPointerContext != NULL) {
       //
@@ -1245,9 +1247,15 @@ GuiDrawLoop (
     //
     GuiFlushScreen (DrawContext);
 
+    NewLastTsc = AsmReadTsc ();
+
     if (DrawContext->GuiContext->AudioPlaybackTimeout >= 0
       && DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
-      if (DrawContext->GuiContext->AudioPlaybackTimeout == 0) {
+      DrawContext->GuiContext->AudioPlaybackTimeout -= (INT32) (DivU64x32 (
+        GetTimeInNanoSecond (NewLastTsc - LastTsc),
+        1000000
+        ));
+      if (DrawContext->GuiContext->AudioPlaybackTimeout <= 0) {
         DrawContext->GuiContext->PickerContext->PlayAudioFile (
           DrawContext->GuiContext->PickerContext,
           OcVoiceOverAudioFileSelected,
@@ -1258,17 +1266,18 @@ GuiDrawLoop (
           DrawContext->GuiContext->BootEntry
           );
       }
-      --DrawContext->GuiContext->AudioPlaybackTimeout;
     }
 
     //
     // Exit early if reach timer timeout and timer isn't disabled due to key event
     //
     if (TimeOutSeconds > 0
-      && GetTimeInNanoSecond (AsmReadTsc () - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
+      && GetTimeInNanoSecond (NewLastTsc - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
       DrawContext->GuiContext->ReadyToBoot = TRUE;
       break;
     }
+
+    LastTsc = NewLastTsc;
   } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
 }
 
