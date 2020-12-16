@@ -18,10 +18,10 @@ import textwrap
 import time
 
 try:
-  from urllib.request import Request,urlopen
+  from urllib.request import Request,HTTPError,urlopen
   from urllib.parse import urlencode,urlparse
 except ImportError:
-  from urllib2 import Request,urlopen
+  from urllib2 import Request,HTTPError,urlopen
   from urllib import urlencode
   from urlparse import urlparse
 
@@ -55,9 +55,13 @@ def run_query(url, headers, post=None, raw=False):
     data = None
 
   req = Request(url=url, headers=headers, data=data)
-  response = urlopen(req)
-  if raw: return response
-  return dict(response.info()), response.read()
+  try:
+    response = urlopen(req)
+    if raw: return response
+    return dict(response.info()), response.read()
+  except HTTPError as e:
+    print('ERROR: "{}" when connecting to {}'.format(e, url))
+    sys.exit(1)
 
 def generate_id(type, id=None):
   valid_chars = ['0', '1', '2', '3', '4', '5', '6', '7', '8', '9', 'A', 'B', 'C', 'D', 'E', 'F']
