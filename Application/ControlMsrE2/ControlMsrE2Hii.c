@@ -243,8 +243,7 @@ VOID  HandleOneVariable (
 
   Print (L"In VarStore \"");
   PrintUINT8Str (Context->IfrVarStore->Name);
-  Print (L"\" GUID: ");
-  PrintGuid ((void*) &Context->IfrVarStore->Guid);
+  Print (L"\" GUID: %g", &Context->IfrVarStore->Guid);
 
   VarSize = sizeof (EFI_IFR_ONE_OF) - Context->IfrOneOf->Header.Length;
   VarSize = 8 - (VarSize / 3);

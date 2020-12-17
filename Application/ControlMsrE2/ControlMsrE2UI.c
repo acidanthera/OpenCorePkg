@@ -216,8 +216,6 @@ EFI_STATUS InterpretArguments ()
           } else if (!StrCmp (Parameter, L"interactive")) {
             Flags |= ARG_INTERACTIVE;
             ParameterCount++;
-          } else if (!StrCmp (Parameter, L"-v")) {
-            Flags |= ARG_VERBOSE;
           } else {
             Print (L"Ignoring unknown command line argument: %s\n", Parameter);
           }
@@ -233,7 +231,7 @@ EFI_STATUS InterpretArguments ()
   if (ParameterCount == 0) {
     Flags |= ARG_UNLOCK;
     Print (L"No option selected, default to unlock.\n");
-    Print (L"Usage: ControlMsrE2 <unlock | lock | interactive> [-v]\n\n");
+    Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
   } else if (ParameterCount > 1) {
     Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n");
     return EFI_INVALID_PARAMETER;

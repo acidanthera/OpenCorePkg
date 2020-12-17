@@ -23,6 +23,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/PcdLib.h>
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -96,12 +97,10 @@ enum {
   ARG_UNLOCK = 2,
   ARG_CHECK = 4,
   ARG_INTERACTIVE = 8,
-  ARG_VERBOSE = 16
 };
 
 #define PADD(x,y) (void*)(((char*) x) + y)
 
-#define IS_VERBOSE() (Flags & ARG_VERBOSE)
 #define IS_LOCK() (Flags & ARG_LOCK)
 #define IS_UNLOCK() (Flags & ARG_UNLOCK)
 #define IS_CHECK() (Flags & ARG_CHECK)
@@ -149,12 +148,6 @@ extern
 VOID
 PrintUINT8Str (
   IN UINT8 *String
-  );
-
-extern
-EFI_STATUS
-PrintGuid (
-  IN EFI_GUID   *Guid
   );
 
 /**

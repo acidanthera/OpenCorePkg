@@ -45,11 +45,11 @@ VOID WalkListHeaders (
 
     if (ListHeaders[ListHeaderIndex] != NULL) {
 
-      if (IS_VERBOSE ()) {
-        Print (L"Package List: ");
-        PrintGuid (&ListHeaders[ListHeaderIndex]->PackageListGuid);
-        Print (L"\n");
-      }
+      DEBUG ((
+        DEBUG_INFO,
+        "Package List: %g\n",
+        &ListHeaders[ListHeaderIndex]->PackageListGuid
+        ));
 
       //
       // First package in list
@@ -60,9 +60,7 @@ VOID WalkListHeaders (
       // For each package in list
       //
       while (ContextsCount < CONTEXTS_MAX) {
-        if (IS_VERBOSE ()) {
-          Print (L"Package Type: %02X ", PkgHeader->Type);
-        }
+        DEBUG ((DEBUG_INFO, "Package Type: %02X ", PkgHeader->Type));
 
         if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
           break;
@@ -74,17 +72,18 @@ VOID WalkListHeaders (
             //
             // Print some Info
             //
-            if (IS_VERBOSE ()) {
-              Print (L"Form: ");
-              PrintGuid ((void*) &(((EFI_IFR_FORM_SET*) IfrHeader)->Guid));
-            }
+            DEBUG ((
+              DEBUG_INFO,
+              "Form: %g\n",
+              &((EFI_IFR_FORM_SET*) IfrHeader)->Guid
+              ));
 
             if (IfrHeader->Length >= 16 + sizeof(EFI_IFR_FORM_SET)) {
-              if (IS_VERBOSE ()) {
-                Print (L" Class Guid: ");
-                PrintGuid (PADD(IfrHeader, sizeof(EFI_IFR_FORM_SET)));
-                Print(L"\n");
-              }
+              DEBUG ((
+                DEBUG_INFO,
+                "Class Guid: %g\n",
+                PADD (IfrHeader, sizeof(EFI_IFR_FORM_SET))
+                ));
 
               //
               // Checkup for Setup Form
@@ -113,15 +112,11 @@ VOID WalkListHeaders (
         PkgHeader = PADD (PkgHeader, PkgHeader->Length);
       }  ///< For each package in list
 
-      if (IS_VERBOSE ()) {
-        Print(L"\n");
-      }
+      DEBUG ((DEBUG_INFO, "\n"));
     }  ///< ListHeader End
   }  ///< For Each Handle
 
-  if (IS_VERBOSE ()) {
-    Print (L"Context Count: %x Options Count %x\n", ContextsCount, OptionsCount);
-  }
+  DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
   if (IS_INTERACTIVE () || IS_LOCK () || IS_UNLOCK ()) {
     if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
