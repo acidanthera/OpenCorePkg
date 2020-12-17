@@ -125,9 +125,9 @@ WalkListHeaders (
 
   DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
-  if (IS_INTERACTIVE () ||
-      IS_LOCK () ||
-      IS_UNLOCK ()) {
+  if (IS_INTERACTIVE ()
+   || IS_LOCK ()
+   || IS_UNLOCK ()) {
     if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
       DEBUG ((DEBUG_ERROR, "Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
     } else if (OptionsCount == 0) {

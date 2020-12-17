@@ -165,8 +165,8 @@ HandleOneOf (
         Ctx->IfrVarStore = IfrVarStore;
         Ctx->Count++;
       } else {  ///< Skip identical Options
-        if ((Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId) ||
-            (Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset)) {
+        if ((Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId)
+         || (Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset)) {
           Ctx->IfrOneOf = IfrOneOf;
           Ctx->IfrVarStore = IfrVarStore;
           Ctx->Count++;
