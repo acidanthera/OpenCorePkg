@@ -16,14 +16,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #define CONTEXTS_MAX 8
 
-EFI_STATUS WalkListHeaders (
+VOID WalkListHeaders (
   IN EFI_HII_HANDLE                *HiiHandles,
   IN EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders,
   IN UINT32                        ListHeaderCount,
   IN EFI_STRING                    SearchString
   )
 {
-  EFI_STATUS               Status;
   UINT16                   OptionsCount;
   UINT16                   ContextsCount;
   ONE_OF_CONTEXT           Contexts[CONTEXTS_MAX];
@@ -34,8 +33,6 @@ EFI_STATUS WalkListHeaders (
   UINT32                   ContextIndex;
   UINT16                   Index;
   CHAR16                   Key;
-
-  Status = EFI_SUCCESS;
 
   OptionsCount = 0;
   ContextsCount = 0;
@@ -169,7 +166,6 @@ EFI_STATUS WalkListHeaders (
       FreePool (ListHeaders[ListHeaderIndex]);
     }
   }
-  return Status;
 }
 
 EFI_STATUS SearchForString (
@@ -178,47 +174,44 @@ EFI_STATUS SearchForString (
 {
   EFI_HII_HANDLE                *HiiHandles;
   EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders;
-  EFI_STATUS                    Status;
   UINT32                        ListHeaderCount;
 
-  Status = EFI_SUCCESS;
+  if (IS_INTERACTIVE ()) {
+    SearchString = ModifySearchString(SearchString);
+  }
 
-    if (IS_INTERACTIVE()) {
-      SearchString = ModifySearchString(SearchString);
-    }
+  HiiHandles = HiiGetHiiHandles (NULL);
 
-    HiiHandles = HiiGetHiiHandles (NULL);
+  if (HiiHandles == NULL) {
+    Print (L"Could not retrieve HiiHandles.\n");
+    return EFI_OUT_OF_RESOURCES;
+  }
 
-    if (HiiHandles == NULL) {
-      Print (L"Could not retrieve HiiHandles.\n");
-      Status = EFI_OUT_OF_RESOURCES;
-    } else {
-      for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ListHeaderCount++) {
-        continue;
-      }
+  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ListHeaderCount++) {
+    continue;
+  }
 
-      //
-      // Keep list alive 'til program finishes.
-      // So that all lists can be searched, the results be displayed together.
-      // And from all those one Option will be selected to be changed
-      //
-      ListHeaders = AllocatePool (sizeof(*ListHeaders) * ListHeaderCount);
+  //
+  // Keep list alive 'til program finishes.
+  // So that all lists can be searched, the results be displayed together.
+  // And from all those one Option will be selected to be changed
+  //
+  ListHeaders = AllocatePool (sizeof(*ListHeaders) * ListHeaderCount);
 
-      if (ListHeaders != NULL) {
-        Status = WalkListHeaders(HiiHandles, ListHeaders, ListHeaderCount, SearchString);
-        FreePool (ListHeaders);
-      } else {
-        Print (L"Could not allocate memory.\n");
-        Status = EFI_OUT_OF_RESOURCES;
-      }
-    }  ///< Handling HiiHandles
-  return Status;
+  if (ListHeaders == NULL) {
+    Print (L"Could not allocate memory.\n");
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  WalkListHeaders(HiiHandles, ListHeaders, ListHeaderCount, SearchString);
+  FreePool (ListHeaders);
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
 EFIAPI
 UefiMain (
-  IN EFI_HANDLE    ImageHandle,
+  IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {

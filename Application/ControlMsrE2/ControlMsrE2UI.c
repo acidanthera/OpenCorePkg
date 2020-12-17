@@ -15,7 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "ControlMsrE2.h"
 
 
-UINTN           mFlags;
+UINTN           Flags;
 
 /*
   Read up to length -1 Characters from keyboard.
@@ -79,8 +79,7 @@ UINT32 ReadLine (
             gST->ConOut->OutputString (gST->ConOut, L" ");
           }
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
-        }
-        else {
+        } else {
           buffer[Pos] = 0;
           return Pos;
         }
@@ -123,16 +122,40 @@ UINT32 ReadYN () {
   return keys[0] == 'y' || keys[0] == 'Y';
 }
 
-VOID PrintGuid (
-  IN EFI_GUID* Guid
+EFI_STATUS
+PrintGuid (
+  IN EFI_GUID *Guid
   )
+/*++
+Routine Description:
+  This function prints a GUID to STDOUT.
+Arguments:
+  Guid    Pointer to a GUID to print.
+Returns:
+  EFI_SUCCESS             The GUID was printed.
+  EFI_INVALID_PARAMETER   The input was NULL.
+--*/
 {
-  Print (L"%08x-%04x-%04x-%02x-%02x-%02x-%02x-%02x-%02x-%02x-%02x",
-       Guid->Data1,
-       Guid->Data2,
-       Guid->Data3,
-       Guid->Data4[0], Guid->Data4[1], Guid->Data4[2], Guid->Data4[3], Guid->Data4[4], Guid->Data4[5], Guid->Data4[6], Guid->Data4[7]
-       );
+  if (Guid == NULL) {
+    // Error (NULL, 0, 2000, "Invalid parameter", "PrintGuidToBuffer() called with a NULL value");
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Print (
+    L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
+    (unsigned) Guid->Data1,
+    Guid->Data2,
+    Guid->Data3,
+    Guid->Data4[0],
+    Guid->Data4[1],
+    Guid->Data4[2],
+    Guid->Data4[3],
+    Guid->Data4[4],
+    Guid->Data4[5],
+    Guid->Data4[6],
+    Guid->Data4[7]
+    );
+  return EFI_SUCCESS;
 }
 
 VOID PrintUINT8Str (
@@ -153,7 +176,7 @@ EFI_STATUS InterpretArguments ()
   CHAR16      *Token;
   UINT16      TokenIndex;
 
-  mFlags = 0;
+  Flags = 0;
 
   if (EFI_ERROR(GetArguments (&Argc, &Argv)))
     Argc = 1;
@@ -161,7 +184,6 @@ EFI_STATUS InterpretArguments ()
   ParameterCount = 0;
 
   for (UINT32 i = 1; i < Argc; i++) {
-
     Token = AllocatePool (StrSize(Argv[i]));
 
     if (Token) {
@@ -183,19 +205,19 @@ EFI_STATUS InterpretArguments ()
           Token[TokenIndex] = 0;
 
           if (!StrCmp (Parameter, L"check")) {
-            mFlags |= ARG_CHECK;
+            Flags |= ARG_CHECK;
             ParameterCount++;
           } else if (!StrCmp (Parameter, L"lock")) {
-            mFlags |= ARG_LOCK;
+            Flags |= ARG_LOCK;
             ParameterCount++;
           } else if (!StrCmp (Parameter, L"unlock")) {
-            mFlags |= ARG_UNLOCK;
+            Flags |= ARG_UNLOCK;
             ParameterCount++;
           } else if (!StrCmp (Parameter, L"interactive")) {
-            mFlags |= ARG_INTERACTIVE;
+            Flags |= ARG_INTERACTIVE;
             ParameterCount++;
           } else if (!StrCmp (Parameter, L"-v")) {
-            mFlags |= ARG_VERBOSE;
+            Flags |= ARG_VERBOSE;
           } else {
             Print (L"Ignoring unknown command line argument: %s\n", Parameter);
           }
@@ -209,7 +231,7 @@ EFI_STATUS InterpretArguments ()
   }  ///< All Arguments analysed
 
   if (ParameterCount == 0) {
-    mFlags = mFlags | ARG_UNLOCK;
+    Flags |= ARG_UNLOCK;
     Print (L"No option selected, default to unlock.\n");
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive> [-v]\n\n");
   } else if (ParameterCount > 1) {

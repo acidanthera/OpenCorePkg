@@ -101,14 +101,14 @@ enum {
 
 #define PADD(x,y) (void*)(((char*) x) + y)
 
-#define IS_VERBOSE() (mFlags & ARG_VERBOSE)
-#define IS_LOCK() (mFlags & ARG_LOCK)
-#define IS_UNLOCK() (mFlags & ARG_UNLOCK)
-#define IS_CHECK() (mFlags & ARG_CHECK)
-#define IS_INTERACTIVE() (mFlags & ARG_INTERACTIVE)
+#define IS_VERBOSE() (Flags & ARG_VERBOSE)
+#define IS_LOCK() (Flags & ARG_LOCK)
+#define IS_UNLOCK() (Flags & ARG_UNLOCK)
+#define IS_CHECK() (Flags & ARG_CHECK)
+#define IS_INTERACTIVE() (Flags & ARG_INTERACTIVE)
 #define BUFFER_LENGTH 128
 
-extern UINTN mFlags;
+extern UINTN Flags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2
@@ -151,13 +151,10 @@ PrintUINT8Str (
   IN UINT8 *String
   );
 
-/**
-  Print Guid
-**/
 extern
-VOID
+EFI_STATUS
 PrintGuid (
-  IN EFI_GUID* Guid
+  IN EFI_GUID   *Guid
   );
 
 /**
