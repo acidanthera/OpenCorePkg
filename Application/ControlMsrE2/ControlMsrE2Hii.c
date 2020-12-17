@@ -32,7 +32,7 @@ HiiExportPackageLists (
 
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
 
-  if ((Status == EFI_BUFFER_TOO_SMALL) && (BufferSize > 0)) {
+  if (Status == EFI_BUFFER_TOO_SMALL && BufferSize > 0) {
     Result = (EFI_HII_PACKAGE_LIST_HEADER *) AllocatePool (BufferSize);
 
     if (Result == NULL) {
@@ -60,13 +60,14 @@ DoForEachOpCode (
   IN     OP_CODE_HANDLER     Handler
   )
 {
-  while ((Stop == NULL) || !(*Stop)) {
-    if (Header->OpCode == EFI_IFR_END_OP)
+  while (Stop == NULL || !(*Stop)) {
+    if (Header->OpCode == EFI_IFR_END_OP) {
       return Header;
+    }
 
     if (Header->OpCode == OpCode) {
       Handler (Header, Stop, Context);
-      if ((Stop != NULL) && *Stop) {
+      if (Stop != NULL && *Stop) {
         return Header;
       }
     }
@@ -102,7 +103,7 @@ HandleVarStore (
 
   if (VarStore->VarStoreId == Ctx->Id) {
     Ctx->VarStoreHeader = VarStore;
-    if (Stop) {
+    if (Stop != NULL) {
       *Stop = TRUE;
     }
   }
@@ -165,8 +166,8 @@ HandleOneOf (
         Ctx->IfrVarStore = IfrVarStore;
         Ctx->Count++;
       } else {  ///< Skip identical Options
-        if ((Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId)
-         || (Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset)) {
+        if (Ctx->IfrOneOf->Question.VarStoreId != IfrOneOf->Question.VarStoreId
+         || Ctx->IfrOneOf->Question.VarStoreInfo.VarOffset != IfrOneOf->Question.VarStoreInfo.VarOffset) {
           Ctx->IfrOneOf = IfrOneOf;
           Ctx->IfrVarStore = IfrVarStore;
           Ctx->Count++;
@@ -211,7 +212,7 @@ HandleOneOf (
                             Data
                             );
 
-            if (Status == EFI_SUCCESS) {
+            if (!EFI_ERROR (Status)) {
               VarSize = sizeof (EFI_IFR_ONE_OF) - IfrOneOf->Header.Length;
               VarSize = 8 - (VarSize / 3);
 
@@ -303,7 +304,7 @@ HandleOneVariable (
                       Data
                       );
 
-      if (Status == EFI_SUCCESS) {
+      if (!EFI_ERROR (Status)) {
         VarPointer = Data + Context->IfrOneOf->Question.VarStoreInfo.VarOffset;
         switch (VarSize) {
         case 1:
@@ -359,7 +360,7 @@ HandleOneVariable (
                             Data
                             );
 
-            if (Status == EFI_SUCCESS) {
+            if (!EFI_ERROR (Status)) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
             } else {
               DEBUG ((DEBUG_ERROR, "\nProblem writing variable.\n"));
@@ -370,8 +371,9 @@ HandleOneVariable (
         } else {
           DEBUG ((DEBUG_ERROR, "Value is as wanted already. No action required.\n"));
         }
-      } else
+      } else {
         DEBUG ((DEBUG_ERROR, "\nCouldn't read Data\n"));
+      }
       FreePool (Data);
     } else {
       DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));

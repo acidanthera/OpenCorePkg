@@ -70,9 +70,6 @@ WalkListHeaders (
           // Form Definition must start with FORM_SET_OP
           //
           if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) {
-            //
-            // Print some Info
-            //
             DEBUG ((
               DEBUG_INFO,
               "Form: %g\n",

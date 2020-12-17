@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 UINTN           Flags;
 
 /*
-  Read up to length -1 Characters from keyboard.
+  Read up to Length -1 Characters from keyboard.
   CR will exit
   LF will exit
   Del key is supported
@@ -26,8 +26,8 @@ UINTN           Flags;
 */
 UINT32
 ReadLine (
-  OUT CHAR16   *buffer,
-  IN  UINT32   length
+  OUT CHAR16   *Buffer,
+  IN  UINT32   Length
   )
 {
   EFI_STATUS     Status;
@@ -42,7 +42,7 @@ ReadLine (
 
   STATIC CHAR16  Output[] = L"A";
 
-  gST->ConOut->EnableCursor(gST->ConOut, TRUE);
+  gST->ConOut->EnableCursor (gST->ConOut, TRUE);
 
   StartRow = gST->ConOut->Mode->CursorRow;
   StartColumn = gST->ConOut->Mode->CursorColumn;
@@ -65,7 +65,7 @@ ReadLine (
     switch (Key.UnicodeChar) {
       case CHAR_BACKSPACE:
         if (Pos > 0) {
-          Pos--;
+          --Pos;
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
           gST->ConOut->OutputString (gST->ConOut, L" ");
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
@@ -76,29 +76,30 @@ ReadLine (
         if (Pos > 0) {
           Pos = 0;
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
-          for (Index = 1; Index < length; ++Index) {
+          for (Index = 1; Index < Length; ++Index) {
             gST->ConOut->OutputString (gST->ConOut, L" ");
           }
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
         } else {
-          buffer[Pos] = 0;
+          Buffer[Pos] = 0;
           return Pos;
         }
         break;
 
       case CHAR_CARRIAGE_RETURN:
       case CHAR_LINEFEED:
-        buffer[Pos] = 0;
+        Buffer[Pos] = 0;
         gST->ConOut->EnableCursor (gST->ConOut, FALSE);
         return Pos;
 
       default:
-        buffer[Pos++] = Key.UnicodeChar;
+        Buffer[Pos] = Key.UnicodeChar;
+        ++Pos;
         Output[0] = Key.UnicodeChar;
         gST->ConOut->OutputString (gST->ConOut, Output);
 
-        if (Pos >= length - 1) {
-          buffer[Pos] = 0;
+        if (Pos >= Length - 1) {
+          Buffer[Pos] = 0;
           return Pos;
         }
         break;
@@ -109,26 +110,34 @@ ReadLine (
 }
 
 CHAR16
-ReadAnyKey () {
-  CHAR16 keys[2];
-  ReadLine (keys, 2);
-  return keys[0];
+ReadAnyKey (
+  VOID
+  )
+{
+  CHAR16 Keys[2];
+  ReadLine (Keys, 2);
+  return Keys[0];
 }
 
-UINT32
-ReadYN () {
-  CHAR16 keys[2];
+BOOLEAN
+ReadYN (
+  VOID
+  )
+{
+  CHAR16 Keys[2];
   do {
-    ReadLine (keys, 2);
-  } while (!OcStriStr (L"yn", keys));
+    ReadLine (Keys, 2);
+  } while (OcStriStr (L"yn", Keys) == 0);
 
-  return keys[0] == 'y' || keys[0] == 'Y';
+  return Keys[0] == 'y' || Keys[0] == 'Y';
 }
 
-#define TOKENLENGTH 32;
+#define TOKENLENGTH 32
 
 EFI_STATUS
-InterpretArguments ()
+InterpretArguments (
+  VOID
+  )
 {
   UINTN       Argc;
   CHAR16      **Argv;
@@ -140,44 +149,45 @@ InterpretArguments ()
 
   Flags = 0;
 
-  if (EFI_ERROR (GetArguments (&Argc, &Argv)))
+  if (EFI_ERROR (GetArguments (&Argc, &Argv))) {
     Argc = 1;
+  }
 
   ParameterCount = 0;
 
   for (Index = 1; Index < Argc; ++Index) {
-    Token = AllocatePool (StrSize(Argv[Index]));
+    Token = AllocatePool (StrSize (Argv[Index]));
 
-    if (Token) {
-      StrCpyS (Token, StrLen(Argv[Index]) + 1, Argv[Index]);
+    if (Token != NULL) {
+      StrCpyS (Token, StrLen (Argv[Index]) + 1, Argv[Index]);
 
       TokenIndex = 0;
 
-      while (Argv[Index][TokenIndex]) {
+      while (Argv[Index][TokenIndex] != '\0') {
         while (Argv[Index][TokenIndex] == ' ') {
-          TokenIndex++;
+          ++TokenIndex;
         }
 
-        if (Argv[Index][TokenIndex]) {
+        if (Argv[Index][TokenIndex] != '\0') {
           Parameter = &Token[TokenIndex];
 
-          while (Token[TokenIndex] != 0 && Token[TokenIndex] != ' ') {
-            TokenIndex++;
+          while (Token[TokenIndex] != '\0' && Token[TokenIndex] != ' ') {
+            ++TokenIndex;
           }
-          Token[TokenIndex] = 0;
+          Token[TokenIndex] = '\0';
 
-          if (!StrCmp (Parameter, L"check")) {
+          if (StrCmp (Parameter, L"check") == 0) {
             Flags |= ARG_CHECK;
-            ParameterCount++;
+            ++ParameterCount;
           } else if (!StrCmp (Parameter, L"lock")) {
             Flags |= ARG_LOCK;
-            ParameterCount++;
+            ++ParameterCount;
           } else if (!StrCmp (Parameter, L"unlock")) {
             Flags |= ARG_UNLOCK;
-            ParameterCount++;
+            ++ParameterCount;
           } else if (!StrCmp (Parameter, L"interactive")) {
             Flags |= ARG_INTERACTIVE;
-            ParameterCount++;
+            ++ParameterCount;
           } else {
             DEBUG ((DEBUG_INFO, "Ignoring unknown command line argument: %s\n", Parameter));
           }
@@ -207,12 +217,13 @@ ModifySearchString (
   IN EFI_STRING SearchString
   )
 {
-  UINT32 Flag;
+  BOOLEAN   Result;
 
   do {
     Print (L"\nCurrent search string: %s\n", SearchString);
     Print (L"Do you want to change it ? ");
-    if ((Flag = ReadYN ()) == TRUE) {
+    Result = ReadYN ();
+    if (Result == TRUE) {
       Print (L"\nEnter search string: ");
 
       CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
@@ -230,7 +241,7 @@ ModifySearchString (
         DEBUG ((DEBUG_ERROR, "Could not allocate memory. Search string can not be changed.\n"));
       }
     }
-  } while (Flag);
+  } while (Result);
 
   return SearchString;
 }

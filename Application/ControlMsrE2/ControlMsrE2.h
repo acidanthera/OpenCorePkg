@@ -125,7 +125,7 @@ VerifyMSRE2 (
 /**
   Wait for Keypress of Y or N. Ignores case.
 **/
-UINT32
+BOOLEAN
 ReadYN (
   VOID
   );
@@ -159,7 +159,7 @@ ModifySearchString (
 **/
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
-  EFI_HII_HANDLE h
+  EFI_HII_HANDLE Handle
   );
 
 /**
@@ -188,6 +188,6 @@ DoForEachOpCode (
   IN EFI_IFR_OP_HEADER   *Header,
   IN UINT8               OpCode,
   IN BOOLEAN             *Stop,
-  IN void                *Context,
+  IN VOID                *Context,
   IN OP_CODE_HANDLER     Handler
   );
