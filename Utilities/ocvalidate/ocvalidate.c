@@ -154,7 +154,7 @@ ReportError (
   if (ErrorCount != 0) {
     DEBUG ((DEBUG_WARN, "%a returns %u %a!\n", FuncName, ErrorCount, ErrorCount > 1 ? "errors" : "error"));
   } else {
-    DEBUG ((DEBUG_INFO, "%a returns no errors!\n", FuncName));
+    DEBUG ((DEBUG_VERBOSE, "%a returns no errors!\n", FuncName));
   }
 
   return ErrorCount;
@@ -178,7 +178,7 @@ CheckACPI (
   BOOLEAN         HasCustomDSDT;
   BOOLEAN         IsAddEnabled;
 
-  DEBUG ((DEBUG_INFO, "config loaded into ACPI checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into ACPI checker!\n"));
 
   ErrorCount    = 0;
   UserAcpi      = Config->Acpi;
@@ -309,7 +309,7 @@ CheckBooter (
   BOOLEAN           IsEnableWriteUnprotectorEnabled;
   BOOLEAN           HasOpenRuntimeEfiDriver;
   
-  DEBUG ((DEBUG_INFO, "config loaded into Booter checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into Booter checker!\n"));
 
   ErrorCount                      = 0;
   UserBooter                      = Config->Booter;
@@ -486,7 +486,7 @@ CheckDeviceProperties (
   CHAR16                    *TextualDevicePath;
   CONST CHAR8               *AsciiProperty;
 
-  DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into DeviceProperties checker!\n"));
 
   ErrorCount  = 0;
   UserDevProp = Config->DeviceProperties;
@@ -558,7 +558,7 @@ CheckKernel (
   BOOLEAN           HasLiluKext;
   BOOLEAN           IsDisableLinkeditJettisonEnabled;
 
-  DEBUG ((DEBUG_INFO, "config loaded into Kernel checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
 
   ErrorCount                       = 0;
   LiluIndex                        = 0;
@@ -707,7 +707,7 @@ CheckMisc (
 {
   UINT32 ErrorCount;
 
-  DEBUG ((DEBUG_INFO, "config loaded into Misc checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
   ErrorCount = 0;
 
@@ -722,7 +722,7 @@ CheckNVRAM (
 {
   UINT32 ErrorCount;
 
-  DEBUG ((DEBUG_INFO, "config loaded into NVRAM checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into NVRAM checker!\n"));
 
   ErrorCount = 0;
 
@@ -737,7 +737,7 @@ CheckPlatformInfo (
 {
   UINT32 ErrorCount;
 
-  DEBUG ((DEBUG_INFO, "config loaded into PlatformInfo checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into PlatformInfo checker!\n"));
 
   ErrorCount = 0;
 
@@ -780,7 +780,7 @@ CheckUEFI (
   UINT32            UserBpp;
   BOOLEAN           UserSetMax;
 
-  DEBUG ((DEBUG_INFO, "config loaded into UEFI checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
 
   ErrorCount                       = 0;
   IndexOpenUsbKbDxeEfiDriver       = 0;
