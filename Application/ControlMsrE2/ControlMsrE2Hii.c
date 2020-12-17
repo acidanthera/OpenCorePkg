@@ -14,12 +14,13 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "ControlMsrE2.h"
 
-typedef struct VarStoreContext_ {
+typedef struct VAR_STORE_CONTEXT_ {
   EFI_VARSTORE_ID    Id;
   EFI_IFR_VARSTORE   *VarStoreHeader;
-} VarStoreContext;
+} VAR_STORE_CONTEXT;
 
-EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (
+EFI_HII_PACKAGE_LIST_HEADER *
+HiiExportPackageLists (
   IN EFI_HII_HANDLE Handle
   )
 {
@@ -32,28 +33,30 @@ EFI_HII_PACKAGE_LIST_HEADER* HiiExportPackageLists (
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
 
   if ((Status == EFI_BUFFER_TOO_SMALL) && (BufferSize > 0)) {
-    Result = (EFI_HII_PACKAGE_LIST_HEADER*) AllocatePool (BufferSize);
+    Result = (EFI_HII_PACKAGE_LIST_HEADER *) AllocatePool (BufferSize);
 
-    if (Result == NULL)
+    if (Result == NULL) {
       return NULL;
+    }
 
     Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, Result);
 
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       FreePool (Result);
       return NULL;
-    } else {
-      return Result;
     }
+
+    return Result;
   }
   return NULL;
 }
 
-EFI_IFR_OP_HEADER* DoForEachOpCode (
+EFI_IFR_OP_HEADER *
+DoForEachOpCode (
   IN     EFI_IFR_OP_HEADER   *Header,
   IN     UINT8               OpCode,
   IN OUT UINT8               *Stop     OPTIONAL,
-  IN     void                *Context,
+  IN     VOID                *Context,
   IN     OP_CODE_HANDLER     Handler
   )
 {
@@ -63,12 +66,19 @@ EFI_IFR_OP_HEADER* DoForEachOpCode (
 
     if (Header->OpCode == OpCode) {
       Handler (Header, Stop, Context);
-      if ((Stop != NULL) && *Stop)
+      if ((Stop != NULL) && *Stop) {
         return Header;
+      }
     }
 
     if (Header->Scope) {
-      Header = DoForEachOpCode (PADD (Header, Header->Length), OpCode, Stop, Context, Handler);
+      Header = DoForEachOpCode (
+                 PADD (Header, Header->Length),
+                 OpCode,
+                 Stop,
+                 Context,
+                 Handler
+                 );
     }
 
     Header = PADD (Header, Header->Length);
@@ -77,17 +87,18 @@ EFI_IFR_OP_HEADER* DoForEachOpCode (
   return Header;
 }
 
-VOID HandleVarStore (
+VOID
+HandleVarStore (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
   IN OUT UINT8               *Stop       OPTIONAL,
-  IN OUT void                *Context
+  IN OUT VOID                *Context
   )
 {
-  VarStoreContext    *Ctx;
-  EFI_IFR_VARSTORE   *VarStore;
+  VAR_STORE_CONTEXT   *Ctx;
+  EFI_IFR_VARSTORE    *VarStore;
 
   Ctx = Context;
-  VarStore = (EFI_IFR_VARSTORE*) IfrHeader;
+  VarStore = (EFI_IFR_VARSTORE *) IfrHeader;
 
   if (VarStore->VarStoreId == Ctx->Id) {
     Ctx->VarStoreHeader = VarStore;
@@ -96,13 +107,14 @@ VOID HandleVarStore (
   }
 }
 
-EFI_IFR_VARSTORE*  GetVarStore (
+EFI_IFR_VARSTORE *
+GetVarStore (
   IN EFI_IFR_OP_HEADER   *Header,
   IN EFI_VARSTORE_ID     Id
   )
 {
-  UINT8           Stop;
-  VarStoreContext Context;
+  UINT8               Stop;
+  VAR_STORE_CONTEXT   Context;
 
   Stop = FALSE;
   Context.Id = Id;
@@ -113,7 +125,8 @@ EFI_IFR_VARSTORE*  GetVarStore (
   return Context.VarStoreHeader;
 }
 
-VOID HandleOneOf (
+VOID
+HandleOneOf (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
   IN OUT UINT8               *Stop       OPTIONAL,
   IN OUT VOID                *Context
@@ -133,16 +146,17 @@ VOID HandleOneOf (
   EFI_STRING         VarStoreName;
 
   Ctx = Context;
-  IfrOneOf = (EFI_IFR_ONE_OF*) IfrHeader;
+  IfrOneOf = (EFI_IFR_ONE_OF *) IfrHeader;
   HiiString = HiiGetString (Ctx->EfiHandle, IfrOneOf->Question.Header.Prompt, "en-US");
 
   if (HiiString == NULL) {
-    Print (L"\nCouldn't allocate memory\n");
+    DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
     return;
   }
 
-  if ((IfrVarStore = GetVarStore (Ctx->FirstIfrHeader, IfrOneOf->Question.VarStoreId)) != NULL) {
-    if (OcStriStr (HiiString, Ctx->SearchText)) {
+  IfrVarStore = GetVarStore (Ctx->FirstIfrHeader, IfrOneOf->Question.VarStoreId);
+  if (IfrVarStore != NULL) {
+    if (OcStriStr (HiiString, Ctx->SearchText) != NULL) {
       OldContextCount = Ctx->Count;
 
       if (Ctx->IfrOneOf == NULL) {
@@ -164,7 +178,8 @@ VOID HandleOneOf (
         Ctx->Count = 1;
         *Stop = TRUE;
       } else if (OldContextCount != Ctx->Count && Ctx->StopAt == DONT_STOP_AT) {
-        Print (L"%X. %02X %04X %04X /%s/ VarStore Name: ",
+        Print (
+          L"%X. %02X %04X %04X /%s/ VarStore Name: ",
           Ctx->Count,
           IfrOneOf->Header.OpCode,
           IfrOneOf->Question.VarStoreInfo.VarName,
@@ -174,22 +189,23 @@ VOID HandleOneOf (
 
         PrintUINT8Str (IfrVarStore->Name);
 
-        VarStoreName = AsciiStrCopyToUnicode ((CHAR8*) IfrVarStore->Name, 0);
+        VarStoreName = AsciiStrCopyToUnicode ((CHAR8 *) IfrVarStore->Name, 0);
 
         DataSize = 0;
         Status = gRT->GetVariable (
                         VarStoreName,
-                        (void*) &IfrVarStore->Guid,
+                        (VOID *) &IfrVarStore->Guid,
                         NULL,
                         &DataSize,
                         NULL
                         );
 
         if (Status == EFI_BUFFER_TOO_SMALL) {
-          if ((Data = AllocatePool (DataSize)) != NULL) {
+          Data = AllocatePool (DataSize);
+          if (Data != NULL) {
             Status = gRT->GetVariable (
                             VarStoreName,
-                            (void*) &IfrVarStore->Guid,
+                            (VOID *) &IfrVarStore->Guid,
                             NULL,
                             &DataSize,
                             Data
@@ -205,13 +221,13 @@ VOID HandleOneOf (
                 VarStoreValue = *VarPointer;
                 break;
               case 2:
-                VarStoreValue = *(UINT16*) (VarPointer);
+                VarStoreValue = *(UINT16 *) (VarPointer);
                 break;
               case 4:
-                VarStoreValue = *(UINT32*) (VarPointer);
+                VarStoreValue = *(UINT32 *) (VarPointer);
                 break;
               default:
-                VarStoreValue = *(UINT64*) (VarPointer);
+                VarStoreValue = *(UINT64 *) (VarPointer);
                 break;
               }
 
@@ -227,8 +243,9 @@ VOID HandleOneOf (
   FreePool (HiiString);
 }
 
-VOID  HandleOneVariable (
-  IN OUT ONE_OF_CONTEXT* Context
+VOID
+HandleOneVariable (
+  IN OUT ONE_OF_CONTEXT *Context
   )
 {
   EFI_STATUS        Status;
@@ -256,16 +273,16 @@ VOID  HandleOneVariable (
   Print (L" Offset: %04X Size: %X ", Context->IfrOneOf->Question.VarStoreInfo.VarOffset, VarSize);
 
   DataSize = 0;
-  HiiString = AsciiStrCopyToUnicode ((CHAR8*) Context->IfrVarStore->Name, 0);
+  HiiString = AsciiStrCopyToUnicode ((CHAR8 *) Context->IfrVarStore->Name, 0);
 
   if (HiiString == NULL) {
-    Print (L"\nCouldn't allocate memory\n");
+    DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
     return;
   }
 
   Status = gRT->GetVariable (
                   HiiString,
-                  (void*) &Context->IfrVarStore->Guid,
+                  (VOID *) &Context->IfrVarStore->Guid,
                   &Attributes,
                   &DataSize,
                   NULL
@@ -275,7 +292,7 @@ VOID  HandleOneVariable (
     if ((Data = AllocatePool (DataSize)) != NULL) {
       Status = gRT->GetVariable (
                       HiiString,
-                      (void*) &Context->IfrVarStore->Guid,
+                      (VOID *) &Context->IfrVarStore->Guid,
                       &Attributes,
                       &DataSize,
                       Data
@@ -288,13 +305,13 @@ VOID  HandleOneVariable (
           VarStoreValue = *VarPointer;
           break;
         case 2:
-          VarStoreValue = *(UINT16*) (VarPointer);
+          VarStoreValue = *(UINT16 *) (VarPointer);
           break;
         case 4:
-          VarStoreValue = *(UINT32*) (VarPointer);
+          VarStoreValue = *(UINT32 *) (VarPointer);
           break;
         default:
-          VarStoreValue = *(UINT64*) (VarPointer);
+          VarStoreValue = *(UINT64 *) (VarPointer);
           break;
         }
 
@@ -317,13 +334,13 @@ VOID  HandleOneVariable (
                 *VarPointer = (UINT8)NewValue;
                 break;
               case 2:
-                *(UINT16*) (VarPointer) = (UINT16)NewValue;
+                *(UINT16 *) (VarPointer) = (UINT16)NewValue;
                 break;
               case 4:
-                *(UINT32*) (VarPointer) = (UINT32)NewValue;
+                *(UINT32 *) (VarPointer) = (UINT32)NewValue;
                 break;
               case 8:
-                *(UINT64*) (VarPointer) = NewValue;
+                *(UINT64 *) (VarPointer) = NewValue;
                 break;
               default:
                 break;
@@ -331,7 +348,7 @@ VOID  HandleOneVariable (
 
             Status = gRT->SetVariable (
                             HiiString,
-                            (void*) &Context->IfrVarStore->Guid,
+                            (VOID *) &Context->IfrVarStore->Guid,
                             Attributes,
                             DataSize,
                             Data
@@ -340,7 +357,7 @@ VOID  HandleOneVariable (
             if (Status == EFI_SUCCESS) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
             } else {
-              Print (L"\nProblem writing variable.\n");
+              DEBUG ((DEBUG_ERROR, "\nProblem writing variable.\n"));
             }
           } else {
             Print (L"\n");
@@ -349,13 +366,13 @@ VOID  HandleOneVariable (
           Print (L"Value is as wanted already. No action required.\n");
         }
       } else
-        Print (L"\nCouldn't read Data\n");
+        DEBUG ((DEBUG_ERROR, "\nCouldn't read Data\n"));
       FreePool (Data);
     } else {
-      Print (L"\nCouldn't allocate memory\n");
+      DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
     }
   } else {
-    Print (L"\nCouldn't find Variable.\n");
+    DEBUG ((DEBUG_ERROR, "\nCouldn't find Variable.\n"));
   }
   FreePool (HiiString);
 }

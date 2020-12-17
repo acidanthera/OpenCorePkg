@@ -83,7 +83,9 @@ typedef struct ONE_OF_CONTEXT_ {
   @param[in] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
   @param[in] Context     Ptr to Hanlder specific data
 **/
-typedef VOID OP_CODE_HANDLER (
+typedef
+VOID
+OP_CODE_HANDLER (
   IN EFI_IFR_OP_HEADER *IfrHeader,
   IN UINT8             *Stop       OPTIONAL,
   IN VOID              *Context
@@ -99,7 +101,7 @@ enum {
   ARG_INTERACTIVE = 8,
 };
 
-#define PADD(x,y) (void*)(((char*) x) + y)
+#define PADD(x,y) (VOID *)(((CHAR8 *) x) + y)
 
 #define IS_LOCK() ((Flags & ARG_LOCK) != 0)
 #define IS_UNLOCK() ((Flags & ARG_UNLOCK) != 0)
@@ -123,23 +125,28 @@ VerifyMSRE2 (
 /**
   Wait for Keypress of Y or N. Ignores case.
 **/
-extern
 UINT32
-ReadYN ();
+ReadYN (
+  VOID
+  );
 
 /**
   Wait for any key press
 **/
 extern
 CHAR16
-ReadAnyKey ();
+ReadAnyKey (
+  VOID
+  );
 
 /**
   Parse commandline arguments
 **/
 extern
 UINTN
-InterpretArguments ();
+InterpretArguments (
+  VOID
+  );
 
 /**
   Print UINT8 String
@@ -163,8 +170,8 @@ ModifySearchString (
   Copies Package Lists to Memory
 **/
 extern
-EFI_HII_PACKAGE_LIST_HEADER
-*HiiExportPackageLists (
+EFI_HII_PACKAGE_LIST_HEADER *
+HiiExportPackageLists (
   EFI_HII_HANDLE h
   );
 
@@ -192,8 +199,8 @@ HandleOneVariable (
   Call Handler for each occurence of opCode, starting to search at header. Called recursively
 **/
 extern
-EFI_IFR_OP_HEADER
-*DoForEachOpCode (
+EFI_IFR_OP_HEADER *
+DoForEachOpCode (
   IN EFI_IFR_OP_HEADER   *Header,
   IN UINT8               OpCode,
   IN UINT8               *Stop,

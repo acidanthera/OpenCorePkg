@@ -16,7 +16,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #define CONTEXTS_MAX 8
 
-VOID WalkListHeaders (
+VOID
+WalkListHeaders (
   IN EFI_HII_HANDLE                *HiiHandles,
   IN EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders,
   IN UINT32                        ListHeaderCount,
@@ -40,7 +41,7 @@ VOID WalkListHeaders (
   //
   // For Each Handle
   //
-  for (ListHeaderIndex = 0; (HiiHandles[ListHeaderIndex] != NULL) && (ContextsCount < CONTEXTS_MAX); ListHeaderIndex++) {
+  for (ListHeaderIndex = 0; (HiiHandles[ListHeaderIndex] != NULL) && (ContextsCount < CONTEXTS_MAX); ++ListHeaderIndex) {
     ListHeaders[ListHeaderIndex] = HiiExportPackageLists (HiiHandles[ListHeaderIndex]);
 
     if (ListHeaders[ListHeaderIndex] != NULL) {
@@ -64,30 +65,29 @@ VOID WalkListHeaders (
         if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
           break;
         } else if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
-          IfrHeader = PADD (PkgHeader, sizeof(EFI_HII_PACKAGE_HEADER));
+          IfrHeader = PADD (PkgHeader, sizeof (EFI_HII_PACKAGE_HEADER));
 
           if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) { // Form Definition must start with FORM_SET_OP
-
             //
             // Print some Info
             //
             DEBUG ((
               DEBUG_INFO,
               "Form: %g\n",
-              &((EFI_IFR_FORM_SET*) IfrHeader)->Guid
+              &((EFI_IFR_FORM_SET *) IfrHeader)->Guid
               ));
 
-            if (IfrHeader->Length >= 16 + sizeof(EFI_IFR_FORM_SET)) {
+            if (IfrHeader->Length >= 16 + sizeof (EFI_IFR_FORM_SET)) {
               DEBUG ((
                 DEBUG_INFO,
                 "Class Guid: %g\n",
-                PADD (IfrHeader, sizeof(EFI_IFR_FORM_SET))
+                PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET))
                 ));
 
               //
               // Checkup for Setup Form
               //
-              if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof(EFI_IFR_FORM_SET)))) {
+              if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET)))) {
                 Contexts[ContextsCount].SearchText = SearchString;
                 Contexts[ContextsCount].EfiHandle = HiiHandles[ListHeaderIndex];
                 Contexts[ContextsCount].ListHeader = ListHeaders[ListHeaderIndex];
@@ -98,7 +98,8 @@ VOID WalkListHeaders (
                 Contexts[ContextsCount].StopAt = DONT_STOP_AT;
                 Contexts[ContextsCount].Count = OptionsCount;
 
-                DoForEachOpCode (Contexts[ContextsCount].FirstIfrHeader,
+                DoForEachOpCode (
+                  Contexts[ContextsCount].FirstIfrHeader,
                   EFI_IFR_ONE_OF_OP,
                   NULL,
                   &Contexts[ContextsCount],
@@ -107,7 +108,7 @@ VOID WalkListHeaders (
 
                 if (Contexts[ContextsCount].Count != OptionsCount) {
                   OptionsCount = Contexts[ContextsCount].Count;
-                  ContextsCount++;
+                  ++ContextsCount;
                 }
               }
             }
@@ -142,7 +143,7 @@ VOID WalkListHeaders (
       if (Key != 0x1B) {
         Index = Key - '0';
 
-        for (ContextIndex = 0; ContextIndex < ContextsCount; ContextIndex++) {
+        for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
           if (Contexts[ContextIndex].Count >= Index) {
             Contexts[ContextIndex].Count = (ContextIndex == 0) ? 0 : (Contexts[ContextIndex - 1].Count);
             Contexts[ContextIndex].StopAt = Index;
@@ -166,14 +167,15 @@ VOID WalkListHeaders (
     }
   }
 
-  for (ListHeaderIndex = 0; ListHeaderIndex < ListHeaderCount; ListHeaderIndex++) {
+  for (ListHeaderIndex = 0; ListHeaderIndex < ListHeaderCount; ++ListHeaderIndex) {
     if (ListHeaders[ListHeaderIndex] != NULL) {
       FreePool (ListHeaders[ListHeaderIndex]);
     }
   }
 }
 
-EFI_STATUS SearchForString (
+EFI_STATUS
+SearchForString (
   IN EFI_STRING SearchString
   )
 {
@@ -192,7 +194,7 @@ EFI_STATUS SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ListHeaderCount++) {
+  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount) {
     continue;
   }
 
@@ -201,7 +203,7 @@ EFI_STATUS SearchForString (
   // So that all lists can be searched, the results be displayed together.
   // And from all those one Option will be selected to be changed
   //
-  ListHeaders = AllocatePool (sizeof(*ListHeaders) * ListHeaderCount);
+  ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
 
   if (ListHeaders == NULL) {
     Print (L"Could not allocate memory.\n");
@@ -225,11 +227,11 @@ UefiMain (
 
   Status = InterpretArguments ();
 
-  if (!EFI_ERROR(Status)) {
+  if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 (ImageHandle, SystemTable);
   }
 
-  if (!EFI_ERROR(Status)) {
+  if (!EFI_ERROR (Status)) {
     Print(L"\nBIOS Options:\n");
 
     SearchString = AsciiStrCopyToUnicode ("cfg", 0);

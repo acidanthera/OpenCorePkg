@@ -14,7 +14,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "ControlMsrE2.h"
 
-
 UINTN           Flags;
 
 /*
@@ -25,7 +24,8 @@ UINTN           Flags;
   Esc any input will be cleared. If there isn't any ReadLine will exít
   When length - 1 characters are entered Readline will exit automatically.
 */
-UINT32 ReadLine (
+UINT32
+ReadLine (
   OUT CHAR16   *buffer,
   IN  UINT32   length
   )
@@ -76,7 +76,7 @@ UINT32 ReadLine (
         if (Pos > 0) {
           Pos = 0;
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
-          for (Index = 1; Index < length; Index++) {
+          for (Index = 1; Index < length; ++Index) {
             gST->ConOut->OutputString (gST->ConOut, L" ");
           }
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
@@ -108,13 +108,15 @@ UINT32 ReadLine (
   return 0;
 }
 
-CHAR16 ReadAnyKey () {
+CHAR16
+ReadAnyKey () {
   CHAR16 keys[2];
   ReadLine (keys, 2);
   return keys[0];
 }
 
-UINT32 ReadYN () {
+UINT32
+ReadYN () {
   CHAR16 keys[2];
   do {
     ReadLine (keys, 2);
@@ -123,16 +125,18 @@ UINT32 ReadYN () {
   return keys[0] == 'y' || keys[0] == 'Y';
 }
 
-VOID PrintUINT8Str (
+VOID
+PrintUINT8Str (
   IN UINT8 *String
   )
 {
-  AsciiPrint ((CHAR8*) String);
+  AsciiPrint ((CHAR8 *) String);
 }
 
 #define TOKENLENGTH 32;
 
-EFI_STATUS InterpretArguments ()
+EFI_STATUS
+InterpretArguments ()
 {
   UINTN       Argc;
   CHAR16      **Argv;
@@ -144,12 +148,12 @@ EFI_STATUS InterpretArguments ()
 
   Flags = 0;
 
-  if (EFI_ERROR(GetArguments (&Argc, &Argv)))
+  if (EFI_ERROR (GetArguments (&Argc, &Argv)))
     Argc = 1;
 
   ParameterCount = 0;
 
-  for (Index = 1; Index < Argc; Index++) {
+  for (Index = 1; Index < Argc; ++Index) {
     Token = AllocatePool (StrSize(Argv[Index]));
 
     if (Token) {
@@ -219,7 +223,7 @@ ModifySearchString (
     if ((Flag = ReadYN ()) == TRUE) {
       Print (L"\nEnter search string: ");
 
-      CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof(CHAR16));
+      CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
 
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
