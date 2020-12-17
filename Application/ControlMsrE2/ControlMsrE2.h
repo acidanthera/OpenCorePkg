@@ -109,7 +109,7 @@ enum {
 #define IS_INTERACTIVE() ((Flags & ARG_INTERACTIVE) != 0)
 #define BUFFER_LENGTH 128
 
-UINTN Flags;
+extern UINTN Flags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2
