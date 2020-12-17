@@ -504,12 +504,15 @@ CheckDeviceProperties (
       FreePool ((VOID *) UnicodeDevicePath);
 
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-      if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
-        DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
-        ++ErrorCount;
+      if (TextualDevicePath != NULL) {
+        if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
+          DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
+          ++ErrorCount;
+        }
       }
     }
 
+    FreePool (TextualDevicePath);
     FreePool (DevicePath);
   }
 
