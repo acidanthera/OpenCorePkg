@@ -478,11 +478,13 @@ CheckDeviceProperties (
 {
   UINT32                    ErrorCount;
   UINT32                    DeviceIndex;
+  UINT32                    PropertyIndex;
   OC_DEV_PROP_CONFIG        UserDevProp;
   CONST CHAR8               *AsciiDevicePath;
   CHAR16                    *UnicodeDevicePath;
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   CHAR16                    *TextualDevicePath;
+  CONST CHAR8               *AsciiProperty;
 
   DEBUG ((DEBUG_INFO, "config loaded into DeviceProperties checker!\n"));
 
@@ -491,7 +493,6 @@ CheckDeviceProperties (
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp.Delete.Count; ++DeviceIndex) {
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp.Delete.Keys[DeviceIndex]);
-    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
     DevicePath        = NULL;
     TextualDevicePath = NULL;
 
@@ -500,21 +501,36 @@ CheckDeviceProperties (
       ++ErrorCount;
     }
 
+    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+
     if (UnicodeDevicePath != NULL) {
       DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
-      FreePool ((VOID *) UnicodeDevicePath);
-
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+
       if (TextualDevicePath != NULL) {
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
           DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
           ++ErrorCount;
         }
       }
+
+      FreePool ((VOID *) UnicodeDevicePath);
+      FreePool (TextualDevicePath);
+      FreePool (DevicePath);
     }
 
-    FreePool (TextualDevicePath);
-    FreePool (DevicePath);
+    for (PropertyIndex = 0; PropertyIndex < UserDevProp.Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
+      AsciiProperty = OC_BLOB_GET (UserDevProp.Delete.Values[DeviceIndex]->Values[PropertyIndex]);
+
+      if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
+        DEBUG ((
+          DEBUG_WARN,
+          DeviceIndex,
+          AsciiProperty
+          ));
+        ++ErrorCount;
+      }
+    }
   }
 
   return ReportError (__func__, ErrorCount);
