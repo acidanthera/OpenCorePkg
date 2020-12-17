@@ -101,10 +101,10 @@ enum {
 
 #define PADD(x,y) (void*)(((char*) x) + y)
 
-#define IS_LOCK() (Flags & ARG_LOCK)
-#define IS_UNLOCK() (Flags & ARG_UNLOCK)
-#define IS_CHECK() (Flags & ARG_CHECK)
-#define IS_INTERACTIVE() (Flags & ARG_INTERACTIVE)
+#define IS_LOCK() ((Flags & ARG_LOCK) != 0)
+#define IS_UNLOCK() ((Flags & ARG_UNLOCK) != 0)
+#define IS_CHECK() ((Flags & ARG_CHECK) != 0)
+#define IS_INTERACTIVE() ((Flags & ARG_INTERACTIVE) != 0)
 #define BUFFER_LENGTH 128
 
 extern UINTN Flags;

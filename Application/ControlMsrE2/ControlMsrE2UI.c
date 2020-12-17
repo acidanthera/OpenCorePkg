@@ -33,6 +33,7 @@ UINT32 ReadLine (
   EFI_STATUS     Status;
   UINTN          EventIndex;
   EFI_INPUT_KEY  Key;
+  UINT32         Index;
   UINT32         Pos;
   INT32          StartRow;
   INT32          StartColumn;
@@ -75,7 +76,7 @@ UINT32 ReadLine (
         if (Pos > 0) {
           Pos = 0;
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
-          for (UINT32 i = 1; i < length; i++) {
+          for (Index = 1; Index < length; Index++) {
             gST->ConOut->OutputString (gST->ConOut, L" ");
           }
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
@@ -122,42 +123,6 @@ UINT32 ReadYN () {
   return keys[0] == 'y' || keys[0] == 'Y';
 }
 
-EFI_STATUS
-PrintGuid (
-  IN EFI_GUID *Guid
-  )
-/*++
-Routine Description:
-  This function prints a GUID to STDOUT.
-Arguments:
-  Guid    Pointer to a GUID to print.
-Returns:
-  EFI_SUCCESS             The GUID was printed.
-  EFI_INVALID_PARAMETER   The input was NULL.
---*/
-{
-  if (Guid == NULL) {
-    // Error (NULL, 0, 2000, "Invalid parameter", "PrintGuidToBuffer() called with a NULL value");
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Print (
-    L"%08x-%04x-%04x-%02x%02x-%02x%02x%02x%02x%02x%02x",
-    (unsigned) Guid->Data1,
-    Guid->Data2,
-    Guid->Data3,
-    Guid->Data4[0],
-    Guid->Data4[1],
-    Guid->Data4[2],
-    Guid->Data4[3],
-    Guid->Data4[4],
-    Guid->Data4[5],
-    Guid->Data4[6],
-    Guid->Data4[7]
-    );
-  return EFI_SUCCESS;
-}
-
 VOID PrintUINT8Str (
   IN UINT8 *String
   )
@@ -175,6 +140,7 @@ EFI_STATUS InterpretArguments ()
   UINTN       ParameterCount;
   CHAR16      *Token;
   UINT16      TokenIndex;
+  UINT32      Index;
 
   Flags = 0;
 
@@ -183,20 +149,20 @@ EFI_STATUS InterpretArguments ()
 
   ParameterCount = 0;
 
-  for (UINT32 i = 1; i < Argc; i++) {
-    Token = AllocatePool (StrSize(Argv[i]));
+  for (Index = 1; Index < Argc; Index++) {
+    Token = AllocatePool (StrSize(Argv[Index]));
 
     if (Token) {
-      StrCpyS (Token, StrLen(Argv[i]) + 1, Argv[i]);
+      StrCpyS (Token, StrLen(Argv[Index]) + 1, Argv[Index]);
 
       TokenIndex = 0;
 
-      while (Argv[i][TokenIndex]) {
-        while (Argv[i][TokenIndex] == ' ') {
+      while (Argv[Index][TokenIndex]) {
+        while (Argv[Index][TokenIndex] == ' ') {
           TokenIndex++;
         }
 
-        if (Argv[i][TokenIndex]) {
+        if (Argv[Index][TokenIndex]) {
           Parameter = &Token[TokenIndex];
 
           while (Token[TokenIndex] != 0 && Token[TokenIndex] != ' ') {

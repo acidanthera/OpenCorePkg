@@ -88,18 +88,23 @@ VOID WalkListHeaders (
               //
               // Checkup for Setup Form
               //
-              if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD(IfrHeader, sizeof(EFI_IFR_FORM_SET)))) {
+              if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof(EFI_IFR_FORM_SET)))) {
                 Contexts[ContextsCount].SearchText = SearchString;
                 Contexts[ContextsCount].EfiHandle = HiiHandles[ListHeaderIndex];
                 Contexts[ContextsCount].ListHeader = ListHeaders[ListHeaderIndex];
                 Contexts[ContextsCount].PkgHeader = PkgHeader;
-                Contexts[ContextsCount].FirstIfrHeader = PADD(IfrHeader, IfrHeader->Length);
+                Contexts[ContextsCount].FirstIfrHeader = PADD (IfrHeader, IfrHeader->Length);
                 Contexts[ContextsCount].IfrVarStore = NULL;
                 Contexts[ContextsCount].IfrOneOf = NULL;
                 Contexts[ContextsCount].StopAt = DONT_STOP_AT;
                 Contexts[ContextsCount].Count = OptionsCount;
 
-                DoForEachOpCode (Contexts[ContextsCount].FirstIfrHeader, EFI_IFR_ONE_OF_OP, NULL, &Contexts[ContextsCount], HandleOneOf);
+                DoForEachOpCode (Contexts[ContextsCount].FirstIfrHeader,
+                  EFI_IFR_ONE_OF_OP,
+                  NULL,
+                  &Contexts[ContextsCount],
+                  HandleOneOf
+                  );
 
                 if (Contexts[ContextsCount].Count != OptionsCount) {
                   OptionsCount = Contexts[ContextsCount].Count;
@@ -144,7 +149,13 @@ VOID WalkListHeaders (
             Contexts[ContextIndex].StopAt = Index;
             Contexts[ContextIndex].IfrOneOf = NULL;
 
-            DoForEachOpCode (Contexts[ContextIndex].FirstIfrHeader, EFI_IFR_ONE_OF_OP, &Stop, &Contexts[ContextIndex], HandleOneOf);
+            DoForEachOpCode (
+              Contexts[ContextIndex].FirstIfrHeader,
+              EFI_IFR_ONE_OF_OP,
+              &Stop,
+              &Contexts[ContextIndex],
+              HandleOneOf
+              );
 
             if (Contexts[ContextIndex].IfrOneOf != NULL) {
               HandleOneVariable (&Contexts[ContextIndex]);

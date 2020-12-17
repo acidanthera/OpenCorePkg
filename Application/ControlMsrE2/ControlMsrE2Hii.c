@@ -164,7 +164,13 @@ VOID HandleOneOf (
         Ctx->Count = 1;
         *Stop = TRUE;
       } else if (OldContextCount != Ctx->Count && Ctx->StopAt == DONT_STOP_AT) {
-        Print (L"%X. %02X %04X %04X /%s/ VarStore Name: ", Ctx->Count, IfrOneOf->Header.OpCode, IfrOneOf->Question.VarStoreInfo.VarName, IfrOneOf->Question.VarStoreId, HiiString);
+        Print (L"%X. %02X %04X %04X /%s/ VarStore Name: ",
+          Ctx->Count,
+          IfrOneOf->Header.OpCode,
+          IfrOneOf->Question.VarStoreInfo.VarName,
+          IfrOneOf->Question.VarStoreId,
+          HiiString
+          );
 
         PrintUINT8Str (IfrVarStore->Name);
 
@@ -177,7 +183,7 @@ VOID HandleOneOf (
                         NULL,
                         &DataSize,
                         NULL
-                      );
+                        );
 
         if (Status == EFI_BUFFER_TOO_SMALL) {
           if ((Data = AllocatePool (DataSize)) != NULL) {
@@ -187,7 +193,7 @@ VOID HandleOneOf (
                             NULL,
                             &DataSize,
                             Data
-                          );
+                            );
 
             if (Status == EFI_SUCCESS) {
               VarSize = sizeof (EFI_IFR_ONE_OF) - IfrOneOf->Header.Length;
@@ -263,7 +269,7 @@ VOID  HandleOneVariable (
                   &Attributes,
                   &DataSize,
                   NULL
-                );
+                  );
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
     if ((Data = AllocatePool (DataSize)) != NULL) {
@@ -273,7 +279,7 @@ VOID  HandleOneVariable (
                       &Attributes,
                       &DataSize,
                       Data
-                    );
+                      );
 
       if (Status == EFI_SUCCESS) {
         VarPointer = Data + Context->IfrOneOf->Question.VarStoreInfo.VarOffset;
@@ -329,7 +335,7 @@ VOID  HandleOneVariable (
                             Attributes,
                             DataSize,
                             Data
-                          );
+                            );
 
             if (Status == EFI_SUCCESS) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
