@@ -55,7 +55,7 @@ EFI_IFR_OP_HEADER *
 DoForEachOpCode (
   IN     EFI_IFR_OP_HEADER   *Header,
   IN     UINT8               OpCode,
-  IN OUT UINT8               *Stop     OPTIONAL,
+  IN OUT BOOLEAN             *Stop     OPTIONAL,
   IN     VOID                *Context,
   IN     OP_CODE_HANDLER     Handler
   )
@@ -90,7 +90,7 @@ DoForEachOpCode (
 VOID
 HandleVarStore (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT UINT8               *Stop       OPTIONAL,
+  IN OUT BOOLEAN             *Stop       OPTIONAL,
   IN OUT VOID                *Context
   )
 {
@@ -102,8 +102,9 @@ HandleVarStore (
 
   if (VarStore->VarStoreId == Ctx->Id) {
     Ctx->VarStoreHeader = VarStore;
-    if (Stop)
+    if (Stop) {
       *Stop = TRUE;
+    }
   }
 }
 
@@ -113,7 +114,7 @@ GetVarStore (
   IN EFI_VARSTORE_ID     Id
   )
 {
-  UINT8               Stop;
+  BOOLEAN             Stop;
   VAR_STORE_CONTEXT   Context;
 
   Stop = FALSE;
@@ -128,7 +129,7 @@ GetVarStore (
 VOID
 HandleOneOf (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT UINT8               *Stop       OPTIONAL,
+  IN OUT BOOLEAN             *Stop       OPTIONAL,
   IN OUT VOID                *Context
   )
 {

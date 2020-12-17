@@ -87,7 +87,7 @@ typedef
 VOID
 OP_CODE_HANDLER (
   IN EFI_IFR_OP_HEADER *IfrHeader,
-  IN UINT8             *Stop       OPTIONAL,
+  IN BOOLEAN           *Stop       OPTIONAL,
   IN VOID              *Context
   );
 
@@ -168,7 +168,7 @@ HiiExportPackageLists (
 VOID
 HandleOneOf (
   IN EFI_IFR_OP_HEADER   *IfrHeader,
-  IN UINT8               *Stop,
+  IN BOOLEAN             *Stop,
   IN VOID                *Context
   );
 
@@ -187,7 +187,7 @@ EFI_IFR_OP_HEADER *
 DoForEachOpCode (
   IN EFI_IFR_OP_HEADER   *Header,
   IN UINT8               OpCode,
-  IN UINT8               *Stop,
+  IN BOOLEAN             *Stop,
   IN void                *Context,
   IN OP_CODE_HANDLER     Handler
   );

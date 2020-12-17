@@ -30,7 +30,7 @@ WalkListHeaders (
   UINT32                   ListHeaderIndex;
   EFI_IFR_OP_HEADER        *IfrHeader;
   EFI_HII_PACKAGE_HEADER   *PkgHeader;
-  UINT8                    Stop;
+  BOOLEAN                  Stop;
   UINT32                   ContextIndex;
   UINT16                   Index;
   CHAR16                   Key;
