@@ -41,10 +41,9 @@ VOID WalkListHeaders (
   // For Each Handle
   //
   for (ListHeaderIndex = 0; (HiiHandles[ListHeaderIndex] != NULL) && (ContextsCount < CONTEXTS_MAX); ListHeaderIndex++) {
-    ListHeaders[ListHeaderIndex] = HiiExportPackageLists(HiiHandles[ListHeaderIndex]);
+    ListHeaders[ListHeaderIndex] = HiiExportPackageLists (HiiHandles[ListHeaderIndex]);
 
     if (ListHeaders[ListHeaderIndex] != NULL) {
-
       DEBUG ((
         DEBUG_INFO,
         "Package List: %g\n",
@@ -209,7 +208,7 @@ EFI_STATUS SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  WalkListHeaders(HiiHandles, ListHeaders, ListHeaderCount, SearchString);
+  WalkListHeaders (HiiHandles, ListHeaders, ListHeaderCount, SearchString);
   FreePool (ListHeaders);
   return EFI_SUCCESS;
 }
@@ -224,7 +223,7 @@ UefiMain (
   EFI_STATUS Status;
   EFI_STRING SearchString;
 
-  Status = InterpretArguments();
+  Status = InterpretArguments ();
 
   if (!EFI_ERROR(Status)) {
     Status = VerifyMSRE2 (ImageHandle, SystemTable);
@@ -244,6 +243,6 @@ UefiMain (
   }
 
   Print (L"Press any key. \n");
-  ReadAnyKey();
+  ReadAnyKey ();
   return Status;
 }

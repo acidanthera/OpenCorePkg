@@ -89,7 +89,7 @@ UINT32 ReadLine (
       case CHAR_CARRIAGE_RETURN:
       case CHAR_LINEFEED:
         buffer[Pos] = 0;
-        gST->ConOut->EnableCursor(gST->ConOut, FALSE);
+        gST->ConOut->EnableCursor (gST->ConOut, FALSE);
         return Pos;
 
       default:
@@ -110,14 +110,14 @@ UINT32 ReadLine (
 
 CHAR16 ReadAnyKey () {
   CHAR16 keys[2];
-  ReadLine(keys, 2);
+  ReadLine (keys, 2);
   return keys[0];
 }
 
 UINT32 ReadYN () {
   CHAR16 keys[2];
   do {
-    ReadLine(keys, 2);
+    ReadLine (keys, 2);
   } while (!OcStriStr (L"yn", keys));
 
   return keys[0] == 'y' || keys[0] == 'Y';
@@ -216,10 +216,10 @@ ModifySearchString (
   do {
     Print (L"\nCurrent search string: %s\n", SearchString);
     Print (L"Do you want to change it ? ");
-    if ((Flag = ReadYN()) == TRUE) {
+    if ((Flag = ReadYN ()) == TRUE) {
       Print (L"\nEnter search string: ");
 
-      CHAR16 *Buffer = AllocatePool(BUFFER_LENGTH * sizeof(CHAR16));
+      CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof(CHAR16));
 
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {

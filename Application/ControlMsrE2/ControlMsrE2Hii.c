@@ -142,7 +142,7 @@ VOID HandleOneOf (
   }
 
   if ((IfrVarStore = GetVarStore (Ctx->FirstIfrHeader, IfrOneOf->Question.VarStoreId)) != NULL) {
-    if (OcStriStr(HiiString, Ctx->SearchText)) {
+    if (OcStriStr (HiiString, Ctx->SearchText)) {
       OldContextCount = Ctx->Count;
 
       if (Ctx->IfrOneOf == NULL) {
@@ -174,7 +174,7 @@ VOID HandleOneOf (
 
         PrintUINT8Str (IfrVarStore->Name);
 
-        VarStoreName = AsciiStrCopyToUnicode((CHAR8*) IfrVarStore->Name, 0);
+        VarStoreName = AsciiStrCopyToUnicode ((CHAR8*) IfrVarStore->Name, 0);
 
         DataSize = 0;
         Status = gRT->GetVariable (
@@ -219,7 +219,7 @@ VOID HandleOneOf (
             }
             FreePool (Data);
           }  ///< Allocate
-        } ///< GetVariable
+        }  ///< GetVariable
         Print (L"\n");
       }
     }
