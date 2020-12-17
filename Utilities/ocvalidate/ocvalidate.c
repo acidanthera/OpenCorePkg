@@ -525,6 +525,7 @@ CheckDeviceProperties (
       if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
+          "DeviceProperties->Delete[%u]->%a contains illegal character!\n",
           DeviceIndex,
           AsciiProperty
           ));
