@@ -49,6 +49,7 @@
 #include <Library/UefiLib.h>
 
 EFI_STATUS
+EFIAPI
 OcPlayAudioFile (
   IN     OC_PICKER_CONTEXT  *Context,
   IN     UINT32             File,
@@ -138,6 +139,7 @@ OcPlayAudioFile (
 }
 
 EFI_STATUS
+EFIAPI
 OcPlayAudioBeep (
   IN     OC_PICKER_CONTEXT        *Context,
   IN     UINT32                   ToneCount,
@@ -170,6 +172,7 @@ OcPlayAudioBeep (
 }
 
 EFI_STATUS
+EFIAPI
 OcPlayAudioEntry (
   IN     OC_PICKER_CONTEXT  *Context,
   IN     OC_BOOT_ENTRY      *Entry
@@ -207,6 +210,7 @@ OcPlayAudioEntry (
 }
 
 VOID
+EFIAPI
 OcToggleVoiceOver (
   IN  OC_PICKER_CONTEXT  *Context,
   IN  UINT32             File  OPTIONAL

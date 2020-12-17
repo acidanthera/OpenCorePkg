@@ -7,6 +7,8 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		35081D4A248177E4006EB0EB /* InputSimTextIn.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857D82421373F005A0D86 /* InputSimTextIn.c */; };
+		35081D4B248177ED006EB0EB /* InputSimAbsPtr.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857D92421373F005A0D86 /* InputSimAbsPtr.c */; };
 		350857EC24216525005A0D86 /* OcUnicodeLib.c in Sources */ = {isa = PBXBuildFile; fileRef = 35366A95240C213400D54CBB /* OcUnicodeLib.c */; };
 		350857ED24220712005A0D86 /* GuiApp.c in Sources */ = {isa = PBXBuildFile; fileRef = 350857D42421373F005A0D86 /* GuiApp.c */; };
 		350857EE2422071A005A0D86 /* OpenCanopy.h in Headers */ = {isa = PBXBuildFile; fileRef = 350857DA2421373F005A0D86 /* OpenCanopy.h */; };
@@ -1955,6 +1957,7 @@
 				3511D59323FDB2A800CC3B17 /* OpenCoreMisc.c in Sources */,
 				35366C04240C213500D54CBB /* DataHub.c in Sources */,
 				3511D59523FDB2A800CC3B17 /* OpenCoreDevProps.c in Sources */,
+				35081D4A248177E4006EB0EB /* InputSimTextIn.c in Sources */,
 				35366CCC240C213500D54CBB /* OcXmlLib.c in Sources */,
 				35366CC1240C213500D54CBB /* FileProtocol.c in Sources */,
 				35366C95240C213500D54CBB /* OcAppleDiskImageLib.c in Sources */,
@@ -2046,6 +2049,7 @@
 				35366C00240C213500D54CBB /* OcPng.c in Sources */,
 				35366C27240C213500D54CBB /* Sha1.c in Sources */,
 				35366C91240C213500D54CBB /* AIM.c in Sources */,
+				35081D4B248177ED006EB0EB /* InputSimAbsPtr.c in Sources */,
 				35366CE1240C213500D54CBB /* OcAppleRamDiskLib.c in Sources */,
 				35366CC7240C213500D54CBB /* AppleCpuSupport.c in Sources */,
 				35366CC3240C213500D54CBB /* LocateFileSystem.c in Sources */,

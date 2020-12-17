@@ -870,6 +870,10 @@ OcMiscBoot (
   Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
   Context->GetEntryIcon          = OcGetBootEntryIcon;
   Context->GetKeyIndex           = OcGetAppleKeyIndex;
+  Context->PlayAudioFile         = OcPlayAudioFile;
+  Context->PlayAudioBeep         = OcPlayAudioBeep;
+  Context->PlayAudioEntry        = OcPlayAudioEntry;
+  Context->ToggleVoiceOver       = OcToggleVoiceOver;
   Context->PickerMode            = PickerMode;
   Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
   Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;

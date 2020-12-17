@@ -333,8 +333,6 @@ InternalContextConstruct (
       + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
 
-  Context->BootEntry = NULL;
-
   Status = EFI_SUCCESS;
 
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {

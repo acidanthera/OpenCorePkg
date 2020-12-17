@@ -80,9 +80,12 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   BOOLEAN                              Refresh;
   BOOLEAN                              LightBackground;
   BOOLEAN                              DoneIntroAnimation;
+  BOOLEAN                              ReadyToBoot;
   UINT8                                Scale;
   UINT32                               CursorDefaultX;
   UINT32                               CursorDefaultY;
+  INT32                                AudioPlaybackTimeout;
+  OC_PICKER_CONTEXT                    *PickerContext;
 } BOOT_PICKER_GUI_CONTEXT;
 
 EFI_STATUS
@@ -95,7 +98,7 @@ BootPickerViewInitialize (
 EFI_STATUS
 BootPickerEntriesAdd (
   IN OC_PICKER_CONTEXT              *Context,
-  IN CONST BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN BOOT_PICKER_GUI_CONTEXT        *GuiContext,
   IN OC_BOOT_ENTRY                  *Entry,
   IN BOOLEAN                        Default
   );
