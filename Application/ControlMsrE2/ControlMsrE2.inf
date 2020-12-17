@@ -47,6 +47,7 @@
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
+  DebugLib
   MemoryAllocationLib
   OcMemoryLib
   OcMiscLib
