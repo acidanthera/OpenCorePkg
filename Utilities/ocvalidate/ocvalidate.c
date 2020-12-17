@@ -495,9 +495,10 @@ CheckDeviceProperties (
     DevicePath        = NULL;
     TextualDevicePath = NULL;
 
-    //
-    // Should we sanitise AsciiDevicePath first? 
-    //
+    if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] contains illegal character!\n", DeviceIndex));
+      ++ErrorCount;
+    }
 
     if (UnicodeDevicePath != NULL) {
       DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
