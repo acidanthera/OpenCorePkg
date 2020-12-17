@@ -41,7 +41,7 @@ WalkListHeaders (
   //
   // For Each Handle
   //
-  for (ListHeaderIndex = 0; (HiiHandles[ListHeaderIndex] != NULL) && (ContextsCount < CONTEXTS_MAX); ++ListHeaderIndex) {
+  for (ListHeaderIndex = 0; HiiHandles[ListHeaderIndex] != NULL && ContextsCount < CONTEXTS_MAX; ++ListHeaderIndex) {
     ListHeaders[ListHeaderIndex] = HiiExportPackageLists (HiiHandles[ListHeaderIndex]);
 
     if (ListHeaders[ListHeaderIndex] != NULL) {
@@ -66,8 +66,10 @@ WalkListHeaders (
           break;
         } else if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
           IfrHeader = PADD (PkgHeader, sizeof (EFI_HII_PACKAGE_HEADER));
-
-          if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) { // Form Definition must start with FORM_SET_OP
+          //
+          // Form Definition must start with FORM_SET_OP
+          //
+          if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) {
             //
             // Print some Info
             //
@@ -123,7 +125,9 @@ WalkListHeaders (
 
   DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
-  if (IS_INTERACTIVE () || IS_LOCK () || IS_UNLOCK ()) {
+  if (IS_INTERACTIVE () ||
+      IS_LOCK () ||
+      IS_UNLOCK ()) {
     if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
       DEBUG ((DEBUG_ERROR, "Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
     } else if (OptionsCount == 0) {
@@ -145,7 +149,7 @@ WalkListHeaders (
 
         for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
           if (Contexts[ContextIndex].Count >= Index) {
-            Contexts[ContextIndex].Count = (ContextIndex == 0) ? 0 : (Contexts[ContextIndex - 1].Count);
+            Contexts[ContextIndex].Count = ContextIndex == 0 ? 0 : Contexts[ContextIndex - 1].Count;
             Contexts[ContextIndex].StopAt = Index;
             Contexts[ContextIndex].IfrOneOf = NULL;
 
@@ -184,7 +188,7 @@ SearchForString (
   UINT32                        ListHeaderCount;
 
   if (IS_INTERACTIVE ()) {
-    SearchString = ModifySearchString(SearchString);
+    SearchString = ModifySearchString (SearchString);
   }
 
   HiiHandles = HiiGetHiiHandles (NULL);
@@ -194,9 +198,7 @@ SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount) {
-    continue;
-  }
+  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount);
 
   //
   // Keep list alive 'til program finishes.
