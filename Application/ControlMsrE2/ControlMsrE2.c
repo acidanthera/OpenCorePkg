@@ -125,9 +125,9 @@ WalkListHeaders (
 
   if (IS_INTERACTIVE () || IS_LOCK () || IS_UNLOCK ()) {
     if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
-      Print (L"Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n");
+      DEBUG ((DEBUG_ERROR, "Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
     } else if (OptionsCount == 0) {
-      Print (L"No corresponding BIOS Options found. Try a different search string using interactive mode.\n");
+      DEBUG ((DEBUG_ERROR, "No corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
     } else {
       Key = '1';
 
@@ -190,7 +190,7 @@ SearchForString (
   HiiHandles = HiiGetHiiHandles (NULL);
 
   if (HiiHandles == NULL) {
-    Print (L"Could not retrieve HiiHandles.\n");
+    DEBUG ((DEBUG_ERROR, "Could not retrieve HiiHandles.\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -206,7 +206,7 @@ SearchForString (
   ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
 
   if (ListHeaders == NULL) {
-    Print (L"Could not allocate memory.\n");
+    DEBUG ((DEBUG_ERROR, "Could not allocate memory.\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -232,7 +232,7 @@ UefiMain (
   }
 
   if (!EFI_ERROR (Status)) {
-    Print(L"\nBIOS Options:\n");
+    Print (L"\nBIOS Options:\n");
 
     SearchString = AsciiStrCopyToUnicode ("cfg", 0);
 
@@ -241,7 +241,7 @@ UefiMain (
       FreePool (SearchString);
     }
   } else {
-    Print (L"Could not allocate memory. Function not available.\n");
+    DEBUG ((DEBUG_ERROR, "Could not allocate memory. Function not available.\n"));
   }
 
   Print (L"Press any key. \n");

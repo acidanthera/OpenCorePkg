@@ -109,7 +109,7 @@ enum {
 #define IS_INTERACTIVE() ((Flags & ARG_INTERACTIVE) != 0)
 #define BUFFER_LENGTH 128
 
-extern UINTN Flags;
+UINTN Flags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2
@@ -133,7 +133,6 @@ ReadYN (
 /**
   Wait for any key press
 **/
-extern
 CHAR16
 ReadAnyKey (
   VOID
@@ -142,25 +141,14 @@ ReadAnyKey (
 /**
   Parse commandline arguments
 **/
-extern
 UINTN
 InterpretArguments (
   VOID
   );
 
 /**
-  Print UINT8 String
-**/
-extern
-VOID
-PrintUINT8Str (
-  IN UINT8 *String
-  );
-
-/**
   Displays SearchString and allows to change it
 **/
-extern
 EFI_STRING
 ModifySearchString (
   EFI_STRING SearchString
@@ -169,7 +157,6 @@ ModifySearchString (
 /**
   Copies Package Lists to Memory
 **/
-extern
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
   EFI_HII_HANDLE h
@@ -178,7 +165,6 @@ HiiExportPackageLists (
 /**
   Callback to Handle IFR_ONE_OF_OP
 **/
-extern
 VOID
 HandleOneOf (
   IN EFI_IFR_OP_HEADER   *IfrHeader,
@@ -189,7 +175,6 @@ HandleOneOf (
 /**
   Displaying and Changing value of BIOS Option. Including UI
 **/
-extern
 VOID
 HandleOneVariable (
   IN ONE_OF_CONTEXT      *Context
@@ -198,7 +183,6 @@ HandleOneVariable (
 /**
   Call Handler for each occurence of opCode, starting to search at header. Called recursively
 **/
-extern
 EFI_IFR_OP_HEADER *
 DoForEachOpCode (
   IN EFI_IFR_OP_HEADER   *Header,

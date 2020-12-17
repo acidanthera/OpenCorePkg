@@ -125,14 +125,6 @@ ReadYN () {
   return keys[0] == 'y' || keys[0] == 'Y';
 }
 
-VOID
-PrintUINT8Str (
-  IN UINT8 *String
-  )
-{
-  AsciiPrint ((CHAR8 *) String);
-}
-
 #define TOKENLENGTH 32;
 
 EFI_STATUS
@@ -187,23 +179,23 @@ InterpretArguments ()
             Flags |= ARG_INTERACTIVE;
             ParameterCount++;
           } else {
-            Print (L"Ignoring unknown command line argument: %s\n", Parameter);
+            DEBUG ((DEBUG_INFO, "Ignoring unknown command line argument: %s\n", Parameter));
           }
         }
       }  ///<  All Tokens parsed
       FreePool (Token);
     } else {
-      Print (L"Couldn't allocate memory.\n");
+      DEBUG ((DEBUG_ERROR, "Couldn't allocate memory.\n"));
       return EFI_OUT_OF_RESOURCES;
     }
   }  ///< All Arguments analysed
 
   if (ParameterCount == 0) {
     Flags |= ARG_UNLOCK;
-    Print (L"No option selected, default to unlock.\n");
+    DEBUG ((DEBUG_ERROR, "No option selected, default to unlock.\n"));
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
   } else if (ParameterCount > 1) {
-    Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n");
+    DEBUG ((DEBUG_ERROR, "interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n"));
     return EFI_INVALID_PARAMETER;
   }
 
@@ -227,19 +219,18 @@ ModifySearchString (
 
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
-          Print (L"\nNo Input. Search string not changed.\n");
+          DEBUG ((DEBUG_INFO, "\nNo Input. Search string not changed.\n"));
           FreePool (Buffer);
         } else {
           FreePool (SearchString);
           SearchString = Buffer;
+          Print (L"\n");
         }
       } else {
-        Print (L"Could not allocate memory. Search string can not be changed.\n");
+        DEBUG ((DEBUG_ERROR, "Could not allocate memory. Search string can not be changed.\n"));
       }
     }
   } while (Flag);
-
-  Print (L"\n");
 
   return SearchString;
 }

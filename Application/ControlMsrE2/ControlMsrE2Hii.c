@@ -178,18 +178,17 @@ HandleOneOf (
         Ctx->Count = 1;
         *Stop = TRUE;
       } else if (OldContextCount != Ctx->Count && Ctx->StopAt == DONT_STOP_AT) {
+        VarStoreName = AsciiStrCopyToUnicode ((CHAR8 *) IfrVarStore->Name, 0);
+
         Print (
-          L"%X. %02X %04X %04X /%s/ VarStore Name: ",
+          L"%X. %02X %04X %04X /%s/ VarStore Name: %s",
           Ctx->Count,
           IfrOneOf->Header.OpCode,
           IfrOneOf->Question.VarStoreInfo.VarName,
           IfrOneOf->Question.VarStoreId,
-          HiiString
+          HiiString,
+          VarStoreName
           );
-
-        PrintUINT8Str (IfrVarStore->Name);
-
-        VarStoreName = AsciiStrCopyToUnicode ((CHAR8 *) IfrVarStore->Name, 0);
 
         DataSize = 0;
         Status = gRT->GetVariable (
@@ -236,6 +235,7 @@ HandleOneOf (
             FreePool (Data);
           }  ///< Allocate
         }  ///< GetVariable
+        FreePool (VarStoreName);
         Print (L"\n");
       }
     }
@@ -264,21 +264,25 @@ HandleOneVariable (
     FreePool (HiiString);
   }
 
-  Print (L"In VarStore \"");
-  PrintUINT8Str (Context->IfrVarStore->Name);
-  Print (L"\" GUID: %g", &Context->IfrVarStore->Guid);
-
-  VarSize = sizeof (EFI_IFR_ONE_OF) - Context->IfrOneOf->Header.Length;
-  VarSize = 8 - (VarSize / 3);
-  Print (L" Offset: %04X Size: %X ", Context->IfrOneOf->Question.VarStoreInfo.VarOffset, VarSize);
-
-  DataSize = 0;
   HiiString = AsciiStrCopyToUnicode ((CHAR8 *) Context->IfrVarStore->Name, 0);
 
   if (HiiString == NULL) {
     DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
     return;
   }
+
+  VarSize = sizeof (EFI_IFR_ONE_OF) - Context->IfrOneOf->Header.Length;
+  VarSize = 8 - (VarSize / 3);
+
+  Print (
+    L"In VarStore \"%s\" GUID: %g Offset: %04X Size: %X ",
+    HiiString,
+    &Context->IfrVarStore->Guid,
+    Context->IfrOneOf->Question.VarStoreInfo.VarOffset,
+    VarSize
+    );
+
+  DataSize = 0;
 
   Status = gRT->GetVariable (
                   HiiString,
@@ -363,7 +367,7 @@ HandleOneVariable (
             Print (L"\n");
           }
         } else {
-          Print (L"Value is as wanted already. No action required.\n");
+          DEBUG ((DEBUG_ERROR, "Value is as wanted already. No action required.\n"));
         }
       } else
         DEBUG ((DEBUG_ERROR, "\nCouldn't read Data\n"));
