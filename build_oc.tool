@@ -168,6 +168,12 @@ package() {
   cp "${selfdir}/Changelog.md" "${dstdir}/Docs"/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/" "${dstdir}/Docs/AcpiSamples"/ || exit 1
 
+  cd "${dstdir}/Docs/AcpiSamples" || exit 1
+  for i in *.dsl ; do
+    iasl "$i" || exit 1
+  done
+  cd - || exit 1
+
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
