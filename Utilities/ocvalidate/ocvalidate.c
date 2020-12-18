@@ -485,6 +485,7 @@ CheckDeviceProperties (
   EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
   CHAR16                    *TextualDevicePath;
   CONST CHAR8               *AsciiProperty;
+  OC_ASSOC                  *PropertyMap;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into DeviceProperties checker!\n"));
 
@@ -504,10 +505,15 @@ CheckDeviceProperties (
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
 
     if (UnicodeDevicePath != NULL) {
-      DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
+      DevicePath        = ConvertTextToDevicePath (UnicodeDevicePath);
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      FreePool (DevicePath);
 
       if (TextualDevicePath != NULL) {
+        //
+        // If TextualDevicePath does not match the original UnicodeDevicePath after converting back,
+        // then it is borked.
+        //
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
           DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
           ++ErrorCount;
@@ -516,7 +522,6 @@ CheckDeviceProperties (
 
       FreePool ((VOID *) UnicodeDevicePath);
       FreePool (TextualDevicePath);
-      FreePool (DevicePath);
     }
 
     for (PropertyIndex = 0; PropertyIndex < UserDevProp.Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
@@ -532,6 +537,55 @@ CheckDeviceProperties (
         ++ErrorCount;
       }
     }
+  }
+
+  for (DeviceIndex = 0; DeviceIndex < UserDevProp.Add.Count; ++DeviceIndex) {
+    PropertyMap       = UserDevProp.Add.Values[DeviceIndex];
+    AsciiDevicePath   = OC_BLOB_GET (UserDevProp.Add.Keys[DeviceIndex]);
+    DevicePath        = NULL;
+    TextualDevicePath = NULL;
+
+    if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] contains illegal character!\n", DeviceIndex));
+      ++ErrorCount;
+    }
+
+    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+
+    if (UnicodeDevicePath != NULL) {
+      DevicePath        = ConvertTextToDevicePath (UnicodeDevicePath);
+      TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      FreePool (DevicePath);
+
+      if (TextualDevicePath != NULL) {
+        //
+        // If TextualDevicePath does not match the original UnicodeDevicePath after converting back,
+        // then it is borked.
+        //
+        if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
+          DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] is borked!\n", DeviceIndex));
+          ++ErrorCount;
+        }
+      }
+      
+      FreePool ((VOID *) UnicodeDevicePath);
+      FreePool (TextualDevicePath);
+    }
+
+    for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
+      AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+
+      if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "DeviceProperties->Add[%u]->%a contains illegal character!\n",
+          DeviceIndex,
+          AsciiProperty
+          ));
+        ++ErrorCount;
+      }
+    }
+
   }
 
   return ReportError (__func__, ErrorCount);
