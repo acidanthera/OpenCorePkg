@@ -25,7 +25,8 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Quirks->RebuildAppleMemoryMap: When enabled, SyncRuntimePermissions is highly recommended to be enabled as well.
 
 ## DeviceProperties
-- TODO
+- Add->Entry[N]: Ensure correct format.
+- Add->Delete[N]: Ensure correct format.
 
 ## Kernel
 - Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
