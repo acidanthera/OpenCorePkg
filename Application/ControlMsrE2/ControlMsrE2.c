@@ -185,7 +185,7 @@ SearchForString (
   UINT32                        ListHeaderCount;
 
   if (IS_INTERACTIVE ()) {
-    SearchString = ModifySearchString (SearchString);
+    ModifySearchString (&SearchString);
   }
 
   HiiHandles = HiiGetHiiHandles (NULL);
@@ -226,7 +226,7 @@ UefiMain (
 
   Status = InterpretArguments ();
   if (!EFI_ERROR (Status)) {
-    Status = VerifyMSRE2 (ImageHandle, SystemTable);
+    Status = VerifyMSRE2 ();
     if (!EFI_ERROR (Status)) {
       Print (L"\nBIOS Options:\n");
 

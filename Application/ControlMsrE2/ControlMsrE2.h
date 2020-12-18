@@ -28,8 +28,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
-#include <Register/Msr.h>
-#include <Protocol/MpService.h>
 
 #include <Library/MemoryAllocationLib.h>
 #include <Uefi/UefiInternalFormRepresentation.h>
@@ -121,8 +119,7 @@ extern
 EFI_STATUS
 EFIAPI
 VerifyMSRE2 (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  VOID
   );
 
 /**
@@ -161,13 +158,11 @@ InterpretArguments (
 /**
   Displays SearchString and allows to change it
 
-  @param[in]     SearchString    Current configuration string
-
-  @retval        Other           Modified string
+  @param[in,out] SearchString    Current configuration string
 **/
-EFI_STRING
+VOID
 ModifySearchString (
-  EFI_STRING SearchString
+  IN OUT EFI_STRING *SearchString
   );
 
 /**
@@ -180,7 +175,7 @@ ModifySearchString (
 **/
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
-  EFI_HII_HANDLE Handle
+  IN     EFI_HII_HANDLE Handle
   );
 
 /**

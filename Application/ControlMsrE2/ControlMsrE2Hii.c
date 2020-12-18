@@ -367,7 +367,7 @@ HandleOneVariable (
             if (!EFI_ERROR (Status)) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
             } else {
-              DEBUG ((DEBUG_ERROR, "\nProblem writing variable.\n"));
+              DEBUG ((DEBUG_ERROR, "\nProblem writing variable - %r\n", Status));
             }
           } else {
             Print (L"\n");

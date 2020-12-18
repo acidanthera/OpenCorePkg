@@ -42,6 +42,7 @@ ReadMsrE2 (
 
   if (EFI_ERROR (Status)) {
     Print (L"Failed to detect CPU Number\n");
+    return;
   }
 
   Value.Uint64 = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
@@ -58,15 +59,14 @@ ReadMsrE2 (
 EFI_STATUS
 EFIAPI
 VerifyMSRE2 (
-  IN EFI_HANDLE        ImageHandle,
-  IN EFI_SYSTEM_TABLE  *SystemTable
+  VOID
   )
 {
   EFI_STATUS  Status;
 
   Print (L"Looking up EFI_MP_SERVICES_PROTOCOL...\n");
 
-  Status = gBS->LocateProtocol (&gEfiMpServiceProtocolGuid, NULL, (VOID **)&mMpServices);
+  Status = gBS->LocateProtocol (&gEfiMpServiceProtocolGuid, NULL, (VOID **) &mMpServices);
   if (EFI_ERROR (Status)) {
     Print (L"Failed to find EFI_MP_SERVICES_PROTOCOL - %r\n", Status);
     return Status;
@@ -87,7 +87,7 @@ VerifyMSRE2 (
   Print (L"Done checking MSR 0xE2 register, compare the values printed!\n");
 
   if (mHasLockedCores && mHasUnlockedCores) {
-    Print (L"This firmware has BORKED MSR 0xE2 register!\n");
+    Print (L"This firmware has BROKEN MSR 0xE2 register!\n");
     Print (L"Some cores are locked, some are not!!!\n");
   } else if (mHasUnlockedCores) {
     Print (L"This firmware has UNLOCKED MSR 0xE2 register!\n");
