@@ -5,9 +5,9 @@
 [![Build Status](https://github.com/acidanthera/OpenCorePkg/workflows/CI/badge.svg?branch=master)](https://github.com/acidanthera/OpenCorePkg/actions) [![Scan Status](https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169)
 -----
 
-OpenCore bootloader with development SDK.
+包含开发SDK的OpenCore引导加载程序。
 
-## Discussion
+## 论坛
 
 - [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
 - [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
@@ -17,39 +17,35 @@ OpenCore bootloader with development SDK.
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 - [PCbeta.com](http://bbs.pcbeta.com/viewthread-1815623-1-1.html) in Chinese
 
-## Libraries
+## 图书馆
 
-This repository also contains additional UEFI support common libraries shared by other projects in [Acidanthera](https://github.com/acidanthera). The primary purpose of the library set is to provide supplemental functionality for Apple-specific UEFI drivers. Key features:
+此存储库还包含其他 UEFI 支持公共库，这些公共库由 [Acidanthera](https://github.com/acidanthera)的其它项目共享. 库集的主要目的是为特定于 Apple 的 UEFI 驱动程序提供补充功能。主要特点:
 
-- Apple disk image loading support
-- Apple keyboard input aggregation
-- Apple PE image signature verification
-- Apple UEFI secure boot supplemental code
-- Audio management with screen reading support
-- Basic ACPI and SMBIOS manipulation
-- CPU information gathering with timer support
-- Cryptographic primitives (SHA-256, RSA, etc.)
-- Decompression primitives (zlib, lzss, lzvn, etc.)
-- Helper code for ACPI reads and modifications
-- Higher level abstractions for files, strings, UEFI variables
-- Overflow checking arithmetics
-- PE image loading with no UEFI Secure Boot conflict
-- Plist configuration format parsing
-- PNG image manipulation
-- Text output and graphics output implementations
-- XNU kernel driver injection and patch engine
+- 苹果磁盘映像加载支持
+- 苹果键盘输入聚合
+- 苹果PE图像签名验证
+- 苹果 UEFI 安全启动补充代码
+- 支持屏幕读取的音频管理
+- 基本 ACPI 和 SMBIOS 操作
+- 支持计时器的 CPU 信息收集
+- 加密基元（SHA-256、RSA 等）
+- 解压缩基元（zlib、lzss、lzvn 等）
+- ACPI 读取和修改的帮助程序代码
+- 文件、字符串、UEFI 变量的更高级别的抽象
+- 溢出检查分析
+- PE 映像加载，无 UEFI 安全启动冲突
+- 列表配置格式分析
+- PNG 图像操作
+- 文本输出和图形输出实现
+- XNU 内核驱动程序注入和修补程序引擎
 
-Early history of the codebase could be found in [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg) and PicoLib library set by The HermitCrabs Lab.
+代码库的早期历史可以在 [AppleSupportPkg](https://github.com/acidanthera/AppleSupportPkg)和 PicoLib 库中找到.
 
 #### OcGuardLib
 
-This library implements basic safety features recommended for the use within the project. It implements fast
-safe integral arithmetics mapping on compiler builtins, type alignment checking, and UBSan runtime,
-based on [NetBSD implementation](https://blog.netbsd.org/tnf/entry/introduction_to_µubsan_a_clean).
+此库实现建议在项目中使用的基本安全功能。它基于[NetBSD implementation](https://blog.netbsd.org/tnf/entry/introduction_to_µubsan_a_clean)实现，在编译器内置、类型对齐检查和 UBSan 运行时上实现快速安全的整体参数映射。
 
-The use of UBSan runtime requires the use of Clang compiler and `-fsanitize=undefined` argument. Refer to
-[Clang documentation](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) for more
-details.
+使用 UBSan 运行时需要使用 Clang 编译器和参数。有关详细信息 [Clang 文档](https://releases.llvm.org/7.0.0/tools/clang/docs/UndefinedBehaviorSanitizer.html) `-fsanitize=undefined` 
 
 #### Credits
 
