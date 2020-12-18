@@ -1,12 +1,12 @@
 ocvalidate Checklist
 =====================
 
-As of commit <TODO>, ocvalidate performs the following checks:
+As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 
 ## Global Rules
 - For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
-- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
+- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (To be fixed)
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 
 ## ACPI
@@ -35,6 +35,7 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Add->Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at Kernel->Quirks.
 - Delete->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
 - Delete->Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
+- Emulate->Cpuid1Data/Cpuid1Mask: Replacing CPUID data requires masking to be active for all the replaced bits.
 
 ## Misc
 - TODO
