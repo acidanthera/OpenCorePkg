@@ -53,16 +53,15 @@ GetCurrentTimestamp (
   VOID
   )
 {
-  struct timeval te;
-
+  struct timeval Time;
   //
   // Get current time.
   //
-  gettimeofday (&te, NULL);
+  gettimeofday (&Time, NULL);
   //
   // Return milliseconds.
   //
-  return te.tv_sec * 1000LL + te.tv_usec / 1000LL;
+  return Time.tv_sec * 1000LL + Time.tv_usec / 1000LL;
 }
 
 STATIC
@@ -176,25 +175,24 @@ CheckACPI (
   UINT32          MaskSize;
   UINT32          ReplaceMaskSize;
   BOOLEAN         HasCustomDSDT;
-  BOOLEAN         IsAddEnabled;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into ACPI checker!\n"));
 
   ErrorCount    = 0;
   UserAcpi      = Config->Acpi;
   HasCustomDSDT = FALSE;
-  IsAddEnabled  = FALSE;
 
   for (Index = 0; Index < UserAcpi.Add.Count; ++Index) {
     Path         = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Path);
     Comment      = OC_BLOB_GET (&UserAcpi.Add.Values[Index]->Comment);
-    IsAddEnabled = UserAcpi.Add.Values[Index]->Enabled;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllLegalCharacter (Path)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
@@ -205,7 +203,7 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (OcAsciiStriStr (Path, "DSDT") != NULL && IsAddEnabled) {
+    if (OcAsciiStriStr (Path, "DSDT") != NULL && UserAcpi.Add.Values[Index]->Enabled) {
       HasCustomDSDT = TRUE;
     }
   }
@@ -213,6 +211,9 @@ CheckACPI (
   for (Index = 0; Index < UserAcpi.Delete.Count; ++Index) {
     Comment = OC_BLOB_GET (&UserAcpi.Delete.Values[Index]->Comment);
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Delete[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
@@ -231,6 +232,9 @@ CheckACPI (
     MaskSize        = UserAcpi.Patch.Values[Index]->Mask.Size;
     ReplaceMaskSize = UserAcpi.Patch.Values[Index]->ReplaceMask.Size;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
@@ -241,6 +245,9 @@ CheckACPI (
     // as serialisation kills it.
     //
 
+    //
+    // Checks for size.
+    //
     if (FindSize != ReplaceSize) {
       DEBUG ((
         DEBUG_WARN,
@@ -272,8 +279,11 @@ CheckACPI (
     }
   }
 
+  //
+  // Check for RebaseRegions when using customised DSDT.
+  //
   if (HasCustomDSDT && !UserAcpi.Quirks.RebaseRegions) {
-    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when there is a custom DSDT table!\n"));
+    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when customised DSDT table is in use!\n"));
     ++ErrorCount;
   }
 
@@ -329,6 +339,9 @@ CheckBooter (
     Comment                = OC_BLOB_GET (&UserBooter.MmioWhitelist.Values[Index]->Comment);
     IsMmioWhitelistEnabled = UserBooter.MmioWhitelist.Values[Index]->Enabled;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->MmioWhitelist[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
@@ -348,16 +361,17 @@ CheckBooter (
     MaskSize        = UserBooter.Patch.Values[Index]->Mask.Size;
     ReplaceMaskSize = UserBooter.Patch.Values[Index]->ReplaceMask.Size;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllPrintableCharacter (Arch)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllLegalCharacter (Identifier)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
@@ -389,6 +403,9 @@ CheckBooter (
       ++ErrorCount;
     }
 
+    //
+    // Checks for size.
+    //
     if (FindSize != ReplaceSize) {
       DEBUG ((
         DEBUG_WARN,
@@ -424,7 +441,11 @@ CheckBooter (
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
 
-    if (!AsciiStringHasAllPrintableCharacter (Driver)) {
+    //
+    // Sanitise strings.
+    // NOTE: Skip '#' as it is treated as comments and thus is legal.
+    //
+    if (Driver[0] != '#' && !AsciiStringHasAllPrintableCharacter (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -497,22 +518,32 @@ CheckDeviceProperties (
     DevicePath        = NULL;
     TextualDevicePath = NULL;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] contains illegal character!\n", DeviceIndex));
       ++ErrorCount;
     }
 
+    //
+    // Convert ASCII device path to Unicode format.
+    //
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
-
     if (UnicodeDevicePath != NULL) {
+      //
+      // Firstly, convert Unicode device path to binary.
+      //
       DevicePath        = ConvertTextToDevicePath (UnicodeDevicePath);
+      //
+      // Secondly, convert binary back to Unicode device path.
+      //
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       FreePool (DevicePath);
 
       if (TextualDevicePath != NULL) {
         //
-        // If TextualDevicePath does not match the original UnicodeDevicePath after converting back,
-        // then it is borked.
+        // If the results do not match, then the original device path is borked.
         //
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
           DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
@@ -527,6 +558,9 @@ CheckDeviceProperties (
     for (PropertyIndex = 0; PropertyIndex < UserDevProp.Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
       AsciiProperty = OC_BLOB_GET (UserDevProp.Delete.Values[DeviceIndex]->Values[PropertyIndex]);
 
+      //
+      // Sanitise strings.
+      //
       if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
@@ -545,22 +579,32 @@ CheckDeviceProperties (
     DevicePath        = NULL;
     TextualDevicePath = NULL;
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] contains illegal character!\n", DeviceIndex));
       ++ErrorCount;
     }
 
+    //
+    // Convert ASCII device path to Unicode format.
+    //
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
-
     if (UnicodeDevicePath != NULL) {
+      //
+      // Firstly, convert Unicode device path to binary.
+      //
       DevicePath        = ConvertTextToDevicePath (UnicodeDevicePath);
+      //
+      // Secondly, convert binary back to Unicode device path.
+      //
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       FreePool (DevicePath);
 
       if (TextualDevicePath != NULL) {
         //
-        // If TextualDevicePath does not match the original UnicodeDevicePath after converting back,
-        // then it is borked.
+        // If the results do not match, then the original device path is borked.
         //
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
           DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] is borked!\n", DeviceIndex));
@@ -575,6 +619,9 @@ CheckDeviceProperties (
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
       AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
 
+      //
+      // Sanitise strings.
+      //
       if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
@@ -628,37 +675,39 @@ CheckKernel (
     MinKernel       = OC_BLOB_GET (&UserKernel.Add.Values[Index]->MinKernel);
     PlistPath       = OC_BLOB_GET (&UserKernel.Add.Values[Index]->PlistPath);
 
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Arch)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllLegalCharacter (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllLegalCharacter (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
     }
+    if (!AsciiStringHasAllLegalCharacter (PlistPath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
 
+    //
+    // FIXME: Handle correct kernel version checking.
+    //
     if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
     }
     if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
-      ++ErrorCount;
-    }
-
-    if (!AsciiStringHasAllLegalCharacter (PlistPath)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
     }
 
@@ -678,16 +727,18 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
       ++ErrorCount;
     }
+    if (AsciiStriCmp (GetFilenameSuffix (PlistPath), "plist") != 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
+      ++ErrorCount;
+    }
 
+    //
+    // TODO: Bring more special checks to kexts from Acidanthera.
+    //
     if (AsciiStrCmp (BundlePath, "Lilu.kext") == 0
       && AsciiStrCmp (ExecutablePath, "Contents/MacOS/Lilu") == 0) {
       HasLiluKext = TRUE;
       LiluIndex   = Index;
-    }
-
-    if (AsciiStriCmp (GetFilenameSuffix (PlistPath), "plist") != 0) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
-      ++ErrorCount;
     }
   }
 
@@ -698,16 +749,17 @@ CheckKernel (
     MaxKernel       = OC_BLOB_GET (&UserKernel.Block.Values[Index]->MaxKernel);
     MinKernel       = OC_BLOB_GET (&UserKernel.Block.Values[Index]->MinKernel);
     
+    //
+    // Sanitise strings.
+    //
     if (!AsciiStringHasAllPrintableCharacter (Arch)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllPrintableCharacter (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
     if (!AsciiStringHasAllLegalCharacter (Identifier)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
@@ -743,11 +795,11 @@ CheckKernel (
     }
   }
 
-  MaxKernel = OC_BLOB_GET (&UserKernel.Emulate.MaxKernel);
-  MinKernel = OC_BLOB_GET (&UserKernel.Emulate.MinKernel);
   //
   // FIXME: Handle correct kernel version checking.
   //
+  MaxKernel = OC_BLOB_GET (&UserKernel.Emulate.MaxKernel);
+  MinKernel = OC_BLOB_GET (&UserKernel.Emulate.MinKernel);
   if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
     ++ErrorCount;
@@ -757,12 +809,18 @@ CheckKernel (
     ++ErrorCount;
   }
   for (Index = 0; Index < (UINT32) ARRAY_SIZE (UserKernel.Emulate.Cpuid1Data); ++Index) {
+    //
+    // Replacing CPUID data requires masking to be active for all the replaced bits.
+    //
     if ((~UserKernel.Emulate.Cpuid1Mask[Index] & UserKernel.Emulate.Cpuid1Data[Index]) != 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data/Cpuid1Mask is borked!\n"));
       ++ErrorCount;
     }
   }
 
+  //
+  // DisableLinkeditJettison should be enabled when Lilu is in use.
+  //
   if (HasLiluKext && !IsDisableLinkeditJettisonEnabled) {
     DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", LiluIndex));
     ++ErrorCount;
@@ -882,6 +940,9 @@ CheckUEFI (
   Resolution                       = OC_BLOB_GET (&UserUefi.Output.Resolution);
   AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi.Audio.AudioDevice);
 
+  //
+  // Sanitise strings.
+  //
   if (!AsciiStringHasAllPrintableCharacter (AsciiAudioDevicePath)) {
     DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice contains illegal character!\n"));
     ++ErrorCount;
@@ -906,6 +967,9 @@ CheckUEFI (
     DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer contains illegal character!\n"));
     ++ErrorCount;
   } else {
+    //
+    // Check whether TextRenderer has System prefix.
+    //
     if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
       IsTextRendererSystem = TRUE;
     }
@@ -918,17 +982,25 @@ CheckUEFI (
   }
 
   if (AsciiAudioDevicePath[0] != '\0') {
+    //
+    // Convert ASCII device path to Unicode format.
+    //
     UnicodeAudioDevicePath = AsciiStrCopyToUnicode (AsciiAudioDevicePath, 0);
 
     if (UnicodeAudioDevicePath != NULL) {
+      //
+      // Firstly, convert Unicode device path to binary.
+      //
       AudioDevicePath        = ConvertTextToDevicePath (UnicodeAudioDevicePath);
+      //
+      // Secondly, convert binary back to Unicode device path.
+      //
       TextualAudioDevicePath = ConvertDevicePathToText (AudioDevicePath, FALSE, FALSE);
       FreePool (AudioDevicePath);
 
       if (TextualAudioDevicePath != NULL) {
         //
-        // If TextualAudioDevicePath does not match the original UnicodeAudioDevicePath after converting back,
-        // then it is borked.
+        // If the results do not match, then the original device path is borked.
         //
         if (OcStriCmp (UnicodeAudioDevicePath, TextualAudioDevicePath) != 0) {
           DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked!\n"));
@@ -945,13 +1017,17 @@ CheckUEFI (
     Driver = OC_BLOB_GET (UserUefi.Drivers.Values[Index]);
 
     //
-    // Skip '#' as it is treated as comments and thus is legal.
+    // Sanitise strings.
+    // NOTE: Skip '#' as it is treated as comments and thus is legal.
     //
     if (Driver[0] != '#' && !AsciiStringHasAllLegalCharacter (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
     }
 
+    //
+    // Brute-force to check duplicated Drivers.
+    //
     for (Index2 = Index + 1; Index2 < UserUefi.Drivers.Count; ++Index2) {
       if (AsciiStrCmp (Driver, OC_BLOB_GET (UserUefi.Drivers.Values[Index2])) == 0) {
         DEBUG ((
@@ -968,12 +1044,10 @@ CheckUEFI (
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
-
     if (AsciiStrCmp (Driver, "OpenUsbKbDxe.efi") == 0) {
       HasOpenUsbKbDxeEfiDriver   = TRUE;
       IndexOpenUsbKbDxeEfiDriver = Index;
     }
-
     if (AsciiStrCmp (Driver, "Ps2KeyboardDxe.efi") == 0) {
       HasPs2KeyboardDxeEfiDriver   = TRUE;
       IndexPs2KeyboardDxeEfiDriver = Index;
@@ -984,6 +1058,7 @@ CheckUEFI (
     DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupport is enabled, but PointerSupportMode is not ASUS!\n"));
     ++ErrorCount;
   }
+
   if (AsciiStrCmp (KeySupportMode, "Auto") != 0
     && AsciiStrCmp (KeySupportMode, "V1") != 0
     && AsciiStrCmp (KeySupportMode, "V2") != 0
@@ -992,22 +1067,30 @@ CheckUEFI (
     ++ErrorCount;
   }
 
-  if (IsRequestBootVarRoutingEnabled && !HasOpenRuntimeEfiDriver) {
-    DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
-    ++ErrorCount;
+  if (IsRequestBootVarRoutingEnabled) {
+    if (!HasOpenRuntimeEfiDriver) {
+      DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
+      ++ErrorCount;
+    }
+  } else {
+    if (IsDeduplicateBootOrderEnabled) {
+      DEBUG ((DEBUG_WARN, "UEFI->Quirks->DeduplicateBootOrder is enabled, but RequestBootVarRouting is not enabled altogether!\n"));
+      ++ErrorCount;
+    }
   }
-  if (IsDeduplicateBootOrderEnabled && !IsRequestBootVarRoutingEnabled) {
-    DEBUG ((DEBUG_WARN, "UEFI->Quirks->DeduplicateBootOrder is enabled, but RequestBootVarRouting is not enabled altogether!\n"));
-    ++ErrorCount;
+
+  if (IsKeySupportEnabled) {
+    if (HasOpenUsbKbDxeEfiDriver) {
+      DEBUG ((DEBUG_WARN, "OpenUsbKbDxe.efi at UEFI->Drivers[%u] should NEVER be used together with UEFI->Input->KeySupport!\n", IndexOpenUsbKbDxeEfiDriver));
+      ++ErrorCount;
+    }
+  } else {
+    if (HasPs2KeyboardDxeEfiDriver) {
+      DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupport should be enabled when Ps2KeyboardDxe.efi is in use!\n"));
+      ++ErrorCount;
+    }
   }
-  if (HasOpenUsbKbDxeEfiDriver && IsKeySupportEnabled) {
-    DEBUG ((DEBUG_WARN, "OpenUsbKbDxe.efi at UEFI->Drivers[%u] should NEVER be used together with UEFI->Input->KeySupport!\n", IndexOpenUsbKbDxeEfiDriver));
-    ++ErrorCount;
-  }
-  if (HasPs2KeyboardDxeEfiDriver && !IsKeySupportEnabled) {
-    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupport should be enabled when Ps2KeyboardDxe.efi is in use!\n"));
-    ++ErrorCount;
-  }
+
   if (HasOpenUsbKbDxeEfiDriver && HasPs2KeyboardDxeEfiDriver) {
     DEBUG ((
       DEBUG_WARN,
@@ -1038,7 +1121,7 @@ CheckUEFI (
   }
 
   //
-  // Parse Output->Resolution.
+  // Parse Output->Resolution by calling OpenCore libraries.
   //
   OcParseScreenResolution (
     Resolution,
@@ -1050,7 +1133,7 @@ CheckUEFI (
   if (Resolution[0] != '\0'
     && !UserSetMax
     && (UserWidth == 0 || UserHeight == 0)) {
-    DEBUG ((DEBUG_WARN, "User->Output->Resolution is borked, please check Configurations.pdf!\n"));
+    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check Configurations.pdf!\n"));
     ++ErrorCount;
   }
 
@@ -1069,6 +1152,9 @@ CheckConfig (
 
   ErrorCount = 0;
 
+  //
+  // Load all checkers.
+  //
   STATIC CONFIG_CHECK ConfigCheckers[] = {
     &CheckACPI,
     &CheckBooter,
@@ -1081,6 +1167,9 @@ CheckConfig (
   };
   ConfigCheckersSize = sizeof (ConfigCheckers) / sizeof (ConfigCheckers[0]);
 
+  //
+  // Pass config structure to all checkers.
+  //
   for (Index = 0; Index < ConfigCheckersSize; ++Index) {
     ErrorCount += ConfigCheckers[Index] (Config);
   }
@@ -1097,10 +1186,16 @@ int main(int argc, const char *argv[]) {
   EFI_STATUS         Status;
   UINT32             ErrorCount;
 
+  //
+  // Enable PCD debug logging.
+  //
   PcdGet8  (PcdDebugPropertyMask)         |= DEBUG_PROPERTY_DEBUG_CODE_ENABLED;
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
+  //
+  // Read config file.
+  //
   ConfigFileName   = argc > 1 ? argv[1] : "config.plist";
   ConfigFileBuffer = readFile (ConfigFileName, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
@@ -1108,9 +1203,15 @@ int main(int argc, const char *argv[]) {
     return -1;
   }
 
+  //
+  // Record the current time when action starts.
+  //
   ExecTimeStart = GetCurrentTimestamp ();
 
-  Status   = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize);
+  //
+  // Initialise config structure to be checked, and exit on error.
+  //
+  Status = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
