@@ -8,6 +8,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
 - For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (To be fixed)
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 
 ## ACPI
 - Add->Entry[N]->Path: `.dsl` filename suffix is not accepted.
@@ -22,11 +23,9 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - Quirks->ProvideMaxSlide: If set to a number greater than zero, ProvideCustomSlide should be enabled altogether.
 - Quirks->DisableVariableWrite/EnableWriteUnprotector/ProvideCustomSlide: When either is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
 - Quirks->EnableWriteUnprotector/RebuildAppleMemoryMap: These two cannot be enabled simultaneously.
-- Quirks->RebuildAppleMemoryMap: When enabled, SyncRuntimePermissions is highly recommended to be enabled as well.
 
 ## DeviceProperties
-- Add->Entry[N]: Ensure correct format.
-- Add->Delete[N]: Ensure correct format.
+- Check requirements for Device Paths in Section Global Rules.
 
 ## Kernel
 - Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
