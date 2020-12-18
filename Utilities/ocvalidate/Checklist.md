@@ -11,30 +11,36 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 
 ## ACPI
-- Add->Entry[N]->Path: `.dsl` filename suffix is not accepted.
-- Add->Entry[N]->Path: If a customised DSDT is added, remind to enable RebaseRegions in Quirks.
+#### Add
+- Entry[N]->Path: `.dsl` filename suffix is not accepted.
+- Entry[N]->Path: If a customised DSDT is added and enabled, `RebaseRegions` in `Quirks` should be enabled.
 
 ## Booter
-- MmioWhitelist->Entry[N]->Enabled: When at least one entry is enabled, remind to enable DevirtualiseMmio in Quirks.
-- Patch->Entry[N]->Arch: Only `Empty string, Any, i386, x86_64` are accepted.
-- Patch->Entry[N]->Identifier: Only `Empty string, Any, Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
-- Quirks->AllowRelocationBlock: When enabled, ProvideCustomSlide should be enabled altogether.
-- Quirks->EnableSafeModeSlide: When enabled, ProvideCustomSlide should be enabled altogether.
-- Quirks->ProvideMaxSlide: If set to a number greater than zero, ProvideCustomSlide should be enabled altogether.
-- Quirks->DisableVariableWrite/EnableWriteUnprotector/ProvideCustomSlide: When either is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
-- Quirks->EnableWriteUnprotector/RebuildAppleMemoryMap: These two cannot be enabled simultaneously.
+#### MmioWhitelist
+- Entry[N]->Enabled: When at least one entry is enabled, `DevirtualiseMmio` in `Quirks` should be enabled.
+#### Patch
+- Entry[N]->Arch: Only `Empty string`, `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->Identifier: Only `Empty string`, `Any`, `Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
+#### Quirks
+- When `AllowRelocationBlock` is enabled, `ProvideCustomSlide` should be enabled altogether.
+- When `EnableSafeModeSlide` is enabled, `ProvideCustomSlide` should be enabled altogether.
+- If `ProvideMaxSlide` is set to a number greater than zero (i.e. is enabled), `ProvideCustomSlide` should be enabled altogether.
+- When `DisableVariableWrite`, `EnableWriteUnprotector`, or `ProvideCustomSlide` is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
 
 ## DeviceProperties
 - Check requirements for Device Paths in Section Global Rules.
 
 ## Kernel
-- Add->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
-- Add->Entry[N]->BundlePath: `.kext` filename suffix should exist.
-- Add->Entry[N]->PlistPath: `.plist` filename suffix should exist.
-- Add->Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at Kernel->Quirks.
-- Delete->Entry[N]->Arch: Only `Any, i386, x86_64` are accepted.
-- Delete->Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
-- Emulate->Cpuid1Data/Cpuid1Mask: Replacing CPUID data requires masking to be active for all the replaced bits.
+#### Add
+- Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->BundlePath: Filename should have `.kext` suffix.
+- Entry[N]->PlistPath: Filename should have `.plist` suffix.
+- Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at `Kernel->Quirks`.
+#### Delete
+- Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
+#### Emulate
+- Replacing CPUID data requires masking to be active (set to non-zero) for all the replaced bits, in `Cpuid1Data` and `Cpuid1Mask` respectively.
 
 ## Misc
 - TODO
@@ -46,14 +52,19 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - TODO
 
 ## UEFI
-- APFS->EnableJumpstart: When enabled, Misc->Security->ScanPolicy should have OC_SCAN_ALLOW_FS_APFS (bit 8) set, or ScanPolicy should be 0 (failsafe value).
-- Quirks->RequestBootVarRouting: When enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
-- Quirks->DeduplicateBootOrder: When enabled, RequestBootVarRouting should be enabled altogether.
-- Driver OpenUsbKbDxe.efi: When in use, UEFI->Input->KeySupport should never be enabled altogether.
-- Driver Ps2KeyboardDxe.efi: When in use, UEFI->Input->KeySupport should be enabled altogether.
-- OpenUsbKbDxe.efi and Ps2KeyboardDxe.efi should never co-exist.
-- Input->KeySupportMode: Ensured to be only `Auto, V1, V2, AMI`.
-- Input->PointerSupportMode: When PointerSupport is enabled, this should only be `ASUS`.
-- Output->ClearScreenOnModeSwitch/IgnoreTextInGraphics/ReplaceTabWithSpace/SanitiseClearScreen: These only apply to `System` TextRenderer
-- Output->Resolution: Ensure correct format.
-- Drivers[N]: No driver should be loaded twice.
+#### APFS
+- When `EnableJumpstart` is enabled, `ScanPolicy` at `Misc->Security` should have `OC_SCAN_ALLOW_FS_APFS` (bit 8) set, or `ScanPolicy` should be `0` (failsafe value).
+#### Quirks
+- When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
+- When `DeduplicateBootOrder` is enabled, `RequestBootVarRouting` should be enabled altogether.
+#### Drivers
+- No drivers should be loaded more than once (i.e. there should NOT be any duplicated entries in this section).
+- When `OpenUsbKbDxe.efi` is in use, `KeySupport` at `UEFI->Input` should NEVER be enabled altogether.
+- When `Ps2KeyboardDxe.efi` is in use, `KeySupport` at `UEFI->Input` should be enabled altogether.
+- `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
+#### Input
+- The value of `KeySupportMode` can only be `Auto`, `V1`, `V2`, or `AMI`.
+- When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.
+#### Output
+- `ClearScreenOnModeSwitch`, `IgnoreTextInGraphics`, `ReplaceTabWithSpace`, and `SanitiseClearScreen` only apply to `System` TextRenderer
+- `Resolution` should match `NUMBERxNUMBER` or `NUMBERxNUMBER@NUMBER` sequences (unless it is an `Empty string` or is set to `Max`).
