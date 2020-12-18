@@ -156,8 +156,7 @@ OcLoadDevPropsSupport (
           DEBUG_INFO,
           "OC: Setting devprop %a:%a - ignored, exists\n",
           AsciiDevicePath,
-          AsciiProperty,
-          Status
+          AsciiProperty
           ));
       }
 
