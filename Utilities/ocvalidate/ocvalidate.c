@@ -160,6 +160,30 @@ ReportError (
 }
 
 STATIC
+BOOLEAN
+DataHasProperMasking (
+  IN  CONST VOID   *Data,
+  IN  CONST VOID   *Mask,
+  IN        UINTN  Size
+  )
+{
+  CONST UINT8  *ByteData;
+  CONST UINT8  *ByteMask;
+  UINTN        Index;
+
+  ByteData = Data;
+  ByteMask = Mask;
+
+  for (Index = 0; Index < Size; ++Index) {
+    if ((ByteData[Index] & ~ByteMask[Index]) != 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
+STATIC
 UINT32
 CheckACPI (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -170,9 +194,13 @@ CheckACPI (
   OC_ACPI_CONFIG  UserAcpi;
   CONST CHAR8     *Path;
   CONST CHAR8     *Comment;
+  CONST UINT8     *Find;
   UINT32          FindSize;
+  CONST UINT8     *Replace;
   UINT32          ReplaceSize;
+  CONST UINT8     *Mask;
   UINT32          MaskSize;
+  CONST UINT8     *ReplaceMask;
   UINT32          ReplaceMaskSize;
   BOOLEAN         HasCustomDSDT;
 
@@ -227,9 +255,13 @@ CheckACPI (
 
   for (Index = 0; Index < UserAcpi.Patch.Count; ++Index) {
     Comment         = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->Comment);
+    Find            = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->Find);
     FindSize        = UserAcpi.Patch.Values[Index]->Find.Size;
+    Replace         = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->Replace);
     ReplaceSize     = UserAcpi.Patch.Values[Index]->Replace.Size;
+    Mask            = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->Mask);
     MaskSize        = UserAcpi.Patch.Values[Index]->Mask.Size;
+    ReplaceMask     = OC_BLOB_GET (&UserAcpi.Patch.Values[Index]->ReplaceMask);
     ReplaceMaskSize = UserAcpi.Patch.Values[Index]->ReplaceMask.Size;
 
     //
@@ -258,24 +290,39 @@ CheckACPI (
         ));
       ++ErrorCount;
     }
-    if (MaskSize > 0 && MaskSize != FindSize) {
-      DEBUG ((DEBUG_WARN,
-        "ACPI->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n",
-        Index,
-        MaskSize,
-        FindSize
-        ));
-      ++ErrorCount;
+    if (MaskSize > 0) {
+      if (MaskSize != FindSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "ACPI->Patch[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
+          Index,
+          MaskSize,
+          FindSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Find, Mask, FindSize)) {
+          DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Find requires Mask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
     }
-    if (ReplaceMaskSize > 0 && ReplaceMaskSize != FindSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "ACPI->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n",
-        Index,
-        ReplaceMaskSize,
-        FindSize
-        ));
-      ++ErrorCount;
+    if (ReplaceMaskSize > 0) {
+      if (ReplaceMaskSize != ReplaceSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "ACPI->Patch[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
+          Index,
+          ReplaceMaskSize,
+          ReplaceSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+          DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
     }
   }
 
@@ -304,9 +351,13 @@ CheckBooter (
   CONST CHAR8       *Arch;
   CONST CHAR8       *Identifier;
   CONST CHAR8       *Driver;
+  CONST UINT8       *Find;
   UINT32            FindSize;
+  CONST UINT8       *Replace;
   UINT32            ReplaceSize;
+  CONST UINT8       *Mask;
   UINT32            MaskSize;
+  CONST UINT8       *ReplaceMask;
   UINT32            ReplaceMaskSize;
   UINT8             MaxSlide;
   BOOLEAN           IsMmioWhitelistEnabled;
@@ -356,9 +407,13 @@ CheckBooter (
     Comment         = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Comment);
     Arch            = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Arch);
     Identifier      = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Identifier);
+    Find            = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Find);
     FindSize        = UserBooter.Patch.Values[Index]->Find.Size;
+    Replace         = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Replace);
     ReplaceSize     = UserBooter.Patch.Values[Index]->Replace.Size;
+    Mask            = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->Mask);
     MaskSize        = UserBooter.Patch.Values[Index]->Mask.Size;
+    ReplaceMask     = OC_BLOB_GET (&UserBooter.Patch.Values[Index]->ReplaceMask);
     ReplaceMaskSize = UserBooter.Patch.Values[Index]->ReplaceMask.Size;
 
     //
@@ -416,25 +471,39 @@ CheckBooter (
         ));
       ++ErrorCount;
     }
-    if (MaskSize > 0 && MaskSize != FindSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Booter->Patch[%u] has Mask set but its size is different from Find/Replace (%u vs %u)!\n",
-        Index,
-        MaskSize,
-        FindSize
-        ));
-      ++ErrorCount;
+    if (MaskSize > 0) {
+      if (MaskSize != FindSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "Booter->Patch[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
+          Index,
+          MaskSize,
+          FindSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Find, Mask, FindSize)) {
+          DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Find requires Mask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
     }
-    if (ReplaceMaskSize > 0 && ReplaceMaskSize != FindSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Booter->Patch[%u] has ReplaceMask set but its size is different from Find/Replace (%u vs %u)!\n",
-        Index,
-        ReplaceMaskSize,
-        FindSize
-        ));
-      ++ErrorCount;
+    if (ReplaceMaskSize > 0) {
+      if (ReplaceMaskSize != ReplaceSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "Booter->Patch[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
+          Index,
+          ReplaceMaskSize,
+          ReplaceSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+          DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
     }
   }
 
@@ -808,14 +877,10 @@ CheckKernel (
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel (currently set to %a) is borked!\n", MinKernel));
     ++ErrorCount;
   }
-  for (Index = 0; Index < (UINT32) ARRAY_SIZE (UserKernel.Emulate.Cpuid1Data); ++Index) {
-    //
-    // Replacing CPUID data requires masking to be active for all the replaced bits.
-    //
-    if ((~UserKernel.Emulate.Cpuid1Mask[Index] & UserKernel.Emulate.Cpuid1Data[Index]) != 0) {
-      DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data/Cpuid1Mask is borked!\n"));
-      ++ErrorCount;
-    }
+
+  if (!DataHasProperMasking (UserKernel.Emulate.Cpuid1Data, UserKernel.Emulate.Cpuid1Mask, sizeof (UserKernel.Emulate.Cpuid1Data))) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
+    ++ErrorCount;
   }
 
   //

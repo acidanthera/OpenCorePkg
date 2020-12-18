@@ -5,7 +5,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 
 ## Global Rules
 - For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
-- For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
+- For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
 - For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (To be fixed)
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
@@ -39,8 +39,6 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 #### Delete
 - Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
 - Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
-#### Emulate
-- Replacing CPUID data requires masking to be active (set to non-zero) for all the replaced bits, in `Cpuid1Data` and `Cpuid1Mask` respectively.
 
 ## Misc
 - TODO
