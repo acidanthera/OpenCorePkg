@@ -520,7 +520,7 @@ CheckDeviceProperties (
         }
       }
 
-      FreePool ((VOID *) UnicodeDevicePath);
+      FreePool (UnicodeDevicePath);
       FreePool (TextualDevicePath);
     }
 
@@ -568,7 +568,7 @@ CheckDeviceProperties (
         }
       }
       
-      FreePool ((VOID *) UnicodeDevicePath);
+      FreePool (UnicodeDevicePath);
       FreePool (TextualDevicePath);
     }
 
@@ -822,35 +822,39 @@ CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  UINT32            Index2;
-  UINT32            IndexOpenUsbKbDxeEfiDriver;
-  UINT32            IndexPs2KeyboardDxeEfiDriver;
-  OC_UEFI_CONFIG    UserUefi;
-  OC_MISC_CONFIG    UserMisc;
-  CONST CHAR8       *Driver;
-  CONST CHAR8       *TextRenderer;
-  CONST CHAR8       *ConsoleMode;
-  CONST CHAR8       *PointerSupportMode;
-  CONST CHAR8       *KeySupportMode;
-  BOOLEAN           HasOpenRuntimeEfiDriver;
-  BOOLEAN           HasOpenUsbKbDxeEfiDriver;
-  BOOLEAN           HasPs2KeyboardDxeEfiDriver;
-  BOOLEAN           IsRequestBootVarRoutingEnabled;
-  BOOLEAN           IsDeduplicateBootOrderEnabled;
-  BOOLEAN           IsKeySupportEnabled;
-  BOOLEAN           IsTextRendererSystem;
-  BOOLEAN           IsClearScreenOnModeSwitchEnabled;
-  BOOLEAN           IsIgnoreTextInGraphicsEnabled;
-  BOOLEAN           IsReplaceTabWithSpaceEnabled;
-  BOOLEAN           IsSanitiseClearScreenEnabled;
-  BOOLEAN           IsPointerSupportEnabled;
-  CONST CHAR8       *Resolution;
-  UINT32            UserWidth;
-  UINT32            UserHeight;
-  UINT32            UserBpp;
-  BOOLEAN           UserSetMax;
+  UINT32                    ErrorCount;
+  UINT32                    Index;
+  UINT32                    Index2;
+  UINT32                    IndexOpenUsbKbDxeEfiDriver;
+  UINT32                    IndexPs2KeyboardDxeEfiDriver;
+  OC_UEFI_CONFIG            UserUefi;
+  OC_MISC_CONFIG            UserMisc;
+  CONST CHAR8               *Driver;
+  CONST CHAR8               *TextRenderer;
+  CONST CHAR8               *ConsoleMode;
+  CONST CHAR8               *PointerSupportMode;
+  CONST CHAR8               *KeySupportMode;
+  BOOLEAN                   HasOpenRuntimeEfiDriver;
+  BOOLEAN                   HasOpenUsbKbDxeEfiDriver;
+  BOOLEAN                   HasPs2KeyboardDxeEfiDriver;
+  BOOLEAN                   IsRequestBootVarRoutingEnabled;
+  BOOLEAN                   IsDeduplicateBootOrderEnabled;
+  BOOLEAN                   IsKeySupportEnabled;
+  BOOLEAN                   IsTextRendererSystem;
+  BOOLEAN                   IsClearScreenOnModeSwitchEnabled;
+  BOOLEAN                   IsIgnoreTextInGraphicsEnabled;
+  BOOLEAN                   IsReplaceTabWithSpaceEnabled;
+  BOOLEAN                   IsSanitiseClearScreenEnabled;
+  BOOLEAN                   IsPointerSupportEnabled;
+  CONST CHAR8               *Resolution;
+  UINT32                    UserWidth;
+  UINT32                    UserHeight;
+  UINT32                    UserBpp;
+  BOOLEAN                   UserSetMax;
+  CONST CHAR8               *AsciiAudioDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *AudioDevicePath;
+  CHAR16                    *UnicodeAudioDevicePath;
+  CHAR16                    *TextualAudioDevicePath;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
 
@@ -876,7 +880,12 @@ CheckUEFI (
   IsTextRendererSystem             = FALSE;
   ConsoleMode                      = OC_BLOB_GET (&UserUefi.Output.ConsoleMode);
   Resolution                       = OC_BLOB_GET (&UserUefi.Output.Resolution);
+  AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi.Audio.AudioDevice);
 
+  if (!AsciiStringHasAllPrintableCharacter (AsciiAudioDevicePath)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice contains illegal character!\n"));
+    ++ErrorCount;
+  }
   if (!AsciiStringHasAllPrintableCharacter (PointerSupportMode)) {
     DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupportMode contains illegal character!\n"));
     ++ErrorCount;
@@ -906,6 +915,30 @@ CheckUEFI (
     && (UserMisc.Security.ScanPolicy != 0 && (UserMisc.Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) {
     DEBUG ((DEBUG_WARN, "UEFI->APFS->EnableJumpstart is enabled, but Misc->Security->ScanPolicy does not allow APFS scanning!\n"));
     ++ErrorCount;
+  }
+
+  if (AsciiAudioDevicePath[0] != '\0') {
+    UnicodeAudioDevicePath = AsciiStrCopyToUnicode (AsciiAudioDevicePath, 0);
+
+    if (UnicodeAudioDevicePath != NULL) {
+      AudioDevicePath        = ConvertTextToDevicePath (UnicodeAudioDevicePath);
+      TextualAudioDevicePath = ConvertDevicePathToText (AudioDevicePath, FALSE, FALSE);
+      FreePool (AudioDevicePath);
+
+      if (TextualAudioDevicePath != NULL) {
+        //
+        // If TextualAudioDevicePath does not match the original UnicodeAudioDevicePath after converting back,
+        // then it is borked.
+        //
+        if (OcStriCmp (UnicodeAudioDevicePath, TextualAudioDevicePath) != 0) {
+          DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked!\n"));
+          ++ErrorCount;
+        }
+      }
+      
+      FreePool (UnicodeAudioDevicePath);
+      FreePool (TextualAudioDevicePath);
+    }
   }
 
   for (Index = 0; Index < UserUefi.Drivers.Count; ++Index) {
