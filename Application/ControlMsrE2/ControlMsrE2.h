@@ -79,9 +79,9 @@ typedef struct ONE_OF_CONTEXT_ {
 /**
   Callback - What to do, when a IfrHeader with a defined OP_CODE is found
 
-  @param[in] IfrHeader   Current IfrHeader under scrutiny
-  @param[in] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
-  @param[in] Context     Ptr to Hanlder specific data
+  @param[in]     IfrHeader   Current IfrHeader under scrutiny
+  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
+  @param[in]     Context     Ptr to Handler specific data
 **/
 typedef
 VOID
@@ -113,6 +113,9 @@ extern UINTN Flags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2
+
+  @retval EFI_SUCCESS    Success
+  @retval Other          Fail to verify MSR 0xE2 status
 **/
 extern
 EFI_STATUS
@@ -124,6 +127,9 @@ VerifyMSRE2 (
 
 /**
   Wait for Keypress of Y or N. Ignores case.
+
+  @retval TRUE     Keypress is Y
+  @retval FALSE    Keypress is N
 **/
 BOOLEAN
 ReadYN (
@@ -132,6 +138,8 @@ ReadYN (
 
 /**
   Wait for any key press
+
+  @retval Other    Unicode for pressed key
 **/
 CHAR16
 ReadAnyKey (
@@ -140,14 +148,22 @@ ReadAnyKey (
 
 /**
   Parse commandline arguments
+
+  @retval EFI_SUCCESS               Success
+  @retval EFI_OUT_OF_RESOURCES      Could not allocate memory
+  @retval EFI_INVALID_PARAMETER     More than 1 parameter provided
 **/
-UINTN
+EFI_STATUS
 InterpretArguments (
   VOID
   );
 
 /**
   Displays SearchString and allows to change it
+
+  @param[in]     SearchString    Current configuration string
+
+  @retval        Other           Modified string
 **/
 EFI_STRING
 ModifySearchString (
@@ -156,6 +172,11 @@ ModifySearchString (
 
 /**
   Copies Package Lists to Memory
+
+  @param[in]     Handle     An EFI_HII_HANDLE that corresponds
+                            to the desired package list in the
+                            HIIdatabase.
+
 **/
 EFI_HII_PACKAGE_LIST_HEADER *
 HiiExportPackageLists (
@@ -164,6 +185,10 @@ HiiExportPackageLists (
 
 /**
   Callback to Handle IFR_ONE_OF_OP
+
+  @param[in]     IfrHeader   Current IfrHeader under scrutiny
+  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
+  @param[in]     Context     Ptr to Handler specific data
 **/
 VOID
 HandleOneOf (
@@ -174,6 +199,8 @@ HandleOneOf (
 
 /**
   Displaying and Changing value of BIOS Option. Including UI
+
+  @param[in]     Context     Ptr to Handler specific data
 **/
 VOID
 HandleOneVariable (
@@ -182,6 +209,12 @@ HandleOneVariable (
 
 /**
   Call Handler for each occurence of opCode, starting to search at header. Called recursively
+
+  @param[in]     Header      Current Header under scrutiny
+  @param[in]     OpCode      Type for OpCode
+  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
+  @param[in]     Context     Ptr to Handler specific data
+  @param[in]     Handler     Handler for data
 **/
 EFI_IFR_OP_HEADER *
 DoForEachOpCode (
