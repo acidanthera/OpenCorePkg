@@ -585,7 +585,6 @@ CheckDeviceProperties (
         ++ErrorCount;
       }
     }
-
   }
 
   return ReportError (__func__, ErrorCount);
@@ -714,6 +713,9 @@ CheckKernel (
       ++ErrorCount;
     }
 
+    //
+    // FIXME: Handle correct kernel version checking.
+    //
     if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
       ++ErrorCount;
@@ -741,9 +743,25 @@ CheckKernel (
     }
   }
 
+  MaxKernel = OC_BLOB_GET (&UserKernel.Emulate.MaxKernel);
+  MinKernel = OC_BLOB_GET (&UserKernel.Emulate.MinKernel);
   //
-  // TODO: Handle Emulate checks here...
+  // FIXME: Handle correct kernel version checking.
   //
+  if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
+    ++ErrorCount;
+  }
+  if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel (currently set to %a) is borked!\n", MinKernel));
+    ++ErrorCount;
+  }
+  for (Index = 0; Index < (UINT32) ARRAY_SIZE (UserKernel.Emulate.Cpuid1Data); ++Index) {
+    if ((~UserKernel.Emulate.Cpuid1Mask[Index] & UserKernel.Emulate.Cpuid1Data[Index]) != 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data/Cpuid1Mask is borked!\n"));
+      ++ErrorCount;
+    }
+  }
 
   if (HasLiluKext && !IsDisableLinkeditJettisonEnabled) {
     DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", LiluIndex));
