@@ -4,7 +4,7 @@ ocvalidate Checklist
 As of commit <TODO>, ocvalidate performs the following checks:
 
 ## Global Rules
-- For all comments (Section `Comment` in all possible fields throughout the whole config) only ASCII printable characters are accepted.
+- For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases.
 - For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
@@ -55,7 +55,5 @@ As of commit <TODO>, ocvalidate performs the following checks:
 - Input->KeySupportMode: Ensured to be only `Auto, V1, V2, AMI`.
 - Input->PointerSupportMode: When PointerSupport is enabled, this should only be `ASUS`.
 - Output->ClearScreenOnModeSwitch/IgnoreTextInGraphics/ReplaceTabWithSpace/SanitiseClearScreen: These only apply to `System` TextRenderer
-- Output->ConsoleMode: Only ASCII printable characters are accepted.
-- Output->TextRenderer: Only ASCII printable characters are accepted.
 - Output->Resolution: Ensure correct format.
 - Drivers[N]: No driver should be loaded twice.
