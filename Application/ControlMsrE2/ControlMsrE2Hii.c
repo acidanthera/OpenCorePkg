@@ -26,27 +26,30 @@ HiiExportPackageLists (
 {
   EFI_STATUS                    Status;
   UINTN                         BufferSize;
-  EFI_HII_PACKAGE_LIST_HEADER   *Result;
+  EFI_HII_PACKAGE_LIST_HEADER   *Buffer;
 
   BufferSize = 0;
 
+  //
+  // Call first time with zero buffer length.
+  // Should fail with EFI_BUFFER_TOO_SMALL.
+  //
   Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, NULL);
-
   if (Status == EFI_BUFFER_TOO_SMALL && BufferSize > 0) {
-    Result = (EFI_HII_PACKAGE_LIST_HEADER *) AllocatePool (BufferSize);
-
-    if (Result == NULL) {
-      return NULL;
+    //
+    // Allocate buffer to hold the HII Database.
+    //
+    Buffer = (EFI_HII_PACKAGE_LIST_HEADER *) AllocatePool (BufferSize);
+    if (Buffer != NULL) {
+      //
+      // Export HII Database into the buffer.
+      //
+      Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, Buffer);
+      if (!EFI_ERROR (Status)) {
+        return Buffer;
+      }
+      FreePool (Buffer);
     }
-
-    Status = gHiiDatabase->ExportPackageLists (gHiiDatabase, Handle, &BufferSize, Result);
-
-    if (EFI_ERROR (Status)) {
-      FreePool (Result);
-      return NULL;
-    }
-
-    return Result;
   }
   return NULL;
 }
@@ -55,7 +58,7 @@ EFI_IFR_OP_HEADER *
 DoForEachOpCode (
   IN     EFI_IFR_OP_HEADER   *Header,
   IN     UINT8               OpCode,
-  IN OUT BOOLEAN             *Stop     OPTIONAL,
+  IN OUT BOOLEAN             *Stop  OPTIONAL,
   IN     VOID                *Context,
   IN     OP_CODE_HANDLER     Handler
   )
@@ -91,7 +94,7 @@ DoForEachOpCode (
 VOID
 HandleVarStore (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT BOOLEAN             *Stop       OPTIONAL,
+  IN OUT BOOLEAN             *Stop  OPTIONAL,
   IN OUT VOID                *Context
   )
 {
@@ -130,7 +133,7 @@ GetVarStore (
 VOID
 HandleOneOf (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
-  IN OUT BOOLEAN             *Stop       OPTIONAL,
+  IN OUT BOOLEAN             *Stop  OPTIONAL,
   IN OUT VOID                *Context
   )
 {
@@ -152,7 +155,7 @@ HandleOneOf (
   HiiString = HiiGetString (Ctx->EfiHandle, IfrOneOf->Question.Header.Prompt, "en-US");
 
   if (HiiString == NULL) {
-    DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
+    DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for HiiString\n"));
     return;
   }
 
@@ -269,7 +272,7 @@ HandleOneVariable (
   HiiString = AsciiStrCopyToUnicode ((CHAR8 *) Context->IfrVarStore->Name, 0);
 
   if (HiiString == NULL) {
-    DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
+    DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for HiiString\n"));
     return;
   }
 
@@ -295,7 +298,8 @@ HandleOneVariable (
                   );
 
   if (Status == EFI_BUFFER_TOO_SMALL) {
-    if ((Data = AllocatePool (DataSize)) != NULL) {
+    Data = AllocatePool (DataSize);
+    if (Data != NULL) {
       Status = gRT->GetVariable (
                       HiiString,
                       (VOID *) &Context->IfrVarStore->Guid,
@@ -372,14 +376,14 @@ HandleOneVariable (
           DEBUG ((DEBUG_ERROR, "Value is as wanted already. No action required.\n"));
         }
       } else {
-        DEBUG ((DEBUG_ERROR, "\nCouldn't read Data\n"));
+        DEBUG ((DEBUG_ERROR, "\nCould not read Data\n"));
       }
       FreePool (Data);
     } else {
-      DEBUG ((DEBUG_ERROR, "\nCouldn't allocate memory\n"));
+      DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for Data\n"));
     }
   } else {
-    DEBUG ((DEBUG_ERROR, "\nCouldn't find Variable.\n"));
+    DEBUG ((DEBUG_ERROR, "\nCould not find Variable.\n"));
   }
   FreePool (HiiString);
 }

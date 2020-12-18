@@ -195,7 +195,7 @@ InterpretArguments (
       }  ///<  All Tokens parsed
       FreePool (Token);
     } else {
-      DEBUG ((DEBUG_ERROR, "Couldn't allocate memory.\n"));
+      DEBUG ((DEBUG_ERROR, "Could not allocate memory for Token.\n"));
       return EFI_OUT_OF_RESOURCES;
     }
   }  ///< All Arguments analysed
@@ -223,7 +223,7 @@ ModifySearchString (
     Print (L"\nCurrent search string: %s\n", SearchString);
     Print (L"Do you want to change it ? ");
     Result = ReadYN ();
-    if (Result == TRUE) {
+    if (Result) {
       Print (L"\nEnter search string: ");
 
       CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));

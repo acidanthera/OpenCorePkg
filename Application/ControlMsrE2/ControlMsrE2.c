@@ -205,7 +205,7 @@ SearchForString (
   ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
 
   if (ListHeaders == NULL) {
-    DEBUG ((DEBUG_ERROR, "Could not allocate memory.\n"));
+    DEBUG ((DEBUG_ERROR, "Could not allocate memory for ListHeaders.\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -225,22 +225,21 @@ UefiMain (
   EFI_STRING SearchString;
 
   Status = InterpretArguments ();
-
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 (ImageHandle, SystemTable);
-  }
+    if (!EFI_ERROR (Status)) {
+      Print (L"\nBIOS Options:\n");
 
-  if (!EFI_ERROR (Status)) {
-    Print (L"\nBIOS Options:\n");
-
-    SearchString = AsciiStrCopyToUnicode ("cfg", 0);
-
-    if (SearchString != NULL) {
-      Status = SearchForString (SearchString);
-      FreePool (SearchString);
+      SearchString = AsciiStrCopyToUnicode ("cfg", 0);
+      if (SearchString != NULL) {
+        Status = SearchForString (SearchString);
+        FreePool (SearchString);
+      } else {
+        DEBUG ((DEBUG_ERROR, "Could not allocate memory for SearchString - %r\n", Status));
+      }
+    } else {
+      DEBUG ((DEBUG_ERROR, "Unable to verify MSR 0xE2 - %r\n", Status));
     }
-  } else {
-    DEBUG ((DEBUG_ERROR, "Could not allocate memory. Function not available.\n"));
   }
 
   Print (L"Press any key. \n");

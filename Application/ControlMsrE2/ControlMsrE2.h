@@ -86,9 +86,9 @@ typedef struct ONE_OF_CONTEXT_ {
 typedef
 VOID
 OP_CODE_HANDLER (
-  IN EFI_IFR_OP_HEADER *IfrHeader,
-  IN BOOLEAN           *Stop       OPTIONAL,
-  IN VOID              *Context
+  IN     EFI_IFR_OP_HEADER *IfrHeader,
+  IN OUT BOOLEAN           *Stop  OPTIONAL,
+  IN     VOID              *Context
   );
 
 /**
@@ -167,9 +167,9 @@ HiiExportPackageLists (
 **/
 VOID
 HandleOneOf (
-  IN EFI_IFR_OP_HEADER   *IfrHeader,
-  IN BOOLEAN             *Stop,
-  IN VOID                *Context
+  IN     EFI_IFR_OP_HEADER   *IfrHeader,
+  IN OUT BOOLEAN             *Stop  OPTIONAL,
+  IN OUT VOID                *Context
   );
 
 /**
@@ -177,7 +177,7 @@ HandleOneOf (
 **/
 VOID
 HandleOneVariable (
-  IN ONE_OF_CONTEXT      *Context
+  IN OUT ONE_OF_CONTEXT      *Context
   );
 
 /**
@@ -185,9 +185,9 @@ HandleOneVariable (
 **/
 EFI_IFR_OP_HEADER *
 DoForEachOpCode (
-  IN EFI_IFR_OP_HEADER   *Header,
-  IN UINT8               OpCode,
-  IN BOOLEAN             *Stop,
-  IN VOID                *Context,
-  IN OP_CODE_HANDLER     Handler
+  IN     EFI_IFR_OP_HEADER   *Header,
+  IN     UINT8               OpCode,
+  IN OUT BOOLEAN             *Stop  OPTIONAL,
+  IN     VOID                *Context,
+  IN     OP_CODE_HANDLER     Handler
   );
