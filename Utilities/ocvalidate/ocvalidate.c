@@ -36,6 +36,17 @@ CheckConfig (
   UINTN   Index;
   UINTN   ConfigCheckersSize;
 
+  STATIC CONFIG_CHECK ConfigCheckers[] = {
+    &CheckACPI,
+    &CheckBooter,
+    &CheckDeviceProperties,
+    &CheckKernel,
+    &CheckMisc,
+    &CheckNVRAM,
+    &CheckPlatformInfo,
+    &CheckUEFI
+  };
+
   ErrorCount = 0;
   ConfigCheckersSize = sizeof (ConfigCheckers) / sizeof (ConfigCheckers[0]);
 

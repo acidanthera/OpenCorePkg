@@ -139,15 +139,4 @@ UINT32
   IN  OC_GLOBAL_CONFIG  *Config
   );
 
-STATIC CONFIG_CHECK ConfigCheckers[] = {
-    &CheckACPI,
-    &CheckBooter,
-    &CheckDeviceProperties,
-    &CheckKernel,
-    &CheckMisc,
-    &CheckNVRAM,
-    &CheckPlatformInfo,
-    &CheckUEFI
-};
-
 #endif // OC_USER_UTILITIES_OCVALIDATE_H
