@@ -194,6 +194,9 @@ SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  //
+  // Retrieve ListHeaderCount
+  //
   for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount);
 
   //
@@ -202,7 +205,6 @@ SearchForString (
   // And from all those one Option will be selected to be changed
   //
   ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
-
   if (ListHeaders == NULL) {
     DEBUG ((DEBUG_ERROR, "Could not allocate memory for ListHeaders.\n"));
     return EFI_OUT_OF_RESOURCES;
@@ -236,6 +238,7 @@ UefiMain (
           FreePool (SearchString);
         } else {
           DEBUG ((DEBUG_ERROR, "Could not allocate memory for SearchString\n"));
+          Status = EFI_OUT_OF_RESOURCES;
         }
       }
     } else {
