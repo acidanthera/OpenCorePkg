@@ -185,7 +185,7 @@ SearchForString (
   UINT32                        ListHeaderCount;
 
   if (IS_INTERACTIVE ()) {
-    SearchString = ModifySearchString (SearchString);
+    ModifySearchString (&SearchString);
   }
 
   HiiHandles = HiiGetHiiHandles (NULL);

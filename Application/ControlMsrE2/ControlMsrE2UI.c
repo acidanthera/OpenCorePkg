@@ -211,15 +211,15 @@ InterpretArguments (
   return EFI_SUCCESS;
 }
 
-EFI_STRING
+VOID
 ModifySearchString (
-  IN     EFI_STRING SearchString
+  IN OUT EFI_STRING *SearchString
   )
 {
   BOOLEAN   Result;
 
   do {
-    Print (L"\nCurrent search string: %s\n", SearchString);
+    Print (L"\nCurrent search string: %s\n", *SearchString);
     Print (L"Do you want to change it ? ");
     Result = ReadYN ();
     if (Result) {
@@ -233,7 +233,7 @@ ModifySearchString (
           FreePool (Buffer);
         } else {
           FreePool (SearchString);
-          SearchString = Buffer;
+          *SearchString = Buffer;
           Print (L"\n");
         }
       } else {
@@ -241,6 +241,4 @@ ModifySearchString (
       }
     }
   } while (Result);
-
-  return SearchString;
 }

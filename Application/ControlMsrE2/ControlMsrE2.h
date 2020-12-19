@@ -159,12 +159,10 @@ InterpretArguments (
   Displays SearchString and allows to change it
 
   @param[in,out] SearchString    Current configuration string
-
-  @retval        Other           Modified string
 **/
-EFI_STRING
+VOID
 ModifySearchString (
-  IN     EFI_STRING SearchString
+  IN OUT EFI_STRING *SearchString
   );
 
 /**
