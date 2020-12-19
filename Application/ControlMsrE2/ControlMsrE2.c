@@ -227,7 +227,7 @@ UefiMain (
   Status = InterpretArguments ();
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 ();
-    if (!EFI_ERROR (Status)) {
+    if (!EFI_ERROR (Status) && Flags != 0) {
       Print (L"\nBIOS Options:\n");
 
       SearchString = AsciiStrCopyToUnicode ("cfg", 0);

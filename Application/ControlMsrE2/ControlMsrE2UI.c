@@ -201,8 +201,7 @@ InterpretArguments (
   }  ///< All Arguments analysed
 
   if (ParameterCount == 0) {
-    Flags |= ARG_UNLOCK;
-    DEBUG ((DEBUG_ERROR, "No option selected, default to unlock.\n"));
+    DEBUG ((DEBUG_ERROR, "No option selected, verify only.\n"));
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
   } else if (ParameterCount > 1) {
     DEBUG ((DEBUG_ERROR, "interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n"));
