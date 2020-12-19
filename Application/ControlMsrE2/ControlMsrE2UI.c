@@ -189,22 +189,22 @@ InterpretArguments (
             Flags |= ARG_INTERACTIVE;
             ++ParameterCount;
           } else {
-            DEBUG ((DEBUG_INFO, "Ignoring unknown command line argument: %s\n", Parameter));
+            Print (L"Ignoring unknown command line argument: %s\n", Parameter);
           }
         }
       }  ///<  All Tokens parsed
       FreePool (Token);
     } else {
-      DEBUG ((DEBUG_ERROR, "Could not allocate memory for Token.\n"));
+      Print (L"Could not allocate memory for Token.\n");
       return EFI_OUT_OF_RESOURCES;
     }
   }  ///< All Arguments analysed
 
   if (ParameterCount == 0) {
-    DEBUG ((DEBUG_ERROR, "No option selected, verify only.\n"));
+    Print (L"No option selected, verify only.\n");
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
   } else if (ParameterCount > 1) {
-    DEBUG ((DEBUG_ERROR, "interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n"));
+    Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n");
     return EFI_INVALID_PARAMETER;
   }
 
@@ -229,7 +229,7 @@ ModifySearchString (
 
       if (Buffer != NULL) {
         if (ReadLine (Buffer, BUFFER_LENGTH) == 0) {
-          DEBUG ((DEBUG_INFO, "\nNo Input. Search string not changed.\n"));
+          Print (L"\nNo Input. Search string not changed.\n");
           FreePool (Buffer);
         } else {
           FreePool (SearchString);
@@ -237,7 +237,7 @@ ModifySearchString (
           Print (L"\n");
         }
       } else {
-        DEBUG ((DEBUG_ERROR, "Could not allocate memory. Search string can not be changed.\n"));
+        Print (L"Could not allocate memory. Search string can not be changed.\n");
       }
     }
   } while (Result);

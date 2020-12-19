@@ -126,9 +126,9 @@ IterateListHeaders (
    || IS_LOCK ()
    || IS_UNLOCK ()) {
     if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
-      DEBUG ((DEBUG_ERROR, "Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
+      Print (L"Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n");
     } else if (OptionsCount == 0) {
-      DEBUG ((DEBUG_ERROR, "No corresponding BIOS Options found. Try a different search string using interactive mode.\n"));
+      Print (L"No corresponding BIOS Options found. Try a different search string using interactive mode.\n");
     } else {
       Key = '1';
 
@@ -190,7 +190,7 @@ SearchForString (
 
   HiiHandles = HiiGetHiiHandles (NULL);
   if (HiiHandles == NULL) {
-    DEBUG ((DEBUG_ERROR, "Could not retrieve HiiHandles.\n"));
+    Print (L"Could not retrieve HiiHandles.\n");
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -206,7 +206,7 @@ SearchForString (
   //
   ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
   if (ListHeaders == NULL) {
-    DEBUG ((DEBUG_ERROR, "Could not allocate memory for ListHeaders.\n"));
+    Print (L"Could not allocate memory for ListHeaders.\n");
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -237,12 +237,12 @@ UefiMain (
           Status = SearchForString (SearchString);
           FreePool (SearchString);
         } else {
-          DEBUG ((DEBUG_ERROR, "Could not allocate memory for SearchString\n"));
+          Print (L"Could not allocate memory for SearchString\n");
           Status = EFI_OUT_OF_RESOURCES;
         }
       }
     } else {
-      DEBUG ((DEBUG_ERROR, "Unable to verify MSR 0xE2 - %r\n", Status));
+      Print (L"Unable to verify MSR 0xE2 - %r\n", Status);
     }
   }
 

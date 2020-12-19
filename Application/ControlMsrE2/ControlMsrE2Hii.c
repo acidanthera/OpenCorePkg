@@ -155,7 +155,7 @@ HandleIfrOption (
   HiiString = HiiGetString (Ctx->EfiHandle, IfrOneOf->Question.Header.Prompt, "en-US");
 
   if (HiiString == NULL) {
-    DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for HiiString\n"));
+    Print (L"\nCould not allocate memory for HiiString\n");
     return;
   }
 
@@ -272,7 +272,7 @@ HandleIfrVariable (
   HiiString = AsciiStrCopyToUnicode ((CHAR8 *) Context->IfrVarStore->Name, 0);
 
   if (HiiString == NULL) {
-    DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for HiiString\n"));
+    Print (L"\nCould not allocate memory for HiiString\n");
     return;
   }
 
@@ -367,23 +367,23 @@ HandleIfrVariable (
             if (!EFI_ERROR (Status)) {
               Print (L"\nDone. You will have to reboot for the change to take effect.\n");
             } else {
-              DEBUG ((DEBUG_ERROR, "\nProblem writing variable - %r\n", Status));
+              Print (L"\nProblem writing variable - %r\n", Status);
             }
           } else {
             Print (L"\n");
           }
         } else {
-          DEBUG ((DEBUG_ERROR, "Value is as wanted already. No action required.\n"));
+          Print (L"Value is as wanted already. No action required.\n");
         }
       } else {
-        DEBUG ((DEBUG_ERROR, "\nCould not read Data\n"));
+        Print (L"\nCould not read Data\n");
       }
       FreePool (Data);
     } else {
-      DEBUG ((DEBUG_ERROR, "\nCould not allocate memory for Data\n"));
+      Print (L"\nCould not allocate memory for Data\n");
     }
   } else {
-    DEBUG ((DEBUG_ERROR, "\nCould not find Variable.\n"));
+    Print (L"\nCould not find Variable.\n");
   }
   FreePool (HiiString);
 }
