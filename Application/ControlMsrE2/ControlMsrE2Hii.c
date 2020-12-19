@@ -198,7 +198,7 @@ HandleOneOf (
         DataSize = 0;
         Status = gRT->GetVariable (
                         VarStoreName,
-                        &IfrVarStore->Guid,
+                        (VOID *) &IfrVarStore->Guid,
                         NULL,
                         &DataSize,
                         NULL
@@ -209,7 +209,7 @@ HandleOneOf (
           if (Data != NULL) {
             Status = gRT->GetVariable (
                             VarStoreName,
-                            &IfrVarStore->Guid,
+                            (VOID *) &IfrVarStore->Guid,
                             NULL,
                             &DataSize,
                             Data
@@ -291,7 +291,7 @@ HandleOneVariable (
 
   Status = gRT->GetVariable (
                   HiiString,
-                  &Context->IfrVarStore->Guid,
+                  (VOID *) &Context->IfrVarStore->Guid,
                   &Attributes,
                   &DataSize,
                   NULL
@@ -302,7 +302,7 @@ HandleOneVariable (
     if (Data != NULL) {
       Status = gRT->GetVariable (
                       HiiString,
-                      &Context->IfrVarStore->Guid,
+                      (VOID *) &Context->IfrVarStore->Guid,
                       &Attributes,
                       &DataSize,
                       Data
@@ -358,7 +358,7 @@ HandleOneVariable (
 
             Status = gRT->SetVariable (
                             HiiString,
-                            &Context->IfrVarStore->Guid,
+                            (VOID *) &Context->IfrVarStore->Guid,
                             Attributes,
                             DataSize,
                             Data
