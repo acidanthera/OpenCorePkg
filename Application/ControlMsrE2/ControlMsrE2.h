@@ -52,14 +52,17 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
   IfrHeaders which contain a Description
   and to return the VarStore
 
-  @param SearchText        Text that must be part of the options description
+  @param SearchText        Text that must be part of the options
+                           description
   @param EfiHandle         Handle of the list the Form is part of
-  @param ListHeader        Ptr to the contents of the handle
-  @param PkgHeader         Ptr to the current package in the list
-  @param FirstIfrHeader    Ptr to first IfrHeader in Package
-  @param IfrVarStore       Ptr to IfrHeader of corresponding varstore in same list
-  @param IfrOneOf          Ptr to IfrHeader of BIOS Option
-  @param StopAt            Used to find a certain BIOS Option
+  @param ListHeader        Pointer to the contents of the handle
+  @param PkgHeader         Pointer to the current package in the
+                           list
+  @param FirstIfrHeader    Pointer to first IfrHeader in Package
+  @param IfrVarStore       Pointer to IfrHeader of corresponding
+                           varstore in same list
+  @param IfrOneOf          Pointer to IfrHeader of BIOS Option
+  @param StopAt            Find a certain BIOS Option
   @param Count             Running number of suitable BIOS Options
 **/
 typedef struct ONE_OF_CONTEXT_ {
@@ -75,11 +78,14 @@ typedef struct ONE_OF_CONTEXT_ {
 } ONE_OF_CONTEXT;
 
 /**
-  Callback - What to do, when a IfrHeader with a defined OP_CODE is found
+  Callback - What to do, when a IfrHeader with a defined
+  OP_CODE is found
 
   @param[in]     IfrHeader   Current IfrHeader under scrutiny
-  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
-  @param[in]     Context     Ptr to Handler specific data
+  @param[in,out] Stop        Pointer to Stop flag. If TRUE no
+                             further search for opcodes. Can
+                             be NULL.
+  @param[in]     Context     Pointer to Handler specific data
 **/
 typedef
 VOID
@@ -93,9 +99,10 @@ OP_CODE_HANDLER (
   Commandline Arguments
 **/
 enum {
-  ARG_LOCK = 1,
-  ARG_UNLOCK = 2,
-  ARG_CHECK = 4,
+  ARG_VERIFY      = 0,
+  ARG_LOCK        = 1,
+  ARG_UNLOCK      = 2,
+  ARG_CHECK       = 4,
   ARG_INTERACTIVE = 8,
 };
 
@@ -179,14 +186,16 @@ HiiExportPackageLists (
   );
 
 /**
-  Callback to Handle IFR_ONE_OF_OP
+  Callback to Handle EFI_IFR_ONE_OF_OP
 
   @param[in]     IfrHeader   Current IfrHeader under scrutiny
-  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
-  @param[in]     Context     Ptr to Handler specific data
+  @param[in,out] Stop        Pointer to Stop flag. If TRUE no
+                             further search for opcodes. Can
+                             be NULL.
+  @param[in]     Context     Pointer to Handler specific data
 **/
 VOID
-HandleOneOf (
+HandleIfrOption (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
   IN OUT BOOLEAN             *Stop  OPTIONAL,
   IN OUT VOID                *Context
@@ -195,24 +204,27 @@ HandleOneOf (
 /**
   Displaying and Changing value of BIOS Option. Including UI
 
-  @param[in]     Context     Ptr to Handler specific data
+  @param[in]     Context     Pointer to Handler specific data
 **/
 VOID
-HandleOneVariable (
+HandleIfrVariable (
   IN OUT ONE_OF_CONTEXT      *Context
   );
 
 /**
-  Call Handler for each occurence of opCode, starting to search at header. Called recursively
+  Call Handler for each occurence of opCode, starting to search
+  at header. Called recursively
 
   @param[in]     Header      Current Header under scrutiny
   @param[in]     OpCode      Type for OpCode
-  @param[in,out] Stop        Ptr to Stop flag. If TRUE no further search for opcodes. Can be NULL.
-  @param[in]     Context     Ptr to Handler specific data
+  @param[in,out] Stop        Pointer to Stop flag. If TRUE no
+                             further search for opcodes. Can
+                             be NULL.
+  @param[in]     Context     Pointer to Handler specific data
   @param[in]     Handler     Handler for data
 **/
 EFI_IFR_OP_HEADER *
-DoForEachOpCode (
+IterateOpCode (
   IN     EFI_IFR_OP_HEADER   *Header,
   IN     UINT8               OpCode,
   IN OUT BOOLEAN             *Stop  OPTIONAL,

@@ -55,7 +55,7 @@ HiiExportPackageLists (
 }
 
 EFI_IFR_OP_HEADER *
-DoForEachOpCode (
+IterateOpCode (
   IN     EFI_IFR_OP_HEADER   *Header,
   IN     UINT8               OpCode,
   IN OUT BOOLEAN             *Stop  OPTIONAL,
@@ -76,7 +76,7 @@ DoForEachOpCode (
     }
 
     if (Header->Scope) {
-      Header = DoForEachOpCode (
+      Header = IterateOpCode (
                  PADD (Header, Header->Length),
                  OpCode,
                  Stop,
@@ -125,13 +125,13 @@ GetVarStore (
   Context.Id = Id;
   Context.VarStoreHeader = NULL;
 
-  DoForEachOpCode (Header, EFI_IFR_VARSTORE_OP, &Stop, &Context, HandleVarStore);
+  IterateOpCode (Header, EFI_IFR_VARSTORE_OP, &Stop, &Context, HandleVarStore);
 
   return Context.VarStoreHeader;
 }
 
 VOID
-HandleOneOf (
+HandleIfrOption (
   IN     EFI_IFR_OP_HEADER   *IfrHeader,
   IN OUT BOOLEAN             *Stop  OPTIONAL,
   IN OUT VOID                *Context
@@ -249,7 +249,7 @@ HandleOneOf (
 }
 
 VOID
-HandleOneVariable (
+HandleIfrVariable (
   IN OUT ONE_OF_CONTEXT *Context
   )
 {

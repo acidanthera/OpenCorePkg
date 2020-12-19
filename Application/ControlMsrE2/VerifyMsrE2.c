@@ -87,7 +87,7 @@ VerifyMSRE2 (
   Print (L"Done checking MSR 0xE2 register, compare the values printed!\n");
 
   if (mHasLockedCores && mHasUnlockedCores) {
-    Print (L"This firmware has BROKEN MSR 0xE2 register!\n");
+    Print (L"This firmware has BORKED MSR 0xE2 register!\n");
     Print (L"Some cores are locked, some are not!!!\n");
   } else if (mHasUnlockedCores) {
     Print (L"This firmware has UNLOCKED MSR 0xE2 register!\n");

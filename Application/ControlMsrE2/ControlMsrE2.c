@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define CONTEXTS_MAX 8
 
 VOID
-WalkListHeaders (
+IterateListHeaders (
   IN EFI_HII_HANDLE                *HiiHandles,
   IN EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders,
   IN UINT32                        ListHeaderCount,
@@ -97,12 +97,12 @@ WalkListHeaders (
                 Contexts[ContextsCount].StopAt = DONT_STOP_AT;
                 Contexts[ContextsCount].Count = OptionsCount;
 
-                DoForEachOpCode (
+                IterateOpCode (
                   Contexts[ContextsCount].FirstIfrHeader,
                   EFI_IFR_ONE_OF_OP,
                   NULL,
                   &Contexts[ContextsCount],
-                  HandleOneOf
+                  HandleIfrOption
                   );
 
                 if (Contexts[ContextsCount].Count != OptionsCount) {
@@ -150,16 +150,16 @@ WalkListHeaders (
             Contexts[ContextIndex].StopAt = Index;
             Contexts[ContextIndex].IfrOneOf = NULL;
 
-            DoForEachOpCode (
+            IterateOpCode (
               Contexts[ContextIndex].FirstIfrHeader,
               EFI_IFR_ONE_OF_OP,
               &Stop,
               &Contexts[ContextIndex],
-              HandleOneOf
+              HandleIfrOption
               );
 
             if (Contexts[ContextIndex].IfrOneOf != NULL) {
-              HandleOneVariable (&Contexts[ContextIndex]);
+              HandleIfrVariable (&Contexts[ContextIndex]);
             }
             break;
           }
@@ -189,7 +189,6 @@ SearchForString (
   }
 
   HiiHandles = HiiGetHiiHandles (NULL);
-
   if (HiiHandles == NULL) {
     DEBUG ((DEBUG_ERROR, "Could not retrieve HiiHandles.\n"));
     return EFI_OUT_OF_RESOURCES;
@@ -209,7 +208,7 @@ SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  WalkListHeaders (HiiHandles, ListHeaders, ListHeaderCount, SearchString);
+  IterateListHeaders (HiiHandles, ListHeaders, ListHeaderCount, SearchString);
   FreePool (ListHeaders);
   return EFI_SUCCESS;
 }
@@ -227,15 +226,17 @@ UefiMain (
   Status = InterpretArguments ();
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 ();
-    if (!EFI_ERROR (Status) && Flags != 0) {
-      Print (L"\nBIOS Options:\n");
+    if (!EFI_ERROR (Status)) {
+      if (Flags != ARG_VERIFY) {
+        Print (L"\nBIOS Options:\n");
 
-      SearchString = AsciiStrCopyToUnicode ("cfg", 0);
-      if (SearchString != NULL) {
-        Status = SearchForString (SearchString);
-        FreePool (SearchString);
-      } else {
-        DEBUG ((DEBUG_ERROR, "Could not allocate memory for SearchString - %r\n", Status));
+        SearchString = AsciiStrCopyToUnicode ("cfg", 0);
+        if (SearchString != NULL) {
+          Status = SearchForString (SearchString);
+          FreePool (SearchString);
+        } else {
+          DEBUG ((DEBUG_ERROR, "Could not allocate memory for SearchString\n"));
+        }
       }
     } else {
       DEBUG ((DEBUG_ERROR, "Unable to verify MSR 0xE2 - %r\n", Status));
