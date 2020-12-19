@@ -6,7 +6,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 ## Global Rules
 - For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 - For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
-- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (To be fixed)
+- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 - TODO: Discuss conventions for `Identifier`, `DevicePath`, `DeviceProperty`, `UEFIDriver`
