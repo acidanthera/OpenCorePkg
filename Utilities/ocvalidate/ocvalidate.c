@@ -1,5 +1,6 @@
 /** @file
   Copyright (C) 2018, vit9696. All rights reserved.
+  Copyright (C) 2020, PMheart. All rights reserved.
 
   All rights reserved.
 
@@ -12,16 +13,9 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Uefi.h>
-#include <Library/UefiLib.h>
-#include <Library/UefiApplicationEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
 
-#include <Library/OcTemplateLib.h>
-#include <Library/OcSerializeLib.h>
-#include <Library/OcMiscLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcConsoleLib.h>
@@ -66,7 +60,7 @@ GetCurrentTimestamp (
 
 STATIC
 CHAR8 *
-GetFilenameSuffix (
+AsciiGetFilenameSuffix (
   IN  CONST CHAR8  *FileName
   )
 {
@@ -94,23 +88,40 @@ GetFilenameSuffix (
 
 STATIC
 BOOLEAN
-AsciiStringHasAllLegalCharacter (
-  IN  CONST CHAR8  *String
+AsciiFileNameHasSuffix (
+  IN  CONST CHAR8  *FileName,
+  IN  CONST CHAR8  *Suffix
+  )
+{
+  //
+  // Ensure non-empty strings.
+  //
+  if (FileName[0] == '\0' || Suffix[0] == '\0') {
+    return FALSE;
+  }
+
+  return AsciiStriCmp (AsciiGetFilenameSuffix (FileName), Suffix) == 0;
+}
+
+STATIC
+BOOLEAN
+AsciiFileSystemPathIsLegal (
+  IN  CONST CHAR8  *Path
   )
 {
   UINTN  Index;
 
-  for (Index = 0; Index < AsciiStrLen (String); ++Index) {
+  for (Index = 0; Index < AsciiStrLen (Path); ++Index) {
     //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/', and '\').
     //
-    if (IsAsciiNumber (String[Index])
-      || IsAsciiAlpha (String[Index])
-      || String[Index] == '_'
-      || String[Index] == '-'
-      || String[Index] == '.'
-      || String[Index] == '/'
-      || String[Index] == '\\') {
+    if (IsAsciiNumber (Path[Index])
+      || IsAsciiAlpha (Path[Index])
+      || Path[Index] == '_'
+      || Path[Index] == '-'
+      || Path[Index] == '.'
+      || Path[Index] == '/'
+      || Path[Index] == '\\') {
       continue;
     }
 
@@ -125,19 +136,173 @@ AsciiStringHasAllLegalCharacter (
 
 STATIC
 BOOLEAN
-AsciiStringHasAllPrintableCharacter (
-  IN  CONST CHAR8  *String
+AsciiCommentIsLegal (
+  IN  CONST CHAR8  *Comment
   )
 {
   UINTN  Index;
 
-  for (Index = 0; Index < AsciiStrLen (String); ++Index) {
+  for (Index = 0; Index < AsciiStrLen (Comment); ++Index) {
     //
     // Unprintable characters matched.
     //
-    if (IsAsciiPrint (String[Index]) == 0) {
+    if (IsAsciiPrint (Comment[Index]) == 0) {
       return FALSE;
     }
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+AsciiIdentifierIsLegal (
+  IN  CONST CHAR8  *Identifier
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
+    //
+    // Skip allowed characters (0-9, A-Z, a-z, '_', '-', and '.').
+    // FIXME: Discuss what exactly is legal for identifiers.
+    //
+    if (IsAsciiNumber (Identifier[Index])
+      || IsAsciiAlpha (Identifier[Index])
+      || Identifier[Index] == '_'
+      || Identifier[Index] == '-'
+      || Identifier[Index] == '.') {
+      continue;
+    }
+
+    //
+    // Disallowed characters matched.
+    //
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+AsciiArchIsLegal (
+  IN  CONST CHAR8  *Arch
+  )
+{
+  //
+  // Only allow Any, i386 (32-bit), and x86_64 (64-bit).
+  // FIXME: Do not allow empty string in OC.
+  //
+  if (AsciiStrCmp (Arch, "Any") != 0
+    && AsciiStrCmp (Arch, "i386") != 0
+    && AsciiStrCmp (Arch, "x86_64") != 0) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+AsciiDevicePathIsLegal (
+  IN  CONST CHAR8  *DevicePath
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < AsciiStrLen (DevicePath); ++Index) {
+    //
+    // Skip allowed characters (0-9, A-Z, a-z, '/', '(', ')', and ',').
+    // FIXME: Discuss whether more/less should be allowed for a legal device path.
+    //
+    if (IsAsciiNumber (DevicePath[Index])
+      || IsAsciiAlpha (DevicePath[Index])
+      || DevicePath[Index] == '/'
+      || DevicePath[Index] == '('
+      || DevicePath[Index] == ')'
+      || DevicePath[Index] == ',') {
+      continue;
+    }
+
+    //
+    // Disallowed characters matched.
+    //
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+AsciiDevicePropertyIsLegal (
+  IN  CONST CHAR8  *DeviceProperty
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < AsciiStrLen (DeviceProperty); ++Index) {
+    //
+    // Skip allowed characters (0-9, A-Z, a-z, '-').
+    // FIXME: Discuss whether more/less should be allowed for a legal device property.
+    //
+    if (IsAsciiNumber (DeviceProperty[Index])
+      || IsAsciiAlpha (DeviceProperty[Index])
+      || DeviceProperty[Index] == '-') {
+      continue;
+    }
+
+    //
+    // Disallowed characters matched.
+    //
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+AsciiUefiDriverIsLegal (
+  IN  CONST CHAR8  *Driver
+  )
+{
+  UINTN  Index;
+
+  //
+  // If an EFI driver does not contain .efi suffix,
+  // then it must be illegal.
+  //
+  if (!AsciiFileNameHasSuffix (Driver, "efi")) {
+    return FALSE;
+  }
+
+  for (Index = 0; Index < AsciiStrLen (Driver); ++Index) {
+    //
+    // NOTE: Skip '#' as it is treated as comments and thus is legal.
+    //
+    if (Driver[0] == '#') {
+      continue;
+    }
+
+    //
+    // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/').
+    // FIXME: Discuss whether more/less should be allowed for a UEFI driver.
+    //
+    if (IsAsciiNumber (Driver[Index])
+      || IsAsciiAlpha (Driver[Index])
+      || Driver[Index] == '_'
+      || Driver[Index] == '-'
+      || Driver[Index] == '.'
+      || Driver[Index] == '/') {
+      continue;
+    }
+
+    //
+    // Disallowed characters matched.
+    //
+    return FALSE;
   }
 
   return TRUE;
@@ -217,16 +382,16 @@ CheckACPI (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllLegalCharacter (Path)) {
+    if (!AsciiFileSystemPathIsLegal (Path)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
 
-    if (AsciiStriCmp (GetFilenameSuffix (Path), "dsl") == 0) {
+    if (AsciiFileNameHasSuffix (Path, "dsl")) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has .dsl suffix!\n", Index));
       ++ErrorCount;
     }
@@ -242,7 +407,7 @@ CheckACPI (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Delete[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -267,7 +432,7 @@ CheckACPI (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -393,7 +558,7 @@ CheckBooter (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->MmioWhitelist[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -419,36 +584,23 @@ CheckBooter (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
-      DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch contains illegal character!\n", Index));
+    if (!AsciiArchIsLegal (Arch)) {
+      DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllLegalCharacter (Identifier)) {
+    if (!AsciiIdentifierIsLegal (Identifier)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
-      ++ErrorCount;
-    }
-
-    if (Arch[0] != '\0'
-      && AsciiStrCmp (Arch, "Any") != 0
-      && AsciiStrCmp (Arch, "i386") != 0
-      && AsciiStrCmp (Arch, "x86_64") != 0) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Booter->Patch[%u]->Arch has illegal value: %a (Can only be Empty string/Any, i386, and x86_64)\n",
-        Index,
-        Arch
-        ));
       ++ErrorCount;
     }
 
     if (Identifier[0] != '\0'
       && AsciiStrCmp (Identifier, "Any") != 0
       && AsciiStrCmp (Identifier, "Apple") != 0
-      && AsciiStriCmp (GetFilenameSuffix (Identifier), "efi") != 0) {
+      && !AsciiFileNameHasSuffix (Identifier, "efi")) {
       DEBUG ((
         DEBUG_WARN,
         "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Empty string/Any, Apple, or a specified bootloader with .efi sufffix)\n",
@@ -512,9 +664,8 @@ CheckBooter (
 
     //
     // Sanitise strings.
-    // NOTE: Skip '#' as it is treated as comments and thus is legal.
     //
-    if (Driver[0] != '#' && !AsciiStringHasAllPrintableCharacter (Driver)) {
+    if (!AsciiUefiDriverIsLegal (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -590,9 +741,13 @@ CheckDeviceProperties (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
+    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] contains illegal character!\n", DeviceIndex));
       ++ErrorCount;
+      //
+      // If even illegal by an entry check, this one must be borked. Skipping such.
+      //
+      continue;
     }
 
     //
@@ -630,7 +785,7 @@ CheckDeviceProperties (
       //
       // Sanitise strings.
       //
-      if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
+      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
           "DeviceProperties->Delete[%u]->%a contains illegal character!\n",
@@ -651,9 +806,13 @@ CheckDeviceProperties (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (AsciiDevicePath)) {
+    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] contains illegal character!\n", DeviceIndex));
       ++ErrorCount;
+      //
+      // If even illegal by an entry check, this one must be borked. Skipping such.
+      //
+      continue;
     }
 
     //
@@ -691,7 +850,7 @@ CheckDeviceProperties (
       //
       // Sanitise strings.
       //
-      if (!AsciiStringHasAllPrintableCharacter (AsciiProperty)) {
+      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) { ///< MARK
         DEBUG ((
           DEBUG_WARN,
           "DeviceProperties->Add[%u]->%a contains illegal character!\n",
@@ -747,25 +906,35 @@ CheckKernel (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch contains illegal character!\n", Index));
+    if (!AsciiArchIsLegal (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllLegalCharacter (BundlePath)) {
+    if (!AsciiFileSystemPathIsLegal (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
+    } else {
+      if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
+        DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
+        ++ErrorCount;
+      }
     }
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllLegalCharacter (ExecutablePath)) {
+    if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllLegalCharacter (PlistPath)) {
+    if (!AsciiFileSystemPathIsLegal (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
+    } else {
+      if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
+        DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
+        ++ErrorCount;
+      }
     }
 
     //
@@ -792,15 +961,6 @@ CheckKernel (
       ++ErrorCount;
     }
 
-    if (AsciiStriCmp (GetFilenameSuffix (BundlePath), "kext") != 0) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
-      ++ErrorCount;
-    }
-    if (AsciiStriCmp (GetFilenameSuffix (PlistPath), "plist") != 0) {
-      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
-      ++ErrorCount;
-    }
-
     //
     // TODO: Bring more special checks to kexts from Acidanthera.
     //
@@ -821,15 +981,15 @@ CheckKernel (
     //
     // Sanitise strings.
     //
-    if (!AsciiStringHasAllPrintableCharacter (Arch)) {
-      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch contains illegal character!\n", Index));
+    if (!AsciiArchIsLegal (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllPrintableCharacter (Comment)) {
+    if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiStringHasAllLegalCharacter (Identifier)) {
+    if (!AsciiIdentifierIsLegal (Identifier)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -975,6 +1135,7 @@ CheckUEFI (
   UINT32                    UserBpp;
   BOOLEAN                   UserSetMax;
   CONST CHAR8               *AsciiAudioDevicePath;
+  BOOLEAN                   IsAsciiAudioDevicePathLegal;
   EFI_DEVICE_PATH_PROTOCOL  *AudioDevicePath;
   CHAR16                    *UnicodeAudioDevicePath;
   CHAR16                    *TextualAudioDevicePath;
@@ -1004,32 +1165,22 @@ CheckUEFI (
   ConsoleMode                      = OC_BLOB_GET (&UserUefi->Output.ConsoleMode);
   Resolution                       = OC_BLOB_GET (&UserUefi->Output.Resolution);
   AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
+  IsAsciiAudioDevicePathLegal      = TRUE;
 
   //
   // Sanitise strings.
   //
-  if (!AsciiStringHasAllPrintableCharacter (AsciiAudioDevicePath)) {
+  if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
     DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice contains illegal character!\n"));
     ++ErrorCount;
+    IsAsciiAudioDevicePathLegal = FALSE;
   }
-  if (!AsciiStringHasAllPrintableCharacter (PointerSupportMode)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupportMode contains illegal character!\n"));
-    ++ErrorCount;
-  }
-  if (!AsciiStringHasAllPrintableCharacter (KeySupportMode)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupportMode contains illegal character!\n"));
-    ++ErrorCount;
-  }
-  if (!AsciiStringHasAllPrintableCharacter (ConsoleMode)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode contains illegal character!\n"));
-    ++ErrorCount;
-  }
-  if (!AsciiStringHasAllPrintableCharacter (Resolution)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution contains illegal character!\n"));
-    ++ErrorCount;
-  }
-  if (!AsciiStringHasAllPrintableCharacter (TextRenderer)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer contains illegal character!\n"));
+  if (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0
+    && AsciiStrCmp (TextRenderer, "BuiltinText") != 0
+    && AsciiStrCmp (TextRenderer, "SystemGraphics") != 0
+    && AsciiStrCmp (TextRenderer, "SystemText") != 0
+    && AsciiStrCmp (TextRenderer, "SystemGeneric") != 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer is illegal (Can only be BuiltinGraphics, BuiltinText, SystemGraphics, SystemText, or SystemGeneric)!\n"));
     ++ErrorCount;
   } else {
     //
@@ -1046,7 +1197,7 @@ CheckUEFI (
     ++ErrorCount;
   }
 
-  if (AsciiAudioDevicePath[0] != '\0') {
+  if (IsAsciiAudioDevicePathLegal && AsciiAudioDevicePath[0] != '\0') {
     //
     // Convert ASCII device path to Unicode format.
     //
@@ -1085,7 +1236,7 @@ CheckUEFI (
     // Sanitise strings.
     // NOTE: Skip '#' as it is treated as comments and thus is legal.
     //
-    if (Driver[0] != '#' && !AsciiStringHasAllLegalCharacter (Driver)) {
+    if (!AsciiUefiDriverIsLegal (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -1128,7 +1279,7 @@ CheckUEFI (
     && AsciiStrCmp (KeySupportMode, "V1") != 0
     && AsciiStrCmp (KeySupportMode, "V2") != 0
     && AsciiStrCmp (KeySupportMode, "AMI") != 0) {
-    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupportMode (currently set to %a) is illegal (Can only be Auto, V1, V2, AMI)!\n", KeySupportMode));
+    DEBUG ((DEBUG_WARN, "UEFI->Input->KeySupportMode is illegal (Can only be Auto, V1, V2, AMI)!\n"));
     ++ErrorCount;
   }
 
@@ -1183,6 +1334,22 @@ CheckUEFI (
       DEBUG ((DEBUG_WARN, "UEFI->Output->SanitiseClearScreen is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
+  }
+
+  //
+  // Parse Output->ConsoleMode by calling OpenCore libraries.
+  //
+  OcParseConsoleMode (
+    ConsoleMode,
+    &UserWidth,
+    &UserHeight,
+    &UserSetMax
+    );
+  if (ConsoleMode[0] != '\0'
+    && !UserSetMax
+    && (UserWidth == 0 || UserHeight == 0)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->ConsoleMode is borked, please check Configurations.pdf!\n"));
+    ++ErrorCount;
   }
 
   //
