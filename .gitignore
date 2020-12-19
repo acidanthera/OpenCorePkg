@@ -49,6 +49,7 @@ prelinkedkernel.unpack
 *.id2
 *.nam
 *.til
+*.aml
 Debug/QemuRun
 Doxy
 Legacy/BinDrivers/X64
