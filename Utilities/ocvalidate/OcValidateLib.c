@@ -126,15 +126,15 @@ AsciiCommentIsLegal (
 BOOLEAN
 AsciiIdentifierIsLegal (
   IN  CONST CHAR8    *Identifier,
-  IN        BOOLEAN  IsKernelPatchIdentifier
+  IN        BOOLEAN  IsKernelIdentifier
   )
 {
   UINTN  Index;
 
   //
-  // Special check for Kernel->Patch->Identifier.
+  // Special check for Identifier under Kernel section.
   //
-  if (IsKernelPatchIdentifier) {
+  if (IsKernelIdentifier) {
     //
     // There must be one dot character unless it is a kernel patch.
     //

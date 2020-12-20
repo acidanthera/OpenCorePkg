@@ -147,7 +147,7 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiIdentifierIsLegal (Identifier, FALSE)) {
+    if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -166,8 +166,84 @@ CheckKernel (
   }
 
   //
-  // TODO: Handle Force checks here...
+  // FIXME: Handle correct kernel version checking.
   //
+  MaxKernel = OC_BLOB_GET (&UserKernel->Emulate.MaxKernel);
+  MinKernel = OC_BLOB_GET (&UserKernel->Emulate.MinKernel);
+  if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
+    ++ErrorCount;
+  }
+  if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel (currently set to %a) is borked!\n", MinKernel));
+    ++ErrorCount;
+  }
+
+  if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
+    ++ErrorCount;
+  }
+
+  for (Index = 0; Index < UserKernel->Force.Count; ++Index) {
+    Arch            = OC_BLOB_GET (&UserKernel->Force.Values[Index]->Arch);
+    BundlePath      = OC_BLOB_GET (&UserKernel->Force.Values[Index]->BundlePath);
+    Comment         = OC_BLOB_GET (&UserKernel->Force.Values[Index]->Comment);
+    ExecutablePath  = OC_BLOB_GET (&UserKernel->Force.Values[Index]->ExecutablePath);
+    MaxKernel       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->MinKernel);
+    PlistPath       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->PlistPath);
+
+    //
+    // Sanitise strings.
+    //
+    if (!AsciiArchIsLegal (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiFileSystemPathIsLegal (BundlePath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath contains illegal character!\n", Index));
+      ++ErrorCount;
+    } else {
+      if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
+        DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
+        ++ErrorCount;
+      }
+    }
+    if (!AsciiCommentIsLegal (Comment)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->ExecutablePath contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiFileSystemPathIsLegal (PlistPath)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath contains illegal character!\n", Index));
+      ++ErrorCount;
+    } else {
+      if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
+        DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
+        ++ErrorCount;
+      }
+    }
+
+    //
+    // FIXME: Handle correct kernel version checking.
+    //
+    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
+      ++ErrorCount;
+    }
+    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
+
+  }
 
   for (Index = 0; Index < UserKernel->Patch.Count; ++Index) {
     Base            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Base);
@@ -182,6 +258,8 @@ CheckKernel (
     MaskSize        = UserKernel->Patch.Values[Index]->Mask.Size;
     ReplaceMask     = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->ReplaceMask);
     ReplaceMaskSize = UserKernel->Patch.Values[Index]->ReplaceMask.Size;
+    MaxKernel       = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MaxKernel);
+    MinKernel       = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MinKernel);
 
     //
     // Sanitise strings.
@@ -196,6 +274,18 @@ CheckKernel (
     }
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    //
+    // FIXME: Handle correct kernel version checking.
+    //
+    if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->MaxKernel (currently set to %a) is borked!\n", Index, MaxKernel));
+      ++ErrorCount;
+    }
+    if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
 
@@ -246,25 +336,6 @@ CheckKernel (
         }
       }
     }
-  }
-
-  //
-  // FIXME: Handle correct kernel version checking.
-  //
-  MaxKernel = OC_BLOB_GET (&UserKernel->Emulate.MaxKernel);
-  MinKernel = OC_BLOB_GET (&UserKernel->Emulate.MinKernel);
-  if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
-    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
-    ++ErrorCount;
-  }
-  if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
-    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel (currently set to %a) is borked!\n", MinKernel));
-    ++ErrorCount;
-  }
-
-  if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
-    DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
-    ++ErrorCount;
   }
 
   //
