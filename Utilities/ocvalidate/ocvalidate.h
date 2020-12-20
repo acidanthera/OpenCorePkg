@@ -24,38 +24,88 @@
 // TODO: Doc functions and add comments where necessary.
 //
 
+/**
+  Get current timestamp in milliseconds.
+  
+  @retval Current timestamp in milliseconds.
+**/
 INT64
 GetCurrentTimestamp (
   VOID
   );
 
+/**
+  Get ASCII filename suffix.
+
+  @param[in]  FileName          Filename given.
+
+  @retval     Empty string      If the FileName is abnormal.
+  @retval     FileName suffix   If the FileName is sane.
+**/
 CHAR8 *
 AsciiGetFilenameSuffix (
   IN  CONST CHAR8  *FileName
   );
 
+/**
+  Check if filename has given suffix.
+
+  @param[in]  FileName          Filename given.
+  @param[in]  Suffix            Suffix to be matched and checked.
+
+  @retval     TRUE              If FileName has Suffix in the end.
+**/
 BOOLEAN
 AsciiFileNameHasSuffix (
   IN  CONST CHAR8  *FileName,
   IN  CONST CHAR8  *Suffix
   );
 
+/**
+  Check if a filesystem path contains only legal characters.
+
+  @param[in]  Path              Filesystem path to be checked.
+
+  @retval     TRUE              If Path only contains 0-9, A-Z, a-z, '_', '-', '.', '/', and '\'.
+**/
 BOOLEAN
 AsciiFileSystemPathIsLegal (
   IN  CONST CHAR8  *Path
   );
 
+/**
+  Check if an OpenCore Configuration Comment contains only ASCII printable characters.
+
+  @param[in]  Comment           Comment to be checked.
+
+  @retval     TRUE              If Comment only contains ASCII printable characters.
+**/
 BOOLEAN
 AsciiCommentIsLegal (
   IN  CONST CHAR8  *Comment
   );
 
+/**
+  Check if an OpenCore Configuration Identifier matches specific conventions.
+
+  @param[in]  Identifier               Identifier to be checked.
+  @param[in]  IsKernelPatchIdentifier  TRUE to perform special checks for Kernel->Patch->Identifier.
+
+  @retval     TRUE                     If Identifier matches conventions.
+**/
 BOOLEAN
 AsciiIdentifierIsLegal (
   IN  CONST CHAR8    *Identifier,
   IN        BOOLEAN  IsKernelIdentifier
   );
 
+/**
+  Check if an OpenCore Configuration Arch matches specific conventions.
+
+  @param[in]  Arch                     Arch to be checked.
+
+  @retval     TRUE                     If Arch has value of either: Any, i386, or x86_64.
+**/
 BOOLEAN
 AsciiArchIsLegal (
   IN  CONST CHAR8  *Arch
