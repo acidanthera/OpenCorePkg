@@ -189,6 +189,7 @@ CheckKernel (
     BundlePath      = OC_BLOB_GET (&UserKernel->Force.Values[Index]->BundlePath);
     Comment         = OC_BLOB_GET (&UserKernel->Force.Values[Index]->Comment);
     ExecutablePath  = OC_BLOB_GET (&UserKernel->Force.Values[Index]->ExecutablePath);
+    Identifier      = OC_BLOB_GET (&UserKernel->Force.Values[Index]->Identifier);
     MaxKernel       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->MaxKernel);
     MinKernel       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->MinKernel);
     PlistPath       = OC_BLOB_GET (&UserKernel->Force.Values[Index]->PlistPath);
