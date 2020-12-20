@@ -1,0 +1,69 @@
+ocvalidate Checklist
+=====================
+
+As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
+
+## Global Rules
+- For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
+- For all patches, excluding section `Kernel->Patch` (where `Base` is not empty), their `Find`, `Replace`, `Mask`, and `ReplaceMask` must have identical size in most cases. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
+- For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
+- For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
+- For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
+- TODO: Discuss conventions for `Identifier`, `DevicePath`, `DeviceProperty`, `UEFIDriver`
+
+## ACPI
+#### Add
+- Entry[N]->Path: `.dsl` filename suffix is not accepted.
+- Entry[N]->Path: If a customised DSDT is added and enabled, `RebaseRegions` in `Quirks` should be enabled.
+
+## Booter
+#### MmioWhitelist
+- Entry[N]->Enabled: When at least one entry is enabled, `DevirtualiseMmio` in `Quirks` should be enabled.
+#### Patch
+- Entry[N]->Arch: Only `Empty string`, `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->Identifier: Only `Empty string`, `Any`, `Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
+#### Quirks
+- When `AllowRelocationBlock` is enabled, `ProvideCustomSlide` should be enabled altogether.
+- When `EnableSafeModeSlide` is enabled, `ProvideCustomSlide` should be enabled altogether.
+- If `ProvideMaxSlide` is set to a number greater than zero (i.e. is enabled), `ProvideCustomSlide` should be enabled altogether.
+- When `DisableVariableWrite`, `EnableWriteUnprotector`, or `ProvideCustomSlide` is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
+
+## DeviceProperties
+- Check requirements for Device Paths in Section Global Rules.
+
+## Kernel
+#### Add
+- Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->BundlePath: Filename should have `.kext` suffix.
+- Entry[N]->PlistPath: Filename should have `.plist` suffix.
+- Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at `Kernel->Quirks`.
+#### Delete
+- Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
+
+## Misc
+- TODO
+
+## NVRAM
+- TODO
+
+## PlatformInfo
+- TODO
+
+## UEFI
+#### APFS
+- When `EnableJumpstart` is enabled, `ScanPolicy` at `Misc->Security` should have `OC_SCAN_ALLOW_FS_APFS` (bit 8) set, or `ScanPolicy` should be `0` (failsafe value).
+#### Quirks
+- When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
+- When `DeduplicateBootOrder` is enabled, `RequestBootVarRouting` should be enabled altogether.
+#### Drivers
+- No drivers should be loaded more than once (i.e. there should NOT be any duplicated entries in this section).
+- When `OpenUsbKbDxe.efi` is in use, `KeySupport` at `UEFI->Input` should NEVER be enabled altogether.
+- When `Ps2KeyboardDxe.efi` is in use, `KeySupport` at `UEFI->Input` should be enabled altogether.
+- `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
+#### Input
+- The value of `KeySupportMode` can only be `Auto`, `V1`, `V2`, or `AMI`.
+- When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.
+#### Output
+- `ClearScreenOnModeSwitch`, `IgnoreTextInGraphics`, `ReplaceTabWithSpace`, and `SanitiseClearScreen` only apply to `System` TextRenderer
+- `Resolution` should match `NUMBERxNUMBER` or `NUMBERxNUMBER@NUMBER` sequences (unless it is an `Empty string` or is set to `Max`).
