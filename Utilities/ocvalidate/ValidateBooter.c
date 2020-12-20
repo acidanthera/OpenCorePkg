@@ -104,18 +104,19 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiIdentifierIsLegal (Identifier)) {
+    if (!AsciiIdentifierIsLegal (Identifier, FALSE)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
-
-    if (Identifier[0] != '\0'
-      && AsciiStrCmp (Identifier, "Any") != 0
+    //
+    // TODO: Drop Empty string support in OC.
+    //
+    if (AsciiStrCmp (Identifier, "Any") != 0
       && AsciiStrCmp (Identifier, "Apple") != 0
       && !AsciiFileNameHasSuffix (Identifier, "efi")) {
       DEBUG ((
         DEBUG_WARN,
-        "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Empty string/Any, Apple, or a specified bootloader with .efi sufffix)\n",
+        "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Any, Apple, or a specified bootloader with .efi sufffix)\n",
         Index,
         Identifier
         ));

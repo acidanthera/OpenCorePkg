@@ -125,10 +125,29 @@ AsciiCommentIsLegal (
 
 BOOLEAN
 AsciiIdentifierIsLegal (
-  IN  CONST CHAR8  *Identifier
+  IN  CONST CHAR8    *Identifier,
+  IN        BOOLEAN  IsKernelPatchIdentifier
   )
 {
   UINTN  Index;
+
+  //
+  // Special check for Kernel->Patch->Identifier.
+  //
+  if (IsKernelPatchIdentifier) {
+    //
+    // There must be one dot character unless it is a kernel patch.
+    //
+    if (AsciiStrCmp (Identifier, "kernel") == 0) {
+      return TRUE;
+    } else {
+      if (OcAsciiStrChr (Identifier, '.') == NULL) {
+        return FALSE;
+      }
+
+      return TRUE;
+    }
+  }
 
   for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
     //

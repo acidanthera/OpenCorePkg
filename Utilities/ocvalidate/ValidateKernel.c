@@ -147,7 +147,7 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiIdentifierIsLegal (Identifier)) {
+    if (!AsciiIdentifierIsLegal (Identifier, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
@@ -194,7 +194,7 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiIdentifierIsLegal (Identifier)) {
+    if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }

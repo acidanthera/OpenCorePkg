@@ -52,7 +52,8 @@ AsciiCommentIsLegal (
 
 BOOLEAN
 AsciiIdentifierIsLegal (
-  IN  CONST CHAR8  *Identifier
+  IN  CONST CHAR8    *Identifier,
+  IN        BOOLEAN  IsKernelIdentifier
   );
 
 BOOLEAN
