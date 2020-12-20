@@ -313,6 +313,81 @@ DataHasProperMasking (
   return TRUE;
 }
 
+VOID
+ValidatePatch (
+  IN       CONST  CHAR8    *PatchSection,
+  IN              UINT32   PatchIndex,
+  IN              BOOLEAN  FindSizeCanBeZero,
+  IN       CONST  UINT8    *Find,
+  IN              UINT32   FindSize,
+  IN       CONST  UINT8    *Replace,
+  IN              UINT32   ReplaceSize,
+  IN       CONST  UINT8    *Mask,
+  IN              UINT32   MaskSize,
+  IN       CONST  UINT8    *ReplaceMask,
+  IN              UINT32   ReplaceMaskSize,
+      OUT         UINT32   *ErrorCount
+  )
+{
+  if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
+    DEBUG ((
+      DEBUG_WARN,
+      "%a[%u] has different Find and Replace size (%u vs %u)!\n",
+      PatchSection,
+      PatchIndex,
+      FindSize,
+      ReplaceSize
+      ));
+    ++*ErrorCount;
+  }
+  if (MaskSize > 0) {
+    if (MaskSize != FindSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "%a[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
+        PatchSection,
+        PatchIndex,
+        MaskSize,
+        FindSize
+        ));
+      ++*ErrorCount;
+    } else {
+      if (!DataHasProperMasking (Find, Mask, FindSize)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "%a[%u]->Find requires Mask to be active for corresponding bits!\n",
+          PatchSection,
+          PatchIndex
+          ));
+        ++*ErrorCount;
+      }
+    }
+  }
+  if (ReplaceMaskSize > 0) {
+    if (ReplaceMaskSize != ReplaceSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "%a[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
+        PatchSection,
+        PatchIndex,
+        ReplaceMaskSize,
+        ReplaceSize
+        ));
+      ++*ErrorCount;
+    } else {
+      if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "%a[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n",
+          PatchSection,
+          PatchIndex
+          ));
+        ++*ErrorCount;
+      }
+    }
+  }
+}
+
 UINT32
 ReportError (
   IN  CONST CHAR8  *FuncName,

@@ -139,6 +139,42 @@ DataHasProperMasking (
   IN        UINTN  Size
   );
 
+/**
+  Check if an OpenCore binary patch is valid.
+
+  If size of Find pattern cannot be zero, and size of Find pattern is different from that of Replace pattern, it is an error.
+  If Mask/ReplaceMask is used, but its size is different from that of Find/Replace, it is an error.
+  If Mask/ReplaceMask is used without corresponding bits being active for Find/Replace pattern, it is an error.
+
+  @param[in]   PatchSection       Patch section to which the patch to be checked belongs.
+  @param[in]   PatchIndex         Index of the patch to be checked.
+  @param[in]   FindSizeCanBeZero  Whether size of Find pattern can be zero. Set to TRUE only when Kernel->Patch->Base is used and Find is empty.
+  @param[in]   Find               Find pattern to be checked.
+  @param[in]   FindSize           Size of Find pattern to be checked.
+  @param[in]   Replace            Replace pattern to be checked.
+  @param[in]   ReplaceSize        Size of Replace pattern to be checked.
+  @param[in]   Mask               Mask pattern to be checked.
+  @param[in]   MaskSize           Size of Mask pattern to be checked.
+  @param[in]   ReplaceMask        ReplaceMask pattern to be checked.
+  @param[in]   ReplaceMaskSize    Size of ReplaceMask pattern to be checked.
+  @param[out]  ErrorCount         Number of errors to cumulate.
+**/
+VOID
+ValidatePatch (
+  IN       CONST  CHAR8    *PatchSection,
+  IN              UINT32   PatchIndex,
+  IN              BOOLEAN  FindSizeCanBeZero,
+  IN       CONST  UINT8    *Find,
+  IN              UINT32   FindSize,
+  IN       CONST  UINT8    *Replace,
+  IN              UINT32   ReplaceSize,
+  IN       CONST  UINT8    *Mask,
+  IN              UINT32   MaskSize,
+  IN       CONST  UINT8    *ReplaceMask,
+  IN              UINT32   ReplaceMaskSize,
+      OUT         UINT32   *ErrorCount
+  );
+
 UINT32
 CheckACPI (
   IN  OC_GLOBAL_CONFIG  *Config

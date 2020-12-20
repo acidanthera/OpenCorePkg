@@ -111,50 +111,20 @@ CheckACPI (
     //
     // Checks for size.
     //
-    if (FindSize != ReplaceSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "ACPI->Patch[%u] has different Find and Replace size (%u vs %u)!\n",
-        Index,
-        FindSize,
-        ReplaceSize
-        ));
-      ++ErrorCount;
-    }
-    if (MaskSize > 0) {
-      if (MaskSize != FindSize) {
-        DEBUG ((
-          DEBUG_WARN,
-          "ACPI->Patch[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
-          Index,
-          MaskSize,
-          FindSize
-          ));
-        ++ErrorCount;
-      } else {
-        if (!DataHasProperMasking (Find, Mask, FindSize)) {
-          DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Find requires Mask to be active for corresponding bits!\n", Index));
-          ++ErrorCount;
-        }
-      }
-    }
-    if (ReplaceMaskSize > 0) {
-      if (ReplaceMaskSize != ReplaceSize) {
-        DEBUG ((
-          DEBUG_WARN,
-          "ACPI->Patch[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
-          Index,
-          ReplaceMaskSize,
-          ReplaceSize
-          ));
-        ++ErrorCount;
-      } else {
-        if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
-          DEBUG ((DEBUG_WARN, "ACPI->Patch[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n", Index));
-          ++ErrorCount;
-        }
-      }
-    }
+    ValidatePatch (
+      "Kernel->Patch",
+      Index,
+      FALSE,
+      Find,
+      FindSize,
+      Replace,
+      ReplaceSize,
+      Mask,
+      MaskSize,
+      ReplaceMask,
+      ReplaceMaskSize,
+      &ErrorCount
+      ); 
   }
 
   //

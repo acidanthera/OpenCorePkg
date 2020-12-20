@@ -43,7 +43,6 @@ CheckKernel (
   CONST CHAR8         *UpdateSMBIOSMode;
   CONST CHAR8         *Base;
   CONST UINT8         *Find;
-  BOOLEAN             FindSizeCanBeZero;
   UINT32              FindSize;
   CONST UINT8         *Replace;
   UINT32              ReplaceSize;
@@ -62,7 +61,6 @@ CheckKernel (
   IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
   IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
   UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
-  FindSizeCanBeZero                = FALSE;
 
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Add.Values[Index]->Arch);
@@ -290,53 +288,23 @@ CheckKernel (
       ++ErrorCount;
     }
 
-    if (Base[0] != '\0' && FindSize == 0) {
-      FindSizeCanBeZero = TRUE;
-    }
-    if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Kernel->Patch[%u] has different Find and Replace size (%u vs %u)!\n",
-        Index,
-        FindSize,
-        ReplaceSize
-        ));
-      ++ErrorCount;
-    }
-    if (MaskSize > 0) {
-      if (MaskSize != FindSize) {
-        DEBUG ((
-          DEBUG_WARN,
-          "Kernel->Patch[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
-          Index,
-          MaskSize,
-          FindSize
-          ));
-        ++ErrorCount;
-      } else {
-        if (!DataHasProperMasking (Find, Mask, FindSize)) {
-          DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Find requires Mask to be active for corresponding bits!\n", Index));
-          ++ErrorCount;
-        }
-      }
-    }
-    if (ReplaceMaskSize > 0) {
-      if (ReplaceMaskSize != ReplaceSize) {
-        DEBUG ((
-          DEBUG_WARN,
-          "Kernel->Patch[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
-          Index,
-          ReplaceMaskSize,
-          ReplaceSize
-          ));
-        ++ErrorCount;
-      } else {
-        if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
-          DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n", Index));
-          ++ErrorCount;
-        }
-      }
-    }
+    //
+    // Checks for size.
+    //
+    ValidatePatch (
+      "Kernel->Patch",
+      Index,
+      Base[0] != '\0' && FindSize == 0,
+      Find,
+      FindSize,
+      Replace,
+      ReplaceSize,
+      Mask,
+      MaskSize,
+      ReplaceMask,
+      ReplaceMaskSize,
+      &ErrorCount
+      );
   }
 
   //
