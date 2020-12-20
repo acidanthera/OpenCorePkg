@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed macrecovery server protocol compatibility
 - Added basic audio assistant support in OpenCanopy
 - Added compiled ACPI samples to the package
+- Fixed timer resolution restoration at boot time
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout
