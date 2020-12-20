@@ -24,28 +24,34 @@ CheckKernel (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  UINT32            LiluIndex;
-  OC_KERNEL_CONFIG  *UserKernel;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *BundlePath;
-  CONST CHAR8       *Comment;
-  CONST CHAR8       *ExecutablePath;
-  CONST CHAR8       *MaxKernel;
-  CONST CHAR8       *MinKernel;
-  CONST CHAR8       *PlistPath;
-  CONST CHAR8       *Identifier;
-  BOOLEAN           HasLiluKext;
-  BOOLEAN           IsDisableLinkeditJettisonEnabled;
+  UINT32              ErrorCount;
+  UINT32              Index;
+  UINT32              LiluIndex;
+  OC_KERNEL_CONFIG    *UserKernel;
+  OC_PLATFORM_CONFIG  *UserPlatformInfo;
+  CONST CHAR8         *Arch;
+  CONST CHAR8         *BundlePath;
+  CONST CHAR8         *Comment;
+  CONST CHAR8         *ExecutablePath;
+  CONST CHAR8         *MaxKernel;
+  CONST CHAR8         *MinKernel;
+  CONST CHAR8         *PlistPath;
+  CONST CHAR8         *Identifier;
+  BOOLEAN             HasLiluKext;
+  BOOLEAN             IsDisableLinkeditJettisonEnabled;
+  BOOLEAN             IsCustomSMBIOSGuidEnabled;
+  CONST CHAR8         *UpdateSMBIOSMode;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
 
   ErrorCount                       = 0;
   LiluIndex                        = 0;
   UserKernel                       = &Config->Kernel;
+  UserPlatformInfo                 = &Config->PlatformInfo;
   HasLiluKext                      = FALSE;
   IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
+  IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
+  UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
 
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Add.Values[Index]->Arch);
@@ -193,6 +199,14 @@ CheckKernel (
 
   if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
+    ++ErrorCount;
+  }
+
+  //
+  // CustomSMBIOSGuid quirk requires UpdateSMBIOSMode at PlatformInfo set to Custom.
+  //
+  if (IsCustomSMBIOSGuidEnabled && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Quirks->CustomSMBIOSGuid is enabled, but PlatformInfo->UpdateSMBIOSMode is not set to Custom!\n"));
     ++ErrorCount;
   }
 

@@ -40,6 +40,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 #### Delete
 - Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
 - Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
+#### Quirks
+- `CustomSMBIOSGuid` requires `UpdateSMBIOSMode` at `PlatformInfo` set to `Custom`.
 
 ## Misc
 - TODO
