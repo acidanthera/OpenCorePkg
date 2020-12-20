@@ -205,7 +205,7 @@ CheckKernel (
     if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
       DEBUG ((
         DEBUG_WARN,
-        "Kernel->Patch[%u] has different Find and Replace size (%u vs %u) when Base is not in use!\n",
+        "Kernel->Patch[%u] has different Find and Replace size (%u vs %u)!\n",
         Index,
         FindSize,
         ReplaceSize
