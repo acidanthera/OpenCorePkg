@@ -140,13 +140,12 @@ AsciiIdentifierIsLegal (
     //
     if (AsciiStrCmp (Identifier, "kernel") == 0) {
       return TRUE;
-    } else {
-      if (OcAsciiStrChr (Identifier, '.') == NULL) {
-        return FALSE;
-      }
-
-      return TRUE;
     }
+    if (OcAsciiStrChr (Identifier, '.') == NULL) {
+      return FALSE;
+    }
+
+    return TRUE;
   }
 
   for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
