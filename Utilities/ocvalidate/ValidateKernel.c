@@ -41,6 +41,16 @@ CheckKernel (
   BOOLEAN             IsDisableLinkeditJettisonEnabled;
   BOOLEAN             IsCustomSMBIOSGuidEnabled;
   CONST CHAR8         *UpdateSMBIOSMode;
+  CONST CHAR8         *Base;
+  CONST UINT8         *Find;
+  BOOLEAN             FindSizeCanBeZero;
+  UINT32              FindSize;
+  CONST UINT8         *Replace;
+  UINT32              ReplaceSize;
+  CONST UINT8         *Mask;
+  UINT32              MaskSize;
+  CONST UINT8         *ReplaceMask;
+  UINT32              ReplaceMaskSize;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
 
@@ -52,6 +62,7 @@ CheckKernel (
   IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
   IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
   UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
+  FindSizeCanBeZero                = FALSE;
 
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Add.Values[Index]->Arch);
@@ -154,6 +165,29 @@ CheckKernel (
     }
   }
 
+  //
+  // TODO: Handle Force checks here...
+  //
+
+  for (Index = 0; Index < UserKernel->Patch.Count; ++Index) {
+    Base            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Base);
+    Comment         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Comment);
+    Arch            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Arch);
+    Identifier      = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Identifier);
+    Find            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Find);
+    FindSize        = UserKernel->Patch.Values[Index]->Find.Size;
+    Replace         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Replace);
+    ReplaceSize     = UserKernel->Patch.Values[Index]->Replace.Size;
+    Mask            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Mask);
+    MaskSize        = UserKernel->Patch.Values[Index]->Mask.Size;
+    ReplaceMask     = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->ReplaceMask);
+    ReplaceMaskSize = UserKernel->Patch.Values[Index]->ReplaceMask.Size;
+
+    //
+    // Sanitise strings.
+    //
+    if (!AsciiCommentIsLegal (Comment)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
     if (!AsciiArchIsLegal (Arch)) {
@@ -163,6 +197,54 @@ CheckKernel (
     if (!AsciiIdentifierIsLegal (Identifier)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
+    }
+
+    if (Base[0] != '\0' && FindSize == 0) {
+      FindSizeCanBeZero = TRUE;
+    }
+    if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
+      DEBUG ((
+        DEBUG_WARN,
+        "Kernel->Patch[%u] has different Find and Replace size (%u vs %u) when Base is not in use!\n",
+        Index,
+        FindSize,
+        ReplaceSize
+        ));
+      ++ErrorCount;
+    }
+    if (MaskSize > 0) {
+      if (MaskSize != FindSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "Kernel->Patch[%u] has Mask set but its size is different from Find (%u vs %u)!\n",
+          Index,
+          MaskSize,
+          FindSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Find, Mask, FindSize)) {
+          DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Find requires Mask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
+    }
+    if (ReplaceMaskSize > 0) {
+      if (ReplaceMaskSize != ReplaceSize) {
+        DEBUG ((
+          DEBUG_WARN,
+          "Kernel->Patch[%u] has ReplaceMask set but its size is different from Replace (%u vs %u)!\n",
+          Index,
+          ReplaceMaskSize,
+          ReplaceSize
+          ));
+        ++ErrorCount;
+      } else {
+        if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+          DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n", Index));
+          ++ErrorCount;
+        }
+      }
     }
   }
 
