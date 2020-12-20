@@ -108,20 +108,6 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    //
-    // TODO: Drop Empty string support in OC.
-    //
-    if (AsciiStrCmp (Identifier, "Any") != 0
-      && AsciiStrCmp (Identifier, "Apple") != 0
-      && !AsciiFileNameHasSuffix (Identifier, "efi")) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Booter->Patch[%u]->Identifier has illegal value: %a (Can only be Any, Apple, or a specified bootloader with .efi sufffix)\n",
-        Index,
-        Identifier
-        ));
-      ++ErrorCount;
-    }
 
     //
     // Checks for size.

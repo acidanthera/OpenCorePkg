@@ -131,21 +131,35 @@ AsciiIdentifierIsLegal (
 {
   UINTN  Index;
 
-  //
-  // Special check for Identifier under Kernel section.
-  //
   if (IsKernelIdentifier) {
     //
-    // There must be one dot character unless it is a kernel patch.
+    // Kernel patch only requires Kernel->Patch->Identifier set to kernel.
     //
     if (AsciiStrCmp (Identifier, "kernel") == 0) {
       return TRUE;
     }
-    if (OcAsciiStrChr (Identifier, '.') == NULL) {
+  } else {
+    //
+    // Any and Apple are two fixed values accepted by Booter->Patch.
+    // TODO: Drop empty string support in OC.
+    //
+    if (AsciiStrCmp (Identifier, "Any") == 0
+      || AsciiStrCmp (Identifier, "Apple") == 0) {
+      return TRUE;
+    }
+    //
+    // For customised bootloader, it must have .efi suffix.
+    //
+    if (!AsciiFileNameHasSuffix (Identifier, "efi")) {
       return FALSE;
     }
+  }
 
-    return TRUE;
+  //
+  // There must be a dot for a sane Identifier.
+  //
+  if (OcAsciiStrChr (Identifier, '.') == NULL) {
+    return FALSE;
   }
 
   for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
