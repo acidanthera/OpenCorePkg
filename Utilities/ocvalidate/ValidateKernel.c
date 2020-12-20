@@ -108,18 +108,6 @@ CheckKernel (
       ++ErrorCount;
     }
 
-    if (AsciiStrCmp (Arch, "Any") != 0
-      && AsciiStrCmp (Arch, "i386") != 0
-      && AsciiStrCmp (Arch, "x86_64") != 0) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Kernel->Add[%u]->Arch has illegal value: %a (Can only be Any, i386, and x86_64)\n",
-        Index,
-        Arch
-        ));
-      ++ErrorCount;
-    }
-
     //
     // TODO: Bring more special checks to kexts from Acidanthera.
     //
@@ -164,21 +152,16 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
+  }
 
-    if (AsciiStrCmp (Arch, "Any") != 0
-      && AsciiStrCmp (Arch, "i386") != 0
-      && AsciiStrCmp (Arch, "x86_64") != 0) {
-      DEBUG ((
-        DEBUG_WARN,
-        "Kernel->Block[%u]->Arch has illegal value: %a (Can only be Any, i386, and x86_64)\n",
-        Index,
-        Arch
-        ));
       ++ErrorCount;
     }
-
-    if (OcAsciiStrChr (Identifier, '.') == NULL) {
-      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Identifier does not contain any dot character (thus it probably is not a real Identifier)!\n", Index));
+    if (!AsciiArchIsLegal (Arch)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiIdentifierIsLegal (Identifier)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
       ++ErrorCount;
     }
   }
