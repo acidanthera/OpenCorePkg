@@ -84,6 +84,9 @@ CheckUEFI (
   ConsoleMode                      = OC_BLOB_GET (&UserUefi->Output.ConsoleMode);
   Resolution                       = OC_BLOB_GET (&UserUefi->Output.Resolution);
   AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
+  AudioDevicePath                  = NULL;
+  UnicodeAudioDevicePath           = NULL;
+  TextualAudioDevicePath           = NULL;
 
   //
   // Sanitise strings.
