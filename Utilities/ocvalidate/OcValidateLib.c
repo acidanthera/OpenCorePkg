@@ -243,6 +243,7 @@ AsciiDevicePropertyIsLegal (
     //
     // Skip allowed characters (0-9, A-Z, a-z, '-').
     // FIXME: Discuss whether more/less should be allowed for a legal device property.
+    // FIXME: Is space character allowed here?
     //
     if (IsAsciiNumber (DeviceProperty[Index])
       || IsAsciiAlpha (DeviceProperty[Index])

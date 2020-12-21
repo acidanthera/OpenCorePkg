@@ -113,7 +113,7 @@ CheckBooter (
     // Checks for size.
     //
     ValidatePatch (
-      "Kernel->Patch",
+      "Booter->Patch",
       Index,
       FALSE,
       Find,
@@ -132,12 +132,8 @@ CheckBooter (
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
 
     //
-    // Sanitise strings.
+    // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.
     //
-    if (!AsciiUefiDriverIsLegal (Driver)) {
-      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
-      ++ErrorCount;
-    }
 
     if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;

@@ -82,6 +82,9 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
     } else {
+      //
+      // Valid BundlePath must contain .kext suffix.
+      //
       if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
         DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
         ++ErrorCount;
@@ -99,6 +102,9 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
     } else {
+      //
+      // Valid PlistPath must contain .plist suffix.
+      //
       if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
         DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
         ++ErrorCount;
@@ -207,6 +213,9 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
     } else {
+      //
+      // Valid BundlePath must contain .kext suffix.
+      //
       if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
         DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
         ++ErrorCount;
@@ -224,6 +233,9 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
     } else {
+      //
+      // Valid PlistPath must contain .plist suffix.
+      //
       if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
         DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
         ++ErrorCount;

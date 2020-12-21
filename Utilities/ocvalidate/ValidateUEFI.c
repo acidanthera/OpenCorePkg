@@ -93,6 +93,9 @@ CheckUEFI (
   if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
     DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice contains illegal character!\n"));
     ++ErrorCount;
+    //
+    // // If even containing illegal characters at ASCII level, it must be borked. Skip checking later.
+    //
     IsAsciiAudioDevicePathLegal = FALSE;
   }
   if (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0
@@ -132,8 +135,6 @@ CheckUEFI (
       // Secondly, convert binary back to Unicode device path.
       //
       TextualAudioDevicePath = ConvertDevicePathToText (AudioDevicePath, FALSE, FALSE);
-      FreePool (AudioDevicePath);
-
       if (TextualAudioDevicePath != NULL) {
         //
         // If the results do not match, then the original device path is borked.
@@ -143,10 +144,11 @@ CheckUEFI (
           ++ErrorCount;
         }
       }
-      
-      FreePool (UnicodeAudioDevicePath);
-      FreePool (TextualAudioDevicePath);
     }
+
+    FreePool (AudioDevicePath);
+    FreePool (UnicodeAudioDevicePath);
+    FreePool (TextualAudioDevicePath);
   }
 
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
@@ -154,11 +156,15 @@ CheckUEFI (
 
     //
     // Sanitise strings.
-    // NOTE: Skip '#' as it is treated as comments and thus is legal.
     //
     if (!AsciiUefiDriverIsLegal (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
+      //
+      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
+      //        can deal with non-ASCII characters. Skipping.
+      //
+      continue;
     }
 
     //

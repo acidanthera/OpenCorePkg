@@ -51,7 +51,7 @@ CheckDeviceProperties (
       DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] contains illegal character!\n", DeviceIndex));
       ++ErrorCount;
       //
-      // If even illegal by an entry check, this one must be borked. Skipping such.
+      // If even containing illegal characters at ASCII level, it must be borked. Skipping such.
       //
       continue;
     }
@@ -69,20 +69,16 @@ CheckDeviceProperties (
       // Secondly, convert binary back to Unicode device path.
       //
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-      FreePool (DevicePath);
-
       if (TextualDevicePath != NULL) {
         //
-        // If the results do not match, then the original device path is borked.
+        // If the results before and after conversion do not match,
+        // then the original device path is borked.
         //
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
-          DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] is borked!\n", DeviceIndex));
+          DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u]->DevicePath is borked!\n", DeviceIndex));
           ++ErrorCount;
         }
       }
-
-      FreePool (UnicodeDevicePath);
-      FreePool (TextualDevicePath);
     }
 
     for (PropertyIndex = 0; PropertyIndex < UserDevProp->Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
@@ -94,13 +90,17 @@ CheckDeviceProperties (
       if (!AsciiDevicePropertyIsLegal (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
-          "DeviceProperties->Delete[%u]->%a contains illegal character!\n",
+          "DeviceProperties->Delete[%u]->Property[%u] contains illegal character!\n",
           DeviceIndex,
-          AsciiProperty
+          PropertyIndex
           ));
         ++ErrorCount;
       }
     }
+
+    FreePool (DevicePath);
+    FreePool (UnicodeDevicePath);
+    FreePool (TextualDevicePath);
   }
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
@@ -134,20 +134,15 @@ CheckDeviceProperties (
       // Secondly, convert binary back to Unicode device path.
       //
       TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-      FreePool (DevicePath);
-
       if (TextualDevicePath != NULL) {
         //
         // If the results do not match, then the original device path is borked.
         //
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
-          DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] is borked!\n", DeviceIndex));
+          DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u]->DevicePath is borked!\n", DeviceIndex));
           ++ErrorCount;
         }
       }
-      
-      FreePool (UnicodeDevicePath);
-      FreePool (TextualDevicePath);
     }
 
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
@@ -156,16 +151,20 @@ CheckDeviceProperties (
       //
       // Sanitise strings.
       //
-      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) { ///< MARK
+      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
-          "DeviceProperties->Add[%u]->%a contains illegal character!\n",
+          "DeviceProperties->Add[%u]->Property[%u] contains illegal character!\n",
           DeviceIndex,
-          AsciiProperty
+          PropertyIndex
           ));
         ++ErrorCount;
       }
     }
+
+    FreePool (DevicePath);
+    FreePool (UnicodeDevicePath);
+    FreePool (TextualDevicePath);
   }
 
   return ReportError (__func__, ErrorCount);

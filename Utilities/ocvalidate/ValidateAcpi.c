@@ -112,7 +112,7 @@ CheckACPI (
     // Checks for size.
     //
     ValidatePatch (
-      "Kernel->Patch",
+      "ACPI->Patch",
       Index,
       FALSE,
       Find,
