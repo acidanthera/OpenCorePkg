@@ -45,18 +45,6 @@ CheckDeviceProperties (
     TextualDevicePath = NULL;
 
     //
-    // Sanitise strings.
-    //
-    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
-      DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u] contains illegal character!\n", DeviceIndex));
-      ++ErrorCount;
-      //
-      // If even containing illegal characters at ASCII level, it must be borked. Skipping such.
-      //
-      continue;
-    }
-
-    //
     // Convert ASCII device path to Unicode format.
     //
     UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
@@ -108,19 +96,7 @@ CheckDeviceProperties (
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
     DevicePath        = NULL;
     TextualDevicePath = NULL;
-
-    //
-    // Sanitise strings.
-    //
-    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
-      DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u] contains illegal character!\n", DeviceIndex));
-      ++ErrorCount;
-      //
-      // If even illegal by an entry check, this one must be borked. Skipping such.
-      //
-      continue;
-    }
-
+    
     //
     // Convert ASCII device path to Unicode format.
     //

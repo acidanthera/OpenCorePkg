@@ -203,36 +203,6 @@ AsciiArchIsLegal (
 }
 
 BOOLEAN
-AsciiDevicePathIsLegal (
-  IN  CONST CHAR8  *DevicePath
-  )
-{
-  UINTN  Index;
-
-  for (Index = 0; Index < AsciiStrLen (DevicePath); ++Index) {
-    //
-    // Skip allowed characters (0-9, A-Z, a-z, '/', '(', ')', and ',').
-    // FIXME: Discuss whether more/less should be allowed for a legal device path.
-    //
-    if (IsAsciiNumber (DevicePath[Index])
-      || IsAsciiAlpha (DevicePath[Index])
-      || DevicePath[Index] == '/'
-      || DevicePath[Index] == '('
-      || DevicePath[Index] == ')'
-      || DevicePath[Index] == ',') {
-      continue;
-    }
-
-    //
-    // Disallowed characters matched.
-    //
-    return FALSE;
-  }
-
-  return TRUE;
-}
-
-BOOLEAN
 AsciiDevicePropertyIsLegal (
   IN  CONST CHAR8  *DeviceProperty
   )

@@ -112,11 +112,6 @@ AsciiArchIsLegal (
   );
 
 BOOLEAN
-AsciiDevicePathIsLegal (
-  IN  CONST CHAR8  *DevicePath
-  );
-
-BOOLEAN
 AsciiDevicePropertyIsLegal (
   IN  CONST CHAR8  *DeviceProperty
   );

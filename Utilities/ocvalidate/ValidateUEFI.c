@@ -55,7 +55,6 @@ CheckUEFI (
   UINT32                    UserBpp;
   BOOLEAN                   UserSetMax;
   CONST CHAR8               *AsciiAudioDevicePath;
-  BOOLEAN                   IsAsciiAudioDevicePathLegal;
   EFI_DEVICE_PATH_PROTOCOL  *AudioDevicePath;
   CHAR16                    *UnicodeAudioDevicePath;
   CHAR16                    *TextualAudioDevicePath;
@@ -85,19 +84,10 @@ CheckUEFI (
   ConsoleMode                      = OC_BLOB_GET (&UserUefi->Output.ConsoleMode);
   Resolution                       = OC_BLOB_GET (&UserUefi->Output.Resolution);
   AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
-  IsAsciiAudioDevicePathLegal      = TRUE;
 
   //
   // Sanitise strings.
   //
-  if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice contains illegal character!\n"));
-    ++ErrorCount;
-    //
-    // // If even containing illegal characters at ASCII level, it must be borked. Skip checking later.
-    //
-    IsAsciiAudioDevicePathLegal = FALSE;
-  }
   if (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0
     && AsciiStrCmp (TextRenderer, "BuiltinText") != 0
     && AsciiStrCmp (TextRenderer, "SystemGraphics") != 0
@@ -120,7 +110,7 @@ CheckUEFI (
     ++ErrorCount;
   }
 
-  if (IsAsciiAudioDevicePathLegal && AsciiAudioDevicePath[0] != '\0') {
+  if (AsciiAudioDevicePath[0] != '\0') {
     //
     // Convert ASCII device path to Unicode format.
     //
