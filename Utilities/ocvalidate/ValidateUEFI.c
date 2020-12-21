@@ -160,10 +160,6 @@ CheckUEFI (
     if (!AsciiUefiDriverIsLegal (Driver)) {
       DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     }
 

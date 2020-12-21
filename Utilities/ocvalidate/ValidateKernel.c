@@ -81,10 +81,6 @@ CheckKernel (
     if (!AsciiFileSystemPathIsLegal (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     } else {
       //
@@ -102,19 +98,11 @@ CheckKernel (
     if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     }
     if (!AsciiFileSystemPathIsLegal (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     } else {
       //
@@ -227,10 +215,6 @@ CheckKernel (
     if (!AsciiFileSystemPathIsLegal (BundlePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     } else {
       //
@@ -248,19 +232,11 @@ CheckKernel (
     if (!AsciiFileSystemPathIsLegal (ExecutablePath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->ExecutablePath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     }
     if (!AsciiFileSystemPathIsLegal (PlistPath)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath contains illegal character!\n", Index));
       ++ErrorCount;
-      //
-      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
-      //        can deal with non-ASCII characters. Skipping.
-      //
       continue;
     } else {
       //
