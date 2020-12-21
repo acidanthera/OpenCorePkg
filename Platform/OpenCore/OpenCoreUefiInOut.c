@@ -109,7 +109,6 @@ OcLoadUefiInputSupport (
   OC_INPUT_POINTER_MODE PointerMode;
   OC_INPUT_KEY_MODE     KeyMode;
   CONST CHAR8           *KeySupportStr;
-  EFI_EVENT             Event;
 
   ExitBs = FALSE;
 
@@ -174,13 +173,7 @@ OcLoadUefiInputSupport (
   }
 
   if (ExitBs) {
-    gBS->CreateEvent (
-      EVT_SIGNAL_EXIT_BOOT_SERVICES,
-      TPL_CALLBACK,
-      OcExitBootServicesInputHandler,
-      Config,
-      &Event
-      );
+    OcScheduleExitBootServices (OcExitBootServicesInputHandler, Config);
   }
 }
 

@@ -70,17 +70,24 @@ OcAppleGenericInputTimerQuirkExit (
 
   if (mTimerProtocol != NULL) {
     //
-    // You are not allowed to call this on APTIO IV, as it results in an interrupt with 0x0 pointer
-    // handler during XNU boot.
+    // You are not allowed to call this after ExitBootServices (e.g. as an Event) on
+    // APTIO IV, as it results in an interrupt with 0x0 pointer handler during XNU boot.
     //
-    // Status = mTimerProtocol->SetTimerPeriod (mTimerProtocol, mOriginalTimerPeriod);
-    // if (!EFI_ERROR (Status)) {
-    //   DEBUG ((DEBUG_INFO, "AmiShimTimerBoostExit changed period %d to %d\n",
-    //     AIT_TIMER_PERIOD, mOriginalTimerPeriod));
-    // } else {
-    //   DEBUG ((DEBUG_INFO, "AmiShimTimerBoostExit failed to change period %d to %d, error - %r\n",
-    //     AIT_TIMER_PERIOD, mOriginalTimerPeriod, Status));
-    // }
+    Status = mTimerProtocol->SetTimerPeriod (mTimerProtocol, mOriginalTimerPeriod);
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "AmiShimTimerBoostExit changed current period to %Lu\n",
+        mOriginalTimerPeriod
+        ));
+    } else {
+       DEBUG ((
+        DEBUG_INFO,
+        "AmiShimTimerBoostExit failed to change current period to %Lu, error - %r\n",
+        mOriginalTimerPeriod,
+        Status
+        ));
+    }
     mTimerProtocol = NULL;
   }
 
