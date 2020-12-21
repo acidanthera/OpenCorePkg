@@ -14,8 +14,7 @@
 **/
 
 #include "ocvalidate.h"
-
-#include <Library/MemoryAllocationLib.h>
+#include "OcValidateLib.h"
 
 #include <Library/OcAppleKernelLib.h>
 

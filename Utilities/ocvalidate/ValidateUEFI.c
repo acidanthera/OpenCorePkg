@@ -14,9 +14,7 @@
 **/
 
 #include "ocvalidate.h"
-
-#include <Library/DevicePathLib.h>
-#include <Library/MemoryAllocationLib.h>
+#include "OcValidateLib.h"
 
 #include <Library/OcConsoleLib.h>
 

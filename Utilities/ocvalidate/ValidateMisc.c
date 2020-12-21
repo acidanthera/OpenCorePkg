@@ -14,6 +14,7 @@
 **/
 
 #include "ocvalidate.h"
+#include "OcValidateLib.h"
 
 //
 // TODO

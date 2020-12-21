@@ -13,11 +13,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Library/MemoryAllocationLib.h>
+#include "ocvalidate.h"
+#include "OcValidateLib.h"
 
 #include <File.h>
-
-#include "ocvalidate.h"
 
 /*
  for fuzzing (TODO):
