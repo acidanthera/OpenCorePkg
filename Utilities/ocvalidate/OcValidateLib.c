@@ -191,7 +191,7 @@ AsciiArchIsLegal (
 {
   //
   // Only allow Any, i386 (32-bit), and x86_64 (64-bit).
-  // FIXME: Do not allow empty string in OC.
+  // TODO: Do not allow empty string in OC.
   //
   if (AsciiStrCmp (Arch, "Any") != 0
     && AsciiStrCmp (Arch, "i386") != 0
@@ -207,27 +207,11 @@ AsciiDevicePropertyIsLegal (
   IN  CONST CHAR8  *DeviceProperty
   )
 {
-  UINTN  Index;
-
-  for (Index = 0; Index < AsciiStrLen (DeviceProperty); ++Index) {
-    //
-    // Skip allowed characters (0-9, A-Z, a-z, '-').
-    // FIXME: Discuss whether more/less should be allowed for a legal device property.
-    // FIXME: Is space character allowed here?
-    //
-    if (IsAsciiNumber (DeviceProperty[Index])
-      || IsAsciiAlpha (DeviceProperty[Index])
-      || DeviceProperty[Index] == '-') {
-      continue;
-    }
-
-    //
-    // Disallowed characters matched.
-    //
-    return FALSE;
-  }
-
-  return TRUE;
+  //
+  // Like comments, device properties can be anything printable.
+  // Calling sanitiser for comments to reduce code duplication.
+  //
+  return AsciiCommentIsLegal (DeviceProperty);
 }
 
 BOOLEAN
@@ -255,7 +239,6 @@ AsciiUefiDriverIsLegal (
 
     //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/').
-    // FIXME: Discuss whether more/less should be allowed for a UEFI driver.
     //
     if (IsAsciiNumber (Driver[Index])
       || IsAsciiAlpha (Driver[Index])
