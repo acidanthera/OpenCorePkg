@@ -51,6 +51,11 @@ CheckACPI (
     if (!AsciiFileSystemPathIsLegal (Path)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path contains illegal character!\n", Index));
       ++ErrorCount;
+      //
+      // FIXME: I do not think ASCII functions (like AsciiStrCmp below)
+      //        can deal with non-ASCII characters. Skipping.
+      //
+      continue;
     }
     if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Comment contains illegal character!\n", Index));
