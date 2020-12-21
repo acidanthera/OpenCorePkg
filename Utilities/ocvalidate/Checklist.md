@@ -9,7 +9,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all `MinKernel` and `MaxKernel` settings, they should follow the conventions indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
-- TODO: Discuss conventions for `Identifier`, `DevicePath`, `DeviceProperty`, `UEFIDriver`
+- For all paths of UEFI Drivers, only `0-9, A-Z, a-z, '_', '-', '.', and '/'` are accepted.
+- TODO: Discuss conventions for `Identifier`
 
 ## ACPI
 #### Add
