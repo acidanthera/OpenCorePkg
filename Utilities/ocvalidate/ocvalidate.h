@@ -27,7 +27,7 @@
 /**
   Get current timestamp in milliseconds.
   
-  @retval Current timestamp in milliseconds.
+  @return     Current timestamp in milliseconds.
 **/
 INT64
 GetCurrentTimestamp (
@@ -37,10 +37,10 @@ GetCurrentTimestamp (
 /**
   Get ASCII filename suffix.
 
-  @param[in]  FileName          Filename given.
+  @param[in]  FileName                 Filename given.
 
-  @retval     Empty string      If the FileName is abnormal.
-  @retval     FileName suffix   If the FileName is sane.
+  @retval     Empty string             If the FileName is abnormal.
+  @retval     FileName suffix          If the FileName is sane.
 **/
 CHAR8 *
 AsciiGetFilenameSuffix (
@@ -50,10 +50,10 @@ AsciiGetFilenameSuffix (
 /**
   Check if filename has given suffix.
 
-  @param[in]  FileName          Filename given.
-  @param[in]  Suffix            Suffix to be matched and checked.
+  @param[in]  FileName                 Filename given.
+  @param[in]  Suffix                   Suffix to be matched and checked.
 
-  @retval     TRUE              If FileName has Suffix in the end.
+  @retval     TRUE                     If FileName has Suffix in the end.
 **/
 BOOLEAN
 AsciiFileNameHasSuffix (
@@ -64,9 +64,9 @@ AsciiFileNameHasSuffix (
 /**
   Check if a filesystem path contains only legal characters.
 
-  @param[in]  Path              Filesystem path to be checked.
+  @param[in]  Path                     Filesystem path to be checked.
 
-  @retval     TRUE              If Path only contains 0-9, A-Z, a-z, '_', '-', '.', '/', and '\'.
+  @retval     TRUE                     If Path only contains 0-9, A-Z, a-z, '_', '-', '.', '/', and '\'.
 **/
 BOOLEAN
 AsciiFileSystemPathIsLegal (
@@ -76,9 +76,9 @@ AsciiFileSystemPathIsLegal (
 /**
   Check if an OpenCore Configuration Comment contains only ASCII printable characters.
 
-  @param[in]  Comment           Comment to be checked.
+  @param[in]  Comment                  Comment to be checked.
 
-  @retval     TRUE              If Comment only contains ASCII printable characters.
+  @retval     TRUE                     If Comment only contains ASCII printable characters.
 **/
 BOOLEAN
 AsciiCommentIsLegal (
@@ -111,22 +111,55 @@ AsciiArchIsLegal (
   IN  CONST CHAR8  *Arch
   );
 
+/**
+  Check if an OpenCore Configuration Device Property contains only ASCII printable characters.
+
+  @param[in]  DeviceProperty           Device Property to be checked.
+
+  @retval     TRUE                     If Device Property only contains ASCII printable characters.
+**/
 BOOLEAN
 AsciiDevicePropertyIsLegal (
   IN  CONST CHAR8  *DeviceProperty
   );
 
+/**
+  Check if a UEFI Driver matches specific conventions.
+
+  @param[in]  Driver                   Driver to be checked.
+
+  @retval     TRUE                     If path of Driver contains .efi suffix, and only contains 0-9, A-Z, a-z, '_', '-', '.', and '/'.
+**/
 BOOLEAN
 AsciiUefiDriverIsLegal (
   IN  CONST CHAR8  *Driver
   );
 
+/**
+  Report status of errors in the end of each checker functions.
+
+  @param[in]  FuncName                 Checker function name. (__func__)
+  @param[in]  ErrorCount               Number of errors to be returned.
+
+  @return     Number of errors detected in one checker.
+**/
 UINT32
 ReportError (
   IN  CONST CHAR8  *FuncName,
   IN  UINT32       ErrorCount
   );
 
+/**
+  Check if a set of data has proper masking set.
+
+  This function assumes identical sizes of Data and Mask, which must be ensured before calling.
+
+  @param[in]  Data                     Data to be checked.
+  @param[in]  Mask                     Mask to be paired with Data.
+  @param[in]  Size                     Size of Data and Mask.
+
+  @retval     TRUE                     If corresponding bits of Mask to Data are active (set to non-zero).
+**/
 BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
@@ -141,18 +174,18 @@ DataHasProperMasking (
   If Mask/ReplaceMask is used, but its size is different from that of Find/Replace, it is an error.
   If Mask/ReplaceMask is used without corresponding bits being active for Find/Replace pattern, it is an error.
 
-  @param[in]   PatchSection       Patch section to which the patch to be checked belongs.
-  @param[in]   PatchIndex         Index of the patch to be checked.
-  @param[in]   FindSizeCanBeZero  Whether size of Find pattern can be zero. Set to TRUE only when Kernel->Patch->Base is used and Find is empty.
-  @param[in]   Find               Find pattern to be checked.
-  @param[in]   FindSize           Size of Find pattern to be checked.
-  @param[in]   Replace            Replace pattern to be checked.
-  @param[in]   ReplaceSize        Size of Replace pattern to be checked.
-  @param[in]   Mask               Mask pattern to be checked.
-  @param[in]   MaskSize           Size of Mask pattern to be checked.
-  @param[in]   ReplaceMask        ReplaceMask pattern to be checked.
-  @param[in]   ReplaceMaskSize    Size of ReplaceMask pattern to be checked.
-  @param[out]  ErrorCount         Number of errors to cumulate.
+  @param[in]   PatchSection            Patch section to which the patch to be checked belongs.
+  @param[in]   PatchIndex              Index of the patch to be checked.
+  @param[in]   FindSizeCanBeZero       Whether size of Find pattern can be zero. Set to TRUE only when Kernel->Patch->Base is used and Find is empty.
+  @param[in]   Find                    Find pattern to be checked.
+  @param[in]   FindSize                Size of Find pattern to be checked.
+  @param[in]   Replace                 Replace pattern to be checked.
+  @param[in]   ReplaceSize             Size of Replace pattern to be checked.
+  @param[in]   Mask                    Mask pattern to be checked.
+  @param[in]   MaskSize                Size of Mask pattern to be checked.
+  @param[in]   ReplaceMask             ReplaceMask pattern to be checked.
+  @param[in]   ReplaceMaskSize         Size of ReplaceMask pattern to be checked.
+  @param[out]  ErrorCount              Number of errors to cumulate.
 **/
 VOID
 ValidatePatch (
