@@ -25,7 +25,7 @@ CheckKernel (
 {
   UINT32              ErrorCount;
   UINT32              Index;
-  UINT32              LiluIndex;
+  INT32               LiluIndex;
   OC_KERNEL_CONFIG    *UserKernel;
   OC_PLATFORM_CONFIG  *UserPlatformInfo;
   CONST CHAR8         *Arch;
@@ -36,7 +36,6 @@ CheckKernel (
   CONST CHAR8         *MinKernel;
   CONST CHAR8         *PlistPath;
   CONST CHAR8         *Identifier;
-  BOOLEAN             HasLiluKext;
   BOOLEAN             IsDisableLinkeditJettisonEnabled;
   BOOLEAN             IsCustomSMBIOSGuidEnabled;
   CONST CHAR8         *UpdateSMBIOSMode;
@@ -53,10 +52,12 @@ CheckKernel (
   DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
 
   ErrorCount                       = 0;
-  LiluIndex                        = 0;
+  //
+  // -1 (default value) means kext not found.
+  //
+  LiluIndex                        = -1;
   UserKernel                       = &Config->Kernel;
   UserPlatformInfo                 = &Config->PlatformInfo;
-  HasLiluKext                      = FALSE;
   IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
   IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
   UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
@@ -126,13 +127,53 @@ CheckKernel (
     }
 
     //
-    // TODO: Bring more special checks to kexts from Acidanthera.
+    // Special checks for kexts from Acidanthera.
     //
-    if (AsciiStrCmp (BundlePath, "Lilu.kext") == 0
-      && AsciiStrCmp (ExecutablePath, "Contents/MacOS/Lilu") == 0) {
-      HasLiluKext = TRUE;
-      LiluIndex   = Index;
+    if (AsciiStrCmp (BundlePath, "Lilu.kext") == 0) {
+      if (AsciiStrCmp (ExecutablePath, "Contents/MacOS/Lilu") == 0
+        && AsciiStrCmp (PlistPath, "Contents/Info.plist") == 0) {
+        LiluIndex = Index;
+      } else {
+        DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath discovers Lilu.kext, but its ExecutablePath or PlistPath is borked!\n", Index));
+        ++ErrorCount;
+      }
     }
+
+    if (AsciiStrCmp (BundlePath, "VirtualSMC.kext") == 0) {
+      if (AsciiStrCmp (ExecutablePath, "Contents/MacOS/VirtualSMC") == 0
+        && AsciiStrCmp (PlistPath, "Contents/Info.plist") == 0) {
+        //
+        // If LiluIndex is still uninitialised, then either Lilu is missing, or this plugin kext is loaded before it.
+        //
+        if (LiluIndex == -1) {
+          DEBUG ((DEBUG_WARN, "Kernel->Add[%u]: %a is loaded before Lilu, or Lilu is missing!\n", Index, BundlePath));
+          ++ErrorCount;
+        }
+      } else {
+        DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath discovers %a, but its ExecutablePath or PlistPath is borked!\n", Index, BundlePath));
+        ++ErrorCount;
+      }
+    }
+
+    if (AsciiStrCmp (BundlePath, "WhateverGreen.kext") == 0) {
+      if (AsciiStrCmp (ExecutablePath, "Contents/MacOS/WhateverGreen") == 0
+        && AsciiStrCmp (PlistPath, "Contents/Info.plist") == 0) {
+        //
+        // If LiluIndex is still uninitialised, then either Lilu is missing, or this plugin kext is loaded before it.
+        //
+        if (LiluIndex == -1) {
+          DEBUG ((DEBUG_WARN, "Kernel->Add[%u]: %a is loaded before Lilu, or Lilu is missing!\n", Index, BundlePath));
+          ++ErrorCount;
+        }
+      } else {
+        DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath discovers %a, but its ExecutablePath or PlistPath is borked!\n", Index, BundlePath));
+        ++ErrorCount;
+      }
+    }
+
+    //
+    // TODO: More special checks for Acidanthera kexts...
+    //
   }
 
   for (Index = 0; Index < UserKernel->Block.Count; ++Index) {
@@ -335,7 +376,7 @@ CheckKernel (
   //
   // DisableLinkeditJettison should be enabled when Lilu is in use.
   //
-  if (HasLiluKext && !IsDisableLinkeditJettisonEnabled) {
+  if (LiluIndex != -1 && !IsDisableLinkeditJettisonEnabled) {
     DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", LiluIndex));
     ++ErrorCount;
   }
