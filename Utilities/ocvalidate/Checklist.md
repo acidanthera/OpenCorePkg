@@ -46,7 +46,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - `CustomSMBIOSGuid` requires `UpdateSMBIOSMode` at `PlatformInfo` set to `Custom`.
 
 ## Misc
-- TODO
+#### Boot
+- HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 
 ## NVRAM
 - TODO

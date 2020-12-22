@@ -16,19 +16,34 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
-//
-// TODO
-//
 UINT32
 CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount;
+  UINT32          ErrorCount;
+  OC_MISC_CONFIG  *UserMisc;
+  OC_UEFI_CONFIG  *UserUefi;
+  CONST CHAR8     *HibernateMode;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
-  ErrorCount = 0;
+  ErrorCount    = 0;
+  UserMisc      = &Config->Misc;
+  UserUefi      = &Config->Uefi;
+  HibernateMode = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
+
+  //
+  // TODO: Check value of ConsoleAttributes.
+  //
+
+  if (AsciiStrCmp (HibernateMode, "None") != 0
+    && AsciiStrCmp (HibernateMode, "Auto") != 0
+    && AsciiStrCmp (HibernateMode, "RTC") != 0
+    && AsciiStrCmp (HibernateMode, "NVRAM") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->HibernateMode is borked (Can only be None, Auto, RTC, or NVRAM)!\n"));
+    ++ErrorCount;
+  }
 
   return ReportError (__func__, ErrorCount);
 }
