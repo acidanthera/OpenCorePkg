@@ -10,7 +10,6 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all entries taking file system path only `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'` are accepted.
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 - For all paths of UEFI Drivers, only `0-9, A-Z, a-z, '_', '-', '.', and '/'` are accepted.
-- TODO: Discuss conventions for `Identifier`
 
 ## ACPI
 #### Add
@@ -21,8 +20,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 #### MmioWhitelist
 - Entry[N]->Enabled: When at least one entry is enabled, `DevirtualiseMmio` in `Quirks` should be enabled.
 #### Patch
-- Entry[N]->Arch: Only `Empty string`, `Any`, `i386`, or `x86_64` are accepted.
-- Entry[N]->Identifier: Only `Empty string`, `Any`, `Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
+- Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
+- Entry[N]->Identifier: Only `Any`, `Apple`, or a specified bootloader with `.efi` sufffix, are accepted.
 #### Quirks
 - When `AllowRelocationBlock` is enabled, `ProvideCustomSlide` should be enabled altogether.
 - When `EnableSafeModeSlide` is enabled, `ProvideCustomSlide` should be enabled altogether.
@@ -38,6 +37,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - Entry[N]->BundlePath: Filename should have `.kext` suffix.
 - Entry[N]->PlistPath: Filename should have `.plist` suffix.
 - Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at `Kernel->Quirks`.
+- For some known kexts, their `BundlePath`, `ExecutablePath`, and `PlistPath` must match against each other. Current list of rules can be found [here](https://github.com/PMheart/OpenCorePkg/blob/master/Utilities/ocvalidate/ValidateKernel.c). (TODO: Change to Acidanthera link once merged)
+- Known [Lilu plugins](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md) must have proper `Add` precedence. That is to say, plugins must be placed after `Lilu.kext`.
 #### Delete
 - Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.
 - Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).

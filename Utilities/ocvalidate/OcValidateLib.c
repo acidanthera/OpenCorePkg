@@ -166,7 +166,7 @@ AsciiIdentifierIsLegal (
   for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
     //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', and '.').
-    // FIXME: Discuss what exactly is legal for identifiers.
+    // FIXME: Discuss what exactly is legal for identifiers, or update the allowed list on request.
     //
     if (IsAsciiNumber (Identifier[Index])
       || IsAsciiAlpha (Identifier[Index])
