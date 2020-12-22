@@ -48,6 +48,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 ## Misc
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
+- PickerAttributes: Only known bits are accepted.
 
 ## NVRAM
 - TODO

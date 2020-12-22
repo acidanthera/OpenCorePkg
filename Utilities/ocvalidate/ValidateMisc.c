@@ -16,6 +16,8 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+#include <Library/OcBootManagementLib.h>
+
 UINT32
 CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -23,15 +25,19 @@ CheckMisc (
 {
   UINT32          ErrorCount;
   OC_MISC_CONFIG  *UserMisc;
-  OC_UEFI_CONFIG  *UserUefi;
+  // OC_UEFI_CONFIG  *UserUefi;
   CONST CHAR8     *HibernateMode;
+  UINT32          PickerAttributes;
+  UINT32          AllowedPickerAttributes;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
-  ErrorCount    = 0;
-  UserMisc      = &Config->Misc;
-  UserUefi      = &Config->Uefi;
-  HibernateMode = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
+  ErrorCount              = 0;
+  UserMisc                = &Config->Misc;
+  // UserUefi                = &Config->Uefi;
+  HibernateMode           = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
+  PickerAttributes        = UserMisc->Boot.PickerAttributes;
+  AllowedPickerAttributes = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
 
   //
   // TODO: Check value of ConsoleAttributes.
@@ -42,6 +48,14 @@ CheckMisc (
     && AsciiStrCmp (HibernateMode, "RTC") != 0
     && AsciiStrCmp (HibernateMode, "NVRAM") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->HibernateMode is borked (Can only be None, Auto, RTC, or NVRAM)!\n"));
+    ++ErrorCount;
+  }
+
+  if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
+    //
+    // FIXME: Can those bits enabled simultaneously or only one signle bit (or several ones) should be active instead?
+    //
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is borked!\n"));
     ++ErrorCount;
   }
 
