@@ -647,9 +647,6 @@ OcLoadUefiSupport (
   )
 {
   EFI_HANDLE            *DriversToConnect;
-  UINT16                *BootOrder;
-  UINTN                 BootOrderCount;
-  BOOLEAN               BootOrderChanged;
   EFI_EVENT             Event;
 
   OcReinstallProtocols (Config);
