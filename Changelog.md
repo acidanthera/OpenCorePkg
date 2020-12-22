@@ -8,6 +8,7 @@ OpenCore Changelog
 - Added basic audio assistant support in OpenCanopy
 - Added compiled ACPI samples to the package
 - Fixed timer resolution restoration at boot time
+- Fixed memory capacity when using custom SMBIOS memory config
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout
