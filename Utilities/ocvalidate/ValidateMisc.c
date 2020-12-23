@@ -17,6 +17,7 @@
 #include "OcValidateLib.h"
 
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcConfigurationLib.h>
 #include <Protocol/OcLog.h>
 
 UINT32
@@ -39,6 +40,8 @@ CheckMisc (
   CONST CHAR8     *BootProtect;
   BOOLEAN         IsRequestBootVarRoutingEnabled;
   CONST CHAR8     *AsciiDmgLoading;
+  UINT32          ExposeSensitiveData;
+  UINT32          AllowedExposeSensitiveData;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -57,6 +60,8 @@ CheckMisc (
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
   AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
+  ExposeSensitiveData            = UserMisc->Security.ExposeSensitiveData;
+  AllowedExposeSensitiveData     = OCS_EXPOSE_BOOT_PATH | OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -123,6 +128,11 @@ CheckMisc (
     && AsciiStrCmp (AsciiDmgLoading, "Signed") != 0
     && AsciiStrCmp (AsciiDmgLoading, "Any") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->DmgLoading is borked (Can only be Disabled, Signed, or Any)!\n"));
+    ++ErrorCount;
+  }
+
+  if ((ExposeSensitiveData & ~AllowedExposeSensitiveData) != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData is borked!\n"));
     ++ErrorCount;
   }
 
