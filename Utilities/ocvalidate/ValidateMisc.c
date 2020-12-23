@@ -38,6 +38,7 @@ CheckMisc (
   UINT32          AllowedTarget;
   CONST CHAR8     *BootProtect;
   BOOLEAN         IsRequestBootVarRoutingEnabled;
+  CONST CHAR8     *AsciiDmgLoading;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -55,6 +56,7 @@ CheckMisc (
   AllowedTarget                  = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
+  AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -100,7 +102,7 @@ CheckMisc (
   //
   // TODO: Check requirements of Security->AuthRestart.
   //
-  
+
   if (AsciiStrCmp (BootProtect, "None") != 0
     && AsciiStrCmp (BootProtect, "Bootstrap") != 0
     && AsciiStrCmp (BootProtect, "BootstrapShort") != 0) {
@@ -115,6 +117,13 @@ CheckMisc (
     //
     // NOTE: RequestBootVarRouting requires OpenRuntime.efi, which will be checked in UEFI checker.
     //
+  }
+
+  if (AsciiStrCmp (AsciiDmgLoading, "Disabled") != 0
+    && AsciiStrCmp (AsciiDmgLoading, "Signed") != 0
+    && AsciiStrCmp (AsciiDmgLoading, "Any") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->DmgLoading is borked (Can only be Disabled, Signed, or Any)!\n"));
+    ++ErrorCount;
   }
 
   return ReportError (__func__, ErrorCount);

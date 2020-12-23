@@ -55,6 +55,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
 #### Security
 - BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to `Bootstrap` or `BootstrapShort`, `RequestBootVarRouting` should be enabled at `UEFI->Quirks`.
+- DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
 
 ## NVRAM
 - TODO
