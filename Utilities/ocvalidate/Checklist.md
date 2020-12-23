@@ -45,10 +45,14 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - Entry[N]->Identifier: At least one dot (`.`) should exist, because any identifier looks like a domain sequence (`vendor.product`).
 #### Quirks
 - `CustomSMBIOSGuid` requires `UpdateSMBIOSMode` at `PlatformInfo` set to `Custom`.
+#### Scheme
+- KernelArch: Only `Auto`, `i386`, `i386-user32`, or `x86_64` are accepted.
+- KernelCache: Only `Auto`, `Cacheless`, `Mkext`, or `Prelinked` are accepted.
 
 ## Misc
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
+- PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
 
 ## NVRAM
 - TODO
