@@ -295,6 +295,31 @@ UnicodeFilterString (
   }
 }
 
+BOOLEAN
+UnicodeIsFilteredString (
+  IN CONST CHAR16   *String,
+  IN       BOOLEAN  SingleLine
+  )
+{
+  while (*String != L'\0') {
+    if ((*String & 0x7FU) != *String) {
+      return FALSE;
+    }
+
+    if (SingleLine && (*String == L'\r' || *String == L'\n')) {
+      return FALSE;
+    }
+
+    if (*String < 0x20 || *String == 0x7F) {
+      return FALSE;
+    }
+
+    ++String;
+  }
+
+  return TRUE;
+}
+
 EFI_STATUS
 EFIAPI
 OcUnicodeSafeSPrint (
