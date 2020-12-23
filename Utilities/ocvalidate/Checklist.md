@@ -61,7 +61,6 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - When `EnableJumpstart` is enabled, `ScanPolicy` at `Misc->Security` should have `OC_SCAN_ALLOW_FS_APFS` (bit 8) set, or `ScanPolicy` should be `0` (failsafe value).
 #### Quirks
 - When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded under `UEFI->Drivers`.
-- When `DeduplicateBootOrder` is enabled, `RequestBootVarRouting` should be enabled altogether.
 #### Drivers
 - No drivers should be loaded more than once (i.e. there should NOT be any duplicated entries in this section).
 - When `OpenUsbKbDxe.efi` is in use, `KeySupport` at `UEFI->Input` should NEVER be enabled altogether.

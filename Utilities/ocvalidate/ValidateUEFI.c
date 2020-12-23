@@ -39,7 +39,6 @@ CheckUEFI (
   BOOLEAN                   HasOpenUsbKbDxeEfiDriver;
   BOOLEAN                   HasPs2KeyboardDxeEfiDriver;
   BOOLEAN                   IsRequestBootVarRoutingEnabled;
-  BOOLEAN                   IsDeduplicateBootOrderEnabled;
   BOOLEAN                   IsKeySupportEnabled;
   BOOLEAN                   IsTextRendererSystem;
   BOOLEAN                   IsClearScreenOnModeSwitchEnabled;
@@ -68,7 +67,6 @@ CheckUEFI (
   HasOpenUsbKbDxeEfiDriver         = FALSE;
   HasPs2KeyboardDxeEfiDriver       = FALSE;
   IsRequestBootVarRoutingEnabled   = UserUefi->Quirks.RequestBootVarRouting;
-  IsDeduplicateBootOrderEnabled    = UserUefi->Quirks.DeduplicateBootOrder;
   IsKeySupportEnabled              = UserUefi->Input.KeySupport;
   IsPointerSupportEnabled          = UserUefi->Input.PointerSupport;
   PointerSupportMode               = OC_BLOB_GET (&UserUefi->Input.PointerSupportMode);
@@ -199,11 +197,6 @@ CheckUEFI (
   if (IsRequestBootVarRoutingEnabled) {
     if (!HasOpenRuntimeEfiDriver) {
       DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
-      ++ErrorCount;
-    }
-  } else {
-    if (IsDeduplicateBootOrderEnabled) {
-      DEBUG ((DEBUG_WARN, "UEFI->Quirks->DeduplicateBootOrder is enabled, but RequestBootVarRouting is not enabled altogether!\n"));
       ++ErrorCount;
     }
   }
