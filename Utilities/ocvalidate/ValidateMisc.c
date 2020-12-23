@@ -30,6 +30,7 @@ CheckMisc (
   CONST CHAR8     *HibernateMode;
   UINT32          PickerAttributes;
   UINT32          AllowedPickerAttributes;
+  CONST CHAR8     *PickerMode;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -40,6 +41,7 @@ CheckMisc (
   HibernateMode           = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
   PickerAttributes        = UserMisc->Boot.PickerAttributes;
   AllowedPickerAttributes = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
+  PickerMode              = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -56,6 +58,16 @@ CheckMisc (
 
   if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is borked!\n"));
+    ++ErrorCount;
+  }
+
+  //
+  // FIXME: Is OpenCanopy.efi mandatory if set to External? Or is this just a suggestion?
+  //
+  if (AsciiStrCmp (PickerMode, "Builtin") != 0
+    && AsciiStrCmp (PickerMode, "External") != 0
+    && AsciiStrCmp (PickerMode, "Apple") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is borked (Can only be Builtin, External, or Apple)!\n"));
     ++ErrorCount;
   }
 
