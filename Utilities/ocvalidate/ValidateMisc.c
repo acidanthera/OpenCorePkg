@@ -63,6 +63,7 @@ CheckMisc (
   )
 {
   UINT32          ErrorCount;
+  UINT32          Index;
   OC_MISC_CONFIG  *UserMisc;
   OC_UEFI_CONFIG  *UserUefi;
   UINT32          ConsoleAttributes;
@@ -85,6 +86,10 @@ CheckMisc (
   UINT32          ScanPolicy;
   UINT32          AllowedScanPolicy;
   CONST CHAR8     *SecureBootModel;
+  CONST CHAR8     *Arguments;
+  CONST CHAR8     *Comment;
+  CONST CHAR8     *Name;
+  CONST CHAR8     *Path;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -222,6 +227,39 @@ CheckMisc (
   if (!ValidateSecureBootModel (SecureBootModel)) {
     DEBUG ((DEBUG_WARN, "Misc->Security->SecureBootModel is borked!\n"));
     ++ErrorCount;
+  }
+
+  for (Index = 0; Index < UserMisc->Entries.Count; ++Index) {
+    Arguments    = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Arguments);
+    Comment      = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Comment);
+    Name         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Name);
+    Path         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Path);
+
+    //
+    // Sanitise strings.
+    //
+    // NOTE: As Arguments takes identical requirements of Comment,
+    //       we use Comment sanitiser here.
+    //
+    if (!AsciiCommentIsLegal (Arguments)) {
+      DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Arguments contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiCommentIsLegal (Comment)) {
+      DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    //
+    // FIXME: Properly sanitise Name and Path.
+    //
+    if (!AsciiCommentIsLegal (Name)) {
+      DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Name contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiCommentIsLegal (Path)) {
+      DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Path contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
   }
 
   return ReportError (__func__, ErrorCount);
