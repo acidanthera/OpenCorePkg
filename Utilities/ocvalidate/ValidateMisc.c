@@ -88,7 +88,8 @@ CheckMisc (
   CONST CHAR8     *SecureBootModel;
   CONST CHAR8     *Arguments;
   CONST CHAR8     *Comment;
-  CONST CHAR8     *Name;
+  CONST CHAR8     *AsciiName;
+  CONST CHAR16    *UnicodeName;
   CONST CHAR8     *Path;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
@@ -232,7 +233,7 @@ CheckMisc (
   for (Index = 0; Index < UserMisc->Entries.Count; ++Index) {
     Arguments    = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Arguments);
     Comment      = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Comment);
-    Name         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Name);
+    AsciiName    = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Name);
     Path         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Path);
 
     //
@@ -249,13 +250,20 @@ CheckMisc (
       DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    //
-    // FIXME: Properly sanitise Name and Path.
-    //
-    if (!AsciiCommentIsLegal (Name)) {
-      DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Name contains illegal character!\n", Index));
-      ++ErrorCount;
+    
+    UnicodeName = AsciiStrCopyToUnicode (AsciiName, 0);
+    if (UnicodeName != NULL) {
+      if (!UnicodeIsFilteredString (UnicodeName, TRUE)) {
+        DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Name contains illegal character!\n", Index));
+        ++ErrorCount;
+      }
+
+      FreePool (UnicodeName);
     }
+
+    //
+    // FIXME: Properly sanitise Path.
+    //
     if (!AsciiCommentIsLegal (Path)) {
       DEBUG ((DEBUG_WARN, "Misc->Entries[%u]->Path contains illegal character!\n", Index));
       ++ErrorCount;
