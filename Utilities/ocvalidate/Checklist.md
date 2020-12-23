@@ -56,6 +56,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 #### Security
 - BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to `Bootstrap` or `BootstrapShort`, `RequestBootVarRouting` should be enabled at `UEFI->Quirks`.
 - DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
+- Vault: Only `Optional`, `Basic`, or `Secure` are accepted.
 
 ## NVRAM
 - TODO

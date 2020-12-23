@@ -44,6 +44,7 @@ CheckMisc (
   CONST CHAR8     *AsciiDmgLoading;
   UINT32          ExposeSensitiveData;
   UINT32          AllowedExposeSensitiveData;
+  CONST CHAR8     *AsciiVault;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -66,6 +67,7 @@ CheckMisc (
   AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   ExposeSensitiveData            = UserMisc->Security.ExposeSensitiveData;
   AllowedExposeSensitiveData     = OCS_EXPOSE_BOOT_PATH | OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO;
+  AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -141,6 +143,13 @@ CheckMisc (
 
   if ((ExposeSensitiveData & ~AllowedExposeSensitiveData) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData is borked!\n"));
+    ++ErrorCount;
+  }
+
+  if (AsciiStrCmp (AsciiVault, "Optional") != 0
+    && AsciiStrCmp (AsciiVault, "Basic") != 0
+    && AsciiStrCmp (AsciiVault, "Secure") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->Vault is borked (Can only be Optional, Basic, or Secure)!\n"));
     ++ErrorCount;
   }
 
