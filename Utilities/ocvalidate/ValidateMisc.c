@@ -34,10 +34,6 @@ ValidateSecureBootModel (
   )
 {
   UINT32   Index;
-  BOOLEAN  IsSecureBootModelValid;
-  UINTN    AllowedSecureBootModelSize;
-
-  IsSecureBootModelValid = FALSE;
   CONST CHAR8 *AllowedSecureBootModel[] = {
     "Default", "Disabled",
     "j137",  "j680",  "j132",  "j174",  "j140k",
@@ -45,16 +41,14 @@ ValidateSecureBootModel (
     "j230k", "j214k", "j223",  "j215",  "j185", "j185f",
     "x86legacy"
   };
-  AllowedSecureBootModelSize = ARRAY_SIZE (AllowedSecureBootModel);
 
-  for (Index = 0; Index < AllowedSecureBootModelSize; ++Index) {
+  for (Index = 0; Index < ARRAY_SIZE (AllowedSecureBootModel); ++Index) {
     if (AsciiStrCmp (SecureBootModel, AllowedSecureBootModel[Index]) == 0) {
-      IsSecureBootModelValid = TRUE;
-      break;
+      return TRUE;
     }
   }
 
-  return IsSecureBootModelValid;
+  return FALSE;
 }
 
 UINT32

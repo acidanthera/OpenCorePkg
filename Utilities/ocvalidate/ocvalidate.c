@@ -33,8 +33,6 @@ CheckConfig (
 {
   UINT32  ErrorCount;
   UINTN   Index;
-  UINTN   ConfigCheckersSize;
-
   STATIC CONFIG_CHECK ConfigCheckers[] = {
     &CheckACPI,
     &CheckBooter,
@@ -47,12 +45,11 @@ CheckConfig (
   };
 
   ErrorCount = 0;
-  ConfigCheckersSize = sizeof (ConfigCheckers) / sizeof (ConfigCheckers[0]);
 
   //
   // Pass config structure to all checkers.
   //
-  for (Index = 0; Index < ConfigCheckersSize; ++Index) {
+  for (Index = 0; Index < ARRAY_SIZE (ConfigCheckers); ++Index) {
     ErrorCount += ConfigCheckers[Index] (Config);
   }
 
