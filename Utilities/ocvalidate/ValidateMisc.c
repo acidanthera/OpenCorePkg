@@ -69,10 +69,7 @@ CheckMisc (
   AllowedExposeSensitiveData     = OCS_EXPOSE_BOOT_PATH | OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO;
   AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
 
-  //
-  // ConsoleAttributes can be zero.
-  //
-  if (ConsoleAttributes != 0 && (ConsoleAttributes & ~0x7FU) != 0) {
+  if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
     ++ErrorCount;
   }
@@ -85,10 +82,7 @@ CheckMisc (
     ++ErrorCount;
   }
 
-  //
-  // PickerAttributes cannot be zero.
-  //
-  if (PickerAttributes == 0 || (PickerAttributes & ~AllowedPickerAttributes) != 0) {
+  if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is borked!\n"));
     ++ErrorCount;
   }
@@ -104,23 +98,18 @@ CheckMisc (
   }
 
   //
-  // DisplayLevel/HaltLevel cannot be zero.
-  //
   // FIXME: Check whether DisplayLevel only supports values within AllowedDisplayLevel, or all possible levels in DebugLib.h?
   //
-  if (DisplayLevel == 0 || (DisplayLevel & ~AllowedDisplayLevel) != 0) {
+  if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is borked!\n"));
     ++ErrorCount;
   }
-  if (HaltLevel == 0 || (HaltLevel & ~AllowedHaltLevel) != 0) {
+  if ((HaltLevel & ~AllowedHaltLevel) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->HaltLevel is borked!\n"));
     ++ErrorCount;
   }
 
-  //
-  // Target cannot be zero.
-  //
-  if (Target == 0 || (Target & ~AllowedTarget) != 0) {
+  if ((Target & ~AllowedTarget) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->Target is borked!\n"));
     ++ErrorCount;
   }
