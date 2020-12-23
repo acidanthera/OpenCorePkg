@@ -74,7 +74,7 @@ CheckMisc (
   AllowedScanPolicy              = OC_SCAN_FILE_SYSTEM_LOCK | OC_SCAN_DEVICE_LOCK | OC_SCAN_DEVICE_BITS | OC_SCAN_FILE_SYSTEM_BITS;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes has unknown bits set!\n"));
     ++ErrorCount;
   }
 
@@ -87,7 +87,7 @@ CheckMisc (
   }
 
   if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is has unknown bits set!\n"));
     ++ErrorCount;
   }
 
@@ -105,16 +105,16 @@ CheckMisc (
   // FIXME: Check whether DisplayLevel only supports values within AllowedDisplayLevel, or all possible levels in DebugLib.h?
   //
   if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is has unknown bits set!\n"));
     ++ErrorCount;
   }
   if ((HaltLevel & ~AllowedHaltLevel) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Security->HaltLevel is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Security->HaltLevel has unknown bits set!\n"));
     ++ErrorCount;
   }
 
   if ((Target & ~AllowedTarget) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Debug->Target is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Debug->Target has unknown bits set!\n"));
     ++ErrorCount;
   }
 
@@ -146,7 +146,7 @@ CheckMisc (
   }
 
   if ((ExposeSensitiveData & ~AllowedExposeSensitiveData) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData is borked!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData has unknown bits set!\n"));
     ++ErrorCount;
   }
 
