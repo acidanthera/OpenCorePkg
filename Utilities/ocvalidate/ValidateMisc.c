@@ -35,6 +35,8 @@ CheckMisc (
   CONST CHAR8     *PickerMode;
   UINT64          DisplayLevel;
   UINT64          AllowedDisplayLevel;
+  UINT64          HaltLevel;
+  UINT64          AllowedHaltLevel;
   UINT32          Target;
   UINT32          AllowedTarget;
   CONST CHAR8     *BootProtect;
@@ -55,6 +57,8 @@ CheckMisc (
   PickerMode                     = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   DisplayLevel                   = UserMisc->Debug.DisplayLevel;
   AllowedDisplayLevel            = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
+  HaltLevel                      = DisplayLevel;
+  AllowedHaltLevel               = AllowedDisplayLevel;
   Target                         = UserMisc->Debug.Target;
   AllowedTarget                  = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
@@ -96,6 +100,10 @@ CheckMisc (
   //
   if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is borked!\n"));
+    ++ErrorCount;
+  }
+  if ((HaltLevel & ~AllowedHaltLevel) != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->HaltLevel is borked!\n"));
     ++ErrorCount;
   }
 
