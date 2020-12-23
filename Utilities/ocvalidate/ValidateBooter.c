@@ -101,7 +101,7 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiArchIsLegal (Arch)) {
+    if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Booter->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }

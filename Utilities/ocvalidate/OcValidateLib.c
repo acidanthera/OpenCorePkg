@@ -187,15 +187,35 @@ AsciiIdentifierIsLegal (
 
 BOOLEAN
 AsciiArchIsLegal (
-  IN  CONST CHAR8  *Arch
+  IN  CONST CHAR8    *Arch,
+  IN        BOOLEAN  IsKernelArch
   )
 {
   //
-  // Only allow Any, i386 (32-bit), and x86_64 (64-bit).
+  // Special mode for Kernel->Scheme->KernelArch.
+  //
+  if (IsKernelArch) {
+    //
+    // Auto and i386-user32 are two special values allowed in KernelArch.
+    //
+    if (AsciiStrCmp (Arch, "Auto") == 0
+      || AsciiStrCmp (Arch, "i386-user32") == 0) {
+      return TRUE;
+    }
+  } else {
+    //
+    // Any is only allowed in non-KernelArch mode.
+    //
+    if (AsciiStrCmp (Arch, "Any") == 0) {
+      return TRUE;
+    }
+  }
+
+  //
+  // i386 and x86_64 are allowed in both modes.
   // TODO: Do not allow empty string in OC.
   //
-  if (AsciiStrCmp (Arch, "Any") != 0
-    && AsciiStrCmp (Arch, "i386") != 0
+  if (AsciiStrCmp (Arch, "i386") != 0
     && AsciiStrCmp (Arch, "x86_64") != 0) {
     return FALSE;
   }

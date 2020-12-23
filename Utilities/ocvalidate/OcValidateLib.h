@@ -100,12 +100,14 @@ AsciiIdentifierIsLegal (
   Check if an OpenCore Configuration Arch matches specific conventions.
 
   @param[in]  Arch                     Arch to be checked.
+  @param[in]  IsKernelArch             Whether to perform special checks for Kernel->Scheme->KernelArch.
 
-  @retval     TRUE                     If Arch has value of either: Any, i386, or x86_64.
+  @retval     TRUE                     If Arch matches conventions.
 **/
 BOOLEAN
 AsciiArchIsLegal (
-  IN  CONST CHAR8  *Arch
+  IN  CONST CHAR8    *Arch,
+  IN        BOOLEAN  IsKernelArch
   );
 
 /**

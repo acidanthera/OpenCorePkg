@@ -116,7 +116,7 @@ CheckKernel (
     //
     // Sanitise strings.
     //
-    if (!AsciiArchIsLegal (Arch)) {
+    if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
@@ -235,7 +235,7 @@ CheckKernel (
     //
     // Sanitise strings.
     //
-    if (!AsciiArchIsLegal (Arch)) {
+    if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
@@ -293,7 +293,7 @@ CheckKernel (
     //
     // Sanitise strings.
     //
-    if (!AsciiArchIsLegal (Arch)) {
+    if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
@@ -374,7 +374,7 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
     }
-    if (!AsciiArchIsLegal (Arch)) {
+    if (!AsciiArchIsLegal (Arch, FALSE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Arch is borked (Can only be Any, i386, and x86_64)!\n", Index));
       ++ErrorCount;
     }
@@ -412,6 +412,15 @@ CheckKernel (
       ReplaceMaskSize,
       &ErrorCount
       );
+  }
+
+  //
+  // Sanitise Kernel->Scheme keys.
+  //
+  Arch = OC_BLOB_GET (&UserKernel->Scheme.KernelArch);
+  if (!AsciiArchIsLegal (Arch, TRUE)) {
+    DEBUG ((DEBUG_WARN, "Kernel->Scheme->KernelArch is borked (Can only be Auto, i386, i386-user32, or x86_64)!\n"));
+    ++ErrorCount;
   }
 
   //
