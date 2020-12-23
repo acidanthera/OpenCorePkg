@@ -20,6 +20,43 @@
 #include <Library/OcConfigurationLib.h>
 #include <Protocol/OcLog.h>
 
+/**
+  Validate if SecureBootModel has allowed value.
+
+  @param[in]  SecureBootModel  SecureBootModel retrieved from user config.
+
+  @retval     TRUE             If SecureBootModel is valid.
+**/
+STATIC
+BOOLEAN
+ValidateSecureBootModel (
+  IN  CONST CHAR8  *SecureBootModel
+  )
+{
+  UINT32   Index;
+  BOOLEAN  IsSecureBootModelValid;
+  UINTN    AllowedSecureBootModelSize;
+
+  IsSecureBootModelValid = FALSE;
+  CONST CHAR8 *AllowedSecureBootModel[] = {
+    "Default", "Disabled",
+    "j137",  "j680",  "j132",  "j174",  "j140k",
+    "j780",  "j213",  "j140a", "j152f", "j160",
+    "j230k", "j214k", "j223",  "j215",  "j185", "j185f",
+    "x86legacy"
+  };
+  AllowedSecureBootModelSize = ARRAY_SIZE (AllowedSecureBootModel);
+
+  for (Index = 0; Index < AllowedSecureBootModelSize; ++Index) {
+    if (AsciiStrCmp (SecureBootModel, AllowedSecureBootModel[Index]) == 0) {
+      IsSecureBootModelValid = TRUE;
+      break;
+    }
+  }
+
+  return IsSecureBootModelValid;
+}
+
 UINT32
 CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -47,6 +84,7 @@ CheckMisc (
   CONST CHAR8     *AsciiVault;
   UINT32          ScanPolicy;
   UINT32          AllowedScanPolicy;
+  CONST CHAR8     *SecureBootModel;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -72,6 +110,7 @@ CheckMisc (
   AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
   ScanPolicy                     = UserMisc->Security.ScanPolicy;
   AllowedScanPolicy              = OC_SCAN_FILE_SYSTEM_LOCK | OC_SCAN_DEVICE_LOCK | OC_SCAN_DEVICE_BITS | OC_SCAN_FILE_SYSTEM_BITS;
+  SecureBootModel                = OC_BLOB_GET (&UserMisc->Security.SecureBootModel);
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes has unknown bits set!\n"));
@@ -175,6 +214,14 @@ CheckMisc (
       DEBUG ((DEBUG_WARN, "Misc->Security->ScanPolicy requests scanning devices, but OC_SCAN_DEVICE_LOCK (bit 1) is not set!\n"));
       ++ErrorCount;
     }
+  }
+
+  //
+  // Validate SecureBootModel.
+  //
+  if (!ValidateSecureBootModel (SecureBootModel)) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->SecureBootModel is borked!\n"));
+    ++ErrorCount;
   }
 
   return ReportError (__func__, ErrorCount);

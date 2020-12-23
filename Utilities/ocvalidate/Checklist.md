@@ -57,6 +57,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to `Bootstrap` or `BootstrapShort`, `RequestBootVarRouting` should be enabled at `UEFI->Quirks`.
 - DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
 - Vault: Only `Optional`, `Basic`, or `Secure` are accepted.
+- SecureBootModel: Only `Default`, `Disabled`, `j137`, `j680`, `j132`, `j174`, `j140k`, `j780`, `j213`, `j140a`, `j152f`, `j160`, `j230k`, `j214k`, `j223`, `j215`, `j185`, `j185f`, or `x86legacy` are accepted.
 
 ## NVRAM
 - TODO
