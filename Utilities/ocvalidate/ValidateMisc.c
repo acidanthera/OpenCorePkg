@@ -26,6 +26,7 @@ CheckMisc (
   UINT32          ErrorCount;
   OC_MISC_CONFIG  *UserMisc;
   // OC_UEFI_CONFIG  *UserUefi;
+  UINT32          ConsoleAttributes;
   CONST CHAR8     *HibernateMode;
   UINT32          PickerAttributes;
   UINT32          AllowedPickerAttributes;
@@ -35,13 +36,15 @@ CheckMisc (
   ErrorCount              = 0;
   UserMisc                = &Config->Misc;
   // UserUefi                = &Config->Uefi;
+  ConsoleAttributes       = UserMisc->Boot.ConsoleAttributes;
   HibernateMode           = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
   PickerAttributes        = UserMisc->Boot.PickerAttributes;
   AllowedPickerAttributes = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
 
-  //
-  // TODO: Check value of ConsoleAttributes.
-  //
+  if ((ConsoleAttributes & ~0x7FU) != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
+    ++ErrorCount;
+  }
 
   if (AsciiStrCmp (HibernateMode, "None") != 0
     && AsciiStrCmp (HibernateMode, "Auto") != 0
@@ -52,9 +55,6 @@ CheckMisc (
   }
 
   if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
-    //
-    // FIXME: Can those bits enabled simultaneously or only one signle bit (or several ones) should be active instead?
-    //
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is borked!\n"));
     ++ErrorCount;
   }
