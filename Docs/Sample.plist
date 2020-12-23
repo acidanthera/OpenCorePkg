@@ -967,7 +967,11 @@
 			</array>
 			<key>7C436110-AB2A-4BBB-A880-FE41995C9F82</key>
 			<array>
+				<string>SystemAudioVolume</string>
 				<string>boot-args</string>
+				<string>csr-active-config</string>
+				<string>prev-lang:kbd</string>
+				<string>run-efi-updater</string>
 			</array>
 		</dict>
 		<key>LegacyEnable</key>
