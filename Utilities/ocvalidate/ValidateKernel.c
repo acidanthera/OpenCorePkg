@@ -169,35 +169,32 @@ CheckKernel (
     }
 
     for (IndexKextInfo = 0; IndexKextInfo < mKextInfoSize; ++IndexKextInfo) {
-      //
-      // Special check for Lilu and Quirks->DisableLinkeditJettison.
-      //
-      if (IndexKextInfo == INDEX_KEXT_LILU) {
-        if (AsciiStrCmp (BundlePath, mKextInfo[INDEX_KEXT_LILU].KextBundlePath) == 0
-          && AsciiStrCmp (ExecutablePath, mKextInfo[INDEX_KEXT_LILU].KextExecutablePath) == 0
-          && AsciiStrCmp (PlistPath, mKextInfo[INDEX_KEXT_LILU].KextPlistPath) == 0) {
+      if (AsciiStrCmp (BundlePath, mKextInfo[IndexKextInfo].KextBundlePath) == 0) {
+        //
+        // BundlePath matched. Continue checking ExecutablePath and PlistPath.
+        //
+        if (AsciiStrCmp (ExecutablePath, mKextInfo[IndexKextInfo].KextExecutablePath) == 0
+          && AsciiStrCmp (PlistPath, mKextInfo[IndexKextInfo].KextPlistPath) == 0) {
           //
-          // Found Lilu kext. Check for DisableLinkeditJettison.
+          // Special check for Lilu and Quirks->DisableLinkeditJettison.
           //
-          if (!IsDisableLinkeditJettisonEnabled) {
-            DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", Index));
-            ++ErrorCount;
+          if (IndexKextInfo == INDEX_KEXT_LILU) {
+            if (!IsDisableLinkeditJettisonEnabled) {
+              DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", Index));
+              ++ErrorCount;
+            }
           }
+        } else {
+          DEBUG ((
+            DEBUG_WARN,
+            "Kernel->Add[%u] discovers %a, but its ExecutablePath (%a) or PlistPath (%a) is borked!\n",
+            IndexKextInfo,
+            BundlePath,
+            ExecutablePath,
+            PlistPath
+            ));
+          ++ErrorCount;
         }
-      }
-
-      if (AsciiStrCmp (BundlePath, mKextInfo[IndexKextInfo].KextBundlePath) == 0
-        && (AsciiStrCmp (ExecutablePath, mKextInfo[IndexKextInfo].KextExecutablePath) != 0
-          || AsciiStrCmp (PlistPath, mKextInfo[IndexKextInfo].KextPlistPath) != 0)) {
-        DEBUG ((
-          DEBUG_WARN,
-          "Kernel->Add[%u] discovers %a, but its ExecutablePath (%a) or PlistPath (%a) is borked!\n",
-          IndexKextInfo,
-          BundlePath,
-          ExecutablePath,
-          PlistPath
-          ));
-        ++ErrorCount;
       }
     }
   }
