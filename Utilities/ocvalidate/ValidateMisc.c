@@ -258,7 +258,7 @@ CheckMisc (
         ++ErrorCount;
       }
 
-      FreePool (UnicodeName);
+      FreePool ((VOID *) UnicodeName);
     }
 
     //
