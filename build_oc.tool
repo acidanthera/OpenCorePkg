@@ -129,7 +129,6 @@ package() {
       "ResetSystem.efi"
       "RtcRw.efi"
       "OpenControl.efi"
-      "VerifyMsrE2.efi"
       "ControlMsrE2.efi"
       )
     for efiTool in "${efiTools[@]}"; do

@@ -122,7 +122,6 @@ extern UINTN Flags;
   @retval EFI_SUCCESS    Success
   @retval Other          Fail to verify MSR 0xE2 status
 **/
-extern
 EFI_STATUS
 EFIAPI
 VerifyMSRE2 (
