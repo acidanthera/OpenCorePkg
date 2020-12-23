@@ -31,6 +31,8 @@ CheckMisc (
   UINT32          PickerAttributes;
   UINT32          AllowedPickerAttributes;
   CONST CHAR8     *PickerMode;
+  UINT64          DisplayLevel;
+  UINT64          AllowedDisplayLevel;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -42,6 +44,8 @@ CheckMisc (
   PickerAttributes        = UserMisc->Boot.PickerAttributes;
   AllowedPickerAttributes = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
   PickerMode              = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
+  DisplayLevel            = UserMisc->Debug.DisplayLevel;
+  AllowedDisplayLevel     = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -68,6 +72,14 @@ CheckMisc (
     && AsciiStrCmp (PickerMode, "External") != 0
     && AsciiStrCmp (PickerMode, "Apple") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is borked (Can only be Builtin, External, or Apple)!\n"));
+    ++ErrorCount;
+  }
+
+  //
+  // FIXME: Check whether DisplayLevel only supports values within AllowedDisplayLevel, or all possible levels in DebugLib.h?
+  //
+  if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is borked!\n"));
     ++ErrorCount;
   }
 
