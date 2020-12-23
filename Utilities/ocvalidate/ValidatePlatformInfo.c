@@ -16,19 +16,34 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+#include <Library/OcMacInfoLib.h>
+
 //
-// TODO
+// NOTE: Only PlatformInfo->Generic is checked here. The rest is ignored.
 //
 UINT32
 CheckPlatformInfo (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32 ErrorCount;
+  UINT32              ErrorCount;
+  OC_PLATFORM_CONFIG  *UserPlatformInfo;
+  BOOLEAN             IsAutomaticEnabled;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into PlatformInfo checker!\n"));
 
-  ErrorCount = 0;
+  ErrorCount         = 0;
+  UserPlatformInfo   = &Config->PlatformInfo;
+  IsAutomaticEnabled = UserPlatformInfo->Automatic;
+
+  if (!IsAutomaticEnabled) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Automatic is not enabled!\n"));
+    ++ErrorCount;
+  }
+
+  //
+  // TODO: Check properties with OcMacInfoLib.
+  //
 
   return ReportError (__func__, ErrorCount);
 }
