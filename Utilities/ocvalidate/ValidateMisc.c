@@ -17,6 +17,7 @@
 #include "OcValidateLib.h"
 
 #include <Library/OcBootManagementLib.h>
+#include <Protocol/OcLog.h>
 
 UINT32
 CheckMisc (
@@ -33,6 +34,8 @@ CheckMisc (
   CONST CHAR8     *PickerMode;
   UINT64          DisplayLevel;
   UINT64          AllowedDisplayLevel;
+  UINT32          Target;
+  UINT32          AllowedTarget;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -46,6 +49,8 @@ CheckMisc (
   PickerMode              = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   DisplayLevel            = UserMisc->Debug.DisplayLevel;
   AllowedDisplayLevel     = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
+  Target                  = UserMisc->Debug.Target;
+  AllowedTarget           = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -80,6 +85,11 @@ CheckMisc (
   //
   if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is borked!\n"));
+    ++ErrorCount;
+  }
+
+  if ((Target & ~AllowedTarget) != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Debug->Target is borked!\n"));
     ++ErrorCount;
   }
 
