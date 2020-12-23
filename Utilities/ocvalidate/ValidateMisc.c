@@ -45,6 +45,8 @@ CheckMisc (
   UINT32          ExposeSensitiveData;
   UINT32          AllowedExposeSensitiveData;
   CONST CHAR8     *AsciiVault;
+  UINT32          ScanPolicy;
+  UINT32          AllowedScanPolicy;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
@@ -68,6 +70,8 @@ CheckMisc (
   ExposeSensitiveData            = UserMisc->Security.ExposeSensitiveData;
   AllowedExposeSensitiveData     = OCS_EXPOSE_BOOT_PATH | OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO;
   AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
+  ScanPolicy                     = UserMisc->Security.ScanPolicy;
+  AllowedScanPolicy              = OC_SCAN_FILE_SYSTEM_LOCK | OC_SCAN_DEVICE_LOCK | OC_SCAN_DEVICE_BITS | OC_SCAN_FILE_SYSTEM_BITS;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -151,6 +155,26 @@ CheckMisc (
     && AsciiStrCmp (AsciiVault, "Secure") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->Vault is borked (Can only be Optional, Basic, or Secure)!\n"));
     ++ErrorCount;
+  }
+
+  //
+  // ScanPolicy can be zero (failsafe value).
+  //
+  if (ScanPolicy != 0) {
+    if ((ScanPolicy & ~AllowedScanPolicy) != 0) { 
+      DEBUG ((DEBUG_WARN, "Misc->Security->ScanPolicy has unknown bits set!\n"));
+      ++ErrorCount;
+    }
+
+    if ((ScanPolicy & OC_SCAN_FILE_SYSTEM_BITS) != 0 && (ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) == 0) {
+      DEBUG ((DEBUG_WARN, "Misc->Security->ScanPolicy requests scanning filesystem, but OC_SCAN_FILE_SYSTEM_LOCK (bit 0) is not set!\n"));
+      ++ErrorCount;
+    }
+
+    if ((ScanPolicy & OC_SCAN_DEVICE_BITS) != 0 && (ScanPolicy & OC_SCAN_DEVICE_LOCK) == 0) {
+      DEBUG ((DEBUG_WARN, "Misc->Security->ScanPolicy requests scanning devices, but OC_SCAN_DEVICE_LOCK (bit 1) is not set!\n"));
+      ++ErrorCount;
+    }
   }
 
   return ReportError (__func__, ErrorCount);
