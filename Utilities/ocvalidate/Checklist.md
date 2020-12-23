@@ -11,6 +11,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 - For all paths of UEFI Drivers, only `0-9, A-Z, a-z, '_', '-', '.', and '/'` are accepted.
 - For all entries requiring bitwise operations (e.g. `ConsoleAttributes`, `PickerAttributes`, or `ScanPolicy`), only known bits can be set.
+- For all entries involving GUID, correct format must be ensured.
 
 ## ACPI
 #### Add

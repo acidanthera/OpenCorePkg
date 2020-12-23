@@ -73,7 +73,7 @@ CheckDeviceProperties (
       //
       // Sanitise strings.
       //
-      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) {
+      if (!AsciiPropertyIsLegal (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
           "DeviceProperties->Delete[%u]->Property[%u] contains illegal character!\n",
@@ -125,7 +125,7 @@ CheckDeviceProperties (
       //
       // Sanitise strings.
       //
-      if (!AsciiDevicePropertyIsLegal (AsciiProperty)) {
+      if (!AsciiPropertyIsLegal (AsciiProperty)) {
         DEBUG ((
           DEBUG_WARN,
           "DeviceProperties->Add[%u]->Property[%u] contains illegal character!\n",

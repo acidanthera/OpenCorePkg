@@ -224,15 +224,15 @@ AsciiArchIsLegal (
 }
 
 BOOLEAN
-AsciiDevicePropertyIsLegal (
-  IN  CONST CHAR8  *DeviceProperty
+AsciiPropertyIsLegal (
+  IN  CONST CHAR8  *Property
   )
 {
   //
-  // Like comments, device properties can be anything printable.
+  // Like comments, properties can be anything printable.
   // Calling sanitiser for comments to reduce code duplication.
   //
-  return AsciiCommentIsLegal (DeviceProperty);
+  return AsciiCommentIsLegal (Property);
 }
 
 BOOLEAN

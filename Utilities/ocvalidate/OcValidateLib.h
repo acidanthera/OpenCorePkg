@@ -111,15 +111,15 @@ AsciiArchIsLegal (
   );
 
 /**
-  Check if an OpenCore Configuration Device Property contains only ASCII printable characters.
+  Check if an OpenCore Configuration Property contains only ASCII printable characters. Mainly used in device properties and NVRAM properties.
 
-  @param[in]  DeviceProperty           Device Property to be checked.
+  @param[in]  Property                 Property to be checked.
 
-  @retval     TRUE                     If Device Property only contains ASCII printable characters.
+  @retval     TRUE                     If Property only contains ASCII printable characters.
 **/
 BOOLEAN
-AsciiDevicePropertyIsLegal (
-  IN  CONST CHAR8  *DeviceProperty
+AsciiPropertyIsLegal (
+  IN  CONST CHAR8  *Property
   );
 
 /**
