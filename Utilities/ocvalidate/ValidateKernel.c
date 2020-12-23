@@ -82,6 +82,7 @@ CheckKernel (
   UINT32              MaskSize;
   CONST UINT8         *ReplaceMask;
   UINT32              ReplaceMaskSize;
+  CONST CHAR8         *KernelCache;
   UINTN               IndexKextInfo;
   UINTN               IndexKextPrecedence;
   BOOLEAN             HasParent;
@@ -103,6 +104,7 @@ CheckKernel (
   IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
   IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
   UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
+  KernelCache                      = OC_BLOB_GET (&UserKernel->Scheme.KernelCache);
 
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Add.Values[Index]->Arch);
@@ -420,6 +422,14 @@ CheckKernel (
   Arch = OC_BLOB_GET (&UserKernel->Scheme.KernelArch);
   if (!AsciiArchIsLegal (Arch, TRUE)) {
     DEBUG ((DEBUG_WARN, "Kernel->Scheme->KernelArch is borked (Can only be Auto, i386, i386-user32, or x86_64)!\n"));
+    ++ErrorCount;
+  }
+
+  if (AsciiStrCmp (KernelCache, "Auto") != 0
+    && AsciiStrCmp (KernelCache, "Cacheless") != 0
+    && AsciiStrCmp (KernelCache, "Mkext") != 0
+    && AsciiStrCmp (KernelCache, "Prelinked") != 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Scheme->KernelCache is borked (Can only be Auto, Cacheless, Mkext, or Prelinked)!\n"));
     ++ErrorCount;
   }
 
