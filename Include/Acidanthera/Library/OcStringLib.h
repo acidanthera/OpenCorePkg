@@ -451,6 +451,20 @@ UnicodeFilterString (
   );
 
 /**
+  Check if string is filtered.
+
+  @param[in]      String      String to be checked.
+  @param[in]      SingleLine  Enforce only one line.
+
+  @retval TRUE if string is filtered.
+**/
+BOOLEAN
+UnicodeIsFilteredString (
+  IN CONST CHAR16   *String,
+  IN       BOOLEAN  SingleLine
+  );
+
+/**
   Check if string starts with GUID.
 
   @param[in]  String  String to check.
