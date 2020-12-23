@@ -16,9 +16,6 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
-//
-// TODO
-//
 UINT32
 CheckNVRAM (
   IN  OC_GLOBAL_CONFIG  *Config
