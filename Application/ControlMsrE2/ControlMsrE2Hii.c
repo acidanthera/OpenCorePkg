@@ -327,7 +327,15 @@ HandleIfrVariable (
 
         Print (L"Value: value %X\n", VarStoreValue);
 
-        NewValue = (IS_INTERACTIVE ()) ? (VarStoreValue) ? 0 : 1 : (IS_LOCK ()) ? 1 : (IS_UNLOCK ()) ? 0 : VarStoreValue;
+        if (IS_INTERACTIVE ()) {
+          NewValue = VarStoreValue != 0 ? 0 : 1;
+        } else if (IS_LOCK ()) {
+          NewValue = 1;
+        } else if (IS_UNLOCK ()) {
+          NewValue = 0;
+        } else {
+          NewValue = VarStoreValue;
+        }
 
         if (NewValue != VarStoreValue) {
           if (IS_INTERACTIVE ()) {

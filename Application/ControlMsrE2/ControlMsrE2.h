@@ -102,7 +102,6 @@ enum {
   ARG_VERIFY      = 0,
   ARG_LOCK        = 1,
   ARG_UNLOCK      = 2,
-  ARG_CHECK       = 4,
   ARG_INTERACTIVE = 8,
 };
 
@@ -110,7 +109,6 @@ enum {
 
 #define IS_LOCK() ((Flags & ARG_LOCK) != 0)
 #define IS_UNLOCK() ((Flags & ARG_UNLOCK) != 0)
-#define IS_CHECK() ((Flags & ARG_CHECK) != 0)
 #define IS_INTERACTIVE() ((Flags & ARG_INTERACTIVE) != 0)
 #define BUFFER_LENGTH 128
 

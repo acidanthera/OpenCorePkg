@@ -176,10 +176,7 @@ InterpretArguments (
           }
           Token[TokenIndex] = '\0';
 
-          if (StrCmp (Parameter, L"check") == 0) {
-            Flags |= ARG_CHECK;
-            ++ParameterCount;
-          } else if (!StrCmp (Parameter, L"lock")) {
+          if (!StrCmp (Parameter, L"lock")) {
             Flags |= ARG_LOCK;
             ++ParameterCount;
           } else if (!StrCmp (Parameter, L"unlock")) {
@@ -204,7 +201,7 @@ InterpretArguments (
     Print (L"No option selected, verify only.\n");
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
   } else if (ParameterCount > 1) {
-    Print (L"interactive, unlock, lock, check are exclusive options. Use only one of them.\n\n");
+    Print (L"interactive, unlock, lock are exclusive options. Use only one of them.\n\n");
     return EFI_INVALID_PARAMETER;
   }
 
