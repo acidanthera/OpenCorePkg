@@ -647,9 +647,6 @@ OcLoadUefiSupport (
   )
 {
   EFI_HANDLE            *DriversToConnect;
-  UINT16                *BootOrder;
-  UINTN                 BootOrderCount;
-  BOOLEAN               BootOrderChanged;
   EFI_EVENT             Event;
 
   OcReinstallProtocols (Config);
@@ -675,9 +672,8 @@ OcLoadUefiSupport (
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: RBVR %d DDBR %d\n",
-    Config->Uefi.Quirks.RequestBootVarRouting,
-    Config->Uefi.Quirks.DeduplicateBootOrder
+    "OC: RequestBootVarRouting %d\n",
+    Config->Uefi.Quirks.RequestBootVarRouting
     ));
 
   //
@@ -690,31 +686,6 @@ OcLoadUefiSupport (
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
     &Config->Uefi.Quirks.RequestBootVarRouting
     );
-
-  if (Config->Uefi.Quirks.DeduplicateBootOrder) {
-    BootOrder = OcGetBootOrder (
-      &gEfiGlobalVariableGuid,
-      FALSE,
-      &BootOrderCount,
-      &BootOrderChanged,
-      NULL
-      );
-
-    if (BootOrder != NULL) {
-      if (BootOrderChanged) {
-        DEBUG ((DEBUG_INFO, "OC: Performed BootOrder deduplication\n"));
-        gRT->SetVariable (
-          EFI_BOOT_ORDER_VARIABLE_NAME,
-          &gEfiGlobalVariableGuid,
-          EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_NON_VOLATILE,
-          BootOrderCount * sizeof (UINT16),
-          BootOrder
-          );
-      }
-
-      FreePool (BootOrder);
-    }
-  }
 
   if (Config->Uefi.Quirks.UnblockFsConnect) {
     OcUnblockUnmountedPartitions ();
