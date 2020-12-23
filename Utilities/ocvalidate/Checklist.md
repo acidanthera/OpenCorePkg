@@ -53,6 +53,8 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
+#### Security
+- BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to `Bootstrap` or `BootstrapShort`, `RequestBootVarRouting` should be enabled at `UEFI->Quirks`.
 
 ## NVRAM
 - TODO

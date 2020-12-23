@@ -26,7 +26,7 @@ CheckMisc (
 {
   UINT32          ErrorCount;
   OC_MISC_CONFIG  *UserMisc;
-  // OC_UEFI_CONFIG  *UserUefi;
+  OC_UEFI_CONFIG  *UserUefi;
   UINT32          ConsoleAttributes;
   CONST CHAR8     *HibernateMode;
   UINT32          PickerAttributes;
@@ -36,21 +36,25 @@ CheckMisc (
   UINT64          AllowedDisplayLevel;
   UINT32          Target;
   UINT32          AllowedTarget;
+  CONST CHAR8     *BootProtect;
+  BOOLEAN         IsRequestBootVarRoutingEnabled;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
-  ErrorCount              = 0;
-  UserMisc                = &Config->Misc;
-  // UserUefi                = &Config->Uefi;
-  ConsoleAttributes       = UserMisc->Boot.ConsoleAttributes;
-  HibernateMode           = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
-  PickerAttributes        = UserMisc->Boot.PickerAttributes;
-  AllowedPickerAttributes = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
-  PickerMode              = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
-  DisplayLevel            = UserMisc->Debug.DisplayLevel;
-  AllowedDisplayLevel     = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
-  Target                  = UserMisc->Debug.Target;
-  AllowedTarget           = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
+  ErrorCount                     = 0;
+  UserMisc                       = &Config->Misc;
+  UserUefi                       = &Config->Uefi;
+  ConsoleAttributes              = UserMisc->Boot.ConsoleAttributes;
+  HibernateMode                  = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
+  PickerAttributes               = UserMisc->Boot.PickerAttributes;
+  AllowedPickerAttributes        = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
+  PickerMode                     = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
+  DisplayLevel                   = UserMisc->Debug.DisplayLevel;
+  AllowedDisplayLevel            = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
+  Target                         = UserMisc->Debug.Target;
+  AllowedTarget                  = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
+  BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
+  IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
 
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes is borked!\n"));
@@ -91,6 +95,26 @@ CheckMisc (
   if ((Target & ~AllowedTarget) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->Target is borked!\n"));
     ++ErrorCount;
+  }
+
+  //
+  // TODO: Check requirements of Security->AuthRestart.
+  //
+  
+  if (AsciiStrCmp (BootProtect, "None") != 0
+    && AsciiStrCmp (BootProtect, "Bootstrap") != 0
+    && AsciiStrCmp (BootProtect, "BootstrapShort") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is borked (Can only be None, Bootstrap, or BootstrapShort)!\n"));
+    ++ErrorCount;
+  } else if (AsciiStrCmp (BootProtect, "Bootstrap") == 0
+    || AsciiStrCmp (BootProtect, "BootstrapShort") == 0) {
+    if (!IsRequestBootVarRoutingEnabled) {
+      DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is set to %a which requires UEFI->Quirks->RequestBootVarRouting to be enabled!\n", BootProtect));
+      ++ErrorCount;
+    }
+    //
+    // NOTE: RequestBootVarRouting requires OpenRuntime.efi, which will be checked in UEFI checker.
+    //
   }
 
   return ReportError (__func__, ErrorCount);
