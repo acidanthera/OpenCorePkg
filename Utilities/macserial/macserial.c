@@ -559,6 +559,10 @@ static bool get_serial(SERIALINFO *info) {
 
 static void get_mlb(SERIALINFO *info, char *dst, size_t sz) {
   // This is a direct reverse from CCC, rework it later...
+  if (info->modelIndex < 0) {
+    printf("WARN: Unknown model, assuming default!\n");
+    info->modelIndex = APPLE_MODEL_MAX - 1;
+  }
   do {
     uint32_t year = 0, week = 0;
 
