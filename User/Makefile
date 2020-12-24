@@ -160,10 +160,6 @@ ifneq ($(STANDALONE),1)
 	# OcAppleKernelLib targets.
 	#
 	OBJS    += KernelVersion.o
-	#
-	# OcConsoleLib targets.
-	#
-	OBJS    += ResolutionParsing.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -192,8 +188,7 @@ ifneq ($(STANDALONE),1)
 				../../Library/OcAppleKeysLib:$\
 				../../Library/OcCpuLib:$\
 				../../Library/OcMiscLib:$\
-				../../Library/OcAppleKernelLib:$\
-				../../Library/OcConsoleLib
+				../../Library/OcAppleKernelLib
 endif
 
 #
