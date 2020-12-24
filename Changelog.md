@@ -12,6 +12,7 @@ OpenCore Changelog
 - Removed no longer required `DeduplicateBootOrder` quirk
 - Fixed macserial crashes when processing invalid serials
 - Fixed macserial issues when processing 2021 year serials
+- Added advanced error checking in ocvalidate utility
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout
