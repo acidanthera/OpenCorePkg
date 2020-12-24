@@ -355,7 +355,8 @@ static bool get_serial_info(const char *serial, SERIALINFO *info, bool print) {
     // Since year can be encoded ambiguously, check the model code for 2010/2020 difference.
     // Old check relies on first letter of model to be greater than or equal to H, which breaks compatibility with iMac20,2 (=0).
     // Added logic checks provided model years `AppleModelYear` first year greater than or equal to 2020.
-    if ((info->modelIndex >= 0 && AppleModelYear[info->modelIndex][0] >= 2020) || (info->decodedYear == 0 && info->model[0] >= 'H')) {
+    if ((info->modelIndex >= 0 && AppleModelYear[info->modelIndex][0] >= 2017 && info->decodedYear < 7)
+      || (info->decodedYear == 0 && info->model[0] >= 'H')) {
       info->decodedYear += 2020;
     } else if (info->decodedYear >= 0) {
       info->decodedYear += 2010;
@@ -503,7 +504,7 @@ static bool get_serial(SERIALINFO *info) {
 
   if (info->decodedYear < 0) {
     if (info->modelIndex < 0)
-      info->decodedYear = country_len == COUNTRY_OLD_LEN ? SERIAL_YEAR_OLD_MAX : SERIAL_YEAR_NEW_MAX;
+      info->decodedYear = country_len == COUNTRY_OLD_LEN ? SERIAL_YEAR_OLD_MAX : SERIAL_YEAR_NEW_MID;
     else
       info->decodedYear = (int32_t)get_production_year((AppleModel)info->modelIndex, false);
   }
@@ -528,7 +529,7 @@ static bool get_serial(SERIALINFO *info) {
     }
 
     size_t base_new_year = 2010;
-    if (info->decodedYear == SERIAL_YEAR_NEW_MAX) {
+    if (info->decodedYear >= SERIAL_YEAR_NEW_MID) {
       base_new_year = 2020;
     }
 
