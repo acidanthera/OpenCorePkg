@@ -531,7 +531,8 @@ InternalBootPickerEntryPtrEvent (
     if (SameIter) {
       SameIter = FALSE;
     } else {
-      Context->BootEntry = Entry->Context;
+      Context->ReadyToBoot = TRUE;
+      ASSERT (Context->BootEntry == Entry->Context);
     }
   }
   //
