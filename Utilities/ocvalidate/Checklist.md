@@ -1,7 +1,7 @@
 ocvalidate Checklist
-=====================
+====================
 
-As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
+This version of ocvalidate performs the following checks:
 
 ## Global Rules
 - For all strings (fields with plist `String` format) throughout the whole config, only ASCII printable characters are accepted at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
@@ -39,7 +39,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - Entry[N]->BundlePath: Filename should have `.kext` suffix.
 - Entry[N]->PlistPath: Filename should have `.plist` suffix.
 - Entry[N]: If `Lilu.kext` is used, `DisableLinkeditJettison` should be enabled at `Kernel->Quirks`.
-- For some known kexts, their `BundlePath`, `ExecutablePath`, and `PlistPath` must match against each other. Current list of rules can be found [here](https://github.com/PMheart/OpenCorePkg/blob/master/Utilities/ocvalidate/ValidateKernel.c). (TODO: Change to Acidanthera link once merged)
+- For some known kexts, their `BundlePath`, `ExecutablePath`, and `PlistPath` must match against each other. Current list of rules can be found [here](https://github.com/acidanthera/OpenCorePkg/blob/master/Utilities/ocvalidate/ValidateKernel.c).
 - Known [Lilu plugins](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md) must have proper `Add` precedence. That is to say, plugins must be placed after `Lilu.kext`.
 #### Delete
 - Entry[N]->Arch: Only `Any`, `i386`, or `x86_64` are accepted.

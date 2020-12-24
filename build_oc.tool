@@ -221,6 +221,8 @@ package() {
   # additional docs for macserial.
   cp "${selfdir}/Utilities/macserial/FORMAT.md" "${dstdir}/Utilities/macserial"/ || exit 1
   cp "${selfdir}/Utilities/macserial/README.md" "${dstdir}/Utilities/macserial"/ || exit 1
+  # additional docs for ocvalidate.
+  cp "${selfdir}/Utilities/ocvalidate/Checklist.md" "${dstdir}/Utilities/ocvalidate"/ || exit 1
 
   pushd "${dstdir}" || exit 1
   zip -qr -FS ../"OpenCore-${ver}-${2}.zip" ./* || exit 1
