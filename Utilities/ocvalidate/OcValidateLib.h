@@ -108,6 +108,18 @@ AsciiUefiDriverIsLegal (
   );
 
 /**
+  Check if a device path in ASCII is valid.
+
+  @param[in]  AsciiDevicePath          Device path to be checked.
+
+  @retval     TRUE                     If AsciiDevicePath is valid.
+**/
+BOOLEAN
+AsciiDevicePathIsLegal (
+  IN  CONST CHAR8  *AsciiDevicePath
+  );
+
+/**
   Check if a set of data has proper masking set.
 
   This function assumes identical sizes of Data and Mask, which must be ensured before calling.

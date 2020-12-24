@@ -111,35 +111,9 @@ CheckUEFI (
     ++ErrorCount;
   }
 
-  if (AsciiAudioDevicePath[0] != '\0') {
-    //
-    // Convert ASCII device path to Unicode format.
-    //
-    UnicodeAudioDevicePath = AsciiStrCopyToUnicode (AsciiAudioDevicePath, 0);
-
-    if (UnicodeAudioDevicePath != NULL) {
-      //
-      // Firstly, convert Unicode device path to binary.
-      //
-      AudioDevicePath        = ConvertTextToDevicePath (UnicodeAudioDevicePath);
-      //
-      // Secondly, convert binary back to Unicode device path.
-      //
-      TextualAudioDevicePath = ConvertDevicePathToText (AudioDevicePath, FALSE, FALSE);
-      if (TextualAudioDevicePath != NULL) {
-        //
-        // If the results do not match, then the original device path is borked.
-        //
-        if (OcStriCmp (UnicodeAudioDevicePath, TextualAudioDevicePath) != 0) {
-          DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked!\n"));
-          ++ErrorCount;
-        }
-      }
-    }
-
-    FreePool (AudioDevicePath);
-    FreePool (UnicodeAudioDevicePath);
-    FreePool (TextualAudioDevicePath);
+  if (AsciiAudioDevicePath[0] != '\0' && !AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
+    ++ErrorCount;
   }
 
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {

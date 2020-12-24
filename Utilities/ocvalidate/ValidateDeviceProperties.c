@@ -26,9 +26,6 @@ CheckDeviceProperties (
   UINT32                    PropertyIndex;
   OC_DEV_PROP_CONFIG        *UserDevProp;
   CONST CHAR8               *AsciiDevicePath;
-  CHAR16                    *UnicodeDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
-  CHAR16                    *TextualDevicePath;
   CONST CHAR8               *AsciiProperty;
   OC_ASSOC                  *PropertyMap;
 
@@ -39,44 +36,10 @@ CheckDeviceProperties (
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Delete.Count; ++DeviceIndex) {
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Delete.Keys[DeviceIndex]);
-    UnicodeDevicePath = NULL;
-    DevicePath        = NULL;
-    TextualDevicePath = NULL;
-
-    //
-    // Convert ASCII device path to Unicode format.
-    //
-    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
-    if (UnicodeDevicePath != NULL) {
-      //
-      // Firstly, convert Unicode device path to binary.
-      //
-      DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
-      if (DevicePath != NULL) {
-        //
-        // Secondly, convert binary back to Unicode device path.
-        //
-        TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-        if (TextualDevicePath != NULL) {
-          //
-          // If the results before and after conversion do not match,
-          // then the original device path is borked.
-          //
-          if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
-            DEBUG ((
-              DEBUG_WARN,
-              "DeviceProperties->Delete[%u]->DevicePath is borked!\nOriginal path: %s\nPath after internal conversion: %s\n\n",
-              DeviceIndex,
-              UnicodeDevicePath,
-              TextualDevicePath
-              ));
-            ++ErrorCount;
-          }
-          FreePool (TextualDevicePath);
-        }
-        FreePool (DevicePath);
-      }
-      FreePool (UnicodeDevicePath);
+    
+    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
+      ++ErrorCount;
     }
 
     for (PropertyIndex = 0; PropertyIndex < UserDevProp->Delete.Values[DeviceIndex]->Count; ++PropertyIndex) {
@@ -100,43 +63,10 @@ CheckDeviceProperties (
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
     PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
-    UnicodeDevicePath = NULL;
-    DevicePath        = NULL;
-    TextualDevicePath = NULL;
     
-    //
-    // Convert ASCII device path to Unicode format.
-    //
-    UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
-    if (UnicodeDevicePath != NULL) {
-      //
-      // Firstly, convert Unicode device path to binary.
-      //
-      DevicePath        = ConvertTextToDevicePath (UnicodeDevicePath);
-      if (DevicePath != NULL) {
-        //
-        // Secondly, convert binary back to Unicode device path.
-        //
-        TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-        if (TextualDevicePath != NULL) {
-          //
-          // If the results do not match, then the original device path is borked.
-          //
-          if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
-            DEBUG ((
-              DEBUG_WARN,
-              "DeviceProperties->Add[%u]->DevicePath is borked!\nOriginal path: %s\nPath after internal conversion: %s\n\n",
-              DeviceIndex,
-              UnicodeDevicePath,
-              TextualDevicePath
-              ));
-            ++ErrorCount;
-          }
-          FreePool (TextualDevicePath);
-        }
-        FreePool (DevicePath);
-      }
-      FreePool (UnicodeDevicePath);
+    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
+      ++ErrorCount;
     }
 
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {

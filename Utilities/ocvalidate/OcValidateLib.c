@@ -249,6 +249,59 @@ AsciiUefiDriverIsLegal (
 }
 
 BOOLEAN
+AsciiDevicePathIsLegal (
+  IN  CONST CHAR8  *AsciiDevicePath
+  )
+{
+  BOOLEAN                   RetVal;
+  CHAR16                    *UnicodeDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+  CHAR16                    *TextualDevicePath;
+
+  RetVal = TRUE;
+
+  //
+  // Convert ASCII device path to Unicode format.
+  //
+  UnicodeDevicePath = AsciiStrCopyToUnicode (AsciiDevicePath, 0);
+  if (UnicodeDevicePath != NULL) {
+    //
+    // Firstly, convert Unicode device path to binary.
+    //
+    DevicePath = ConvertTextToDevicePath (UnicodeDevicePath);
+    if (DevicePath != NULL) {
+      //
+      // Secondly, convert binary back to Unicode device path.
+      //
+      TextualDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      if (TextualDevicePath != NULL) {
+        //
+        // If the results before and after conversion do not match,
+        // then the original device path is borked.
+        //
+        if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
+          DEBUG ((
+            DEBUG_WARN,
+            "Original path: %s\nPath after internal conversion: %s\n\n",
+            UnicodeDevicePath,
+            TextualDevicePath
+            ));
+          //
+          // Do not return immediately in order to free properly.
+          //
+          RetVal = FALSE;
+        }
+        FreePool (TextualDevicePath);
+      }
+      FreePool (DevicePath);
+    }
+    FreePool (UnicodeDevicePath);
+  }
+
+  return RetVal;
+}
+
+BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
