@@ -96,6 +96,18 @@ GetMacInfo (
   );
 
 /**
+  Determine if specified model have real Mac information.
+
+  @param[in] ProductName        Product to check information for.
+
+  @retval TRUE if there is information for ProductName.
+**/
+BOOLEAN
+HasMacInfo (
+  IN CONST CHAR8     *ProductName
+  );
+
+/**
   Determine if specified model and kernel version can
   run in 64-bit kernel mode.
 
