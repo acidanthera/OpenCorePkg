@@ -63,19 +63,16 @@ CheckMisc (
   UINT32          ConsoleAttributes;
   CONST CHAR8     *HibernateMode;
   UINT32          PickerAttributes;
-  UINT32          AllowedPickerAttributes;
   CONST CHAR8     *PickerMode;
   UINT64          DisplayLevel;
   UINT64          AllowedDisplayLevel;
   UINT64          HaltLevel;
   UINT64          AllowedHaltLevel;
   UINT32          Target;
-  UINT32          AllowedTarget;
   CONST CHAR8     *BootProtect;
   BOOLEAN         IsRequestBootVarRoutingEnabled;
   CONST CHAR8     *AsciiDmgLoading;
   UINT32          ExposeSensitiveData;
-  UINT32          AllowedExposeSensitiveData;
   CONST CHAR8     *AsciiVault;
   UINT32          ScanPolicy;
   UINT32          AllowedScanPolicy;
@@ -94,19 +91,16 @@ CheckMisc (
   ConsoleAttributes              = UserMisc->Boot.ConsoleAttributes;
   HibernateMode                  = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
   PickerAttributes               = UserMisc->Boot.PickerAttributes;
-  AllowedPickerAttributes        = OC_ATTR_USE_VOLUME_ICON | OC_ATTR_USE_DISK_LABEL_FILE | OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | OC_ATTR_USE_POINTER_CONTROL;
   PickerMode                     = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   DisplayLevel                   = UserMisc->Debug.DisplayLevel;
   AllowedDisplayLevel            = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
   HaltLevel                      = DisplayLevel;
   AllowedHaltLevel               = AllowedDisplayLevel;
   Target                         = UserMisc->Debug.Target;
-  AllowedTarget                  = OC_LOG_ENABLE | OC_LOG_CONSOLE | OC_LOG_DATA_HUB | OC_LOG_SERIAL | OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | OC_LOG_FILE;
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
   AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   ExposeSensitiveData            = UserMisc->Security.ExposeSensitiveData;
-  AllowedExposeSensitiveData     = OCS_EXPOSE_BOOT_PATH | OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO;
   AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
   ScanPolicy                     = UserMisc->Security.ScanPolicy;
   AllowedScanPolicy              = OC_SCAN_FILE_SYSTEM_LOCK | OC_SCAN_DEVICE_LOCK | OC_SCAN_DEVICE_BITS | OC_SCAN_FILE_SYSTEM_BITS;
@@ -125,7 +119,7 @@ CheckMisc (
     ++ErrorCount;
   }
 
-  if ((PickerAttributes & ~AllowedPickerAttributes) != 0) {
+  if ((PickerAttributes & ~OC_ATTR_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is has unknown bits set!\n"));
     ++ErrorCount;
   }
@@ -152,7 +146,7 @@ CheckMisc (
     ++ErrorCount;
   }
 
-  if ((Target & ~AllowedTarget) != 0) {
+  if ((Target & ~OC_LOG_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->Target has unknown bits set!\n"));
     ++ErrorCount;
   }
@@ -184,7 +178,7 @@ CheckMisc (
     ++ErrorCount;
   }
 
-  if ((ExposeSensitiveData & ~AllowedExposeSensitiveData) != 0) {
+  if ((ExposeSensitiveData & ~OCS_EXPOSE_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData has unknown bits set!\n"));
     ++ErrorCount;
   }
