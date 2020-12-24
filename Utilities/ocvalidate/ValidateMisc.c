@@ -99,7 +99,7 @@ CheckMisc (
   Target                         = UserMisc->Debug.Target;
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
-  AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Boot.DmgLoading);
+  AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Security.DmgLoading);
   ExposeSensitiveData            = UserMisc->Security.ExposeSensitiveData;
   AsciiVault                     = OC_BLOB_GET (&UserMisc->Security.Vault);
   ScanPolicy                     = UserMisc->Security.ScanPolicy;
