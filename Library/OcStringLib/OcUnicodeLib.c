@@ -71,11 +71,7 @@ OcStrniCmp (
   //
   ASSERT (StrSize (FirstString) != 0);
   ASSERT (StrSize (SecondString) != 0);
-
-  if (PcdGet32 (PcdMaximumUnicodeStringLength) != 0) {
-    ASSERT (Length <= PcdGet32 (PcdMaximumUnicodeStringLength));
-  }
-
+  
   UpperFirstString  = CharToUpper (*FirstString);
   UpperSecondString = CharToUpper (*SecondString);
   while ((*FirstString != L'\0') &&
