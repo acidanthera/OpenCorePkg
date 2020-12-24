@@ -96,11 +96,11 @@ GetMacInfo (
   );
 
 /**
-  Determine if specified model have real Mac information.
+  Determine if specified product name is a real Mac model.
 
-  @param[in] ProductName        Product to check information for.
+  @param[in] ProductName   Product to check information for.
 
-  @retval TRUE if there is information for ProductName.
+  @retval TRUE if ProductName is a real Mac model.
 **/
 BOOLEAN
 HasMacInfo (
