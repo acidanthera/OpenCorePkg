@@ -46,17 +46,20 @@ CheckPlatformInfo (
   SystemMemoryStatus = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemMemoryStatus);
   AsciiSystemUUID    = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemUuid);
 
-  if (!IsAutomaticEnabled) {
-    DEBUG ((DEBUG_WARN, "PlatformInfo->Automatic is not enabled!\n"));
-    ++ErrorCount;
-  }
-
   if (AsciiStrCmp (UpdateSMBIOSMode, "TryOverwrite") != 0
     && AsciiStrCmp (UpdateSMBIOSMode, "Create") != 0
     && AsciiStrCmp (UpdateSMBIOSMode, "Overwrite") != 0
     && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->UpdateSMBIOSMode is borked (Can only be TryOverwrite, Create, Overwrite, or Custom)!\n"));
     ++ErrorCount;
+  }
+
+  if (!IsAutomaticEnabled) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Automatic is not enabled!\n"));
+    //
+    // This is not an error, but we need to stop checking further.
+    //
+    return ReportError (__func__, ErrorCount);
   }
 
   if (!HasMacInfo (SystemProductName)) {
