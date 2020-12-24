@@ -59,8 +59,8 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (AsciiFileNameHasSuffix (Path, "dsl")) {
-      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has .dsl suffix!\n", Index));
+    if (!AsciiFileNameHasSuffix (Path, "aml") && !AsciiFileNameHasSuffix (Path, "bin")) {
+      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has filename suffix other than .aml and .bin!\n", Index));
       ++ErrorCount;
     }
 
