@@ -202,11 +202,50 @@ OcAsciiSafeSPrint (
   return Status;
 }
 
+INTN
+EFIAPI
+OcAsciiStrniCmp (
+  IN CONST CHAR8   *FirstString,
+  IN CONST CHAR8   *SecondString,
+  IN UINTN         Length
+  )
+{
+  CHAR8  UpperFirstString;
+  CHAR8  UpperSecondString;
+
+  if (Length == 0) {
+    return 0;
+  }
+
+  //
+  // ASSERT both strings are less long than PcdMaximumAsciiStringLength.
+  // Length tests are performed inside AsciiStrLen().
+  //
+  ASSERT (AsciiStrSize (FirstString) != 0);
+  ASSERT (AsciiStrSize (SecondString) != 0);
+
+  UpperFirstString  = AsciiCharToUpper (*FirstString);
+  UpperSecondString = AsciiCharToUpper (*SecondString);
+  while ((*FirstString != '\0') &&
+         (*SecondString != '\0') &&
+         (UpperFirstString == UpperSecondString) &&
+         (Length > 1)) {
+    FirstString++;
+    SecondString++;
+    UpperFirstString  = AsciiCharToUpper (*FirstString);
+    UpperSecondString = AsciiCharToUpper (*SecondString);
+    Length--;
+  }
+
+  return UpperFirstString - UpperSecondString;
+}
+
 BOOLEAN
 EFIAPI
 OcAsciiEndsWith (
   IN CONST CHAR8      *String,
-  IN CONST CHAR8      *SearchString
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
   )
 {
   UINTN   StringLength;
@@ -218,6 +257,10 @@ OcAsciiEndsWith (
   StringLength        = AsciiStrLen (String);
   SearchStringLength  = AsciiStrLen (SearchString);
 
+  if (CaseInsensitiveMatch) {
+    return StringLength >= SearchStringLength
+      && OcAsciiStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+  }
   return StringLength >= SearchStringLength
     && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }

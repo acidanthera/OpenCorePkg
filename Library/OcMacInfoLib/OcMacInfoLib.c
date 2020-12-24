@@ -84,11 +84,11 @@ LookupInternalEntry (
       //
       // Even the first element does not match, required due to unsigned End.
       //
-      return &gMacInfoModels[gMacInfoDefaultModel];
+      return NULL;
     }
   }
 
-  return &gMacInfoModels[gMacInfoDefaultModel];
+  return NULL;
 }
 
 VOID
@@ -102,6 +102,12 @@ GetMacInfo (
   ZeroMem (MacInfo, sizeof (*MacInfo));
 
   InternalEntry = LookupInternalEntry (ProductName);
+  if (InternalEntry == NULL) {
+    //
+    // Fallback to default model if given ProductName is not found.
+    //
+    InternalEntry = &gMacInfoModels[gMacInfoDefaultModel];
+  }
 
   //
   // Fill in DataHub values.
@@ -143,6 +149,18 @@ GetMacInfo (
   if (InternalEntry->PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
     MacInfo->Smbios.PlatformFeature      = &InternalEntry->PlatformFeature;
   }
+}
+
+BOOLEAN
+HasMacInfo (
+  IN CONST CHAR8     *ProductName
+  )
+{
+  CONST MAC_INFO_INTERNAL_ENTRY  *InternalEntry;
+
+  InternalEntry = LookupInternalEntry (ProductName);
+
+  return InternalEntry != NULL;
 }
 
 BOOLEAN

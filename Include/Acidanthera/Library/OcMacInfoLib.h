@@ -91,8 +91,20 @@ typedef struct MAC_INFO_DATA_ {
 **/
 VOID
 GetMacInfo (
-  IN CONST CHAR8     *ProductName,
+  IN  CONST CHAR8    *ProductName,
   OUT MAC_INFO_DATA  *MacInfo
+  );
+
+/**
+  Determine if specified product name is a real Mac model.
+
+  @param[in] ProductName   Product to check information for.
+
+  @retval TRUE if ProductName is a real Mac model.
+**/
+BOOLEAN
+HasMacInfo (
+  IN CONST CHAR8     *ProductName
   );
 
 /**

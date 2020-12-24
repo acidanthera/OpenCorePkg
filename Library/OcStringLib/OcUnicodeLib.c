@@ -71,11 +71,7 @@ OcStrniCmp (
   //
   ASSERT (StrSize (FirstString) != 0);
   ASSERT (StrSize (SecondString) != 0);
-
-  if (PcdGet32 (PcdMaximumUnicodeStringLength) != 0) {
-    ASSERT (Length <= PcdGet32 (PcdMaximumUnicodeStringLength));
-  }
-
+  
   UpperFirstString  = CharToUpper (*FirstString);
   UpperSecondString = CharToUpper (*SecondString);
   while ((*FirstString != L'\0') &&
@@ -360,7 +356,8 @@ BOOLEAN
 EFIAPI
 OcUnicodeEndsWith (
   IN CONST CHAR16     *String,
-  IN CONST CHAR16     *SearchString
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
   )
 {
   UINTN   StringLength;
@@ -372,6 +369,10 @@ OcUnicodeEndsWith (
   StringLength        = StrLen (String);
   SearchStringLength  = StrLen (SearchString);
 
+  if (CaseInsensitiveMatch) {
+    return StringLength >= SearchStringLength
+      && OcStrniCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
+  }
   return StringLength >= SearchStringLength
     && StrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }

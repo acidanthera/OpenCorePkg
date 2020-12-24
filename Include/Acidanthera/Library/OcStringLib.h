@@ -148,11 +148,55 @@ OcAsciiSafeSPrint (
   ...
   );
 
+/**
+  Compares up to a specified length the contents of two Null-terminated ASCII
+  strings using case insensitive comparisons, and returns the difference
+  between the first mismatched ASCII characters.
+
+  This function compares the Null-terminated ASCII string FirstString to the
+  Null-terminated ASCII string SecondString using case insensitive
+  comparisons.  At most, Length ASCII characters will be compared. If Length
+  is 0, then 0 is returned. If FirstString is identical to SecondString, then 0
+  is returned. Otherwise, the value returned is the first mismatched upper case
+  ASCII character in SecondString subtracted from the first mismatched upper
+  case ASCII character in FirstString.
+
+  If Length > 0 and FirstString is NULL, then ASSERT().
+  If Length > 0 and SecondString is NULL, then ASSERT().
+  TODO
+  If PcdMaximumAsciiStringLength is not zero, and Length is greater than
+  PcdMaximumAsciiStringLength, then ASSERT().
+  If PcdMaximumAsciiStringLength is not zero, and FirstString contains more
+  than PcdMaximumAsciiStringLength ASCII characters, not including the
+  Null-terminator, then ASSERT().
+  If PcdMaximumAsciiStringLength is not zero, and SecondString contains more
+  than PcdMaximumAsciiStringLength ASCII characters, not including the
+  Null-terminator, then ASSERT().
+
+  @param  FirstString   A pointer to a Null-terminated ASCII string.
+  @param  SecondString  A pointer to a Null-terminated ASCII string.
+  @param  Length        The maximum number of ASCII characters to compare.
+
+  @retval ==0    FirstString is identical to SecondString using case
+                 insensitive comparisons.
+  @retval others FirstString is not identical to SecondString using case
+                 insensitive comparisons.
+
+**/
+INTN
+EFIAPI
+OcAsciiStrniCmp (
+  IN CONST CHAR8   *FirstString,
+  IN CONST CHAR8   *SecondString,
+  IN UINTN         Length
+  );
+
 /** Check if ASCII string ends with another ASCII string.
 
-  @param[in]  String        A pointer to a Null-terminated ASCII string.
-  @param[in]  SearchString  A pointer to a Null-terminated ASCII string
-                            to compare against String.
+  @param[in]  String                A pointer to a Null-terminated ASCII string.
+  @param[in]  SearchString          A pointer to a Null-terminated ASCII string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
 
   @retval  TRUE if String ends with SearchString.
 **/
@@ -160,7 +204,8 @@ BOOLEAN
 EFIAPI
 OcAsciiEndsWith (
   IN CONST CHAR8      *String,
-  IN CONST CHAR8      *SearchString
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
   );
 
 /**
@@ -396,9 +441,10 @@ OcUnicodeSafeSPrint (
 
 /** Check if Unicode string ends with another Unicode string.
 
-  @param[in]  String        A pointer to a Null-terminated Unicode string.
-  @param[in]  SearchString  A pointer to a Null-terminated Unicode string
-                            to compare against String.
+  @param[in]  String                A pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString          A pointer to a Null-terminated Unicode string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
 
   @retval  TRUE if String ends with SearchString.
 **/
@@ -406,7 +452,8 @@ BOOLEAN
 EFIAPI
 OcUnicodeEndsWith (
   IN CONST CHAR16     *String,
-  IN CONST CHAR16     *SearchString
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
   );
 
 /**
