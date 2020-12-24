@@ -55,7 +55,6 @@ CheckPlatformInfo (
   }
 
   if (!IsAutomaticEnabled) {
-    DEBUG ((DEBUG_WARN, "PlatformInfo->Automatic is not enabled!\n"));
     //
     // This is not an error, but we need to stop checking further.
     //
