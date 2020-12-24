@@ -366,16 +366,14 @@ ValidatePatch (
         FindSize
         ));
       ++ErrorCount;
-    } else {
-      if (!DataHasProperMasking (Find, Mask, FindSize)) {
-        DEBUG ((
-          DEBUG_WARN,
-          "%a[%u]->Find requires Mask to be active for corresponding bits!\n",
-          PatchSection,
-          PatchIndex
-          ));
-        ++ErrorCount;
-      }
+    } else if (!DataHasProperMasking (Find, Mask, FindSize)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "%a[%u]->Find requires Mask to be active for corresponding bits!\n",
+        PatchSection,
+        PatchIndex
+        ));
+      ++ErrorCount;
     }
   }
   
@@ -390,16 +388,14 @@ ValidatePatch (
         ReplaceSize
         ));
       ++ErrorCount;
-    } else {
-      if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
-        DEBUG ((
-          DEBUG_WARN,
-          "%a[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n",
-          PatchSection,
-          PatchIndex
-          ));
-        ++ErrorCount;
-      }
+    } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+      DEBUG ((
+        DEBUG_WARN,
+        "%a[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n",
+        PatchSection,
+        PatchIndex
+        ));
+      ++ErrorCount;
     }
   }
 

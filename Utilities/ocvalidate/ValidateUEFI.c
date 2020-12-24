@@ -52,9 +52,6 @@ CheckUEFI (
   UINT32                    UserBpp;
   BOOLEAN                   UserSetMax;
   CONST CHAR8               *AsciiAudioDevicePath;
-  EFI_DEVICE_PATH_PROTOCOL  *AudioDevicePath;
-  CHAR16                    *UnicodeAudioDevicePath;
-  CHAR16                    *TextualAudioDevicePath;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
 
@@ -80,9 +77,6 @@ CheckUEFI (
   ConsoleMode                      = OC_BLOB_GET (&UserUefi->Output.ConsoleMode);
   Resolution                       = OC_BLOB_GET (&UserUefi->Output.Resolution);
   AsciiAudioDevicePath             = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
-  AudioDevicePath                  = NULL;
-  UnicodeAudioDevicePath           = NULL;
-  TextualAudioDevicePath           = NULL;
 
   //
   // Sanitise strings.
