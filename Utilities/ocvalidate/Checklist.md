@@ -11,7 +11,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - For all Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only strings in canonic string format are accepted.
 - For all paths of UEFI Drivers, only `0-9, A-Z, a-z, '_', '-', '.', and '/'` are accepted.
 - For all entries requiring bitwise operations (e.g. `ConsoleAttributes`, `PickerAttributes`, or `ScanPolicy`), only known bits can be set.
-- For all entries involving GUID, correct format must be ensured.
+- For all entries involving GUID (mainly at Section `NVRAM`), correct format must be ensured.
 
 ## ACPI
 #### Add
@@ -61,10 +61,13 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 - SecureBootModel: Only `Default`, `Disabled`, `j137`, `j680`, `j132`, `j174`, `j140k`, `j780`, `j213`, `j140a`, `j152f`, `j160`, `j230k`, `j214k`, `j223`, `j215`, `j185`, `j185f`, or `x86legacy` are accepted.
 
 ## NVRAM
-- TODO
+- Check requirements for GUID in Section Global Rules.
 
 ## PlatformInfo
-- TODO
+- UpdateSMBIOSMode: Only `TryOverwrite`, `Create`, `Overwrite`, or `Custom` are accepted.
+#### Generic
+- SystemProductName: Only real Mac models are accepted.
+- SystemMemoryStatus: Only `Auto`, `Upgradable`, or `Soldered` are accepted.
 
 ## UEFI
 #### APFS
