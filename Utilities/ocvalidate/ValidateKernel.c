@@ -130,7 +130,7 @@ CheckKernel (
       //
       // Valid BundlePath must contain .kext suffix.
       //
-      if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
+      if (!OcAsciiEndsWith (BundlePath, ".kext", TRUE)) {
         DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
         ++ErrorCount;
       }
@@ -152,7 +152,7 @@ CheckKernel (
       //
       // Valid PlistPath must contain .plist suffix.
       //
-      if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
+      if (!OcAsciiEndsWith (PlistPath, ".plist", TRUE)) {
         DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
         ++ErrorCount;
       }
@@ -311,7 +311,7 @@ CheckKernel (
       //
       // Valid BundlePath must contain .kext suffix.
       //
-      if (!AsciiFileNameHasSuffix (BundlePath, "kext")) {
+      if (!OcAsciiEndsWith (BundlePath, ".kext", TRUE)) {
         DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->BundlePath does NOT contain .kext suffix!\n", Index));
         ++ErrorCount;
       }
@@ -333,7 +333,7 @@ CheckKernel (
       //
       // Valid PlistPath must contain .plist suffix.
       //
-      if (!AsciiFileNameHasSuffix (PlistPath, "plist")) {
+      if (!OcAsciiEndsWith (PlistPath, ".plist", TRUE)) {
         DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->PlistPath does NOT contain .plist suffix!\n", Index));
         ++ErrorCount;
       }

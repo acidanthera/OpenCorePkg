@@ -59,7 +59,7 @@ CheckACPI (
       ++ErrorCount;
     }
 
-    if (!AsciiFileNameHasSuffix (Path, "aml") && !AsciiFileNameHasSuffix (Path, "bin")) {
+    if (!OcAsciiEndsWith (Path, ".aml", TRUE) && !OcAsciiEndsWith (Path, ".bin", TRUE)) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has filename suffix other than .aml and .bin!\n", Index));
       ++ErrorCount;
     }

@@ -32,33 +32,6 @@ GetCurrentTimestamp (
   );
 
 /**
-  Get ASCII filename suffix.
-
-  @param[in]  FileName                 Filename given.
-
-  @retval     Empty string             If the FileName is abnormal.
-  @retval     FileName suffix          If the FileName is sane.
-**/
-CHAR8 *
-AsciiGetFilenameSuffix (
-  IN  CONST CHAR8  *FileName
-  );
-
-/**
-  Check if filename has given suffix.
-
-  @param[in]  FileName                 Filename given.
-  @param[in]  Suffix                   Suffix to be matched and checked.
-
-  @retval     TRUE                     If FileName has Suffix in the end.
-**/
-BOOLEAN
-AsciiFileNameHasSuffix (
-  IN  CONST CHAR8  *FileName,
-  IN  CONST CHAR8  *Suffix
-  );
-
-/**
   Check if a filesystem path contains only legal characters.
 
   @param[in]  Path                     Filesystem path to be checked.

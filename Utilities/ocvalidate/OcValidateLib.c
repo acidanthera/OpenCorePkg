@@ -32,49 +32,6 @@ GetCurrentTimestamp (
   return Time.tv_sec * 1000LL + Time.tv_usec / 1000LL;
 }
 
-CHAR8 *
-AsciiGetFilenameSuffix (
-  IN  CONST CHAR8  *FileName
-  )
-{
-  CONST CHAR8  *SuffixDot;
-
-  //
-  // Find the last dot by reverse order.
-  //
-  SuffixDot = OcAsciiStrrChr (FileName, '.');
-
-  //
-  // In some weird cases the filename can be crazily like
-  // "a.suffix." (note that '.') or "..." (extremely abnormal).
-  // We do not support such.
-  //
-  if (!SuffixDot || SuffixDot == FileName) {
-    return (CHAR8 *) "";
-  }
-
-  //
-  // In most normal cases, return whatever following the dot.
-  //
-  return (CHAR8 *) SuffixDot + 1;
-}
-
-BOOLEAN
-AsciiFileNameHasSuffix (
-  IN  CONST CHAR8  *FileName,
-  IN  CONST CHAR8  *Suffix
-  )
-{
-  //
-  // Ensure non-empty strings.
-  //
-  if (FileName[0] == '\0' || Suffix[0] == '\0') {
-    return FALSE;
-  }
-
-  return AsciiStriCmp (AsciiGetFilenameSuffix (FileName), Suffix) == 0;
-}
-
 BOOLEAN
 AsciiFileSystemPathIsLegal (
   IN  CONST CHAR8  *Path
@@ -151,7 +108,7 @@ AsciiIdentifierIsLegal (
     //
     // For customised bootloader, it must have .efi suffix.
     //
-    if (!AsciiFileNameHasSuffix (Identifier, "efi")) {
+    if (!OcAsciiEndsWith (Identifier, ".efi", TRUE)) {
       return FALSE;
     }
   }
@@ -246,7 +203,7 @@ AsciiUefiDriverIsLegal (
   // If an EFI driver does not contain .efi suffix,
   // then it must be illegal.
   //
-  if (!AsciiFileNameHasSuffix (Driver, "efi")) {
+  if (!OcAsciiEndsWith (Driver, ".efi", TRUE)) {
     return FALSE;
   }
 
