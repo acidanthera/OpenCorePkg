@@ -53,8 +53,7 @@ CONST MAC_INFO_64BIT_COMPAT_ENTRY gMac64BitModels[] = {
 STATIC
 CONST MAC_INFO_INTERNAL_ENTRY *
 LookupInternalEntry (
-  CONST CHAR8    *ProductName,
-        BOOLEAN  SetDefaultModel
+  CONST CHAR8    *ProductName
   )
 {
   UINTN  Start;
@@ -85,11 +84,11 @@ LookupInternalEntry (
       //
       // Even the first element does not match, required due to unsigned End.
       //
-      return SetDefaultModel ? &gMacInfoModels[gMacInfoDefaultModel] : NULL;
+      return NULL;
     }
   }
 
-  return SetDefaultModel ? &gMacInfoModels[gMacInfoDefaultModel] : NULL;
+  return NULL;
 }
 
 VOID
@@ -102,7 +101,13 @@ GetMacInfo (
 
   ZeroMem (MacInfo, sizeof (*MacInfo));
 
-  InternalEntry = LookupInternalEntry (ProductName, TRUE);
+  InternalEntry = LookupInternalEntry (ProductName);
+  if (InternalEntry == NULL) {
+    //
+    // Fallback to default model if given ProductName is not found.
+    //
+    InternalEntry = &gMacInfoModels[gMacInfoDefaultModel];
+  }
 
   //
   // Fill in DataHub values.
@@ -153,7 +158,7 @@ HasMacInfo (
 {
   CONST MAC_INFO_INTERNAL_ENTRY  *InternalEntry;
 
-  InternalEntry = LookupInternalEntry (ProductName, FALSE);
+  InternalEntry = LookupInternalEntry (ProductName);
 
   return InternalEntry != NULL;
 }
