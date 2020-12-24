@@ -94,13 +94,11 @@ CheckUEFI (
     && AsciiStrCmp (TextRenderer, "SystemGeneric") != 0) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->TextRenderer is illegal (Can only be BuiltinGraphics, BuiltinText, SystemGraphics, SystemText, or SystemGeneric)!\n"));
     ++ErrorCount;
-  } else {
+  } else if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
     //
     // Check whether TextRenderer has System prefix.
     //
-    if (AsciiStrnCmp (TextRenderer, "System", L_STR_LEN ("System")) == 0) {
-      IsTextRendererSystem = TRUE;
-    }
+    IsTextRendererSystem = TRUE;
   }
 
   if (UserUefi->Apfs.EnableJumpstart
