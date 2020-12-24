@@ -441,9 +441,10 @@ OcUnicodeSafeSPrint (
 
 /** Check if Unicode string ends with another Unicode string.
 
-  @param[in]  String        A pointer to a Null-terminated Unicode string.
-  @param[in]  SearchString  A pointer to a Null-terminated Unicode string
-                            to compare against String.
+  @param[in]  String                A pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString          A pointer to a Null-terminated Unicode string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
 
   @retval  TRUE if String ends with SearchString.
 **/
@@ -451,7 +452,8 @@ BOOLEAN
 EFIAPI
 OcUnicodeEndsWith (
   IN CONST CHAR16     *String,
-  IN CONST CHAR16     *SearchString
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
   );
 
 /**
