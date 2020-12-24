@@ -38,8 +38,11 @@ AsciiFileSystemPathIsLegal (
   )
 {
   UINTN  Index;
+  UINTN  PathLength;
 
-  for (Index = 0; Index < AsciiStrLen (Path); ++Index) {
+  PathLength = AsciiStrLen (Path);
+
+  for (Index = 0; Index < PathLength; ++Index) {
     //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/', and '\').
     //
@@ -68,8 +71,11 @@ AsciiCommentIsLegal (
   )
 {
   UINTN  Index;
+  UINTN  CommentLength;
 
-  for (Index = 0; Index < AsciiStrLen (Comment); ++Index) {
+  CommentLength = AsciiStrLen (Comment);
+
+  for (Index = 0; Index < CommentLength; ++Index) {
     //
     // Unprintable characters matched.
     //
@@ -88,6 +94,7 @@ AsciiIdentifierIsLegal (
   )
 {
   UINTN  Index;
+  UINTN  IdentifierLength;
 
   if (IsKernelIdentifier) {
     //
@@ -120,7 +127,9 @@ AsciiIdentifierIsLegal (
     return FALSE;
   }
 
-  for (Index = 0; Index < AsciiStrLen (Identifier); ++Index) {
+  IdentifierLength = AsciiStrLen (Identifier);
+
+  for (Index = 0; Index < IdentifierLength; ++Index) {
     //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', and '.').
     // FIXME: Discuss what exactly is legal for identifiers, or update the allowed list on request.
@@ -198,6 +207,7 @@ AsciiUefiDriverIsLegal (
   )
 {
   UINTN  Index;
+  UINTN  DriverLength;
 
   //
   // If an EFI driver does not contain .efi suffix,
@@ -207,7 +217,9 @@ AsciiUefiDriverIsLegal (
     return FALSE;
   }
 
-  for (Index = 0; Index < AsciiStrLen (Driver); ++Index) {
+  DriverLength = AsciiStrLen (Driver);
+
+  for (Index = 0; Index < DriverLength; ++Index) {
     //
     // NOTE: Skip '#' as it is treated as comments and thus is legal.
     //
