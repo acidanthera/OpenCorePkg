@@ -91,7 +91,7 @@ typedef struct MAC_INFO_DATA_ {
 **/
 VOID
 GetMacInfo (
-  IN CONST CHAR8     *ProductName,
+  IN  CONST CHAR8    *ProductName,
   OUT MAC_INFO_DATA  *MacInfo
   );
 

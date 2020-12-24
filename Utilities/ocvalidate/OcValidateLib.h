@@ -93,7 +93,7 @@ AsciiCommentIsLegal (
 BOOLEAN
 AsciiIdentifierIsLegal (
   IN  CONST CHAR8    *Identifier,
-  IN        BOOLEAN  IsKernelIdentifier
+  IN  BOOLEAN        IsKernelIdentifier
   );
 
 /**
@@ -107,7 +107,7 @@ AsciiIdentifierIsLegal (
 BOOLEAN
 AsciiArchIsLegal (
   IN  CONST CHAR8    *Arch,
-  IN        BOOLEAN  IsKernelArch
+  IN  BOOLEAN        IsKernelArch
   );
 
 /**
@@ -135,20 +135,6 @@ AsciiUefiDriverIsLegal (
   );
 
 /**
-  Report status of errors in the end of each checker functions.
-
-  @param[in]  FuncName                 Checker function name. (__func__)
-  @param[in]  ErrorCount               Number of errors to be returned.
-
-  @return     Number of errors detected in one checker.
-**/
-UINT32
-ReportError (
-  IN  CONST CHAR8  *FuncName,
-  IN  UINT32       ErrorCount
-  );
-
-/**
   Check if a set of data has proper masking set.
 
   This function assumes identical sizes of Data and Mask, which must be ensured before calling.
@@ -163,7 +149,7 @@ BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
-  IN        UINTN  Size
+  IN  UINTN        Size
   );
 
 /**
@@ -188,18 +174,32 @@ DataHasProperMasking (
 **/
 VOID
 ValidatePatch (
-  IN       CONST  CHAR8    *PatchSection,
-  IN              UINT32   PatchIndex,
-  IN              BOOLEAN  FindSizeCanBeZero,
-  IN       CONST  UINT8    *Find,
-  IN              UINT32   FindSize,
-  IN       CONST  UINT8    *Replace,
-  IN              UINT32   ReplaceSize,
-  IN       CONST  UINT8    *Mask,
-  IN              UINT32   MaskSize,
-  IN       CONST  UINT8    *ReplaceMask,
-  IN              UINT32   ReplaceMaskSize,
-      OUT         UINT32   *ErrorCount
+  IN   CONST   CHAR8   *PatchSection,
+  IN   UINT32          PatchIndex,
+  IN   BOOLEAN         FindSizeCanBeZero,
+  IN   CONST   UINT8   *Find,
+  IN   UINT32          FindSize,
+  IN   CONST   UINT8   *Replace,
+  IN   UINT32          ReplaceSize,
+  IN   CONST   UINT8   *Mask,
+  IN   UINT32          MaskSize,
+  IN   CONST   UINT8   *ReplaceMask,
+  IN   UINT32          ReplaceMaskSize,
+  OUT  UINT32          *ErrorCount
+  );
+
+/**
+  Report status of errors in the end of each checker functions.
+
+  @param[in]  FuncName                 Checker function name. (__func__)
+  @param[in]  ErrorCount               Number of errors to be returned.
+
+  @return     Number of errors detected in one checker.
+**/
+UINT32
+ReportError (
+  IN  CONST CHAR8  *FuncName,
+  IN  UINT32       ErrorCount
   );
 
 #endif // OC_USER_UTILITIES_OCVALIDATELIB_H
