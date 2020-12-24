@@ -27,22 +27,58 @@ CheckPlatformInfo (
   )
 {
   UINT32              ErrorCount;
+  EFI_STATUS          Status;
   OC_PLATFORM_CONFIG  *UserPlatformInfo;
   BOOLEAN             IsAutomaticEnabled;
+  CONST CHAR8         *UpdateSMBIOSMode;
+  CONST CHAR8         *SystemProductName;
+  CONST CHAR8         *SystemMemoryStatus;
+  CONST CHAR8         *AsciiSystemUUID;
+  GUID                Guid;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into PlatformInfo checker!\n"));
 
   ErrorCount         = 0;
   UserPlatformInfo   = &Config->PlatformInfo;
   IsAutomaticEnabled = UserPlatformInfo->Automatic;
+  UpdateSMBIOSMode   = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
+  SystemProductName  = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemProductName);
+  SystemMemoryStatus = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemMemoryStatus);
+  AsciiSystemUUID    = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemUuid);
 
   if (!IsAutomaticEnabled) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Automatic is not enabled!\n"));
     ++ErrorCount;
   }
 
+  if (AsciiStrCmp (UpdateSMBIOSMode, "TryOverwrite") != 0
+    && AsciiStrCmp (UpdateSMBIOSMode, "Create") != 0
+    && AsciiStrCmp (UpdateSMBIOSMode, "Overwrite") != 0
+    && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->UpdateSMBIOSMode is borked (Can only be TryOverwrite, Create, Overwrite, or Custom)!\n"));
+    ++ErrorCount;
+  }
+
+  if (!HasMacInfo (SystemProductName)) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemProductName has unknown model set!\n"));
+    ++ErrorCount;
+  }
+
+  if (AsciiStrCmp (SystemMemoryStatus, "Auto") != 0
+    && AsciiStrCmp (SystemMemoryStatus, "Upgradable") != 0
+    && AsciiStrCmp (SystemMemoryStatus, "Soldered") != 0) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemMemoryStatus is borked (Can only be Auto, Upgradable, or Soldered)!\n"));
+    ++ErrorCount;
+  }
+
+  Status = AsciiStrToGuid (AsciiSystemUUID, &Guid);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked!\n"));
+    ++ErrorCount;
+  }
+
   //
-  // TODO: Check properties with OcMacInfoLib.
+  // TODO: Sanitise MLB, ProcessorType, and SystemSerialNumber if possible...
   //
 
   return ReportError (__func__, ErrorCount);
