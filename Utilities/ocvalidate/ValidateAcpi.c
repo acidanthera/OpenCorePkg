@@ -113,7 +113,7 @@ CheckACPI (
     //
     // Checks for size.
     //
-    ValidatePatch (
+    ErrorCount += ValidatePatch (
       "ACPI->Patch",
       Index,
       FALSE,
@@ -124,8 +124,7 @@ CheckACPI (
       Mask,
       MaskSize,
       ReplaceMask,
-      ReplaceMaskSize,
-      &ErrorCount
+      ReplaceMaskSize
       ); 
   }
 

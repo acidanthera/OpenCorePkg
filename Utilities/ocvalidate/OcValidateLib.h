@@ -143,9 +143,10 @@ DataHasProperMasking (
   @param[in]   MaskSize                Size of Mask pattern to be checked.
   @param[in]   ReplaceMask             ReplaceMask pattern to be checked.
   @param[in]   ReplaceMaskSize         Size of ReplaceMask pattern to be checked.
-  @param[out]  ErrorCount              Number of errors to cumulate.
+
+  @return      Number of errors detected.
 **/
-VOID
+UINT32
 ValidatePatch (
   IN   CONST   CHAR8   *PatchSection,
   IN   UINT32          PatchIndex,
@@ -157,8 +158,7 @@ ValidatePatch (
   IN   CONST   UINT8   *Mask,
   IN   UINT32          MaskSize,
   IN   CONST   UINT8   *ReplaceMask,
-  IN   UINT32          ReplaceMaskSize,
-  OUT  UINT32          *ErrorCount
+  IN   UINT32          ReplaceMaskSize
   );
 
 /**

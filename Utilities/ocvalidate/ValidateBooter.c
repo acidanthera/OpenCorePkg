@@ -113,7 +113,7 @@ CheckBooter (
     //
     // Checks for size.
     //
-    ValidatePatch (
+    ErrorCount += ValidatePatch (
       "Booter->Patch",
       Index,
       FALSE,
@@ -124,8 +124,7 @@ CheckBooter (
       Mask,
       MaskSize,
       ReplaceMask,
-      ReplaceMaskSize,
-      &ErrorCount
+      ReplaceMaskSize
       );
   }
 

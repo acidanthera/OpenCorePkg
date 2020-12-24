@@ -400,7 +400,7 @@ CheckKernel (
     //
     // Checks for size.
     //
-    ValidatePatch (
+    ErrorCount += ValidatePatch (
       "Kernel->Patch",
       Index,
       Base[0] != '\0' && FindSize == 0,
@@ -411,8 +411,7 @@ CheckKernel (
       Mask,
       MaskSize,
       ReplaceMask,
-      ReplaceMaskSize,
-      &ErrorCount
+      ReplaceMaskSize
       );
   }
 

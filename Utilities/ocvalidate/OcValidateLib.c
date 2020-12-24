@@ -271,7 +271,7 @@ DataHasProperMasking (
   return TRUE;
 }
 
-VOID
+UINT32
 ValidatePatch (
   IN   CONST   CHAR8   *PatchSection,
   IN   UINT32          PatchIndex,
@@ -283,10 +283,13 @@ ValidatePatch (
   IN   CONST   UINT8   *Mask,
   IN   UINT32          MaskSize,
   IN   CONST   UINT8   *ReplaceMask,
-  IN   UINT32          ReplaceMaskSize,
-  OUT  UINT32          *ErrorCount
+  IN   UINT32          ReplaceMaskSize
   )
 {
+  UINT32  ErrorCount;
+
+  ErrorCount = 0;
+
   if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
     DEBUG ((
       DEBUG_WARN,
@@ -296,7 +299,7 @@ ValidatePatch (
       FindSize,
       ReplaceSize
       ));
-    ++*ErrorCount;
+    ++ErrorCount;
   }
 
   if (MaskSize > 0) {
@@ -309,7 +312,7 @@ ValidatePatch (
         MaskSize,
         FindSize
         ));
-      ++*ErrorCount;
+      ++ErrorCount;
     } else {
       if (!DataHasProperMasking (Find, Mask, FindSize)) {
         DEBUG ((
@@ -318,7 +321,7 @@ ValidatePatch (
           PatchSection,
           PatchIndex
           ));
-        ++*ErrorCount;
+        ++ErrorCount;
       }
     }
   }
@@ -333,7 +336,7 @@ ValidatePatch (
         ReplaceMaskSize,
         ReplaceSize
         ));
-      ++*ErrorCount;
+      ++ErrorCount;
     } else {
       if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
         DEBUG ((
@@ -342,10 +345,12 @@ ValidatePatch (
           PatchSection,
           PatchIndex
           ));
-        ++*ErrorCount;
+        ++ErrorCount;
       }
     }
   }
+
+  return ErrorCount;
 }
 
 UINT32
