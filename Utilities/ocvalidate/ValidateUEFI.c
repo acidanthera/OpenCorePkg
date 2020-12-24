@@ -101,8 +101,12 @@ CheckUEFI (
     IsTextRendererSystem = TRUE;
   }
 
+  //
+  // If FS restrictions is enabled but APFS FS scanning is disabled, it is an error.
+  //
   if (UserUefi->Apfs.EnableJumpstart
-    && (UserMisc->Security.ScanPolicy != 0 && (UserMisc->Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0)) {
+    && (UserMisc->Security.ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0
+    && (UserMisc->Security.ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0) {
     DEBUG ((DEBUG_WARN, "UEFI->APFS->EnableJumpstart is enabled, but Misc->Security->ScanPolicy does not allow APFS scanning!\n"));
     ++ErrorCount;
   }
