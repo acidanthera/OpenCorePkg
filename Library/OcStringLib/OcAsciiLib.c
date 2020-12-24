@@ -224,10 +224,6 @@ OcAsciiStrniCmp (
   ASSERT (AsciiStrSize (FirstString) != 0);
   ASSERT (AsciiStrSize (SecondString) != 0);
 
-  if (PcdGet32 (PcdMaximumAsciiStringLength) != 0) {
-    ASSERT (Length <= PcdGet32 (PcdMaximumAsciiStringLength));
-  }
-
   UpperFirstString  = AsciiCharToUpper (*FirstString);
   UpperSecondString = AsciiCharToUpper (*SecondString);
   while ((*FirstString != '\0') &&
