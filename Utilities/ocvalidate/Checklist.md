@@ -15,7 +15,7 @@ As of commit [TODO_DONT_CLICK](TODO), ocvalidate performs the following checks:
 
 ## ACPI
 #### Add
-- Entry[N]->Path: `.dsl` filename suffix is not accepted.
+- Entry[N]->Path: Only `.aml` and `.bin` filename suffix are accepted.
 - Entry[N]->Path: If a customised DSDT is added and enabled, `RebaseRegions` in `Quirks` should be enabled.
 
 ## Booter
