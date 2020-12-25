@@ -38,87 +38,82 @@ IterateListHeaders (
   OptionsCount = 0;
   ContextsCount = 0;
 
-  //
-  // For Each Handle
-  //
   for (ListHeaderIndex = 0; HiiHandles[ListHeaderIndex] != NULL && ContextsCount < CONTEXTS_MAX; ++ListHeaderIndex) {
     ListHeaders[ListHeaderIndex] = HiiExportPackageLists (HiiHandles[ListHeaderIndex]);
 
-    if (ListHeaders[ListHeaderIndex] != NULL) {
-      DEBUG ((
-        DEBUG_INFO,
-        "Package List: %g\n",
-        &ListHeaders[ListHeaderIndex]->PackageListGuid
-        ));
+    if (ListHeaders[ListHeaderIndex] == NULL) {
+      continue;
+    }
 
-      //
-      // First package in list
-      //
-      PkgHeader = PADD (ListHeaders[ListHeaderIndex], sizeof (EFI_HII_PACKAGE_LIST_HEADER));
+    DEBUG ((
+      DEBUG_INFO,
+      "Package List: %g\n",
+      &ListHeaders[ListHeaderIndex]->PackageListGuid
+      ));
 
-      //
-      // For each package in list
-      //
-      while (ContextsCount < CONTEXTS_MAX) {
-        DEBUG ((DEBUG_INFO, "Package Type: %02X ", PkgHeader->Type));
+    PkgHeader = PADD (ListHeaders[ListHeaderIndex], sizeof (EFI_HII_PACKAGE_LIST_HEADER));
 
-        if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
-          break;
-        } else if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
-          IfrHeader = PADD (PkgHeader, sizeof (EFI_HII_PACKAGE_HEADER));
-          //
-          // Form Definition must start with FORM_SET_OP
-          //
-          if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) {
+    while (ContextsCount < CONTEXTS_MAX) {
+      DEBUG ((DEBUG_INFO, "Package Type: %02X ", PkgHeader->Type));
+
+      if (PkgHeader->Type == EFI_HII_PACKAGE_END) {
+        break;
+      }
+
+      if (PkgHeader->Type == EFI_HII_PACKAGE_FORMS) {
+        IfrHeader = PADD (PkgHeader, sizeof (EFI_HII_PACKAGE_HEADER));
+        //
+        // Form Definition must start with FORM_SET_OP
+        //
+        if (IfrHeader->OpCode == EFI_IFR_FORM_SET_OP) {
+          DEBUG ((
+            DEBUG_INFO,
+            "Form: %g\n",
+            &((EFI_IFR_FORM_SET *) IfrHeader)->Guid
+            ));
+
+          if (IfrHeader->Length >= sizeof (GUID) + sizeof (EFI_IFR_FORM_SET)) {
             DEBUG ((
               DEBUG_INFO,
-              "Form: %g\n",
-              &((EFI_IFR_FORM_SET *) IfrHeader)->Guid
+              "Class Guid: %g\n",
+              PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET))
               ));
 
-            if (IfrHeader->Length >= 16 + sizeof (EFI_IFR_FORM_SET)) {
-              DEBUG ((
-                DEBUG_INFO,
-                "Class Guid: %g\n",
-                PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET))
-                ));
+            //
+            // Checkup for Setup Form
+            //
+            if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET)))) {
+              Contexts[ContextsCount].SearchText = SearchString;
+              Contexts[ContextsCount].EfiHandle = HiiHandles[ListHeaderIndex];
+              Contexts[ContextsCount].ListHeader = ListHeaders[ListHeaderIndex];
+              Contexts[ContextsCount].PkgHeader = PkgHeader;
+              Contexts[ContextsCount].FirstIfrHeader = PADD (IfrHeader, IfrHeader->Length);
+              Contexts[ContextsCount].IfrVarStore = NULL;
+              Contexts[ContextsCount].IfrOneOf = NULL;
+              Contexts[ContextsCount].StopAt = DONT_STOP_AT;
+              Contexts[ContextsCount].Count = OptionsCount;
 
-              //
-              // Checkup for Setup Form
-              //
-              if (CompareGuid (&gEfiHiiPlatformSetupFormsetGuid, PADD (IfrHeader, sizeof (EFI_IFR_FORM_SET)))) {
-                Contexts[ContextsCount].SearchText = SearchString;
-                Contexts[ContextsCount].EfiHandle = HiiHandles[ListHeaderIndex];
-                Contexts[ContextsCount].ListHeader = ListHeaders[ListHeaderIndex];
-                Contexts[ContextsCount].PkgHeader = PkgHeader;
-                Contexts[ContextsCount].FirstIfrHeader = PADD (IfrHeader, IfrHeader->Length);
-                Contexts[ContextsCount].IfrVarStore = NULL;
-                Contexts[ContextsCount].IfrOneOf = NULL;
-                Contexts[ContextsCount].StopAt = DONT_STOP_AT;
-                Contexts[ContextsCount].Count = OptionsCount;
+              IterateOpCode (
+                Contexts[ContextsCount].FirstIfrHeader,
+                EFI_IFR_ONE_OF_OP,
+                NULL,
+                &Contexts[ContextsCount],
+                HandleIfrOption
+                );
 
-                IterateOpCode (
-                  Contexts[ContextsCount].FirstIfrHeader,
-                  EFI_IFR_ONE_OF_OP,
-                  NULL,
-                  &Contexts[ContextsCount],
-                  HandleIfrOption
-                  );
-
-                if (Contexts[ContextsCount].Count != OptionsCount) {
-                  OptionsCount = Contexts[ContextsCount].Count;
-                  ++ContextsCount;
-                }
+              if (Contexts[ContextsCount].Count != OptionsCount) {
+                OptionsCount = Contexts[ContextsCount].Count;
+                ++ContextsCount;
               }
             }
           }
         }
-        PkgHeader = PADD (PkgHeader, PkgHeader->Length);
-      }  ///< For each package in list
+      }
+      PkgHeader = PADD (PkgHeader, PkgHeader->Length);
+    }
 
-      DEBUG ((DEBUG_INFO, "\n"));
-    }  ///< ListHeader End
-  }  ///< For Each Handle
+    DEBUG ((DEBUG_INFO, "\n"));
+  }
 
   DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
@@ -136,12 +131,12 @@ IterateListHeaders (
         do {
           Print (L"\nEnter choice (1..%x) ? ", OptionsCount);
           Key = ReadAnyKey ();
-        } while ((Key < '1') && (Key > '0' + OptionsCount) && (Key != 0x1B));
+        } while ((Key < '1') && (Key > '0' + OptionsCount) && (Key != CHAR_ESC));
 
         Print (L"\n");
       }
 
-      if (Key != 0x1B) {
+      if (Key != CHAR_ESC) {
         Index = Key - '0';
 
         for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
@@ -194,9 +189,6 @@ SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  //
-  // Retrieve ListHeaderCount
-  //
   for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount);
 
   //
@@ -211,7 +203,9 @@ SearchForString (
   }
 
   IterateListHeaders (HiiHandles, ListHeaders, ListHeaderCount, SearchString);
+
   FreePool (ListHeaders);
+  FreePool (HiiHandles);
   return EFI_SUCCESS;
 }
 
@@ -232,7 +226,7 @@ UefiMain (
       if (Flags != ARG_VERIFY) {
         Print (L"\nBIOS Options:\n");
 
-        SearchString = AsciiStrCopyToUnicode ("cfg", 0);
+        SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
         if (SearchString != NULL) {
           Status = SearchForString (SearchString);
           FreePool (SearchString);

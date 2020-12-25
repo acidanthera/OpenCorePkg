@@ -72,7 +72,7 @@ ReadLine (
         }
         break;
 
-      case 0x1B:
+      case CHAR_ESC:
         if (Pos > 0) {
           Pos = 0;
           gST->ConOut->SetCursorPosition (gST->ConOut, StartColumn + Pos, StartRow);
@@ -98,7 +98,7 @@ ReadLine (
         Output[0] = Key.UnicodeChar;
         gST->ConOut->OutputString (gST->ConOut, Output);
 
-        if (Pos >= Length - 1) {
+        if (Pos == Length - 1) {
           Buffer[Pos] = 0;
           return Pos;
         }
@@ -156,45 +156,41 @@ InterpretArguments (
   ParameterCount = 0;
 
   for (Index = 1; Index < Argc; ++Index) {
-    Token = AllocatePool (StrSize (Argv[Index]));
-
-    if (Token != NULL) {
-      StrCpyS (Token, StrLen (Argv[Index]) + 1, Argv[Index]);
-
-      TokenIndex = 0;
-
-      while (Argv[Index][TokenIndex] != '\0') {
-        while (Argv[Index][TokenIndex] == ' ') {
-          ++TokenIndex;
-        }
-
-        if (Argv[Index][TokenIndex] != '\0') {
-          Parameter = &Token[TokenIndex];
-
-          while (Token[TokenIndex] != '\0' && Token[TokenIndex] != ' ') {
-            ++TokenIndex;
-          }
-          Token[TokenIndex] = '\0';
-
-          if (!StrCmp (Parameter, L"lock")) {
-            Flags |= ARG_LOCK;
-            ++ParameterCount;
-          } else if (!StrCmp (Parameter, L"unlock")) {
-            Flags |= ARG_UNLOCK;
-            ++ParameterCount;
-          } else if (!StrCmp (Parameter, L"interactive")) {
-            Flags |= ARG_INTERACTIVE;
-            ++ParameterCount;
-          } else {
-            Print (L"Ignoring unknown command line argument: %s\n", Parameter);
-          }
-        }
-      }  ///<  All Tokens parsed
-      FreePool (Token);
-    } else {
+    Token = AllocateCopyPool (StrSize (Argv[Index]), Argv[Index]);
+    if (Token == NULL) {
       Print (L"Could not allocate memory for Token.\n");
       return EFI_OUT_OF_RESOURCES;
     }
+
+    TokenIndex = 0;
+
+    while (Token[TokenIndex] != '\0') {
+      if (Token[TokenIndex] == ' ') {
+        ++TokenIndex;
+        continue;
+      }
+
+      Parameter = &Token[TokenIndex];
+
+      while (Token[TokenIndex] != '\0' && Token[TokenIndex] != ' ') {
+        ++TokenIndex;
+      }
+      Token[TokenIndex] = '\0';
+
+      if (StrCmp (Parameter, L"lock") == 0) {
+        Flags |= ARG_LOCK;
+        ++ParameterCount;
+      } else if (StrCmp (Parameter, L"unlock") == 0) {
+        Flags |= ARG_UNLOCK;
+        ++ParameterCount;
+      } else if (StrCmp (Parameter, L"interactive") == 0) {
+        Flags |= ARG_INTERACTIVE;
+        ++ParameterCount;
+      } else {
+        Print (L"Ignoring unknown command line argument: %s\n", Parameter);
+      }
+    }  ///<  All Tokens parsed
+    FreePool (Token);
   }  ///< All Arguments analysed
 
   if (ParameterCount == 0) {

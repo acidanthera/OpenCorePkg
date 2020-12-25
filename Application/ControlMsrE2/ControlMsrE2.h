@@ -45,6 +45,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/HiiConfigKeyword.h>
 #include <Guid/HiiPlatformSetupFormset.h>
 
+#define CHAR_ESC     0x1B
 #define DONT_STOP_AT 0xFFFF
 
 /**
