@@ -57,7 +57,7 @@ details.
 - Chameleon and Clover teams for hints and legacy
 - [al3xtjames](https://github.com/al3xtjames)
 - [Andrey1970AppleLife](https://github.com/Andrey1970AppleLife)
-- [Download-Fritz](https://github.com/Download-Fritz)
+- [mhaeuser (ex Download-Fritz)](https://github.com/mhaeuser)
 - [Goldfish64](https://github.com/Goldfish64)
 - [nms42](https://github.com/nms42)
 - [PMheart](https://github.com/PMheart)
