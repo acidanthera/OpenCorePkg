@@ -124,12 +124,12 @@ ReadYN (
   VOID
   )
 {
-  CHAR16 Keys[2];
+  CHAR16 Key;
   do {
-    ReadLine (Keys, 2);
-  } while (OcStriStr (L"yn", Keys) == 0);
+    Key = ReadAnyKey ();
+  } while (Key != 'y' && Key != 'Y' && Key != 'n' && Key != 'N');
 
-  return Keys[0] == 'y' || Keys[0] == 'Y';
+  return Key == 'y' || Key == 'Y';
 }
 
 #define TOKENLENGTH 32
@@ -172,9 +172,10 @@ InterpretArguments (
 
       Parameter = &Token[TokenIndex];
 
-      while (Token[TokenIndex] != '\0' && Token[TokenIndex] != ' ') {
+      do {
         ++TokenIndex;
-      }
+      } while (Token[TokenIndex] != '\0' && Token[TokenIndex] != ' ');
+
       Token[TokenIndex] = '\0';
 
       if (StrCmp (Parameter, L"lock") == 0) {
@@ -225,7 +226,7 @@ ModifySearchString (
           Print (L"\nNo Input. Search string not changed.\n");
           FreePool (Buffer);
         } else {
-          FreePool (SearchString);
+          FreePool (*SearchString);
           *SearchString = Buffer;
           Print (L"\n");
         }

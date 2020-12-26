@@ -223,23 +223,25 @@ HandleIfrOption (
             VarSize = sizeof (EFI_IFR_ONE_OF) - IfrOneOf->Header.Length;
             VarSize = 8 - (VarSize / 3);
 
-            VarPointer = Data + IfrOneOf->Question.VarStoreInfo.VarOffset;
-            switch (VarSize) {
-            case 1:
-              VarStoreValue = *VarPointer;
-              break;
-            case 2:
-              VarStoreValue = *(UINT16 *) (VarPointer);
-              break;
-            case 4:
-              VarStoreValue = *(UINT32 *) (VarPointer);
-              break;
-            default:
-              VarStoreValue = *(UINT64 *) (VarPointer);
-              break;
-            }
+            if (DataSize >= IfrOneOf->Question.VarStoreInfo.VarOffset + VarSize) {
+              VarPointer = Data + IfrOneOf->Question.VarStoreInfo.VarOffset;
+              switch (VarSize) {
+              case 1:
+                VarStoreValue = *VarPointer;
+                break;
+              case 2:
+                VarStoreValue = *(UINT16 *) (VarPointer);
+                break;
+              case 4:
+                VarStoreValue = *(UINT32 *) (VarPointer);
+                break;
+              default:
+                VarStoreValue = *(UINT64 *) (VarPointer);
+                break;
+              }
 
-            Print (L" Value: value %X", VarStoreValue);
+              Print (L" Value: value %X", VarStoreValue);
+            }
           }
           FreePool (Data);
         }  ///< Allocate

@@ -199,6 +199,7 @@ SearchForString (
   ListHeaders = AllocatePool (sizeof (*ListHeaders) * ListHeaderCount);
   if (ListHeaders == NULL) {
     Print (L"Could not allocate memory for ListHeaders.\n");
+    FreePool (HiiHandles);
     return EFI_OUT_OF_RESOURCES;
   }
 
