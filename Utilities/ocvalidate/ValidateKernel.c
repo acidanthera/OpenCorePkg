@@ -91,7 +91,6 @@ STATIC KEXT_INFO mKextInfo[] = {
   { "BrcmPatchRAM.kext",                                                    "Contents/MacOS/BrcmPatchRAM",        "Contents/Info.plist" },
   { "BrcmPatchRAM2.kext",                                                   "Contents/MacOS/BrcmPatchRAM2",       "Contents/Info.plist" },
   { "BrcmPatchRAM3.kext",                                                   "Contents/MacOS/BrcmPatchRAM3",       "Contents/Info.plist" },
-  { "BrcmPatchRAM3.kext",                                                   "Contents/MacOS/BrcmPatchRAM3",       "Contents/Info.plist" },
   { "Legacy_USB3.kext",                                                     "",                                   "Contents/Info.plist" },
   { "Legacy_InternalHub-EHCx.kext",                                         "",                                   "Contents/Info.plist" },
   { "VoodooPS2Controller.kext",                                             "Contents/MacOS/VoodooPS2Controller", "Contents/Info.plist" },
