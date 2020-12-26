@@ -5924,6 +5924,16 @@ functioning. Feature highlights:
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
+  \texttt{SetupDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+
+  Some codecs require a vendor-specific delay after the reconfiguration
+  (e.g. volume setting). This option makes it configurable. In general
+  the necessary delay may be as long as 0.5 seconds.
+
+\item
   \texttt{VolumeAmplifier}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\

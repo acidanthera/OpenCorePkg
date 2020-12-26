@@ -707,6 +707,7 @@ mUefiAudioSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AudioSupport",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioSupport),
   OC_SCHEMA_INTEGER_IN ("MinimumVolume",      OC_GLOBAL_CONFIG, Uefi.Audio.MinimumVolume),
   OC_SCHEMA_STRING_IN  ("PlayChime",          OC_GLOBAL_CONFIG, Uefi.Audio.PlayChime),
+  OC_SCHEMA_INTEGER_IN ("SetupDelay",         OC_GLOBAL_CONFIG, Uefi.Audio.SetupDelay),
   OC_SCHEMA_INTEGER_IN ("VolumeAmplifier",    OC_GLOBAL_CONFIG, Uefi.Audio.VolumeAmplifier),
 };
 

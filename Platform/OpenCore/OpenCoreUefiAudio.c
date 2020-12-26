@@ -447,6 +447,11 @@ OcLoadUefiAudioSupport (
     return;
   }
 
+  OcAudio->SetDelay (
+    OcAudio,
+    Config->Uefi.Audio.SetupDelay
+    );
+
   OcSetVoiceOverLanguage (NULL);
 
   if (OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))

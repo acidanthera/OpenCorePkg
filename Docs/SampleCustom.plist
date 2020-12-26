@@ -1263,6 +1263,8 @@
 			<integer>0</integer>
 			<key>AudioSupport</key>
 			<false/>
+			<key>SetupDelay</key>
+			<integer>0</integer>
 			<key>MinimumVolume</key>
 			<integer>20</integer>
 			<key>PlayChime</key>
