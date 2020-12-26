@@ -19,23 +19,22 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcCompressionLib.h>
 
-typedef UINT8  u_int8_t;
-typedef UINT16 u_int16_t;
-typedef UINT32 u_int32_t;
+#define compress_lzss CompressLZSS
+#define decompress_lzss DecompressLZSS
+
+#ifdef EFIUSER
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+#include <stdlib.h>
+#else
 
 typedef INT8  int8_t;
 typedef INT16 int16_t;
 typedef INT32 int32_t;
 
-#define compress_lzss CompressLZSS
-#define decompress_lzss DecompressLZSS
-
 #ifdef memset
 #undef memset
-#endif
-
-#ifdef bzero
-#undef bzero
 #endif
 
 #ifdef malloc
@@ -47,8 +46,17 @@ typedef INT32 int32_t;
 #endif
 
 #define memset(Dst, Val, Size) SetMem ((Dst), (Size), (Val))
-#define bzero(Dst, Size) ZeroMem ((Dst), (Size))
 #define malloc(Size) AllocatePool (Size)
 #define free(Ptr) FreePool (Ptr)
+#endif
+
+typedef UINT8  u_int8_t;
+typedef UINT16 u_int16_t;
+typedef UINT32 u_int32_t;
+
+#ifdef bzero
+#undef bzero
+#endif
+#define bzero(Dst, Size) ZeroMem ((Dst), (Size))
 
 #endif // LZSS_H

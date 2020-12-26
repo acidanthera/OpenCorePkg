@@ -63,4 +63,11 @@ extern EFI_GUID gOcCustomSmbios3TableGuid;
 extern EFI_GUID gOcCustomSmbiosTableGuid;
 extern EFI_GUID gOcAudioProtocolGuid;
 
+#ifdef SANITIZE_TEST
+#include <sanitizer/asan_interface.h>
+#else
+#define ASAN_POISON_MEMORY_REGION(addr, size) do { } while (0)
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size) do { } while (0)
+#endif
+
 #endif // OC_USER_GLOBAL_VAR_H

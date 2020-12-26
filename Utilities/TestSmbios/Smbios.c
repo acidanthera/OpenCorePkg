@@ -29,19 +29,6 @@
 #include <stdbool.h>
 #include <stdlib.h>
 
-/*
- for fuzzing (TODO):
- clang-mp-7.0 -fshort-wchar -DCONFIG_TABLE_INSTALLER=NilInstallConfigurationTableCustom -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../EfiPkg/Include/ -I../../../MdePkg/Include/ -I../../../UefiCpuPkg/Include/ -include ../Include/Base.h Smbios.c ../../Library/OcSmbiosLib/DebugSmbios.c ../../Library/OcSmbiosLib/SmbiosInternal.c ../../Library/OcSmbiosLib/SmbiosPatch.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMiscLib/LegacyRegionLock.c ../../Library/OcMiscLib/LegacyRegionUnlock.c ../../Library/OcCpuLib/OcCpuLib.c -o Smbios
-
- rm -rf DICT fuzz*.log ; mkdir DICT ; cp Smbios.bin DICT ; ./Smbios -jobs=4 DICT
-
- rm -rf Smbios.dSYM DICT fuzz*.log Smbios
-*/
-
-#ifdef FUZZING_TEST
-#define main no_main
-#endif
-
 STATIC GUID SystemUUID = {0x5BC82C38, 0x4DB6, 0x4883, {0x85, 0x2E, 0xE7, 0x8D, 0x78, 0x0A, 0x6F, 0xE6}};
 STATIC UINT8 BoardType = 0xA; // Motherboard (BaseBoardTypeMotherBoard)
 STATIC UINT8 MemoryFormFactor = 0xD; // SODIMM, 0x9 for DIMM (MemoryFormFactorSodimm)
@@ -82,7 +69,7 @@ bool doDump = false;
 SMBIOS_TABLE_ENTRY_POINT        gSmbios;
 SMBIOS_TABLE_3_0_ENTRY_POINT    gSmbios3;
 
-int main(int argc, char** argv) {
+int ENTRY_POINT(int argc, char** argv) {
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 

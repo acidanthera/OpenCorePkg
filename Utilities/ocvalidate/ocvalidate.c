@@ -18,14 +18,6 @@
 
 #include <File.h>
 
-/*
- for fuzzing (TODO):
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h ConfigValidty.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcConfigurationLib/OcConfigurationLib.c -o ConfigValidty
- rm -rf DICT fuzz*.log ; mkdir DICT ; cp ConfigValidty.plist DICT ; ./ConfigValidty -jobs=4 DICT
-
- rm -rf ConfigValidty.dSYM DICT fuzz*.log ConfigValidty
-*/
-
 UINT32
 CheckConfig (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -56,7 +48,7 @@ CheckConfig (
   return ErrorCount;
 }
 
-int main(int argc, const char *argv[]) {
+int ENTRY_POINT(int argc, const char *argv[]) {
   UINT8              *ConfigFileBuffer;
   UINT32             ConfigFileSize;
   CONST CHAR8        *ConfigFileName;

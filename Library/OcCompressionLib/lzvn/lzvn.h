@@ -18,6 +18,22 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcCompressionLib.h>
 
+#define lzvn_decode_buffer DecompressLZVN
+
+#ifdef EFIUSER
+#include <stdint.h>
+#include <stddef.h>
+#include <string.h>
+
+//
+// Ugly workaround for size_t incompatibility with UINTN.
+//
+#ifdef size_t
+#undef size_t
+#endif
+#define size_t UINTN
+
+#else
 typedef UINT16 uint16_t;
 typedef UINT32 uint32_t;
 typedef UINT64 uint64_t;
@@ -29,8 +45,6 @@ typedef INT64 int64_t;
 typedef UINTN size_t;
 typedef UINTN uintmax_t;
 
-#define lzvn_decode_buffer DecompressLZVN
-
 #ifdef memset
 #undef memset
 #endif
@@ -41,5 +55,7 @@ typedef UINTN uintmax_t;
 
 #define memset(Dst, Value, Size) SetMem ((Dst), (Size), (UINT8)(Value))
 #define memcpy(Dst, Src, Size) CopyMem ((Dst), (Src), (Size))
+
+#endif
 
 #endif /* LZVN_H */

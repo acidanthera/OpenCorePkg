@@ -7,6 +7,23 @@
 #define OC_USER_PCD_H
 
 //
+// Workaround RSIZE_MAX redeclaration in stdint.h and PrintLibInternal.c.
+//
+#ifdef __STDC_WANT_LIB_EXT1__
+#undef __STDC_WANT_LIB_EXT1__
+#endif
+#define __STDC_WANT_LIB_EXT1__ 0
+#include <stdint.h>
+
+//
+// Workaround for NULL redeclaration.
+//
+#include <stddef.h>
+#ifdef NULL
+#undef NULL
+#endif
+
+//
 // Workaround overrides to symbol visibility in ProcessorBind.h
 // breaking linkage with C standard library with GCC/BFD.
 //
