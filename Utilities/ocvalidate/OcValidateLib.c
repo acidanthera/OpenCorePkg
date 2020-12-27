@@ -302,6 +302,19 @@ AsciiDevicePathIsLegal (
 }
 
 BOOLEAN
+AsciiGuidIsLegal (
+  IN  CONST CHAR8  *AsciiGuid
+  )
+{
+  EFI_STATUS  Status;
+  GUID        Guid;
+
+  Status = AsciiStrToGuid (AsciiGuid, &Guid);
+
+  return !EFI_ERROR (Status);
+}
+
+BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,

@@ -27,14 +27,12 @@ CheckPlatformInfo (
   )
 {
   UINT32              ErrorCount;
-  EFI_STATUS          Status;
   OC_PLATFORM_CONFIG  *UserPlatformInfo;
   BOOLEAN             IsAutomaticEnabled;
   CONST CHAR8         *UpdateSMBIOSMode;
   CONST CHAR8         *SystemProductName;
   CONST CHAR8         *SystemMemoryStatus;
   CONST CHAR8         *AsciiSystemUUID;
-  GUID                Guid;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into PlatformInfo checker!\n"));
 
@@ -73,8 +71,7 @@ CheckPlatformInfo (
     ++ErrorCount;
   }
 
-  Status = AsciiStrToGuid (AsciiSystemUUID, &Guid);
-  if (EFI_ERROR (Status)) {
+  if (AsciiSystemUUID[0] != '\0' && !AsciiGuidIsLegal (AsciiSystemUUID)) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked!\n"));
     ++ErrorCount;
   }

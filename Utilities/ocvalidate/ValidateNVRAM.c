@@ -22,13 +22,11 @@ CheckNVRAM (
   )
 {
   UINT32           ErrorCount;
-  EFI_STATUS       Status;
   UINT32           GuidIndex;
   UINT32           VariableIndex;
   OC_NVRAM_CONFIG  *UserNVRAM;
   CONST CHAR8      *AsciiGuid;
   CONST CHAR8      *AsciiNVRAMKey;
-  GUID             VariableGuid;
   OC_ASSOC         *VariableMap;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into NVRAM checker!\n"));
@@ -38,9 +36,8 @@ CheckNVRAM (
 
   for (GuidIndex = 0; GuidIndex < UserNVRAM->Add.Count; ++GuidIndex) {
     AsciiGuid = OC_BLOB_GET (UserNVRAM->Add.Keys[GuidIndex]);
-    Status    = AsciiStrToGuid (AsciiGuid, &VariableGuid);
 
-    if (EFI_ERROR (Status)) {
+    if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->Add[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
@@ -67,9 +64,8 @@ CheckNVRAM (
 
   for (GuidIndex = 0; GuidIndex < UserNVRAM->Delete.Count; ++GuidIndex) {
     AsciiGuid = OC_BLOB_GET (UserNVRAM->Delete.Keys[GuidIndex]);
-    Status    = AsciiStrToGuid (AsciiGuid, &VariableGuid);
 
-    if (EFI_ERROR (Status)) {
+    if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->Delete[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
@@ -94,9 +90,8 @@ CheckNVRAM (
 
   for (GuidIndex = 0; GuidIndex < UserNVRAM->Legacy.Count; ++GuidIndex) {
     AsciiGuid = OC_BLOB_GET (UserNVRAM->Legacy.Keys[GuidIndex]);
-    Status    = AsciiStrToGuid (AsciiGuid, &VariableGuid);
 
-    if (EFI_ERROR (Status)) {
+    if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->LegacySchema[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
