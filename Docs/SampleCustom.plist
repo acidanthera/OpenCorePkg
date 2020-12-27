@@ -946,12 +946,12 @@
 				<data>Rg==</data>
 				<key>boot-args</key>
 				<string>-v keepsyms=1</string>
+				<key>run-efi-updater</key>
+				<string>No</string>
 				<key>csr-active-config</key>
 				<data>AAAAAA==</data>
 				<key>prev-lang:kbd</key>
 				<data>cnUtUlU6MjUy</data>
-				<key>run-efi-updater</key>
-				<string>No</string>
 			</dict>
 		</dict>
 		<key>Delete</key>
@@ -1410,14 +1410,14 @@
 			<dict>
 				<key>Address</key>
 				<integer>569344</integer>
+				<key>Type</key>
+				<string>RuntimeCode</string>
 				<key>Comment</key>
 				<string>Fix black screen on wake from hibernation for Lenovo Thinkpad T490</string>
 				<key>Enabled</key>
 				<false/>
 				<key>Size</key>
 				<integer>4096</integer>
-				<key>Type</key>
-				<string>RuntimeCode</string>
 			</dict>
 		</array>
 	</dict>
