@@ -15,43 +15,9 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "ValidateKernel.h"
 
 #include <Library/OcAppleKernelLib.h>
-
-#define INDEX_KEXT_LILU  0U
-
-typedef struct KEXT_PRECEDENCE_ {
-  CONST CHAR8  *Child;
-  CONST CHAR8  *Parent;
-} KEXT_PRECEDENCE;
-
-typedef struct KEXT_INFO_ {
-  CONST CHAR8  *KextBundlePath;
-  CONST CHAR8  *KextExecutablePath;
-  CONST CHAR8  *KextPlistPath;
-} KEXT_INFO;
-
-STATIC KEXT_PRECEDENCE mKextPrecedence[] = {
-  { "VirtualSMC.kext",    "Lilu.kext" },
-  { "WhateverGreen.kext", "Lilu.kext" },
-  //
-  // TODO: Add more kexts here...
-  //
-};
-STATIC UINTN mKextPrecedenceSize = ARRAY_SIZE (mKextPrecedence);
-
-STATIC KEXT_INFO mKextInfo[] = {
-  //
-  // NOTE: Index of Lilu should always be 0. Please add entries after this if necessary.
-  //
-  { "Lilu.kext",          "Contents/MacOS/Lilu",          "Contents/Info.plist" },
-  { "VirtualSMC.kext",    "Contents/MacOS/VirtualSMC",    "Contents/Info.plist" },
-  { "WhateverGreen.kext", "Contents/MacOS/WhateverGreen", "Contents/Info.plist" },
-  //
-  // TODO: Add more kexts here...
-  //
-};
-STATIC UINTN mKextInfoSize = ARRAY_SIZE (mKextInfo);
 
 STATIC
 BOOLEAN
