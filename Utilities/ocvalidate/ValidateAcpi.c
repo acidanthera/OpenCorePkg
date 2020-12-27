@@ -17,12 +17,12 @@
 #include "OcValidateLib.h"
 
 /**
-  Callback funtion to verify whether two entries are duplicated in ACPI->Add.
+  Callback funtion to verify whether more than one Path is duplicated in ACPI->Add.
 
-  @param[in]  PrimaryEntry   The first entry to be checked.
+  @param[in]  PrimaryEntry    The first entry to be checked.
   @param[in]  SecondaryEntry  The second entry to be checked.
 
-  @retval     TRUE         If PrimaryEntry and SecondaryEntry are duplicated.
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
 **/
 STATIC
 BOOLEAN

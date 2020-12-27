@@ -18,9 +18,17 @@
 
 #include <Library/OcConsoleLib.h>
 
+/**
+  Callback funtion to verify whether one UEFI driver is duplicated in UEFI->Drivers.
+
+  @param[in]  PrimaryEntry    The first entry to be checked.
+  @param[in]  SecondaryEntry  The second entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
 STATIC
 BOOLEAN
-CheckUEFIDriver (
+UEFIDriverHasDuplication (
   IN  CONST VOID  *Driver1,
   IN  CONST VOID  *Driver2
   )
@@ -161,7 +169,7 @@ CheckUEFI (
     UserUefi->Drivers.Values,
     UserUefi->Drivers.Count,
     sizeof (UserUefi->Drivers.Values[0]),
-    CheckUEFIDriver
+    UEFIDriverHasDuplication
     );
 
   if (IsPointerSupportEnabled && AsciiStrCmp (PointerSupportMode, "ASUS") != 0) {
