@@ -15,91 +15,96 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "ValidateKernel.h"
 
 #include <Library/OcAppleKernelLib.h>
 
-#define INDEX_KEXT_LILU  0U
+/**
+  Callback funtion to verify whether more than one BundlePath is duplicated in Kernel->Add.
 
-typedef struct KEXT_PRECEDENCE_ {
-  CONST CHAR8  *Child;
-  CONST CHAR8  *Parent;
-} KEXT_PRECEDENCE;
+  @param[in]  PrimaryEntry    The first entry to be checked.
+  @param[in]  SecondaryEntry  The second entry to be checked.
 
-typedef struct KEXT_INFO_ {
-  CONST CHAR8  *KextBundlePath;
-  CONST CHAR8  *KextExecutablePath;
-  CONST CHAR8  *KextPlistPath;
-} KEXT_INFO;
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+KernelAddHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_KERNEL_ADD_ENTRY  *KernelAddEntry1;
+  CONST OC_KERNEL_ADD_ENTRY  *KernelAddEntry2;
+  CONST CHAR8                *KernelAddBundlePathString1;
+  CONST CHAR8                *KernelAddBundlePathString2;
 
-STATIC KEXT_PRECEDENCE mKextPrecedence[] = {
-  { "VirtualSMC.kext",                                                  "Lilu.kext" },
-  { "WhateverGreen.kext",                                               "Lilu.kext" },
-  { "SMCBatteryManager.kext",                                           "VirtualSMC.kext" },
-  { "SMCDellSensors.kext",                                              "VirtualSMC.kext" },
-  { "SMCLightSensor.kext",                                              "VirtualSMC.kext" },
-  { "SMCProcessor.kext",                                                "VirtualSMC.kext" },
-  { "SMCSuperIO.kext",                                                  "VirtualSMC.kext" },
-  { "AppleALC.kext",                                                    "Lilu.kext" },
-  { "AirportBrcmFixup.kext",                                            "Lilu.kext" },
-  { "BrightnessKeys.kext",                                              "Lilu.kext" },
-  { "CpuTscSync.kext",                                                  "Lilu.kext" },
-  { "CPUFriend.kext",                                                   "Lilu.kext" },
-  { "CPUFriendDataProvider.kext",                                       "CPUFriend.kext" },
-  { "DebugEnhancer.kext",                                               "Lilu.kext" },
-  { "HibernationFixup.kext",                                            "Lilu.kext" },
-  { "NVMeFix.kext",                                                     "Lilu.kext" },
-  { "RestrictEvents.kext",                                              "Lilu.kext" },
-  { "RTCMemoryFixup.kext",                                              "Lilu.kext" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Keyboard.kext", "VoodooPS2Controller.kext" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Mouse.kext",    "VoodooPS2Controller.kext" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext", "VoodooPS2Controller.kext" },
-};
-STATIC UINTN mKextPrecedenceSize = ARRAY_SIZE (mKextPrecedence);
+  KernelAddEntry1            = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
+  KernelAddEntry2            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelAddBundlePathString1 = OC_BLOB_GET (&KernelAddEntry1->BundlePath);
+  KernelAddBundlePathString2 = OC_BLOB_GET (&KernelAddEntry2->BundlePath);
 
-STATIC KEXT_INFO mKextInfo[] = {
+  return StringIsDuplicated ("Kernel->Add", KernelAddBundlePathString1, KernelAddBundlePathString2);
+}
+
+/**
+  Callback funtion to verify whether more than one Identifier is duplicated in Kernel->Block.
+
+  @param[in]  PrimaryEntry    The first entry to be checked.
+  @param[in]  SecondaryEntry  The second entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+KernelBlockHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockEntry1;
+  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockEntry2;
+  CONST CHAR8                  *KernelBlockIdentifierString1;
+  CONST CHAR8                  *KernelBlockIdentifierString2;
+
+  KernelBlockEntry1            = *(OC_KERNEL_BLOCK_ENTRY **) PrimaryEntry;
+  KernelBlockEntry2            = *(OC_KERNEL_BLOCK_ENTRY **) SecondaryEntry;
+  KernelBlockIdentifierString1 = OC_BLOB_GET (&KernelBlockEntry1->Identifier);
+  KernelBlockIdentifierString2 = OC_BLOB_GET (&KernelBlockEntry2->Identifier);
+
+  return StringIsDuplicated ("Kernel->Block", KernelBlockIdentifierString1, KernelBlockIdentifierString2);
+}
+
+/**
+  Callback funtion to verify whether more than one BundlePath is duplicated in Kernel->Force.
+
+  @param[in]  PrimaryEntry    The first entry to be checked.
+  @param[in]  SecondaryEntry  The second entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+KernelForceHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
   //
-  // NOTE: Index of Lilu should always be 0. Please add entries after this if necessary.
+  // NOTE: Add and Force share the same constructor.
   //
-  { "Lilu.kext",                                                            "Contents/MacOS/Lilu",                "Contents/Info.plist" },
-  { "VirtualSMC.kext",                                                      "Contents/MacOS/VirtualSMC",          "Contents/Info.plist" },
-  { "WhateverGreen.kext",                                                   "Contents/MacOS/WhateverGreen",       "Contents/Info.plist" },
-  { "SMCBatteryManager.kext",                                               "Contents/MacOS/SMCBatteryManager",   "Contents/Info.plist" },
-  { "SMCDellSensors.kext",                                                  "Contents/MacOS/SMCDellSensors",      "Contents/Info.plist" },
-  { "SMCLightSensor.kext",                                                  "Contents/MacOS/SMCLightSensor",      "Contents/Info.plist" },
-  { "SMCProcessor.kext",                                                    "Contents/MacOS/SMCProcessor",        "Contents/Info.plist" },
-  { "SMCSuperIO.kext",                                                      "Contents/MacOS/SMCSuperIO",          "Contents/Info.plist" },
-  { "AppleALC.kext",                                                        "Contents/MacOS/AppleALC",            "Contents/Info.plist" },
-  { "AirportBrcmFixup.kext",                                                "Contents/MacOS/AirportBrcmFixup",    "Contents/Info.plist" },
-  { "AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcm4360_Injector.kext", "",                                   "Contents/Info.plist" },
-  { "AirportBrcmFixup.kext/Contents/PlugIns/AirPortBrcmNIC_Injector.kext",  "",                                   "Contents/Info.plist" },
-  { "BrightnessKeys.kext",                                                  "Contents/MacOS/BrightnessKeys",      "Contents/Info.plist" },
-  { "CpuTscSync.kext",                                                      "Contents/MacOS/CpuTscSync",          "Contents/Info.plist" },
-  { "CPUFriend.kext",                                                       "Contents/MacOS/CPUFriend",           "Contents/Info.plist" },
-  { "CPUFriendDataProvider.kext",                                           "",                                   "Contents/Info.plist" },
-  { "DebugEnhancer.kext",                                                   "Contents/MacOS/DebugEnhancer",       "Contents/Info.plist" },
-  { "HibernationFixup.kext",                                                "Contents/MacOS/HibernationFixup",    "Contents/Info.plist" },
-  { "NVMeFix.kext",                                                         "Contents/MacOS/NVMeFix",             "Contents/Info.plist" },
-  { "RestrictEvents.kext",                                                  "Contents/MacOS/RestrictEvents",      "Contents/Info.plist" },
-  { "RTCMemoryFixup.kext",                                                  "Contents/MacOS/RTCMemoryFixup",      "Contents/Info.plist" },
-  { "IntelMausi.kext",                                                      "Contents/MacOS/IntelMausi",          "Contents/Info.plist" },
-  { "IntelSnowMausi.kext",                                                  "Contents/MacOS/IntelSnowMausi",      "Contents/Info.plist" },
-  { "BrcmBluetoothInjector.kext",                                           "",                                   "Contents/Info.plist" },
-  { "BrcmFirmwareData.kext",                                                "Contents/MacOS/BrcmFirmwareData",    "Contents/Info.plist" },
-  { "BrcmFirmwareRepo.kext",                                                "Contents/MacOS/BrcmFirmwareRepo",    "Contents/Info.plist" },
-  { "BrcmNonPatchRAM.kext",                                                 "Contents/MacOS/BrcmNonPatchRAM",     "Contents/Info.plist" },
-  { "BrcmNonPatchRAM2.kext",                                                "Contents/MacOS/BrcmNonPatchRAM2",    "Contents/Info.plist" },
-  { "BrcmPatchRAM.kext",                                                    "Contents/MacOS/BrcmPatchRAM",        "Contents/Info.plist" },
-  { "BrcmPatchRAM2.kext",                                                   "Contents/MacOS/BrcmPatchRAM2",       "Contents/Info.plist" },
-  { "BrcmPatchRAM3.kext",                                                   "Contents/MacOS/BrcmPatchRAM3",       "Contents/Info.plist" },
-  { "Legacy_USB3.kext",                                                     "",                                   "Contents/Info.plist" },
-  { "Legacy_InternalHub-EHCx.kext",                                         "",                                   "Contents/Info.plist" },
-  { "VoodooPS2Controller.kext",                                             "Contents/MacOS/VoodooPS2Controller", "Contents/Info.plist" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Keyboard.kext",     "Contents/MacOS/VoodooPS2Keyboard",   "Contents/Info.plist" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Mouse.kext",        "Contents/MacOS/VoodooPS2Mouse",      "Contents/Info.plist" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooPS2Trackpad.kext",     "Contents/MacOS/VoodooPS2Trackpad",   "Contents/Info.plist" },
-  { "VoodooPS2Controller.kext/Contents/PlugIns/VoodooInput.kext",           "Contents/MacOS/VoodooInput",         "Contents/Info.plist" },
-};
-STATIC UINTN mKextInfoSize = ARRAY_SIZE (mKextInfo);
+  CONST OC_KERNEL_ADD_ENTRY    *KernelForceEntry1;
+  CONST OC_KERNEL_ADD_ENTRY    *KernelForceEntry2;
+  CONST CHAR8                  *KernelForceBundlePathString1;
+  CONST CHAR8                  *KernelForceBundlePathString2;
+
+  KernelForceEntry1            = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
+  KernelForceEntry2            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelForceBundlePathString1 = OC_BLOB_GET (&KernelForceEntry1->BundlePath);
+  KernelForceBundlePathString2 = OC_BLOB_GET (&KernelForceEntry2->BundlePath);
+
+  return StringIsDuplicated ("Kernel->Force", KernelForceBundlePathString1, KernelForceBundlePathString2);
+}
 
 UINT32
 CheckKernel (
@@ -458,6 +463,28 @@ CheckKernel (
       ReplaceMaskSize
       );
   }
+
+  //
+  // Check duplicated entries in Kernel section.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Add.Values,
+    UserKernel->Add.Count,
+    sizeof (UserKernel->Add.Values[0]),
+    KernelAddHasDuplication
+    );
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Block.Values,
+    UserKernel->Block.Count,
+    sizeof (UserKernel->Block.Values[0]),
+    KernelBlockHasDuplication
+    );
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Force.Values,
+    UserKernel->Force.Count,
+    sizeof (UserKernel->Force.Values[0]),
+    KernelForceHasDuplication
+    );
 
   //
   // Sanitise Kernel->Scheme keys.

@@ -416,6 +416,65 @@ ValidatePatch (
 }
 
 UINT32
+FindArrayDuplication (
+  IN  VOID               *First,
+  IN  UINTN              Number,
+  IN  UINTN              Size,
+  IN  DUPLICATION_CHECK  DupChecker
+  )
+{
+  UINT32        ErrorCount;
+  UINTN         Index;
+  UINTN         Index2;
+  CONST UINT8   *PrimaryEntry;
+  CONST UINT8   *SecondaryEntry;
+
+  ErrorCount = 0;
+
+  for (Index = 0; Index < Number; ++Index) {
+    for (Index2 = Index + 1; Index2 < Number; ++Index2) {
+      //
+      // As First is now being read byte-by-byte after casting to UINT8*,
+      // its next element is now First + Size * Index.
+      //
+      PrimaryEntry   = (UINT8 *) First + Size * Index;
+      SecondaryEntry = (UINT8 *) First + Size * Index2;
+      if (DupChecker (PrimaryEntry, SecondaryEntry)) {
+        //
+        // DupChecker prints what is duplicated, and here the index is printed.
+        //
+        DEBUG ((DEBUG_WARN, "at Index %u and %u!\n", Index, Index2));
+        ++ErrorCount;
+      }
+    }
+  }
+
+  return ErrorCount;
+}
+
+BOOLEAN
+StringIsDuplicated (
+  IN  CONST CHAR8  *EntrySection,
+  IN  CONST CHAR8  *FirstEntry,
+  IN  CONST CHAR8  *SecondEntry
+  )
+{
+  BOOLEAN HasDup;
+
+  HasDup = FALSE;
+
+  if (AsciiStrCmp (FirstEntry, SecondEntry) == 0) {
+    //
+    // Print duplicated entries. Index will be printed in the parent function (FindArrayDuplication).
+    //
+    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, FirstEntry));
+    HasDup = TRUE;
+  }
+
+  return HasDup;
+}
+
+UINT32
 ReportError (
   IN  CONST CHAR8  *FuncName,
   IN  UINT32       ErrorCount

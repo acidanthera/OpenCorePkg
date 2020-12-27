@@ -168,7 +168,7 @@ DataHasProperMasking (
   @param[in]   ReplaceMask             ReplaceMask pattern to be checked.
   @param[in]   ReplaceMaskSize         Size of ReplaceMask pattern to be checked.
 
-  @return      Number of errors detected.
+  @return      Number of errors detected, which are treated as errors to be cumulated to the whole number of errors found in a single checker.
 **/
 UINT32
 ValidatePatch (
@@ -183,6 +183,50 @@ ValidatePatch (
   IN   UINT32          MaskSize,
   IN   CONST   UINT8   *ReplaceMask,
   IN   UINT32          ReplaceMaskSize
+  );
+
+/**
+  Check whether PrimaryEntry and SecondaryEntry are duplicated.
+**/
+typedef
+BOOLEAN
+(*DUPLICATION_CHECK) (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  );
+
+/**
+  Check if one array has duplicated entries.
+
+  @param[in]  First       Pointer to the first object of the array to be checked, converted to a VOID*.
+  @param[in]  Number      Number of elements in the array pointed to by First.
+  @param[in]  Size        Size in bytes of each element in the array.
+  @param[in]  DupChecker  Pointer to a comparator function which returns TRUE if duplication is found. See DUPLICATION_CHECK for function prototype.
+
+  @return     Number of duplications detected, which are treated as errors to be cumulated to the whole number of errors found in a single checker.
+**/
+UINT32
+FindArrayDuplication (
+  IN  VOID               *First,
+  IN  UINTN              Number,
+  IN  UINTN              Size,
+  IN  DUPLICATION_CHECK  DupChecker
+  );
+
+/**
+  Check if two strings are duplicated to each other. Used as a wrapper of AsciiStrCmp to print duplicated entries.
+
+  @param[in]  EntrySection  Section of strings to which they belong.
+  @param[in]  PrimaryEntry  First entry in string format.
+  @param[in]  PrimaryEntry  Second entry in string format.
+
+  @retval     TRUE          If Entry1 and Entry2 are duplicated to each other.
+**/
+BOOLEAN
+StringIsDuplicated (
+  IN  CONST CHAR8  *EntrySection,
+  IN  CONST CHAR8  *PrimaryEntry,
+  IN  CONST CHAR8  *SecondaryEntry
   );
 
 /**

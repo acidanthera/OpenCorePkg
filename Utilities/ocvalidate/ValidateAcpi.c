@@ -16,6 +16,34 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+/**
+  Callback funtion to verify whether more than one Path is duplicated in ACPI->Add.
+
+  @param[in]  PrimaryEntry    The first entry to be checked.
+  @param[in]  SecondaryEntry  The second entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+ACPIAddHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_ACPI_ADD_ENTRY  *ACPIAddEntry1;
+  CONST OC_ACPI_ADD_ENTRY  *ACPIAddEntry2;
+  CONST CHAR8              *ACPIAddPathString1;
+  CONST CHAR8              *ACPIAddPathString2;
+
+  ACPIAddEntry1      = *(OC_ACPI_ADD_ENTRY **) PrimaryEntry;
+  ACPIAddEntry2      = *(OC_ACPI_ADD_ENTRY **) SecondaryEntry;
+  ACPIAddPathString1 = OC_BLOB_GET (&ACPIAddEntry1->Path);
+  ACPIAddPathString2 = OC_BLOB_GET (&ACPIAddEntry2->Path);
+
+  return StringIsDuplicated ("ACPI->Add", ACPIAddPathString1, ACPIAddPathString2);
+}
+
 UINT32
 CheckACPI (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -68,6 +96,16 @@ CheckACPI (
       HasCustomDSDT = TRUE;
     }
   }
+
+  //
+  // Check duplicated entries in ACPI->Add.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserAcpi->Add.Values,
+    UserAcpi->Add.Count,
+    sizeof (UserAcpi->Add.Values[0]),
+    ACPIAddHasDuplication
+    );
 
   for (Index = 0; Index < UserAcpi->Delete.Count; ++Index) {
     Comment = OC_BLOB_GET (&UserAcpi->Delete.Values[Index]->Comment);
