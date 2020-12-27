@@ -15,10 +15,6 @@
 #include "libDERImg4/Img4oids.h"
 #include "libDERImg4/libDERImg4.h"
 
-#ifdef FUZZING_TEST
-#define main no_main
-#endif
-
 EFI_GUID gAppleSecureBootVariableGuid;
 
 void InternalDebugEnvInfo (
@@ -164,7 +160,7 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
   return 0;
 }
 
-int main (int argc, char *argv[])
+int ENTRY_POINT (int argc, char *argv[])
 {
   if (argc < 2 || ((argc % 3) != 1 && argc != 2)) {
     printf ("Img4 ([image path] [manifest path] [object type])*\n");

@@ -143,6 +143,14 @@ InternalOcAudioGenBeep (
     return EFI_ABORTED;
   }
 
+  //
+  // We are required to wait for some time after codec setup on some systems.
+  // REF: https://github.com/acidanthera/bugtracker/issues/971
+  //
+  if (Private->PlaybackDelay > 0) {
+    gBS->Stall (Private->PlaybackDelay);
+  }
+
   for (Index = 0; Index < ToneCount; ++Index) {
     Status = Private->AudioIo->StartPlayback (
       Private->AudioIo,

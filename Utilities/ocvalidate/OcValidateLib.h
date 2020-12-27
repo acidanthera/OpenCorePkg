@@ -120,6 +120,18 @@ AsciiDevicePathIsLegal (
   );
 
 /**
+  Check if a GUID in ASCII is valid.
+
+  @param[in]  AsciiGuid                GUID to be checked.
+
+  @retval     TRUE                     If AsciiGuid has valid GUID format.
+**/
+BOOLEAN
+AsciiGuidIsLegal (
+  IN  CONST CHAR8  *AsciiGuid
+  );
+
+/**
   Check if a set of data has proper masking set.
 
   This function assumes identical sizes of Data and Mask, which must be ensured before calling.

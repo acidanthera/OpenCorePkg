@@ -5,6 +5,8 @@
 
 .DEFAULT_GOAL := all
 
+LCOV          ?= lcov
+GENHTML       ?= genhtml
 CC            ?= gcc
 MKDIR         := mkdir -p
 
@@ -65,13 +67,28 @@ ifeq ($(DIST),Windows)
 endif
 
 ifeq ($(SANITIZE),1)
-	CFLAGS  += -fsanitize=undefined,address
+	CFLAGS  += -fsanitize=undefined,address -D SANITIZE_TEST
 	LDFLAGS += -fsanitize=undefined,address
 endif
 
 ifeq ($(FUZZ),1)
-	CFLAGS  += -fsanitize=fuzzer -D FUZZING_TEST
-	LDFLAGS += -fsanitize=fuzzer -D FUZZING_TEST
+	CFLAGS  += -fsanitize=fuzzer -D FUZZING_TEST -D ENTRY_POINT=no_main
+	LDFLAGS += -fsanitize=fuzzer
+else
+	CFLAGS  += -D ENTRY_POINT=main
+endif
+
+ifeq ($(FUZZ_JOBS),)
+	FUZZ_JOBS = 4
+endif
+
+ifeq ($(FUZZ_MEM),)
+	FUZZ_MEM = 4096
+endif
+
+ifeq ($(COVERAGE),1)
+	CFLAGS  += -fprofile-arcs -ftest-coverage -D COVERAGE_TEST
+	LDFLAGS += --coverage
 endif
 
 ifeq ($(DEBUG),1)
@@ -214,5 +231,24 @@ $(PRODUCT): $(OBJS)
 	$(CC) $(LDFLAGS) $(OBJS) $(LDLIBS) -o $(PRODUCT)
 	$(STRIP) $(STRIPFLAGS) $(PRODUCT)
 
-clean:
+fuzz: $(PRODUCT) FORCE
+	@rm -f fuzz*.log
+	@$(MKDIR) FUZZDICT
+	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
+
+coverage: $(PRODUCT) FORCE
+	@$(LCOV) --version
+	@rm -rf COVERAGE
+	@$(MKDIR) COVERAGE
+	$(LCOV) --no-checksum --zerocounters --directory .
+	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
+	for f in FUZZDICT/*; do  ./$(PRODUCT) $$f ; done || true
+	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info || exit 1
+	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_tmp || exit 1
+	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info_final || exit 1
+	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
+
+clean: FORCE
 	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).exe
+
+FORCE:

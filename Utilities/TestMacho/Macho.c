@@ -22,20 +22,6 @@
 
 #include <File.h>
 
-/*
- for fuzzing (TODO):
- clang-mp-7.0 -Dmain=__main -g -fsanitize=undefined,address,fuzzer -I../Include -I../../Include -I../../../MdePkg/Include/ -include ../Include/Base.h -I../../../EfiPkg/Include/ Macho.c  ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c  ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c -o Macho
- rm -rf DICT fuzz*.log ; mkdir DICT ; cp /System/Library/Kernels/kernel DICT ; ./Macho -rss_limit_mb=4096M -jobs=4 DICT
-
- rm -rf fuzz*.log ; mkdir -p DICT ; cp /System/Library/Kernels/kernel DICT/kernel ; ./Macho -jobs=4 -rss_limit_mb=4096M DICT
-
- rm -rf Macho.dSYM DICT fuzz*.log Macho
-*/
-
-#ifdef FUZZING_TEST
-#define main no_main
-#endif
-
 MACH_HEADER_64 Header;
 MACH_SECTION_64 Sect;
 MACH_SEGMENT_COMMAND_64 Seg;
@@ -285,7 +271,7 @@ static int FeedMacho(void *file, uint32_t size) {
   return code != 963;
 }
 
-int main(int argc, char** argv) {
+int ENTRY_POINT(int argc, char** argv) {
   uint32_t f;
   uint8_t *b;
   if ((b = readFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {

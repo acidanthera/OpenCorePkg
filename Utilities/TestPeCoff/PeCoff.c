@@ -15,27 +15,6 @@
 
 #include <File.h>
 
-/**
-
-clang -g -fsanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -fshort-wchar -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c ../../Library/OcAppleRamDiskLib/OcAppleRamDiskLib.c ../../Library/OcFileLib/ReadFile.c ../../Library/OcFileLib/FileProtocol.c -o DiskImage
-
-clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -fshort-wchar -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h DiskImage.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLib.c ../../Library/OcAppleDiskImageLib/OcAppleDiskImageLibInternal.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcCompressionLib/zlib/zlib_uefi.c ../../Library/OcCompressionLib/zlib/adler32.c ../../Library/OcCompressionLib/zlib/deflate.c ../../Library/OcCompressionLib/zlib/crc32.c  ../../Library/OcCompressionLib/zlib/compress.c ../../Library/OcCompressionLib/zlib/infback.c ../../Library/OcCompressionLib/zlib/inffast.c  ../../Library/OcCompressionLib/zlib/inflate.c  ../../Library/OcCompressionLib/zlib/inftrees.c ../../Library/OcCompressionLib/zlib/trees.c ../../Library/OcCompressionLib/zlib/uncompr.c ../../Library/OcCryptoLib/Sha256.c  ../../Library/OcCryptoLib/Rsa2048Sha256.c ../../Library/OcAppleKeysLib/OcAppleKeysLib.c ../../Library/OcAppleChunklistLib/OcAppleChunklistLib.c ../../Library/OcAppleRamDiskLib/OcAppleRamDiskLib.c../../Library/OcFileLib/ReadFile.c ../../Library/OcFileLib/FileProtocol.c -o DiskImage
-rm -rf DICT fuzz*.log ; mkdir DICT ; UBSAN_OPTIONS='halt_on_error=1' ./DiskImage -jobs=4 DICT -rss_limit_mb=4096
-
-**/
-
-#ifdef FUZZING_TEST
-#define main no_main
-#include <sanitizer/asan_interface.h>
-#else
-#define ASAN_POISON_MEMORY_REGION(addr, size)
-#define ASAN_UNPOISON_MEMORY_REGION(addr, size)
-#endif
-
-#if 0
-#include <CommonCrypto/CommonDigest.h>
-#endif
-
 EFI_STATUS
 TestImageLoad (
   IN VOID   *SourceBuffer,
@@ -122,7 +101,7 @@ TestImageLoad (
   return EFI_SUCCESS;
 }
 
-int main (int argc, char *argv[]) {
+int ENTRY_POINT (int argc, char *argv[]) {
   if (argc < 2) {
     printf ("Please provide a valid PE image path\n");
     return -1;

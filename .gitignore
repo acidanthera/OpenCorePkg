@@ -28,7 +28,10 @@ Utilities/TestPeCoff/PeCoff
 *.o
 *.o.tmp
 *.exe
-DICT
+*.gcda
+*.gcno
+FUZZDICT
+COVERAGE
 fuzz-*.log
 crash-*
 oom-*
