@@ -467,7 +467,7 @@ StringIsDuplicated (
     //
     // Print duplicated entries. Index will be printed in the parent function (FindArrayDuplication).
     //
-    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, PrimaryEntry));
+    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, PrimaryEntry[0] != '\0' ? PrimaryEntry : "<empty string>"));
     HasDup = TRUE;
   }
 

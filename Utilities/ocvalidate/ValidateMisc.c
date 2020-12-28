@@ -21,6 +21,75 @@
 #include <Protocol/OcLog.h>
 
 /**
+  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Entries.
+
+  @param[in]  PrimaryEntry    Primary entry to be checked.
+  @param[in]  SecondaryEntry  Secondary entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+MiscEntriesHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  //
+  // NOTE: Entries and Tools share the same constructor.
+  //
+  CONST OC_MISC_TOOLS_ENTRY           *MiscEntriesPrimaryEntry;
+  CONST OC_MISC_TOOLS_ENTRY           *MiscEntriesSecondaryEntry;
+  CONST CHAR8                         *MiscEntriesPrimaryArgumentsString;
+  CONST CHAR8                         *MiscEntriesSecondaryArgumentsString;
+  CONST CHAR8                         *MiscEntriesPrimaryPathString;
+  CONST CHAR8                         *MiscEntriesSecondaryPathString;
+
+  MiscEntriesPrimaryEntry             = *(CONST OC_MISC_TOOLS_ENTRY **) PrimaryEntry;
+  MiscEntriesSecondaryEntry           = *(CONST OC_MISC_TOOLS_ENTRY **) SecondaryEntry;
+  MiscEntriesPrimaryArgumentsString   = OC_BLOB_GET (&MiscEntriesPrimaryEntry->Arguments);
+  MiscEntriesSecondaryArgumentsString = OC_BLOB_GET (&MiscEntriesSecondaryEntry->Arguments);
+  MiscEntriesPrimaryPathString        = OC_BLOB_GET (&MiscEntriesPrimaryEntry->Path);
+  MiscEntriesSecondaryPathString      = OC_BLOB_GET (&MiscEntriesSecondaryEntry->Path);
+
+  return StringIsDuplicated ("Misc->Entries->Arguments", MiscEntriesPrimaryArgumentsString, MiscEntriesSecondaryArgumentsString)
+    && StringIsDuplicated ("Misc->Entries->Path", MiscEntriesPrimaryPathString, MiscEntriesSecondaryPathString);
+}
+
+/**
+  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Tools.
+
+  @param[in]  PrimaryEntry    Primary entry to be checked.
+  @param[in]  SecondaryEntry  Secondary entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
+STATIC
+BOOLEAN
+MiscToolsHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_MISC_TOOLS_ENTRY         *MiscToolsPrimaryEntry;
+  CONST OC_MISC_TOOLS_ENTRY         *MiscToolsSecondaryEntry;
+  CONST CHAR8                       *MiscToolsPrimaryArgumentsString;
+  CONST CHAR8                       *MiscToolsSecondaryArgumentsString;
+  CONST CHAR8                       *MiscToolsPrimaryPathString;
+  CONST CHAR8                       *MiscToolsSecondaryPathString;
+
+  MiscToolsPrimaryEntry             = *(CONST OC_MISC_TOOLS_ENTRY **) PrimaryEntry;
+  MiscToolsSecondaryEntry           = *(CONST OC_MISC_TOOLS_ENTRY **) SecondaryEntry;
+  MiscToolsPrimaryArgumentsString   = OC_BLOB_GET (&MiscToolsPrimaryEntry->Arguments);
+  MiscToolsSecondaryArgumentsString = OC_BLOB_GET (&MiscToolsSecondaryEntry->Arguments);
+  MiscToolsPrimaryPathString        = OC_BLOB_GET (&MiscToolsPrimaryEntry->Path);
+  MiscToolsSecondaryPathString      = OC_BLOB_GET (&MiscToolsSecondaryEntry->Path);
+
+  return StringIsDuplicated ("Misc->Tools->Arguments", MiscToolsPrimaryArgumentsString, MiscToolsSecondaryArgumentsString)
+    && StringIsDuplicated ("Misc->Tools->Path", MiscToolsPrimaryPathString, MiscToolsSecondaryPathString);
+}
+
+/**
   Validate if SecureBootModel has allowed value.
 
   @param[in]  SecureBootModel  SecureBootModel retrieved from user config.
@@ -257,6 +326,64 @@ CheckMisc (
       ++ErrorCount;
     }
   }
+  //
+  // Same thing for Tools.
+  //
+  for (Index = 0; Index < UserMisc->Tools.Count; ++Index) {
+    Arguments    = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Arguments);
+    Comment      = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Comment);
+    AsciiName    = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Name);
+    Path         = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Path);
+
+    //
+    // Sanitise strings.
+    //
+    // NOTE: As Arguments takes identical requirements of Comment,
+    //       we use Comment sanitiser here.
+    //
+    if (!AsciiCommentIsLegal (Arguments)) {
+      DEBUG ((DEBUG_WARN, "Misc->Tools[%u]->Arguments contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    if (!AsciiCommentIsLegal (Comment)) {
+      DEBUG ((DEBUG_WARN, "Misc->Tools[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+    
+    UnicodeName = AsciiStrCopyToUnicode (AsciiName, 0);
+    if (UnicodeName != NULL) {
+      if (!UnicodeIsFilteredString (UnicodeName, TRUE)) {
+        DEBUG ((DEBUG_WARN, "Misc->Tools[%u]->Name contains illegal character!\n", Index));
+        ++ErrorCount;
+      }
+
+      FreePool ((VOID *) UnicodeName);
+    }
+
+    //
+    // FIXME: Properly sanitise Path.
+    //
+    if (!AsciiCommentIsLegal (Path)) {
+      DEBUG ((DEBUG_WARN, "Misc->Tools[%u]->Path contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+  }
+
+  //
+  // Check duplicated entries in Entries and Tools.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserMisc->Entries.Values,
+    UserMisc->Entries.Count,
+    sizeof (UserMisc->Entries.Values[0]),
+    MiscEntriesHasDuplication
+    );
+  ErrorCount += FindArrayDuplication (
+    UserMisc->Tools.Values,
+    UserMisc->Tools.Count,
+    sizeof (UserMisc->Tools.Values[0]),
+    MiscToolsHasDuplication
+    );
 
   return ReportError (__func__, ErrorCount);
 }
