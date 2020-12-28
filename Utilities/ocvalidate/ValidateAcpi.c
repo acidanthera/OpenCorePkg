@@ -36,8 +36,8 @@ ACPIAddHasDuplication (
   CONST CHAR8                *ACPIAddPrimaryPathString;
   CONST CHAR8                *ACPIAddSecondaryPathString;
 
-  ACPIAddPrimaryEntry        = *(OC_ACPI_ADD_ENTRY **) PrimaryEntry;
-  ACPIAddSecondaryEntry      = *(OC_ACPI_ADD_ENTRY **) SecondaryEntry;
+  ACPIAddPrimaryEntry        = *(CONST OC_ACPI_ADD_ENTRY **) PrimaryEntry;
+  ACPIAddSecondaryEntry      = *(CONST OC_ACPI_ADD_ENTRY **) SecondaryEntry;
   ACPIAddPrimaryPathString   = OC_BLOB_GET (&ACPIAddPrimaryEntry->Path);
   ACPIAddSecondaryPathString = OC_BLOB_GET (&ACPIAddSecondaryEntry->Path);
 
