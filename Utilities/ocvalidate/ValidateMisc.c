@@ -16,6 +16,7 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+#include <Library/BaseLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConfigurationLib.h>
 #include <Protocol/OcLog.h>
@@ -52,8 +53,13 @@ MiscEntriesHasDuplication (
   MiscEntriesPrimaryPathString        = OC_BLOB_GET (&MiscEntriesPrimaryEntry->Path);
   MiscEntriesSecondaryPathString      = OC_BLOB_GET (&MiscEntriesSecondaryEntry->Path);
 
-  return StringIsDuplicated ("Misc->Entries->Arguments", MiscEntriesPrimaryArgumentsString, MiscEntriesSecondaryArgumentsString)
-    && StringIsDuplicated ("Misc->Entries->Path", MiscEntriesPrimaryPathString, MiscEntriesSecondaryPathString);
+  if (AsciiStrCmp (MiscEntriesPrimaryArgumentsString, MiscEntriesSecondaryArgumentsString) == 0
+    && AsciiStrCmp (MiscEntriesPrimaryPathString, MiscEntriesSecondaryPathString) == 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Entries->Arguments: %a is duplicated ", MiscEntriesPrimaryPathString));
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
@@ -85,8 +91,13 @@ MiscToolsHasDuplication (
   MiscToolsPrimaryPathString        = OC_BLOB_GET (&MiscToolsPrimaryEntry->Path);
   MiscToolsSecondaryPathString      = OC_BLOB_GET (&MiscToolsSecondaryEntry->Path);
 
-  return StringIsDuplicated ("Misc->Tools->Arguments", MiscToolsPrimaryArgumentsString, MiscToolsSecondaryArgumentsString)
-    && StringIsDuplicated ("Misc->Tools->Path", MiscToolsPrimaryPathString, MiscToolsSecondaryPathString);
+  if (AsciiStrCmp (MiscToolsPrimaryArgumentsString, MiscToolsSecondaryArgumentsString) == 0
+    && AsciiStrCmp (MiscToolsPrimaryPathString, MiscToolsSecondaryPathString) == 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Tools->Path: %a is duplicated ", MiscToolsPrimaryPathString));
+    return TRUE;
+  }
+
+  return FALSE;
 }
 
 /**
