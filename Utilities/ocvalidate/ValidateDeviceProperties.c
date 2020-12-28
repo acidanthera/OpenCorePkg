@@ -16,6 +16,14 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+/**
+  Callback funtion to verify whether one entry is duplicated in DeviceProperties->Add.
+
+  @param[in]  PrimaryEntry    Primary entry to be checked.
+  @param[in]  SecondaryEntry  Secondary entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
 STATIC
 BOOLEAN
 DevPropsAddHasDuplication (
@@ -36,6 +44,14 @@ DevPropsAddHasDuplication (
   return StringIsDuplicated ("DeviceProperties->Add", DevPropsAddPrimaryDevicePathString, DevPropsAddSecondaryDevicePathString);
 }
 
+/**
+  Callback funtion to verify whether one entry is duplicated in DeviceProperties->Delete.
+
+  @param[in]  PrimaryEntry    Primary entry to be checked.
+  @param[in]  SecondaryEntry  Secondary entry to be checked.
+
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+**/
 STATIC
 BOOLEAN
 DevPropsDeleteHasDuplication (

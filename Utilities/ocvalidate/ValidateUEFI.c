@@ -21,8 +21,8 @@
 /**
   Callback funtion to verify whether one UEFI driver is duplicated in UEFI->Drivers.
 
-  @param[in]  PrimaryDriver    The first driver to be checked.
-  @param[in]  SecondaryDriver  The second driver to be checked.
+  @param[in]  PrimaryDriver    Primary driver to be checked.
+  @param[in]  SecondaryDriver  Secondary driver to be checked.
 
   @retval     TRUE             If PrimaryDriver and SecondaryDriver are duplicated.
 **/

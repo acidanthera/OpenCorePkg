@@ -455,19 +455,19 @@ FindArrayDuplication (
 BOOLEAN
 StringIsDuplicated (
   IN  CONST CHAR8  *EntrySection,
-  IN  CONST CHAR8  *FirstEntry,
-  IN  CONST CHAR8  *SecondEntry
+  IN  CONST CHAR8  *PrimaryEntry,
+  IN  CONST CHAR8  *SecondaryEntry
   )
 {
   BOOLEAN HasDup;
 
   HasDup = FALSE;
 
-  if (AsciiStrCmp (FirstEntry, SecondEntry) == 0) {
+  if (AsciiStrCmp (PrimaryEntry, SecondaryEntry) == 0) {
     //
     // Print duplicated entries. Index will be printed in the parent function (FindArrayDuplication).
     //
-    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, FirstEntry));
+    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, PrimaryEntry));
     HasDup = TRUE;
   }
 
