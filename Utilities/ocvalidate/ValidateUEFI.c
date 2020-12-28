@@ -21,29 +21,29 @@
 /**
   Callback funtion to verify whether one UEFI driver is duplicated in UEFI->Drivers.
 
-  @param[in]  PrimaryEntry    The first entry to be checked.
-  @param[in]  SecondaryEntry  The second entry to be checked.
+  @param[in]  PrimaryDriver    The first driver to be checked.
+  @param[in]  SecondaryDriver  The second driver to be checked.
 
-  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated.
+  @retval     TRUE             If PrimaryDriver and SecondaryDriver are duplicated.
 **/
 STATIC
 BOOLEAN
 UEFIDriverHasDuplication (
-  IN  CONST VOID  *Driver1,
-  IN  CONST VOID  *Driver2
+  IN  CONST VOID  *PrimaryDriver,
+  IN  CONST VOID  *SecondaryDriver
   )
 {
-  CONST OC_STRING  *UEFIDriver1;
-  CONST OC_STRING  *UEFIDriver2;
-  CONST CHAR8      *DriverString1;
-  CONST CHAR8      *DriverString2;
+  CONST OC_STRING           *UEFIPrimaryDriver;
+  CONST OC_STRING           *UEFISecondaryDriver;
+  CONST CHAR8               *UEFIDriverPrimaryString;
+  CONST CHAR8               *UEFIDriverSecondaryString;
 
-  UEFIDriver1      = *(CONST OC_STRING **) Driver1;
-  UEFIDriver2      = *(CONST OC_STRING **) Driver2;
-  DriverString1    = OC_BLOB_GET (UEFIDriver1);
-  DriverString2    = OC_BLOB_GET (UEFIDriver2);
+  UEFIPrimaryDriver         = *(CONST OC_STRING **) PrimaryDriver;
+  UEFISecondaryDriver       = *(CONST OC_STRING **) SecondaryDriver;
+  UEFIDriverPrimaryString   = OC_BLOB_GET (UEFIPrimaryDriver);
+  UEFIDriverSecondaryString = OC_BLOB_GET (UEFISecondaryDriver);
 
-  return StringIsDuplicated ("UEFI->Drivers", DriverString1, DriverString2);
+  return StringIsDuplicated ("UEFI->Drivers", UEFIDriverPrimaryString, UEFIDriverSecondaryString);
 }
 
 UINT32

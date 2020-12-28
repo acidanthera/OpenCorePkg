@@ -31,17 +31,17 @@ ACPIAddHasDuplication (
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_ACPI_ADD_ENTRY  *ACPIAddEntry1;
-  CONST OC_ACPI_ADD_ENTRY  *ACPIAddEntry2;
-  CONST CHAR8              *ACPIAddPathString1;
-  CONST CHAR8              *ACPIAddPathString2;
+  CONST OC_ACPI_ADD_ENTRY    *ACPIAddPrimaryEntry;
+  CONST OC_ACPI_ADD_ENTRY    *ACPIAddSecondaryEntry;
+  CONST CHAR8                *ACPIAddPrimaryPathString;
+  CONST CHAR8                *ACPIAddSecondaryPathString;
 
-  ACPIAddEntry1      = *(OC_ACPI_ADD_ENTRY **) PrimaryEntry;
-  ACPIAddEntry2      = *(OC_ACPI_ADD_ENTRY **) SecondaryEntry;
-  ACPIAddPathString1 = OC_BLOB_GET (&ACPIAddEntry1->Path);
-  ACPIAddPathString2 = OC_BLOB_GET (&ACPIAddEntry2->Path);
+  ACPIAddPrimaryEntry        = *(OC_ACPI_ADD_ENTRY **) PrimaryEntry;
+  ACPIAddSecondaryEntry      = *(OC_ACPI_ADD_ENTRY **) SecondaryEntry;
+  ACPIAddPrimaryPathString   = OC_BLOB_GET (&ACPIAddPrimaryEntry->Path);
+  ACPIAddSecondaryPathString = OC_BLOB_GET (&ACPIAddSecondaryEntry->Path);
 
-  return StringIsDuplicated ("ACPI->Add", ACPIAddPathString1, ACPIAddPathString2);
+  return StringIsDuplicated ("ACPI->Add", ACPIAddPrimaryPathString, ACPIAddSecondaryPathString);
 }
 
 UINT32

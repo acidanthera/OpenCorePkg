@@ -216,11 +216,11 @@ FindArrayDuplication (
 /**
   Check if two strings are duplicated to each other. Used as a wrapper of AsciiStrCmp to print duplicated entries.
 
-  @param[in]  EntrySection  Section of strings to which they belong.
-  @param[in]  PrimaryEntry  First entry in string format.
-  @param[in]  PrimaryEntry  Second entry in string format.
+  @param[in]  EntrySection    Section of strings to which they belong.
+  @param[in]  PrimaryEntry    Primary entry in string format.
+  @param[in]  SecondaryEntry  Secondary entry in string format.
 
-  @retval     TRUE          If Entry1 and Entry2 are duplicated to each other.
+  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated to each other.
 **/
 BOOLEAN
 StringIsDuplicated (

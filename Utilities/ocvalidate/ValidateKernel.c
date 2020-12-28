@@ -34,17 +34,17 @@ KernelAddHasDuplication (
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_KERNEL_ADD_ENTRY  *KernelAddEntry1;
-  CONST OC_KERNEL_ADD_ENTRY  *KernelAddEntry2;
-  CONST CHAR8                *KernelAddBundlePathString1;
-  CONST CHAR8                *KernelAddBundlePathString2;
+  CONST OC_KERNEL_ADD_ENTRY          *KernelAddPrimaryEntry;
+  CONST OC_KERNEL_ADD_ENTRY          *KernelAddSecondaryEntry;
+  CONST CHAR8                        *KernelAddPrimaryBundlePathString;
+  CONST CHAR8                        *KernelAddSecondaryBundlePathString;
 
-  KernelAddEntry1            = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
-  KernelAddEntry2            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
-  KernelAddBundlePathString1 = OC_BLOB_GET (&KernelAddEntry1->BundlePath);
-  KernelAddBundlePathString2 = OC_BLOB_GET (&KernelAddEntry2->BundlePath);
+  KernelAddPrimaryEntry              = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
+  KernelAddSecondaryEntry            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelAddPrimaryBundlePathString   = OC_BLOB_GET (&KernelAddPrimaryEntry->BundlePath);
+  KernelAddSecondaryBundlePathString = OC_BLOB_GET (&KernelAddSecondaryEntry->BundlePath);
 
-  return StringIsDuplicated ("Kernel->Add", KernelAddBundlePathString1, KernelAddBundlePathString2);
+  return StringIsDuplicated ("Kernel->Add", KernelAddPrimaryBundlePathString, KernelAddSecondaryBundlePathString);
 }
 
 /**
@@ -62,17 +62,17 @@ KernelBlockHasDuplication (
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockEntry1;
-  CONST OC_KERNEL_BLOCK_ENTRY  *KernelBlockEntry2;
-  CONST CHAR8                  *KernelBlockIdentifierString1;
-  CONST CHAR8                  *KernelBlockIdentifierString2;
+  CONST OC_KERNEL_BLOCK_ENTRY          *KernelBlockPrimaryEntry;
+  CONST OC_KERNEL_BLOCK_ENTRY          *KernelBlockSecondaryEntry;
+  CONST CHAR8                          *KernelBlockPrimaryIdentifierString;
+  CONST CHAR8                          *KernelBlockSecondaryIdentifierString;
 
-  KernelBlockEntry1            = *(OC_KERNEL_BLOCK_ENTRY **) PrimaryEntry;
-  KernelBlockEntry2            = *(OC_KERNEL_BLOCK_ENTRY **) SecondaryEntry;
-  KernelBlockIdentifierString1 = OC_BLOB_GET (&KernelBlockEntry1->Identifier);
-  KernelBlockIdentifierString2 = OC_BLOB_GET (&KernelBlockEntry2->Identifier);
+  KernelBlockPrimaryEntry              = *(OC_KERNEL_BLOCK_ENTRY **) PrimaryEntry;
+  KernelBlockSecondaryEntry            = *(OC_KERNEL_BLOCK_ENTRY **) SecondaryEntry;
+  KernelBlockPrimaryIdentifierString   = OC_BLOB_GET (&KernelBlockPrimaryEntry->Identifier);
+  KernelBlockSecondaryIdentifierString = OC_BLOB_GET (&KernelBlockSecondaryEntry->Identifier);
 
-  return StringIsDuplicated ("Kernel->Block", KernelBlockIdentifierString1, KernelBlockIdentifierString2);
+  return StringIsDuplicated ("Kernel->Block", KernelBlockPrimaryIdentifierString, KernelBlockSecondaryIdentifierString);
 }
 
 /**
@@ -93,17 +93,17 @@ KernelForceHasDuplication (
   //
   // NOTE: Add and Force share the same constructor.
   //
-  CONST OC_KERNEL_ADD_ENTRY    *KernelForceEntry1;
-  CONST OC_KERNEL_ADD_ENTRY    *KernelForceEntry2;
-  CONST CHAR8                  *KernelForceBundlePathString1;
-  CONST CHAR8                  *KernelForceBundlePathString2;
+  CONST OC_KERNEL_ADD_ENTRY            *KernelForcePrimaryEntry;
+  CONST OC_KERNEL_ADD_ENTRY            *KernelForceSecondaryEntry;
+  CONST CHAR8                          *KernelForcePrimaryBundlePathString;
+  CONST CHAR8                          *KernelForceSecondaryBundlePathString;
 
-  KernelForceEntry1            = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
-  KernelForceEntry2            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
-  KernelForceBundlePathString1 = OC_BLOB_GET (&KernelForceEntry1->BundlePath);
-  KernelForceBundlePathString2 = OC_BLOB_GET (&KernelForceEntry2->BundlePath);
+  KernelForcePrimaryEntry              = *(OC_KERNEL_ADD_ENTRY **) PrimaryEntry;
+  KernelForceSecondaryEntry            = *(OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
+  KernelForcePrimaryBundlePathString   = OC_BLOB_GET (&KernelForcePrimaryEntry->BundlePath);
+  KernelForceSecondaryBundlePathString = OC_BLOB_GET (&KernelForceSecondaryEntry->BundlePath);
 
-  return StringIsDuplicated ("Kernel->Force", KernelForceBundlePathString1, KernelForceBundlePathString2);
+  return StringIsDuplicated ("Kernel->Force", KernelForcePrimaryBundlePathString, KernelForceSecondaryBundlePathString);
 }
 
 UINT32

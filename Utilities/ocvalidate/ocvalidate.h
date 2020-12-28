@@ -20,10 +20,6 @@
 
 /**
   Validate OpenCore Configuration.
-
-  @param[in]  Config   Configuration structure.
-
-  @return     Number of errors detected.
 **/
 typedef
 UINT32
