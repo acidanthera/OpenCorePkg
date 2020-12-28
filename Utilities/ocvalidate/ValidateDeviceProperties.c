@@ -16,6 +16,46 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+STATIC
+BOOLEAN
+DevPropsAddHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_STRING                      *DevPropsAddPrimaryEntry;
+  CONST OC_STRING                      *DevPropsAddSecondaryEntry;
+  CONST CHAR8                          *DevPropsAddPrimaryDevicePathString;
+  CONST CHAR8                          *DevPropsAddSecondaryDevicePathString;
+
+  DevPropsAddPrimaryEntry              = *(CONST OC_STRING **) PrimaryEntry;
+  DevPropsAddSecondaryEntry            = *(CONST OC_STRING **) SecondaryEntry;
+  DevPropsAddPrimaryDevicePathString   = OC_BLOB_GET (DevPropsAddPrimaryEntry);
+  DevPropsAddSecondaryDevicePathString = OC_BLOB_GET (DevPropsAddSecondaryEntry);
+
+  return StringIsDuplicated ("DeviceProperties->Add", DevPropsAddPrimaryDevicePathString, DevPropsAddSecondaryDevicePathString);
+}
+
+STATIC
+BOOLEAN
+DevPropsDeleteHasDuplication (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_STRING                         *DevPropsDeletePrimaryEntry;
+  CONST OC_STRING                         *DevPropsDeleteSecondaryEntry;
+  CONST CHAR8                             *DevPropsDeletePrimaryDevicePathString;
+  CONST CHAR8                             *DevPropsDeleteSecondaryDevicePathString;
+
+  DevPropsDeletePrimaryEntry              = *(CONST OC_STRING **) PrimaryEntry;
+  DevPropsDeleteSecondaryEntry            = *(CONST OC_STRING **) SecondaryEntry;
+  DevPropsDeletePrimaryDevicePathString   = OC_BLOB_GET (DevPropsDeletePrimaryEntry);
+  DevPropsDeleteSecondaryDevicePathString = OC_BLOB_GET (DevPropsDeleteSecondaryEntry);
+
+  return StringIsDuplicated ("DeviceProperties->Delete", DevPropsDeletePrimaryDevicePathString, DevPropsDeleteSecondaryDevicePathString);
+}
+
 UINT32
 CheckDeviceProperties (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -58,7 +98,27 @@ CheckDeviceProperties (
         ++ErrorCount;
       }
     }
+
+    //
+    // Check duplicated properties in DeviceProperties->Delete[N].
+    //
+    ErrorCount += FindArrayDuplication (
+      UserDevProp->Delete.Values[DeviceIndex]->Values,
+      UserDevProp->Delete.Values[DeviceIndex]->Count,
+      sizeof (UserDevProp->Delete.Values[DeviceIndex]->Values[0]),
+      DevPropsDeleteHasDuplication
+      );
   }
+
+  //
+  // Check duplicated entries in DeviceProperties->Delete.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserDevProp->Delete.Keys,
+    UserDevProp->Delete.Count,
+    sizeof (UserDevProp->Delete.Keys[0]),
+    DevPropsDeleteHasDuplication
+    );
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
     PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
@@ -85,7 +145,27 @@ CheckDeviceProperties (
         ++ErrorCount;
       }
     }
+
+    //
+    // Check duplicated properties in DeviceProperties->Add[N].
+    //
+    ErrorCount += FindArrayDuplication (
+      PropertyMap->Keys,
+      PropertyMap->Count,
+      sizeof (PropertyMap->Keys[0]),
+      DevPropsAddHasDuplication
+      );
   }
+
+  //
+  // Check duplicated entries in DeviceProperties->Add.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserDevProp->Add.Keys,
+    UserDevProp->Add.Count,
+    sizeof (UserDevProp->Add.Keys[0]),
+    DevPropsAddHasDuplication
+    );
 
   return ReportError (__func__, ErrorCount);
 }
