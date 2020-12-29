@@ -352,6 +352,14 @@ InternalOcAudioPlayFile (
     Channels
     );
   if (!EFI_ERROR (Status)) {
+    //
+    // We are required to wait for some time after codec setup on some systems.
+    // REF: https://github.com/acidanthera/bugtracker/issues/971
+    //
+    if (Private->PlaybackDelay > 0) {
+      gBS->Stall (Private->PlaybackDelay);
+    }
+
     Status = Private->AudioIo->StartPlaybackAsync (
       Private->AudioIo,
       RawBuffer,
@@ -466,4 +474,22 @@ InternalOcAudioStopPlayBack (
   gBS->RestoreTPL (OldTpl);
 
   return EFI_SUCCESS;
+}
+
+UINTN
+EFIAPI
+InternalOcAudioSetDelay (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINTN                      Delay
+  )
+{
+  OC_AUDIO_PROTOCOL_PRIVATE       *Private;
+  UINTN                           PreviousDelay;
+
+  Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
+
+  PreviousDelay = Private->PlaybackDelay;
+  Private->PlaybackDelay = Delay;
+
+  return PreviousDelay;
 }

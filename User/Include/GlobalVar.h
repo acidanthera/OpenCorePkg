@@ -22,6 +22,7 @@ extern EFI_GUID gAppleBlessedSystemFolderInfoGuid;
 extern EFI_GUID gAppleBootPolicyProtocolGuid;
 extern EFI_GUID gAppleVendorVariableGuid;
 extern EFI_GUID gAppleImg4VerificationProtocolGuid;
+extern EFI_GUID gAppleBeepGenProtocolGuid; 
 
 extern const CHAR8 *gEfiCallerBaseName;
 extern EFI_GUID gEfiGraphicsOutputProtocolGuid;
@@ -60,5 +61,13 @@ extern EFI_GUID gEfiSmbiosTableGuid;
 extern EFI_GUID gOcVendorVariableGuid;
 extern EFI_GUID gOcCustomSmbios3TableGuid;
 extern EFI_GUID gOcCustomSmbiosTableGuid;
+extern EFI_GUID gOcAudioProtocolGuid;
+
+#ifdef SANITIZE_TEST
+#include <sanitizer/asan_interface.h>
+#else
+#define ASAN_POISON_MEMORY_REGION(addr, size) do { } while (0)
+#define ASAN_UNPOISON_MEMORY_REGION(addr, size) do { } while (0)
+#endif
 
 #endif // OC_USER_GLOBAL_VAR_H

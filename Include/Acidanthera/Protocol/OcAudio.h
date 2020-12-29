@@ -18,7 +18,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
-#define OC_AUDIO_PROTOCOL_REVISION  0x010000
+#define OC_AUDIO_PROTOCOL_REVISION  0x020000
 
 //
 // OC_AUDIO_PROTOCOL_GUID
@@ -217,6 +217,21 @@ EFI_STATUS
   IN     BOOLEAN                    Wait
   );
 
+/**
+  Set playback delay.
+
+  @param[in,out] This         Audio protocol instance.
+  @param[in]     Delay        Delay after audio configuration in microseconds.
+
+  @return previous delay, defaults to 0.
+**/
+typedef
+UINTN
+(EFIAPI* OC_AUDIO_SET_DELAY) (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINTN                      Delay
+  );
+
 //
 // Includes a revision for debugging reasons.
 //
@@ -226,6 +241,7 @@ struct OC_AUDIO_PROTOCOL_ {
   OC_AUDIO_SET_PROVIDER   SetProvider;
   OC_AUDIO_PLAY_FILE      PlayFile;
   OC_AUDIO_STOP_PLAYBACK  StopPlayback;
+  OC_AUDIO_SET_DELAY      SetDelay;
 };
 
 extern EFI_GUID gOcAudioProtocolGuid;

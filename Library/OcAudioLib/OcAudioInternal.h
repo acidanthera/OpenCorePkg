@@ -48,6 +48,7 @@ typedef struct {
   VOID                                  *ProviderContext;
   VOID                                  *CurrentBuffer;
   EFI_EVENT                             PlaybackEvent;
+  UINTN                                 PlaybackDelay;
   UINT8                                 Language;
   UINT8                                 OutputIndex;
   UINT8                                 Volume;
@@ -88,6 +89,13 @@ EFIAPI
 InternalOcAudioStopPlayBack (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     BOOLEAN                    Wait
+  );
+
+UINTN
+EFIAPI
+InternalOcAudioSetDelay (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINTN                      Delay
   );
 
 EFI_STATUS

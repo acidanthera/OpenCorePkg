@@ -5924,6 +5924,16 @@ functioning. Feature highlights:
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
+  \texttt{SetupDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+
+  Some codecs require a vendor-specific delay after the reconfiguration
+  (e.g. volume setting). This option makes it configurable. In general
+  the necessary delay may be as long as 0.5 seconds.
+
+\item
   \texttt{VolumeAmplifier}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -6465,46 +6475,6 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{DeduplicateBootOrder}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Remove duplicate entries in \texttt{BootOrder} variable
-  in \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
-
-  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
-
-  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
-  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
-  \begin{itemize}
-  \tightlist
-  \item Operating systems are jailed and only controlled by OpenCore boot
-  environment to enhance security.
-  \item Operating systems do not mess with OpenCore boot priority, and guarantee
-  fluent updates and hibernation wakes for cases that require reboots with OpenCore
-  in the middle.
-  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
-  \end{itemize}
-
-  However, some types of firmware do their own boot option scanning on startup by checking
-  for file presence on the available disks. This scanning often includes non-standard
-  locations such as Windows Bootloader paths. This is typically not an issue but some
-  firmware, such as ASUS firmware on the APTIO V, have bugs. On such, scanning is
-  implemented improperly and firmware preferences may get accidentally corrupted
-  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without resetting NVRAM.
-
-  To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
-  install Windows with \texttt{RequestBootVarRouting} enabled. As the Windows bootloader
-  option will not be created by the Windows installer, the firmware will attempt to create
-  this itself, leading to a corruption of its boot option list.
-
-  This quirk removes all duplicates in \texttt{BootOrder} variable attempting to resolve
-  the consequences of the bugs upon OpenCore loading. It is recommended to use this key
-  along with \texttt{BootProtect} option.
-
-\item
   \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -6550,6 +6520,19 @@ functioning. Feature highlights:
   In summary, this quirk is required to reliably
   use the \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in firmware that is not compatible with macOS boot entries by design.
+
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
+  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
+  \begin{itemize}
+  \tightlist
+  \item Operating systems are jailed and only controlled by OpenCore boot
+  environment to enhance security.
+  \item Operating systems do not mess with OpenCore boot priority, and guarantee
+  fluent updates and hibernation wakes for cases that require reboots with OpenCore
+  in the middle.
+  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
+  or anyhow corrupted.
+  \end{itemize}
 
 \item
   \texttt{TscSyncTimeout}\\

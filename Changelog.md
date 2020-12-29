@@ -3,6 +3,17 @@ OpenCore Changelog
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
 - Updated underlying EDK II package to edk2-stable202011
+- Updated builtin firmware versions for SMBIOS and the rest
+- Fixed macrecovery server protocol compatibility
+- Added basic audio assistant support in OpenCanopy
+- Added compiled ACPI samples to the package
+- Fixed timer resolution restoration at boot time
+- Fixed memory capacity when using custom SMBIOS memory config
+- Removed no longer required `DeduplicateBootOrder` quirk
+- Fixed macserial crashes when processing invalid serials
+- Fixed macserial issues when processing 2021 year serials
+- Added advanced error checking in ocvalidate utility
+- Added `SetupDelay` to configure audio setup delay
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout

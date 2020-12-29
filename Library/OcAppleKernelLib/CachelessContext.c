@@ -184,7 +184,7 @@ ScanExtensions (
     }
 
     if (FileInfoSize > 0) {
-      if (OcUnicodeEndsWith (FileInfo->FileName, L".kext")) {
+      if (OcUnicodeEndsWith (FileInfo->FileName, L".kext", FALSE)) {
         Status = File->Open (File, &FileKext, FileInfo->FileName, EFI_FILE_MODE_READ, EFI_FILE_DIRECTORY);
         if (EFI_ERROR (Status)) {
           continue;
@@ -1391,7 +1391,7 @@ CachelessContextHookBuiltin (
   //
   // Try to get Info.plist.
   //
-  if (OcUnicodeEndsWith (FileName, L"Info.plist")) {
+  if (OcUnicodeEndsWith (FileName, L"Info.plist", FALSE)) {
     BuiltinKext = LookupBuiltinKextForPlistPath (Context, FileName);
     if (BuiltinKext != NULL && BuiltinKext->PatchValidOSBundleRequired) {
       DEBUG ((DEBUG_INFO, "OCAK: Processing plist patches for %s\n", FileName));

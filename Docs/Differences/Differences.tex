@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Dec  7 21:29:15 2020
-%DIF ADD ../Configuration.tex        Mon Dec  7 21:32:29 2020
+%DIF DEL PreviousConfiguration.tex   Wed Dec 16 19:38:04 2020
+%DIF ADD ../Configuration.tex        Sat Dec 26 11:23:56 2020
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5984,7 +5984,19 @@ functioning. Feature highlights:
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
-  \texttt{VolumeAmplifier}\\
+  \DIFaddbegin \texttt{\DIFadd{SetupDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Audio codec reconfiguration delay in microseconds.
+}
+
+  \DIFadd{Some codecs require a vendor-specific delay after the reconfiguration
+  (e.g. volume setting). This option makes it configurable. In general
+  the necessary delay may be as long as 0.5 seconds.
+}
+
+\item
+  \DIFaddend \texttt{VolumeAmplifier}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Multiplication coefficient for system volume to raw volume linear translation
@@ -6525,47 +6537,89 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{DeduplicateBootOrder}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Remove duplicate entries in \texttt{BootOrder} variable
-  in \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
+  \DIFdelbegin \texttt{\DIFdel{DeduplicateBootOrder}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Remove duplicate entries in }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
+\DIFdel{variable
+  in }\texttt{\DIFdel{EFI\_GLOBAL\_VARIABLE\_GUID}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
+%DIFDELCMD <   %%%
+\DIFdel{This quirk requires }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
+\DIFdel{to be enabled and therefore
+  }\texttt{\DIFdel{OC\_FIRMWARE\_RUNTIME}} %DIFAUXCMD
+\DIFdel{protocol implemented in }\texttt{\DIFdel{OpenRuntime.efi}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
-  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
-  \begin{itemize}
-  \tightlist
-  \item Operating systems are jailed and only controlled by OpenCore boot
+%DIFDELCMD <   %%%
+\DIFdel{By redirecting }\texttt{\DIFdel{Boot}} %DIFAUXCMD
+\DIFdel{prefixed variables to a separate GUID namespace
+  with the help of }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
+\DIFdel{quirk we achieve multiple goals:
+  }%DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <   \tightlist
+%DIFDELCMD <   \item %%%
+\item%DIFAUXCMD
+\DIFdel{Operating systems are jailed and only controlled by OpenCore boot
   environment to enhance security.
-  \item Operating systems do not mess with OpenCore boot priority, and guarantee
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Operating systems do not mess with OpenCore boot priority, and guarantee
   fluent updates and hibernation wakes for cases that require reboots with OpenCore
   in the middle.
-  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
+  }%DIFDELCMD < \item %%%
+\item%DIFAUXCMD
+\DIFdel{Potentially incompatible boot entries, such as macOS entries, are not deleted
   or anyhow corrupted.
-  \end{itemize}
+  }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize}
+%DIFDELCMD < 
 
-  However, some types of firmware do their own boot option scanning on startup by checking
+%DIFDELCMD <   %%%
+\DIFdel{However, some types of firmware do their own boot option scanning on startup by checking
   for file presence on the available disks. This scanning often includes non-standard
   locations such as Windows Bootloader paths. This is typically not an issue but some
   firmware, such as ASUS firmware on the APTIO V, have bugs. On such, scanning is
   implemented improperly and firmware preferences may get accidentally corrupted
-  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
+  due to }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
+\DIFdel{entry duplication (each option will be added twice) making
   it impossible to boot without resetting NVRAM.
+}%DIFDELCMD < 
 
-  To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
-  install Windows with \texttt{RequestBootVarRouting} enabled. As the Windows bootloader
+%DIFDELCMD <   %%%
+\DIFdel{To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
+  install Windows with }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
+\DIFdel{enabled. As the Windows bootloader
   option will not be created by the Windows installer, the firmware will attempt to create
   this itself, leading to a corruption of its boot option list.
+}%DIFDELCMD < 
 
-  This quirk removes all duplicates in \texttt{BootOrder} variable attempting to resolve
+%DIFDELCMD <   %%%
+\DIFdel{This quirk removes all duplicates in }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
+\DIFdel{variable attempting to resolve
   the consequences of the bugs upon OpenCore loading. It is recommended to use this key
-  along with \texttt{BootProtect} option.
+  along with }\texttt{\DIFdel{BootProtect}} %DIFAUXCMD
+\DIFdel{option.
+}%DIFDELCMD < 
 
-\item
-  \texttt{ExitBootServicesDelay}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
@@ -6610,6 +6664,21 @@ functioning. Feature highlights:
   In summary, this quirk is required to reliably
   use the \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in firmware that is not compatible with macOS boot entries by design.
+\DIFaddbegin 
+
+  \DIFadd{By redirecting }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables to a separate GUID namespace
+  with the help of }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{quirk we achieve multiple goals:
+  }\begin{itemize}
+  \tightlist
+  \item \DIFadd{Operating systems are jailed and only controlled by OpenCore boot
+  environment to enhance security.
+  }\item \DIFadd{Operating systems do not mess with OpenCore boot priority, and guarantee
+  fluent updates and hibernation wakes for cases that require reboots with OpenCore
+  in the middle.
+  }\item \DIFadd{Potentially incompatible boot entries, such as macOS entries, are not deleted
+  or anyhow corrupted.
+  }\end{itemize}
+\DIFaddend 
 
 \item
   \texttt{TscSyncTimeout}\\

@@ -23,20 +23,6 @@
 
 #include <File.h>
 
-/*
- for fuzzing (TODO):
- clang-mp-7.0 -DFUZZING_TEST=1 -g -fsanitize=undefined,address,fuzzer -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Library/OcAppleKernelLib/KernelReader.c ../../Library/OcCompressionLib/lzss/lzss.c ../../Library/OcCompressionLib/lzvn/lzvn.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c -o Prelinked
- rm -rf DICT fuzz*.log ; mkdir DICT ; find /System/Library/Extensions/<< * >>/Contents/MacOS -type f -exec cp {} DICT \; UBSAN_OPTIONS='halt_on_error=1' ./Prelinked -jobs=4 DICT -rss_limit_mb=4096
-
- rm -rf Prelinked.dSYM DICT fuzz*.log Prelinked
-
- clang -DTEST_SLE=1 -g -O3 -fno-sanitize=undefined,address -Wno-incompatible-pointer-types-discards-qualifiers -I../Include -I../../Include -I../../../MdePkg/Include/ -I../../../EfiPkg/Include/ -include ../Include/Base.h Prelinked.c ../../Library/OcXmlLib/OcXmlLib.c ../../Library/OcTemplateLib/OcTemplateLib.c ../../Library/OcSerializeLib/OcSerializeLib.c ../../Library/OcMiscLib/Base64Decode.c ../../Library/OcStringLib/OcAsciiLib.c ../../Library/OcMachoLib/CxxSymbols.c ../../Library/OcMachoLib/Header.c ../../Library/OcMachoLib/Relocations.c ../../Library/OcMachoLib/Symbols.c ../../Library/OcAppleKernelLib/PrelinkedContext.c ../../Library/OcAppleKernelLib/PrelinkedKext.c ../../Library/OcAppleKernelLib/KextPatcher.c ../../Library/OcMiscLib/DataPatcher.c ../../Library/OcAppleKernelLib/Link.c ../../Library/OcAppleKernelLib/Vtables.c ../../Library/OcAppleKernelLib/KernelReader.c ../../Library/OcCompressionLib/lzss/lzss.c ../../Library/OcCompressionLib/lzvn/lzvn.c ../../Tests/KernelTest/Lilu.c ../../Tests/KernelTest/Vsmc.c  -o Prelinked
-
- for i in /System/Library/Extensions/<< * >>.kext ; do plist=$i/Contents/Info.plist ; kext="$i/Contents/MacOS/$(/usr/libexec/PlistBuddy -c 'Print CFBundleExecutable' "$plist")" ; echo "$kext $plist" ; ./Prelinked prelinkedkernel.unpack "$kext" "$plist" ; done
-
- /[^\n]+\nPassed.kext injected - 0x8[^\n]+
-*/
-
 STATIC BOOLEAN FailedToProcess = FALSE;
 STATIC UINT32  KernelVersion   = 0;
 
@@ -503,10 +489,6 @@ ApplyKernelPatches (
   }
 }
 
-#ifdef FUZZING_TEST
-#define main no_main
-#endif
-
 static EFI_FILE_PROTOCOL nilFilProtocol;
 
 UINT8  *Prelinked;
@@ -834,7 +816,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   return 0;
 }
 
-int main(int argc, char *argv[]) {
+int ENTRY_POINT(int argc, char *argv[]) {
   int code = wrap_main(argc, argv);
   if (FailedToProcess) {
     code = -1;

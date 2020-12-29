@@ -237,6 +237,9 @@ IsOpenCoreBootloader (
     sizeof (FileReadMagic),
     FileReadMagic
     );
+
+  File->Close(File);
+
   if (EFI_ERROR (Status)) {
     return FALSE;
   }

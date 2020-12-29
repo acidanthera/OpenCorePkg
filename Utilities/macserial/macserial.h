@@ -11,7 +11,7 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define PROGRAM_VERSION "2.1.6"
+#define PROGRAM_VERSION "2.1.7"
 
 #ifdef __GNUC__
 uint32_t arc4random(void) __attribute__((weak));
@@ -34,7 +34,8 @@ uint32_t arc4random_uniform(uint32_t upper_bound) __attribute__((weak));
 #define SERIAL_YEAR_OLD_MAX 2012
 
 #define SERIAL_YEAR_NEW_MIN 2010
-#define SERIAL_YEAR_NEW_MAX 2020
+#define SERIAL_YEAR_NEW_MID 2020
+#define SERIAL_YEAR_NEW_MAX 2030
 
 #define SERIAL_COPY_MIN 1
 #define SERIAL_COPY_MAX 34

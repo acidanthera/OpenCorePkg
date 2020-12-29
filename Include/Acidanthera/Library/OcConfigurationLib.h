@@ -349,6 +349,9 @@
 #define OCS_EXPOSE_VERSION_UI  4U
 #define OCS_EXPOSE_OEM_INFO    8U
 #define OCS_EXPOSE_VERSION     (OCS_EXPOSE_VERSION_VAR | OCS_EXPOSE_VERSION_UI)
+#define OCS_EXPOSE_ALL_BITS (\
+  OCS_EXPOSE_BOOT_PATH  | OCS_EXPOSE_VERSION_VAR | \
+  OCS_EXPOSE_VERSION_UI | OCS_EXPOSE_OEM_INFO)
 
 typedef enum {
   OcsVaultOptional = 0,
@@ -361,9 +364,9 @@ typedef enum {
   _(OC_STRING                   , Vault                       ,      , OC_STRING_CONSTR ("Secure", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , DmgLoading                  ,      , OC_STRING_CONSTR ("Signed", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
+  _(UINT32                      , ExposeSensitiveData         ,      , OCS_EXPOSE_VERSION      , ()) \
   _(BOOLEAN                     , AllowNvramReset             ,      , FALSE                   , ()) \
   _(BOOLEAN                     , AllowSetDefault             ,      , FALSE                   , ()) \
-  _(BOOLEAN                     , ExposeSensitiveData         ,      , OCS_EXPOSE_VERSION      , ()) \
   _(BOOLEAN                     , AuthRestart                 ,      , FALSE                   , ()) \
   _(BOOLEAN                     , BlacklistAppleUpdate        ,      , FALSE                   , ()) \
   _(BOOLEAN                     , EnablePassword              ,      , FALSE                   , ()) \
@@ -522,9 +525,9 @@ typedef enum {
   _(OC_STRING                    , BoardLocationInChassis,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                    , ChassisManufacturer   ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT8                        , ChassisType           ,  , 0                                , ()                   ) \
-  _(OC_STRING                    , ChassisVersion        ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
-  _(OC_STRING                    , ChassisSerialNumber   ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
-  _(OC_STRING                    , ChassisAssetTag       ,  , OC_STRING_CONSTR ("", _, __)     , ()                   ) \
+  _(OC_STRING                    , ChassisVersion        ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , ChassisSerialNumber   ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                    , ChassisAssetTag       ,  , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT32                       , PlatformFeature       ,  , 0xFFFFFFFFU                      , ()                   ) \
   _(UINT64                       , FirmwareFeatures      ,  , 0                                , ()                   ) \
   _(UINT64                       , FirmwareFeaturesMask  ,  , 0                                , ()                   ) \
@@ -576,6 +579,7 @@ typedef enum {
 #define OC_UEFI_AUDIO_FIELDS(_, __) \
   _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , SetupDelay         ,     , 0                             , ()) \
   _(UINT16                      , VolumeAmplifier    ,     , 0                             , ()) \
   _(BOOLEAN                     , AudioSupport       ,     , FALSE                         , ()) \
   _(UINT8                       , AudioCodec         ,     , 0                             , ()) \
@@ -646,7 +650,6 @@ typedef enum {
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \
   _(UINT32                      , TscSyncTimeout              ,     , 0      , ()) \
-  _(BOOLEAN                     , DeduplicateBootOrder        ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \

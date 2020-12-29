@@ -47,6 +47,7 @@ mAudioProtocol = {
   .ProviderContext = NULL,
   .CurrentBuffer   = NULL,
   .PlaybackEvent   = NULL,
+  .PlaybackDelay   = 0,
   .Language        = AppleVoiceOverLanguageEn,
   .OutputIndex     = 0,
   .Volume          = 100,
@@ -56,6 +57,7 @@ mAudioProtocol = {
     .SetProvider        = InternalOcAudioSetProvider,
     .PlayFile           = InternalOcAudioPlayFile,
     .StopPlayback       = InternalOcAudioStopPlayBack,
+    .SetDelay           = InternalOcAudioSetDelay
   },
   .BeepGen         = {
     .GenBeep            = InternalOcAudioGenBeep,

@@ -678,7 +678,7 @@ CreateMemoryArray (
   // Maximum Capacity is represented in KB.
   //
   if (*Data->MemoryMaxCapacity < SIZE_2TB) {
-    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = (UINT16)(*Data->MemoryMaxCapacity / SIZE_1KB);
+    Table->CurrentPtr.Standard.Type16->MaximumCapacity          = (UINT32)(*Data->MemoryMaxCapacity / SIZE_1KB);
     Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = 0;
   } else {
     Table->CurrentPtr.Standard.Type16->MaximumCapacity          = SIZE_2TB / SIZE_1KB;
