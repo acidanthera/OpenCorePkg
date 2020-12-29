@@ -85,3 +85,5 @@ This version of ocvalidate performs the following checks:
 #### Output
 - `ClearScreenOnModeSwitch`, `IgnoreTextInGraphics`, `ReplaceTabWithSpace`, and `SanitiseClearScreen` only apply to `System` TextRenderer
 - `Resolution` should match `NUMBERxNUMBER` or `NUMBERxNUMBER@NUMBER` sequences (unless it is an `Empty string` or is set to `Max`).
+#### ReservedMemory
+- Type: Only `Reserved`, `LoaderCode`, `LoaderData`, `BootServiceCode`, `BootServiceData`, `RuntimeCode`, `RuntimeData`, `Available`, `Persistent`, `UnusableMemory`, `ACPIReclaimMemory`, `ACPIMemoryNVS`, `MemoryMappedIO`, `MemoryMappedIOPortSpace`, and `PalCode` are accepted.

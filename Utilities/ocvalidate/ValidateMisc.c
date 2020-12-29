@@ -113,7 +113,7 @@ ValidateSecureBootModel (
   IN  CONST CHAR8  *SecureBootModel
   )
 {
-  UINT32   Index;
+  UINTN   Index;
   CONST CHAR8 *AllowedSecureBootModel[] = {
     "Default", "Disabled",
     "j137",  "j680",  "j132",  "j174",  "j140k",

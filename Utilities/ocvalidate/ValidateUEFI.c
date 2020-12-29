@@ -46,6 +46,28 @@ UEFIDriverHasDuplication (
   return StringIsDuplicated ("UEFI->Drivers", UEFIDriverPrimaryString, UEFIDriverSecondaryString);
 }
 
+STATIC
+BOOLEAN
+ValidateReservedMemoryType (
+  IN  CONST CHAR8  *Type
+  )
+{
+  UINTN  Index;
+  CONST CHAR8  *AllowedType[] = {
+    "Reserved",          "LoaderCode",    "LoaderData",     "BootServiceCode",         "BootServiceData",
+    "RuntimeCode",       "RuntimeData",   "Available",      "Persistent",              "UnusableMemory",
+    "ACPIReclaimMemory", "ACPIMemoryNVS", "MemoryMappedIO", "MemoryMappedIOPortSpace", "PalCode"
+  };
+
+  for (Index = 0; Index < ARRAY_SIZE (AllowedType); ++Index) {
+    if (AsciiStrCmp (Type, AllowedType[Index]) == 0) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
 UINT32
 CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -79,6 +101,7 @@ CheckUEFI (
   UINT32                    UserBpp;
   BOOLEAN                   UserSetMax;
   CONST CHAR8               *AsciiAudioDevicePath;
+  CONST CHAR8               *AsciiReservedMemoryType;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
 
@@ -264,6 +287,17 @@ CheckUEFI (
     && (UserWidth == 0 || UserHeight == 0)) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check Configurations.pdf!\n"));
     ++ErrorCount;
+  }
+
+  //
+  // Validate ReservedMemory[N]->Type.
+  //
+  for (Index = 0; Index < UserUefi->ReservedMemory.Count; ++Index) {
+    AsciiReservedMemoryType = OC_BLOB_GET (&UserUefi->ReservedMemory.Values[Index]->Type);
+    if (!ValidateReservedMemoryType (AsciiReservedMemoryType)) {
+      DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Type is borked!\n", Index));
+      ++ErrorCount;
+    }
   }
 
   return ReportError (__func__, ErrorCount);

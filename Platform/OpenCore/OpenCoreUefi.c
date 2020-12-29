@@ -614,7 +614,7 @@ OcReserveMemory (
       RsvdMemoryTypeStr = OC_BLOB_GET (&Config->Uefi.ReservedMemory.Values[Index]->Type);
 
       Status = OcDescToMemoryType (RsvdMemoryTypeStr, &RsvdMemoryType);
-      if (EFI_ERROR (Status)){
+      if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OC: Invalid ReservedMemory Type: %a\n", RsvdMemoryTypeStr));
         RsvdMemoryType = EfiReservedMemoryType;
       }
