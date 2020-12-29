@@ -16,6 +16,8 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+#include <OpenCore.h>
+
 #include <File.h>
 
 UINT32
@@ -37,6 +39,8 @@ CheckConfig (
   };
 
   ErrorCount = 0;
+
+  DEBUG ((DEBUG_ERROR, "\nNOTE: This version of ocvalidate is only compatible with OpenCore version %a!\n\n", OPEN_CORE_VERSION));
 
   //
   // Pass config structure to all checkers.
@@ -65,9 +69,13 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   //
-  // Read config file.
+  // Read config file (Only one single config is supported).
   //
-  ConfigFileName   = argc > 1 ? argv[1] : "config.plist";
+  if (argc != 2) {
+    DEBUG ((DEBUG_ERROR, "\nUsage: %a <path/to/config.plist>\n\n", argv[0]));
+    return -1;
+  }
+  ConfigFileName   = argv[1];
   ConfigFileBuffer = readFile (ConfigFileName, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ConfigFileName));
