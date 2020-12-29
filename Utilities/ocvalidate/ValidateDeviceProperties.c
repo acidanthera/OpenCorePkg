@@ -137,7 +137,6 @@ CheckDeviceProperties (
     );
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
-    PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
     AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
     
     if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
@@ -145,6 +144,8 @@ CheckDeviceProperties (
       ++ErrorCount;
     }
 
+    PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
+    
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
       AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
 
