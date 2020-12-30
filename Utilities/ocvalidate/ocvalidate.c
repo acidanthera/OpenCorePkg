@@ -40,8 +40,6 @@ CheckConfig (
 
   ErrorCount = 0;
 
-  DEBUG ((DEBUG_ERROR, "\nNOTE: This version of ocvalidate is only compatible with OpenCore version %a!\n\n", OPEN_CORE_VERSION));
-
   //
   // Pass config structure to all checkers.
   //
@@ -69,12 +67,17 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   //
-  // Read config file (Only one single config is supported).
+  // Print usage.
   //
-  if (argc != 2) {
-    DEBUG ((DEBUG_ERROR, "\nUsage: %a <path/to/config.plist>\n\n", argv[0]));
+  if (argc != 2 || (argc > 1 && AsciiStrCmp (argv[1], "--version") == 0)) {
+    DEBUG ((DEBUG_ERROR, "\nNOTE: This version of ocvalidate is only compatible with OpenCore version %a!\n\n", OPEN_CORE_VERSION));
+    DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/config.plist>\n\n", argv[0]));
     return -1;
   }
+
+  //
+  // Read config file (Only one single config is supported).
+  //
   ConfigFileName   = argv[1];
   ConfigFileBuffer = readFile (ConfigFileName, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
