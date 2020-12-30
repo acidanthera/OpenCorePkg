@@ -18,11 +18,18 @@
 
 #define INDEX_KEXT_LILU  0U
 
+//
+// Child kext must be put after Parent kext in OpenCore config->Kernel->Add.
+// This means that the index of Child kext must be greater than that of Parent kext.
+//
 typedef struct KEXT_PRECEDENCE_ {
   CONST CHAR8  *Child;
   CONST CHAR8  *Parent;
 } KEXT_PRECEDENCE;
 
+//
+// Sanitiser for known kext info. Mainly those from Acidanthera.
+//
 typedef struct KEXT_INFO_ {
   CONST CHAR8  *KextBundlePath;
   CONST CHAR8  *KextExecutablePath;
