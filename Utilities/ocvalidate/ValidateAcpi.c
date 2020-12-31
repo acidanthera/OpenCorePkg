@@ -41,6 +41,10 @@ ACPIAddHasDuplication (
   ACPIAddPrimaryPathString   = OC_BLOB_GET (&ACPIAddPrimaryEntry->Path);
   ACPIAddSecondaryPathString = OC_BLOB_GET (&ACPIAddSecondaryEntry->Path);
 
+  if (!ACPIAddPrimaryEntry->Enabled || !ACPIAddSecondaryEntry->Enabled) {
+    return FALSE;
+  }
+
   return StringIsDuplicated ("ACPI->Add", ACPIAddPrimaryPathString, ACPIAddSecondaryPathString);
 }
 

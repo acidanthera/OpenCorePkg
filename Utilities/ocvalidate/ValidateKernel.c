@@ -44,6 +44,10 @@ KernelAddHasDuplication (
   KernelAddPrimaryBundlePathString   = OC_BLOB_GET (&KernelAddPrimaryEntry->BundlePath);
   KernelAddSecondaryBundlePathString = OC_BLOB_GET (&KernelAddSecondaryEntry->BundlePath);
 
+  if (!KernelAddPrimaryEntry->Enabled || !KernelAddSecondaryEntry->Enabled) {
+    return FALSE;
+  }
+
   return StringIsDuplicated ("Kernel->Add", KernelAddPrimaryBundlePathString, KernelAddSecondaryBundlePathString);
 }
 
@@ -71,6 +75,10 @@ KernelBlockHasDuplication (
   KernelBlockSecondaryEntry            = *(CONST OC_KERNEL_BLOCK_ENTRY **) SecondaryEntry;
   KernelBlockPrimaryIdentifierString   = OC_BLOB_GET (&KernelBlockPrimaryEntry->Identifier);
   KernelBlockSecondaryIdentifierString = OC_BLOB_GET (&KernelBlockSecondaryEntry->Identifier);
+
+  if (!KernelBlockPrimaryEntry->Enabled || !KernelBlockSecondaryEntry->Enabled) {
+    return FALSE;
+  }
 
   return StringIsDuplicated ("Kernel->Block", KernelBlockPrimaryIdentifierString, KernelBlockSecondaryIdentifierString);
 }
@@ -102,6 +110,10 @@ KernelForceHasDuplication (
   KernelForceSecondaryEntry            = *(CONST OC_KERNEL_ADD_ENTRY **) SecondaryEntry;
   KernelForcePrimaryBundlePathString   = OC_BLOB_GET (&KernelForcePrimaryEntry->BundlePath);
   KernelForceSecondaryBundlePathString = OC_BLOB_GET (&KernelForceSecondaryEntry->BundlePath);
+
+  if (!KernelForcePrimaryEntry->Enabled || !KernelForceSecondaryEntry->Enabled) {
+    return FALSE;
+  }
 
   return StringIsDuplicated ("Kernel->Force", KernelForcePrimaryBundlePathString, KernelForceSecondaryBundlePathString);
 }
