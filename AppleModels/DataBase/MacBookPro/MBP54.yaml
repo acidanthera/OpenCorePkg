@@ -66,7 +66,7 @@ SmcPlatform:
   - 0x00
 # FIXME: check
 SmcEPCI: 0x7B002
-OEMStrings: ""
+OEMStrings: |-
 Specifications:
   CPUCodename:
     - "Penryn"

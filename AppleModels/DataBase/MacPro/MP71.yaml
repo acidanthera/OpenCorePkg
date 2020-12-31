@@ -97,6 +97,7 @@ AppleBoardCode:
 AppleModelYear:
   - 2019
   - 2020
+  - 2021
 MinimumOSVersion: "10.15.1"
 MaximumOSVersion: null
 AppleModelId: "J160"

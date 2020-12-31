@@ -6,14 +6,10 @@ SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro5,1"
 SystemVersion: "1.2"
 # Note, this one is used by macserial
-SystemSerialNumber: "C07JQ07TF4MC"
+SystemSerialNumber: "CK151076EUH"
 SystemSKUNumber: "System SKU#"
 SystemFamily: "MacPro"
 BoardManufacturer: "Apple Inc."
-# This and similar ones can be an array itself, like this:
-# BoardProduct:
-#  "Mac-827FB448E656EC26"
-#  "Mac-smthelse"
 BoardProduct: "Mac-F221BEC8"
 BoardVersion: "MacPro5,1"
 BoardAssetTag: ""
@@ -102,26 +98,6 @@ Specifications:
     - "Mac Pro Server (Mid 2012)"
 # Note, first model code is used by macserial
 AppleModelCode:
-# Mid 2012
-  - "F4MC"
-  - "F500"
-  - "F4YY"
-  - "F6TD"
-  - "F6TF"
-  - "F6TG"
-  - "F6TC"
-  - "F6T9"
-  - "F64D"
-  - "F64C"
-  - "F648"
-  - "F649"
-  - "F4MH"
-  - "F4MD"
-  - "F4MG"
-  - "F64F"
-  - "F501"
-  - "F4MJ"
-  - "F4MF"
 # Mid 2010
   - "EUH"
   - "GWR"
@@ -158,6 +134,26 @@ AppleModelCode:
   - "HPY"
   - "HPW"
   - "HPV"
+# Mid 2012
+  - "F4MC"
+  - "F500"
+  - "F4YY"
+  - "F6TD"
+  - "F6TF"
+  - "F6TG"
+  - "F6TC"
+  - "F6T9"
+  - "F64D"
+  - "F64C"
+  - "F648"
+  - "F649"
+  - "F4MH"
+  - "F4MD"
+  - "F4MG"
+  - "F64F"
+  - "F501"
+  - "F4MJ"
+  - "F4MF"
 # Note, first board code is used by macserial
 AppleBoardCode:
   - "BH8"
@@ -168,8 +164,6 @@ AppleModelYear:
   - 2012
   - 2013
 # Optional, override for macserial default year
-MacserialModelYear: 2012
-# Optional, override for SystemSerialNumber for Clover, wtf?
-CloverSerialNumber: "C07J77F7F4MC"
+MacserialModelYear: 2011
 MinimumOSVersion: "10.7.4"
 MaximumOSVersion: "10.14.6"
