@@ -124,12 +124,16 @@ if [ "${TARGET}" = "" ]; then
   TARGET="RELEASE"
 fi
 
+if [ "${TARGETCHAIN}" = "" ]; then
+  TARGETCHAIN="XCODE5"
+fi
+
 if [ "${INTREE}" != "" ]; then
   # In-tree compilation is merely for packing.
   cd .. || exit 1
 
-  build -a "${TARGETARCH}" -b "${TARGET}" -t XCODE5 -p OpenCorePkg/OpenDuetPkg.dsc || exit 1
-  BUILD_DIR="${WORKSPACE}/Build/OpenDuetPkg/${TARGET}_XCODE5"
+  build -a "${TARGETARCH}" -b "${TARGET}" -t ${TARGETCHAIN} -p OpenCorePkg/OpenDuetPkg.dsc || exit 1
+  BUILD_DIR="${WORKSPACE}/Build/OpenDuetPkg/${TARGET}_${TARGETCHAIN}"
   BUILD_DIR_ARCH="${BUILD_DIR}/${TARGETARCH}"
   imgbuild "${TARGETARCH}"
 else
