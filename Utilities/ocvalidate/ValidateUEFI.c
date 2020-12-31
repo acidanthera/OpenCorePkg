@@ -46,6 +46,49 @@ UEFIDriverHasDuplication (
   return StringIsDuplicated ("UEFI->Drivers", UEFIDriverPrimaryString, UEFIDriverSecondaryString);
 }
 
+/**
+  Callback funtion to verify whether one UEFI ReservedMemory entry overlaps the other,
+  in terms of Address and Size.
+
+  @param[in]  PrimaryEntry     Primary entry to be checked.
+  @param[in]  SecondaryEntry   Secondary entry to be checked.
+
+  @retval     TRUE             If PrimaryEntry and SecondaryEntry have overlapped Address and Size.
+**/
+STATIC
+BOOLEAN
+UEFIReservedMemoryHasOverlap (
+  IN  CONST VOID  *PrimaryEntry,
+  IN  CONST VOID  *SecondaryEntry
+  )
+{
+  CONST OC_UEFI_RSVD_ENTRY           *UEFIReservedMemoryPrimaryEntry;
+  CONST OC_UEFI_RSVD_ENTRY           *UEFIReservedMemorySecondaryEntry;
+  UINT64                             UEFIReservedMemoryPrimaryAddress;
+  UINT64                             UEFIReservedMemoryPrimarySize;
+  UINT64                             UEFIReservedMemorySecondaryAddress;
+  UINT64                             UEFIReservedMemorySecondarySize;
+
+  UEFIReservedMemoryPrimaryEntry     = *(CONST OC_UEFI_RSVD_ENTRY **) PrimaryEntry;
+  UEFIReservedMemorySecondaryEntry   = *(CONST OC_UEFI_RSVD_ENTRY **) SecondaryEntry;
+  UEFIReservedMemoryPrimaryAddress   = UEFIReservedMemoryPrimaryEntry->Address;
+  UEFIReservedMemoryPrimarySize      = UEFIReservedMemoryPrimaryEntry->Size;
+  UEFIReservedMemorySecondaryAddress = UEFIReservedMemorySecondaryEntry->Address;
+  UEFIReservedMemorySecondarySize    = UEFIReservedMemorySecondaryEntry->Size;
+
+  if (!UEFIReservedMemoryPrimaryEntry->Enabled || !UEFIReservedMemorySecondaryEntry->Enabled) {
+    return FALSE;
+  }
+
+  if (UEFIReservedMemoryPrimaryAddress < UEFIReservedMemorySecondaryAddress + UEFIReservedMemorySecondarySize
+    && UEFIReservedMemorySecondaryAddress < UEFIReservedMemoryPrimaryAddress + UEFIReservedMemoryPrimarySize) {
+    DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory: Entries have overlapped Address and Size "));
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
 STATIC
 BOOLEAN
 ValidateReservedMemoryType (
@@ -102,6 +145,8 @@ CheckUEFI (
   BOOLEAN                   UserSetMax;
   CONST CHAR8               *AsciiAudioDevicePath;
   CONST CHAR8               *AsciiReservedMemoryType;
+  UINT64                    ReservedMemoryAddress;
+  UINT64                    ReservedMemorySize;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
 
@@ -290,15 +335,40 @@ CheckUEFI (
   }
 
   //
-  // Validate ReservedMemory[N]->Type.
+  // Validate ReservedMemory[N].
   //
   for (Index = 0; Index < UserUefi->ReservedMemory.Count; ++Index) {
     AsciiReservedMemoryType = OC_BLOB_GET (&UserUefi->ReservedMemory.Values[Index]->Type);
+    ReservedMemoryAddress   = UserUefi->ReservedMemory.Values[Index]->Address;
+    ReservedMemorySize      = UserUefi->ReservedMemory.Values[Index]->Size;
+
     if (!ValidateReservedMemoryType (AsciiReservedMemoryType)) {
       DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Type is borked!\n", Index));
       ++ErrorCount;
     }
+
+    if (ReservedMemoryAddress % EFI_PAGE_SIZE != 0) {
+      DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Address (%Lu) cannot be divided by page size!\n", Index, ReservedMemoryAddress));
+      ++ErrorCount;
+    }
+
+    if (ReservedMemorySize == 0ULL) {
+      DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Size cannot be zero!\n", Index));
+      ++ErrorCount;
+    } else if (ReservedMemorySize % EFI_PAGE_SIZE != 0) {
+      DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Size (%Lu) cannot be divided by page size!\n", Index, ReservedMemorySize));
+      ++ErrorCount;
+    }
   }
+  //
+  // Now overlapping check amongst Address and Size.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserUefi->ReservedMemory.Values,
+    UserUefi->ReservedMemory.Count,
+    sizeof (UserUefi->ReservedMemory.Values[0]),
+    UEFIReservedMemoryHasOverlap
+    );
 
   return ReportError (__func__, ErrorCount);
 }
