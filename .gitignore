@@ -13,6 +13,7 @@ Utilities/EfiResTool/EfiResTool
 Utilities/macserial/macserial
 Utilities/icnspack/icnspack
 Utilities/ocvalidate/ocvalidate
+Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
 Utilities/TestBmf/Bmf
 Utilities/TestDiskImage/DiskImage

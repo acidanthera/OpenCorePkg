@@ -4,6 +4,7 @@ buildutil() {
   UTILS=(
     "AppleEfiSignTool"
     "EfiResTool"
+    "LogoutHook"
     "disklabel"
     "icnspack"
     "macserial"
@@ -178,12 +179,24 @@ package() {
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
-    "LogoutHook"
     "macrecovery"
     "kpdescribe"
     )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" "${dstdir}/Utilities"/ || exit 1
+  done
+
+  buildutil || exit 1
+
+  # Copy LogoutHook.
+  mkdir -p "${dstdir}/Utilities/LogoutHook" || exit 1
+  logoutFiles=(
+    "LogoutHook.command"
+    "README.md"
+    "nvramdump"
+    )
+  for file in "${logoutFiles[@]}"; do
+    cp "${selfdir}/Utilities/LogoutHook/${file}" "${dstdir}/Utilities/LogoutHook"/ || exit 1
   done
 
   # Copy OpenDuetPkg booter.
@@ -201,7 +214,6 @@ package() {
     fi
   done
 
-  buildutil || exit 1
   utils=(
     "macserial"
     "ocvalidate"
