@@ -3,7 +3,7 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <GlobalVar.h>
+#include <UserGlobalVar.h>
 
 EFI_GUID gAppleBootVariableGuid              = { 0X7C436110, 0XAB2A, 0X4BBB, { 0XA8, 0X80, 0XFE, 0X41, 0X99, 0X5C, 0X9F, 0X82 }};
 EFI_GUID gAppleEventProtocolGuid             = { 0X33BE0EF1, 0X89C9, 0X4A6D, { 0XBB, 0X9F, 0X69, 0XDC, 0X8D, 0XD5, 0X16, 0XB9 }};

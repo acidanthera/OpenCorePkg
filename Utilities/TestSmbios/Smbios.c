@@ -13,9 +13,9 @@
 **/
 
 #include <UserFile.h>
-#include <GlobalVar.h>
-#include <BootServices.h>
-#include <Pcd.h>
+#include <UserGlobalVar.h>
+#include <UserBootServices.h>
+#include <UserPcd.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
