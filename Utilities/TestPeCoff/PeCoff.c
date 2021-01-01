@@ -13,7 +13,7 @@
 #include <stdio.h>
 #include <string.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 EFI_STATUS
 TestImageLoad (
@@ -113,7 +113,7 @@ int ENTRY_POINT (int argc, char *argv[]) {
   uint8_t *Image;
   uint32_t ImageSize;
 
-  if ((Image = readFile (argv[1], &ImageSize)) == NULL) {
+  if ((Image = UserReadFile (argv[1], &ImageSize)) == NULL) {
     printf ("Read fail\n");
     return 1;
   }

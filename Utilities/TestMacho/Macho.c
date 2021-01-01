@@ -20,7 +20,7 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 MACH_HEADER_64 Header;
 MACH_SECTION_64 Sect;
@@ -274,7 +274,7 @@ static int FeedMacho(void *file, uint32_t size) {
 int ENTRY_POINT(int argc, char** argv) {
   uint32_t f;
   uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {
+  if ((b = UserReadFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {
     printf("Read fail\n");
     return -1;
   }

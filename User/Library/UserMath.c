@@ -33,6 +33,7 @@ DivU64x32Remainder (
   if (Remainder != NULL) {
     *Remainder = (UINT32)(Dividend % Divisor);
   }
+
   return Dividend / Divisor;
 }
 
@@ -49,6 +50,7 @@ DivS64x64Remainder (
   if (Remainder != NULL) {
     *Remainder = Dividend % Divisor;
   }
+
   return Dividend / Divisor;
 }
 
@@ -65,6 +67,7 @@ DivU64x64Remainder (
   if (Remainder != NULL) {
     *Remainder = Dividend % Divisor;
   }
+
   return Dividend / Divisor;
 }
 

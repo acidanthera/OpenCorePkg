@@ -124,7 +124,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# Compatibility headers.
 	#
-	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/GlobalVar.h
+	CFLAGS  += -include ../../User/Include/UserPcd.h -include ../../User/Include/UserGlobalVar.h
 	#
 	# UDK implementations.
 	#
@@ -132,7 +132,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o GlobalVar.o UserMath.o UserMisc.o Pcd.o OcDummy.o
+	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserOcDummy.o
 	#
 	# OcGuardLib targets.
 	#
@@ -212,7 +212,7 @@ endif
 # Miscellaneous implementations that do not depend on UDK.
 #
 VPATH   += ../../User/Library:$
-OBJS    += File.o
+OBJS    += UserFile.o
 
 #
 # Directory where objects will be produced.

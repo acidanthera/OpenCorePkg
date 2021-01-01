@@ -21,7 +21,7 @@
 #include <string.h>
 #include <sys/time.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 STATIC BOOLEAN FailedToProcess = FALSE;
 STATIC UINT32  KernelVersion   = 0;
@@ -530,7 +530,7 @@ int wrap_main(int argc, char** argv) {
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;
   const char *name = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
-  if ((Prelinked = readFile(name, &PrelinkedSize)) == NULL) {
+  if ((Prelinked = UserReadFile(name, &PrelinkedSize)) == NULL) {
     printf("Read fail %s\n", name);
     return -1;
   }
@@ -549,7 +549,7 @@ int wrap_main(int argc, char** argv) {
         TestData = NULL;
         TestDataSize = 0;
       } else {
-        TestData = readFile(argv[argi + 2], &TestDataSize);
+        TestData = UserReadFile(argv[argi + 2], &TestDataSize);
         if (TestData == NULL) {
           printf("Read data fail %s\n", argv[argi + 2]);
           abort();
@@ -559,7 +559,7 @@ int wrap_main(int argc, char** argv) {
     }
 
     if (argc - argi > 3) {
-      TestPlist = (CHAR8*) readFile(argv[argi + 3], &TestPlistSize);
+      TestPlist = (CHAR8*) UserReadFile(argv[argi + 3], &TestPlistSize);
       if (TestPlist == NULL) {
         printf("Read plist fail\n");
         free(TestData);
@@ -688,7 +688,7 @@ int wrap_main(int argc, char** argv) {
           TestData = NULL;
           TestDataSize = 0;
         } else {
-          TestData = readFile(argv[2], &TestDataSize);
+          TestData = UserReadFile(argv[2], &TestDataSize);
           if (TestData == NULL) {
             printf("Read data fail %s\n", argv[2]);
             abort();
@@ -698,7 +698,7 @@ int wrap_main(int argc, char** argv) {
       }
 
       if (argc > 3) {
-        TestPlist = (CHAR8*) readFile(argv[3], &TestPlistSize);
+        TestPlist = (CHAR8*) UserReadFile(argv[3], &TestPlistSize);
         if (TestPlist == NULL) {
           printf("Read plist fail\n");
           abort();
@@ -741,7 +741,7 @@ int wrap_main(int argc, char** argv) {
 
     ApplyKextPatches (&Context);
 
-    writeFile("out.bin", Prelinked, Context.PrelinkedSize);
+    UserWriteFile("out.bin", Prelinked, Context.PrelinkedSize);
 
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[OK] Prelink inject complete success\n"));
@@ -771,7 +771,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     return 0;
   }
 
-  if ((Prelinked = readFile("prelinkedkernel.unpack", &PrelinkedSize)) == NULL) {
+  if ((Prelinked = UserReadFile("prelinkedkernel.unpack", &PrelinkedSize)) == NULL) {
     printf("Read fail\n");
     return 0;
   }

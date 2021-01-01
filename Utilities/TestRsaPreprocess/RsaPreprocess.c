@@ -17,7 +17,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 #include <Base.h>
 
@@ -66,7 +66,7 @@ int main(int argc, char *argv[]) {
   uint32_t          PkSize;
 
   for (Index = 1; (int) Index < argc; ++Index) {
-    PublicKey = (OC_RSA_PUBLIC_KEY *)readFile (argv[Index], &PkSize);
+    PublicKey = (OC_RSA_PUBLIC_KEY *)UserReadFile (argv[Index], &PkSize);
     if (PublicKey == NULL) {
       printf ("read error\n");
       return -1;

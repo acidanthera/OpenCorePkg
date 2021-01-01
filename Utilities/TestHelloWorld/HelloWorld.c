@@ -19,7 +19,7 @@ UefiMain (
   return EFI_SUCCESS;
 }
 
-int main(int argc, char **argv) {
+int main(int argc, const char *argv[]) {
   UefiMain (gImageHandle, gST);
   return 0;
 }
