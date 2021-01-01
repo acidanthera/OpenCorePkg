@@ -212,7 +212,7 @@ endif
 # Miscellaneous implementations that do not depend on UDK.
 #
 VPATH   += ../../User/Library:$
-OBJS    += File.o
+OBJS    += UserFile.o
 
 #
 # Directory where objects will be produced.

@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <File.h>
+#include <UserFile.h>
 #include <GlobalVar.h>
 #include <BootServices.h>
 #include <Pcd.h>

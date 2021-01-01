@@ -5,7 +5,7 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <File.h>
+#include <UserFile.h>
 
 #include <Base.h>
 #include <Library/MemoryAllocationLib.h>

@@ -18,7 +18,7 @@
 
 #include <OpenCore.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 UINT32
 CheckConfig (

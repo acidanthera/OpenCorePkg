@@ -3,7 +3,7 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <File.h>
+#include <UserFile.h>
 
 uint8_t *readFile(const char *str, uint32_t *size) {
   FILE *f = fopen(str, "rb");
