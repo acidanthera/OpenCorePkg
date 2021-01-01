@@ -274,7 +274,7 @@ static int FeedMacho(void *file, uint32_t size) {
 int ENTRY_POINT(int argc, char** argv) {
   uint32_t f;
   uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {
+  if ((b = UserReadFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {
     printf("Read fail\n");
     return -1;
   }

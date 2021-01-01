@@ -10,8 +10,8 @@
 #include <stdlib.h>
 #include <stdint.h>
 
-uint8_t *readFile(const char *str, uint32_t *size);
+uint8_t *UserReadFile(const char *str, uint32_t *size);
 
-void writeFile(const char *str, void *data, uint32_t size);
+void UserWriteFile(const char *str, void *data, uint32_t size);
 
 #endif // OC_USER_FILE_H

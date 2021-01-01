@@ -75,7 +75,7 @@ int ENTRY_POINT(int argc, char** argv) {
 
   uint32_t f;
   uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "Smbios.bin", &f)) == NULL) {
+  if ((b = UserReadFile(argc > 1 ? argv[1] : "Smbios.bin", &f)) == NULL) {
     printf("Read fail\n");
     return -1;
   }
