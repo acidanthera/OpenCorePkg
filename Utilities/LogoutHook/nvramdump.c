@@ -83,7 +83,6 @@ CFDictionaryRef CreateMyDictionary(void) {
 
     const char *key[32];
     char name[64];
-    char v[32];
     CFStringRef   var;
     int i = 0;
     int n = 7; // num of keys in this GUID
@@ -98,11 +97,8 @@ CFDictionaryRef CreateMyDictionary(void) {
     guid = "8BE4DF61-93CA-11D2-AA0D-00E098032B8C";
 
     for ( i = 0; i < n; i++ ) {
-        strcpy(v, key[i]);
-        strcpy(name, guid);
-        strcat(name, ":");
-        strcat(name, v);
-        var = CFStringCreateWithCString(NULL, v, kCFStringEncodingUTF8);
+        snprintf(name, sizeof(name), "%s:%s", guid, key[i]);
+        var = CFStringCreateWithCString(NULL, key[i], kCFStringEncodingUTF8);
         result = GetOFVariable(name, &nameRef, &valueRef);
         if (result == KERN_SUCCESS) {
             CFDictionaryAddValue (dict2, var, valueRef);
@@ -123,11 +119,8 @@ CFDictionaryRef CreateMyDictionary(void) {
     guid = "36C28AB5-6566-4C50-9EBD-CBB920F83843";
 
     for ( i = 0; i < n; i++ ) {
-        strcpy(v, key[i]);
-        strcpy(name, guid);
-        strcat(name, ":");
-        strcat(name, v);
-        var = CFStringCreateWithCString(NULL, v, kCFStringEncodingUTF8);
+        snprintf(name, sizeof(name), "%s:%s", guid, key[i]);
+        var = CFStringCreateWithCString(NULL, key[i], kCFStringEncodingUTF8);
         result = GetOFVariable(name, &nameRef, &valueRef);
         if (result == KERN_SUCCESS) {
             CFDictionaryAddValue (dict3, var, valueRef);
