@@ -158,6 +158,8 @@ AllocatePages (
   VOID  *Memory;
   INTN  RetVal;
 
+  Memory = NULL;
+
   RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
 
   if (RetVal != 0) {
