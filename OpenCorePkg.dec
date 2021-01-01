@@ -833,6 +833,9 @@
   OcMemoryLib|Include/Acidanthera/Library/OcMemoryLib.h
 
   ##  @libraryclass
+  OcMpeg3Lib|Include/Acidanthera/Library/OcMpeg3Lib.h
+
+  ##  @libraryclass
   OcMiscLib|Include/Acidanthera/Library/OcMiscLib.h
 
   ##  @libraryclass

@@ -15,6 +15,7 @@ buildutil() {
     "TestImg4"
     "TestKextInject"
     "TestMacho"
+    "TestMp3"
     "TestPeCoff"
     "TestRsaPreprocess"
     "TestSmbios"
