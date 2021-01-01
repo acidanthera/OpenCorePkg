@@ -15,6 +15,7 @@ CpuBreakpoint (
   )
 {
   ASSERT (FALSE);
+
   while (TRUE);
 }
 
@@ -53,14 +54,24 @@ AsmCpuid (
 {
   UINT32 eax = 0, ebx = 0, ecx = 0, edx = 0;
 
-  asm ("cpuid\n"
-       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-       : "0" (Index));
+  asm (
+    "cpuid\n"
+    : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+    : "0" (Index)
+    );
 
-  if (Eax) *Eax = eax;
-  if (Ebx) *Ebx = ebx;
-  if (Ecx) *Ecx = ecx;
-  if (Edx) *Edx = edx;
+  if (Eax) {
+    *Eax = eax;
+  }
+  if (Ebx) {
+    *Ebx = ebx;
+  }
+  if (Ecx) {
+    *Ecx = ecx;
+  }
+  if (Edx) {
+    *Edx = edx;
+  }
 
   return Index;
 }
@@ -77,14 +88,25 @@ AsmCpuidEx (
 {
   UINT32 eax = 0, ebx = 0, ecx = 0, edx = 0;
 
-  asm ("cpuid\n"
-       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-       : "0" (Index), "2" (SubIndex));
+  asm (
+    "cpuid\n"
+    : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
+    : "0"  (Index),
+    "2"    (SubIndex)
+    );
 
-  if (Eax) *Eax = eax;
-  if (Ebx) *Ebx = ebx;
-  if (Ecx) *Ecx = ecx;
-  if (Edx) *Edx = edx;
+  if (Eax) {
+    *Eax = eax;
+  }
+  if (Ebx) {
+    *Ebx = ebx;
+  }
+  if (Ecx) {
+    *Ecx = ecx;
+  }
+  if (Edx) {
+    *Edx = edx;
+  }
 
   return Index;
 }

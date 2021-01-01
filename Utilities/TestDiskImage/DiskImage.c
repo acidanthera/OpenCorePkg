@@ -15,7 +15,7 @@
 
 #include <string.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 int ENTRY_POINT (int argc, char *argv[]) {
   if (argc < 2) {
@@ -38,7 +38,7 @@ int ENTRY_POINT (int argc, char *argv[]) {
     uint8_t  *UncompDmg = NULL;
     uint32_t UncompSize;
 
-    if ((Dmg = readFile (argv[i], &DmgSize)) == NULL) {
+    if ((Dmg = UserReadFile (argv[i], &DmgSize)) == NULL) {
       printf ("Read fail\n");
       goto ContinueDmgLoop;
     }
@@ -75,7 +75,7 @@ int ENTRY_POINT (int argc, char *argv[]) {
     DmgContextValid = 1;
 
     if (strcmp (argv[i + 1], "n") != 0) {
-      if ((Chunklist = readFile (argv[i + 1], &ChunklistSize)) == NULL) {
+      if ((Chunklist = UserReadFile (argv[i + 1], &ChunklistSize)) == NULL) {
         printf ("Read fail\n");
         goto ContinueDmgLoop;
       }

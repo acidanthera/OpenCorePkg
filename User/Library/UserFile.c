@@ -3,9 +3,9 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <File.h>
+#include <UserFile.h>
 
-uint8_t *readFile(const char *str, uint32_t *size) {
+uint8_t *UserReadFile(const char *str, uint32_t *size) {
   FILE *f = fopen(str, "rb");
 
   if (!f) return NULL;
@@ -25,14 +25,12 @@ uint8_t *readFile(const char *str, uint32_t *size) {
   return string;
 }
 
-void writeFile(const char *str, void *data, uint32_t size) {
+void UserWriteFile(const char *str, void *data, uint32_t size) {
   FILE *Fh = fopen(str, "wb");
 
-  if (Fh != NULL) {
-    if (fwrite (data, size, 1, Fh) != 1)
-      abort();
-    fclose(Fh);
-  } else {
+  if (!Fh) abort();
+  
+  if (fwrite (data, size, 1, Fh) != 1)
     abort();
-  }
+  fclose(Fh);
 }

@@ -18,6 +18,10 @@ ifeq ($(UDK_PATH),)
 	endif
 endif
 
+ifeq ($(OC_USER),)
+	OC_USER := ../..
+endif
+
 ifeq ($(OS),Windows_NT)
 	DIST ?= Windows
 else
@@ -110,8 +114,8 @@ endif
 #
 # Search Paths.
 #
-CFLAGS += -I../../User/Include
-CFLAGS += -I../../Include/Acidanthera -I../../Include/Apple -I../../Include/Apple/$(UDK_ARCH) -I../../Include/Generic -I../../Include/Intel -I../../Include/Microsoft
+CFLAGS += -I$(OC_USER)/User/Include
+CFLAGS += -I$(OC_USER)/Include/Acidanthera -I$(OC_USER)/Include/Apple -I$(OC_USER)/Include/Apple/$(UDK_ARCH) -I$(OC_USER)/Include/Generic -I$(OC_USER)/Include/Intel -I$(OC_USER)/Include/Microsoft
 
 #
 # Skip including UDK when suggesting STANDALONE mode.
@@ -124,7 +128,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# Compatibility headers.
 	#
-	CFLAGS  += -include ../../User/Include/Pcd.h -include ../../User/Include/GlobalVar.h
+	CFLAGS  += -include $(OC_USER)/User/Include/UserPcd.h -include $(OC_USER)/User/Include/UserGlobalVar.h
 	#
 	# UDK implementations.
 	#
@@ -132,7 +136,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
-	OBJS    += BaseMemoryLib.o BootServices.o GlobalVar.o UserMath.o UserMisc.o Pcd.o OcDummy.o
+	OBJS    += UserBaseMemoryLib.o UserBootServices.o UserGlobalVar.o UserMath.o UserMisc.o UserPcd.o UserOcDummy.o
 	#
 	# OcGuardLib targets.
 	#
@@ -194,25 +198,25 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdePkg/Library/UefiDevicePathLib:$\
 				$(UDK_PATH)/MdeModulePkg/Library/BaseBmpSupportLib:$\
 				$(UDK_PATH)/UefiCpuPkg/Library/MtrrLib:$\
-				../../Library/OcGuardLib:$\
-				../../Library/OcSerializeLib:$\
-				../../Library/OcTemplateLib:$\
-				../../Library/OcXmlLib:$\
-				../../Library/OcStringLib:$\
-				../../Library/OcCryptoLib:$\
-				../../Library/OcCryptoLib/$(UDK_ARCH):$\
-				../../Library/OcMachoLib:$\
-				../../Library/OcAppleKeysLib:$\
-				../../Library/OcCpuLib:$\
-				../../Library/OcMiscLib:$\
-				../../Library/OcAppleKernelLib
+				$(OC_USER)/Library/OcGuardLib:$\
+				$(OC_USER)/Library/OcSerializeLib:$\
+				$(OC_USER)/Library/OcTemplateLib:$\
+				$(OC_USER)/Library/OcXmlLib:$\
+				$(OC_USER)/Library/OcStringLib:$\
+				$(OC_USER)/Library/OcCryptoLib:$\
+				$(OC_USER)/Library/OcCryptoLib/$(UDK_ARCH):$\
+				$(OC_USER)/Library/OcMachoLib:$\
+				$(OC_USER)/Library/OcAppleKeysLib:$\
+				$(OC_USER)/Library/OcCpuLib:$\
+				$(OC_USER)/Library/OcMiscLib:$\
+				$(OC_USER)/Library/OcAppleKernelLib
 endif
 
 #
 # Miscellaneous implementations that do not depend on UDK.
 #
-VPATH   += ../../User/Library:$
-OBJS    += File.o
+VPATH   += $(OC_USER)/User/Library:$
+OBJS    += UserFile.o
 
 #
 # Directory where objects will be produced.

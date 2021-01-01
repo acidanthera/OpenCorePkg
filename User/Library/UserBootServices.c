@@ -3,43 +3,40 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <BootServices.h>
+#include <UserBootServices.h>
 
-EFI_BOOT_SERVICES mBootServices =
-{
-  .RaiseTPL       = DummyRaiseTPL,
-  .LocateProtocol = DummyLocateProtocol,
-  .AllocatePages  = DummyAllocatePages,
+#include <stdio.h>
+
+EFI_BOOT_SERVICES mBootServices = {
+  .RaiseTPL                  = DummyRaiseTPL,
+  .LocateProtocol            = DummyLocateProtocol,
+  .AllocatePages             = DummyAllocatePages,
   .InstallConfigurationTable = DummyInstallConfigurationTable
 };
 
-EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL mConOut = 
-{
+EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL mConOut = {
   .OutputString = NullTextOutputString
 };
 
-EFI_SYSTEM_TABLE mSystemTable =
-{
+EFI_SYSTEM_TABLE mSystemTable = {
   .BootServices = &mBootServices,
   .ConOut       = &mConOut
 };
 
-EFI_RUNTIME_SERVICES mRuntimeServices = {
-  
-};
+EFI_RUNTIME_SERVICES  mRuntimeServices = {};
 
-EFI_SYSTEM_TABLE  *gST  = &mSystemTable;
-EFI_BOOT_SERVICES *gBS  = &mBootServices;
+EFI_SYSTEM_TABLE      *gST  = &mSystemTable;
+EFI_BOOT_SERVICES     *gBS  = &mBootServices;
 
-EFI_HANDLE gImageHandle = (EFI_HANDLE)(UINTN) 0x12345;
+EFI_HANDLE            gImageHandle = (EFI_HANDLE) 0xDEADBABEULL;
 
-BOOLEAN mPostEBS = FALSE;
-EFI_SYSTEM_TABLE *mDebugST = &mSystemTable;
+BOOLEAN               mPostEBS  = FALSE;
+EFI_SYSTEM_TABLE      *mDebugST = &mSystemTable;
 
-EFI_RUNTIME_SERVICES *gRT  = &mRuntimeServices;
+EFI_RUNTIME_SERVICES  *gRT      = &mRuntimeServices;
 
-#define CONFIG_TABLE_SIZE_INCREASED 0x10
-UINTN mSystemTableAllocateSize = 0;
+#define CONFIG_TABLE_SIZE_INCREASED  0x10
+UINTN mSystemTableAllocateSize  = 0ULL;
 
 EFI_TPL
 EFIAPI
@@ -48,23 +45,23 @@ DummyRaiseTPL (
   )
 {
   ASSERT (FALSE);
+
   return 0;
 }
 
 EFI_STATUS
+EFIAPI
 DummyLocateProtocol (
-  EFI_GUID        *ProtocolGuid,
-  VOID            *Registration,
-  VOID            **Interface
+  IN  EFI_GUID  *Protocol,
+  IN  VOID      *Registration, OPTIONAL
+  OUT VOID      **Interface
   )
 {
-  (VOID) ProtocolGuid;
-  (VOID) Registration;
-  (VOID) Interface;
   return EFI_NOT_FOUND;
 }
 
 EFI_STATUS
+EFIAPI
 DummyAllocatePages (
   IN     EFI_ALLOCATE_TYPE            Type,
   IN     EFI_MEMORY_TYPE              MemoryType,
@@ -80,13 +77,17 @@ DummyAllocatePages (
 EFI_STATUS
 EFIAPI
 DummyInstallConfigurationTable (
-  IN EFI_GUID *Guid,
-  IN VOID     *Table
+  IN EFI_GUID                 *Guid,
+  IN VOID                     *Table
   )
 {
-  UINTN                   Index;
-  EFI_CONFIGURATION_TABLE *EfiConfigurationTable;
-  EFI_CONFIGURATION_TABLE *OldTable;
+  //
+  // NOTE: This code is adapted from original EDK II implementations.
+  //
+
+  UINTN                    Index;
+  EFI_CONFIGURATION_TABLE  *EfiConfigurationTable;
+  EFI_CONFIGURATION_TABLE  *OldTable;
 
   //
   // If Guid is NULL, then this operation cannot be performed
@@ -133,13 +134,10 @@ DummyInstallConfigurationTable (
       &(gST->ConfigurationTable[Index + 1]),
       (gST->NumberOfTableEntries - Index) * sizeof (EFI_CONFIGURATION_TABLE)
       );
-
   } else {
-
     //
     // No matching GUIDs were found, so this is an add operation.
     //
-
     if (Table == NULL) {
       //
       // If Table is NULL on an add operation, then return an error.
@@ -155,7 +153,7 @@ DummyInstallConfigurationTable (
       // Allocate a table with one additional entry.
       //
       mSystemTableAllocateSize += (CONFIG_TABLE_SIZE_INCREASED * sizeof (EFI_CONFIGURATION_TABLE));
-      EfiConfigurationTable = AllocatePool (mSystemTableAllocateSize);
+      EfiConfigurationTable     = AllocatePool (mSystemTableAllocateSize);
       if (EfiConfigurationTable == NULL) {
         //
         // If a new table could not be allocated, then return an error.
@@ -203,7 +201,7 @@ DummyInstallConfigurationTable (
     //
     // Fill in the new entry
     //
-    CopyGuid ((VOID *)&EfiConfigurationTable[Index].VendorGuid, Guid);
+    CopyGuid ((VOID *) &EfiConfigurationTable[Index].VendorGuid, Guid);
     EfiConfigurationTable[Index].VendorTable  = Table;
 
     //
@@ -212,27 +210,26 @@ DummyInstallConfigurationTable (
     gST->NumberOfTableEntries++;
   }
 
-  //
-  // Fix up the CRC-32 in the EFI System Table
-  //
-  // CalculateEfiHdrCrc (&gST->Hdr);
-
   return EFI_SUCCESS;
 }
 
 EFI_STATUS
 EFIAPI
 NullTextOutputString (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN CHAR16                          *String
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN CHAR16                           *String
   )
 {
-  while (*String) {
+  while (*String != '\0') {
     if (*String != '\r') {
-      printf("%c", (char) *String);
+      //
+      // Cast string to CHAR8 to truncate unicode symbols.
+      //
+      putchar ((CHAR8) *String);
     }
 
     ++String;
   }
+  
   return EFI_SUCCESS;
 }

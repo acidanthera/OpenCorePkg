@@ -18,7 +18,7 @@
 
 #include <OpenCore.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 UINT32
 CheckConfig (
@@ -79,7 +79,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   // Read config file (Only one single config is supported).
   //
   ConfigFileName   = argv[1];
-  ConfigFileBuffer = readFile (ConfigFileName, &ConfigFileSize);
+  ConfigFileBuffer = UserReadFile (ConfigFileName, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ConfigFileName));
     return -1;

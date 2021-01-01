@@ -4,7 +4,7 @@
 #include <stdlib.h>
 #include <string.h>
 
-#include <File.h>
+#include <UserFile.h>
 
 #include <Base.h>
 
@@ -53,7 +53,7 @@ int debugManifest (char *manifestName)
   uint32_t ManSize;
   DERImg4ManifestInfo ManInfo;
 
-  Manifest = readFile (manifestName, &ManSize);
+  Manifest = UserReadFile (manifestName, &ManSize);
   if (Manifest == NULL) {
     printf ("\n!!! read error !!!\n");
     return -1;
@@ -112,7 +112,7 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
   uint32_t ManSize, ImgSize;
   DERImg4ManifestInfo ManInfo;
 
-  Manifest = readFile (manifestName, &ManSize);
+  Manifest = UserReadFile (manifestName, &ManSize);
   if (Manifest == NULL) {
     printf ("\n!!! read error !!!\n");
     return -1;
@@ -132,7 +132,7 @@ int verifyImg4 (char *imageName, char *manifestName, char *type)
 
   InternalDebugEnvInfo (&ManInfo.environment);
 
-  Image = readFile (imageName, &ImgSize);
+  Image = UserReadFile (imageName, &ImgSize);
   if (Image == NULL) {
     printf ("\n!!! read error !!!\n");
     return -1;
