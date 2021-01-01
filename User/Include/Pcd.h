@@ -39,40 +39,42 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/OcCryptoLib.h>
 
-extern UINT32 _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize;
+extern UINT32   _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdUgaConsumeSupport;
-extern UINT8 _gPcd_FixedAtBuild_PcdDebugPropertyMask;
-extern UINT8 _gPcd_FixedAtBuild_PcdDebugClearMemoryValue;
-extern UINT32 _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel;
-extern UINT32 _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel;
-extern UINT32 _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength;
-extern UINT32 _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength;
-extern UINT32 _gPcd_FixedAtBuild_PcdMaximumLinkedListLength;
-extern BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList;
-extern UINT32 _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs;
-extern UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
-extern BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
-extern BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
+extern UINT8    _gPcd_FixedAtBuild_PcdDebugPropertyMask;
+extern UINT8    _gPcd_FixedAtBuild_PcdDebugClearMemoryValue;
+extern UINT32   _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel;
+extern UINT32   _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel;
+extern UINT32   _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength;
+extern UINT32   _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength;
+extern UINT32   _gPcd_FixedAtBuild_PcdMaximumLinkedListLength;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdVerifyNodeInList;
+extern UINT32   _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs;
+extern UINT32   _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
 
-#define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize  _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
-#define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport  _gPcd_FixedAtBuild_PcdUgaConsumeSupport
-#define _PCD_GET_MODE_8_PcdDebugPropertyMask  _gPcd_FixedAtBuild_PcdDebugPropertyMask
-#define _PCD_GET_MODE_8_PcdDebugClearMemoryValue  _gPcd_FixedAtBuild_PcdDebugClearMemoryValue
-#define _PCD_GET_MODE_32_PcdFixedDebugPrintErrorLevel  _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel
-#define _PCD_GET_MODE_32_PcdDebugPrintErrorLevel  _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel
-#define _PCD_GET_MODE_32_PcdMaximumAsciiStringLength  _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength
-#define _PCD_GET_MODE_32_PcdMaximumUnicodeStringLength  _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength
-#define _PCD_GET_MODE_32_PcdMaximumLinkedListLength  _gPcd_FixedAtBuild_PcdMaximumLinkedListLength
-#define _PCD_GET_MODE_BOOL_PcdVerifyNodeInList  _gPcd_FixedAtBuild_PcdVerifyNodeInList
-#define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli  (512U | 256U)
+#define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize         _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
+#define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport               _gPcd_FixedAtBuild_PcdUgaConsumeSupport
+#define _PCD_GET_MODE_8_PcdDebugPropertyMask                  _gPcd_FixedAtBuild_PcdDebugPropertyMask
+#define _PCD_GET_MODE_8_PcdDebugClearMemoryValue              _gPcd_FixedAtBuild_PcdDebugClearMemoryValue
+#define _PCD_GET_MODE_32_PcdFixedDebugPrintErrorLevel         _gPcd_FixedAtBuild_PcdFixedDebugPrintErrorLevel
+#define _PCD_GET_MODE_32_PcdDebugPrintErrorLevel              _gPcd_FixedAtBuild_PcdDebugPrintErrorLevel
+#define _PCD_GET_MODE_32_PcdMaximumAsciiStringLength          _gPcd_FixedAtBuild_PcdMaximumAsciiStringLength
+#define _PCD_GET_MODE_32_PcdMaximumUnicodeStringLength        _gPcd_FixedAtBuild_PcdMaximumUnicodeStringLength
+#define _PCD_GET_MODE_32_PcdMaximumLinkedListLength           _gPcd_FixedAtBuild_PcdMaximumLinkedListLength
+#define _PCD_GET_MODE_BOOL_PcdVerifyNodeInList                _gPcd_FixedAtBuild_PcdVerifyNodeInList
+#define _PCD_GET_MODE_16_PcdOcCryptoAllowedRsaModuli          (512U | 256U)
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes  \
   ((1U << OcSigHashTypeSha256) | (1U << OcSigHashTypeSha384) | (1U << OcSigHashTypeSha512))
 #define _PCD_GET_MODE_32_PcdCpuNumberOfReservedVariableMtrrs  _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs
-// this will not be of any effect at userspace
-#define _PCD_GET_MODE_64_PcdPciExpressBaseAddress 0
-#define _PCD_GET_MODE_64_PcdPciExpressBaseSize 0
-#define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount  _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount
+//
+// This will not be of any effect at userspace.
+//
+#define _PCD_GET_MODE_64_PcdPciExpressBaseAddress             0
+#define _PCD_GET_MODE_64_PcdPciExpressBaseSize                0
+#define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount        _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount
 #define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader           _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
 
 #endif // OC_USER_PCD_H
