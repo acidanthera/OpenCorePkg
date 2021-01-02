@@ -1840,7 +1840,14 @@ PatchForceSecureBootScheme (
   UINT8        *HybridAp;
   UINT32       Diff;
 
-  ASSERT (Patcher != NULL);
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    return EFI_NOT_FOUND;
+  }
 
   //
   // This code is for debugging APFS snapshot verification for Big Sur.
@@ -1856,11 +1863,6 @@ PatchForceSecureBootScheme (
   // - __img4_chip_ap_hybrid (hybrid arm/x86 ap)
   //   for platfirms with v2 or newer coprocessor and personalised policy (2).
   //
-
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
-    return EFI_SUCCESS;
-  }
 
   Last = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext)
     + MachoGetFileSize (&Patcher->MachContext) - 64);
