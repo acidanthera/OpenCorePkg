@@ -462,7 +462,10 @@
   gMicrosoftVariableGuid                     = { 0x77FA9ABD, 0x0359, 0x4D32, { 0xBD, 0x60, 0x28, 0xF4, 0xE7, 0x8F, 0x78, 0x4B }}
 
 [Protocols]
-  ## Include/Acidanthera/Protocol/Audio.h
+  ## Include/Acidanthera/Protocol/AudioDecode.h
+  gEfiAudioDecodeProtocolGuid                = { 0xAF3F6C23, 0x8132, 0x4880, { 0xB3, 0x29, 0x04, 0x8D, 0xF7, 0x1D, 0xD8, 0x6A }}
+
+  ## Include/Acidanthera/Protocol/AudioIo.h
   gEfiAudioIoProtocolGuid                    = { 0xF05B559C, 0x1971, 0x4AF5, { 0xB2, 0xAE, 0xD6, 0x08, 0x08, 0xF7, 0x4F, 0x70 }}
 
   ## Include/Acidanthera/Protocol/HdaCodecInfo.h
@@ -876,6 +879,9 @@
 
   ##  @libraryclass
   OcVirtualFsLib|Include/Acidanthera/Library/OcVirtualFsLib.h
+
+  ##  @libraryclass
+  OcWaveLib|Include/Acidanthera/Library/OcWaveLib.h
 
   ##  @libraryclass
   OcXmlLib|Include/Acidanthera/Library/OcXmlLib.h

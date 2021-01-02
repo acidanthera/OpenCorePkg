@@ -135,15 +135,4 @@ InternalOcAudioVoiceOverGetLanguage (
   OUT    CONST CHAR8                      **LanguageString
   );
 
-EFI_STATUS
-InternalGetRawData (
-  IN UINT8                           *Buffer,
-  IN UINTN                           BufferSize,
-  OUT UINT8                          **RawBuffer,
-  OUT UINTN                          *RawBufferSize,
-  OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
-  OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
-  OUT UINT8                          *Channels
-  );
-
 #endif // OC_AUDIO_INTERNAL_H

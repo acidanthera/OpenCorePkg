@@ -15,6 +15,7 @@
 #ifndef OC_AUDIO_PROTOCOL_H
 #define OC_AUDIO_PROTOCOL_H
 
+#include <Protocol/AudioIo.h>
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
@@ -138,6 +139,9 @@ EFI_STATUS
   @paran[in]      LanguageCode Language code for the file.
   @param[out]     Buffer       Pointer to buffer.
   @param[out]     BufferSize   Pointer to buffer size.
+  @param[out]     Frequency    Decoded PCM frequency.
+  @param[out]     Bits         Decoded bit count.
+  @param[out]     Channels     Decoded amount of channels.
 
   @retval EFI_SUCCESS on successful file lookup.
 **/
@@ -148,7 +152,10 @@ EFI_STATUS
   IN  UINT32                          File,
   IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
   OUT UINT8                           **Buffer,
-  OUT UINT32                          *BufferSize
+  OUT UINT32                          *BufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ      *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS      *Bits,
+  OUT UINT8                           *Channels
   );
 
 /**

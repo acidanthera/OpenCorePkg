@@ -5638,14 +5638,15 @@ functioning. Feature highlights:
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the only supported audio file format is WAVE PCM. While it is
+  directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
 
   Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
-  files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].wav}.
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].[audio ext]}.
+  For unlocalised files filename does not include the language code and looks as follows:
+  \texttt{[audio type]\_[audio path].[audio ext]}. Audio extension can either be \texttt{mp3}
+  or \texttt{wav}.
 
   \begin{itemize}
   \tightlist
@@ -5659,7 +5660,7 @@ functioning. Feature highlights:
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.mp3}.
   \end{itemize}
 
   Audio localisation is determined separately for macOS bootloader and OpenCore.

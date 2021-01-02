@@ -46,6 +46,7 @@
 //
 // Proctols that are consumed/produced.
 //
+#include <Protocol/AudioDecode.h>
 #include <Protocol/AudioIo.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/DevicePathUtilities.h>
@@ -64,5 +65,6 @@
 // Driver Bindings.
 extern EFI_DRIVER_BINDING_PROTOCOL gHdaControllerDriverBinding;
 extern EFI_DRIVER_BINDING_PROTOCOL gHdaCodecDriverBinding;
+extern EFI_AUDIO_DECODE_PROTOCOL   gEfiAudioDecodeProtocol;
 
 #endif // EFI_AUDIODXE_H

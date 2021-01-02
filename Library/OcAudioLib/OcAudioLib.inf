@@ -36,7 +36,6 @@
   OcAudioLib.c
   OcAudioInternal.h
   OcAudioVoiceOver.c
-  OcAudioWave.c
 
 [Packages]
   MdePkg/MdePkg.dec

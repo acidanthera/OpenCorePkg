@@ -279,10 +279,8 @@ InternalOcAudioPlayFile (
 {
   EFI_STATUS                      Status;
   OC_AUDIO_PROTOCOL_PRIVATE       *Private;
-  UINT8                           *Buffer;
-  UINT32                          BufferSize;
   UINT8                           *RawBuffer;
-  UINTN                           RawBufferSize;
+  UINT32                          RawBufferSize;
   EFI_AUDIO_IO_PROTOCOL_FREQ      Frequency;
   EFI_AUDIO_IO_PROTOCOL_BITS      Bits;
   UINT8                           Channels;
@@ -299,24 +297,17 @@ InternalOcAudioPlayFile (
     Private->ProviderContext,
     File,
     Private->Language,
-    &Buffer,
-    &BufferSize
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has no file %d for lang %d - %r\n", File, Private->Language, Status));
-    return EFI_NOT_FOUND;
-  }
-
-  Status = InternalGetRawData (
-    Buffer,
-    BufferSize,
     &RawBuffer,
     &RawBufferSize,
     &Frequency,
     &Bits,
     &Channels
     );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAU: PlayFile has no file %d for lang %d - %r\n", File, Private->Language, Status));
+    return EFI_NOT_FOUND;
+  }
 
   DEBUG ((
     DEBUG_INFO,
@@ -333,7 +324,7 @@ InternalOcAudioPlayFile (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAU: PlayFile has invalid file %d for lang %d - %r\n", File, Private->Language, Status));
     if (Private->ProviderRelease != NULL) {
-      Private->ProviderRelease (Private->ProviderContext, Buffer);
+      Private->ProviderRelease (Private->ProviderContext, RawBuffer);
     }
     return EFI_NOT_FOUND;
   }
@@ -341,7 +332,7 @@ InternalOcAudioPlayFile (
   This->StopPlayback (This, Wait);
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
-  Private->CurrentBuffer = Buffer;
+  Private->CurrentBuffer = RawBuffer;
 
   Status = Private->AudioIo->SetupPlayback (
     Private->AudioIo,

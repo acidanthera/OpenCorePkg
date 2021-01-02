@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Dec 31 17:45:46 2020
-%DIF ADD ../Configuration.tex        Fri Jan  1 00:20:20 2021
+%DIF DEL PreviousConfiguration.tex   Wed Dec 16 19:38:04 2020
+%DIF ADD ../Configuration.tex        Sat Jan  2 07:28:05 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5698,14 +5698,16 @@ functioning. Feature highlights:
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the only supported audio file format is WAVE PCM. While it is
+  directory. Currently the \DIFdelbegin \DIFdel{only }\DIFdelend supported audio file \DIFdelbegin \DIFdel{format is }\DIFdelend \DIFaddbegin \DIFadd{formats are MP3 and }\DIFaddend WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
 
   Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
-  files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].wav}.
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin [\DIFadd{audio ext}]\DIFaddend }.
+  For unlocalised files filename does not include the language code and looks as follows:
+  \texttt{[audio type]\_[audio path].\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin [\DIFadd{audio ext}]\DIFaddend }. \DIFaddbegin \DIFadd{Audio extension can either be }\texttt{\DIFadd{mp3}}
+  \DIFadd{or }\texttt{\DIFadd{wav}}\DIFadd{.
+}\DIFaddend 
 
   \begin{itemize}
   \tightlist
@@ -5719,7 +5721,7 @@ functioning. Feature highlights:
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin \DIFadd{mp3}\DIFaddend }.
   \end{itemize}
 
   Audio localisation is determined separately for macOS bootloader and OpenCore.
