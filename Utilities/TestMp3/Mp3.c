@@ -15,7 +15,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcMpeg3Lib.h>
+#include <Library/OcMp3Lib.h>
 #include <Library/OcMiscLib.h>
 
 #include <string.h>
@@ -39,7 +39,7 @@ int ENTRY_POINT(int argc, char** argv) {
   EFI_AUDIO_IO_PROTOCOL_BITS bits;
   UINT8                      channels;
 
-  EFI_STATUS Status = OcDecodeMpeg3 (
+  EFI_STATUS Status = OcDecodeMp3 (
     buffer,
     size,
     &outbuffer,
@@ -70,7 +70,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     EFI_AUDIO_IO_PROTOCOL_BITS bits;
     UINT8                      channels;
 
-    EFI_STATUS Status = OcDecodeMpeg3 (
+    EFI_STATUS Status = OcDecodeMp3 (
       Data,
       Size,
       &outbuffer,

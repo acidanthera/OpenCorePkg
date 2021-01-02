@@ -18,7 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcGuardLib.h>
-#include <Library/OcMpeg3Lib.h>
+#include <Library/OcMp3Lib.h>
 #include "helix/mp3dec.h"
 
 /**
@@ -86,7 +86,7 @@ BufferResize (
 }
 
 EFI_STATUS
-OcDecodeMpeg3 (
+OcDecodeMp3 (
   IN  CONST VOID                     *InBuffer,
   IN  UINT32                         InBufferSize,
   OUT VOID                           **OutBuffer,

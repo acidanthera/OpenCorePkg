@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_MPEG3_LIB_H
-#define OC_MPEG3_LIB_H
+#ifndef OC_MP3_LIB_H
+#define OC_MP3_LIB_H
 
 #include <Protocol/AudioIo.h>
 
@@ -21,7 +21,7 @@
   Decode MP3 audio to PCM audio.
   WARNING: This method does not take untrusted data.
 
-  @param[in]  InBuffer       Buffer with mpeg3 audio data.
+  @param[in]  InBuffer       Buffer with mp3 audio data.
   @param[in]  InBufferSize   InBuffer size in bytes.
   @param[out] OutBuffer      Decoded PCM data allocated from pool (needs to be freed).
   @param[out] OutBufferSize  Decoded PCM data size in bytes.
@@ -34,7 +34,7 @@
   @retval EFI_OUT_OF_RESOURCES on memory allocation failure.
 **/
 EFI_STATUS
-OcDecodeMpeg3 (
+OcDecodeMp3 (
   IN  CONST VOID                     *InBuffer,
   IN  UINT32                         InBufferSize,
   OUT VOID                           **OutBuffer,
@@ -44,4 +44,4 @@ OcDecodeMpeg3 (
   OUT UINT8                          *Channels
   );
 
-#endif // OC_MPEG3_LIB_H
+#endif // OC_MP3_LIB_H

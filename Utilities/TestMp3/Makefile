@@ -6,7 +6,7 @@
 PROJECT = Mp3
 PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
-	OcMpeg3Lib.o \
+	OcMp3Lib.o \
 	bitstream.o \
 	buffers.o \
 	dct32.o \
@@ -22,8 +22,8 @@ OBJS    = $(PROJECT).o \
 	stproc.o \
 	subband.o \
 	trigtabs.o
-VPATH   = ../../Library/OcMpeg3Lib:$\
-	../../Library/OcMpeg3Lib/helix
+VPATH   = ../../Library/OcMp3Lib:$\
+	../../Library/OcMp3Lib/helix
 include ../../User/Makefile
 ifneq ($(SANITIZE),)
 	CFLAGS += -fno-sanitize=shift
