@@ -3040,9 +3040,9 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
-  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
-    an alternate one if it is supported. For example, this could make a use of old-style icons
-    with a custom background colour.
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_HIDE\_THEMED\_ICONS}, prefers builtin icons
+    for certain icon categories to match the theme style. For example, this could force
+    displaying the builtin Time Machine icon. Requires \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}.
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
   in the picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
@@ -3178,6 +3178,23 @@ entry choice will update till next manual reconfiguration.
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple BootPicker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
+
+\item
+  \texttt{PickerVariant}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Choose specific icon set used for boot management.
+  
+  The following values are supported:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Automatically select one set of icons based on \texttt{DefaultBackground}
+  colour.
+  \item \texttt{Default} --- Normal icon set (without prefix).
+  \item \texttt{Old} --- Vintage icon set (\texttt{Old} filename prefix).
+  \item \texttt{Modern} --- Nouveau icon set (\texttt{Modern} filename prefix).
+  \item Other value --- Custom icon set if supported by the resources.
+  \end{itemize}
 
 \end{enumerate}
 

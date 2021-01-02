@@ -849,7 +849,14 @@ BootPickerEntriesAdd (
 
   VolumeEntry->Context = Entry;
 
-  if (UseVolumeIcon) {
+  //
+  // Load volume icons when allowed.
+  // Do not load volume icons for Time Machine entries unless explicitly enabled.
+  // This works around Time Machine icon style incompatibilities.
+  //
+  if (UseVolumeIcon
+    && (Entry->Type != OC_BOOT_APPLE_TIME_MACHINE
+      || (Context->PickerAttributes & OC_ATTR_HIDE_THEMED_ICONS) == 0)) {
     Status = Context->GetEntryIcon (Context, Entry, &IconFileData, &IconFileSize);
 
     if (!EFI_ERROR (Status)) {

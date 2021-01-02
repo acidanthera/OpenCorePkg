@@ -739,6 +739,7 @@ OcMiscBoot (
   UINTN                  BlessOverrideSize;
   CHAR16                 **BlessOverride;
   CONST CHAR8            *AsciiPicker;
+  CONST CHAR8            *AsciiPickerVariant;
   CONST CHAR8            *AsciiDmg;
 
   AsciiPicker = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
@@ -753,6 +754,8 @@ OcMiscBoot (
     DEBUG ((DEBUG_WARN, "OC: Unknown PickerMode: %a, using builtin\n", AsciiPicker));
     PickerMode = OcPickerModeBuiltin;
   }
+
+  AsciiPickerVariant = OC_BLOB_GET (&Config->Misc.Boot.PickerVariant);
 
   AsciiDmg = OC_BLOB_GET (&Config->Misc.Security.DmgLoading);
 
@@ -877,6 +880,7 @@ OcMiscBoot (
   Context->PickerMode            = PickerMode;
   Context->ConsoleAttributes     = Config->Misc.Boot.ConsoleAttributes;
   Context->PickerAttributes      = Config->Misc.Boot.PickerAttributes;
+  Context->PickerVariant         = AsciiPickerVariant;
   Context->BlacklistAppleUpdate  = Config->Misc.Security.BlacklistAppleUpdate;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_VERSION_UI) != 0) {

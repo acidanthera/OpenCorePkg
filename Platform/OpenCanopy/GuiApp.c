@@ -116,7 +116,7 @@ LoadImageFileFromStorage (
   IN  UINT32                   MatchWidth,
   IN  UINT32                   MatchHeight,
   IN  BOOLEAN                  Icon,
-  IN  BOOLEAN                  Old,
+  IN  CONST CHAR8              *Prefix,
   IN  BOOLEAN                  AllowLessSize
   )
 {
@@ -137,7 +137,7 @@ LoadImageFileFromStorage (
       Path,
       sizeof (Path),
       OPEN_CORE_IMAGE_PATH L"%a%a%a.icns",
-      Old ? "Old" : "",
+      Prefix,
       Index > 0 ? "Ext" : "",
       ImageFilePath
       );
@@ -169,11 +169,11 @@ LoadImageFileFromStorage (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCUI: Failed to load image (%u/%u) %s old:%d icon:%d - %r\n",
+        "OCUI: Failed to load image (%u/%u) %s prefix:%a icon:%d - %r\n",
         Index+1,
         ImageCount,
         Path,
-        Old,
+        Prefix,
         Icon,
         Status
         ));
@@ -274,7 +274,7 @@ InternalContextConstruct (
   UINTN                              UiScaleSize;
   UINT32                             Index;
   UINT32                             ImageDimension;
-  BOOLEAN                            Old;
+  CONST CHAR8                        *Prefix;
   BOOLEAN                            Result;
 
   ASSERT (Context != NULL);
@@ -315,9 +315,16 @@ InternalContextConstruct (
   mBackgroundPixel.Blue     = Context->BackgroundColor.Pixel.Blue;
   mBackgroundPixel.Reserved = 0xFF;
 
-  Old = Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY;
-  if ((Picker->PickerAttributes & OC_ATTR_USE_ALTERNATE_ICONS) != 0) {
-    Old = !Old;
+  if (AsciiStrCmp (Picker->PickerVariant, "Auto") == 0) {
+    if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
+      Prefix = "Old";
+    } else {
+      Prefix = "";
+    }
+  } else if (AsciiStrCmp (Picker->PickerVariant, "Default") == 0) {
+    Prefix = "";
+  } else {
+    Prefix = Picker->PickerVariant;
   }
 
   if (Context->BackgroundColor.Raw == APPLE_COLOR_SYRAH_BLACK) {
@@ -354,7 +361,7 @@ InternalContextConstruct (
       ImageDimension,
       ImageDimension,
       Index >= ICON_NUM_SYS,
-      Old,
+      Prefix,
       Index == ICON_CURSOR
       );
 

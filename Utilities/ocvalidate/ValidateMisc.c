@@ -152,6 +152,7 @@ CheckMisc (
   CONST CHAR8     *HibernateMode;
   UINT32          PickerAttributes;
   CONST CHAR8     *PickerMode;
+  CONST CHAR8     *PickerVariant;
   UINT64          DisplayLevel;
   UINT64          AllowedDisplayLevel;
   UINT64          HaltLevel;
@@ -180,6 +181,7 @@ CheckMisc (
   HibernateMode                  = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
   PickerAttributes               = UserMisc->Boot.PickerAttributes;
   PickerMode                     = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
+  PickerVariant                  = OC_BLOB_GET (&UserMisc->Boot.PickerVariant);
   DisplayLevel                   = UserMisc->Debug.DisplayLevel;
   AllowedDisplayLevel            = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
   HaltLevel                      = DisplayLevel;
@@ -219,6 +221,11 @@ CheckMisc (
     && AsciiStrCmp (PickerMode, "External") != 0
     && AsciiStrCmp (PickerMode, "Apple") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is borked (Can only be Builtin, External, or Apple)!\n"));
+    ++ErrorCount;
+  }
+
+  if (PickerVariant[0] == '\0') {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant cannot be empty!\n"));
     ++ErrorCount;
   }
 

@@ -60,11 +60,11 @@ typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 #define OC_ATTR_USE_VOLUME_ICON          BIT0
 #define OC_ATTR_USE_DISK_LABEL_FILE      BIT1
 #define OC_ATTR_USE_GENERIC_LABEL_IMAGE  BIT2
-#define OC_ATTR_USE_ALTERNATE_ICONS      BIT3
+#define OC_ATTR_HIDE_THEMED_ICONS        BIT3
 #define OC_ATTR_USE_POINTER_CONTROL      BIT4
 #define OC_ATTR_ALL_BITS (\
   OC_ATTR_USE_VOLUME_ICON         | OC_ATTR_USE_DISK_LABEL_FILE | \
-  OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_USE_ALTERNATE_ICONS | \
+  OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_HIDE_THEMED_ICONS   | \
   OC_ATTR_USE_POINTER_CONTROL)
 
 /**
@@ -691,6 +691,10 @@ struct OC_PICKER_CONTEXT_ {
   // - BIT16~BIT31 are OEM-specific.
   //
   UINT32                     PickerAttributes;
+  //
+  // Picker icon set variant (refer to docs for requested behaviour).
+  //
+  CONST CHAR8                *PickerVariant;
   //
   // Enable polling boot arguments.
   //

@@ -17,6 +17,8 @@ OpenCore Changelog
 - Reworked LogoutHook.command to support older macOS
 - Improved Duet USB legacy management for supported controllers
 - Implemented MP3 audio decoding for audio assistant support
+- Added support for `PickerVariant` for more theme variants
+- Added `OC_ATTR_HIDE_THEMED_ICONS` `PickerAttribute` for Time Machine
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout

@@ -325,6 +325,7 @@
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
   _(UINT32                      , ConsoleAttributes           ,     , 0                                   , ())                   \
   _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
+  _(OC_STRING                   , PickerVariant               ,     , OC_STRING_CONSTR ("Auto", _, __)    , OC_DESTR (OC_STRING)) \
   _(UINT32                      , TakeoffDelay                ,     , 0                                   , ())                   \
   _(UINT32                      , Timeout                     ,     , 0                                   , ())                   \
   _(BOOLEAN                     , PickerAudioAssist           ,     , FALSE                               , ())                   \
