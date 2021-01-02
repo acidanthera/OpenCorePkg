@@ -1273,6 +1273,13 @@ GuiDrawLoop (
     //
     if (TimeOutSeconds > 0
       && GetTimeInNanoSecond (NewLastTsc - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
+      if (DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
+        DrawContext->GuiContext->PickerContext->PlayAudioFile (
+          DrawContext->GuiContext->PickerContext,
+          OcVoiceOverAudioFileTimeout,
+          FALSE
+          );
+      }
       DrawContext->GuiContext->ReadyToBoot = TRUE;
       break;
     }
