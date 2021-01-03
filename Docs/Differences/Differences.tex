@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Dec 16 19:38:04 2020
-%DIF ADD ../Configuration.tex        Sat Jan  2 15:39:49 2021
+%DIF ADD ../Configuration.tex        Sun Jan  3 10:04:28 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4324,16 +4324,20 @@ troubleshooting:
   \item \texttt{cpus=VALUE} (maximum number of CPUs used)
   \item \texttt{debug=VALUE} (debug mask)
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
-  \item \texttt{keepsyms=1} (show panic log debug symbols)
+  \item \DIFaddbegin \texttt{\DIFadd{ioaccel\_debug=VALUE}} \DIFadd{(}\texttt{\DIFadd{IOAccelerator}} \DIFadd{debug mask)
+  }\item \DIFaddend \texttt{keepsyms=1} (show panic log debug symbols)
   \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
   \item \texttt{nvram-log=1} (enables AppleEFINVRAM logs)
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
-  \item \texttt{lapic\_dont\_panic=1}
-  \item \texttt{slide=VALUE} (manually set KASLR slide)
+  \item \texttt{lapic\_dont\_panic=1} \DIFaddbegin \DIFadd{(disable lapic spurious interrupt panic on AP cores)
+  }\DIFaddend \item \DIFaddbegin \texttt{\DIFadd{panic\_on\_display\_hang=1}} \DIFadd{(trigger panic on display hang)
+  }\item \texttt{\DIFadd{panic\_on\_gpu\_hang=1}} \DIFadd{(trigger panic on GPU hang)
+  }\item \DIFaddend \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
-  \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
+  \item \DIFaddbegin \texttt{\DIFadd{spin\_wait\_for\_gpu=1}} \DIFadd{(reduces GPU timeout on high load)
+  }\item \DIFaddend \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
   \item \texttt{-s} (single mode)
