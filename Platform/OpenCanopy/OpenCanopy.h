@@ -174,7 +174,7 @@ GuiObjDrawDelegate (
   IN     UINT32                  OffsetY,
   IN     UINT32                  Width,
   IN     UINT32                  Height,
-  IN     BOOLEAN                 ParentRedrawn
+  IN     BOOLEAN                 RequestDraw
   );
 
 GUI_OBJ *

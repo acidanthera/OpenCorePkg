@@ -34,6 +34,68 @@ extern CONST GUI_IMAGE   mBackgroundImage;
 STATIC UINT8 mBootPickerOpacity = 0xFF;
 // STATIC UINT8 mBootPickerImageIndex = 0;
 
+//
+// FIXME: Create BootPickerView struct with background colour/image info.
+//
+GLOBAL_REMOVE_IF_UNREFERENCED INT64 mBackgroundImageOffsetX;
+GLOBAL_REMOVE_IF_UNREFERENCED INT64 mBackgroundImageOffsetY;
+
+VOID
+GuiDrawChildImage (
+  IN     CONST GUI_IMAGE      *Image,
+  IN     UINT8                Opacity,
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN     INT64                ParentBaseX,
+  IN     INT64                ParentBaseY,
+  IN     INT64                ChildBaseX,
+  IN     INT64                ChildBaseY,
+  IN     UINT32               OffsetX,
+  IN     UINT32               OffsetY,
+  IN     UINT32               Width,
+  IN     UINT32               Height,
+  IN     BOOLEAN              RequestDraw
+  )
+{
+  BOOLEAN Result;
+
+  ASSERT (Image != NULL);
+  ASSERT (DrawContext != NULL);
+
+  Result = GuiClipChildBounds (
+             ChildBaseX,
+             Image->Width,
+             &OffsetX,
+             &Width
+             );
+  if (Result) {
+    Result = GuiClipChildBounds (
+               ChildBaseY,
+               Image->Height,
+               &OffsetY,
+               &Height
+               );
+    if (Result) {
+      ASSERT (Image->Width  > OffsetX);
+      ASSERT (Image->Height > OffsetY);
+      ASSERT (Image->Buffer != NULL);
+
+      GuiDrawToBuffer (
+        Image,
+        Opacity,
+        FALSE,
+        DrawContext,
+        ParentBaseX + ChildBaseX,
+        ParentBaseY + ChildBaseY,
+        OffsetX,
+        OffsetY,
+        Width,
+        Height,
+        RequestDraw
+        );
+    }
+  }
+}
+
 BOOLEAN
 GuiClickableIsHit (
   IN CONST GUI_IMAGE  *Image,
@@ -110,8 +172,25 @@ InternalBootPickerViewDraw (
     OffsetY,
     Width,
     Height,
-    TRUE
+    RequestDraw
     );
+
+  if (DrawContext->GuiContext->Background.Buffer != NULL) {
+    GuiDrawChildImage (
+      &DrawContext->GuiContext->Background,
+      0xFF,
+      DrawContext,
+      BaseX,
+      BaseY,
+      mBackgroundImageOffsetX,
+      mBackgroundImageOffsetY,
+      OffsetX,
+      OffsetY,
+      Width,
+      Height,
+      FALSE
+      );
+  }
 
   GuiObjDrawDelegate (
     This,
@@ -386,62 +465,6 @@ InternalBootPickerKeyEvent (
       DrawContext->GuiContext->PickerContext,
       0
       );
-  }
-}
-
-VOID
-GuiDrawChildImage (
-  IN     CONST GUI_IMAGE      *Image,
-  IN     UINT8                Opacity,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     INT64                ParentBaseX,
-  IN     INT64                ParentBaseY,
-  IN     INT64                ChildBaseX,
-  IN     INT64                ChildBaseY,
-  IN     UINT32               OffsetX,
-  IN     UINT32               OffsetY,
-  IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
-  )
-{
-  BOOLEAN Result;
-
-  ASSERT (Image != NULL);
-  ASSERT (DrawContext != NULL);
-
-  Result = GuiClipChildBounds (
-             ChildBaseX,
-             Image->Width,
-             &OffsetX,
-             &Width
-             );
-  if (Result) {
-    Result = GuiClipChildBounds (
-               ChildBaseY,
-               Image->Height,
-               &OffsetY,
-               &Height
-               );
-    if (Result) {
-      ASSERT (Image->Width  > OffsetX);
-      ASSERT (Image->Height > OffsetY);
-      ASSERT (Image->Buffer != NULL);
-
-      GuiDrawToBuffer (
-        Image,
-        Opacity,
-        FALSE,
-        DrawContext,
-        ParentBaseX + ChildBaseX,
-        ParentBaseY + ChildBaseY,
-        OffsetX,
-        OffsetY,
-        Width,
-        Height,
-        RequestDraw
-        );
-    }
   }
 }
 
@@ -1245,6 +1268,17 @@ BootPickerViewInitialize (
     GuiContext
     );
   DrawContext->Scale = GuiContext->Scale;
+
+  mBackgroundImageOffsetX = DivS64x64Remainder (
+    (INT64) mBootPickerView.Width - DrawContext->GuiContext->Background.Width,
+    2,
+    NULL
+    );
+  mBackgroundImageOffsetY = DivS64x64Remainder (
+    (INT64) mBootPickerView.Height - DrawContext->GuiContext->Background.Height,
+    2,
+    NULL
+    );
 
   mBootPickerSelector.ClickImage   = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.CurrentImage = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];

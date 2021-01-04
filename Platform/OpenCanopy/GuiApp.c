@@ -96,6 +96,7 @@ InternalContextDestruct (
     InternalSafeFreePool (Context->Labels[Index].Buffer);
   }
 
+  InternalSafeFreePool (&Context->Background.Buffer);
   InternalSafeFreePool (Context->FontContext.FontImage.Buffer);
   /*
   InternalSafeFreePool (Context->Poof[0].Buffer);
@@ -326,6 +327,18 @@ InternalContextConstruct (
   } else {
     Prefix = Picker->PickerVariant;
   }
+
+  LoadImageFileFromStorage (
+    &Context->Background,
+    Storage,
+    "Background",
+    Context->Scale,
+    0,
+    0,
+    FALSE,
+    Prefix,
+    FALSE
+    );
 
   if (Context->BackgroundColor.Raw == APPLE_COLOR_SYRAH_BLACK) {
     Context->LightBackground = FALSE;
