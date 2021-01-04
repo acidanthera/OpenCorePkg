@@ -185,6 +185,39 @@ InternalBootPickerSelectEntry (
   Selector->Obj.OffsetX += (VolumeEntryObj->Width - Selector->Obj.Width) / 2;
 }
 
+INT64
+InternelBootPickerScrollSelected (
+  IN UINT32  Scale
+  )
+{
+  CONST GUI_VOLUME_ENTRY *SelectedEntry;
+  INT64                  EntryOffsetX;
+  INT64                  ScrollDelta;
+
+  ASSERT (mBootPicker.SelectedEntry != NULL);
+  //
+  // If the selected entry is outside of the view, scroll it accordingly.
+  // This function is called every time an entry is added or changed.
+  // Due to this internal design, the selected entry can never be outside of the
+  // view by more than one entry's size.
+  //
+  SelectedEntry = mBootPicker.SelectedEntry;
+  EntryOffsetX  = mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX;
+  ScrollDelta   = (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Scale;
+
+  if (EntryOffsetX < 0) {
+    mBootPicker.Hdr.Obj.OffsetX += ScrollDelta;
+    return ScrollDelta;
+  }
+  
+  if (EntryOffsetX + SelectedEntry->Hdr.Obj.Width > mBootPickerView.Width) {
+    mBootPicker.Hdr.Obj.OffsetX -= ScrollDelta;
+    return -ScrollDelta;
+  }
+
+  return 0;
+}
+
 VOID
 InternalBootPickerChangeEntry (
   IN OUT GUI_VOLUME_PICKER    *This,
@@ -195,6 +228,9 @@ InternalBootPickerChangeEntry (
   )
 {
   GUI_VOLUME_ENTRY *PrevEntry;
+  INT64            ScrollOffset;
+  INT64            DrawX;
+  UINT32           DrawWidth;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -211,28 +247,54 @@ InternalBootPickerChangeEntry (
   PrevEntry = This->SelectedEntry;
   InternalBootPickerSelectEntry (This, NewEntry);
 
-  //
-  // To redraw the entry *and* the selector, draw the entire height of the
-  // Picker object. For this, the height just reach from the top of the entries
-  // to the bottom of the selector.
-  //
-  GuiDrawScreen (
-    DrawContext,
-    BaseX + NewEntry->Hdr.Obj.OffsetX,
-    BaseY + NewEntry->Hdr.Obj.OffsetY,
-    NewEntry->Hdr.Obj.Width,
-    This->Hdr.Obj.Height,
-    TRUE
-    );
+  ScrollOffset = InternelBootPickerScrollSelected (DrawContext->Scale);
+  if (ScrollOffset == 0) {
+    //
+    // To redraw the entry *and* the selector, draw the entire height of the
+    // Picker object. For this, the height just reach from the top of the entries
+    // to the bottom of the selector.
+    //
+    GuiDrawScreen (
+      DrawContext,
+      BaseX + NewEntry->Hdr.Obj.OffsetX,
+      BaseY + NewEntry->Hdr.Obj.OffsetY,
+      NewEntry->Hdr.Obj.Width,
+      This->Hdr.Obj.Height,
+      TRUE
+      );
 
-  GuiDrawScreen (
-    DrawContext,
-    BaseX + PrevEntry->Hdr.Obj.OffsetX,
-    BaseY + PrevEntry->Hdr.Obj.OffsetY,
-    PrevEntry->Hdr.Obj.Width,
-    This->Hdr.Obj.Height,
-    TRUE
-    );
+    GuiDrawScreen (
+      DrawContext,
+      BaseX + PrevEntry->Hdr.Obj.OffsetX,
+      BaseY + PrevEntry->Hdr.Obj.OffsetY,
+      PrevEntry->Hdr.Obj.Width,
+      This->Hdr.Obj.Height,
+      TRUE
+      );
+  } else {
+    //
+    // The X coordinate of the view changed by scrolling, so adjust it.
+    // The entire view plus an entry prior or following need to be drawn.
+    //
+    if (ScrollOffset < 0) {
+      DrawX     = BaseX + ScrollOffset;
+      DrawWidth = (UINT32) (This->Hdr.Obj.Width - ScrollOffset);
+    } else {
+      DrawX     = BaseX;
+      DrawWidth = (UINT32) (This->Hdr.Obj.Width + ScrollOffset);
+    }
+    //
+    // The entry list has been scrolled, redraw the entire view.
+    //
+    GuiDrawScreen (
+      DrawContext,
+      DrawX,
+      BaseY,
+      DrawWidth,
+      This->Hdr.Obj.Height,
+      TRUE
+      );
+  }
 
   //
   // Set voice timeout to N frames from now.
@@ -967,6 +1029,10 @@ BootPickerEntriesAdd (
   if (Default) {
     InternalBootPickerSelectEntry (&mBootPicker, VolumeEntry);
     GuiContext->BootEntry = Entry;
+  }
+
+  if (mBootPicker.SelectedEntry != NULL) {
+    InternelBootPickerScrollSelected (GuiContext->Scale);
   }
 
   return EFI_SUCCESS;
