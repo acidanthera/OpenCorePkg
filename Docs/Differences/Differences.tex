@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Dec 16 19:38:04 2020
-%DIF ADD ../Configuration.tex        Sun Jan  3 10:04:28 2021
+%DIF DEL PreviousConfiguration.tex   Mon Jan  4 20:49:33 2021
+%DIF ADD ../Configuration.tex        Mon Jan  4 20:51:24 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6\DIFdelbegin \DIFdel{.4}\DIFdelend \DIFaddbegin \DIFadd{.5}\DIFaddend )
+       Reference Manual (0.6\DIFdelbegin \DIFdel{.5}\DIFdelend \DIFaddbegin \DIFadd{.6}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -166,7 +166,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright \DIFdelbegin \DIFdel{2018-2020 }\DIFdelend \DIFaddbegin \DIFadd{2018-2021 }\DIFaddend vit9696
+       Copyright \textcopyright 2018-2021 vit9696
 
    \end{center}
 \end{titlepage}
@@ -3100,11 +3100,10 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
-  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_\DIFdelbegin \DIFdel{USE}\DIFdelend \DIFaddbegin \DIFadd{HIDE}\DIFaddend \_\DIFdelbegin \DIFdel{ALTERNATE}\DIFdelend \DIFaddbegin \DIFadd{THEMED}\DIFaddend \_ICONS}, \DIFdelbegin \DIFdel{changes used icon set to an alternate one if it is supported}\DIFdelend \DIFaddbegin \DIFadd{prefers builtin icons
-    for certain icon categories to match the theme style}\DIFaddend . For example, this could \DIFdelbegin \DIFdel{make a use of old-style icons
-    with a custom background colour. }\DIFdelend \DIFaddbegin \DIFadd{force
-    displaying the builtin Time Machine icon. Requires }\texttt{\DIFadd{OC\_ATTR\_USE\_VOLUME\_ICON}}\DIFadd{.
-  }\DIFaddend \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_HIDE\_THEMED\_ICONS}, prefers builtin icons
+    for certain icon categories to match the theme style. For example, this could force
+    displaying the builtin Time Machine icon. Requires \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}.
+  \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
   in the picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
   \end{itemize}
@@ -3240,25 +3239,24 @@ entry choice will update till next manual reconfiguration.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
 
-\DIFaddbegin \item
-  \texttt{\DIFadd{PickerVariant}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Choose specific icon set used for boot management.
-  }
+\item
+  \texttt{PickerVariant}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Choose specific icon set used for boot management.
 
-  \DIFadd{The following values are supported:
-  }\begin{itemize}
+  The following values are supported:
+  \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{Auto}} \DIFadd{--- Automatically select one set of icons based on }\texttt{\DIFadd{DefaultBackground}}
-  \DIFadd{colour.
-  }\item \texttt{\DIFadd{Default}} \DIFadd{--- Normal icon set (without prefix).
-  }\item \texttt{\DIFadd{Old}} \DIFadd{--- Vintage icon set (}\texttt{\DIFadd{Old}} \DIFadd{filename prefix).
-  }\item \texttt{\DIFadd{Modern}} \DIFadd{--- Nouveau icon set (}\texttt{\DIFadd{Modern}} \DIFadd{filename prefix).
-  }\item \DIFadd{Other value --- Custom icon set if supported by the resources.
-  }\end{itemize}
+  \item \texttt{Auto} --- Automatically select one set of icons based on \texttt{DefaultBackground}
+  colour.
+  \item \texttt{Default} --- Normal icon set (without prefix).
+  \item \texttt{Old} --- Vintage icon set (\texttt{Old} filename prefix).
+  \item \texttt{Modern} --- Nouveau icon set (\texttt{Modern} filename prefix).
+  \item Other value --- Custom icon set if supported by the resources.
+  \end{itemize}
 
-\DIFaddend \end{enumerate}
+\end{enumerate}
 
 \subsection{Debug Properties}\label{miscdebugprops}
 
@@ -4324,20 +4322,20 @@ troubleshooting:
   \item \texttt{cpus=VALUE} (maximum number of CPUs used)
   \item \texttt{debug=VALUE} (debug mask)
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
-  \item \DIFaddbegin \texttt{\DIFadd{ioaccel\_debug=VALUE}} \DIFadd{(}\texttt{\DIFadd{IOAccelerator}} \DIFadd{debug mask)
-  }\item \DIFaddend \texttt{keepsyms=1} (show panic log debug symbols)
+  \item \texttt{ioaccel\_debug=VALUE} (\texttt{IOAccelerator} debug mask)
+  \item \texttt{keepsyms=1} (show panic log debug symbols)
   \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
   \item \texttt{nvram-log=1} (enables AppleEFINVRAM logs)
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
-  \item \texttt{lapic\_dont\_panic=1} \DIFaddbegin \DIFadd{(disable lapic spurious interrupt panic on AP cores)
-  }\DIFaddend \item \DIFaddbegin \texttt{\DIFadd{panic\_on\_display\_hang=1}} \DIFadd{(trigger panic on display hang)
-  }\item \texttt{\DIFadd{panic\_on\_gpu\_hang=1}} \DIFadd{(trigger panic on GPU hang)
-  }\item \DIFaddend \texttt{slide=VALUE} (manually set KASLR slide)
+  \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
+  \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
+  \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
+  \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
-  \item \DIFaddbegin \texttt{\DIFadd{spin\_wait\_for\_gpu=1}} \DIFadd{(reduces GPU timeout on high load)
-  }\item \DIFaddend \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
+  \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
+  \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
   \item \texttt{-s} (single mode)
@@ -5721,16 +5719,15 @@ functioning. Feature highlights:
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the \DIFdelbegin \DIFdel{only }\DIFdelend supported audio file \DIFdelbegin \DIFdel{format is }\DIFdelend \DIFaddbegin \DIFadd{formats are MP3 and }\DIFaddend WAVE PCM. While it is
+  directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
 
   Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin [\DIFadd{audio ext}]\DIFaddend }.
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].[audio ext]}.
   For unlocalised files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin [\DIFadd{audio ext}]\DIFaddend }. \DIFaddbegin \DIFadd{Audio extension can either be }\texttt{\DIFadd{mp3}}
-  \DIFadd{or }\texttt{\DIFadd{wav}}\DIFadd{.
-}\DIFaddend 
+  \texttt{[audio type]\_[audio path].[audio ext]}. Audio extension can either be \texttt{mp3}
+  or \texttt{wav}.
 
   \begin{itemize}
   \tightlist
@@ -5744,7 +5741,7 @@ functioning. Feature highlights:
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.\DIFdelbegin \DIFdel{wav}\DIFdelend \DIFaddbegin \DIFadd{mp3}\DIFaddend }.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.mp3}.
   \end{itemize}
 
   Audio localisation is determined separately for macOS bootloader and OpenCore.
@@ -6009,19 +6006,17 @@ functioning. Feature highlights:
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{SetupDelay}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Audio codec reconfiguration delay in microseconds.
-}
+  \texttt{SetupDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
 
-  \DIFadd{Some codecs require a vendor-specific delay after the reconfiguration
+  Some codecs require a vendor-specific delay after the reconfiguration
   (e.g. volume setting). This option makes it configurable. In general
   the necessary delay may be as long as 0.5 seconds.
-}
 
 \item
-  \DIFaddend \texttt{VolumeAmplifier}\\
+  \texttt{VolumeAmplifier}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Multiplication coefficient for system volume to raw volume linear translation
@@ -6562,89 +6557,7 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \DIFdelbegin \texttt{\DIFdel{DeduplicateBootOrder}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Type}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
-\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
-%DIFDELCMD < \\
-%DIFDELCMD <   %%%
-\textbf{\DIFdel{Description}}%DIFAUXCMD
-\DIFdel{: Remove duplicate entries in }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
-\DIFdel{variable
-  in }\texttt{\DIFdel{EFI\_GLOBAL\_VARIABLE\_GUID}}%DIFAUXCMD
-\DIFdel{.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{This quirk requires }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
-\DIFdel{to be enabled and therefore
-  }\texttt{\DIFdel{OC\_FIRMWARE\_RUNTIME}} %DIFAUXCMD
-\DIFdel{protocol implemented in }\texttt{\DIFdel{OpenRuntime.efi}}%DIFAUXCMD
-\DIFdel{.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{By redirecting }\texttt{\DIFdel{Boot}} %DIFAUXCMD
-\DIFdel{prefixed variables to a separate GUID namespace
-  with the help of }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
-\DIFdel{quirk we achieve multiple goals:
-  }%DIFDELCMD < \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <   \tightlist
-%DIFDELCMD <   \item %%%
-\item%DIFAUXCMD
-\DIFdel{Operating systems are jailed and only controlled by OpenCore boot
-  environment to enhance security.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{Operating systems do not mess with OpenCore boot priority, and guarantee
-  fluent updates and hibernation wakes for cases that require reboots with OpenCore
-  in the middle.
-  }%DIFDELCMD < \item %%%
-\item%DIFAUXCMD
-\DIFdel{Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
-  }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize}
-%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{However, some types of firmware do their own boot option scanning on startup by checking
-  for file presence on the available disks. This scanning often includes non-standard
-  locations such as Windows Bootloader paths. This is typically not an issue but some
-  firmware, such as ASUS firmware on the APTIO V, have bugs. On such, scanning is
-  implemented improperly and firmware preferences may get accidentally corrupted
-  due to }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
-\DIFdel{entry duplication (each option will be added twice) making
-  it impossible to boot without resetting NVRAM.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
-  install Windows with }\texttt{\DIFdel{RequestBootVarRouting}} %DIFAUXCMD
-\DIFdel{enabled. As the Windows bootloader
-  option will not be created by the Windows installer, the firmware will attempt to create
-  this itself, leading to a corruption of its boot option list.
-}%DIFDELCMD < 
-
-%DIFDELCMD <   %%%
-\DIFdel{This quirk removes all duplicates in }\texttt{\DIFdel{BootOrder}} %DIFAUXCMD
-\DIFdel{variable attempting to resolve
-  the consequences of the bugs upon OpenCore loading. It is recommended to use this key
-  along with }\texttt{\DIFdel{BootProtect}} %DIFAUXCMD
-\DIFdel{option.
-}%DIFDELCMD < 
-
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\DIFdelend \texttt{ExitBootServicesDelay}\\
+  \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
@@ -6689,21 +6602,19 @@ functioning. Feature highlights:
   In summary, this quirk is required to reliably
   use the \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in firmware that is not compatible with macOS boot entries by design.
-\DIFaddbegin 
 
-  \DIFadd{By redirecting }\texttt{\DIFadd{Boot}} \DIFadd{prefixed variables to a separate GUID namespace
-  with the help of }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{quirk we achieve multiple goals:
-  }\begin{itemize}
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
+  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
+  \begin{itemize}
   \tightlist
-  \item \DIFadd{Operating systems are jailed and only controlled by OpenCore boot
+  \item Operating systems are jailed and only controlled by OpenCore boot
   environment to enhance security.
-  }\item \DIFadd{Operating systems do not mess with OpenCore boot priority, and guarantee
+  \item Operating systems do not mess with OpenCore boot priority, and guarantee
   fluent updates and hibernation wakes for cases that require reboots with OpenCore
   in the middle.
-  }\item \DIFadd{Potentially incompatible boot entries, such as macOS entries, are not deleted
+  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
   or anyhow corrupted.
-  }\end{itemize}
-\DIFaddend 
+  \end{itemize}
 
 \item
   \texttt{TscSyncTimeout}\\

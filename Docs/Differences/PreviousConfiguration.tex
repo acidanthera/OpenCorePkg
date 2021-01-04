@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6.4)
+       Reference Manual (0.6.5)
 
        \vspace{0.2in}
 
@@ -106,7 +106,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2020 vit9696
+       Copyright \textcopyright 2018-2021 vit9696
 
    \end{center}
 \end{titlepage}
@@ -3040,9 +3040,9 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
-  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
-    an alternate one if it is supported. For example, this could make a use of old-style icons
-    with a custom background colour.
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_HIDE\_THEMED\_ICONS}, prefers builtin icons
+    for certain icon categories to match the theme style. For example, this could force
+    displaying the builtin Time Machine icon. Requires \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}.
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
   in the picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
@@ -3178,6 +3178,23 @@ entry choice will update till next manual reconfiguration.
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple BootPicker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
+
+\item
+  \texttt{PickerVariant}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Choose specific icon set used for boot management.
+  
+  The following values are supported:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Automatically select one set of icons based on \texttt{DefaultBackground}
+  colour.
+  \item \texttt{Default} --- Normal icon set (without prefix).
+  \item \texttt{Old} --- Vintage icon set (\texttt{Old} filename prefix).
+  \item \texttt{Modern} --- Nouveau icon set (\texttt{Modern} filename prefix).
+  \item Other value --- Custom icon set if supported by the resources.
+  \end{itemize}
 
 \end{enumerate}
 
@@ -4245,15 +4262,19 @@ troubleshooting:
   \item \texttt{cpus=VALUE} (maximum number of CPUs used)
   \item \texttt{debug=VALUE} (debug mask)
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
+  \item \texttt{ioaccel\_debug=VALUE} (\texttt{IOAccelerator} debug mask)
   \item \texttt{keepsyms=1} (show panic log debug symbols)
   \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
   \item \texttt{nvram-log=1} (enables AppleEFINVRAM logs)
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
-  \item \texttt{lapic\_dont\_panic=1}
+  \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
+  \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
+  \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
   \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
+  \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
   \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
@@ -5638,14 +5659,15 @@ functioning. Feature highlights:
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the only supported audio file format is WAVE PCM. While it is
+  directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
 
   Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
-  files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].wav}.
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].[audio ext]}.
+  For unlocalised files filename does not include the language code and looks as follows:
+  \texttt{[audio type]\_[audio path].[audio ext]}. Audio extension can either be \texttt{mp3}
+  or \texttt{wav}.
 
   \begin{itemize}
   \tightlist
@@ -5659,7 +5681,7 @@ functioning. Feature highlights:
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.mp3}.
   \end{itemize}
 
   Audio localisation is determined separately for macOS bootloader and OpenCore.
@@ -5922,6 +5944,16 @@ functioning. Feature highlights:
 
   \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
+
+\item
+  \texttt{SetupDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Audio codec reconfiguration delay in microseconds.
+
+  Some codecs require a vendor-specific delay after the reconfiguration
+  (e.g. volume setting). This option makes it configurable. In general
+  the necessary delay may be as long as 0.5 seconds.
 
 \item
   \texttt{VolumeAmplifier}\\
@@ -6465,46 +6497,6 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{DeduplicateBootOrder}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Remove duplicate entries in \texttt{BootOrder} variable
-  in \texttt{EFI\_GLOBAL\_VARIABLE\_GUID}.
-
-  This quirk requires \texttt{RequestBootVarRouting} to be enabled and therefore
-  \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented in \texttt{OpenRuntime.efi}.
-
-  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
-  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
-  \begin{itemize}
-  \tightlist
-  \item Operating systems are jailed and only controlled by OpenCore boot
-  environment to enhance security.
-  \item Operating systems do not mess with OpenCore boot priority, and guarantee
-  fluent updates and hibernation wakes for cases that require reboots with OpenCore
-  in the middle.
-  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
-  \end{itemize}
-
-  However, some types of firmware do their own boot option scanning on startup by checking
-  for file presence on the available disks. This scanning often includes non-standard
-  locations such as Windows Bootloader paths. This is typically not an issue but some
-  firmware, such as ASUS firmware on the APTIO V, have bugs. On such, scanning is
-  implemented improperly and firmware preferences may get accidentally corrupted
-  due to \texttt{BootOrder} entry duplication (each option will be added twice) making
-  it impossible to boot without resetting NVRAM.
-
-  To trigger the bug, some valid boot options (e.g. OpenCore) are required. Then
-  install Windows with \texttt{RequestBootVarRouting} enabled. As the Windows bootloader
-  option will not be created by the Windows installer, the firmware will attempt to create
-  this itself, leading to a corruption of its boot option list.
-
-  This quirk removes all duplicates in \texttt{BootOrder} variable attempting to resolve
-  the consequences of the bugs upon OpenCore loading. It is recommended to use this key
-  along with \texttt{BootProtect} option.
-
-\item
   \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -6550,6 +6542,19 @@ functioning. Feature highlights:
   In summary, this quirk is required to reliably
   use the \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane in firmware that is not compatible with macOS boot entries by design.
+
+  By redirecting \texttt{Boot} prefixed variables to a separate GUID namespace
+  with the help of \texttt{RequestBootVarRouting} quirk we achieve multiple goals:
+  \begin{itemize}
+  \tightlist
+  \item Operating systems are jailed and only controlled by OpenCore boot
+  environment to enhance security.
+  \item Operating systems do not mess with OpenCore boot priority, and guarantee
+  fluent updates and hibernation wakes for cases that require reboots with OpenCore
+  in the middle.
+  \item Potentially incompatible boot entries, such as macOS entries, are not deleted
+  or anyhow corrupted.
+  \end{itemize}
 
 \item
   \texttt{TscSyncTimeout}\\
