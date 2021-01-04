@@ -15,7 +15,7 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
-#include "ValidateKernel.h"
+#include "KextInfo.h"
 
 #include <Library/OcAppleKernelLib.h>
 
@@ -156,12 +156,6 @@ CheckKernel (
   CONST CHAR8         *ChildKext;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
-  //
-  // Ensure Lilu to be always placed where it is supposed to be.
-  // 
-  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextBundlePath, "Lilu.kext") == 0);
-  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextExecutablePath, "Contents/MacOS/Lilu") == 0);
-  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextPlistPath, "Contents/Info.plist") == 0);
 
   ErrorCount                       = 0;
   UserKernel                       = &Config->Kernel;

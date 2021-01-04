@@ -15,6 +15,7 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "KextInfo.h"
 
 #include <OpenCore.h>
 
@@ -39,6 +40,11 @@ CheckConfig (
   };
 
   ErrorCount = 0;
+
+  //
+  // Ensure correct kext info prior to verification.
+  //
+  ValidateKextInfo ();
 
   //
   // Pass config structure to all checkers.

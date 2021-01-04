@@ -15,6 +15,7 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "KextInfo.h"
 
 #include <Library/BaseLib.h>
 #include <Library/OcBootManagementLib.h>
@@ -144,37 +145,41 @@ CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32          ErrorCount;
-  UINT32          Index;
-  OC_MISC_CONFIG  *UserMisc;
-  OC_UEFI_CONFIG  *UserUefi;
-  UINT32          ConsoleAttributes;
-  CONST CHAR8     *HibernateMode;
-  UINT32          PickerAttributes;
-  CONST CHAR8     *PickerMode;
-  CONST CHAR8     *PickerVariant;
-  UINT64          DisplayLevel;
-  UINT64          AllowedDisplayLevel;
-  UINT64          HaltLevel;
-  UINT64          AllowedHaltLevel;
-  UINT32          Target;
-  CONST CHAR8     *BootProtect;
-  BOOLEAN         IsRequestBootVarRoutingEnabled;
-  CONST CHAR8     *AsciiDmgLoading;
-  UINT32          ExposeSensitiveData;
-  CONST CHAR8     *AsciiVault;
-  UINT32          ScanPolicy;
-  UINT32          AllowedScanPolicy;
-  CONST CHAR8     *SecureBootModel;
-  CONST CHAR8     *Arguments;
-  CONST CHAR8     *Comment;
-  CONST CHAR8     *AsciiName;
-  CONST CHAR16    *UnicodeName;
-  CONST CHAR8     *Path;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_KERNEL_CONFIG  *UserKernel;
+  OC_MISC_CONFIG    *UserMisc;
+  OC_UEFI_CONFIG    *UserUefi;
+  UINT32            ConsoleAttributes;
+  CONST CHAR8       *HibernateMode;
+  UINT32            PickerAttributes;
+  CONST CHAR8       *PickerMode;
+  CONST CHAR8       *PickerVariant;
+  UINT64            DisplayLevel;
+  UINT64            AllowedDisplayLevel;
+  UINT64            HaltLevel;
+  UINT64            AllowedHaltLevel;
+  UINT32            Target;
+  BOOLEAN           IsAuthRestartEnabled;
+  BOOLEAN           HasVSMCKext;
+  CONST CHAR8       *BootProtect;
+  BOOLEAN           IsRequestBootVarRoutingEnabled;
+  CONST CHAR8       *AsciiDmgLoading;
+  UINT32            ExposeSensitiveData;
+  CONST CHAR8       *AsciiVault;
+  UINT32            ScanPolicy;
+  UINT32            AllowedScanPolicy;
+  CONST CHAR8       *SecureBootModel;
+  CONST CHAR8       *Arguments;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *AsciiName;
+  CONST CHAR16      *UnicodeName;
+  CONST CHAR8       *Path;
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
 
   ErrorCount                     = 0;
+  UserKernel                     = &Config->Kernel;
   UserMisc                       = &Config->Misc;
   UserUefi                       = &Config->Uefi;
   ConsoleAttributes              = UserMisc->Boot.ConsoleAttributes;
@@ -187,6 +192,8 @@ CheckMisc (
   HaltLevel                      = DisplayLevel;
   AllowedHaltLevel               = AllowedDisplayLevel;
   Target                         = UserMisc->Debug.Target;
+  IsAuthRestartEnabled           = UserMisc->Security.AuthRestart;
+  HasVSMCKext                    = FALSE;
   BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
   AsciiDmgLoading                = OC_BLOB_GET (&UserMisc->Security.DmgLoading);
@@ -246,9 +253,15 @@ CheckMisc (
     ++ErrorCount;
   }
 
-  //
-  // TODO: Check requirements of Security->AuthRestart.
-  //
+  for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
+    if (AsciiStrCmp (OC_BLOB_GET (&UserKernel->Add.Values[Index]->BundlePath), mKextInfo[INDEX_KEXT_VSMC].KextBundlePath) == 0) {
+      HasVSMCKext = TRUE;
+    }
+  }
+  if (IsAuthRestartEnabled && !HasVSMCKext) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->AuthRestart is enabled, but VirtualSMC is not loaded at Kernel->Add!\n"));
+    ++ErrorCount;
+  }
 
   if (AsciiStrCmp (BootProtect, "None") != 0
     && AsciiStrCmp (BootProtect, "Bootstrap") != 0
