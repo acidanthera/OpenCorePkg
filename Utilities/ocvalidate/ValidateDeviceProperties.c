@@ -217,7 +217,7 @@ CheckDeviceProperties (
     &CheckDevicePropertiesDelete
   };
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into DeviceProperties checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount  = 0;
 

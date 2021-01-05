@@ -656,7 +656,7 @@ CheckKernel (
     &CheckKernelScheme
   };
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount = 0;
 

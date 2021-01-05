@@ -222,7 +222,7 @@ CheckBooter (
     &CheckBooterQuirks
   };
   
-  DEBUG ((DEBUG_VERBOSE, "config loaded into Booter checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount  = 0;
 

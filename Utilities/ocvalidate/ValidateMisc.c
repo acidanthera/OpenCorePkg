@@ -176,7 +176,7 @@ CheckMisc (
   CONST CHAR16      *UnicodeName;
   CONST CHAR8       *Path;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into Misc checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount                     = 0;
   UserKernel                     = &Config->Kernel;

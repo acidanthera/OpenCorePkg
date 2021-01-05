@@ -151,7 +151,7 @@ CheckUEFI (
   UINT64                    ReservedMemoryAddress;
   UINT64                    ReservedMemorySize;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into UEFI checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount                       = 0;
   IndexOpenUsbKbDxeEfiDriver       = 0;

@@ -34,7 +34,7 @@ CheckPlatformInfo (
   CONST CHAR8         *SystemMemoryStatus;
   CONST CHAR8         *AsciiSystemUUID;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into PlatformInfo checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount         = 0;
   UserPlatformInfo   = &Config->PlatformInfo;

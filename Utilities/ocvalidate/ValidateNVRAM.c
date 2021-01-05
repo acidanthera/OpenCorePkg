@@ -113,7 +113,7 @@ CheckNVRAM (
   CONST CHAR8      *AsciiNVRAMKey;
   OC_ASSOC         *VariableMap;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into NVRAM checker!\n"));
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount = 0;
   UserNVRAM  = &Config->Nvram;
