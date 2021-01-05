@@ -312,4 +312,12 @@ GuiGetInterpolatedValue (
   IN       UINT64             CurrentTime
   );
 
+VOID
+GuiGetBaseCoords (
+  IN  GUI_OBJ              *This,
+  IN  GUI_DRAWING_CONTEXT  *DrawContext,
+  OUT INT64                *BaseX,
+  OUT INT64                *BaseY
+  );
+
 #endif // OPEN_CANOPY_H

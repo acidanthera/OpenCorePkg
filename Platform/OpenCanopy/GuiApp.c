@@ -55,6 +55,8 @@ mIconNames[ICON_NUM_TOTAL] = {
   [ICON_CURSOR]             = "Cursor",
   [ICON_SELECTED]           = "Selected",
   [ICON_SELECTOR]           = "Selector",
+  [ICON_LEFT]               = "Left",
+  [ICON_RIGHT]              = "Right",
   [ICON_GENERIC_HDD]        = "HardDrive",
   [ICON_APPLE]              = "Apple",
   [ICON_APPLE_RECOVERY]     = "AppleRecv",
@@ -96,7 +98,7 @@ InternalContextDestruct (
     InternalSafeFreePool (Context->Labels[Index].Buffer);
   }
 
-  InternalSafeFreePool (&Context->Background.Buffer);
+  InternalSafeFreePool (Context->Background.Buffer);
   InternalSafeFreePool (Context->FontContext.FontImage.Buffer);
   /*
   InternalSafeFreePool (Context->Poof[0].Buffer);
@@ -362,6 +364,8 @@ InternalContextConstruct (
       ImageDimension = BOOT_SELECTOR_BACKGROUND_DIMENSION;
     } else if (Index == ICON_SELECTOR) {
       ImageDimension = BOOT_SELECTOR_BUTTON_DIMENSION;
+    } else if (Index == ICON_LEFT || Index == ICON_RIGHT) {
+      ImageDimension = BOOT_SCROLL_BUTTON_DIMENSION;
     } else {
       ImageDimension = BOOT_ENTRY_ICON_DIMENSION;
     }
@@ -378,7 +382,7 @@ InternalContextConstruct (
       Index == ICON_CURSOR
       );
 
-    if (!EFI_ERROR (Status) && Index == ICON_SELECTOR) {
+    if (!EFI_ERROR (Status) && (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT)) {
       Status = GuiCreateHighlightedImage (
         &Context->Icons[Index][ICON_TYPE_HELD],
         &Context->Icons[Index][ICON_TYPE_BASE],
