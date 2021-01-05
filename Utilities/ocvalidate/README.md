@@ -90,7 +90,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `OpenUsbKbDxe.efi` is in use, `KeySupport` in `UEFI->Input` should never be enabled altogether.
 - When `Ps2KeyboardDxe.efi` is in use, `KeySupport` in `UEFI->Input` should always be enabled altogether.
 - `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
-- When `HfsPlus.efi` or `AudioDxe.efi` is in use, `ConnectDrivers` should be enabled altogether.
+- When HFS+ filesystem driver or `AudioDxe.efi` is in use, `ConnectDrivers` should be enabled altogether.
 #### Input
 - KeySupportMode: Only `Auto`, `V1`, `V2`, or `AMI` are accepted.
 - When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.
