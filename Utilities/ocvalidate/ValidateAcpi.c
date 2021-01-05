@@ -220,14 +220,20 @@ CheckACPI (
   )
 {
   UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK ACPICheckers[] = {
+    &CheckACPIAdd,
+    &CheckACPIDelete,
+    &CheckACPIPatch
+  };
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into ACPI checker!\n"));
 
   ErrorCount  = 0;
 
-  ErrorCount += CheckACPIAdd (Config);
-  ErrorCount += CheckACPIDelete (Config);
-  ErrorCount += CheckACPIPatch (Config);
+  for (Index = 0; Index < ARRAY_SIZE (ACPICheckers); ++Index) {
+    ErrorCount += ACPICheckers[Index] (Config);
+  }
 
   return ReportError (__func__, ErrorCount);
 }

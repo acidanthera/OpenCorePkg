@@ -211,13 +211,19 @@ CheckDeviceProperties (
   )
 {
   UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK DevicePropertiesCheckers[] = {
+    &CheckDevicePropertiesAdd,
+    &CheckDevicePropertiesDelete
+  };
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into DeviceProperties checker!\n"));
 
   ErrorCount  = 0;
 
-  ErrorCount += CheckDevicePropertiesAdd (Config);
-  ErrorCount += CheckDevicePropertiesDelete (Config);
+  for (Index = 0; Index < ARRAY_SIZE (DevicePropertiesCheckers); ++Index) {
+    ErrorCount += DevicePropertiesCheckers[Index] (Config);
+  }
 
   return ReportError (__func__, ErrorCount);
 }

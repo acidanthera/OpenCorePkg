@@ -215,14 +215,20 @@ CheckBooter (
   )
 {
   UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK BooterCheckers[] = {
+    &CheckBooterMmioWhitelist,
+    &CheckBooterPatch,
+    &CheckBooterQuirks
+  };
   
   DEBUG ((DEBUG_VERBOSE, "config loaded into Booter checker!\n"));
 
   ErrorCount  = 0;
 
-  ErrorCount += CheckBooterMmioWhitelist (Config);
-  ErrorCount += CheckBooterPatch (Config);
-  ErrorCount += CheckBooterQuirks (Config);
+  for (Index = 0; Index < ARRAY_SIZE (BooterCheckers); ++Index) {
+    ErrorCount += BooterCheckers[Index] (Config);
+  }
 
   return ReportError (__func__, ErrorCount);
 }
