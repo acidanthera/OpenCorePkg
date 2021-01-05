@@ -190,6 +190,14 @@ GuiObjDrawDelegate (
   ASSERT (This->Height > OffsetY);
   ASSERT (DrawContext != NULL);
 
+  if (Width > This->Width - OffsetX) {
+    Width = This->Width - OffsetX;
+  }
+
+  if (Height > This->Height - OffsetY) {
+    Height = This->Height - OffsetY;
+  }
+
   for (
     ChildEntry = GetPreviousNode (&This->Children, &This->Children);
     !IsNull (&This->Children, ChildEntry);
