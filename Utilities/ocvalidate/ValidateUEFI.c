@@ -130,7 +130,7 @@ CheckUEFI (
   BOOLEAN                   HasOpenRuntimeEfiDriver;
   BOOLEAN                   HasOpenUsbKbDxeEfiDriver;
   BOOLEAN                   HasPs2KeyboardDxeEfiDriver;
-  BOOLEAN                   HasHfsPlusEfiDriver;
+  BOOLEAN                   HasHfsEfiDriver;
   BOOLEAN                   HasAudioDxeEfiDriver;
   BOOLEAN                   IsConnectDriversEnabled;
   BOOLEAN                   IsRequestBootVarRoutingEnabled;
@@ -161,7 +161,7 @@ CheckUEFI (
   HasOpenRuntimeEfiDriver          = FALSE;
   HasOpenUsbKbDxeEfiDriver         = FALSE;
   HasPs2KeyboardDxeEfiDriver       = FALSE;
-  HasHfsPlusEfiDriver              = FALSE;
+  HasHfsEfiDriver                  = FALSE;
   HasAudioDxeEfiDriver             = FALSE;
   IsConnectDriversEnabled          = UserUefi->ConnectDrivers;
   IsRequestBootVarRoutingEnabled   = UserUefi->Quirks.RequestBootVarRouting;
@@ -234,8 +234,12 @@ CheckUEFI (
       HasPs2KeyboardDxeEfiDriver   = TRUE;
       IndexPs2KeyboardDxeEfiDriver = Index;
     }
-    if (AsciiStrCmp (Driver, "HfsPlus.efi") == 0) {
-      HasHfsPlusEfiDriver = TRUE;
+    //
+    // There are several HFS Plus drivers, including HfsPlus, VboxHfs, etc.
+    // Here only "hfs" (case-insensitive) is matched.
+    //
+    if (OcAsciiStriStr (Driver, "hfs") != NULL) {
+      HasHfsEfiDriver = TRUE;
     }
     if (AsciiStrCmp (Driver, "AudioDxe.efi")) {
       HasAudioDxeEfiDriver = TRUE;
@@ -295,8 +299,8 @@ CheckUEFI (
   }
 
   if (!IsConnectDriversEnabled) {
-    if (HasHfsPlusEfiDriver) {
-      DEBUG ((DEBUG_WARN, "HfsPlus.efi is loaded, but UEFI->ConnectDrivers is not enabled!\n"));
+    if (HasHfsEfiDriver) {
+      DEBUG ((DEBUG_WARN, "HFS+ filesystem driver is loaded, but UEFI->ConnectDrivers is not enabled!\n"));
       ++ErrorCount;
     }
     if (HasAudioDxeEfiDriver) {
