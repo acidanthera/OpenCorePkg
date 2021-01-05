@@ -66,6 +66,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
 #### Security
+- AuthRestart: If enabled, `VirtualSMC.kext` should be present in `Kernel->Add`.
 - BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to the latter two, `RequestBootVarRouting` should be enabled in `UEFI->Quirks`.
 - DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
 - Vault: Only `Optional`, `Basic`, or `Secure` are accepted.
@@ -89,6 +90,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `OpenUsbKbDxe.efi` is in use, `KeySupport` in `UEFI->Input` should never be enabled altogether.
 - When `Ps2KeyboardDxe.efi` is in use, `KeySupport` in `UEFI->Input` should always be enabled altogether.
 - `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
+- When `HfsPlus.efi` or `AudioDxe.efi` is in use, `ConnectDrivers` should be enabled altogether.
 #### Input
 - KeySupportMode: Only `Auto`, `V1`, `V2`, or `AMI` are accepted.
 - When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.

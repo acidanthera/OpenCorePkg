@@ -130,6 +130,9 @@ CheckUEFI (
   BOOLEAN                   HasOpenRuntimeEfiDriver;
   BOOLEAN                   HasOpenUsbKbDxeEfiDriver;
   BOOLEAN                   HasPs2KeyboardDxeEfiDriver;
+  BOOLEAN                   HasHfsPlusEfiDriver;
+  BOOLEAN                   HasAudioDxeEfiDriver;
+  BOOLEAN                   IsConnectDriversEnabled;
   BOOLEAN                   IsRequestBootVarRoutingEnabled;
   BOOLEAN                   IsKeySupportEnabled;
   BOOLEAN                   IsTextRendererSystem;
@@ -158,6 +161,9 @@ CheckUEFI (
   HasOpenRuntimeEfiDriver          = FALSE;
   HasOpenUsbKbDxeEfiDriver         = FALSE;
   HasPs2KeyboardDxeEfiDriver       = FALSE;
+  HasHfsPlusEfiDriver              = FALSE;
+  HasAudioDxeEfiDriver             = FALSE;
+  IsConnectDriversEnabled          = UserUefi->ConnectDrivers;
   IsRequestBootVarRoutingEnabled   = UserUefi->Quirks.RequestBootVarRouting;
   IsKeySupportEnabled              = UserUefi->Input.KeySupport;
   IsPointerSupportEnabled          = UserUefi->Input.PointerSupport;
@@ -228,6 +234,12 @@ CheckUEFI (
       HasPs2KeyboardDxeEfiDriver   = TRUE;
       IndexPs2KeyboardDxeEfiDriver = Index;
     }
+    if (AsciiStrCmp (Driver, "HfsPlus.efi") == 0) {
+      HasHfsPlusEfiDriver = TRUE;
+    }
+    if (AsciiStrCmp (Driver, "AudioDxe.efi")) {
+      HasAudioDxeEfiDriver = TRUE;
+    }
   }
 
   //
@@ -280,6 +292,17 @@ CheckUEFI (
       IndexPs2KeyboardDxeEfiDriver
       ));
     ++ErrorCount;
+  }
+
+  if (!IsConnectDriversEnabled) {
+    if (HasHfsPlusEfiDriver) {
+      DEBUG ((DEBUG_WARN, "HfsPlus.efi is loaded, but UEFI->ConnectDrivers is not enabled!\n"));
+      ++ErrorCount;
+    }
+    if (HasAudioDxeEfiDriver) {
+      DEBUG ((DEBUG_WARN, "AudioDevice.efi is loaded, but UEFI->ConnectDrivers is not enabled!\n"));
+      ++ErrorCount;
+    }
   }
 
   if (!IsTextRendererSystem) {
