@@ -773,7 +773,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
       INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerSelector.Hdr.Obj.Children)
     }
   },
-  NULL,
   NULL
 };
 
@@ -1280,7 +1279,6 @@ BootPickerViewInitialize (
     NULL
     );
 
-  mBootPickerSelector.ClickImage   = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.CurrentImage = &GuiContext->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
   mBootPickerSelector.Hdr.Obj.OffsetX = 0;
   mBootPickerSelector.Hdr.Obj.OffsetY = 0;

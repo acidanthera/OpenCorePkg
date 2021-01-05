@@ -191,8 +191,8 @@ GuiObjDelegatePtrEvent (
 
 BOOLEAN
 GuiClipChildBounds (
-  IN     INT64   ObjectOffset,
-  IN     UINT32  ObjectLength,
+  IN     INT64   ChildOffset,
+  IN     UINT32  ChildLength,
   IN OUT UINT32  *ReqOffset,
   IN OUT UINT32  *ReqLength
   );

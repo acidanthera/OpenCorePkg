@@ -12,7 +12,6 @@
 
 typedef struct {
   GUI_OBJ_CHILD         Hdr;
-  CONST GUI_IMAGE       *ClickImage;
   CONST GUI_IMAGE       *CurrentImage;
 } GUI_OBJ_CLICKABLE;
 
