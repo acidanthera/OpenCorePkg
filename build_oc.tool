@@ -176,7 +176,7 @@ package() {
   for i in *.dsl ; do
     iasl "$i" || exit 1
   done
-  mv *.aml "${dstdir}/Docs/AcpiSamples/Binaries" || exit 1
+  mv ./*.aml "${dstdir}/Docs/AcpiSamples/Binaries" || exit 1
   cd - || exit 1
 
   utilScpts=(
