@@ -1760,6 +1760,8 @@ BootPickerViewInitialize (
   mBootPicker.Hdr.Obj.OffsetX = mBootPickerContainer.Obj.Width / 2;
   mBootPicker.Hdr.Obj.OffsetY = 0;
 
+  mBootPicker.SelectedEntry = NULL;
+
   // TODO: animations should be tied to UI objects, not global
   // Each object has its own list of animations.
   // How to animate addition of one or more boot entries?
