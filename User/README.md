@@ -71,6 +71,7 @@ Most UDK variables are available due to including the original headers.
 - To distinguish target platform `MDE_CPU_*` variables can be used.
   For example, `MDE_CPU_IA32` for 32-bit Intel and `MDE_CPU_X64` for 64-bit Intel.
 - To distinguish from normal UEFI compilation use `EFIUSER` variable.
+- To detect debug build use `EFIUSER_DEBUG` variable.
 - To detect sanitizing status use `SANITIZE_TEST`.
 - To detect fuzzing status use `FUZZING_TEST`.
 - Use `ENTRY_POINT` variable for `main` to automatically disable it for fuzzing.

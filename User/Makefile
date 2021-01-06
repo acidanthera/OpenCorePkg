@@ -96,7 +96,7 @@ ifeq ($(COVERAGE),1)
 endif
 
 ifeq ($(DEBUG),1)
-	CFLAGS  += -g -O0
+	CFLAGS  += -g -O0 -D EFIUSER_DEBUG
 	#
 	# Forcibly disable stripping when enabling DEBUG mode.
 	#
