@@ -241,7 +241,7 @@ CheckUEFI (
     if (OcAsciiStriStr (Driver, "hfs") != NULL) {
       HasHfsEfiDriver = TRUE;
     }
-    if (AsciiStrCmp (Driver, "AudioDxe.efi")) {
+    if (AsciiStrCmp (Driver, "AudioDxe.efi") == 0) {
       HasAudioDxeEfiDriver = TRUE;
     }
   }
