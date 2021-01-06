@@ -555,8 +555,8 @@ InternalBootPickerEntryDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
-    (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
+    BOOT_ENTRY_ICON_SPACE * DrawContext->Scale,
+    BOOT_ENTRY_ICON_SPACE * DrawContext->Scale,
     OffsetX,
     OffsetY,
     Width,
@@ -619,8 +619,8 @@ InternalBootPickerEntryPtrEvent (
     return This;
   }
 
-  if (OffsetX < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2
-   || OffsetY < (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2) {
+  if (OffsetX < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale
+   || OffsetY < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale) {
     return This;
   }
 
@@ -628,8 +628,8 @@ InternalBootPickerEntryPtrEvent (
 
   IsHit = GuiClickableIsHit (
             &Entry->EntryIcon,
-            OffsetX - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2,
-            OffsetY - (BOOT_ENTRY_DIMENSION - BOOT_ENTRY_ICON_DIMENSION) * DrawContext->Scale / 2
+            OffsetX - BOOT_ENTRY_ICON_SPACE * DrawContext->Scale,
+            OffsetY - BOOT_ENTRY_ICON_SPACE * DrawContext->Scale
             );
   if (!IsHit) {
     return This;
@@ -1740,7 +1740,11 @@ BootPickerViewInitialize (
   mBootPickerContainer.Obj.Height  = BOOT_SELECTOR_HEIGHT * GuiContext->Scale;
   mBootPickerContainer.Obj.Width   = ContainerMaxWidth - ContainerWidthDelta;
   mBootPickerContainer.Obj.OffsetX = (mBootPickerView.Width - mBootPickerContainer.Obj.Width) / 2;
-  mBootPickerContainer.Obj.OffsetY = (mBootPickerView.Height - mBootPickerContainer.Obj.Height) / 2;
+  //
+  // Center the icons and labels excluding the selector images vertically.
+  //
+  ASSERT ((mBootPickerView.Height - (BOOT_ENTRY_HEIGHT - BOOT_ENTRY_ICON_SPACE) * GuiContext->Scale) / 2 - (BOOT_ENTRY_ICON_SPACE * GuiContext->Scale) == (mBootPickerView.Height - (BOOT_ENTRY_HEIGHT + BOOT_ENTRY_ICON_SPACE) * GuiContext->Scale) / 2);
+  mBootPickerContainer.Obj.OffsetY = (mBootPickerView.Height - (BOOT_ENTRY_HEIGHT + BOOT_ENTRY_ICON_SPACE) * GuiContext->Scale) / 2;
 
   mBootPicker.Hdr.Obj.Height  = BOOT_SELECTOR_HEIGHT * GuiContext->Scale;
   //
