@@ -48,8 +48,9 @@ ACPIAddHasDuplication (
   return StringIsDuplicated ("ACPI->Add", ACPIAddPrimaryPathString, ACPIAddSecondaryPathString);
 }
 
+STATIC
 UINT32
-CheckACPI (
+CheckACPIAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
@@ -58,25 +59,15 @@ CheckACPI (
   OC_ACPI_CONFIG  *UserAcpi;
   CONST CHAR8     *Path;
   CONST CHAR8     *Comment;
-  CONST UINT8     *Find;
-  UINT32          FindSize;
-  CONST UINT8     *Replace;
-  UINT32          ReplaceSize;
-  CONST UINT8     *Mask;
-  UINT32          MaskSize;
-  CONST UINT8     *ReplaceMask;
-  UINT32          ReplaceMaskSize;
   BOOLEAN         HasCustomDSDT;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into ACPI checker!\n"));
-
-  ErrorCount    = 0;
-  UserAcpi      = &Config->Acpi;
-  HasCustomDSDT = FALSE;
+  ErrorCount      = 0;
+  UserAcpi        = &Config->Acpi;
+  HasCustomDSDT   = FALSE;
 
   for (Index = 0; Index < UserAcpi->Add.Count; ++Index) {
-    Path         = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Path);
-    Comment      = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Comment);
+    Path          = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Path);
+    Comment       = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Comment);
 
     //
     // Sanitise strings.
@@ -111,8 +102,33 @@ CheckACPI (
     ACPIAddHasDuplication
     );
 
+  //
+  // Check for RebaseRegions when using customised DSDT.
+  //
+  if (HasCustomDSDT && !UserAcpi->Quirks.RebaseRegions) {
+    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when customised DSDT table is in use!\n"));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckACPIDelete (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32          ErrorCount;
+  UINT32          Index;
+  OC_ACPI_CONFIG  *UserAcpi;
+  CONST CHAR8     *Comment;
+
+  ErrorCount      = 0;
+  UserAcpi        = &Config->Acpi;
+
   for (Index = 0; Index < UserAcpi->Delete.Count; ++Index) {
-    Comment = OC_BLOB_GET (&UserAcpi->Delete.Values[Index]->Comment);
+    Comment       = OC_BLOB_GET (&UserAcpi->Delete.Values[Index]->Comment);
 
     //
     // Sanitise strings.
@@ -127,6 +143,31 @@ CheckACPI (
     // as serialisation kills it.
     //
   }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckACPIPatch (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32          ErrorCount;
+  UINT32          Index;
+  OC_ACPI_CONFIG  *UserAcpi;
+  CONST CHAR8     *Comment;
+  CONST UINT8     *Find;
+  UINT32          FindSize;
+  CONST UINT8     *Replace;
+  UINT32          ReplaceSize;
+  CONST UINT8     *Mask;
+  UINT32          MaskSize;
+  CONST UINT8     *ReplaceMask;
+  UINT32          ReplaceMaskSize;
+ 
+  ErrorCount      = 0;
+  UserAcpi        = &Config->Acpi;
 
   for (Index = 0; Index < UserAcpi->Patch.Count; ++Index) {
     Comment         = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->Comment);
@@ -170,12 +211,28 @@ CheckACPI (
       ); 
   }
 
-  //
-  // Check for RebaseRegions when using customised DSDT.
-  //
-  if (HasCustomDSDT && !UserAcpi->Quirks.RebaseRegions) {
-    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when customised DSDT table is in use!\n"));
-    ++ErrorCount;
+  return ErrorCount;
+}
+
+UINT32
+CheckACPI (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK ACPICheckers[] = {
+    &CheckACPIAdd,
+    &CheckACPIDelete,
+    &CheckACPIPatch
+  };
+
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
+
+  ErrorCount  = 0;
+
+  for (Index = 0; Index < ARRAY_SIZE (ACPICheckers); ++Index) {
+    ErrorCount += ACPICheckers[Index] (Config);
   }
 
   return ReportError (__func__, ErrorCount);

@@ -118,52 +118,32 @@ KernelForceHasDuplication (
   return StringIsDuplicated ("Kernel->Force", KernelForcePrimaryBundlePathString, KernelForceSecondaryBundlePathString);
 }
 
+STATIC
 UINT32
-CheckKernel (
+CheckKernelAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  UINT32              Index;
-  OC_KERNEL_CONFIG    *UserKernel;
-  OC_PLATFORM_CONFIG  *UserPlatformInfo;
-  CONST CHAR8         *Arch;
-  CONST CHAR8         *BundlePath;
-  CONST CHAR8         *Comment;
-  CONST CHAR8         *ExecutablePath;
-  CONST CHAR8         *MaxKernel;
-  CONST CHAR8         *MinKernel;
-  CONST CHAR8         *PlistPath;
-  CONST CHAR8         *Identifier;
-  BOOLEAN             IsDisableLinkeditJettisonEnabled;
-  BOOLEAN             IsCustomSMBIOSGuidEnabled;
-  CONST CHAR8         *UpdateSMBIOSMode;
-  CONST CHAR8         *Base;
-  CONST UINT8         *Find;
-  UINT32              FindSize;
-  CONST UINT8         *Replace;
-  UINT32              ReplaceSize;
-  CONST UINT8         *Mask;
-  UINT32              MaskSize;
-  CONST UINT8         *ReplaceMask;
-  UINT32              ReplaceMaskSize;
-  CONST CHAR8         *KernelCache;
-  UINTN               IndexKextInfo;
-  UINTN               IndexKextPrecedence;
-  BOOLEAN             HasParent;
-  CONST CHAR8         *CurrentKext;
-  CONST CHAR8         *ParentKext;
-  CONST CHAR8         *ChildKext;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_KERNEL_CONFIG  *UserKernel;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *BundlePath;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *ExecutablePath;
+  CONST CHAR8       *MaxKernel;
+  CONST CHAR8       *MinKernel;
+  CONST CHAR8       *PlistPath;
+  BOOLEAN           IsDisableLinkeditJettisonEnabled;
+  UINTN             IndexKextInfo;
+  UINTN             IndexKextPrecedence;
+  BOOLEAN           HasParent;
+  CONST CHAR8       *CurrentKext;
+  CONST CHAR8       *ParentKext;
+  CONST CHAR8       *ChildKext;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into Kernel checker!\n"));
-
-  ErrorCount                       = 0;
-  UserKernel                       = &Config->Kernel;
-  UserPlatformInfo                 = &Config->PlatformInfo;
-  IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
-  IsCustomSMBIOSGuidEnabled        = UserKernel->Quirks.CustomSmbiosGuid;
-  UpdateSMBIOSMode                 = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
-  KernelCache                      = OC_BLOB_GET (&UserKernel->Scheme.KernelCache);
+  ErrorCount        = 0;
+  UserKernel        = &Config->Kernel;
 
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Add.Values[Index]->Arch);
@@ -238,6 +218,7 @@ CheckKernel (
           // Special check for Lilu and Quirks->DisableLinkeditJettison.
           //
           if (IndexKextInfo == INDEX_KEXT_LILU) {
+            IsDisableLinkeditJettisonEnabled = UserKernel->Quirks.DisableLinkeditJettison;
             if (!IsDisableLinkeditJettisonEnabled) {
               DEBUG ((DEBUG_WARN, "Lilu.kext is loaded at Kernel->Add[%u], but DisableLinkeditJettison is not enabled at Kernel->Quirks!\n", Index));
               ++ErrorCount;
@@ -277,12 +258,43 @@ CheckKernel (
           ++ErrorCount;
         }
         //
-        // Parent is already found before Child. Done.
+        // Parent is already found before Child as guaranteed by the first if. Done.
         //
         break;
       }
     }
   }
+
+  //
+  // Check duplicated entries in Kernel->Add.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Add.Values,
+    UserKernel->Add.Count,
+    sizeof (UserKernel->Add.Values[0]),
+    KernelAddHasDuplication
+    );
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelBlock (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_KERNEL_CONFIG  *UserKernel;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *MaxKernel;
+  CONST CHAR8       *MinKernel;
+  CONST CHAR8       *Identifier;
+
+  ErrorCount        = 0;
+  UserKernel        = &Config->Kernel;
 
   for (Index = 0; Index < UserKernel->Block.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Block.Values[Index]->Arch);
@@ -321,6 +333,33 @@ CheckKernel (
   }
 
   //
+  // Check duplicated entries in Kernel->Block.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Block.Values,
+    UserKernel->Block.Count,
+    sizeof (UserKernel->Block.Values[0]),
+    KernelBlockHasDuplication
+    );
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelEmulate (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  OC_KERNEL_CONFIG    *UserKernel;
+  CONST CHAR8         *MaxKernel;
+  CONST CHAR8         *MinKernel;
+
+  ErrorCount          = 0;
+  UserKernel          = &Config->Kernel; 
+
+  //
   // FIXME: Handle correct kernel version checking.
   //
   MaxKernel = OC_BLOB_GET (&UserKernel->Emulate.MaxKernel);
@@ -338,6 +377,30 @@ CheckKernel (
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
     ++ErrorCount;
   }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelForce (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_KERNEL_CONFIG  *UserKernel;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *BundlePath;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *ExecutablePath;
+  CONST CHAR8       *Identifier;
+  CONST CHAR8       *MaxKernel;
+  CONST CHAR8       *MinKernel;
+  CONST CHAR8       *PlistPath;
+
+  ErrorCount        = 0;
+  UserKernel        = &Config->Kernel;
 
   for (Index = 0; Index < UserKernel->Force.Count; ++Index) {
     Arch            = OC_BLOB_GET (&UserKernel->Force.Values[Index]->Arch);
@@ -405,24 +468,63 @@ CheckKernel (
       DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
       ++ErrorCount;
     }
-
   }
 
+  //
+  // Check duplicated entries in Kernel->Force.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserKernel->Force.Values,
+    UserKernel->Force.Count,
+    sizeof (UserKernel->Force.Values[0]),
+    KernelForceHasDuplication
+    );
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelPatch (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  UINT32              Index;
+  OC_KERNEL_CONFIG    *UserKernel;
+  CONST CHAR8         *Arch;
+  CONST CHAR8         *Comment;
+  CONST CHAR8         *MaxKernel;
+  CONST CHAR8         *MinKernel;
+  CONST CHAR8         *Identifier;
+  CONST CHAR8         *Base;
+  CONST UINT8         *Find;
+  UINT32              FindSize;
+  CONST UINT8         *Replace;
+  UINT32              ReplaceSize;
+  CONST UINT8         *Mask;
+  UINT32              MaskSize;
+  CONST UINT8         *ReplaceMask;
+  UINT32              ReplaceMaskSize;
+
+  ErrorCount          = 0;
+  UserKernel          = &Config->Kernel;
+
   for (Index = 0; Index < UserKernel->Patch.Count; ++Index) {
-    Base            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Base);
-    Comment         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Comment);
-    Arch            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Arch);
-    Identifier      = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Identifier);
-    Find            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Find);
-    FindSize        = UserKernel->Patch.Values[Index]->Find.Size;
-    Replace         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Replace);
-    ReplaceSize     = UserKernel->Patch.Values[Index]->Replace.Size;
-    Mask            = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Mask);
-    MaskSize        = UserKernel->Patch.Values[Index]->Mask.Size;
-    ReplaceMask     = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->ReplaceMask);
-    ReplaceMaskSize = UserKernel->Patch.Values[Index]->ReplaceMask.Size;
-    MaxKernel       = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MaxKernel);
-    MinKernel       = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MinKernel);
+    Base              = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Base);
+    Comment           = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Comment);
+    Arch              = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Arch);
+    Identifier        = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Identifier);
+    Find              = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Find);
+    FindSize          = UserKernel->Patch.Values[Index]->Find.Size;
+    Replace           = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Replace);
+    ReplaceSize       = UserKernel->Patch.Values[Index]->Replace.Size;
+    Mask              = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->Mask);
+    MaskSize          = UserKernel->Patch.Values[Index]->Mask.Size;
+    ReplaceMask       = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->ReplaceMask);
+    ReplaceMaskSize   = UserKernel->Patch.Values[Index]->ReplaceMask.Size;
+    MaxKernel         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MaxKernel);
+    MinKernel         = OC_BLOB_GET (&UserKernel->Patch.Values[Index]->MinKernel);
 
     //
     // Sanitise strings.
@@ -470,27 +572,51 @@ CheckKernel (
       );
   }
 
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelQuirks (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  OC_KERNEL_CONFIG    *UserKernel;
+  OC_PLATFORM_CONFIG  *UserPlatformInfo;
+  BOOLEAN             IsCustomSMBIOSGuidEnabled;
+  CONST CHAR8         *UpdateSMBIOSMode;
+
+  ErrorCount          = 0;
+  UserKernel          = &Config->Kernel;
+  UserPlatformInfo    = &Config->PlatformInfo;
+
   //
-  // Check duplicated entries in Kernel section.
+  // CustomSMBIOSGuid quirk requires UpdateSMBIOSMode at PlatformInfo set to Custom.
   //
-  ErrorCount += FindArrayDuplication (
-    UserKernel->Add.Values,
-    UserKernel->Add.Count,
-    sizeof (UserKernel->Add.Values[0]),
-    KernelAddHasDuplication
-    );
-  ErrorCount += FindArrayDuplication (
-    UserKernel->Block.Values,
-    UserKernel->Block.Count,
-    sizeof (UserKernel->Block.Values[0]),
-    KernelBlockHasDuplication
-    );
-  ErrorCount += FindArrayDuplication (
-    UserKernel->Force.Values,
-    UserKernel->Force.Count,
-    sizeof (UserKernel->Force.Values[0]),
-    KernelForceHasDuplication
-    );
+  IsCustomSMBIOSGuidEnabled = UserKernel->Quirks.CustomSmbiosGuid;
+  UpdateSMBIOSMode          = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
+  if (IsCustomSMBIOSGuidEnabled && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
+    DEBUG ((DEBUG_WARN, "Kernel->Quirks->CustomSMBIOSGuid is enabled, but PlatformInfo->UpdateSMBIOSMode is not set to Custom!\n"));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckKernelScheme (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  OC_KERNEL_CONFIG    *UserKernel;
+  CONST CHAR8         *Arch;
+  CONST CHAR8         *KernelCache;
+
+  ErrorCount          = 0;
+  UserKernel          = &Config->Kernel;
 
   //
   // Sanitise Kernel->Scheme keys.
@@ -501,6 +627,7 @@ CheckKernel (
     ++ErrorCount;
   }
 
+  KernelCache = OC_BLOB_GET (&UserKernel->Scheme.KernelCache);
   if (AsciiStrCmp (KernelCache, "Auto") != 0
     && AsciiStrCmp (KernelCache, "Cacheless") != 0
     && AsciiStrCmp (KernelCache, "Mkext") != 0
@@ -509,12 +636,37 @@ CheckKernel (
     ++ErrorCount;
   }
 
+  return ErrorCount;
+}
+
+UINT32
+CheckKernel (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK KernelCheckers[] = {
+    &CheckKernelAdd,
+    &CheckKernelBlock,
+    &CheckKernelEmulate,
+    &CheckKernelForce,
+    &CheckKernelPatch,
+    &CheckKernelQuirks,
+    &CheckKernelScheme
+  };
+
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
+
+  ErrorCount = 0;
+
   //
-  // CustomSMBIOSGuid quirk requires UpdateSMBIOSMode at PlatformInfo set to Custom.
+  // Ensure correct kext info prior to verification.
   //
-  if (IsCustomSMBIOSGuidEnabled && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
-    DEBUG ((DEBUG_WARN, "Kernel->Quirks->CustomSMBIOSGuid is enabled, but PlatformInfo->UpdateSMBIOSMode is not set to Custom!\n"));
-    ++ErrorCount;
+  ValidateKextInfo ();
+
+  for (Index = 0; Index < ARRAY_SIZE (KernelCheckers); ++Index) {
+    ErrorCount += KernelCheckers[Index] (Config);
   }
 
   return ReportError (__func__, ErrorCount);

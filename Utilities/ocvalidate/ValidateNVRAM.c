@@ -100,8 +100,9 @@ NVRAMLegacySchemaHasDuplication (
   return StringIsDuplicated ("NVRAM->LegacySchema", NVRAMLegacySchemaPrimaryGUIDString, NVRAMLegacySchemaSecondaryGUIDString);
 }
 
+STATIC
 UINT32
-CheckNVRAM (
+CheckNVRAMAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
@@ -112,8 +113,6 @@ CheckNVRAM (
   CONST CHAR8      *AsciiGuid;
   CONST CHAR8      *AsciiNVRAMKey;
   OC_ASSOC         *VariableMap;
-
-  DEBUG ((DEBUG_VERBOSE, "config loaded into NVRAM checker!\n"));
 
   ErrorCount = 0;
   UserNVRAM  = &Config->Nvram;
@@ -166,6 +165,25 @@ CheckNVRAM (
     NVRAMAddHasDuplication
     );
 
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckNVRAMDelete (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32           ErrorCount;
+  UINT32           GuidIndex;
+  UINT32           VariableIndex;
+  OC_NVRAM_CONFIG  *UserNVRAM;
+  CONST CHAR8      *AsciiGuid;
+  CONST CHAR8      *AsciiNVRAMKey;
+
+  ErrorCount = 0;
+  UserNVRAM  = &Config->Nvram;
+
   for (GuidIndex = 0; GuidIndex < UserNVRAM->Delete.Count; ++GuidIndex) {
     AsciiGuid = OC_BLOB_GET (UserNVRAM->Delete.Keys[GuidIndex]);
 
@@ -212,6 +230,25 @@ CheckNVRAM (
     NVRAMDeleteHasDuplication
     );
 
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckNVRAMSchema (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32           ErrorCount;
+  UINT32           GuidIndex;
+  UINT32           VariableIndex;
+  OC_NVRAM_CONFIG  *UserNVRAM;
+  CONST CHAR8      *AsciiGuid;
+  CONST CHAR8      *AsciiNVRAMKey;
+
+  ErrorCount = 0;
+  UserNVRAM  = &Config->Nvram;
+
   for (GuidIndex = 0; GuidIndex < UserNVRAM->Legacy.Count; ++GuidIndex) {
     AsciiGuid = OC_BLOB_GET (UserNVRAM->Legacy.Keys[GuidIndex]);
 
@@ -257,6 +294,31 @@ CheckNVRAM (
     sizeof (UserNVRAM->Legacy.Keys[0]),
     NVRAMLegacySchemaHasDuplication
     );
+
+  return ErrorCount;
+}
+
+
+UINT32
+CheckNVRAM (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK NVRAMCheckers[] = {
+    &CheckNVRAMAdd,
+    &CheckNVRAMDelete,
+    &CheckNVRAMSchema
+  };
+
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
+
+  ErrorCount = 0;
+
+  for (Index = 0; Index < ARRAY_SIZE (NVRAMCheckers); ++Index) {
+    ErrorCount += NVRAMCheckers[Index] (Config);
+  }
 
   return ReportError (__func__, ErrorCount);
 }

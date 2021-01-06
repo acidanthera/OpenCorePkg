@@ -72,8 +72,9 @@ DevPropsDeleteHasDuplication (
   return StringIsDuplicated ("DeviceProperties->Delete", DevPropsDeletePrimaryDevicePathString, DevPropsDeleteSecondaryDevicePathString);
 }
 
+STATIC
 UINT32
-CheckDeviceProperties (
+CheckDevicePropertiesAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
@@ -85,7 +86,72 @@ CheckDeviceProperties (
   CONST CHAR8               *AsciiProperty;
   OC_ASSOC                  *PropertyMap;
 
-  DEBUG ((DEBUG_VERBOSE, "config loaded into DeviceProperties checker!\n"));
+  ErrorCount = 0;
+  UserDevProp = &Config->DeviceProperties;
+
+  for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
+    AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
+    
+    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
+      DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
+      ++ErrorCount;
+    }
+
+    PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
+    
+    for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
+      AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+
+      //
+      // Sanitise strings.
+      //
+      if (!AsciiPropertyIsLegal (AsciiProperty)) {
+        DEBUG ((
+          DEBUG_WARN,
+          "DeviceProperties->Add[%u]->Property[%u] contains illegal character!\n",
+          DeviceIndex,
+          PropertyIndex
+          ));
+        ++ErrorCount;
+      }
+    }
+
+    //
+    // Check duplicated properties in DeviceProperties->Add[N].
+    //
+    ErrorCount += FindArrayDuplication (
+      PropertyMap->Keys,
+      PropertyMap->Count,
+      sizeof (PropertyMap->Keys[0]),
+      DevPropsAddHasDuplication
+      );
+  }
+
+  //
+  // Check duplicated entries in DeviceProperties->Add.
+  //
+  ErrorCount += FindArrayDuplication (
+    UserDevProp->Add.Keys,
+    UserDevProp->Add.Count,
+    sizeof (UserDevProp->Add.Keys[0]),
+    DevPropsAddHasDuplication
+    );
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckDevicePropertiesDelete (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32                    ErrorCount;
+  UINT32                    DeviceIndex;
+  UINT32                    PropertyIndex;
+  OC_DEV_PROP_CONFIG        *UserDevProp;
+  CONST CHAR8               *AsciiDevicePath;
+  CONST CHAR8               *AsciiProperty;
 
   ErrorCount  = 0;
   UserDevProp = &Config->DeviceProperties;
@@ -136,53 +202,28 @@ CheckDeviceProperties (
     DevPropsDeleteHasDuplication
     );
 
-  for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
-    AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
-    
-    if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
-      DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
-      ++ErrorCount;
-    }
+  return ErrorCount;
+}
 
-    PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
-    
-    for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
-      AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
+UINT32
+CheckDeviceProperties (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK DevicePropertiesCheckers[] = {
+    &CheckDevicePropertiesAdd,
+    &CheckDevicePropertiesDelete
+  };
 
-      //
-      // Sanitise strings.
-      //
-      if (!AsciiPropertyIsLegal (AsciiProperty)) {
-        DEBUG ((
-          DEBUG_WARN,
-          "DeviceProperties->Add[%u]->Property[%u] contains illegal character!\n",
-          DeviceIndex,
-          PropertyIndex
-          ));
-        ++ErrorCount;
-      }
-    }
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
-    //
-    // Check duplicated properties in DeviceProperties->Add[N].
-    //
-    ErrorCount += FindArrayDuplication (
-      PropertyMap->Keys,
-      PropertyMap->Count,
-      sizeof (PropertyMap->Keys[0]),
-      DevPropsAddHasDuplication
-      );
+  ErrorCount  = 0;
+
+  for (Index = 0; Index < ARRAY_SIZE (DevicePropertiesCheckers); ++Index) {
+    ErrorCount += DevicePropertiesCheckers[Index] (Config);
   }
-
-  //
-  // Check duplicated entries in DeviceProperties->Add.
-  //
-  ErrorCount += FindArrayDuplication (
-    UserDevProp->Add.Keys,
-    UserDevProp->Add.Count,
-    sizeof (UserDevProp->Add.Keys[0]),
-    DevPropsAddHasDuplication
-    );
 
   return ReportError (__func__, ErrorCount);
 }
