@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Jan  4 20:49:33 2021
-%DIF ADD ../Configuration.tex        Mon Jan  4 20:51:24 2021
+%DIF DEL PreviousConfiguration.tex   Wed Jan  6 14:43:46 2021
+%DIF ADD ../Configuration.tex        Wed Jan  6 20:13:36 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5638,20 +5638,27 @@ directory. Full list of supported icons (in \texttt{.icns} format) is provided b
 icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
 icon if available (e.g. \texttt{OldExtHardDrive.icns}).
 
-\begin{itemize}
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: In the following all dimensions are normative for the 1x scaling level and shall be
+scaled accordingly for other levels.
+}
+
+\DIFaddend \begin{itemize}
 \tightlist
-  \item \texttt{Cursor} --- Mouse cursor (mandatory).
-  \item \texttt{Selected} --- Selected item (mandatory).
-  \item \texttt{Selector} --- Selecting item (mandatory).
-  \item \texttt{HardDrive} --- Generic OS (mandatory).
-  \item \texttt{Apple} --- Apple OS.
-  \item \texttt{AppleRecv} --- Apple Recovery OS.
-  \item \texttt{AppleTM} --- Apple Time Machine.
-  \item \texttt{Windows} --- Windows.
-  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
-  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
-  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
-  \item \texttt{Tool} --- Any other tool.
+  \item \texttt{Cursor} --- Mouse cursor (mandatory\DIFaddbegin \DIFadd{, up to 144x144}\DIFaddend ).
+  \item \texttt{Selected} --- Selected item (mandatory\DIFaddbegin \DIFadd{, 144x144}\DIFaddend ).
+  \item \texttt{Selector} --- Selecting item (mandatory\DIFaddbegin \DIFadd{, up to 144x40}\DIFaddend ).
+  \item \DIFaddbegin \texttt{\DIFadd{Left}} \DIFadd{--- Scrolling left (mandatory, 40x40).
+  }\item \texttt{\DIFadd{Right}} \DIFadd{--- Scrolling right (mandatory, 40x40).
+  }\item \DIFaddend \texttt{HardDrive} --- Generic OS (mandatory\DIFaddbegin \DIFadd{, 128x128}\DIFaddend ).
+  \item \DIFaddbegin \texttt{\DIFadd{Background}} \DIFadd{--- Centred background image.
+  }\item \DIFaddend \texttt{Apple} --- Apple OS \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
+  \item \texttt{AppleRecv} --- Apple Recovery OS \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
+  \item \texttt{AppleTM} --- Apple Time Machine \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
+  \item \texttt{Windows} --- Windows \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}\DIFaddbegin \DIFadd{, 128x128}\DIFaddend ).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
+  \item \texttt{Shell} --- Entry with UEFI Shell name \DIFdelbegin \DIFdel{(}\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend e.g. \texttt{OpenShell} \DIFaddbegin \DIFadd{(128x128}\DIFaddend ).
+  \item \texttt{Tool} --- Any other tool \DIFaddbegin \DIFadd{(128x128)}\DIFaddend .
 \end{itemize}
 
 Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
@@ -5671,9 +5678,11 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
-Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
-Font is Helvetica 12 pt times scale factor.
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: All labels must have a height of exactly 12 px. There is no limit for their width.
+}
+
+\DIFaddend Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
+\texttt{icnspack}\DIFdelbegin \DIFdel{. Please refer to sample data for the details about the dimensions}\DIFdelend . Font is Helvetica 12 pt times scale factor.
 
 Font format corresponds to \href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}.
 While there are many utilities to generate font files, currently it is recommended to use

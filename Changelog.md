@@ -3,6 +3,8 @@ OpenCore Changelog
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy
 - Added background image support in OpenCanopy
+- Fixed selector boot option choice in OpenCanopy
+- Relaxed selector dimensions for OpenCanopy
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
