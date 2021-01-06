@@ -660,6 +660,11 @@ CheckKernel (
 
   ErrorCount = 0;
 
+  //
+  // Ensure correct kext info prior to verification.
+  //
+  ValidateKextInfo ();
+
   for (Index = 0; Index < ARRAY_SIZE (KernelCheckers); ++Index) {
     ErrorCount += KernelCheckers[Index] (Config);
   }
