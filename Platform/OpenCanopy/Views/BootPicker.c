@@ -905,7 +905,8 @@ InternalBootPickerSelectorPtrEvent (
     if (IsHit) {
       if (Event == GuiPointerPrimaryUp) {
         ASSERT (mBootPicker.SelectedEntry != NULL);
-        Context->BootEntry = mBootPicker.SelectedEntry->Context;
+        ASSERT (Context->BootEntry == mBootPicker.SelectedEntry->Context);
+        Context->ReadyToBoot = TRUE;
       } else  {
         ButtonImage = &Context->Icons[ICON_SELECTOR][ICON_TYPE_HELD];
       }
