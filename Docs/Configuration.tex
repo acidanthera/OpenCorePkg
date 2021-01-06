@@ -5578,23 +5578,26 @@ directory. Full list of supported icons (in \texttt{.icns} format) is provided b
 icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
 icon if available (e.g. \texttt{OldExtHardDrive.icns}).
 
+\emph{Note}: In the following all dimensions are normative for the 1x scaling level and shall be
+scaled accordingly for other levels.
+
 \begin{itemize}
 \tightlist
-  \item \texttt{Cursor} --- Mouse cursor (mandatory).
-  \item \texttt{Selected} --- Selected item (mandatory).
-  \item \texttt{Selector} --- Selecting item (mandatory).
-  \item \texttt{Left} --- Scrolling left (mandatory).
-  \item \texttt{Right} --- Scrolling right (mandatory).
-  \item \texttt{HardDrive} --- Generic OS (mandatory).
+  \item \texttt{Cursor} --- Mouse cursor (mandatory, up to 144x144).
+  \item \texttt{Selected} --- Selected item (mandatory, 144x144).
+  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40).
+  \item \texttt{Left} --- Scrolling left (mandatory, 40x40).
+  \item \texttt{Right} --- Scrolling right (mandatory, 40x40).
+  \item \texttt{HardDrive} --- Generic OS (mandatory, 128x128).
   \item \texttt{Background} --- Centred background image.
-  \item \texttt{Apple} --- Apple OS.
-  \item \texttt{AppleRecv} --- Apple Recovery OS.
-  \item \texttt{AppleTM} --- Apple Time Machine.
-  \item \texttt{Windows} --- Windows.
-  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
-  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
-  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
-  \item \texttt{Tool} --- Any other tool.
+  \item \texttt{Apple} --- Apple OS (128x128).
+  \item \texttt{AppleRecv} --- Apple Recovery OS (128x128).
+  \item \texttt{AppleTM} --- Apple Time Machine (128x128).
+  \item \texttt{Windows} --- Windows (128x128).
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}, 128x128).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool (128x128).
+  \item \texttt{Shell} --- Entry with UEFI Shell name for e.g. \texttt{OpenShell} (128x128).
+  \item \texttt{Tool} --- Any other tool (128x128).
 \end{itemize}
 
 Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
@@ -5614,9 +5617,10 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
+\emph{Note}: All labels must have a height of exactly 12 px. There is no limit for their width.
+
 Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
-Font is Helvetica 12 pt times scale factor.
+\texttt{icnspack}. Font is Helvetica 12 pt times scale factor.
 
 Font format corresponds to \href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}.
 While there are many utilities to generate font files, currently it is recommended to use
