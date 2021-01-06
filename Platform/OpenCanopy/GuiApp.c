@@ -180,7 +180,17 @@ LoadImageFileFromStorage (
         Icon,
         Status
         ));
-      return Index == ICON_TYPE_BASE ? EFI_NOT_FOUND : EFI_SUCCESS;
+      if (Index == ICON_TYPE_BASE) {
+        STATIC_ASSERT (
+          ICON_TYPE_BASE == 0,
+          "Memory may be leaked due to previously loaded images."
+          );
+        return EFI_NOT_FOUND;
+      }
+
+      Images[Index].Width  = 0;
+      Images[Index].Height = 0;
+      Images[Index].Buffer = NULL;
     }
   }
 
@@ -276,9 +286,11 @@ InternalContextConstruct (
   UINT32                             FontDataSize;
   UINTN                              UiScaleSize;
   UINT32                             Index;
-  UINT32                             ImageDimension;
+  UINT32                             ImageWidth;
+  UINT32                             ImageHeight;
   CONST CHAR8                        *Prefix;
   BOOLEAN                            Result;
+  BOOLEAN                            AllowLessSize;
 
   ASSERT (Context != NULL);
 
@@ -355,19 +367,25 @@ InternalContextConstruct (
       + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
 
-  Status = EFI_SUCCESS;
-
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {
+    AllowLessSize = FALSE;
     if (Index == ICON_CURSOR) {
-      ImageDimension = MAX_CURSOR_DIMENSION;
+      ImageWidth  = MAX_CURSOR_DIMENSION;
+      ImageHeight = MAX_CURSOR_DIMENSION;
+      AllowLessSize = TRUE;
     } else if (Index == ICON_SELECTED) {
-      ImageDimension = BOOT_SELECTOR_BACKGROUND_DIMENSION;
+      ImageWidth  = BOOT_SELECTOR_BACKGROUND_DIMENSION;
+      ImageHeight = BOOT_SELECTOR_BACKGROUND_DIMENSION;
     } else if (Index == ICON_SELECTOR) {
-      ImageDimension = BOOT_SELECTOR_BUTTON_DIMENSION;
+      ImageWidth  = BOOT_SELECTOR_BUTTON_WIDTH;
+      ImageHeight = BOOT_SELECTOR_BUTTON_HEIGHT;
+      AllowLessSize = TRUE;
     } else if (Index == ICON_LEFT || Index == ICON_RIGHT) {
-      ImageDimension = BOOT_SCROLL_BUTTON_DIMENSION;
+      ImageWidth  = BOOT_SCROLL_BUTTON_DIMENSION;
+      ImageHeight = BOOT_SCROLL_BUTTON_DIMENSION;
     } else {
-      ImageDimension = BOOT_ENTRY_ICON_DIMENSION;
+      ImageWidth  = BOOT_ENTRY_ICON_DIMENSION;
+      ImageHeight = BOOT_ENTRY_ICON_DIMENSION;
     }
 
     Status = LoadImageFileFromStorage (
@@ -375,57 +393,58 @@ InternalContextConstruct (
       Storage,
       mIconNames[Index],
       Context->Scale,
-      ImageDimension,
-      ImageDimension,
+      ImageWidth,
+      ImageHeight,
       Index >= ICON_NUM_SYS,
       Prefix,
-      Index == ICON_CURSOR
+      AllowLessSize
       );
-
-    if (!EFI_ERROR (Status) && (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT)) {
-      Status = GuiCreateHighlightedImage (
-        &Context->Icons[Index][ICON_TYPE_HELD],
-        &Context->Icons[Index][ICON_TYPE_BASE],
-        &mHighlightPixel
-        );
-    }
-
-    //
-    // For generic disk icon being able to distinguish internal and external
-    // disk icons is a security requirement. These icons are used whenever
-    // 'typed' external icons are not available.
-    //
-    if (!EFI_ERROR (Status)
-      && Index == ICON_GENERIC_HDD
-      && Context->Icons[Index][ICON_TYPE_EXTERNAL].Buffer == NULL) {
-      Status = EFI_NOT_FOUND;
-      DEBUG ((DEBUG_WARN, "OCUI: Missing external disk icon\n"));
-      break;
+    if (!EFI_ERROR (Status)) {
+      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT) {
+        Status = GuiCreateHighlightedImage (
+          &Context->Icons[Index][ICON_TYPE_HELD],
+          &Context->Icons[Index][ICON_TYPE_BASE],
+          &mHighlightPixel
+          );
+      } else if (Index == ICON_GENERIC_HDD
+              && Context->Icons[Index][ICON_TYPE_EXTERNAL].Buffer == NULL) {
+        //
+        // For generic disk icon being able to distinguish internal and external
+        // disk icons is a security requirement. These icons are used whenever
+        // 'typed' external icons are not available.
+        //
+        Status = EFI_NOT_FOUND;
+        DEBUG ((DEBUG_WARN, "OCUI: Missing external disk icon\n"));
+        STATIC_ASSERT (
+          ICON_GENERIC_HDD < ICON_NUM_MANDATORY,
+          "The base icon should must be cleaned up explicitly."
+          );
+      }
+    } else {
+      ZeroMem (&Context->Icons[Index], sizeof (Context->Icons[Index]));
     }
 
     if (EFI_ERROR (Status) && Index < ICON_NUM_MANDATORY) {
-      break;
-    }
-
-    Status = EFI_SUCCESS;
-  }
-
-  if (!EFI_ERROR (Status)) {
-    for (Index = 0; Index < LABEL_NUM_TOTAL; ++Index) {
-      Status |= LoadLabelFromStorage (
-        Storage,
-        mLabelNames[Index],
-        Context->Scale,
-        Context->LightBackground,
-        &Context->Labels[Index]
-        );
+      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images\n"));
+      InternalContextDestruct (Context);
+      return EFI_UNSUPPORTED;
     }
   }
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCUI: Failed to load images\n"));
-    InternalContextDestruct (Context);
-    return EFI_UNSUPPORTED;
+  for (Index = 0; Index < LABEL_NUM_TOTAL; ++Index) {
+    Status = LoadLabelFromStorage (
+      Storage,
+      mLabelNames[Index],
+      Context->Scale,
+      Context->LightBackground,
+      &Context->Labels[Index]
+      );
+    if (EFI_ERROR (Status)) {
+      Context->Labels[Index].Buffer = NULL;
+      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images\n"));
+      InternalContextDestruct (Context);
+      return EFI_UNSUPPORTED;
+    }
   }
 
   if (Context->Scale == 2) {
