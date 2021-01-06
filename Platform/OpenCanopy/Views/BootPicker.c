@@ -722,8 +722,12 @@ InternalBootPickerSelectorDraw (
   ButtonImage = Clickable->CurrentImage;
   ASSERT (ButtonImage != NULL);
 
-  ASSERT_EQUALS (ButtonImage->Width , BOOT_SELECTOR_BUTTON_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (ButtonImage->Height, BOOT_SELECTOR_BUTTON_DIMENSION * DrawContext->Scale);
+  STATIC_ASSERT (
+    BOOT_SELECTOR_BUTTON_WIDTH <= BOOT_SELECTOR_BACKGROUND_DIMENSION,
+    "The selector width must not exceed the selector background width."
+    );
+  ASSERT (ButtonImage->Width <= BOOT_SELECTOR_BUTTON_WIDTH * DrawContext->Scale);
+  ASSERT (ButtonImage->Height <= BOOT_SELECTOR_BUTTON_HEIGHT * DrawContext->Scale);
   ASSERT (ButtonImage->Buffer != NULL);
 
   GuiDrawChildImage (
@@ -732,8 +736,8 @@ InternalBootPickerSelectorDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2,
-    (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale,
+    (BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale - ButtonImage->Width) / 2,
+    (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) * DrawContext->Scale,
     OffsetX,
     OffsetY,
     Width,
@@ -891,12 +895,12 @@ InternalBootPickerSelectorPtrEvent (
   ASSERT (Event == GuiPointerPrimaryDown
        || Event == GuiPointerPrimaryHold
        || Event == GuiPointerPrimaryUp);
-  if (OffsetX >= (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2
-   && OffsetY >= (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale) {
+  if (OffsetX >= (BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale - ButtonImage->Width) / 2
+   && OffsetY >= (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) * DrawContext->Scale) {
     IsHit = GuiClickableIsHit (
               ButtonImage,
-              OffsetX - (BOOT_SELECTOR_BACKGROUND_DIMENSION - BOOT_SELECTOR_BUTTON_DIMENSION) * DrawContext->Scale / 2,
-              OffsetY - (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE)     * DrawContext->Scale
+              OffsetX - (BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale - ButtonImage->Width) / 2,
+              OffsetY - (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) * DrawContext->Scale
               );
     if (IsHit) {
       if (Event == GuiPointerPrimaryUp) {
