@@ -108,12 +108,9 @@ enum {
 
 #define PADD(x,y) (VOID *)(((CHAR8 *) x) + y)
 
-#define IS_LOCK() ((Flags & ARG_LOCK) != 0)
-#define IS_UNLOCK() ((Flags & ARG_UNLOCK) != 0)
-#define IS_INTERACTIVE() ((Flags & ARG_INTERACTIVE) != 0)
 #define BUFFER_LENGTH 128
 
-extern UINTN Flags;
+extern UINTN mArgumentFlags;
 
 /**
   Check MsrE2 Status - original VerifyMSRE2

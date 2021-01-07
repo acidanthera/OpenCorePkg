@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "ControlMsrE2.h"
 
-UINTN           Flags;
+UINTN           mArgumentFlags;
 
 /*
   Read up to Length -1 Characters from keyboard.
@@ -146,11 +146,14 @@ InterpretArguments (
   CHAR16      *Token;
   UINT16      TokenIndex;
   UINT32      Index;
+  EFI_STATUS  Status;
 
-  Flags = 0;
+  mArgumentFlags = ARG_VERIFY;
 
-  if (EFI_ERROR (GetArguments (&Argc, &Argv))) {
-    Argc = 1;
+  Status = GetArguments (&Argc, &Argv);
+  if (EFI_ERROR (Status)) {
+    Print (L"Unable to get arguments - %r\n", Status);
+    return Status;
   }
 
   ParameterCount = 0;
@@ -179,30 +182,32 @@ InterpretArguments (
       Token[TokenIndex] = '\0';
 
       if (StrCmp (Parameter, L"lock") == 0) {
-        Flags |= ARG_LOCK;
-        ++ParameterCount;
+        mArgumentFlags = ARG_LOCK;
       } else if (StrCmp (Parameter, L"unlock") == 0) {
-        Flags |= ARG_UNLOCK;
-        ++ParameterCount;
+        mArgumentFlags = ARG_UNLOCK;
       } else if (StrCmp (Parameter, L"interactive") == 0) {
-        Flags |= ARG_INTERACTIVE;
-        ++ParameterCount;
+        mArgumentFlags = ARG_INTERACTIVE;
       } else {
-        Print (L"Ignoring unknown command line argument: %s\n", Parameter);
+        Print (L"Unknown command line argument: %s\n", Parameter);
+        Status = EFI_INVALID_PARAMETER;
+        break;
       }
-    }  ///<  All Tokens parsed
+      ++ParameterCount;
+    }
     FreePool (Token);
-  }  ///< All Arguments analysed
+  }
+
+  if (ParameterCount > 1) {
+    Print (L"interactive, unlock, lock are exclusive options. Use only one of them.\n\n");
+    Status = EFI_INVALID_PARAMETER;
+  }
 
   if (ParameterCount == 0) {
     Print (L"No option selected, verify only.\n");
     Print (L"Usage: ControlMsrE2 <unlock | lock | interactive>\n\n");
-  } else if (ParameterCount > 1) {
-    Print (L"interactive, unlock, lock are exclusive options. Use only one of them.\n\n");
-    return EFI_INVALID_PARAMETER;
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 VOID

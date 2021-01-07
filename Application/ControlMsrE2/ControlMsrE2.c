@@ -15,6 +15,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include "ControlMsrE2.h"
 
 #define CONTEXTS_MAX 8
+#define OPTIONS_MAX  9
 
 VOID
 IterateListHeaders (
@@ -117,47 +118,43 @@ IterateListHeaders (
 
   DEBUG ((DEBUG_INFO, "Context Count: %x Options Count %x\n", ContextsCount, OptionsCount));
 
-  if (IS_INTERACTIVE ()
-   || IS_LOCK ()
-   || IS_UNLOCK ()) {
-    if (OptionsCount > 9 || ContextsCount == CONTEXTS_MAX) {
-      Print (L"Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n");
-    } else if (OptionsCount == 0) {
-      Print (L"No corresponding BIOS Options found. Try a different search string using interactive mode.\n");
-    } else {
-      Key = '1';
+  if (OptionsCount > OPTIONS_MAX || ContextsCount == CONTEXTS_MAX) {
+    Print (L"Too many corresponding BIOS Options found. Try a different search string using interactive mode.\n");
+  } else if (OptionsCount == 0) {
+    Print (L"No corresponding BIOS Options found. Try a different search string using interactive mode.\n");
+  } else {
+    Key = '1';
 
-      if (OptionsCount > 1) {
-        do {
-          Print (L"\nEnter choice (1..%x) ? ", OptionsCount);
-          Key = ReadAnyKey ();
-        } while ((Key < '1') && (Key > '0' + OptionsCount) && (Key != CHAR_ESC));
+    if (OptionsCount > 1) {
+      do {
+        Print (L"\nEnter choice (1..%x) ? ", OptionsCount);
+        Key = ReadAnyKey ();
+      } while ((Key < '1') && (Key > '0' + OptionsCount) && (Key != CHAR_ESC));
 
-        Print (L"\n");
-      }
+      Print (L"\n");
+    }
 
-      if (Key != CHAR_ESC) {
-        Index = Key - '0';
+    if (Key != CHAR_ESC) {
+      Index = Key - '0';
 
-        for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
-          if (Contexts[ContextIndex].Count >= Index) {
-            Contexts[ContextIndex].Count = ContextIndex == 0 ? 0 : Contexts[ContextIndex - 1].Count;
-            Contexts[ContextIndex].StopAt = Index;
-            Contexts[ContextIndex].IfrOneOf = NULL;
+      for (ContextIndex = 0; ContextIndex < ContextsCount; ++ContextIndex) {
+        if (Contexts[ContextIndex].Count >= Index) {
+          Contexts[ContextIndex].Count = ContextIndex == 0 ? 0 : Contexts[ContextIndex - 1].Count;
+          Contexts[ContextIndex].StopAt = Index;
+          Contexts[ContextIndex].IfrOneOf = NULL;
 
-            IterateOpCode (
-              Contexts[ContextIndex].FirstIfrHeader,
-              EFI_IFR_ONE_OF_OP,
-              &Stop,
-              &Contexts[ContextIndex],
-              HandleIfrOption
-              );
+          IterateOpCode (
+            Contexts[ContextIndex].FirstIfrHeader,
+            EFI_IFR_ONE_OF_OP,
+            &Stop,
+            &Contexts[ContextIndex],
+            HandleIfrOption
+            );
 
-            if (Contexts[ContextIndex].IfrOneOf != NULL) {
-              HandleIfrVariable (&Contexts[ContextIndex]);
-            }
-            break;
+          if (Contexts[ContextIndex].IfrOneOf != NULL) {
+            HandleIfrVariable (&Contexts[ContextIndex]);
           }
+          break;
         }
       }
     }
@@ -179,7 +176,7 @@ SearchForString (
   EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders;
   UINT32                        ListHeaderCount;
 
-  if (IS_INTERACTIVE ()) {
+  if (mArgumentFlags == ARG_INTERACTIVE) {
     ModifySearchString (&SearchString);
   }
 
@@ -224,17 +221,19 @@ UefiMain (
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 ();
     if (!EFI_ERROR (Status)) {
-      if (Flags != ARG_VERIFY) {
-        Print (L"\nBIOS Options:\n");
+      if (mArgumentFlags == ARG_VERIFY) {
+        return Status;
+      }
 
-        SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
-        if (SearchString != NULL) {
-          Status = SearchForString (SearchString);
-          FreePool (SearchString);
-        } else {
-          Print (L"Could not allocate memory for SearchString\n");
-          Status = EFI_OUT_OF_RESOURCES;
-        }
+      Print (L"\nBIOS Options:\n");
+
+      SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
+      if (SearchString != NULL) {
+        Status = SearchForString (SearchString);
+        FreePool (SearchString);
+      } else {
+        Print (L"Could not allocate memory for SearchString\n");
+        Status = EFI_OUT_OF_RESOURCES;
       }
     } else {
       Print (L"Unable to verify MSR 0xE2 - %r\n", Status);

@@ -332,20 +332,20 @@ HandleIfrVariable (
 
         Print (L"Value: value %X\n", VarStoreValue);
 
-        if (IS_INTERACTIVE ()) {
+        if (mArgumentFlags == ARG_INTERACTIVE) {
           NewValue = VarStoreValue != 0 ? 0 : 1;
-        } else if (IS_LOCK ()) {
+        } else if (mArgumentFlags == ARG_LOCK) {
           NewValue = 1;
-        } else if (IS_UNLOCK ()) {
+        } else if (mArgumentFlags == ARG_UNLOCK) {
           NewValue = 0;
         } else {
           NewValue = VarStoreValue;
         }
 
         if (NewValue != VarStoreValue) {
-          if (IS_INTERACTIVE ()) {
+          if (mArgumentFlags == ARG_INTERACTIVE) {
             Print (L"Do you want to toggle the value y/n ?");
-          } else if (IS_LOCK ()) {
+          } else if (mArgumentFlags == ARG_LOCK) {
             Print (L"Do you want to set the value y/n ?");
           } else {
             Print (L"Do you want to clear the value y/n ?");
