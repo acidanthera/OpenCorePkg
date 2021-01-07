@@ -949,7 +949,7 @@ fsw_status_t fsw_dnode_get_path(struct fsw_volume *vol, struct fsw_dnode *dno, s
     fsw_status_t        status;
     struct fsw_string   *array, *temp_arr_ptr;
     fsw_u32             array_capacity, array_len;
-    fsw_s32             i;
+    fsw_s64             i;
     fsw_u16             *temp_char_ptr;
 
     // Simple growable array
@@ -975,7 +975,7 @@ fsw_status_t fsw_dnode_get_path(struct fsw_volume *vol, struct fsw_dnode *dno, s
 
             if (!status) {
                 // Copy array contents
-                for (i = 0; i < array_len; ++i)
+                for (i = 0; i < (fsw_s64) array_len; ++i)
                     array[i] = temp_arr_ptr[i];
 
                 // Free the old pool
@@ -1014,7 +1014,7 @@ fsw_status_t fsw_dnode_get_path(struct fsw_volume *vol, struct fsw_dnode *dno, s
 
     temp_char_ptr = (fsw_u16 *) out_path->data;
     if (array_len > 0) {
-        for (i = array_len - 1; i >= 0; --i) {
+        for (i = (fsw_s64) array_len - 1; i >= 0; --i) {
             *(temp_char_ptr++) = SEP_CHAR;
             fsw_memcpy(temp_char_ptr, array[i].data, array[i].size);
             temp_char_ptr += array[i].len;
@@ -1026,7 +1026,7 @@ fsw_status_t fsw_dnode_get_path(struct fsw_volume *vol, struct fsw_dnode *dno, s
 #undef SEP_CHAR
 
 done:
-    for (int i = 0; i < array_len; ++i)
+    for (i = 0; i < (fsw_s64) array_len; ++i)
        fsw_strfree(&array[i]);
     fsw_free(array);
 
