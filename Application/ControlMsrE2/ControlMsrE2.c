@@ -14,6 +14,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "ControlMsrE2.h"
 
+//
+// Maximum search contexts and matched options allowed
+//
 #define CONTEXTS_MAX 8
 #define OPTIONS_MAX  9
 

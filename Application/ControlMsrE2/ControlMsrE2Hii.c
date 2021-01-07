@@ -314,6 +314,7 @@ HandleIfrVariable (
         );
 
       if (!EFI_ERROR (Status)) {
+        ASSERT (DataSize >= Context->IfrOneOf->Question.VarStoreInfo.VarOffset + VarSize);
         VarPointer = Data + Context->IfrOneOf->Question.VarStoreInfo.VarOffset;
         switch (VarSize) {
         case 1:
@@ -326,6 +327,7 @@ HandleIfrVariable (
           VarStoreValue = *(UINT32 *) (VarPointer);
           break;
         default:
+          ASSERT (VarSize == 8);
           VarStoreValue = *(UINT64 *) (VarPointer);
           break;
         }
