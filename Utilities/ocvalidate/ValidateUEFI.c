@@ -179,7 +179,6 @@ CheckUEFIDrivers (
 {
   UINT32                       ErrorCount;
   OC_UEFI_CONFIG               *UserUefi;
-  OC_MISC_CONFIG               *UserMisc;
   UINT32                       Index;
   CONST CHAR8                  *Driver;
   BOOLEAN                      HasOpenRuntimeEfiDriver;
@@ -191,16 +190,12 @@ CheckUEFIDrivers (
   UINT32                       IndexHfsEfiDriver;
   BOOLEAN                      HasAudioDxeEfiDriver;
   UINT32                       IndexAudioDxeEfiDriver;
-  BOOLEAN                      HasOpenCanopyEfiDriver;
-  UINT32                       IndexOpenCanopyEfiDriver;
-  CONST CHAR8                  *PickerMode;
   BOOLEAN                      IsRequestBootVarRoutingEnabled;
   BOOLEAN                      IsKeySupportEnabled;
   BOOLEAN                      IsConnectDriversEnabled;
 
   ErrorCount                   = 0;
   UserUefi                     = &Config->Uefi;
-  UserMisc                     = &Config->Misc;
 
   HasOpenRuntimeEfiDriver      = FALSE;
   HasOpenUsbKbDxeEfiDriver     = FALSE;
@@ -211,8 +206,6 @@ CheckUEFIDrivers (
   IndexHfsEfiDriver            = 0;
   HasAudioDxeEfiDriver         = FALSE;
   IndexAudioDxeEfiDriver       = 0;
-  HasOpenCanopyEfiDriver       = FALSE;
-  IndexOpenCanopyEfiDriver     = 0;
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
 
@@ -247,10 +240,6 @@ CheckUEFIDrivers (
     if (AsciiStrCmp (Driver, "AudioDxe.efi") == 0) {
       HasAudioDxeEfiDriver   = TRUE;
       IndexAudioDxeEfiDriver = Index;
-    }
-    if (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0) {
-      HasOpenCanopyEfiDriver   = TRUE;
-      IndexOpenCanopyEfiDriver = Index;
     }
   }
 
@@ -305,12 +294,6 @@ CheckUEFIDrivers (
       DEBUG ((DEBUG_WARN, "AudioDevice.efi is loaded at UEFI->Drivers[%u], but UEFI->ConnectDrivers is not enabled!\n", IndexAudioDxeEfiDriver));
       ++ErrorCount;
     }
-  }
-
-  PickerMode = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
-  if (HasOpenCanopyEfiDriver && AsciiStrCmp (PickerMode, "External") != 0) {
-    DEBUG ((DEBUG_WARN, "OpenCanopy.efi is loaded at UEFI->Drivers[%u], but Misc->Boot->PickerMode is not set to External!\n", IndexOpenCanopyEfiDriver));
-    ++ErrorCount;
   }
 
   return ErrorCount;
