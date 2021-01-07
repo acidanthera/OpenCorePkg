@@ -158,7 +158,7 @@ fsw_hfsplus_posix_time(fsw_u32 t);
  * Return a pointer to the B-Tree key at the beginning of the record.
  */
 static HFSPlusBTKey *
-fsw_hfsplus_btnode_get_rec(BTNodeDescriptor* btnode, fsw_u16 size, fsw_u16 rnum);
+fsw_hfsplus_btnode_get_rec(BTNodeDescriptor* btnode, fsw_u16 size, fsw_u32 rnum);
 
 /* Given a B-Tree record pointer 'k', return a pointer to the data
  * immediately following the key record; IOW, skip the key record which
@@ -565,7 +565,7 @@ fsw_hfsplus_dno_stat(struct fsw_hfsplus_volume *v, struct fsw_hfsplus_dnode *d,
 }
 
 static HFSPlusBTKey *
-fsw_hfsplus_btnode_get_rec(BTNodeDescriptor* btnode, fsw_u16 size, fsw_u16 rnum)
+fsw_hfsplus_btnode_get_rec(BTNodeDescriptor* btnode, fsw_u16 size, fsw_u32 rnum)
 {
     fsw_u16 *off = (fsw_u16 *) ((fsw_u8 *) btnode + size) - 1 - rnum;
     return (HFSPlusBTKey *)((fsw_u8 *)btnode + fsw_u16_be_swap(*off));
