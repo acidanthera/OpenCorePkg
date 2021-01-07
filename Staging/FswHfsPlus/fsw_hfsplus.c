@@ -574,7 +574,7 @@ fsw_hfsplus_btnode_get_rec(BTNodeDescriptor* btnode, fsw_u16 size, fsw_u32 rnum)
 static void *
 fsw_hfsplus_bt_rec_skip_key(HFSPlusBTKey *k)
 {
-    return (void *)k + sizeof(k->keyLength) + fsw_u16_be_swap(k->keyLength);
+    return (fsw_u8 *)k + sizeof(k->keyLength) + fsw_u16_be_swap(k->keyLength);
 }
 
 static fsw_u32
@@ -609,8 +609,8 @@ fsw_hfsplus_bt_search(struct fsw_hfsplus_dnode *bt,
             return status;
 
         // sanity check: record 0 located immediately after node descriptor
-        if ((void *)btnode + sizeof(BTNodeDescriptor) !=
-            (void *)fsw_hfsplus_btnode_get_rec(btnode, bt->bt_ndsz, 0))
+        if ((fsw_u8 *)btnode + sizeof(BTNodeDescriptor) !=
+            (fsw_u8 *)fsw_hfsplus_btnode_get_rec(btnode, bt->bt_ndsz, 0))
             return FSW_VOLUME_CORRUPTED;
 
         // search records within current node
@@ -861,7 +861,6 @@ fsw_hfsplus_btree_get_rec(struct fsw_hfsplus_dnode *bt,
         }
     }
 
-    return status;
 }
 
 static fsw_status_t
