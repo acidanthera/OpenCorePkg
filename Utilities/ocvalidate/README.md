@@ -84,6 +84,8 @@ Utility to validate whether a `config.plist` matches requirements and convention
 ### UEFI
 #### APFS
 - When `EnableJumpstart` is enabled, `ScanPolicy` in `Misc->Security` should have `OC_SCAN_ALLOW_FS_APFS` (bit 8) set, together with `OC_SCAN_FILE_SYSTEM_LOCK` (bit 0) set. Or `ScanPolicy` should be `0` (failsafe value).
+#### Audio
+- When `AudioSupport` is enabled, AudioDevice cannot be empty and must be a valid path.
 #### Quirks
 - When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded in `UEFI->Drivers`.
 #### Drivers

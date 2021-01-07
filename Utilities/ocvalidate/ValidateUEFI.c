@@ -150,15 +150,22 @@ CheckUEFIAudio (
 {
   UINT32                   ErrorCount;
   OC_UEFI_CONFIG           *UserUefi;
+  BOOLEAN                  IsAudioSupportEnabled;
   CONST CHAR8              *AsciiAudioDevicePath;
 
   ErrorCount               = 0;
   UserUefi                 = &Config->Uefi;
-  AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
 
-  if (AsciiAudioDevicePath[0] != '\0' && !AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
-    DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
-    ++ErrorCount;
+  IsAudioSupportEnabled    = UserUefi->Audio.AudioSupport;
+  AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
+  if (IsAudioSupportEnabled) {
+    if (AsciiAudioDevicePath[0] == '\0') {
+      DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevicePath cannot be empty when AudioSupport is enabled!\n"));
+      ++ErrorCount;
+    } else if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
+      ++ErrorCount;
+    }
   }
 
   return ErrorCount;
