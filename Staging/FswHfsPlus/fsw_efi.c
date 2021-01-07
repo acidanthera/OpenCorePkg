@@ -726,7 +726,7 @@ EFI_STATUS fsw_efi_file_read(IN FSW_FILE_DATA *File,
     Print(L"fsw_efi_file_read %d bytes\n", *BufferSize);
 #endif
     
-    buffer_size = *BufferSize;
+    buffer_size = (fsw_u32) *BufferSize;
     Status = fsw_efi_map_status(fsw_shandle_read(&File->shand, &buffer_size, Buffer),
                                 (FSW_VOLUME_DATA *)File->shand.dnode->vol->host_data);
     *BufferSize = buffer_size;
@@ -788,7 +788,7 @@ EFI_STATUS fsw_efi_dir_open(IN FSW_FILE_DATA *File,
         return EFI_WRITE_PROTECTED;
     
     lookup_path.type = FSW_STRING_TYPE_UTF16;
-    lookup_path.len  = StrLen(FileName);
+    lookup_path.len  = (int) StrLen(FileName);
     lookup_path.size = lookup_path.len * sizeof(fsw_u16);
     lookup_path.data = FileName;
     
@@ -872,11 +872,10 @@ EFI_STATUS fsw_efi_bless_info(IN FSW_VOLUME_DATA *Volume,
                               OUT VOID *Buffer,
                               IN OUT UINTN *BufferSize) {
     EFI_STATUS                  Status;
-    UINT32                      RequiredSize;
+    UINTN                       RequiredSize;
     EFI_DEVICE_PATH_PROTOCOL    *devicePathProtocol;
     struct fsw_string           PathStr;
     UINT16                      *PathChars;
-    UINT32                      i;
 
     Status = fsw_efi_map_status(fsw_get_bless_info(Volume->vol, BlessType, &PathStr), Volume);
     if (Status)
@@ -890,8 +889,7 @@ EFI_STATUS fsw_efi_bless_info(IN FSW_VOLUME_DATA *Volume,
         return EFI_OUT_OF_RESOURCES;
     }
 
-    for (i = 0; i < PathStr.len; ++i)
-        PathChars[i] = ((UINT16*)PathStr.data)[i];
+    CopyMem(PathChars, PathStr.data, PathStr.size);
     PathChars[PathStr.len] = 0;
     fsw_strfree(&PathStr);
 
