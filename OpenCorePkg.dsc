@@ -237,7 +237,7 @@
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
-  OpenCorePkg/Staging/VBoxHfs/VBoxHfs.inf
+  OpenCorePkg/Staging/FswHfsPlus/FswHfsPlus.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf
   OpenCorePkg/Tests/CryptoTest/CryptoTest.inf
