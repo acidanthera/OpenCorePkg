@@ -81,6 +81,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 #### Generic
 - SystemProductName: Only real Mac models are accepted.
 - SystemMemoryStatus: Only `Auto`, `Upgradable`, or `Soldered` are accepted.
+- ProcessorType: Only known first byte can be set.
 
 ### UEFI
 #### APFS

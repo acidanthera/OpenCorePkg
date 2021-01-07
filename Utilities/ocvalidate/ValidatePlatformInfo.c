@@ -17,6 +17,47 @@
 #include "OcValidateLib.h"
 
 #include <Library/OcMacInfoLib.h>
+#include <IndustryStandard/AppleSmBios.h>
+
+STATIC
+BOOLEAN
+ValidateProcessorType (
+  IN  UINT16  ProcessorType
+  )
+{
+  UINTN  Index;
+  UINT8  AllowedProcessorType[] = {
+    AppleProcessorMajorCore,
+    AppleProcessorMajorCore2,
+    AppleProcessorMajorXeonPenryn,
+    AppleProcessorMajorXeonNehalem,
+    AppleProcessorMajorI5,
+    AppleProcessorMajorI7,
+    AppleProcessorMajorI3,
+    AppleProcessorMajorI9,
+    AppleProcessorMajorXeonE5,
+    AppleProcessorMajorM,
+    AppleProcessorMajorM3,
+    AppleProcessorMajorM5,
+    AppleProcessorMajorM7,
+    AppleProcessorMajorXeonW
+  };
+
+  //
+  // 0 is allowed.
+  //
+  if (ProcessorType == 0U) {
+    return TRUE;
+  }
+
+  for (Index = 0; Index < ARRAY_SIZE (AllowedProcessorType); ++Index) {
+    if ((ProcessorType >> 8U) == AllowedProcessorType[Index]) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
 
 //
 // NOTE: Only PlatformInfo->Generic is checked here. The rest is ignored.
@@ -33,6 +74,7 @@ CheckPlatformInfoGeneric (
   CONST CHAR8         *SystemProductName;
   CONST CHAR8         *SystemMemoryStatus;
   CONST CHAR8         *AsciiSystemUUID;
+  UINT16              ProcessorType;
 
   ErrorCount          = 0;
   UserPlatformInfo    = &Config->PlatformInfo;
@@ -54,6 +96,12 @@ CheckPlatformInfoGeneric (
   AsciiSystemUUID     = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemUuid);
   if (AsciiSystemUUID[0] != '\0' && !AsciiGuidIsLegal (AsciiSystemUUID)) {
     DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked!\n"));
+    ++ErrorCount;
+  }
+
+  ProcessorType       = UserPlatformInfo->Generic.ProcessorType;
+  if (!ValidateProcessorType (ProcessorType)) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->ProcessorType is borked!\n"));
     ++ErrorCount;
   }
 
