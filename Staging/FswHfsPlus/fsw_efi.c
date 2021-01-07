@@ -877,6 +877,10 @@ EFI_STATUS fsw_efi_bless_info(IN FSW_VOLUME_DATA *Volume,
     struct fsw_string           PathStr;
     UINT16                      *PathChars;
 
+#if DEBUG_LEVEL
+    Print(L"fsw_efi_bless_info.1\n");
+#endif
+
     Status = fsw_efi_map_status(fsw_get_bless_info(Volume->vol, BlessType, &PathStr), Volume);
     if (Status)
         return EFI_NOT_FOUND;
@@ -893,7 +897,9 @@ EFI_STATUS fsw_efi_bless_info(IN FSW_VOLUME_DATA *Volume,
     PathChars[PathStr.len] = 0;
     fsw_strfree(&PathStr);
 
-    Print(L"Bless info=%s\n", PathChars);
+#if DEBUG_LEVEL
+    Print(L"fsw_efi_bless_info.2 type=%d, res=%s\n", BlessType, PathChars);
+#endif
 
     devicePathProtocol = FileDevicePath(Volume->Handle, PathChars);
     FreePool(PathChars);
