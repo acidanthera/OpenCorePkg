@@ -64,7 +64,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 ### Misc
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
-- PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
+- PickerMode: Only `Builtin`, `External`, or `Apple` are accepted. When set to `External`, `OpenCanopy.efi` should be loaded in `UEFI->Drivers`.
 - `PickerAudioAssist` requires `AudioSupport` in `UEFI->Audio` to be enabled.
 #### Security
 - AuthRestart: If enabled, `VirtualSMC.kext` should be present in `Kernel->Add`.
@@ -95,6 +95,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `Ps2KeyboardDxe.efi` is in use, `KeySupport` in `UEFI->Input` should always be enabled altogether.
 - `OpenUsbKbDxe.efi` and `Ps2KeyboardDxe.efi` should never co-exist.
 - When HFS+ filesystem driver or `AudioDxe.efi` is in use, `ConnectDrivers` should be enabled altogether.
+- When `OpenCanopy.efi` is in use, `PickerMode` in `Misc->Boot` should be set to `External`.
 #### Input
 - KeySupportMode: Only `Auto`, `V1`, `V2`, or `AMI` are accepted.
 - When `PointerSupport` is enabled, the value of `PointerSupportMode` should only be `ASUS`.

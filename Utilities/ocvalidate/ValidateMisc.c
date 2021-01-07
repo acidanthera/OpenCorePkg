@@ -152,6 +152,9 @@ CheckMiscBoot (
   UINT32            ConsoleAttributes;
   CONST CHAR8       *HibernateMode;
   UINT32            PickerAttributes;
+  UINT32            Index;
+  CONST CHAR8       *Driver;
+  BOOLEAN           HasOpenCanopyEfiDriver;
   CONST CHAR8       *PickerMode;
   CONST CHAR8       *PickerVariant;
   BOOLEAN           IsPickerAudioAssistEnabled;
@@ -182,14 +185,22 @@ CheckMiscBoot (
     ++ErrorCount;
   }
 
-  //
-  // FIXME: Is OpenCanopy.efi mandatory if set to External? Or is this just a suggestion?
-  //
+  HasOpenCanopyEfiDriver = FALSE;
+  for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
+    Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+
+    if (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0) {
+      HasOpenCanopyEfiDriver = TRUE;
+    }
+  }
   PickerMode        = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
   if (AsciiStrCmp (PickerMode, "Builtin") != 0
     && AsciiStrCmp (PickerMode, "External") != 0
     && AsciiStrCmp (PickerMode, "Apple") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is borked (Can only be Builtin, External, or Apple)!\n"));
+    ++ErrorCount;
+  } else if (AsciiStrCmp (PickerMode, "External") == 0 && !HasOpenCanopyEfiDriver) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is set to External, but OpenCanopy is not loaded at UEFI->Drivers!\n"));
     ++ErrorCount;
   }
 
