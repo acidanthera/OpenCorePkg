@@ -155,7 +155,7 @@ static fsw_status_t fsw_strcoerce_UTF8_ISO88591(void *srcdata, int srclen, struc
             c |= ((*sp++ & 0x3f) << 6);
             c |= (*sp++ & 0x3f);
         }
-        *dp++ = c;
+        *dp++ = (fsw_u8) c;
     }
     return FSW_SUCCESS;
 }
@@ -179,7 +179,7 @@ static fsw_status_t fsw_strcoerce_UTF16_ISO88591(void *srcdata, int srclen, stru
     dp = (fsw_u8 *)dest->data;
     for (i = 0; i < srclen; i++) {
         c = *sp++;
-        *dp++ = c;
+        *dp++ = (fsw_u8) c;
     }
     return FSW_SUCCESS;
 }
@@ -203,7 +203,7 @@ static fsw_status_t fsw_strcoerce_UTF16_SWAPPED_ISO88591(void *srcdata, int srcl
     dp = (fsw_u8 *)dest->data;
     for (i = 0; i < srclen; i++) {
         c = *sp++; c = FSW_SWAPVALUE_U16(c);
-        *dp++ = c;
+        *dp++ = (fsw_u8) c;
     }
     return FSW_SUCCESS;
 }
@@ -227,7 +227,7 @@ static fsw_status_t fsw_strcoerce_ISO88591_UTF16(void *srcdata, int srclen, stru
     dp = (fsw_u16 *)dest->data;
     for (i = 0; i < srclen; i++) {
         c = *sp++;
-        *dp++ = c;
+        *dp++ = (fsw_u16) c;
     }
     return FSW_SUCCESS;
 }
@@ -261,7 +261,7 @@ static fsw_status_t fsw_strcoerce_UTF8_UTF16(void *srcdata, int srclen, struct f
             c |= ((*sp++ & 0x3f) << 6);
             c |= (*sp++ & 0x3f);
         }
-        *dp++ = c;
+        *dp++ = (fsw_u16) c;
     }
     return FSW_SUCCESS;
 }
@@ -285,7 +285,7 @@ static fsw_status_t fsw_strcoerce_UTF16_SWAPPED_UTF16(void *srcdata, int srclen,
     dp = (fsw_u16 *)dest->data;
     for (i = 0; i < srclen; i++) {
         c = *sp++; c = FSW_SWAPVALUE_U16(c);
-        *dp++ = c;
+        *dp++ = (fsw_u16) c;
     }
     return FSW_SUCCESS;
 }
@@ -326,7 +326,7 @@ static fsw_status_t fsw_strcoerce_ISO88591_UTF8(void *srcdata, int srclen, struc
         c = *sp++;
         
         if (c < 0x000080) {
-            *dp++ = c;
+            *dp++ = (fsw_u8) c;
         } else if (c < 0x000800) {
             *dp++ = 0xc0 | ((c >> 6) & 0x1f);
             *dp++ = 0x80 | (c & 0x3f);
@@ -380,7 +380,7 @@ static fsw_status_t fsw_strcoerce_UTF16_UTF8(void *srcdata, int srclen, struct f
         c = *sp++;
         
         if (c < 0x000080) {
-            *dp++ = c;
+            *dp++ = (fsw_u8) c;
         } else if (c < 0x000800) {
             *dp++ = 0xc0 | ((c >> 6) & 0x1f);
             *dp++ = 0x80 | (c & 0x3f);
@@ -434,7 +434,7 @@ static fsw_status_t fsw_strcoerce_UTF16_SWAPPED_UTF8(void *srcdata, int srclen, 
         c = *sp++; c = FSW_SWAPVALUE_U16(c);
         
         if (c < 0x000080) {
-            *dp++ = c;
+            *dp++ = (fsw_u8) c;
         } else if (c < 0x000800) {
             *dp++ = 0xc0 | ((c >> 6) & 0x1f);
             *dp++ = 0x80 | (c & 0x3f);

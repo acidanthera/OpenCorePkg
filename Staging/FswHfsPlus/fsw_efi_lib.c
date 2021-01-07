@@ -79,10 +79,10 @@ VOID fsw_efi_decode_time(OUT EFI_TIME *EfiTime, IN UINT32 UnixTime)
     days = UnixTime / SECSPERDAY;
     rem = UnixTime % SECSPERDAY;
     
-    EfiTime->Hour = (int) (rem / SECSPERHOUR);
+    EfiTime->Hour = (UINT8) (rem / SECSPERHOUR);
     rem = rem % SECSPERHOUR;
-    EfiTime->Minute = (int) (rem / SECSPERMIN);
-    EfiTime->Second = (int) (rem % SECSPERMIN);
+    EfiTime->Minute = (UINT8) (rem / SECSPERMIN);
+    EfiTime->Second = (UINT8) (rem % SECSPERMIN);
     
     y = EPOCH_YEAR;
     while (days < 0 || days >= (long) year_lengths[yleap = isleap(y)]) {
@@ -94,12 +94,12 @@ VOID fsw_efi_decode_time(OUT EFI_TIME *EfiTime, IN UINT32 UnixTime)
             LEAPS_THRU_END_OF(y - 1);
         y = newy;
     }
-    EfiTime->Year = y;
+    EfiTime->Year = (UINT16) y;
     ip = mon_lengths[yleap];
     for (EfiTime->Month = 0; days >= (long) ip[EfiTime->Month]; ++(EfiTime->Month))
         days = days - (long) ip[EfiTime->Month];
     EfiTime->Month++;  // adjust range to EFI conventions
-    EfiTime->Day = (int) (days + 1);
+    EfiTime->Day = (UINT8) (days + 1);
 }
 
 //
