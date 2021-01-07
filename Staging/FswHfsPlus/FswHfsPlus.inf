@@ -38,9 +38,9 @@
 
 [BuildOptions]
   GCC:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
-  INTEL:*_*_*_CC_FLAGS = -DFSTYPE=hfsplus
-  MSFT:*_*_*_CC_FLAGS = -DFSTYPE=hfsplus
-  XCODE:*_*_*_CC_FLAGS = -DFSTYPE=hfsplus
+  INTEL:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+  MSFT:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+  XCODE:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
 
 [Packages]
   MdePkg/MdePkg.dec
