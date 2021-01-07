@@ -967,6 +967,9 @@ fsw_status_t fsw_dnode_get_path(struct fsw_volume *vol, struct fsw_dnode *dno, s
     out_path->size = 0;
 
     while (status == FSW_SUCCESS && !fsw_dnode_is_root(dno)) {
+        // dnode should be filled!
+        fsw_dnode_fill(dno);
+
         // Extend array capacity if needed
         if (array_len == array_capacity) {
             temp_arr_ptr = array;
