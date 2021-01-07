@@ -148,14 +148,18 @@ CheckMiscBoot (
 {
   UINT32            ErrorCount;
   OC_MISC_CONFIG    *UserMisc;
+  OC_UEFI_CONFIG    *UserUefi;
   UINT32            ConsoleAttributes;
   CONST CHAR8       *HibernateMode;
   UINT32            PickerAttributes;
   CONST CHAR8       *PickerMode;
   CONST CHAR8       *PickerVariant;
+  BOOLEAN           IsPickerAudioAssistEnabled;
+  BOOLEAN           IsAudioSupportEnabled;
 
   ErrorCount        = 0;
   UserMisc          = &Config->Misc;
+  UserUefi          = &Config->Uefi;
 
   ConsoleAttributes = UserMisc->Boot.ConsoleAttributes;
   if ((ConsoleAttributes & ~0x7FU) != 0) {
@@ -192,6 +196,13 @@ CheckMiscBoot (
   PickerVariant     = OC_BLOB_GET (&UserMisc->Boot.PickerVariant);
   if (PickerVariant[0] == '\0') {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant cannot be empty!\n"));
+    ++ErrorCount;
+  }
+
+  IsPickerAudioAssistEnabled = UserMisc->Boot.PickerAudioAssist;
+  IsAudioSupportEnabled      = UserUefi->Audio.AudioSupport;
+  if (IsPickerAudioAssistEnabled && !IsAudioSupportEnabled) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAudioAssist is enabled, but UEFI->Audio->AudioSupport is not enabled altogether!\n"));
     ++ErrorCount;
   }
 

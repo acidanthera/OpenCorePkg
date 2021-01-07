@@ -65,6 +65,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
+- `PickerAudioAssist` requires `AudioSupport` in `UEFI->Audio` to be enabled.
 #### Security
 - AuthRestart: If enabled, `VirtualSMC.kext` should be present in `Kernel->Add`.
 - BootProtect: Only `None`, `Bootstrap`, or `BootstrapShort` are accepted. When set to the latter two, `RequestBootVarRouting` should be enabled in `UEFI->Quirks`.
