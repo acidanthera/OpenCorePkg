@@ -1182,7 +1182,7 @@ fsw_hfsplus_dnid2thread(struct fsw_hfsplus_volume *v, fsw_u32 dnid,
 {
     fsw_status_t            status;
     HFSPlusCatalogKey       sk, *tk;
-    fsw_u32_be              rec_num;
+    fsw_u32                 rec_num;
 
     // Known parent id is enough to find a thread
     sk.parentID = dnid;
