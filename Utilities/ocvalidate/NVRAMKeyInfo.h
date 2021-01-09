@@ -30,17 +30,9 @@ typedef struct NVRAM_KEY_MAP_ {
   NVRAM_KEY_CHECK   KeyChecker;
 } NVRAM_KEY_MAP;
 
-typedef
-BOOLEAN
-(*NVRAM_GUID_CHECK) (
-  IN  CONST CHAR8  *KeyName,
-  IN  CONST VOID   *KeyValue,
-  IN  UINT32       ValueSize
-  );
-
 typedef struct NVRAM_GUID_MAP_ {
   CONST EFI_GUID    *Guid;
-  NVRAM_GUID_CHECK  GuidChecker;
+  NVRAM_KEY_MAP     *NvramKeyMap;
 } NVRAM_GUID_MAP;
 
 extern NVRAM_GUID_MAP  mGUIDMaps[];

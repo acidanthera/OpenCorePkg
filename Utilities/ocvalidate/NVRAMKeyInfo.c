@@ -72,71 +72,16 @@ ValidateNvdaDrv (
   return FALSE;
 }
 
-STATIC
-BOOLEAN
-CheckNVRAMKeyValueByMap (
-  IN  CONST NVRAM_KEY_MAP  *NVRAMKeyMap,
-  IN  UINTN                NVRAMKeyMapCount,
-  IN  CONST CHAR8          *KeyName,
-  IN  CONST VOID           *KeyValue,
-  IN  UINT32               ValueSize
-  )
-{
-  UINTN  Index;
+STATIC NVRAM_KEY_MAP  mAppleVendorNvramGuidKeyMaps[] = {
+  { "UIScale",  ValidateUIScale },
+};
 
-  for (Index = 0; Index < NVRAMKeyMapCount; ++Index) {
-    if (AsciiStrCmp (KeyName, NVRAMKeyMap[Index].KeyName) == 0) {
-      return NVRAMKeyMap[Index].KeyChecker (KeyValue, ValueSize);
-    }
-  }
-
-  return TRUE;
-}
-
-STATIC
-BOOLEAN
-CheckAppleVendorNvramGuid (
-  IN  CONST CHAR8  *KeyName,
-  IN  CONST VOID   *KeyValue,
-  IN  UINT32       ValueSize
-  )
-{
-  STATIC NVRAM_KEY_MAP  mNVRAMKeyMaps[] = {
-    { "UIScale",  ValidateUIScale },
-  };
-
-  return CheckNVRAMKeyValueByMap (
-           &mNVRAMKeyMaps[0],
-           ARRAY_SIZE (mNVRAMKeyMaps),
-           KeyName,
-           KeyValue,
-           ValueSize
-           );
-}
-
-STATIC
-BOOLEAN
-CheckAppleBootVariableGuid (
-  IN  CONST CHAR8  *KeyName,
-  IN  CONST VOID   *KeyValue,
-  IN  UINT32       ValueSize
-  )
-{
-  STATIC NVRAM_KEY_MAP  mNVRAMKeyMaps[] = {
-    { "nvda_drv", ValidateNvdaDrv },
-  };
-
-  return CheckNVRAMKeyValueByMap (
-           &mNVRAMKeyMaps[0],
-           ARRAY_SIZE (mNVRAMKeyMaps),
-           KeyName,
-           KeyValue,
-           ValueSize
-           );
-}
+STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
+  { "nvda_drv", ValidateNvdaDrv },
+};
 
 NVRAM_GUID_MAP mGUIDMaps[]    = {
-  { &gAppleVendorNvramGuid,  CheckAppleVendorNvramGuid },
-  { &gAppleBootVariableGuid, CheckAppleBootVariableGuid }
+  { &gAppleVendorNvramGuid,  &mAppleVendorNvramGuidKeyMaps[0] },
+  { &gAppleBootVariableGuid, &mAppleBootVariableGuidKeyMaps[0] }
 };
 UINTN          mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
