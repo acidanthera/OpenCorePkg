@@ -15,6 +15,7 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "NVRAMKeyInfo.h"
 
 /**
   Callback funtion to verify whether one entry is duplicated in NVRAM->Add.
@@ -102,6 +103,53 @@ NVRAMLegacySchemaHasDuplication (
 
 STATIC
 UINT32
+ValidateNVRAMKeyByGuid (
+  IN  CONST CHAR8     *AsciiGuid,
+  IN  CONST OC_ASSOC  *VariableMap
+  )
+{
+  UINT32      ErrorCount;
+  EFI_STATUS  Status;
+  GUID        Guid;
+  UINT32      VariableIndex;
+  UINTN       Index;
+  UINT32      RetVal;
+
+  ErrorCount = 0;
+  RetVal = 0;
+
+  Status = AsciiStrToGuid (AsciiGuid, &Guid);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "NVRAM->Add: Unable to check %a due to borked GUID format!\n", AsciiGuid));
+    ++ErrorCount;
+    return ErrorCount;
+  }
+
+  for (Index = 0; Index < mGUIDCheckersSize; ++Index) {
+    for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
+      if (CompareGuid (&Guid, mGUIDCheckers[Index].Guid)) {
+        if (!mGUIDCheckers[Index].GuidChecker (
+                                    OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
+                                    OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+                                    VariableMap->Values[VariableIndex]->Size
+                                    )) {
+          DEBUG ((
+            DEBUG_WARN,
+            "NVRAM->Add->%g->%a has illegal value!\n",
+            &Guid,
+            OC_BLOB_GET (VariableMap->Keys[VariableIndex])
+            ));
+          ++ErrorCount;
+        }
+      }
+    }
+  }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
 CheckNVRAMAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
@@ -153,6 +201,11 @@ CheckNVRAMAdd (
       sizeof (VariableMap->Keys[0]),
       NVRAMAddHasDuplication
       );
+
+    //
+    // Check for accepted values for NVRAM keys.
+    //
+    ErrorCount += ValidateNVRAMKeyByGuid (AsciiGuid, VariableMap);
   }
 
   //
