@@ -81,7 +81,7 @@ STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
 };
 
 NVRAM_GUID_MAP mGUIDMaps[]    = {
-  { &gAppleVendorNvramGuid,  &mAppleVendorNvramGuidKeyMaps[0] },
-  { &gAppleBootVariableGuid, &mAppleBootVariableGuidKeyMaps[0] }
+  { &gAppleVendorNvramGuid,  &mAppleVendorNvramGuidKeyMaps[0],  ARRAY_SIZE (mAppleVendorNvramGuidKeyMaps) },
+  { &gAppleBootVariableGuid, &mAppleBootVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleBootVariableGuidKeyMaps) }
 };
 UINTN          mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);

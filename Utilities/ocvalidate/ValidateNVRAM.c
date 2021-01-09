@@ -113,6 +113,7 @@ ValidateNVRAMKeyByGuid (
   GUID        Guid;
   UINT32      VariableIndex;
   UINTN       Index;
+  UINTN       Index2;
 
   ErrorCount = 0;
 
@@ -126,17 +127,19 @@ ValidateNVRAMKeyByGuid (
   for (Index = 0; Index < mGUIDMapsCount; ++Index) {
     if (CompareGuid (&Guid, mGUIDMaps[Index].Guid)) {
       for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
-        if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMap->KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
-          if (!mGUIDMaps[Index].NvramKeyMap->KeyChecker (
-                                               OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                               VariableMap->Values[VariableIndex]->Size)) {
-            DEBUG ((
-              DEBUG_WARN,
-              "NVRAM->Add->%g->%a has illegal value!\n",
-              &Guid,
-              OC_BLOB_GET (VariableMap->Keys[VariableIndex])
-              ));
-            ++ErrorCount;
+        for (Index2 = 0; Index2 < mGUIDMaps[Index].NvramKeyMapCount; ++Index2) {
+          if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMap[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
+            if (!mGUIDMaps[Index].NvramKeyMap[Index2].KeyChecker (
+                                                 OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+                                                 VariableMap->Values[VariableIndex]->Size)) {
+              DEBUG ((
+                DEBUG_WARN,
+                "NVRAM->Add->%g->%a has illegal value!\n",
+                &Guid,
+                OC_BLOB_GET (VariableMap->Keys[VariableIndex])
+                ));
+              ++ErrorCount;
+            }
           }
         }
       }
