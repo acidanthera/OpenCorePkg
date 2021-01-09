@@ -26,6 +26,7 @@ CheckConfig (
   )
 {
   UINT32  ErrorCount;
+  UINT32  CurrErrorCount;
   UINTN   Index;
   STATIC CONFIG_CHECK ConfigCheckers[] = {
     &CheckACPI,
@@ -38,13 +39,22 @@ CheckConfig (
     &CheckUEFI
   };
 
-  ErrorCount = 0;
+  ErrorCount     = 0;
+  CurrErrorCount = 0;
 
   //
   // Pass config structure to all checkers.
   //
   for (Index = 0; Index < ARRAY_SIZE (ConfigCheckers); ++Index) {
-    ErrorCount += ConfigCheckers[Index] (Config);
+    CurrErrorCount = ConfigCheckers[Index] (Config);
+
+    if (CurrErrorCount != 0) {
+      //
+      // Print an extra newline on error.
+      //
+      DEBUG ((DEBUG_WARN, "\n"));
+      ErrorCount += CurrErrorCount;
+    }
   }
 
   return ErrorCount;
@@ -99,6 +109,10 @@ int ENTRY_POINT(int argc, const char *argv[]) {
     return -1;
   }
 
+  //
+  // Print a newline that splits errors between OcConfigurationInit and config checkers.
+  //
+  DEBUG ((DEBUG_ERROR, "\n"));
   ErrorCount = CheckConfig (&Config);
   if (ErrorCount == 0) {
     DEBUG ((
@@ -119,7 +133,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   }
 
   OcConfigurationFree (&Config);
-  free (ConfigFileBuffer);
+  FreePool (ConfigFileBuffer);
 
   return 0;
 }

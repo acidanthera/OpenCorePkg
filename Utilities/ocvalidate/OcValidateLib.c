@@ -282,7 +282,7 @@ AsciiDevicePathIsLegal (
         if (OcStriCmp (UnicodeDevicePath, TextualDevicePath) != 0) {
           DEBUG ((
             DEBUG_WARN,
-            "Original path: %s\nPath after internal conversion: %s\n\n",
+            "Original path: %s\nPath after internal conversion: %s\n",
             UnicodeDevicePath,
             TextualDevicePath
             ));

@@ -37,11 +37,11 @@ typedef struct KEXT_INFO_ {
   CONST CHAR8  *KextPlistPath;
 } KEXT_INFO;
 
-extern KEXT_PRECEDENCE mKextPrecedence[];
-extern UINTN mKextPrecedenceSize;
+extern KEXT_PRECEDENCE  mKextPrecedence[];
+extern UINTN            mKextPrecedenceSize;
 
-extern KEXT_INFO mKextInfo[];
-extern UINTN mKextInfoSize;
+extern KEXT_INFO  mKextInfo[];
+extern UINTN      mKextInfoSize;
 
 /**
   ASSERT() on mismatched kext info.
