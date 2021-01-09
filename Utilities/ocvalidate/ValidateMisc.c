@@ -199,9 +199,6 @@ CheckMiscBoot (
     && AsciiStrCmp (PickerMode, "Apple") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is borked (Can only be Builtin, External, or Apple)!\n"));
     ++ErrorCount;
-  } else if (AsciiStrCmp (PickerMode, "External") == 0 && !HasOpenCanopyEfiDriver) {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerMode is set to External, but OpenCanopy is not loaded at UEFI->Drivers!\n"));
-    ++ErrorCount;
   } else if (HasOpenCanopyEfiDriver && AsciiStrCmp (PickerMode, "External") != 0) {
     DEBUG ((DEBUG_WARN, "OpenCanopy.efi is loaded at UEFI->Drivers, but Misc->Boot->PickerMode is not set to External!\n"));
     ++ErrorCount;
