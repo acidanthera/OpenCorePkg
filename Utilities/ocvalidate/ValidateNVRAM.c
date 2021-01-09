@@ -130,8 +130,8 @@ ValidateNVRAMKeyByGuid (
         for (Index2 = 0; Index2 < mGUIDMaps[Index].NvramKeyMapCount; ++Index2) {
           if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMap[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
             if (!mGUIDMaps[Index].NvramKeyMap[Index2].KeyChecker (
-                                                 OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                                 VariableMap->Values[VariableIndex]->Size)) {
+                                                        OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+                                                        VariableMap->Values[VariableIndex]->Size)) {
               DEBUG ((
                 DEBUG_WARN,
                 "NVRAM->Add->%g->%a has illegal value!\n",
