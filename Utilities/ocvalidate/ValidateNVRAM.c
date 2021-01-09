@@ -127,11 +127,12 @@ ValidateNVRAMKeyByGuid (
   for (Index = 0; Index < mGUIDMapsCount; ++Index) {
     if (CompareGuid (&Guid, mGUIDMaps[Index].Guid)) {
       for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
-        for (Index2 = 0; Index2 < mGUIDMaps[Index].NvramKeyMapCount; ++Index2) {
-          if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMap[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
-            if (!mGUIDMaps[Index].NvramKeyMap[Index2].KeyChecker (
+        for (Index2 = 0; Index2 < mGUIDMaps[Index].NvramKeyMapsCount; ++Index2) {
+          if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMaps[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
+            if (!mGUIDMaps[Index].NvramKeyMaps[Index2].KeyChecker (
                                                         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                                        VariableMap->Values[VariableIndex]->Size)) {
+                                                        VariableMap->Values[VariableIndex]->Size)
+                                                        ) {
               DEBUG ((
                 DEBUG_WARN,
                 "NVRAM->Add->%g->%a has illegal value!\n",

@@ -32,8 +32,8 @@ typedef struct NVRAM_KEY_MAP_ {
 
 typedef struct NVRAM_GUID_MAP_ {
   CONST EFI_GUID       *Guid;
-  CONST NVRAM_KEY_MAP  *NvramKeyMap;
-  UINTN                NvramKeyMapCount;
+  CONST NVRAM_KEY_MAP  *NvramKeyMaps;
+  UINTN                NvramKeyMapsCount;
 } NVRAM_GUID_MAP;
 
 extern NVRAM_GUID_MAP  mGUIDMaps[];
