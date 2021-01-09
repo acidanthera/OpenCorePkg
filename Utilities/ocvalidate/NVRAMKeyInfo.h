@@ -25,10 +25,10 @@ BOOLEAN
   IN  UINT32        ValueSize
   );
 
-typedef struct NVRAM_KEY_CONTEXT_ {
+typedef struct NVRAM_KEY_MAP_ {
   CONST CHAR8       *KeyName;
   NVRAM_KEY_CHECK   KeyChecker;
-} NVRAM_KEY_CONTEXT;
+} NVRAM_KEY_MAP;
 
 typedef
 BOOLEAN
@@ -38,12 +38,12 @@ BOOLEAN
   IN  UINT32       ValueSize
   );
 
-typedef struct NVRAM_GUID_CONTEXT_ {
+typedef struct NVRAM_GUID_MAP_ {
   CONST EFI_GUID    *Guid;
   NVRAM_GUID_CHECK  GuidChecker;
-} NVRAM_GUID_CONTEXT;
+} NVRAM_GUID_MAP;
 
-extern NVRAM_GUID_CONTEXT mGUIDCheckers[];
-extern UINTN              mGUIDCheckersSize;
+extern NVRAM_GUID_MAP  mGUIDMaps[];
+extern UINTN           mGUIDMapsCount;
 
 #endif // OC_USER_UTILITIES_OCVALIDATE_NVRAM_KEY_INFO_H

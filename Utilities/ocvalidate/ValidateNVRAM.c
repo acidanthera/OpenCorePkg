@@ -113,10 +113,8 @@ ValidateNVRAMKeyByGuid (
   GUID        Guid;
   UINT32      VariableIndex;
   UINTN       Index;
-  UINT32      RetVal;
 
   ErrorCount = 0;
-  RetVal = 0;
 
   Status = AsciiStrToGuid (AsciiGuid, &Guid);
   if (EFI_ERROR (Status)) {
@@ -125,14 +123,14 @@ ValidateNVRAMKeyByGuid (
     return ErrorCount;
   }
 
-  for (Index = 0; Index < mGUIDCheckersSize; ++Index) {
+  for (Index = 0; Index < mGUIDMapsCount; ++Index) {
     for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
-      if (CompareGuid (&Guid, mGUIDCheckers[Index].Guid)) {
-        if (!mGUIDCheckers[Index].GuidChecker (
-                                    OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
-                                    OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                    VariableMap->Values[VariableIndex]->Size
-                                    )) {
+      if (CompareGuid (&Guid, mGUIDMaps[Index].Guid)) {
+        if (!mGUIDMaps[Index].GuidChecker (
+                                OC_BLOB_GET (VariableMap->Keys[VariableIndex]),
+                                OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+                                VariableMap->Values[VariableIndex]->Size
+                                )) {
           DEBUG ((
             DEBUG_WARN,
             "NVRAM->Add->%g->%a has illegal value!\n",

@@ -74,28 +74,44 @@ ValidateNvdaDrv (
 
 STATIC
 BOOLEAN
+CheckNVRAMKeyValueByMap (
+  IN  CONST NVRAM_KEY_MAP  *NVRAMKeyMap,
+  IN  UINTN                NVRAMKeyMapCount,
+  IN  CONST CHAR8          *KeyName,
+  IN  CONST VOID           *KeyValue,
+  IN  UINT32               ValueSize
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < NVRAMKeyMapCount; ++Index) {
+    if (AsciiStrCmp (KeyName, NVRAMKeyMap[Index].KeyName) == 0) {
+      return NVRAMKeyMap[Index].KeyChecker (KeyValue, ValueSize);
+    }
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
 CheckAppleVendorNvramGuid (
   IN  CONST CHAR8  *KeyName,
   IN  CONST VOID   *KeyValue,
   IN  UINT32       ValueSize
   )
 {
-  UINTN   Index;
-  STATIC NVRAM_KEY_CONTEXT  mNVRAMKeyContexts[]   = {
+  STATIC NVRAM_KEY_MAP  mNVRAMKeyMaps[] = {
     { "UIScale",  ValidateUIScale },
   };
 
-  for (Index = 0; Index < ARRAY_SIZE (mNVRAMKeyContexts); ++Index) {
-    if (AsciiStrCmp (KeyName, mNVRAMKeyContexts[Index].KeyName) == 0) {
-      if (mNVRAMKeyContexts[Index].KeyChecker (KeyValue, ValueSize)) {
-        return TRUE;
-      }
-
-      return FALSE;
-    }
-  }
-
-  return TRUE;
+  return CheckNVRAMKeyValueByMap (
+           &mNVRAMKeyMaps[0],
+           ARRAY_SIZE (mNVRAMKeyMaps),
+           KeyName,
+           KeyValue,
+           ValueSize
+           );
 }
 
 STATIC
@@ -106,26 +122,21 @@ CheckAppleBootVariableGuid (
   IN  UINT32       ValueSize
   )
 {
-  UINTN   Index;
-  STATIC NVRAM_KEY_CONTEXT  mNVRAMKeyContexts[] = {
+  STATIC NVRAM_KEY_MAP  mNVRAMKeyMaps[] = {
     { "nvda_drv", ValidateNvdaDrv },
   };
 
-  for (Index = 0; Index < ARRAY_SIZE (mNVRAMKeyContexts); ++Index) {
-    if (AsciiStrCmp (KeyName, mNVRAMKeyContexts[Index].KeyName) == 0) {
-      if (mNVRAMKeyContexts[Index].KeyChecker (KeyValue, ValueSize)) {
-        return TRUE;
-      }
-
-      return FALSE;
-    }
-  }
-
-  return TRUE;
+  return CheckNVRAMKeyValueByMap (
+           &mNVRAMKeyMaps[0],
+           ARRAY_SIZE (mNVRAMKeyMaps),
+           KeyName,
+           KeyValue,
+           ValueSize
+           );
 }
 
-NVRAM_GUID_CONTEXT mGUIDCheckers[]       = {
+NVRAM_GUID_MAP mGUIDMaps[]    = {
   { &gAppleVendorNvramGuid,  CheckAppleVendorNvramGuid },
   { &gAppleBootVariableGuid, CheckAppleBootVariableGuid }
 };
-UINTN              mGUIDCheckersSize     = ARRAY_SIZE (mGUIDCheckers);
+UINTN          mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
