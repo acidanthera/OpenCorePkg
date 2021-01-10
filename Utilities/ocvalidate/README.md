@@ -63,7 +63,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 
 ### Misc
 #### BlessOverride
-- Entries cannot be `\EFI\Microsoft\Boot\bootmgfw.efi` or `EFI\Microsoft\Boot\bootmgfw.efi` since OpenCore knows this path.
+- Entries cannot be `\EFI\Microsoft\Boot\bootmgfw.efi` or `\System\Library\CoreServices\boot.efi` since OpenCore knows these paths.
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.

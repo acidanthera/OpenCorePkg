@@ -148,26 +148,31 @@ CheckBlessOverride (
 {
   UINT32              ErrorCount;
   UINT32              Index;
+  UINTN               Index2;
   OC_MISC_CONFIG      *UserMisc;
   CONST CHAR8         *BlessOverrideEntry;
-  STATIC CONST CHAR8  *DisallowedBlessOverride;
+  STATIC CONST CHAR8  *DisallowedBlessOverrideValues[] = {
+    "\\EFI\\Microsoft\\Boot\\bootmgfw.efi",
+    "\\System\\Library\\CoreServices\\boot.efi",
+  };
 
   ErrorCount          = 0;
   UserMisc            = &Config->Misc;
 
-  DisallowedBlessOverride = "\\EFI\\Microsoft\\Boot\\bootmgfw.efi";
   for (Index = 0; Index < UserMisc->BlessOverride.Count; ++Index) {
     BlessOverrideEntry = OC_BLOB_GET (UserMisc->BlessOverride.Values[Index]);
 
     //
-    // &DisallowedBlessOverride[1] means no first '\\', which is
-    // "EFI\\Microsoft\\Boot\\bootmgfw.efi".
+    // &DisallowedBlessOverrideValues[][1] means no first '\\'.
     //
-    if (AsciiStrCmp (BlessOverrideEntry, DisallowedBlessOverride) == 0
-      || AsciiStrCmp (BlessOverrideEntry, &DisallowedBlessOverride[1]) == 0) {
-      DEBUG ((DEBUG_WARN, "Misc->BlessOverride cannot contain %a!\n", BlessOverrideEntry));
-      ++ErrorCount;
+    for (Index2 = 0; Index2 < ARRAY_SIZE (DisallowedBlessOverrideValues); ++Index2) {
+      if (AsciiStrCmp (BlessOverrideEntry, DisallowedBlessOverrideValues[Index2]) == 0
+        || AsciiStrCmp (BlessOverrideEntry, &DisallowedBlessOverrideValues[Index2][1]) == 0) {
+        DEBUG ((DEBUG_WARN, "Misc->BlessOverride: %a is redundant!\n", BlessOverrideEntry));
+        ++ErrorCount;
+      }
     }
+    
   }
 
   return ErrorCount;
