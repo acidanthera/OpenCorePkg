@@ -367,6 +367,20 @@ OcAsciiStrrChr (
   );
 
 /**
+  Check if a string up to N bytes is ASCII-printable.
+
+  @param[in]  String      String to be checked.
+  @param[in]  Number      Number of bytes to scan.
+
+  @retval     TRUE        If String within Number bytes is all ASCII-printable.
+**/
+BOOLEAN
+OcAsciiStringNPrintable (
+  IN  CONST CHAR8  *String,
+  IN  UINTN        Number
+  );
+
+/**
   Returns the first occurrence of a Null-terminated Unicode sub-string
   in a Null-terminated Unicode string through a case insensitive comparison.
 
