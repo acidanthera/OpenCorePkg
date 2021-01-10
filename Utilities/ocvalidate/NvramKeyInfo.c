@@ -26,7 +26,7 @@ ValidateUIScale (
   CONST UINT8         *UIScaleValue;
   STATIC CONST UINT8  AllowedUIScaleValue[] = {
     0x01,
-    0x02
+    0x02   ///< HiDPI
   };
 
   UIScaleValue = (CONST UINT8 *) Value;
@@ -54,7 +54,8 @@ ValidateNvdaDrv (
   UINTN               Index;
   CONST UINT8         *NvdaDrvValue;
   STATIC CONST UINT8  AllowedNvdaDrvValue[] = {
-    0x31
+    0x30,  ///< "0" - WebDriver off
+    0x31   ///< "1" - WebDriver on
   };
 
   NvdaDrvValue = (CONST UINT8 *) Value;
@@ -72,12 +73,27 @@ ValidateNvdaDrv (
   return FALSE;
 }
 
+STATIC
+BOOLEAN
+ValidateBootArgs (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  CONST CHAR8   *BootArgsValue;
+
+  BootArgsValue = (CONST CHAR8 *) Value;
+
+  return OcAsciiStringNPrintable (BootArgsValue, (UINTN) ValueSize);
+}
+
 STATIC NVRAM_KEY_MAP  mAppleVendorNvramGuidKeyMaps[] = {
-  { "UIScale",  ValidateUIScale },
+  { "UIScale",   ValidateUIScale  },
 };
 
 STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
-  { "nvda_drv", ValidateNvdaDrv },
+  { "nvda_drv",  ValidateNvdaDrv  },
+  { "boot-args", ValidateBootArgs }
 };
 
 NVRAM_GUID_MAP mGUIDMaps[] = {
