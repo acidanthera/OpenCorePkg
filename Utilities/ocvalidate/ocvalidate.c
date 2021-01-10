@@ -25,16 +25,16 @@ CheckConfig (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINT32  CurrErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK ConfigCheckers[] = {
+  UINT32               ErrorCount;
+  UINT32               CurrErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  ConfigCheckers[] = {
     &CheckACPI,
     &CheckBooter,
     &CheckDeviceProperties,
     &CheckKernel,
     &CheckMisc,
-    &CheckNVRAM,
+    &CheckNvram,
     &CheckPlatformInfo,
     &CheckUEFI
   };

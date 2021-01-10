@@ -13,7 +13,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "NVRAMKeyInfo.h"
+#include "NvramKeyInfo.h"
 
 STATIC
 BOOLEAN
@@ -22,8 +22,8 @@ ValidateUIScale (
   IN  UINT32       ValueSize
   )
 {
-  UINTN        Index;
-  CONST UINT8  *UIScaleValue;
+  UINTN               Index;
+  CONST UINT8         *UIScaleValue;
   STATIC CONST UINT8  AllowedUIScaleValue[] = {
     0x01,
     0x02
@@ -51,8 +51,8 @@ ValidateNvdaDrv (
   IN  UINT32       ValueSize
   )
 {
-  UINTN        Index;
-  CONST UINT8  *NvdaDrvValue;
+  UINTN               Index;
+  CONST UINT8         *NvdaDrvValue;
   STATIC CONST UINT8  AllowedNvdaDrvValue[] = {
     0x31
   };
@@ -80,8 +80,8 @@ STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
   { "nvda_drv", ValidateNvdaDrv },
 };
 
-NVRAM_GUID_MAP mGUIDMaps[]    = {
+NVRAM_GUID_MAP mGUIDMaps[] = {
   { &gAppleVendorNvramGuid,  &mAppleVendorNvramGuidKeyMaps[0],  ARRAY_SIZE (mAppleVendorNvramGuidKeyMaps) },
   { &gAppleBootVariableGuid, &mAppleBootVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleBootVariableGuidKeyMaps) }
 };
-UINTN          mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
+UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);

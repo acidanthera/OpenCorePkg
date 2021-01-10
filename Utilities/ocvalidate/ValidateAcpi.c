@@ -219,9 +219,9 @@ CheckACPI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK ACPICheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  ACPICheckers[] = {
     &CheckACPIAdd,
     &CheckACPIDelete,
     &CheckACPIPatch

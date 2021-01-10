@@ -8,13 +8,13 @@ PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
           OcValidateLib.o \
           KextInfo.o \
-          NVRAMKeyInfo.o \
+          NvramKeyInfo.o \
           ValidateAcpi.o \
           ValidateBooter.o \
           ValidateDeviceProperties.o \
           ValidateKernel.o \
           ValidateMisc.o \
-          ValidateNVRAM.o \
+          ValidateNvram.o \
           ValidatePlatformInfo.o \
           ValidateUEFI.o
 #

@@ -122,8 +122,8 @@ ValidateSecureBootModel (
   IN  CONST CHAR8  *SecureBootModel
   )
 {
-  UINTN   Index;
-  CONST CHAR8 *AllowedSecureBootModel[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedSecureBootModel[] = {
     "Default", "Disabled",
     "j137",  "j680",  "j132",  "j174",  "j140k",
     "j780",  "j213",  "j140a", "j152f", "j160",
@@ -522,9 +522,9 @@ CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK MiscCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  MiscCheckers[] = {
     &CheckMiscBoot,
     &CheckMiscDebug,
     &CheckMiscEntries,

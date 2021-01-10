@@ -644,9 +644,9 @@ CheckKernel (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK KernelCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  KernelCheckers[] = {
     &CheckKernelAdd,
     &CheckKernelBlock,
     &CheckKernelEmulate,

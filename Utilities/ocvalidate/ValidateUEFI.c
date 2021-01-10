@@ -95,8 +95,8 @@ ValidateReservedMemoryType (
   IN  CONST CHAR8  *Type
   )
 {
-  UINTN  Index;
-  CONST CHAR8  *AllowedType[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedType[] = {
     "Reserved",          "LoaderCode",    "LoaderData",     "BootServiceCode",         "BootServiceData",
     "RuntimeCode",       "RuntimeData",   "Available",      "Persistent",              "UnusableMemory",
     "ACPIReclaimMemory", "ACPIMemoryNVS", "MemoryMappedIO", "MemoryMappedIOPortSpace", "PalCode"
@@ -512,9 +512,9 @@ CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK UEFICheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  UEFICheckers[] = {
     &CheckUEFIAPFS,
     &CheckUEFIAudio,
     &CheckUEFIDrivers,

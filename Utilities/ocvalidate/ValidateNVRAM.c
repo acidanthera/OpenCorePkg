@@ -15,7 +15,7 @@
 
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
-#include "NVRAMKeyInfo.h"
+#include "NvramKeyInfo.h"
 
 /**
   Callback funtion to verify whether one entry is duplicated in NVRAM->Add.
@@ -27,22 +27,22 @@
 **/
 STATIC
 BOOLEAN
-NVRAMAddHasDuplication (
+NvramAddHasDuplication (
   IN  CONST VOID  *PrimaryEntry,
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_STRING             *NVRAMAddPrimaryEntry;
-  CONST OC_STRING             *NVRAMAddSecondaryEntry;
-  CONST CHAR8                 *NVRAMAddPrimaryGUIDString;
-  CONST CHAR8                 *NVRAMAddSecondaryGUIDString;
+  CONST OC_STRING             *NvramAddPrimaryEntry;
+  CONST OC_STRING             *NvramAddSecondaryEntry;
+  CONST CHAR8                 *NvramAddPrimaryGUIDString;
+  CONST CHAR8                 *NvramAddSecondaryGUIDString;
 
-  NVRAMAddPrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
-  NVRAMAddSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
-  NVRAMAddPrimaryGUIDString   = OC_BLOB_GET (NVRAMAddPrimaryEntry);
-  NVRAMAddSecondaryGUIDString = OC_BLOB_GET (NVRAMAddSecondaryEntry);
+  NvramAddPrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
+  NvramAddSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
+  NvramAddPrimaryGUIDString   = OC_BLOB_GET (NvramAddPrimaryEntry);
+  NvramAddSecondaryGUIDString = OC_BLOB_GET (NvramAddSecondaryEntry);
 
-  return StringIsDuplicated ("NVRAM->Add", NVRAMAddPrimaryGUIDString, NVRAMAddSecondaryGUIDString);
+  return StringIsDuplicated ("NVRAM->Add", NvramAddPrimaryGUIDString, NvramAddSecondaryGUIDString);
 }
 
 /**
@@ -55,22 +55,22 @@ NVRAMAddHasDuplication (
 **/
 STATIC
 BOOLEAN
-NVRAMDeleteHasDuplication (
+NvramDeleteHasDuplication (
   IN  CONST VOID  *PrimaryEntry,
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_STRING                *NVRAMDeletePrimaryEntry;
-  CONST OC_STRING                *NVRAMDeleteSecondaryEntry;
-  CONST CHAR8                    *NVRAMDeletePrimaryGUIDString;
-  CONST CHAR8                    *NVRAMDeleteSecondaryGUIDString;
+  CONST OC_STRING                *NvramDeletePrimaryEntry;
+  CONST OC_STRING                *NvramDeleteSecondaryEntry;
+  CONST CHAR8                    *NvramDeletePrimaryGUIDString;
+  CONST CHAR8                    *NvramDeleteSecondaryGUIDString;
 
-  NVRAMDeletePrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
-  NVRAMDeleteSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
-  NVRAMDeletePrimaryGUIDString   = OC_BLOB_GET (NVRAMDeletePrimaryEntry);
-  NVRAMDeleteSecondaryGUIDString = OC_BLOB_GET (NVRAMDeleteSecondaryEntry);
+  NvramDeletePrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
+  NvramDeleteSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
+  NvramDeletePrimaryGUIDString   = OC_BLOB_GET (NvramDeletePrimaryEntry);
+  NvramDeleteSecondaryGUIDString = OC_BLOB_GET (NvramDeleteSecondaryEntry);
 
-  return StringIsDuplicated ("NVRAM->Delete", NVRAMDeletePrimaryGUIDString, NVRAMDeleteSecondaryGUIDString);
+  return StringIsDuplicated ("NVRAM->Delete", NvramDeletePrimaryGUIDString, NvramDeleteSecondaryGUIDString);
 }
 
 /**
@@ -83,27 +83,27 @@ NVRAMDeleteHasDuplication (
 **/
 STATIC
 BOOLEAN
-NVRAMLegacySchemaHasDuplication (
+NvramLegacySchemaHasDuplication (
   IN  CONST VOID  *PrimaryEntry,
   IN  CONST VOID  *SecondaryEntry
   )
 {
-  CONST OC_STRING                      *NVRAMLegacySchemaPrimaryEntry;
-  CONST OC_STRING                      *NVRAMLegacySchemaSecondaryEntry;
-  CONST CHAR8                          *NVRAMLegacySchemaPrimaryGUIDString;
-  CONST CHAR8                          *NVRAMLegacySchemaSecondaryGUIDString;
+  CONST OC_STRING                      *NvramLegacySchemaPrimaryEntry;
+  CONST OC_STRING                      *NvramLegacySchemaSecondaryEntry;
+  CONST CHAR8                          *NvramLegacySchemaPrimaryGUIDString;
+  CONST CHAR8                          *NvramLegacySchemaSecondaryGUIDString;
 
-  NVRAMLegacySchemaPrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
-  NVRAMLegacySchemaSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
-  NVRAMLegacySchemaPrimaryGUIDString   = OC_BLOB_GET (NVRAMLegacySchemaPrimaryEntry);
-  NVRAMLegacySchemaSecondaryGUIDString = OC_BLOB_GET (NVRAMLegacySchemaSecondaryEntry);
+  NvramLegacySchemaPrimaryEntry        = *(CONST OC_STRING **) PrimaryEntry;
+  NvramLegacySchemaSecondaryEntry      = *(CONST OC_STRING **) SecondaryEntry;
+  NvramLegacySchemaPrimaryGUIDString   = OC_BLOB_GET (NvramLegacySchemaPrimaryEntry);
+  NvramLegacySchemaSecondaryGUIDString = OC_BLOB_GET (NvramLegacySchemaSecondaryEntry);
 
-  return StringIsDuplicated ("NVRAM->LegacySchema", NVRAMLegacySchemaPrimaryGUIDString, NVRAMLegacySchemaSecondaryGUIDString);
+  return StringIsDuplicated ("NVRAM->LegacySchema", NvramLegacySchemaPrimaryGUIDString, NvramLegacySchemaSecondaryGUIDString);
 }
 
 STATIC
 UINT32
-ValidateNVRAMKeyByGuid (
+ValidateNvramKeyByGuid (
   IN  CONST CHAR8     *AsciiGuid,
   IN  CONST OC_ASSOC  *VariableMap
   )
@@ -130,9 +130,9 @@ ValidateNVRAMKeyByGuid (
         for (Index2 = 0; Index2 < mGUIDMaps[Index].NvramKeyMapsCount; ++Index2) {
           if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMaps[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
             if (!mGUIDMaps[Index].NvramKeyMaps[Index2].KeyChecker (
-                                                        OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                                        VariableMap->Values[VariableIndex]->Size)
-                                                        ) {
+                                                         OC_BLOB_GET (VariableMap->Values[VariableIndex]),
+                                                         VariableMap->Values[VariableIndex]->Size)
+                                                         ) {
               DEBUG ((
                 DEBUG_WARN,
                 "NVRAM->Add->%g->%a has illegal value!\n",
@@ -152,38 +152,38 @@ ValidateNVRAMKeyByGuid (
 
 STATIC
 UINT32
-CheckNVRAMAdd (
+CheckNvramAdd (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
   UINT32           ErrorCount;
   UINT32           GuidIndex;
   UINT32           VariableIndex;
-  OC_NVRAM_CONFIG  *UserNVRAM;
+  OC_NVRAM_CONFIG  *UserNvram;
   CONST CHAR8      *AsciiGuid;
-  CONST CHAR8      *AsciiNVRAMKey;
+  CONST CHAR8      *AsciiNvramKey;
   OC_ASSOC         *VariableMap;
 
   ErrorCount = 0;
-  UserNVRAM  = &Config->Nvram;
+  UserNvram  = &Config->Nvram;
 
-  for (GuidIndex = 0; GuidIndex < UserNVRAM->Add.Count; ++GuidIndex) {
-    AsciiGuid = OC_BLOB_GET (UserNVRAM->Add.Keys[GuidIndex]);
+  for (GuidIndex = 0; GuidIndex < UserNvram->Add.Count; ++GuidIndex) {
+    AsciiGuid = OC_BLOB_GET (UserNvram->Add.Keys[GuidIndex]);
 
     if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->Add[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
 
-    VariableMap = UserNVRAM->Add.Values[GuidIndex];
+    VariableMap = UserNvram->Add.Values[GuidIndex];
 
     for (VariableIndex = 0; VariableIndex < VariableMap->Count; ++VariableIndex) {
-      AsciiNVRAMKey = OC_BLOB_GET (VariableMap->Keys[VariableIndex]);
+      AsciiNvramKey = OC_BLOB_GET (VariableMap->Keys[VariableIndex]);
 
       //
       // Sanitise strings.
       //
-      if (!AsciiPropertyIsLegal (AsciiNVRAMKey)) {
+      if (!AsciiPropertyIsLegal (AsciiNvramKey)) {
         DEBUG ((
           DEBUG_WARN,
           "NVRAM->Add[%u]->Key[%u] contains illegal character!\n",
@@ -201,23 +201,23 @@ CheckNVRAMAdd (
       VariableMap->Keys,
       VariableMap->Count,
       sizeof (VariableMap->Keys[0]),
-      NVRAMAddHasDuplication
+      NvramAddHasDuplication
       );
 
     //
     // Check for accepted values for NVRAM keys.
     //
-    ErrorCount += ValidateNVRAMKeyByGuid (AsciiGuid, VariableMap);
+    ErrorCount += ValidateNvramKeyByGuid (AsciiGuid, VariableMap);
   }
 
   //
   // Check duplicated entries in NVRAM->Add.
   //
   ErrorCount += FindArrayDuplication (
-    UserNVRAM->Add.Keys,
-    UserNVRAM->Add.Count,
-    sizeof (UserNVRAM->Add.Keys[0]),
-    NVRAMAddHasDuplication
+    UserNvram->Add.Keys,
+    UserNvram->Add.Count,
+    sizeof (UserNvram->Add.Keys[0]),
+    NvramAddHasDuplication
     );
 
   return ErrorCount;
@@ -225,35 +225,35 @@ CheckNVRAMAdd (
 
 STATIC
 UINT32
-CheckNVRAMDelete (
+CheckNvramDelete (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
   UINT32           ErrorCount;
   UINT32           GuidIndex;
   UINT32           VariableIndex;
-  OC_NVRAM_CONFIG  *UserNVRAM;
+  OC_NVRAM_CONFIG  *UserNvram;
   CONST CHAR8      *AsciiGuid;
-  CONST CHAR8      *AsciiNVRAMKey;
+  CONST CHAR8      *AsciiNvramKey;
 
   ErrorCount = 0;
-  UserNVRAM  = &Config->Nvram;
+  UserNvram  = &Config->Nvram;
 
-  for (GuidIndex = 0; GuidIndex < UserNVRAM->Delete.Count; ++GuidIndex) {
-    AsciiGuid = OC_BLOB_GET (UserNVRAM->Delete.Keys[GuidIndex]);
+  for (GuidIndex = 0; GuidIndex < UserNvram->Delete.Count; ++GuidIndex) {
+    AsciiGuid = OC_BLOB_GET (UserNvram->Delete.Keys[GuidIndex]);
 
     if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->Delete[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
 
-    for (VariableIndex = 0; VariableIndex < UserNVRAM->Delete.Values[GuidIndex]->Count; ++VariableIndex) {
-      AsciiNVRAMKey = OC_BLOB_GET (UserNVRAM->Delete.Values[GuidIndex]->Values[VariableIndex]);
+    for (VariableIndex = 0; VariableIndex < UserNvram->Delete.Values[GuidIndex]->Count; ++VariableIndex) {
+      AsciiNvramKey = OC_BLOB_GET (UserNvram->Delete.Values[GuidIndex]->Values[VariableIndex]);
 
       //
       // Sanitise strings.
       //
-      if (!AsciiPropertyIsLegal (AsciiNVRAMKey)) {
+      if (!AsciiPropertyIsLegal (AsciiNvramKey)) {
         DEBUG ((
           DEBUG_WARN,
           "NVRAM->Delete[%u]->Key[%u] contains illegal character!\n",
@@ -268,10 +268,10 @@ CheckNVRAMDelete (
     // Check duplicated properties in NVRAM->Delete.
     //
     ErrorCount += FindArrayDuplication (
-      UserNVRAM->Delete.Values[GuidIndex]->Values,
-      UserNVRAM->Delete.Values[GuidIndex]->Count,
-      sizeof (UserNVRAM->Delete.Values[GuidIndex]->Values[0]),
-      NVRAMDeleteHasDuplication
+      UserNvram->Delete.Values[GuidIndex]->Values,
+      UserNvram->Delete.Values[GuidIndex]->Count,
+      sizeof (UserNvram->Delete.Values[GuidIndex]->Values[0]),
+      NvramDeleteHasDuplication
       );
   }
 
@@ -279,10 +279,10 @@ CheckNVRAMDelete (
   // Check duplicated entries in NVRAM->Delete.
   //
   ErrorCount += FindArrayDuplication (
-    UserNVRAM->Delete.Keys,
-    UserNVRAM->Delete.Count,
-    sizeof (UserNVRAM->Delete.Keys[0]),
-    NVRAMDeleteHasDuplication
+    UserNvram->Delete.Keys,
+    UserNvram->Delete.Count,
+    sizeof (UserNvram->Delete.Keys[0]),
+    NvramDeleteHasDuplication
     );
 
   return ErrorCount;
@@ -290,35 +290,35 @@ CheckNVRAMDelete (
 
 STATIC
 UINT32
-CheckNVRAMSchema (
+CheckNvramSchema (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
   UINT32           ErrorCount;
   UINT32           GuidIndex;
   UINT32           VariableIndex;
-  OC_NVRAM_CONFIG  *UserNVRAM;
+  OC_NVRAM_CONFIG  *UserNvram;
   CONST CHAR8      *AsciiGuid;
-  CONST CHAR8      *AsciiNVRAMKey;
+  CONST CHAR8      *AsciiNvramKey;
 
   ErrorCount = 0;
-  UserNVRAM  = &Config->Nvram;
+  UserNvram  = &Config->Nvram;
 
-  for (GuidIndex = 0; GuidIndex < UserNVRAM->Legacy.Count; ++GuidIndex) {
-    AsciiGuid = OC_BLOB_GET (UserNVRAM->Legacy.Keys[GuidIndex]);
+  for (GuidIndex = 0; GuidIndex < UserNvram->Legacy.Count; ++GuidIndex) {
+    AsciiGuid = OC_BLOB_GET (UserNvram->Legacy.Keys[GuidIndex]);
 
     if (!AsciiGuidIsLegal (AsciiGuid)) {
       DEBUG ((DEBUG_WARN, "NVRAM->LegacySchema[%u] has borked GUID!\n", GuidIndex));
       ++ErrorCount;
     }
 
-    for (VariableIndex = 0; VariableIndex < UserNVRAM->Legacy.Values[GuidIndex]->Count; ++VariableIndex) {
-      AsciiNVRAMKey = OC_BLOB_GET (UserNVRAM->Legacy.Values[GuidIndex]->Values[VariableIndex]);
+    for (VariableIndex = 0; VariableIndex < UserNvram->Legacy.Values[GuidIndex]->Count; ++VariableIndex) {
+      AsciiNvramKey = OC_BLOB_GET (UserNvram->Legacy.Values[GuidIndex]->Values[VariableIndex]);
 
       //
       // Sanitise strings.
       //
-      if (!AsciiPropertyIsLegal (AsciiNVRAMKey)) {
+      if (!AsciiPropertyIsLegal (AsciiNvramKey)) {
         DEBUG ((
           DEBUG_WARN,
           "NVRAM->LegacySchema[%u]->Key[%u] contains illegal character!\n",
@@ -333,10 +333,10 @@ CheckNVRAMSchema (
     // Check duplicated properties in NVRAM->LegacySchema.
     //
     ErrorCount += FindArrayDuplication (
-      UserNVRAM->Legacy.Values[GuidIndex]->Values,
-      UserNVRAM->Legacy.Values[GuidIndex]->Count,
-      sizeof (UserNVRAM->Legacy.Values[GuidIndex]->Values[0]),
-      NVRAMLegacySchemaHasDuplication
+      UserNvram->Legacy.Values[GuidIndex]->Values,
+      UserNvram->Legacy.Values[GuidIndex]->Count,
+      sizeof (UserNvram->Legacy.Values[GuidIndex]->Values[0]),
+      NvramLegacySchemaHasDuplication
       );
   }
 
@@ -344,10 +344,10 @@ CheckNVRAMSchema (
   // Check duplicated entries in NVRAM->LegacySchema.
   //
   ErrorCount += FindArrayDuplication (
-    UserNVRAM->Legacy.Keys,
-    UserNVRAM->Legacy.Count,
-    sizeof (UserNVRAM->Legacy.Keys[0]),
-    NVRAMLegacySchemaHasDuplication
+    UserNvram->Legacy.Keys,
+    UserNvram->Legacy.Count,
+    sizeof (UserNvram->Legacy.Keys[0]),
+    NvramLegacySchemaHasDuplication
     );
 
   return ErrorCount;
@@ -355,24 +355,24 @@ CheckNVRAMSchema (
 
 
 UINT32
-CheckNVRAM (
+CheckNvram (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK NVRAMCheckers[] = {
-    &CheckNVRAMAdd,
-    &CheckNVRAMDelete,
-    &CheckNVRAMSchema
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  NvramCheckers[] = {
+    &CheckNvramAdd,
+    &CheckNvramDelete,
+    &CheckNvramSchema
   };
 
   DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount = 0;
 
-  for (Index = 0; Index < ARRAY_SIZE (NVRAMCheckers); ++Index) {
-    ErrorCount += NVRAMCheckers[Index] (Config);
+  for (Index = 0; Index < ARRAY_SIZE (NvramCheckers); ++Index) {
+    ErrorCount += NvramCheckers[Index] (Config);
   }
 
   return ReportError (__func__, ErrorCount);

@@ -210,9 +210,9 @@ CheckDeviceProperties (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK DevicePropertiesCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  DevicePropertiesCheckers[] = {
     &CheckDevicePropertiesAdd,
     &CheckDevicePropertiesDelete
   };

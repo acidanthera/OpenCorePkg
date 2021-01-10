@@ -21,13 +21,13 @@
 typedef
 BOOLEAN
 (*NVRAM_KEY_CHECK) (
-  IN  CONST VOID    *Value,
-  IN  UINT32        ValueSize
+  IN  CONST VOID       *Value,
+  IN  UINT32           ValueSize
   );
 
 typedef struct NVRAM_KEY_MAP_ {
-  CONST CHAR8       *KeyName;
-  NVRAM_KEY_CHECK   KeyChecker;
+  CONST CHAR8          *KeyName;
+  NVRAM_KEY_CHECK      KeyChecker;
 } NVRAM_KEY_MAP;
 
 typedef struct NVRAM_GUID_MAP_ {

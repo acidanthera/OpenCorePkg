@@ -25,8 +25,8 @@ ValidateProcessorType (
   IN  UINT16  ProcessorType
   )
 {
-  UINTN  Index;
-  UINT8  AllowedProcessorType[] = {
+  UINTN               Index;
+  STATIC CONST UINT8  AllowedProcessorType[] = {
     AppleProcessorMajorCore,
     AppleProcessorMajorCore2,
     AppleProcessorMajorXeonPenryn,
@@ -117,12 +117,12 @@ CheckPlatformInfo (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32              ErrorCount;
-  OC_PLATFORM_CONFIG  *UserPlatformInfo;
-  BOOLEAN             IsAutomaticEnabled;
-  CONST CHAR8         *UpdateSMBIOSMode;
-  UINTN               Index;
-  STATIC CONFIG_CHECK PlatformInfoCheckers[] = {
+  UINT32               ErrorCount;
+  OC_PLATFORM_CONFIG   *UserPlatformInfo;
+  BOOLEAN              IsAutomaticEnabled;
+  CONST CHAR8          *UpdateSMBIOSMode;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  PlatformInfoCheckers[] = {
     &CheckPlatformInfoGeneric
   };
 

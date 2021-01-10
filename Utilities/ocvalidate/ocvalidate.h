@@ -95,7 +95,7 @@ CheckMisc (
   @return     Number of errors detected.
 **/
 UINT32
-CheckNVRAM (
+CheckNvram (
   IN  OC_GLOBAL_CONFIG  *Config
   );
 
