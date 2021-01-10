@@ -435,9 +435,12 @@ fsw_hfsplus_btf_setup(struct fsw_hfsplus_volume *v,
 static fsw_status_t
 fsw_hfsplus_vol_mount(struct fsw_hfsplus_volume *v)
 {
-    void         *buf;
-    fsw_u32      bs;
-    fsw_status_t status;
+    void                    *buf;
+    fsw_u32                 bs;
+    BTNodeDescriptor        *btnode;
+    HFSPlusCatalogThread    *thread;
+    struct fsw_string       label;
+    fsw_status_t            status;
 
     // allocate memory for vol. header
     status = fsw_alloc(sizeof(HFSPlusVolumeHeader), &v->vh);
@@ -471,6 +474,24 @@ fsw_hfsplus_vol_mount(struct fsw_hfsplus_volume *v)
     if (status)
         return status;
 
+    // Get volume label from kHFSRootFolderID thread record
+    // Not-readed volume label is not fatal error, we can proceed without it
+    status = fsw_alloc(v->catf->bt_ndsz, &btnode);
+    if (status) {
+        goto done;
+    }
+    status = fsw_hfsplus_dnid2thread(v, kHFSRootFolderID, btnode, &thread);
+
+    if (!status) {
+        label.len = fsw_u16_be_swap(thread->nodeName.length);
+        label.size = sizeof(fsw_u16) * label.len;
+        label.data = thread->nodeName.unicode;
+        label.type = FSW_STRING_TYPE_UTF16_BE;
+        fsw_strdup_coerce(&v->g.label, FSW_STRING_TYPE_UTF16, &label);
+    }
+
+    fsw_free(btnode);
+done:
     return FSW_SUCCESS;
 }
 
