@@ -86,19 +86,18 @@ CheckDevicePropertiesAdd (
   CONST CHAR8               *AsciiProperty;
   OC_ASSOC                  *PropertyMap;
 
-  ErrorCount = 0;
-  UserDevProp = &Config->DeviceProperties;
+  ErrorCount                = 0;
+  UserDevProp               = &Config->DeviceProperties;
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
-    AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
+    AsciiDevicePath = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
     
     if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Add[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
       ++ErrorCount;
     }
 
-    PropertyMap       = UserDevProp->Add.Values[DeviceIndex];
-    
+    PropertyMap = UserDevProp->Add.Values[DeviceIndex];
     for (PropertyIndex = 0; PropertyIndex < PropertyMap->Count; ++PropertyIndex) {
       AsciiProperty = OC_BLOB_GET (PropertyMap->Keys[PropertyIndex]);
 
@@ -120,22 +119,22 @@ CheckDevicePropertiesAdd (
     // Check duplicated properties in DeviceProperties->Add[N].
     //
     ErrorCount += FindArrayDuplication (
-      PropertyMap->Keys,
-      PropertyMap->Count,
-      sizeof (PropertyMap->Keys[0]),
-      DevPropsAddHasDuplication
-      );
+                    PropertyMap->Keys,
+                    PropertyMap->Count,
+                    sizeof (PropertyMap->Keys[0]),
+                    DevPropsAddHasDuplication
+                    );
   }
 
   //
   // Check duplicated entries in DeviceProperties->Add.
   //
   ErrorCount += FindArrayDuplication (
-    UserDevProp->Add.Keys,
-    UserDevProp->Add.Count,
-    sizeof (UserDevProp->Add.Keys[0]),
-    DevPropsAddHasDuplication
-    );
+                  UserDevProp->Add.Keys,
+                  UserDevProp->Add.Count,
+                  sizeof (UserDevProp->Add.Keys[0]),
+                  DevPropsAddHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -153,11 +152,11 @@ CheckDevicePropertiesDelete (
   CONST CHAR8               *AsciiDevicePath;
   CONST CHAR8               *AsciiProperty;
 
-  ErrorCount  = 0;
-  UserDevProp = &Config->DeviceProperties;
+  ErrorCount                = 0;
+  UserDevProp               = &Config->DeviceProperties;
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Delete.Count; ++DeviceIndex) {
-    AsciiDevicePath   = OC_BLOB_GET (UserDevProp->Delete.Keys[DeviceIndex]);
+    AsciiDevicePath = OC_BLOB_GET (UserDevProp->Delete.Keys[DeviceIndex]);
     
     if (!AsciiDevicePathIsLegal (AsciiDevicePath)) {
       DEBUG ((DEBUG_WARN, "DeviceProperties->Delete[%u]->DevicePath is borked! Please check the information above!\n", DeviceIndex));
@@ -185,22 +184,22 @@ CheckDevicePropertiesDelete (
     // Check duplicated properties in DeviceProperties->Delete[N].
     //
     ErrorCount += FindArrayDuplication (
-      UserDevProp->Delete.Values[DeviceIndex]->Values,
-      UserDevProp->Delete.Values[DeviceIndex]->Count,
-      sizeof (UserDevProp->Delete.Values[DeviceIndex]->Values[0]),
-      DevPropsDeleteHasDuplication
-      );
+                    UserDevProp->Delete.Values[DeviceIndex]->Values,
+                    UserDevProp->Delete.Values[DeviceIndex]->Count,
+                    sizeof (UserDevProp->Delete.Values[DeviceIndex]->Values[0]),
+                    DevPropsDeleteHasDuplication
+                    );
   }
 
   //
   // Check duplicated entries in DeviceProperties->Delete.
   //
   ErrorCount += FindArrayDuplication (
-    UserDevProp->Delete.Keys,
-    UserDevProp->Delete.Count,
-    sizeof (UserDevProp->Delete.Keys[0]),
-    DevPropsDeleteHasDuplication
-    );
+                  UserDevProp->Delete.Keys,
+                  UserDevProp->Delete.Count,
+                  sizeof (UserDevProp->Delete.Keys[0]),
+                  DevPropsDeleteHasDuplication
+                  );
 
   return ErrorCount;
 }

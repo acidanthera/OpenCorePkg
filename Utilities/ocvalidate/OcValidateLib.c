@@ -311,6 +311,9 @@ AsciiGuidIsLegal (
 
   Status = AsciiStrToGuid (AsciiGuid, &Guid);
 
+  //
+  // AsciiStrToGuid should never return errors on valid GUID.
+  //
   return !EFI_ERROR (Status);
 }
 
@@ -329,6 +332,9 @@ DataHasProperMasking (
   ByteMask = Mask;
 
   for (Index = 0; Index < Size; ++Index) {
+    //
+    // Mask should only be set when corresponding bits on Data are inactive.
+    //
     if ((ByteData[Index] & ~ByteMask[Index]) != 0) {
       return FALSE;
     }
@@ -356,6 +362,9 @@ ValidatePatch (
 
   ErrorCount = 0;
 
+  //
+  // If size of Find cannot be zero and it is different from that of Replace, then error.
+  //
   if (!FindSizeCanBeZero && FindSize != ReplaceSize) {
     DEBUG ((
       DEBUG_WARN,
@@ -369,6 +378,9 @@ ValidatePatch (
   }
 
   if (MaskSize > 0) {
+    //
+    // If Mask is set, but its size is different from that of Find, then error.
+    //
     if (MaskSize != FindSize) {
       DEBUG ((
         DEBUG_WARN,
@@ -380,6 +392,9 @@ ValidatePatch (
         ));
       ++ErrorCount;
     } else if (!DataHasProperMasking (Find, Mask, FindSize)) {
+      //
+      // If Mask is set without corresponding bits being active for Find, then error.
+      //
       DEBUG ((
         DEBUG_WARN,
         "%a[%u]->Find requires Mask to be active for corresponding bits!\n",
@@ -389,8 +404,11 @@ ValidatePatch (
       ++ErrorCount;
     }
   }
-  
+
   if (ReplaceMaskSize > 0) {
+    //
+    // If ReplaceMask is set, but its size is different from that of Replace, then error.
+    //
     if (ReplaceMaskSize != ReplaceSize) {
       DEBUG ((
         DEBUG_WARN,
@@ -402,6 +420,9 @@ ValidatePatch (
         ));
       ++ErrorCount;
     } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+      //
+      // If ReplaceMask is set without corresponding bits being active for Replace, then error.
+      //
       DEBUG ((
         DEBUG_WARN,
         "%a[%u]->Replace requires ReplaceMask to be active for corresponding bits!\n",
@@ -455,23 +476,19 @@ FindArrayDuplication (
 BOOLEAN
 StringIsDuplicated (
   IN  CONST CHAR8  *EntrySection,
-  IN  CONST CHAR8  *PrimaryEntry,
-  IN  CONST CHAR8  *SecondaryEntry
+  IN  CONST CHAR8  *FirstString,
+  IN  CONST CHAR8  *SecondString  
   )
 {
-  BOOLEAN HasDup;
-
-  HasDup = FALSE;
-
-  if (AsciiStrCmp (PrimaryEntry, SecondaryEntry) == 0) {
+  if (AsciiStrCmp (FirstString, SecondString) == 0) {
     //
-    // Print duplicated entries. Index will be printed in the parent function (FindArrayDuplication).
+    // Print duplicated entries whose index will be printed in the parent function (FindArrayDuplication).
     //
-    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, PrimaryEntry[0] != '\0' ? PrimaryEntry : "<empty string>"));
-    HasDup = TRUE;
+    DEBUG ((DEBUG_WARN, "%a: %a is duplicated ", EntrySection, FirstString[0] != '\0' ? FirstString : "<empty string>"));
+    return TRUE;
   }
 
-  return HasDup;
+  return FALSE;
 }
 
 UINT32

@@ -269,11 +269,11 @@ CheckKernelAdd (
   // Check duplicated entries in Kernel->Add.
   //
   ErrorCount += FindArrayDuplication (
-    UserKernel->Add.Values,
-    UserKernel->Add.Count,
-    sizeof (UserKernel->Add.Values[0]),
-    KernelAddHasDuplication
-    );
+                  UserKernel->Add.Values,
+                  UserKernel->Add.Count,
+                  sizeof (UserKernel->Add.Values[0]),
+                  KernelAddHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -336,11 +336,11 @@ CheckKernelBlock (
   // Check duplicated entries in Kernel->Block.
   //
   ErrorCount += FindArrayDuplication (
-    UserKernel->Block.Values,
-    UserKernel->Block.Count,
-    sizeof (UserKernel->Block.Values[0]),
-    KernelBlockHasDuplication
-    );
+                  UserKernel->Block.Values,
+                  UserKernel->Block.Count,
+                  sizeof (UserKernel->Block.Values[0]),
+                  KernelBlockHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -373,7 +373,11 @@ CheckKernelEmulate (
     ++ErrorCount;
   }
 
-  if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
+  if (!DataHasProperMasking (
+         UserKernel->Emulate.Cpuid1Data,
+         UserKernel->Emulate.Cpuid1Mask,
+         sizeof (UserKernel->Emulate.Cpuid1Data)
+         )) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
     ++ErrorCount;
   }
@@ -474,11 +478,11 @@ CheckKernelForce (
   // Check duplicated entries in Kernel->Force.
   //
   ErrorCount += FindArrayDuplication (
-    UserKernel->Force.Values,
-    UserKernel->Force.Count,
-    sizeof (UserKernel->Force.Values[0]),
-    KernelForceHasDuplication
-    );
+                  UserKernel->Force.Values,
+                  UserKernel->Force.Count,
+                  sizeof (UserKernel->Force.Values[0]),
+                  KernelForceHasDuplication
+                  );
 
   return ErrorCount;
 }
@@ -558,18 +562,18 @@ CheckKernelPatch (
     // Checks for size.
     //
     ErrorCount += ValidatePatch (
-      "Kernel->Patch",
-      Index,
-      Base[0] != '\0' && FindSize == 0,
-      Find,
-      FindSize,
-      Replace,
-      ReplaceSize,
-      Mask,
-      MaskSize,
-      ReplaceMask,
-      ReplaceMaskSize
-      );
+                    "Kernel->Patch",
+                    Index,
+                    Base[0] != '\0' && FindSize == 0,
+                    Find,
+                    FindSize,
+                    Replace,
+                    ReplaceSize,
+                    Mask,
+                    MaskSize,
+                    ReplaceMask,
+                    ReplaceMaskSize
+                    );
   }
 
   return ErrorCount;

@@ -139,13 +139,16 @@ int ENTRY_POINT(int argc, const char *argv[]) {
 }
 
 INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
-  VOID *NewData = AllocatePool (Size);
-  if (NewData) {
+  VOID              *NewData;
+  OC_GLOBAL_CONFIG  Config;
+
+  NewData = AllocatePool (Size);
+  if (NewData != NULL) {
     CopyMem (NewData, Data, Size);
-    OC_GLOBAL_CONFIG   Config;
     OcConfigurationInit (&Config, NewData, Size);
     OcConfigurationFree (&Config);
     FreePool (NewData);
   }
+  
   return 0;
 }

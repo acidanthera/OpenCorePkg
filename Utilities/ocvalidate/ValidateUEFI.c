@@ -247,11 +247,11 @@ CheckUEFIDrivers (
   // Check duplicated Drivers.
   //
   ErrorCount += FindArrayDuplication (
-    UserUefi->Drivers.Values,
-    UserUefi->Drivers.Count,
-    sizeof (UserUefi->Drivers.Values[0]),
-    UEFIDriverHasDuplication
-    );
+                  UserUefi->Drivers.Values,
+                  UserUefi->Drivers.Count,
+                  sizeof (UserUefi->Drivers.Values[0]),
+                  UEFIDriverHasDuplication
+                  );
 
   IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
   if (IsRequestBootVarRoutingEnabled) {
@@ -498,11 +498,11 @@ CheckUEFIReservedMemory (
   // Now overlapping check amongst Address and Size.
   //
   ErrorCount += FindArrayDuplication (
-    UserUefi->ReservedMemory.Values,
-    UserUefi->ReservedMemory.Count,
-    sizeof (UserUefi->ReservedMemory.Values[0]),
-    UEFIReservedMemoryHasOverlap
-    );
+                  UserUefi->ReservedMemory.Values,
+                  UserUefi->ReservedMemory.Count,
+                  sizeof (UserUefi->ReservedMemory.Values[0]),
+                  UEFIReservedMemoryHasOverlap
+                  );
 
   return ErrorCount;
 }
