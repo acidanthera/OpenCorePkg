@@ -20,7 +20,7 @@
 #include <Library/OcAppleKernelLib.h>
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Add.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -52,7 +52,7 @@ KernelAddHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Identifier is duplicated in Kernel->Block.
+  Callback function to verify whether Identifier is duplicated in Kernel->Block.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -84,7 +84,7 @@ KernelBlockHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Force.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Force.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.

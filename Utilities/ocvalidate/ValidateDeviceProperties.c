@@ -17,7 +17,7 @@
 #include "OcValidateLib.h"
 
 /**
-  Callback funtion to verify whether one entry is duplicated in DeviceProperties->Add.
+  Callback function to verify whether one entry is duplicated in DeviceProperties->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -45,7 +45,7 @@ DevPropsAddHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether one entry is duplicated in DeviceProperties->Delete.
+  Callback function to verify whether one entry is duplicated in DeviceProperties->Delete.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.

@@ -23,7 +23,7 @@
 #include <Protocol/OcLog.h>
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Entries.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Entries.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -68,7 +68,7 @@ MiscEntriesHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Tools.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Tools.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.

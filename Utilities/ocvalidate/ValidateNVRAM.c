@@ -18,7 +18,7 @@
 #include "NvramKeyInfo.h"
 
 /**
-  Callback funtion to verify whether one entry is duplicated in NVRAM->Add.
+  Callback function to verify whether one entry is duplicated in NVRAM->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -46,7 +46,7 @@ NvramAddHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether one entry is duplicated in NVRAM->Delete.
+  Callback function to verify whether one entry is duplicated in NVRAM->Delete.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -74,7 +74,7 @@ NvramDeleteHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether one entry is duplicated in NVRAM->LegacySchema.
+  Callback function to verify whether one entry is duplicated in NVRAM->LegacySchema.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -131,8 +131,8 @@ ValidateNvramKeyByGuid (
           if (AsciiStrCmp (mGUIDMaps[Index].NvramKeyMaps[Index2].KeyName, OC_BLOB_GET (VariableMap->Keys[VariableIndex])) == 0) {
             if (!mGUIDMaps[Index].NvramKeyMaps[Index2].KeyChecker (
                                                          OC_BLOB_GET (VariableMap->Values[VariableIndex]),
-                                                         VariableMap->Values[VariableIndex]->Size)
-                                                         ) {
+                                                         VariableMap->Values[VariableIndex]->Size
+                                                         )) {
               DEBUG ((
                 DEBUG_WARN,
                 "NVRAM->Add->%g->%a has illegal value!\n",
