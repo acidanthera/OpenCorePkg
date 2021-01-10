@@ -62,6 +62,8 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - KernelCache: Only `Auto`, `Cacheless`, `Mkext`, or `Prelinked` are accepted.
 
 ### Misc
+#### BlessOverride
+- Entries cannot be `\EFI\Microsoft\Boot\bootmgfw.efi` or `EFI\Microsoft\Boot\bootmgfw.efi` since OpenCore knows this path.
 #### Boot
 - HibernateMode: Only `None`, `Auto`, `RTC`, or `NVRAM` are accepted.
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.

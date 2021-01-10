@@ -142,6 +142,39 @@ ValidateSecureBootModel (
 
 STATIC
 UINT32
+CheckBlessOverride (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  UINT32              Index;
+  OC_MISC_CONFIG      *UserMisc;
+  CONST CHAR8         *BlessOverrideEntry;
+  STATIC CONST CHAR8  *DisallowedBlessOverride;
+
+  ErrorCount          = 0;
+  UserMisc            = &Config->Misc;
+
+  DisallowedBlessOverride = "\\EFI\\Microsoft\\Boot\\bootmgfw.efi";
+  for (Index = 0; Index < UserMisc->BlessOverride.Count; ++Index) {
+    BlessOverrideEntry = OC_BLOB_GET (UserMisc->BlessOverride.Values[Index]);
+
+    //
+    // &DisallowedBlessOverride[1] means no first '\\', which is
+    // "EFI\\Microsoft\\Boot\\bootmgfw.efi".
+    //
+    if (AsciiStrCmp (BlessOverrideEntry, DisallowedBlessOverride) == 0
+      || AsciiStrCmp (BlessOverrideEntry, &DisallowedBlessOverride[1]) == 0) {
+      DEBUG ((DEBUG_WARN, "Misc->BlessOverride cannot contain %a!\n", BlessOverrideEntry));
+      ++ErrorCount;
+    }
+  }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
 CheckMiscBoot (
   IN  OC_GLOBAL_CONFIG  *Config
   )
@@ -525,6 +558,7 @@ CheckMisc (
   UINT32               ErrorCount;
   UINTN                Index;
   STATIC CONFIG_CHECK  MiscCheckers[] = {
+    &CheckBlessOverride,
     &CheckMiscBoot,
     &CheckMiscDebug,
     &CheckMiscEntries,
