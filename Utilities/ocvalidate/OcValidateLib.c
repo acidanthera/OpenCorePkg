@@ -470,7 +470,7 @@ BOOLEAN
 StringIsDuplicated (
   IN  CONST CHAR8  *EntrySection,
   IN  CONST CHAR8  *FirstString,
-  IN  CONST CHAR8  *SecondString  
+  IN  CONST CHAR8  *SecondString
   )
 {
   if (AsciiStrCmp (FirstString, SecondString) == 0) {
