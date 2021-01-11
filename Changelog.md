@@ -6,6 +6,7 @@ OpenCore Changelog
 - Fixed selector boot option choice in OpenCanopy
 - Relaxed selector dimensions for OpenCanopy
 - Add `MaxBIOSVersion` option to `Generic`
+- Fix MLB verification feature in macrecovery
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
