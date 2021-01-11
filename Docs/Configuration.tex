@@ -4628,6 +4628,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
+  \texttt{MaxBIOSVersion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999}, recommended for 
+  legacy Macs with custom SMBIOS to avoid BIOS updates in macOS 11, Big Sur.
+
+\item
   \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -4650,7 +4657,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
+  \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.

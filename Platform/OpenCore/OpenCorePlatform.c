@@ -373,6 +373,12 @@ OcPlatformUpdateSmbios (
         DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS system memory status %a\n", SystemMemoryStatus));
       }
     }
+    //
+    // Override default BIOSVersion.
+    //
+    if (Config->PlatformInfo.Generic.MaxBIOSVersion) {
+      Data.BIOSVersion = "9999.999.999";
+    }
 
     if (MacInfo->DataHub.SmcRevision != NULL) {
       OcSmbiosGetSmcVersion (MacInfo->DataHub.SmcRevision, SmcVersion);
