@@ -4628,6 +4628,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
+  \texttt{BIOSVersion}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Version\\
+  \textbf{Description}: Refer to SMBIOS \texttt{BIOSVersion}.
+
+\item
   \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -4650,7 +4657,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
+  \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.

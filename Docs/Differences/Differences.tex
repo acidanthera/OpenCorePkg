@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Sun Jan 10 13:38:23 2021
+%DIF DEL PreviousConfiguration.tex   Tue Jan  5 20:10:35 2021
+%DIF ADD ../Configuration.tex        Sun Jan 10 22:01:06 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4688,7 +4688,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
-  \texttt{SystemMemoryStatus}\\
+  \DIFaddbegin \texttt{\DIFadd{BIOSVersion}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{SMBIOS}}\DIFadd{: BIOS Information (Type 0) --- BIOS Version}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Refer to SMBIOS }\texttt{\DIFadd{BIOSVersion}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Indicates whether system memory is upgradable in \texttt{PlatformFeature}.
@@ -4710,8 +4718,8 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
-  \textbf{Type}: \texttt{plist\ integer}\\
+  \texttt{ProcessorType}\DIFaddbegin \\
+  \DIFaddend \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
 \item
