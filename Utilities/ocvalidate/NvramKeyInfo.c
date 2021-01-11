@@ -84,7 +84,7 @@ ValidateBootArgs (
 
   BootArgsValue = (CONST CHAR8 *) Value;
 
-  return OcAsciiStringNPrintable (BootArgsValue, (UINTN) ValueSize);
+  return OcAsciiStringNPrintable (BootArgsValue, ValueSize);
 }
 
 STATIC NVRAM_KEY_MAP  mAppleVendorNvramGuidKeyMaps[] = {
