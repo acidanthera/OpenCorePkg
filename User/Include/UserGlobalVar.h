@@ -27,7 +27,6 @@ extern EFI_GUID     gAppleBlessedOsxFolderInfoGuid;
 extern EFI_GUID     gAppleBlessedSystemFileInfoGuid;
 extern EFI_GUID     gAppleBlessedSystemFolderInfoGuid;
 extern EFI_GUID     gAppleBootPolicyProtocolGuid;
-extern EFI_GUID     gAppleVendorNvramGuid;
 extern EFI_GUID     gAppleVendorVariableGuid;
 extern EFI_GUID     gAppleImg4VerificationProtocolGuid;
 extern EFI_GUID     gAppleBeepGenProtocolGuid; 

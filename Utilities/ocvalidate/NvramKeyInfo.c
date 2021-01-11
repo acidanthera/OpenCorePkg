@@ -87,17 +87,84 @@ ValidateBootArgs (
   return OcAsciiStringNPrintable (BootArgsValue, ValueSize);
 }
 
-STATIC NVRAM_KEY_MAP  mAppleVendorNvramGuidKeyMaps[] = {
-  { "UIScale",   ValidateUIScale  },
-};
+STATIC
+BOOLEAN
+ValidateNvramKey8 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT8);
+}
+
+STATIC
+BOOLEAN
+ValidateNvramKey32 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT32);
+}
+
+STATIC
+BOOLEAN
+ValidateNvramKey64 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT64);
+}
+
+STATIC
+BOOLEAN
+ValidateDefaultBackgroundColor (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  CONST UINT32  *DefaultBackgroundColorValue;
+
+  DefaultBackgroundColorValue = (CONST UINT32 *) Value;
+
+  if (!ValidateNvramKey32 (Value, ValueSize)) {
+    return FALSE;
+  }
+
+  //
+  // The last byte must be zero.
+  //
+  // NOTE: Plist has big endian, but it should be small endian here.
+  //
+  return (*DefaultBackgroundColorValue >> 24U) == 0U;
+}
 
 STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
-  { "nvda_drv",  ValidateNvdaDrv  },
-  { "boot-args", ValidateBootArgs }
+  { "nvda_drv",          ValidateNvdaDrv    },
+  { "boot-args",         ValidateBootArgs   },
+  { "csr-active-config", ValidateNvramKey32 },
+  { "StartupMute",       ValidateNvramKey8  },
+  { "SystemAudioVolume", ValidateNvramKey8  },
+};
+
+STATIC NVRAM_KEY_MAP  mAppleVendorVariableGuidKeyMaps[] = {
+  { "UIScale",                  ValidateUIScale                },
+  { "FirmwareFeatures",         ValidateNvramKey32             },
+  { "ExtendedFirmwareFeatures", ValidateNvramKey64             },
+  { "FirmwareFeaturesMask",     ValidateNvramKey32             },
+  { "ExtendedFirmwareFeatures", ValidateNvramKey64             },
+  { "DefaultBackgroundColor",   ValidateDefaultBackgroundColor },
 };
 
 NVRAM_GUID_MAP mGUIDMaps[] = {
-  { &gAppleVendorNvramGuid,  &mAppleVendorNvramGuidKeyMaps[0],  ARRAY_SIZE (mAppleVendorNvramGuidKeyMaps) },
-  { &gAppleBootVariableGuid, &mAppleBootVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleBootVariableGuidKeyMaps) }
+  { &gAppleBootVariableGuid,   &mAppleBootVariableGuidKeyMaps[0],   ARRAY_SIZE (mAppleBootVariableGuidKeyMaps)   },
+  { &gAppleVendorVariableGuid, &mAppleVendorVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleVendorVariableGuidKeyMaps) },
 };
 UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
