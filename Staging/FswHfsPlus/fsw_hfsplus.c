@@ -475,24 +475,34 @@ fsw_hfsplus_vol_mount(struct fsw_hfsplus_volume *v)
         return status;
 
     // Get volume label from kHFSRootFolderID thread record
-    // Not-readed volume label is not fatal error, we can proceed without it
+    // Not-readed volume label is not fatal error,
+    // we can proceed without it leaving label empty
     status = fsw_alloc(v->catf->bt_ndsz, &btnode);
-    if (status) {
-        goto done;
-    }
-    status = fsw_hfsplus_dnid2thread(v, kHFSRootFolderID, btnode, &thread);
-
     if (!status) {
+        status = fsw_hfsplus_dnid2thread(v, kHFSRootFolderID, btnode, &thread);
+        if (status)
+            goto label_read_fail;
+
         label.len = fsw_u16_be_swap(thread->nodeName.length);
         label.size = sizeof(fsw_u16) * label.len;
         label.data = thread->nodeName.unicode;
         label.type = FSW_STRING_TYPE_UTF16_BE;
-        fsw_strdup_coerce(&v->g.label, FSW_STRING_TYPE_UTF16, &label);
+
+        status = fsw_strdup_coerce(&v->g.label, FSW_STRING_TYPE_UTF16, &label);
+        if (status)
+            goto label_read_fail;
+
+        fsw_free(btnode);
     }
 
-    fsw_free(btnode);
-done:
     return FSW_SUCCESS;
+
+// If volume label reading failed we leave it empty and return SUCCESS status
+label_read_fail:
+    fsw_free(btnode);
+    v->g.label.type = FSW_STRING_TYPE_EMPTY;
+    return FSW_SUCCESS;
+
 }
 
 static void
