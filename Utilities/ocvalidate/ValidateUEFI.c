@@ -209,6 +209,10 @@ CheckUEFIDrivers (
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
 
+    if (Driver[0] == '#') {
+      continue;
+    }
+
     //
     // Sanitise strings.
     //
