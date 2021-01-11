@@ -17,6 +17,42 @@
 
 STATIC
 BOOLEAN
+ValidateNvramKeySize8 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT8);
+}
+
+STATIC
+BOOLEAN
+ValidateNvramKeySize32 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT32);
+}
+
+STATIC
+BOOLEAN
+ValidateNvramKeySize64 (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  (VOID) Value;
+
+  return ValueSize == sizeof (UINT64);
+}
+
+STATIC
+BOOLEAN
 ValidateUIScale (
   IN  CONST VOID   *Value,
   IN  UINT32       ValueSize
@@ -31,7 +67,7 @@ ValidateUIScale (
 
   UIScaleValue = (CONST UINT8 *) Value;
 
-  if (ValueSize != sizeof (AllowedUIScaleValue[0])) {
+  if (!ValidateNvramKeySize8 (Value, ValueSize)) {
     return FALSE;
   }
 
@@ -60,7 +96,7 @@ ValidateNvdaDrv (
 
   NvdaDrvValue = (CONST UINT8 *) Value;
 
-  if (ValueSize != sizeof (AllowedNvdaDrvValue[0])) {
+  if (!ValidateNvramKeySize8 (Value, ValueSize)) {
     return FALSE;
   }
 
@@ -89,77 +125,45 @@ ValidateBootArgs (
 
 STATIC
 BOOLEAN
-ValidateNvramKey8 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
-  )
-{
-  (VOID) Value;
-
-  return ValueSize == sizeof (UINT8);
-}
-
-STATIC
-BOOLEAN
-ValidateNvramKey32 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
-  )
-{
-  (VOID) Value;
-
-  return ValueSize == sizeof (UINT32);
-}
-
-STATIC
-BOOLEAN
-ValidateNvramKey64 (
-  IN  CONST VOID   *Value,
-  IN  UINT32       ValueSize
-  )
-{
-  (VOID) Value;
-
-  return ValueSize == sizeof (UINT64);
-}
-
-STATIC
-BOOLEAN
 ValidateDefaultBackgroundColor (
   IN  CONST VOID   *Value,
   IN  UINT32       ValueSize
   )
 {
-  CONST UINT32  *DefaultBackgroundColorValue;
+  //
+  // Cast Value to UINT8 * to ensure alignment.
+  //
+  CONST UINT8  *DefaultBackgroundColorValue;
 
-  DefaultBackgroundColorValue = (CONST UINT32 *) Value;
+  DefaultBackgroundColorValue = (CONST UINT8 *) Value;
 
-  if (!ValidateNvramKey32 (Value, ValueSize)) {
+  //
+  // Even if casted to UINT8 *, DefaultBackgroundColor is still 32-bit.
+  //
+  if (!ValidateNvramKeySize32 (Value, ValueSize)) {
     return FALSE;
   }
 
   //
   // The last byte must be zero.
   //
-  // NOTE: Plist has big endian, but it should be small endian here.
-  //
-  return (*DefaultBackgroundColorValue >> 24U) == 0U;
+  return DefaultBackgroundColorValue[3] == 0U;
 }
 
 STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
-  { "nvda_drv",          ValidateNvdaDrv    },
-  { "boot-args",         ValidateBootArgs   },
-  { "csr-active-config", ValidateNvramKey32 },
-  { "StartupMute",       ValidateNvramKey8  },
-  { "SystemAudioVolume", ValidateNvramKey8  },
+  { "nvda_drv",          ValidateNvdaDrv        },
+  { "boot-args",         ValidateBootArgs       },
+  { "csr-active-config", ValidateNvramKeySize32 },
+  { "StartupMute",       ValidateNvramKeySize8  },
+  { "SystemAudioVolume", ValidateNvramKeySize8  },
 };
 
 STATIC NVRAM_KEY_MAP  mAppleVendorVariableGuidKeyMaps[] = {
   { "UIScale",                  ValidateUIScale                },
-  { "FirmwareFeatures",         ValidateNvramKey32             },
-  { "ExtendedFirmwareFeatures", ValidateNvramKey64             },
-  { "FirmwareFeaturesMask",     ValidateNvramKey32             },
-  { "ExtendedFirmwareFeatures", ValidateNvramKey64             },
+  { "FirmwareFeatures",         ValidateNvramKeySize32         },
+  { "ExtendedFirmwareFeatures", ValidateNvramKeySize64         },
+  { "FirmwareFeaturesMask",     ValidateNvramKeySize32         },
+  { "ExtendedFirmwareFeatures", ValidateNvramKeySize64         },
   { "DefaultBackgroundColor",   ValidateDefaultBackgroundColor },
 };
 
