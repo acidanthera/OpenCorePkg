@@ -374,7 +374,7 @@ OcPlatformUpdateSmbios (
       }
     }
 	//
-	// Permit overriding BIOSVersion
+	// Permit overriding BIOSVersion.
 	//
     if (OC_BLOB_GET (&Config->PlatformInfo.Generic.BIOSVersion)[0] != '\0') {
       Data.BIOSVersion = OC_BLOB_GET (&Config->PlatformInfo.Generic.BIOSVersion);
