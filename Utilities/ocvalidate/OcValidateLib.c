@@ -221,13 +221,6 @@ AsciiUefiDriverIsLegal (
 
   for (Index = 0; Index < DriverLength; ++Index) {
     //
-    // NOTE: Skip '#' as it is treated as comments and thus is legal.
-    //
-    if (Driver[0] == '#') {
-      continue;
-    }
-
-    //
     // Skip allowed characters (0-9, A-Z, a-z, '_', '-', '.', '/').
     //
     if (IsAsciiNumber (Driver[Index])
