@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jan  5 20:10:35 2021
-%DIF ADD ../Configuration.tex        Sun Jan 10 22:01:06 2021
+%DIF ADD ../Configuration.tex        Sun Jan 10 23:34:57 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4688,11 +4688,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{BIOSVersion}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
-  \textbf{\DIFadd{SMBIOS}}\DIFadd{: BIOS Information (Type 0) --- BIOS Version}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Refer to SMBIOS }\texttt{\DIFadd{BIOSVersion}}\DIFadd{.
+  \DIFaddbegin \texttt{\DIFadd{MaxBIOSVersion}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets }\texttt{\DIFadd{BIOSVersion}} \DIFadd{to }\texttt{\DIFadd{9999.999.999}}\DIFadd{, recommended for 
+  legacy Macs with custom SMBIOS to avoid BIOS updates in macOS 11, Big Sur.
 }
 
 \item

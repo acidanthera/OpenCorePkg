@@ -374,10 +374,10 @@ OcPlatformUpdateSmbios (
       }
     }
 	//
-	// Permit overriding BIOSVersion.
+	// Override default BIOSVersion.
 	//
-    if (OC_BLOB_GET (&Config->PlatformInfo.Generic.BIOSVersion)[0] != '\0') {
-      Data.BIOSVersion = OC_BLOB_GET (&Config->PlatformInfo.Generic.BIOSVersion);
+    if (Config->PlatformInfo.Generic.MaxBIOSVersion) {
+      Data.BIOSVersion = "9999.999.999";
     }
 
     if (MacInfo->DataHub.SmcRevision != NULL) {

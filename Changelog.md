@@ -5,7 +5,7 @@ OpenCore Changelog
 - Added background image support in OpenCanopy
 - Fixed selector boot option choice in OpenCanopy
 - Relaxed selector dimensions for OpenCanopy
-- Add `BIOSVersion` option to `Generic`
+- Add `MaxBIOSVersion` option to `Generic`
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
