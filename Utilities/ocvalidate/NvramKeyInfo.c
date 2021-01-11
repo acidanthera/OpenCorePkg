@@ -67,7 +67,7 @@ ValidateUIScale (
 
   UIScaleValue = (CONST UINT8 *) Value;
 
-  if (!ValidateNvramKeySize8 (Value, ValueSize)) {
+  if (!ValidateNvramKeySize8 (NULL, ValueSize)) {
     return FALSE;
   }
 
@@ -96,7 +96,7 @@ ValidateNvdaDrv (
 
   NvdaDrvValue = (CONST UINT8 *) Value;
 
-  if (!ValidateNvramKeySize8 (Value, ValueSize)) {
+  if (!ValidateNvramKeySize8 (NULL, ValueSize)) {
     return FALSE;
   }
 
@@ -140,7 +140,7 @@ ValidateDefaultBackgroundColor (
   //
   // Even if casted to UINT8 *, DefaultBackgroundColor is still 32-bit.
   //
-  if (!ValidateNvramKeySize32 (Value, ValueSize)) {
+  if (!ValidateNvramKeySize32 (NULL, ValueSize)) {
     return FALSE;
   }
 
