@@ -80,6 +80,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 #### gAppleBootVariableGuid (`7C436110-AB2A-4BBB-A880-FE41995C9F82`)
 - `nvda_drv` must have type `Plist Data` with the value of `0x30` or `0x31`.
 - `boot-args` must be an ASCII string (thus `Plist String`) without trailing `\0`.
+- `bootercfg` must be an ASCII string (thus `Plist String`) without trailing `\0`.
 - `csr-active-config` must have type `Plist Data` and have length of 4 bytes.
 - `StartupMute` must have type `Plist Data` and have length of 1 byte.
 - `SystemAudioVolume` must have type `Plist Data` and have length of 1 byte.

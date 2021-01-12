@@ -125,6 +125,19 @@ ValidateBootArgs (
 
 STATIC
 BOOLEAN
+ValidateBooterCfg (
+  IN  CONST VOID   *Value,
+  IN  UINT32       ValueSize
+  )
+{
+  //
+  // bootercfg is similar to boot-args.
+  //
+  return ValidateBootArgs (Value, ValueSize);
+}
+
+STATIC
+BOOLEAN
 ValidateDefaultBackgroundColor (
   IN  CONST VOID   *Value,
   IN  UINT32       ValueSize
@@ -153,6 +166,7 @@ ValidateDefaultBackgroundColor (
 STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
   { "nvda_drv",          ValidateNvdaDrv        },
   { "boot-args",         ValidateBootArgs       },
+  { "bootercfg",         ValidateBooterCfg      },
   { "csr-active-config", ValidateNvramKeySize32 },
   { "StartupMute",       ValidateNvramKeySize8  },
   { "SystemAudioVolume", ValidateNvramKeySize8  },
