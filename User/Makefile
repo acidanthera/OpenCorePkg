@@ -238,7 +238,7 @@ $(PRODUCT): $(OBJS)
 fuzz: $(PRODUCT) FORCE
 	@rm -f fuzz*.log
 	@$(MKDIR) FUZZDICT
-	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
+	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
