@@ -76,7 +76,20 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - SecureBootModel: Only `Default`, `Disabled`, `j137`, `j680`, `j132`, `j174`, `j140k`, `j780`, `j213`, `j140a`, `j152f`, `j160`, `j230k`, `j214k`, `j223`, `j215`, `j185`, `j185f`, or `x86legacy` are accepted.
 
 ### NVRAM
-- Requirements here all follow Global Rules.
+- Requirements here all follow Global Rules. In addition, the following keys and values are checked:
+#### gAppleBootVariableGuid (`7C436110-AB2A-4BBB-A880-FE41995C9F82`)
+- `nvda_drv` must have type `Plist Data` with the value of `0x30` or `0x31`.
+- `boot-args` must be an ASCII string (thus `Plist String`) without trailing `\0`.
+- `csr-active-config` must have type `Plist Data` and have length of 4 bytes.
+- `StartupMute` must have type `Plist Data` and have length of 1 byte.
+- `SystemAudioVolume` must have type `Plist Data` and have length of 1 byte.
+#### gAppleVendorVariableGuid (`4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14`)
+- `UIScale` must have type `Plist Data` with the value of `0x01` or `0x02`.
+- `FirmwareFeatures` must have type `Plist Data` and have length of 4 bytes.
+- `ExtendedFirmwareFeatures` must have type `Plist Data` and have length of 8 bytes.
+- `FirmwareFeaturesMask` must have type `Plist Data` and have length of 4 bytes.
+- `ExtendedFirmwareFeatures` must have type `Plist Data` and have length of 8 bytes.
+- `DefaultBackgroundColor` must have type `Plist Data` and have length of 4 bytes. Also, its last byte must be `0x00`.
 
 ### PlatformInfo
 - UpdateSMBIOSMode: Only `TryOverwrite`, `Create`, `Overwrite`, or `Custom` are accepted.
