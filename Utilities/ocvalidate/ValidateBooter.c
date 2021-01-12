@@ -16,54 +16,26 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+STATIC
 UINT32
-CheckBooter (
+CheckBooterMmioWhitelist (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
   UINT32            ErrorCount;
   UINT32            Index;
   OC_BOOTER_CONFIG  *UserBooter;
-  OC_UEFI_CONFIG    *UserUefi;
   CONST CHAR8       *Comment;
-  CONST CHAR8       *Arch;
-  CONST CHAR8       *Identifier;
-  CONST CHAR8       *Driver;
-  CONST UINT8       *Find;
-  UINT32            FindSize;
-  CONST UINT8       *Replace;
-  UINT32            ReplaceSize;
-  CONST UINT8       *Mask;
-  UINT32            MaskSize;
-  CONST UINT8       *ReplaceMask;
-  UINT32            ReplaceMaskSize;
-  UINT8             MaxSlide;
   BOOLEAN           IsMmioWhitelistEnabled;
   BOOLEAN           ShouldEnableDevirtualiseMmio;
   BOOLEAN           IsDevirtualiseMmioEnabled;
-  BOOLEAN           IsAllowRelocationBlockEnabled;
-  BOOLEAN           IsProvideCustomSlideEnabled;
-  BOOLEAN           IsEnableSafeModeSlideEnabled;
-  BOOLEAN           IsDisableVariableWriteEnabled;
-  BOOLEAN           IsEnableWriteUnprotectorEnabled;
-  BOOLEAN           HasOpenRuntimeEfiDriver;
-  
-  DEBUG ((DEBUG_VERBOSE, "config loaded into Booter checker!\n"));
 
   ErrorCount                      = 0;
   UserBooter                      = &Config->Booter;
-  UserUefi                        = &Config->Uefi;
   IsMmioWhitelistEnabled          = FALSE;
   ShouldEnableDevirtualiseMmio    = FALSE;
   IsDevirtualiseMmioEnabled       = UserBooter->Quirks.DevirtualiseMmio;
-  IsAllowRelocationBlockEnabled   = UserBooter->Quirks.AllowRelocationBlock;
-  IsProvideCustomSlideEnabled     = UserBooter->Quirks.ProvideCustomSlide;
-  IsEnableSafeModeSlideEnabled    = UserBooter->Quirks.EnableSafeModeSlide;
-  IsDisableVariableWriteEnabled   = UserBooter->Quirks.DisableVariableWrite;
-  IsEnableWriteUnprotectorEnabled = UserBooter->Quirks.EnableWriteUnprotector;
-  HasOpenRuntimeEfiDriver         = FALSE;
-  MaxSlide                        = UserBooter->Quirks.ProvideMaxSlide;
-  
+
   for (Index = 0; Index < UserBooter->MmioWhitelist.Count; ++Index) {
     Comment                = OC_BLOB_GET (&UserBooter->MmioWhitelist.Values[Index]->Comment);
     IsMmioWhitelistEnabled = UserBooter->MmioWhitelist.Values[Index]->Enabled;
@@ -80,6 +52,37 @@ CheckBooter (
       ShouldEnableDevirtualiseMmio = TRUE;
     }
   }
+
+  if (ShouldEnableDevirtualiseMmio && !IsDevirtualiseMmioEnabled) {
+    DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
+}
+
+UINT32
+CheckBooterPatch (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_BOOTER_CONFIG  *UserBooter;
+  CONST CHAR8       *Comment;
+  CONST CHAR8       *Arch;
+  CONST CHAR8       *Identifier;
+  CONST UINT8       *Find;
+  UINT32            FindSize;
+  CONST UINT8       *Replace;
+  UINT32            ReplaceSize;
+  CONST UINT8       *Mask;
+  UINT32            MaskSize;
+  CONST UINT8       *ReplaceMask;
+  UINT32            ReplaceMaskSize;
+
+  ErrorCount        = 0;
+  UserBooter        = &Config->Booter;
 
   for (Index = 0; Index < UserBooter->Patch.Count; ++Index) {
     Comment         = OC_BLOB_GET (&UserBooter->Patch.Values[Index]->Comment);
@@ -128,6 +131,39 @@ CheckBooter (
       );
   }
 
+  return ErrorCount;
+}
+
+STATIC
+UINT32
+CheckBooterQuirks (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_BOOTER_CONFIG  *UserBooter;
+  OC_UEFI_CONFIG    *UserUefi;
+  CONST CHAR8       *Driver;
+  UINT8             MaxSlide;
+  BOOLEAN           IsAllowRelocationBlockEnabled;
+  BOOLEAN           IsProvideCustomSlideEnabled;
+  BOOLEAN           IsEnableSafeModeSlideEnabled;
+  BOOLEAN           IsDisableVariableWriteEnabled;
+  BOOLEAN           IsEnableWriteUnprotectorEnabled;
+  BOOLEAN           HasOpenRuntimeEfiDriver;
+
+  ErrorCount                      = 0;
+  UserBooter                      = &Config->Booter;
+  UserUefi                        = &Config->Uefi;
+  IsAllowRelocationBlockEnabled   = UserBooter->Quirks.AllowRelocationBlock;
+  IsProvideCustomSlideEnabled     = UserBooter->Quirks.ProvideCustomSlide;
+  IsEnableSafeModeSlideEnabled    = UserBooter->Quirks.EnableSafeModeSlide;
+  IsDisableVariableWriteEnabled   = UserBooter->Quirks.DisableVariableWrite;
+  IsEnableWriteUnprotectorEnabled = UserBooter->Quirks.EnableWriteUnprotector;
+  HasOpenRuntimeEfiDriver         = FALSE;
+  MaxSlide                        = UserBooter->Quirks.ProvideMaxSlide;
+
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
 
@@ -140,10 +176,6 @@ CheckBooter (
     }
   }
 
-  if (ShouldEnableDevirtualiseMmio && !IsDevirtualiseMmioEnabled) {
-    DEBUG ((DEBUG_WARN, "There are enabled entries under Booter->MmioWhitelist, but DevirtualiseMmio is not enabled!\n"));
-    ++ErrorCount;
-  }
   if (!HasOpenRuntimeEfiDriver) {
     if (IsProvideCustomSlideEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideCustomSlide is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
@@ -158,6 +190,7 @@ CheckBooter (
       ++ErrorCount;
     }
   }
+
   if (!IsProvideCustomSlideEnabled) {
     if (IsAllowRelocationBlockEnabled) {
       DEBUG ((DEBUG_WARN, "Booter->Quirks->AllowRelocationBlock is enabled, but ProvideCustomSlide is not enabled altogether!\n"));
@@ -171,6 +204,30 @@ CheckBooter (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
       ++ErrorCount;
     }
+  }
+
+  return ErrorCount;
+}
+
+UINT32
+CheckBooter (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32  ErrorCount;
+  UINTN   Index;
+  STATIC CONFIG_CHECK BooterCheckers[] = {
+    &CheckBooterMmioWhitelist,
+    &CheckBooterPatch,
+    &CheckBooterQuirks
+  };
+  
+  DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
+
+  ErrorCount  = 0;
+
+  for (Index = 0; Index < ARRAY_SIZE (BooterCheckers); ++Index) {
+    ErrorCount += BooterCheckers[Index] (Config);
   }
 
   return ReportError (__func__, ErrorCount);

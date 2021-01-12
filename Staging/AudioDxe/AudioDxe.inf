@@ -41,7 +41,9 @@
   DevicePathLib
   MemoryAllocationLib
   OcHdaDevicesLib
+  OcMp3Lib
   OcStringLib
+  OcWaveLib
   PcdLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
@@ -53,6 +55,7 @@
   gEfiHdaIoProtocolGuid               # PRODUCES
   gEfiHdaCodecInfoProtocolGuid        # PRODUCES
   gEfiAudioIoProtocolGuid             # PRODUCES
+  gEfiAudioDecodeProtocolGuid         # PRODUCES
   gVMwareHdaProtocolGuid              # SOMETIMES_CONSUMES
 
 [Sources]
@@ -69,5 +72,6 @@
   HdaController/HdaControllerHdaIo.c
   HdaController/HdaController.h
   HdaController/HdaController.c
+  AudioDecode.c
   AudioDxe.h
   AudioDxe.c

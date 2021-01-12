@@ -15,6 +15,7 @@ CpuBreakpoint (
   )
 {
   ASSERT (FALSE);
+
   while (TRUE);
 }
 
@@ -44,25 +45,60 @@ EnableInterrupts (
 
 UINT32
 AsmCpuid (
-  UINT32 Index,
-  UINT32 *Eax,
-  UINT32 *Ebx,
-  UINT32 *Ecx,
-  UINT32 *Edx
+  IN      UINT32                    Index,
+  OUT     UINT32                    *Eax,  OPTIONAL
+  OUT     UINT32                    *Ebx,  OPTIONAL
+  OUT     UINT32                    *Ecx,  OPTIONAL
+  OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-  UINT32 eax = 0, ebx = 0, ecx = 0, edx = 0;
+  #if defined(__i386__) || defined(__x86_64__)
+  UINT32  EaxVal;
+  UINT32  EbxVal;
+  UINT32  EcxVal;
+  UINT32  EdxVal;
 
-  asm ("cpuid\n"
-       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-       : "0" (Index));
+  EaxVal  = 0;
+  EbxVal  = 0;
+  EcxVal  = 0;
+  EdxVal  = 0;
 
-  if (Eax) *Eax = eax;
-  if (Ebx) *Ebx = ebx;
-  if (Ecx) *Ecx = ecx;
-  if (Edx) *Edx = edx;
+  asm (
+    "cpuid\n"
+    : "=a" (EaxVal), "=b" (EbxVal), "=c" (EcxVal), "=d" (EdxVal)
+    : "0" (Index)
+    );
+
+  if (Eax != NULL) {
+    *Eax = EaxVal;
+  }
+  if (Ebx != NULL) {
+    *Ebx = EbxVal;
+  }
+  if (Ecx != NULL) {
+    *Ecx = EcxVal;
+  }
+  if (Edx != NULL) {
+    *Edx = EdxVal;
+  }
 
   return Index;
+  #else
+  if (Eax != NULL) {
+    *Eax = 0;
+  }
+  if (Ebx != NULL) {
+    *Ebx = 0;
+  }
+  if (Ecx != NULL) {
+    *Ecx = 0;
+  }
+  if (Edx != NULL) {
+    *Edx = 0;
+  }
+
+  return 0;
+  #endif
 }
 
 UINT32
@@ -75,18 +111,54 @@ AsmCpuidEx (
   OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-  UINT32 eax = 0, ebx = 0, ecx = 0, edx = 0;
+  #if defined(__i386__) || defined(__x86_64__)
+  UINT32  EaxVal;
+  UINT32  EbxVal;
+  UINT32  EcxVal;
+  UINT32  EdxVal;
 
-  asm ("cpuid\n"
-       : "=a" (eax), "=b" (ebx), "=c" (ecx), "=d" (edx)
-       : "0" (Index), "2" (SubIndex));
+  EaxVal  = 0;
+  EbxVal  = 0;
+  EcxVal  = 0;
+  EdxVal  = 0;
 
-  if (Eax) *Eax = eax;
-  if (Ebx) *Ebx = ebx;
-  if (Ecx) *Ecx = ecx;
-  if (Edx) *Edx = edx;
+  asm (
+    "cpuid\n"
+    : "=a" (EaxVal), "=b" (EbxVal), "=c" (EcxVal), "=d" (EdxVal)
+    : "0"  (Index),
+    "2"    (SubIndex)
+    );
+
+  if (Eax != NULL) {
+    *Eax = EaxVal;
+  }
+  if (Ebx != NULL) {
+    *Ebx = EbxVal;
+  }
+  if (Ecx != NULL) {
+    *Ecx = EcxVal;
+  }
+  if (Edx != NULL) {
+    *Edx = EdxVal;
+  }
 
   return Index;
+  #else
+  if (Eax != NULL) {
+    *Eax = 0;
+  }
+  if (Ebx != NULL) {
+    *Ebx = 0;
+  }
+  if (Ecx != NULL) {
+    *Ecx = 0;
+  }
+  if (Edx != NULL) {
+    *Edx = 0;
+  }
+
+  return 0;
+  #endif
 }
 
 UINT32

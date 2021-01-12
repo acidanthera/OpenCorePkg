@@ -1,5 +1,13 @@
 OpenCore Changelog
 ==================
+#### v0.6.6
+- Added keyboard and pointer entry scroll support in OpenCanopy
+- Added background image support in OpenCanopy
+- Fixed selector boot option choice in OpenCanopy
+- Relaxed selector dimensions for OpenCanopy
+- Add `MaxBIOSVersion` option to `Generic`
+- Fix MLB verification feature in macrecovery
+
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
 - Updated underlying EDK II package to edk2-stable202011
@@ -14,6 +22,11 @@ OpenCore Changelog
 - Fixed macserial issues when processing 2021 year serials
 - Added advanced error checking in ocvalidate utility
 - Added `SetupDelay` to configure audio setup delay
+- Reworked LogoutHook.command to support older macOS
+- Implemented MP3 audio decoding for audio assistant support
+- Added support for `PickerVariant` for more theme variants
+- Added `OC_ATTR_HIDE_THEMED_ICONS` `PickerAttribute` for Time Machine
+- Fixed OpenUsbKb compatibility with certain keyboards
 
 #### v0.6.4
 - Added `BlacklistAppleUpdate` to fix macOS 11 broken update optout

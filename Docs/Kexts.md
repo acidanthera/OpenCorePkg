@@ -27,7 +27,7 @@ Kexts
 
 | Keyboard, trackpad and mouse | MinKernel (Min macOS) | MaxKernel (Max macOS) |
 |------------------------------|-----------------------|-----------------------|
-| [ApplePS2SmartTouchPad.kext](https://osxlatitude.com/forums/topic/1948-elan-focaltech-and-synaptics-smart-touchpad-driver-mac-os-x/) | — | — |
+| [BrightnessKeys.kext](https://github.com/acidanthera/BrightnessKeys) | — | — |
 | [GK701HIDDevice.kext](https://github.com/osy86/GK701HIDDevice) | — | — |
 | [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | 17.0.0 (10.13) | — |
 | [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse) | — | — |

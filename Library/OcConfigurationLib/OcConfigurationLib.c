@@ -398,6 +398,7 @@ mMiscConfigurationBootSchema[] = {
   OC_SCHEMA_INTEGER_IN ("PickerAttributes",    OC_GLOBAL_CONFIG, Misc.Boot.PickerAttributes),
   OC_SCHEMA_BOOLEAN_IN ("PickerAudioAssist",   OC_GLOBAL_CONFIG, Misc.Boot.PickerAudioAssist),
   OC_SCHEMA_STRING_IN  ("PickerMode",          OC_GLOBAL_CONFIG, Misc.Boot.PickerMode),
+  OC_SCHEMA_STRING_IN  ("PickerVariant",       OC_GLOBAL_CONFIG, Misc.Boot.PickerVariant),
   OC_SCHEMA_BOOLEAN_IN ("PollAppleHotKeys",    OC_GLOBAL_CONFIG, Misc.Boot.PollAppleHotKeys),
   OC_SCHEMA_BOOLEAN_IN ("ShowPicker",          OC_GLOBAL_CONFIG, Misc.Boot.ShowPicker),
   OC_SCHEMA_INTEGER_IN ("TakeoffDelay",        OC_GLOBAL_CONFIG, Misc.Boot.TakeoffDelay),
@@ -547,6 +548,7 @@ OC_SCHEMA
 mPlatformConfigurationGenericSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AdviseWindows",      OC_GLOBAL_CONFIG, PlatformInfo.Generic.AdviseWindows),
   OC_SCHEMA_STRING_IN  ("MLB",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Mlb),
+  OC_SCHEMA_BOOLEAN_IN ("MaxBIOSVersion",     OC_GLOBAL_CONFIG, PlatformInfo.Generic.MaxBIOSVersion),
   OC_SCHEMA_INTEGER_IN ("ProcessorType",      OC_GLOBAL_CONFIG, PlatformInfo.Generic.ProcessorType),
   OC_SCHEMA_DATAF_IN   ("ROM",                OC_GLOBAL_CONFIG, PlatformInfo.Generic.Rom),
   OC_SCHEMA_BOOLEAN_IN ("SpoofVendor",        OC_GLOBAL_CONFIG, PlatformInfo.Generic.SpoofVendor),

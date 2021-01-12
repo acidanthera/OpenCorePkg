@@ -12,10 +12,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <File.h>
-#include <GlobalVar.h>
-#include <BootServices.h>
-#include <Pcd.h>
+#include <UserFile.h>
+#include <UserGlobalVar.h>
+#include <UserBootServices.h>
+#include <UserPcd.h>
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -75,7 +75,7 @@ int ENTRY_POINT(int argc, char** argv) {
 
   uint32_t f;
   uint8_t *b;
-  if ((b = readFile(argc > 1 ? argv[1] : "Smbios.bin", &f)) == NULL) {
+  if ((b = UserReadFile(argc > 1 ? argv[1] : "Smbios.bin", &f)) == NULL) {
     printf("Read fail\n");
     return -1;
   }

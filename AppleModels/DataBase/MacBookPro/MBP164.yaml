@@ -90,6 +90,7 @@ AppleBoardCode:
 # Note, first year is used by macserial
 AppleModelYear:
   - 2020
+  - 2021
 MinimumOSVersion: "10.15.5"
 MaximumOSVersion: null
 AppleModelId: "J215"

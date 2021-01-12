@@ -17,6 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
+#include <Protocol/AudioDecode.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -57,52 +58,35 @@ STATIC OC_AUDIO_FILE  mOcAudioFiles[OcVoiceOverAudioFileMax - OcVoiceOverAudioFi
 // Reconsider it when we resolve lags with AudioDxe.
 //
 STATIC BOOLEAN        mEnableAudioCaching = FALSE;
+STATIC EFI_AUDIO_DECODE_PROTOCOL  *mAudioDecodeProtocol = NULL;
 
 STATIC
-EFI_STATUS
-EFIAPI
-OcAudioAcquireFile (
-  IN  VOID                            *Context,
+CONST CHAR8 *
+OcAudioGetFilePath (
   IN  UINT32                          File,
-  IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
-  OUT UINT8                           **Buffer,
-  OUT UINT32                          *BufferSize
+  OUT CHAR8                           *TmpPath,
+  OUT UINT32                          TmpPathSize,
+  OUT CONST CHAR8                     **BaseType,
+  OUT BOOLEAN                         *Localised
   )
 {
-  EFI_STATUS          Status;
-  CHAR8               IndexPath[8];
-  CHAR16              FilePath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_STORAGE_CONTEXT  *Storage;
-  CONST CHAR8         *BaseType;
-  CONST CHAR8         *BasePath;
-  BOOLEAN             Localised;
-  OC_AUDIO_FILE       *CacheFile;
+  EFI_STATUS    Status;
+  CONST CHAR8   *BasePath;
 
-  Storage   = (OC_STORAGE_CONTEXT *) Context;
-  Localised = TRUE;
-  CacheFile = NULL;
+  *Localised = TRUE;
 
   if (File >= OcVoiceOverAudioFileBase && File < OcVoiceOverAudioFileMax) {
-    if (mEnableAudioCaching) {
-      CacheFile = &mOcAudioFiles[File - OcVoiceOverAudioFileBase];
-      if (CacheFile->Buffer != NULL) {
-        *Buffer = CacheFile->Buffer;
-        *BufferSize = CacheFile->Size;
-        return EFI_SUCCESS;
-      }
-    }
-
-    BaseType  = "OCEFIAudio";
+    *BaseType  = "OCEFIAudio";
     if (File > OcVoiceOverAudioFileIndexBase && File <= OcVoiceOverAudioFileIndexMax) {
       Status = OcAsciiSafeSPrint (
-        IndexPath,
-        sizeof (IndexPath),
+        TmpPath,
+        TmpPathSize,
         "%a%c",
         File >= OcVoiceOverAudioFileIndexAlphabetical ? "Letter" : "",
         "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ"[File - OcVoiceOverAudioFileIndexBase]
         );
       ASSERT_EFI_ERROR (Status);
-      BasePath = IndexPath;
+      BasePath = TmpPath;
     } else {
       switch (File) {
         case OcVoiceOverAudioFileAbortTimeout:
@@ -188,17 +172,8 @@ OcAudioAcquireFile (
           break;
       }
     }
-  } else if (File < AppleVoiceOverAudioFileMax) {
-    if (mEnableAudioCaching) {
-      CacheFile = &mAppleAudioFiles[File];
-      if (CacheFile->Buffer != NULL) {
-        *Buffer = CacheFile->Buffer;
-        *BufferSize = CacheFile->Size;
-        return EFI_SUCCESS;
-      }
-    }
-
-    BaseType  = "AXEFIAudio";
+  } else {
+    *BaseType  = "AXEFIAudio";
     switch (File) {
       case AppleVoiceOverAudioFileVoiceOverOn:
         BasePath = "VoiceOverOn";
@@ -222,82 +197,210 @@ OcAudioAcquireFile (
         BasePath = "AccountLocked";
         break;
       case AppleVoiceOverAudioFileVoiceOverBoot:
-        BaseType = "OCEFIAudio";
-        BasePath = "VoiceOver_Boot";
-        Localised = FALSE;
+        *BaseType  = "OCEFIAudio";
+        BasePath   = "VoiceOver_Boot";
+        *Localised = FALSE;
         break;
       case AppleVoiceOverAudioFileVoiceOverBoot2:
         BasePath = "VoiceOver_Boot";
-        Localised = FALSE;
+        *Localised = FALSE;
         break;
       case AppleVoiceOverAudioFileClick:
         BasePath = "Click";
-        Localised = FALSE;
+        *Localised = FALSE;
         break;
       case AppleVoiceOverAudioFileBeep:
         BasePath = "Beep";
-        Localised = FALSE;
+        *Localised = FALSE;
         break;
       default:
         BasePath = NULL;
         break;
     }
-  } else {
-    BasePath = NULL;
   }
+
+  return BasePath;
+}
+
+STATIC
+VOID *
+OcAudioGetFileContents (
+  IN  OC_STORAGE_CONTEXT              *Storage,
+  IN  CONST CHAR8                     *BaseType,
+  IN  CONST CHAR8                     *BasePath,
+  IN  CONST CHAR8                     *Extension,
+  IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
+  IN  BOOLEAN                         Localised,
+  OUT UINT32                          *BufferSize
+  )
+{
+  EFI_STATUS  Status;
+  CHAR16      FilePath[OC_STORAGE_SAFE_PATH_MAX];
+  VOID        *Buffer;
+
+  if (Localised) {
+    Status = OcUnicodeSafeSPrint (
+      FilePath,
+      sizeof (FilePath),
+      OPEN_CORE_AUDIO_PATH "%a_%a_%a.%a",
+      BaseType,
+      OcLanguageCodeToString (LanguageCode),
+      BasePath,
+      Extension
+      );
+    ASSERT_EFI_ERROR (Status);
+
+    if (!OcStorageExistsFileUnicode (Storage, FilePath)) {
+      Status = OcUnicodeSafeSPrint (
+        FilePath,
+        sizeof (FilePath),
+        OPEN_CORE_AUDIO_PATH "%a_%a_%a.%a",
+        BaseType,
+        OcLanguageCodeToString (AppleVoiceOverLanguageEn),
+        BasePath,
+        Extension
+        );
+      ASSERT_EFI_ERROR (Status);
+
+      if (!OcStorageExistsFileUnicode (Storage, FilePath)) {
+        return NULL;
+      }
+    }
+  } else {
+    Status = OcUnicodeSafeSPrint (
+      FilePath,
+      sizeof (FilePath),
+      OPEN_CORE_AUDIO_PATH "%a_%a.%a",
+      BaseType,
+      BasePath,
+      Extension
+      );
+    ASSERT_EFI_ERROR (Status);
+
+    if (!OcStorageExistsFileUnicode (Storage, FilePath)) {
+      return NULL;
+    }
+  }
+
+  Buffer = OcStorageReadFileUnicode (
+    Storage,
+    FilePath,
+    BufferSize
+    );
+  if (Buffer == NULL) {
+    return NULL;
+  }
+
+  return Buffer;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcAudioAcquireFile (
+  IN  VOID                            *Context,
+  IN  UINT32                          File,
+  IN  APPLE_VOICE_OVER_LANGUAGE_CODE  LanguageCode,
+  OUT UINT8                           **Buffer,
+  OUT UINT32                          *BufferSize,
+  OUT EFI_AUDIO_IO_PROTOCOL_FREQ      *Frequency,
+  OUT EFI_AUDIO_IO_PROTOCOL_BITS      *Bits,
+  OUT UINT8                           *Channels
+  )
+{
+  EFI_STATUS          Status;
+  CHAR8               TmpPath[8];
+  OC_STORAGE_CONTEXT  *Storage;
+  CONST CHAR8         *BaseType;
+  CONST CHAR8         *BasePath;
+  UINT8               *FileBuffer;
+  UINT32              FileBufferSize;
+  BOOLEAN             Localised;
+  OC_AUDIO_FILE       *CacheFile;
+
+  Storage   = (OC_STORAGE_CONTEXT *) Context;
+  CacheFile = NULL;
+
+  if (File >= OcVoiceOverAudioFileBase && File < OcVoiceOverAudioFileMax) {
+    if (mEnableAudioCaching) {
+      CacheFile = &mOcAudioFiles[File - OcVoiceOverAudioFileBase];
+      if (CacheFile->Buffer != NULL) {
+        *Buffer = CacheFile->Buffer;
+        *BufferSize = CacheFile->Size;
+        return EFI_SUCCESS;
+      }
+    }
+  } else if (File < AppleVoiceOverAudioFileMax) {
+    if (mEnableAudioCaching) {
+      CacheFile = &mAppleAudioFiles[File];
+      if (CacheFile->Buffer != NULL) {
+        *Buffer = CacheFile->Buffer;
+        *BufferSize = CacheFile->Size;
+        return EFI_SUCCESS;
+      }
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: Invalid wave index %d\n", File));
+    return EFI_NOT_FOUND;
+  }
+
+  BasePath = OcAudioGetFilePath (
+    File,
+    TmpPath,
+    sizeof (TmpPath),
+    &BaseType,
+    &Localised
+    );
 
   if (BasePath == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Unknown Wave %d\n", File));
     return EFI_NOT_FOUND;
   }
 
-  if (Localised) {
-    Status = OcUnicodeSafeSPrint (
-      FilePath,
-      sizeof (FilePath),
-      OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
+  FileBuffer = OcAudioGetFileContents (
+    Storage,
+    BaseType,
+    BasePath,
+    "mp3",
+    LanguageCode,
+    Localised,
+    &FileBufferSize
+    );
+  if (FileBuffer == NULL) {
+    FileBuffer = OcAudioGetFileContents (
+      Storage,
       BaseType,
-      OcLanguageCodeToString (LanguageCode),
-      BasePath
+      BasePath,
+      "wav",
+      LanguageCode,
+      Localised,
+      &FileBufferSize
       );
-    ASSERT_EFI_ERROR (Status);
-
-    if (!OcStorageExistsFileUnicode (Context, FilePath)) {
-      Status = OcUnicodeSafeSPrint (
-        FilePath,
-        sizeof (FilePath),
-        OPEN_CORE_AUDIO_PATH "%a_%a_%a.wav",
-        BaseType,
-        OcLanguageCodeToString (AppleVoiceOverLanguageEn),
-        BasePath
-        );
-      ASSERT_EFI_ERROR (Status);
-    }
-  } else {
-    Status = OcUnicodeSafeSPrint (
-      FilePath,
-      sizeof (FilePath),
-      OPEN_CORE_AUDIO_PATH "%a_%a.wav",
-      BaseType,
-      BasePath
-      );
-    ASSERT_EFI_ERROR (Status);
   }
 
-  DEBUG ((DEBUG_INFO, "OC: Wave %s was requested\n", FilePath));
-
-  *Buffer = OcStorageReadFileUnicode (
-    Storage,
-    FilePath,
-    BufferSize
-    );
-  if (*Buffer == NULL) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: Wave %s cannot be found!\n",
-      FilePath
-      ));
+  if (FileBuffer == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Wave %a cannot be found!\n", BasePath));
     return EFI_NOT_FOUND;
+  }
+
+  ASSERT (mAudioDecodeProtocol != NULL);
+
+  Status = mAudioDecodeProtocol->DecodeAny (
+    mAudioDecodeProtocol,
+    FileBuffer,
+    FileBufferSize,
+    (VOID **) Buffer,
+    BufferSize,
+    Frequency,
+    Bits,
+    Channels
+    );
+
+  FreePool (FileBuffer);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Wave %a cannot be decoded - %r!\n", BasePath, Status));
+    return EFI_UNSUPPORTED;
   }
 
   if (CacheFile != NULL) {
@@ -382,6 +485,16 @@ OcLoadUefiAudioSupport (
 
   if (!Config->Uefi.Audio.AudioSupport) {
     DEBUG ((DEBUG_INFO, "OC: Requested not to use audio\n"));
+    return;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiAudioDecodeProtocolGuid,
+    NULL,
+    (VOID **) &mAudioDecodeProtocol
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Cannot locate audio decoder protocol - %r\n", Status));
     return;
   }
 

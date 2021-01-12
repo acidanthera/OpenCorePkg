@@ -116,7 +116,7 @@ AppleModelCode:
   - "GRL"
 # Note, first board code is used by macserial
 AppleBoardCode:
-  - "DD7J"
+  - "000"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2010

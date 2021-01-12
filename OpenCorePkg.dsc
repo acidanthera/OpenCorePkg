@@ -93,6 +93,7 @@
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
+  OcMp3Lib|OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OcOSInfoLib|OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
   OcPngLib|OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OcRngLib|OpenCorePkg/Library/OcRngLib/OcRngLib.inf
@@ -107,6 +108,7 @@
   OcUnicodeCollationEngGenericLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
   OcUnicodeCollationEngLocalLib|OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OcVirtualFsLib|OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
+  OcWaveLib|OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
@@ -212,6 +214,7 @@
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
+  OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
@@ -225,6 +228,7 @@
   OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngGenericLib.inf
   OpenCorePkg/Library/OcUnicodeCollationEngLib/OcUnicodeCollationEngLocalLib.inf
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
+  OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf

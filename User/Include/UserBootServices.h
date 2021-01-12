@@ -14,11 +14,9 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/DebugLib.h>
 
-#include <stdio.h>
-
-extern EFI_BOOT_SERVICES mBootServices;
-extern EFI_SYSTEM_TABLE mSystemTable;
-extern EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL mConOut;
+extern EFI_BOOT_SERVICES                mBootServices;
+extern EFI_SYSTEM_TABLE                 mSystemTable;
+extern EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  mConOut;
 
 EFI_TPL
 EFIAPI
@@ -27,13 +25,15 @@ DummyRaiseTPL (
   );
 
 EFI_STATUS
+EFIAPI
 DummyLocateProtocol (
-  EFI_GUID        *ProtocolGuid,
-  VOID            *Registration,
-  VOID            **Interface
+  IN  EFI_GUID  *Protocol,
+  IN  VOID      *Registration, OPTIONAL
+  OUT VOID      **Interface
   );
 
 EFI_STATUS
+EFIAPI
 DummyAllocatePages (
   IN     EFI_ALLOCATE_TYPE            Type,
   IN     EFI_MEMORY_TYPE              MemoryType,
@@ -44,15 +44,15 @@ DummyAllocatePages (
 EFI_STATUS
 EFIAPI
 DummyInstallConfigurationTable (
-  IN EFI_GUID *Guid,
-  IN VOID     *Table
+  IN EFI_GUID                 *Guid,
+  IN VOID                     *Table
   );
 
 EFI_STATUS
 EFIAPI
 NullTextOutputString (
-  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL *This,
-  IN CHAR16                          *String
+  IN EFI_SIMPLE_TEXT_OUTPUT_PROTOCOL  *This,
+  IN CHAR16                           *String
   );
 
 #endif // OC_USER_BOOT_SERVICES_H

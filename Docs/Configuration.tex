@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.6.5)
+       Reference Manual (0.6.6)
 
        \vspace{0.2in}
 
@@ -106,7 +106,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2020 vit9696
+       Copyright \textcopyright 2018-2021 vit9696
 
    \end{center}
 \end{titlepage}
@@ -3040,9 +3040,9 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. May give less detail for the actual
     boot entry.
-  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_USE\_ALTERNATE\_ICONS}, changes used icon set to
-    an alternate one if it is supported. For example, this could make a use of old-style icons
-    with a custom background colour.
+  \item \texttt{0x0008} --- \texttt{OC\_ATTR\_HIDE\_THEMED\_ICONS}, prefers builtin icons
+    for certain icon categories to match the theme style. For example, this could force
+    displaying the builtin Time Machine icon. Requires \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}.
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enable pointer control
   in the picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
@@ -3178,6 +3178,23 @@ entry choice will update till next manual reconfiguration.
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple BootPicker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
+
+\item
+  \texttt{PickerVariant}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Choose specific icon set used for boot management.
+  
+  The following values are supported:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Automatically select one set of icons based on \texttt{DefaultBackground}
+  colour.
+  \item \texttt{Default} --- Normal icon set (without prefix).
+  \item \texttt{Old} --- Vintage icon set (\texttt{Old} filename prefix).
+  \item \texttt{Modern} --- Nouveau icon set (\texttt{Modern} filename prefix).
+  \item Other value --- Custom icon set if supported by the resources.
+  \end{itemize}
 
 \end{enumerate}
 
@@ -4126,7 +4143,7 @@ A continuously updated variable list can be found in a corresponding document:
 \hyperref[platforminfonvram]{PlatformNVRAM} or
 \hyperref[platforminfogeneric]{Generic} subsections of
 \hyperref[platforminfo]{PlatformInfo} section.
-Using \texttt{PlatformInfo} is the recommend way of setting these variables.
+Using \texttt{PlatformInfo} is the recommended way of setting these variables.
 
 The following variables are mandatory for macOS functioning:
 
@@ -4135,7 +4152,7 @@ The following variables are mandatory for macOS functioning:
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeatures}
   \break
-  32-bit \texttt{FirmwareFeatures}. Present on all Macs to avoid extra parsing of SMBIOS tables
+  32-bit \texttt{FirmwareFeatures}. Present on all Macs to avoid extra parsing of SMBIOS tables.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeaturesMask}
   \break
@@ -4169,7 +4186,7 @@ improvements:
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeatures}
   \break
   Combined \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}. Present on
-  newer Macs to avoid extra parsing of SMBIOS tables
+  newer Macs to avoid extra parsing of SMBIOS tables.
 \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeaturesMask}
   \break
@@ -4245,15 +4262,19 @@ troubleshooting:
   \item \texttt{cpus=VALUE} (maximum number of CPUs used)
   \item \texttt{debug=VALUE} (debug mask)
   \item \texttt{io=VALUE} (\texttt{IOKit} debug mask)
+  \item \texttt{ioaccel\_debug=VALUE} (\texttt{IOAccelerator} debug mask)
   \item \texttt{keepsyms=1} (show panic log debug symbols)
   \item \texttt{kextlog=VALUE} (kernel extension loading debug mask)
   \item \texttt{nvram-log=1} (enables AppleEFINVRAM logs)
   \item \texttt{nv\_disable=1} (disables NVIDIA GPU acceleration)
   \item \texttt{nvda\_drv=1} (legacy way to enable NVIDIA web driver, removed in 10.12)
   \item \texttt{npci=0x2000} (\href{https://www.insanelymac.com/forum/topic/260539-1068-officially-released/?do=findComment&comment=1707972}{legacy}, disables \texttt{kIOPCIConfiguratorPFM64})
-  \item \texttt{lapic\_dont\_panic=1}
+  \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
+  \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
+  \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
   \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
+  \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
   \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
   \item \texttt{-nehalem\_error\_disable}
   \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
@@ -4607,6 +4628,14 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
+  \texttt{MaxBIOSVersion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999.999.999}, recommended for legacy 
+  Macs when using \texttt{Automatic} PlatformInfo to avoid BIOS updates in unofficially supported macOS 
+  versions.
+
+\item
   \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -4629,7 +4658,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
+  \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
@@ -5557,20 +5586,26 @@ directory. Full list of supported icons (in \texttt{.icns} format) is provided b
 icons will use the closest available icon. External entries will use \texttt{Ext}-prefixed
 icon if available (e.g. \texttt{OldExtHardDrive.icns}).
 
+\emph{Note}: In the following all dimensions are normative for the 1x scaling level and shall be
+scaled accordingly for other levels.
+
 \begin{itemize}
 \tightlist
-  \item \texttt{Cursor} --- Mouse cursor (mandatory).
-  \item \texttt{Selected} --- Selected item (mandatory).
-  \item \texttt{Selector} --- Selecting item (mandatory).
-  \item \texttt{HardDrive} --- Generic OS (mandatory).
-  \item \texttt{Apple} --- Apple OS.
-  \item \texttt{AppleRecv} --- Apple Recovery OS.
-  \item \texttt{AppleTM} --- Apple Time Machine.
-  \item \texttt{Windows} --- Windows.
-  \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
-  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
-  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
-  \item \texttt{Tool} --- Any other tool.
+  \item \texttt{Cursor} --- Mouse cursor (mandatory, up to 144x144).
+  \item \texttt{Selected} --- Selected item (mandatory, 144x144).
+  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40).
+  \item \texttt{Left} --- Scrolling left (mandatory, 40x40).
+  \item \texttt{Right} --- Scrolling right (mandatory, 40x40).
+  \item \texttt{HardDrive} --- Generic OS (mandatory, 128x128).
+  \item \texttt{Background} --- Centred background image.
+  \item \texttt{Apple} --- Apple OS (128x128).
+  \item \texttt{AppleRecv} --- Apple Recovery OS (128x128).
+  \item \texttt{AppleTM} --- Apple Time Machine (128x128).
+  \item \texttt{Windows} --- Windows (128x128).
+  \item \texttt{Other} --- Custom entry (see \texttt{Entries}, 128x128).
+  \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool (128x128).
+  \item \texttt{Shell} --- Entry with UEFI Shell name for e.g. \texttt{OpenShell} (128x128).
+  \item \texttt{Tool} --- Any other tool (128x128).
 \end{itemize}
 
 Predefined labels are put to \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Label}
@@ -5590,9 +5625,10 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
+\emph{Note}: All labels must have a height of exactly 12 px. There is no limit for their width.
+
 Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}. Please refer to sample data for the details about the dimensions.
-Font is Helvetica 12 pt times scale factor.
+\texttt{icnspack}. Font is Helvetica 12 pt times scale factor.
 
 Font format corresponds to \href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}.
 While there are many utilities to generate font files, currently it is recommended to use
@@ -5638,14 +5674,15 @@ functioning. Feature highlights:
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
-  directory. Currently the only supported audio file format is WAVE PCM. While it is
+  directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
   support 16-bit signed stereo audio at 44100 or 48000 Hz.
 
   Audio file path is determined by audio type, audio localisation, and audio path. Each filename
-  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].wav}. For unlocalised
-  files filename does not include the language code and looks as follows:
-  \texttt{[audio type]\_[audio path].wav}.
+  looks as follows: \texttt{[audio type]\_[audio localisation]\_[audio path].[audio ext]}.
+  For unlocalised files filename does not include the language code and looks as follows:
+  \texttt{[audio type]\_[audio path].[audio ext]}. Audio extension can either be \texttt{mp3}
+  or \texttt{wav}.
 
   \begin{itemize}
   \tightlist
@@ -5659,7 +5696,7 @@ functioning. Feature highlights:
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/Protocol/AppleVoiceOver.h}{\texttt{APPLE\_VOICE\_OVER\_AUDIO\_FILE} definition}.
   For OpenCore audio paths refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Protocol/OcAudio.h}{\texttt{OC\_VOICE\_OVER\_AUDIO\_FILE} definition}.
-  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.wav}.
+  The only exception is OpenCore boot chime file, which is \texttt{OCEFIAudio\_VoiceOver\_Boot.mp3}.
   \end{itemize}
 
   Audio localisation is determined separately for macOS bootloader and OpenCore.

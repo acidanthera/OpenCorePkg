@@ -63,7 +63,7 @@ SmcPlatform:
   - 0x00
   - 0x00
 SmcEPCI: 0x07C002
-OEMStrings: ""
+OEMStrings: |-
 Specifications:
   CPUCodename:
     - "Bloomfield"

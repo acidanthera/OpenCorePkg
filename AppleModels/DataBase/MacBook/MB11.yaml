@@ -63,7 +63,7 @@ SmcPlatform:
   - 0x00
 # FIXME: check
 SmcEPCI: 0x71001
-OEMStrings: ""
+OEMStrings: |-
 Specifications:
   CPUCodename:
     - "Yonah"

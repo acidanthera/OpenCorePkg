@@ -13,11 +13,14 @@ Utilities/EfiResTool/EfiResTool
 Utilities/macserial/macserial
 Utilities/icnspack/icnspack
 Utilities/ocvalidate/ocvalidate
+Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
 Utilities/TestBmf/Bmf
 Utilities/TestDiskImage/DiskImage
 Utilities/TestHelloWorld/HelloWorld
 Utilities/TestImg4/Img4
+Utilities/TestMp3/Mp3
+Utilities/TestMp3/test.bin
 Utilities/TestKernelCollection2/KernelCollection2
 Utilities/TestKextInject/KextInject
 Utilities/TestKextInject/Result.xml

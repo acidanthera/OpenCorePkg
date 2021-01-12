@@ -57,8 +57,8 @@ gHdaCodecDriverBinding = {
 EFI_STATUS
 EFIAPI
 AudioDxeInit(
-  IN EFI_HANDLE ImageHandle,
-  IN EFI_SYSTEM_TABLE *SystemTable
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_STATUS  Status;
@@ -91,8 +91,20 @@ AudioDxeInit(
     &gHdaCodecComponentName2
     );
 
-  ASSERT_EFI_ERROR(Status);
-  if (EFI_ERROR(Status)) {
+  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &ImageHandle,
+    &gEfiAudioDecodeProtocolGuid,
+    &gEfiAudioDecodeProtocol,
+    NULL
+    );
+
+  ASSERT_EFI_ERROR (Status);
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 

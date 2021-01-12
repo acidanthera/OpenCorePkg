@@ -174,7 +174,7 @@ GuiObjDrawDelegate (
   IN     UINT32                  OffsetY,
   IN     UINT32                  Width,
   IN     UINT32                  Height,
-  IN     BOOLEAN                 ParentRedrawn
+  IN     BOOLEAN                 RequestDraw
   );
 
 GUI_OBJ *
@@ -191,8 +191,8 @@ GuiObjDelegatePtrEvent (
 
 BOOLEAN
 GuiClipChildBounds (
-  IN     INT64   ObjectOffset,
-  IN     UINT32  ObjectLength,
+  IN     INT64   ChildOffset,
+  IN     UINT32  ChildLength,
   IN OUT UINT32  *ReqOffset,
   IN OUT UINT32  *ReqLength
   );
@@ -310,6 +310,14 @@ UINT32
 GuiGetInterpolatedValue (
   IN CONST GUI_INTERPOLATION  *Interpol,
   IN       UINT64             CurrentTime
+  );
+
+VOID
+GuiGetBaseCoords (
+  IN  GUI_OBJ              *This,
+  IN  GUI_DRAWING_CONTEXT  *DrawContext,
+  OUT INT64                *BaseX,
+  OUT INT64                *BaseY
   );
 
 #endif // OPEN_CANOPY_H

@@ -98,11 +98,11 @@ GuiClipChildBounds (
   ASSERT (ReqOffset != NULL);
   ASSERT (ReqLength != NULL);
 
-  if (ChildLength == 0) {
-    return FALSE;
-  }
-
   if (ChildOffset >= 0) {
+    if (ChildLength == 0) {
+      return FALSE;
+    }
+
     PosChildOffset = (UINT32)ChildOffset;
   } else {
     if ((INT64)ChildLength - (-ChildOffset) <= 0) {
@@ -112,6 +112,8 @@ GuiClipChildBounds (
     PosChildOffset = 0;
     ChildLength    = (UINT32)(ChildLength - (-ChildOffset));
   }
+
+  ASSERT (ChildLength > 0);
 
   NewOffset = *ReqOffset;
   NewLength = *ReqLength;
@@ -187,6 +189,14 @@ GuiObjDrawDelegate (
   ASSERT (This->Width  > OffsetX);
   ASSERT (This->Height > OffsetY);
   ASSERT (DrawContext != NULL);
+
+  if (Width > This->Width - OffsetX) {
+    Width = This->Width - OffsetX;
+  }
+
+  if (Height > This->Height - OffsetY) {
+    Height = This->Height - OffsetY;
+  }
 
   for (
     ChildEntry = GetPreviousNode (&This->Children, &This->Children);
@@ -637,6 +647,8 @@ GuiDrawScreen (
 {
   UINT32 PosX;
   UINT32 PosY;
+  INT64  EffWidth;
+  INT64  EffHeight;
 
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
@@ -665,15 +677,10 @@ GuiDrawScreen (
     PosY  = 0;
   }
 
-  if (PosX >= DrawContext->Screen->Width
-   || PosY >= DrawContext->Screen->Height) {
-    return;
-  }
+  EffWidth  = MIN (Width,  (INT64) DrawContext->Screen->Width  - PosX);
+  EffHeight = MIN (Height, (INT64) DrawContext->Screen->Height - PosY);
 
-  Width  = MIN (Width,  DrawContext->Screen->Width  - PosX);
-  Height = MIN (Height, DrawContext->Screen->Height - PosY);
-
-  if (Width == 0 || Height == 0) {
+  if (EffWidth <= 0 || EffHeight <= 0) {
     return;
   }
 
@@ -1273,6 +1280,13 @@ GuiDrawLoop (
     //
     if (TimeOutSeconds > 0
       && GetTimeInNanoSecond (NewLastTsc - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
+      if (DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
+        DrawContext->GuiContext->PickerContext->PlayAudioFile (
+          DrawContext->GuiContext->PickerContext,
+          OcVoiceOverAudioFileTimeout,
+          FALSE
+          );
+      }
       DrawContext->GuiContext->ReadyToBoot = TRUE;
       break;
     }

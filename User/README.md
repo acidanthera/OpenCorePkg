@@ -37,6 +37,7 @@ Additional variables are supported to adjust the compilation process.
 - `CC=cc` — build with `cc` compiler (e.g. `i686-w64-mingw32-gcc` for Windows).
 - `DIST=Target` — build for target `Target` (e.g. `Darwin`, `Linux`, `Windows`).
 - `STRIP=strip` — build with `strip` stripping tool (e.g. `i686-w64-mingw32-strip` for Windows).
+- `OC_PATH` - path to OpenCorePkg for out-of-tree utilities (defaults to `../..`).
 - `UDK_ARCH=Ia32` — build with 32-bit UDK architecture (defaults to `X64`).
 - `UDK_PATH=/path/to/UDK` — build with custom UDK path (defaults to `$PACKAGES_PATH`).
 - `WERROR=1` — treat compiler warnings as errors.
@@ -70,6 +71,7 @@ Most UDK variables are available due to including the original headers.
 - To distinguish target platform `MDE_CPU_*` variables can be used.
   For example, `MDE_CPU_IA32` for 32-bit Intel and `MDE_CPU_X64` for 64-bit Intel.
 - To distinguish from normal UEFI compilation use `EFIUSER` variable.
+- To detect debug build use `EFIUSER_DEBUG` variable.
 - To detect sanitizing status use `SANITIZE_TEST`.
 - To detect fuzzing status use `FUZZING_TEST`.
 - Use `ENTRY_POINT` variable for `main` to automatically disable it for fuzzing.

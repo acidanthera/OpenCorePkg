@@ -13,21 +13,9 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_USER_UTILITIES_OCVALIDATE_VALIDATE_KERNEL_H
-#define OC_USER_UTILITIES_OCVALIDATE_VALIDATE_KERNEL_H
+#include "KextInfo.h"
 
-#define INDEX_KEXT_LILU  0U
-
-typedef struct KEXT_PRECEDENCE_ {
-  CONST CHAR8  *Child;
-  CONST CHAR8  *Parent;
-} KEXT_PRECEDENCE;
-
-typedef struct KEXT_INFO_ {
-  CONST CHAR8  *KextBundlePath;
-  CONST CHAR8  *KextExecutablePath;
-  CONST CHAR8  *KextPlistPath;
-} KEXT_INFO;
+#include <Library/DebugLib.h>
 
 KEXT_PRECEDENCE mKextPrecedence[] = {
   { "VirtualSMC.kext",                                                  "Lilu.kext" },
@@ -59,6 +47,9 @@ KEXT_INFO mKextInfo[] = {
   // NOTE: Index of Lilu should always be 0. Please add entries after this if necessary.
   //
   { "Lilu.kext",                                                            "Contents/MacOS/Lilu",                "Contents/Info.plist" },
+  //
+  // NOTE: Index of VirtualSMC should always be 1. Please add entries after this if necessary.
+  //
   { "VirtualSMC.kext",                                                      "Contents/MacOS/VirtualSMC",          "Contents/Info.plist" },
   { "WhateverGreen.kext",                                                   "Contents/MacOS/WhateverGreen",       "Contents/Info.plist" },
   { "SMCBatteryManager.kext",                                               "Contents/MacOS/SMCBatteryManager",   "Contents/Info.plist" },
@@ -99,4 +90,19 @@ KEXT_INFO mKextInfo[] = {
 };
 UINTN mKextInfoSize = ARRAY_SIZE (mKextInfo);
 
-#endif // OC_USER_UTILITIES_OCVALIDATE_VALIDATE_KERNEL_H
+VOID
+ValidateKextInfo (
+  VOID
+  )
+{
+  //
+  // Ensure Lilu and VirtualSMC to be always placed where it is supposed to be.
+  // 
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextBundlePath, "Lilu.kext") == 0);
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextExecutablePath, "Contents/MacOS/Lilu") == 0);
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_LILU].KextPlistPath, "Contents/Info.plist") == 0);
+
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_VSMC].KextBundlePath, "VirtualSMC.kext") == 0);
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_VSMC].KextExecutablePath, "Contents/MacOS/VirtualSMC") == 0);
+  ASSERT (AsciiStrCmp (mKextInfo[INDEX_KEXT_VSMC].KextPlistPath, "Contents/Info.plist") == 0);
+}

@@ -1,6 +1,6 @@
 /** @file
   Copyright (C) 2018, John Davis. All rights reserved.
-  Copyright (C) 2020, vit9696. All rights reserved.
+  Copyright (C) 2020-2021, vit9696. All rights reserved.
 
   All rights reserved.
 
@@ -13,32 +13,23 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <Uefi.h>
+
 #include <IndustryStandard/Riff.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcAudioLib.h>
-#include <Library/OcDevicePathLib.h>
 #include <Library/OcGuardLib.h>
-#include <Library/OcMiscLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-
-#include <Protocol/AppleHda.h>
-#include <Protocol/AppleBeepGen.h>
-#include <Protocol/AppleVoiceOver.h>
-#include <Protocol/HdaIo.h>
-
-#include "OcAudioInternal.h"
+#include <Library/OcWaveLib.h>
 
 EFI_STATUS
-InternalGetRawData (
+OcDecodeWave (
   IN  UINT8                          *Buffer,
   IN  UINTN                          BufferSize,
   OUT UINT8                          **RawBuffer,
-  OUT UINTN                          *RawBufferSize,
+  OUT UINT32                         *RawBufferSize,
   OUT EFI_AUDIO_IO_PROTOCOL_FREQ     *Frequency,
   OUT EFI_AUDIO_IO_PROTOCOL_BITS     *Bits,
   OUT UINT8                          *Channels

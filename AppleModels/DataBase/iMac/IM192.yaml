@@ -155,6 +155,7 @@ AppleBoardCode:
 AppleModelYear:
   - 2019
   - 2020
+  - 2021
 CloverSerialNumber: "C02Y9HACJWDW"
 MinimumOSVersion: "10.14.4"
 MaximumOSVersion: null

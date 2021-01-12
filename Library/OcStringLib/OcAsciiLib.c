@@ -355,3 +355,42 @@ OcAsciiStrrChr (
 
   return Save;
 }
+
+BOOLEAN
+OcAsciiStringNPrintable (
+  IN  CONST CHAR8  *String,
+  IN  UINTN        Number
+  )
+{
+  UINTN  Index;
+
+  for (Index = 0; Index < Number; ++Index) {
+    //
+    // Terminate search if non-printable character is found.
+    // The next IFs determine the return value.
+    //
+    if (!IsAsciiPrint (String[Index])) {
+      break;
+    }
+  }
+
+  //
+  // If the loop above can be terminated without errors, Index should equal to ValueSize.
+  // And this is all good.
+  //
+  if (Index == Number) {
+    return TRUE;
+  }
+
+  //
+  // If the last character is not ASCII-printable but is '\0', then it is fine.
+  //
+  if (Index == Number - 1) {
+    return String[Index] == '\0';
+  }
+
+  //
+  // Otherwise, the string is broken.
+  //
+  return FALSE;
+}

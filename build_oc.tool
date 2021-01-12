@@ -4,6 +4,7 @@ buildutil() {
   UTILS=(
     "AppleEfiSignTool"
     "EfiResTool"
+    "LogoutHook"
     "disklabel"
     "icnspack"
     "macserial"
@@ -14,6 +15,7 @@ buildutil() {
     "TestImg4"
     "TestKextInject"
     "TestMacho"
+    "TestMp3"
     "TestPeCoff"
     "TestRsaPreprocess"
     "TestSmbios"
@@ -169,21 +171,35 @@ package() {
   cp "${selfdir}/Changelog.md" "${dstdir}/Docs"/ || exit 1
   cp -r "${selfdir}/Docs/AcpiSamples/"* "${dstdir}/Docs/AcpiSamples"/ || exit 1
 
-  cd "${dstdir}/Docs/AcpiSamples" || exit 1
+  mkdir -p "${dstdir}/Docs/AcpiSamples/Binaries" || exit 1
+  cd "${dstdir}/Docs/AcpiSamples/Source" || exit 1
   for i in *.dsl ; do
     iasl "$i" || exit 1
   done
+  mv ./*.aml "${dstdir}/Docs/AcpiSamples/Binaries" || exit 1
   cd - || exit 1
 
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
-    "LogoutHook"
     "macrecovery"
     "kpdescribe"
     )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" "${dstdir}/Utilities"/ || exit 1
+  done
+
+  buildutil || exit 1
+
+  # Copy LogoutHook.
+  mkdir -p "${dstdir}/Utilities/LogoutHook" || exit 1
+  logoutFiles=(
+    "LogoutHook.command"
+    "README.md"
+    "nvramdump"
+    )
+  for file in "${logoutFiles[@]}"; do
+    cp "${selfdir}/Utilities/LogoutHook/${file}" "${dstdir}/Utilities/LogoutHook"/ || exit 1
   done
 
   # Copy OpenDuetPkg booter.
@@ -201,7 +217,6 @@ package() {
     fi
   done
 
-  buildutil || exit 1
   utils=(
     "macserial"
     "ocvalidate"

@@ -68,7 +68,7 @@ SmcPlatform:
   - 0x00
 # FIXME: check
 SmcEPCI: 0x73002
-OEMStrings: ""
+OEMStrings: |-
 Specifications:
   CPUCodename:
     - "Merom"
