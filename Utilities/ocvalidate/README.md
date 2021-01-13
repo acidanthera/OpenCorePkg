@@ -27,7 +27,6 @@ Utility to validate whether a `config.plist` matches requirements and convention
 ### ACPI
 #### Add
 - Entry[N]->Path: Only `.aml` and `.bin` filename suffix are accepted.
-- Entry[N]->Path: If a customised DSDT is added and enabled, `RebaseRegions` in `ACPI->Quirks` should be enabled.
 
 ### Booter
 #### MmioWhitelist
