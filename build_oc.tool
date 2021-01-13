@@ -151,7 +151,7 @@ package() {
       "Ps2MouseDxe.efi"
       "Ps2KeyboardDxe.efi"
       "UsbMouseDxe.efi"
-      "FswHfsPlus.efi"
+      "OpenHfsPlus.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do
