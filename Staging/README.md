@@ -1,6 +1,6 @@
 Staging drivers considered experimental and not production ready.
 
-## FswHfsPlus
+## OpenHfsPlus
 This driver implements HFS+ support with bless extensions.
 
 ## AudioDxe

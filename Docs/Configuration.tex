@@ -5446,7 +5446,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   have a flawed FAT support implementation that may lead to corrupted filesystems
   on write attempts. Embedding this driver within the firmware may be required in case
   writing to the EFI partition is needed during the boot process. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
 & NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmware starting with the Broadwell generation. For Haswell and earlier, embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
@@ -5464,24 +5464,24 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
   For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
   support and thus requires \texttt{KeySupport} to be enabled. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
   may not include this driver but it is necessary for the touchpad to work
   in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
-& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
-  such as OVMF may not include this driver but it is necessary for the mouse to work
-  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{FswHfsPlus}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenHfsPlus}}\textbf{*}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
+\href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
+& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
+  such as OVMF may not include this driver but it is necessary for the mouse to work
+  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
 \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
 & XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most types of firmware starting with the Sandy Bridge generation. For earlier firmware
