@@ -301,7 +301,7 @@ InternelBootPickerScrollSelected (
   // This is done to achieve the correct offset during initialisation as the
   // entries may be at "half-steps" due to centering.
   //
-  ASSERT ((mBootPickerContainer.Obj.Width + BOOT_ENTRY_SPACE) % ((BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Scale) == 0);
+  ASSERT ((mBootPickerContainer.Obj.Width + BOOT_ENTRY_SPACE * Scale) % ((BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Scale) == 0);
 
   if (EntryOffsetX < 0) {
     return -EntryOffsetX;
