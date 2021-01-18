@@ -36,7 +36,6 @@ EFI_STATUS
 LoadOpenCore (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  EFI_DEVICE_PATH_PROTOCOL         *LoaderDevicePath,
-  IN  EFI_HANDLE                       ParentImageHandle,
   OUT EFI_HANDLE                       *ImageHandle,
   OUT EFI_DEVICE_PATH_PROTOCOL         **ImagePath
   )
@@ -50,7 +49,6 @@ LoadOpenCore (
   UINT32                     BufferSize;
 
   ASSERT (FileSystem != NULL);
-  ASSERT (ParentImageHandle != NULL);
   ASSERT (ImageHandle != NULL);
   ASSERT (ImagePath != NULL);
 
@@ -122,40 +120,19 @@ LoadOpenCore (
   // Run OpenCore image
   //
   *ImageHandle = NULL;
-  Status = gBS->LoadImage (
-    FALSE,
-    ParentImageHandle,
+  Status = OcLoadAndRunImage (
     NULL,
     Buffer,
     BufferSize,
     ImageHandle
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "BS: Failed to load OpenCore image - %r\n", Status));
+    DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image - %r\n", Status));
     FreePool (Buffer);
     if (*ImagePath != NULL) {
       FreePool (*ImagePath);
     }
-    return Status;
   }
-
-  DEBUG ((DEBUG_INFO, "BS: Loaded OpenCore image at %p handle\n", *ImageHandle));
-
-  Status = gBS->StartImage (
-    *ImageHandle,
-    NULL,
-    NULL
-    );
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "BS: Failed to start OpenCore image - %r\n", Status));
-    gBS->UnloadImage (*ImageHandle);
-    if (*ImagePath != NULL) {
-      FreePool (*ImagePath);
-    }
-  }
-
-  FreePool (Buffer);
 
   return Status;
 }
@@ -267,7 +244,7 @@ UefiMain (
   }
 
   DEBUG ((DEBUG_INFO, "BS: Trying to load OpenCore image...\n"));
-  Status = LoadOpenCore (FileSystem, LoadedImage->FilePath, ImageHandle, &OcImageHandle, &OcImagePath);
+  Status = LoadOpenCore (FileSystem, LoadedImage->FilePath, &OcImageHandle, &OcImagePath);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "BS: Failed to load OpenCore from disk - %r\n", Status));
     return EFI_NOT_FOUND;

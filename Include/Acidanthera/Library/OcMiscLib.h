@@ -95,6 +95,22 @@ OcHandleProtocolFallback (
   );
 
 /**
+  Run and execute image file from buffer.
+
+  @param[in]  DevicePath   Image device path, optional.
+  @param[in]  Buffer       Buffer with image data, optional when DP is given.
+  @param[in]  BufferSize   Image data size in the buffer.
+  @param[out] ImageHandle  Loaded image handle for drivers, optional.
+**/
+EFI_STATUS
+OcLoadAndRunImage (
+  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
+  IN   VOID                      *Buffer      OPTIONAL,
+  IN   UINTN                     BufferSize,
+  OUT  EFI_HANDLE                *ImageHandle OPTIONAL
+  );
+
+/**
   Release UEFI ownership from USB controllers at booting.
 **/
 EFI_STATUS

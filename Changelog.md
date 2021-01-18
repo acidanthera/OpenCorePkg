@@ -5,6 +5,9 @@ OpenCore Changelog
 - Added background image support in OpenCanopy
 - Fixed selector boot option choice in OpenCanopy
 - Relaxed selector dimensions for OpenCanopy
+- Add `MaxBIOSVersion` option to `Generic`
+- Fix MLB verification feature in macrecovery
+- Replaced `VBoxHfs` driver with `OpenHfsPlus`
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes

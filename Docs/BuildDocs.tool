@@ -44,7 +44,7 @@ latexbuild Configuration
 
 cd Differences || abort "Unable to process annotations"
 rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
-latexdiff -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
+latexdiff --allow-spaces -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
   > Differences.tex || \
   abort "Unable to differentiate"
 latexbuild Differences -interaction=nonstopmode

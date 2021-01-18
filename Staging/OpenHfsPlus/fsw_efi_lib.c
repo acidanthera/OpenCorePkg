@@ -1,23 +1,9 @@
-/* $Id: fsw_efi_lib.c $ */
-/** @file
- * fsw_efi_lib.c - EFI host environment library functions.
- */
-
-/*
- * Copyright (C) 2010 Oracle Corporation
- *
- * This file is part of VirtualBox Open Source Edition (OSE), as
- * available from http://www.virtualbox.org. This file is free software;
- * you can redistribute it and/or modify it under the terms of the GNU
- * General Public License (GPL) as published by the Free Software
- * Foundation, in version 2 as it comes in the "COPYING" file of the
- * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
- * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+/**
+ * \file fsw_efi_lib.c
+ * EFI host environment library functions.
  */
 
 /*-
- * This code is based on:
- *
  * Copyright (c) 2006 Christoph Pfisterer
  *
  * Redistribution and use in source and binary forms, with or without
@@ -87,17 +73,17 @@ VOID fsw_efi_decode_time(OUT EFI_TIME *EfiTime, IN UINT32 UnixTime)
     long        days, rem;
     int         y, newy, yleap;
     const int   *ip;
-
+    
     ZeroMem(EfiTime, sizeof(EFI_TIME));
-
+    
     days = UnixTime / SECSPERDAY;
     rem = UnixTime % SECSPERDAY;
-
+    
     EfiTime->Hour = (UINT8) (rem / SECSPERHOUR);
     rem = rem % SECSPERHOUR;
     EfiTime->Minute = (UINT8) (rem / SECSPERMIN);
     EfiTime->Second = (UINT8) (rem % SECSPERMIN);
-
+    
     y = EPOCH_YEAR;
     while (days < 0 || days >= (long) year_lengths[yleap = isleap(y)]) {
         newy = y + days / DAYSPERNYEAR;
@@ -108,7 +94,7 @@ VOID fsw_efi_decode_time(OUT EFI_TIME *EfiTime, IN UINT32 UnixTime)
             LEAPS_THRU_END_OF(y - 1);
         y = newy;
     }
-    EfiTime->Year = (UINT16)y;
+    EfiTime->Year = (UINT16) y;
     ip = mon_lengths[yleap];
     for (EfiTime->Month = 0; days >= (long) ip[EfiTime->Month]; ++(EfiTime->Month))
         days = days - (long) ip[EfiTime->Month];
@@ -122,38 +108,22 @@ VOID fsw_efi_decode_time(OUT EFI_TIME *EfiTime, IN UINT32 UnixTime)
 
 UINTN fsw_efi_strsize(struct fsw_string *s)
 {
-    return (fsw_strlen(s) + 1) * sizeof (CHAR16);
+    if (s->type == FSW_STRING_TYPE_EMPTY)
+        return sizeof(CHAR16);
+    return (s->len + 1) * sizeof(CHAR16);
 }
 
 VOID fsw_efi_strcpy(CHAR16 *Dest, struct fsw_string *src)
 {
-    switch (fsw_strkind(src)) {
-    default:
-        break;
-
-    case FSW_STRING_KIND_UTF16:
-        CopyMem(Dest, fsw_strchars(src), fsw_efi_strsize(src));
-        break;
+    if (src->type == FSW_STRING_TYPE_EMPTY) {
+        Dest[0] = 0;
+    } else if (src->type == FSW_STRING_TYPE_UTF16) {
+        CopyMem(Dest, src->data, src->size);
+        Dest[src->len] = 0;
+    } else {
+        // TODO: coerce, recurse
+        Dest[0] = 0;
     }
-
-    Dest[fsw_strlen(src)] = 0;
-}
-
-int fsw_streq_ISO88591_UTF16(void *s1data, void *s2data, int len)
-{
-    int i;
-    fsw_u8 *p1 = (fsw_u8 *)s1data;
-    fsw_u16 *p2 = (fsw_u16 *)s2data;
-
-    for (i = 0; i<len; i++)
-    {
-        if (fsw_to_lower(p1[i]) != fsw_to_lower(p2[i]))
-        {
-            return 0;
-        }
-    }
-
-    return 1;
 }
 
 // EOF

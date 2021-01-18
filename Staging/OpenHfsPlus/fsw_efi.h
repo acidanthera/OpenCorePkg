@@ -1,23 +1,9 @@
-/* $Id: fsw_efi.h $ */
-/** @file
- * fsw_efi.h - EFI host environment header.
- */
-
-/*
- * Copyright (C) 2010 Oracle Corporation
- *
- * This file is part of VirtualBox Open Source Edition (OSE), as
- * available from http://www.virtualbox.org. This file is free software;
- * you can redistribute it and/or modify it under the terms of the GNU
- * General Public License (GPL) as published by the Free Software
- * Foundation, in version 2 as it comes in the "COPYING" file of the
- * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
- * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+/**
+ * \file fsw_efi.h
+ * EFI host environment header.
  */
 
 /*-
- * This code is based on:
- *
  * Copyright (c) 2006 Christoph Pfisterer
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,30 +38,32 @@
 #ifndef _FSW_EFI_H_
 #define _FSW_EFI_H_
 
+#include <Guid/AppleBless.h>
 #include "fsw_core.h"
+
 
 /**
  * EFI Host: Private per-volume structure.
  */
 
 typedef struct {
-    UINT64                          Signature;      //!< Used to identify this structure
-
-    EFI_SIMPLE_FILE_SYSTEM_PROTOCOL FileSystem;     //!< Published EFI protocol interface structure
-
-    EFI_HANDLE                      Handle;         //!< The device handle the protocol is attached to
-    EFI_DISK_IO_PROTOCOL            *DiskIo;        //!< The Disk I/O protocol we use for disk access
-    UINT32                          MediaId;        //!< The media ID from the Block I/O protocol
-    EFI_STATUS                      LastIOStatus;   //!< Last status from Disk I/O
-
-    struct fsw_volume               *vol;           //!< FSW volume structure
-
+    UINT64                      Signature;      //!< Used to identify this structure
+    
+    EFI_FILE_IO_INTERFACE       FileSystem;     //!< Published EFI protocol interface structure
+    
+    EFI_HANDLE                  Handle;         //!< The device handle the protocol is attached to
+    EFI_DISK_IO                 *DiskIo;        //!< The Disk I/O protocol we use for disk access
+    UINT32                      MediaId;        //!< The media ID from the Block I/O protocol
+    EFI_STATUS                  LastIOStatus;   //!< Last status from Disk I/O
+    
+    struct fsw_volume           *vol;           //!< FSW volume structure
+    
 } FSW_VOLUME_DATA;
 
 /** Signature for the volume structure. */
-#define FSW_VOLUME_DATA_SIGNATURE  SIGNATURE_32 ('f', 's', 'w', 'V')
+#define FSW_VOLUME_DATA_SIGNATURE  EFI_SIGNATURE_32 ('f', 's', 'w', 'V')
 /** Access macro for the volume structure. */
-#define FSW_VOLUME_FROM_VOL_INTERFACE(a)  CR (a, FSW_VOLUME_DATA, FileSystem, FSW_VOLUME_DATA_SIGNATURE)
+#define FSW_VOLUME_FROM_FILE_SYSTEM(a)  CR (a, FSW_VOLUME_DATA, FileSystem, FSW_VOLUME_DATA_SIGNATURE)
 
 /**
  * EFI Host: Private structure for a EFI_FILE interface.
@@ -83,21 +71,21 @@ typedef struct {
 
 typedef struct {
     UINT64                      Signature;      //!< Used to identify this structure
-
+    
     EFI_FILE                    FileHandle;     //!< Published EFI protocol interface structure
-
-    UINTN                       Type;           //!< File type used for dispatching
+    
+    UINTN                       Type;           //!< File type used for dispatchinng
     struct fsw_shandle          shand;          //!< FSW handle for this file
-
+    
 } FSW_FILE_DATA;
 
 /** File type: regular file. */
-#define FSW_EFI_FILE_KIND_FILE  (0)
+#define FSW_EFI_FILE_TYPE_FILE  (0)
 /** File type: directory. */
-#define FSW_EFI_FILE_KIND_DIR   (1)
+#define FSW_EFI_FILE_TYPE_DIR   (1)
 
 /** Signature for the file handle structure. */
-#define FSW_FILE_DATA_SIGNATURE    SIGNATURE_32 ('f', 's', 'w', 'F')
+#define FSW_FILE_DATA_SIGNATURE    EFI_SIGNATURE_32 ('f', 's', 'w', 'F')
 /** Access macro for the file handle structure. */
 #define FSW_FILE_FROM_FILE_HANDLE(a)  CR (a, FSW_FILE_DATA, FileHandle, FSW_FILE_DATA_SIGNATURE)
 

@@ -1,10 +1,9 @@
 /**
- * \file fsw_posix_base.h
- * Base definitions for the POSIX user space host environment.
+ * \file fsw_efi_edk2_base.h
+ * Base definitions for the EDK EFI Toolkit environment.
  */
-
-/*-
- * Copyright (c) 2006 Christoph Pfisterer
+/*
+ * Copyright (c) 2012 Stefan Agner
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -35,61 +34,43 @@
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-#ifndef _FSW_POSIX_BASE_H_
-#define _FSW_POSIX_BASE_H_
+#ifndef _FSW_EFI_EDK2_BASE_H_
+#define _FSW_EFI_EDK2_BASE_H_
+/*
+ * Here is common declarations for EDK<->EDK2 compatibility
+ */
+# include <Base.h>
+# include <Uefi.h>
+# include <Library/DebugLib.h>
+# include <Library/BaseLib.h>
+# include <Protocol/DriverBinding.h>
+# include <Library/BaseMemoryLib.h>
+# include <Library/UefiRuntimeServicesTableLib.h>
+# include <Library/UefiDriverEntryPoint.h>
+# include <Library/UefiBootServicesTableLib.h>
+# include <Library/MemoryAllocationLib.h>
+# include <Library/DevicePathLib.h>
+# include <Protocol/DevicePathFromText.h>
+# include <Protocol/DevicePathToText.h>
+# include <Protocol/DebugPort.h>
+# include <Protocol/DebugSupport.h>
+# include <Library/PrintLib.h>
+# include <Library/UefiLib.h>
+# include <Protocol/SimpleFileSystem.h>
+# include <Protocol/BlockIo.h>
+# include <Protocol/DiskIo.h>
+# include <Guid/FileSystemInfo.h>
+# include <Guid/FileInfo.h>
+# include <Guid/FileSystemVolumeLabelInfo.h>
+# include <Protocol/ComponentName.h>
 
+# define BS gBS
 
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <errno.h>
-#include <stdint.h>
+# define EFI_FILE_HANDLE_REVISION EFI_SIMPLE_FILE_SYSTEM_PROTOCOL_REVISION
+# define SIZE_OF_EFI_FILE_SYSTEM_VOLUME_LABEL_INFO  SIZE_OF_EFI_FILE_SYSTEM_VOLUME_LABEL
+# define EFI_FILE_SYSTEM_VOLUME_LABEL_INFO EFI_FILE_SYSTEM_VOLUME_LABEL
+# define EFI_SIGNATURE_32(a, b, c, d) SIGNATURE_32(a, b, c, d)
+# define DivU64x32(x,y,z) DivU64x32((x),(y))
 
-#ifdef HOST_MSWIN
-#include <windows.h>
-#include <io.h>
-#endif
-
-#ifdef HOST_POSIX
-#include <unistd.h>
-#endif
-
-#define FSW_LITTLE_ENDIAN (1)
-// TODO: use info from the headers to define FSW_LITTLE_ENDIAN or FSW_BIG_ENDIAN
-
-
-// types
-
-typedef int8_t        fsw_s8;
-typedef uint8_t       fsw_u8;
-typedef int16_t       fsw_s16;
-typedef uint16_t      fsw_u16;
-typedef int32_t       fsw_s32;
-typedef uint32_t      fsw_u32;
-typedef int64_t       fsw_s64;
-typedef uint64_t      fsw_u64;
-
-
-// allocation functions
-
-#define fsw_alloc(size, ptrptr) (((*(ptrptr) = malloc(size)) == NULL) ? FSW_OUT_OF_MEMORY : FSW_SUCCESS)
-#define fsw_free(ptr) if (ptr != NULL) free(ptr)
-
-// memory functions
-
-#define fsw_memzero(dest,size) memset(dest,0,size)
-#define fsw_memcpy(dest,src,size) memcpy(dest,src,size)
-#define fsw_memeq(p1,p2,size) (memcmp(p1,p2,size) == 0)
-
-// message printing
-
-#define FSW_MSGSTR(s) s
-#define FSW_MSGFUNC(...) (void) printf __VA_ARGS__
-
-// 64-bit hooks
-
-#define FSW_U64_SHR(val,shiftbits) ((fsw_u64)(val) >> (shiftbits))
-#define FSW_U64_SHL(val,shiftbits) ((fsw_u64)(val) << (shiftbits))
-#define FSW_U64_DIV(val,divisor) ((fsw_u64)(val) / (divisor))
 
 #endif

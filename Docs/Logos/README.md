@@ -14,7 +14,8 @@ version of the logo, which has slightly wrong colourspace due to missing
 conic gradient support in SVG.
 
 You may use this logo free of charge to refer to OpenCore project for
-informational purposes. The use of this logo in your own projects which
+informational purposes. You have no right to modify logo. 
+The use of this logo in your own projects which
 are related to OpenCore is also permitted free of charge, yet requires
 OpenCore maintainer approval. Please
 [contact us](https://github.com/acidanthera/bugtracker/issues/new)

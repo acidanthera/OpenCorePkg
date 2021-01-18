@@ -451,7 +451,8 @@ typedef enum {
   _(UINT16                      , ProcessorType      ,     , 0                                            , () )                   \
   _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
   _(BOOLEAN                     , SpoofVendor        ,     , FALSE                                        , () )                   \
-  _(BOOLEAN                     , AdviseWindows      ,     , FALSE                                        , () )
+  _(BOOLEAN                     , AdviseWindows      ,     , FALSE                                        , () )                   \
+  _(BOOLEAN                     , MaxBIOSVersion     ,     , FALSE                                        , () )
   OC_DECLARE (OC_PLATFORM_GENERIC_CONFIG)
 
 #define OC_PLATFORM_DATA_HUB_CONFIG_FIELDS(_, __) \

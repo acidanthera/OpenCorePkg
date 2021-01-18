@@ -1,23 +1,9 @@
-/* $Id: fsw_base.h $ */
-/** @file
- * fsw_base.h - Base definitions switch.
- */
-
-/*
- * Copyright (C) 2010 Oracle Corporation
- *
- * This file is part of VirtualBox Open Source Edition (OSE), as
- * available from http://www.virtualbox.org. This file is free software;
- * you can redistribute it and/or modify it under the terms of the GNU
- * General Public License (GPL) as published by the Free Software
- * Foundation, in version 2 as it comes in the "COPYING" file of the
- * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
- * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+/**
+ * \file fsw_base.h
+ * Base definitions switch.
  */
 
 /*-
- * This code is based on:
- *
  * Copyright (c) 2006 Christoph Pfisterer
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,6 +38,7 @@
 #ifndef _FSW_BASE_H_
 #define _FSW_BASE_H_
 
+
 #ifndef FSW_DEBUG_LEVEL
 /**
  * Global debugging level. Can be set locally for the scope of a single
@@ -61,30 +48,30 @@
 #endif
 
 
-#ifdef EFIAPI
+#ifdef HOST_EFI
 #include "fsw_efi_base.h"
 #endif
 
-#if defined(HOST_POSIX) || defined(HOST_MSWIN)
+#ifdef HOST_POSIX
 #include "fsw_posix_base.h"
 #endif
 
 // message printing
 
 #if FSW_DEBUG_LEVEL >= 1
-#define FSW_MSG_ASSERT(...) FSW_MSGFUNC(__VA_ARGS__)
+#define FSW_MSG_ASSERT(params) FSW_MSGFUNC(params)
 #else
 #define FSW_MSG_ASSERT(params)
 #endif
 
 #if FSW_DEBUG_LEVEL >= 2
-#define FSW_MSG_DEBUG(...) FSW_MSGFUNC(__VA_ARGS__)
+#define FSW_MSG_DEBUG(params) FSW_MSGFUNC(params)
 #else
 #define FSW_MSG_DEBUG(params)
 #endif
 
 #if FSW_DEBUG_LEVEL >= 3
-#define FSW_MSG_DEBUGV(...) FSW_MSGFUNC(__VA_ARGS__)
+#define FSW_MSG_DEBUGV(params) FSW_MSGFUNC(params)
 #else
 #define FSW_MSG_DEBUGV(params)
 #endif

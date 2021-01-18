@@ -289,7 +289,7 @@ def action_verify(args):
   """
   Try to verify MLB serial number.
   """
-  session = get_session()
+  session = get_session(args)
   generic_latest   = get_image_info(session, bid=RECENT_MAC, mlb=MLB_ZERO,
     diag=False, os_type='latest')
   uvalid_default   = get_image_info(session, bid=args.board_id, mlb=args.mlb,

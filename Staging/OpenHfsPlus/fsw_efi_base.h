@@ -1,23 +1,9 @@
-/* $Id: fsw_efi_base.h $ */
-/** @file
- * fsw_efi_base.h - Base definitions for the EFI host environment.
- */
-
-/*
- * Copyright (C) 2010-2011 Oracle Corporation
- *
- * This file is part of VirtualBox Open Source Edition (OSE), as
- * available from http://www.virtualbox.org. This file is free software;
- * you can redistribute it and/or modify it under the terms of the GNU
- * General Public License (GPL) as published by the Free Software
- * Foundation, in version 2 as it comes in the "COPYING" file of the
- * VirtualBox OSE distribution. VirtualBox OSE is distributed in the
- * hope that it will be useful, but WITHOUT ANY WARRANTY of any kind.
+/**
+ * \file fsw_efi_base.h
+ * Base definitions for the EFI host environment.
  */
 
 /*-
- * This code is based on:
- *
  * Copyright (c) 2006 Christoph Pfisterer
  *
  * Redistribution and use in source and binary forms, with or without
@@ -52,31 +38,11 @@
 #ifndef _FSW_EFI_BASE_H_
 #define _FSW_EFI_BASE_H_
 
-#include <Uefi.h>
-#include <Library/DebugLib.h>
-#include <Library/BaseLib.h>
-#include <Protocol/DriverBinding.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/UefiRuntimeServicesTableLib.h>
-#include <Library/UefiDriverEntryPoint.h>
-#include <Library/UefiBootServicesTableLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/DevicePathLib.h>
-#include <Protocol/DevicePathFromText.h>
-#include <Protocol/DevicePathToText.h>
-#include <Protocol/DebugPort.h>
-#include <Protocol/DebugSupport.h>
-#include <Library/PrintLib.h>
-#include <Library/UefiLib.h>
-#include <Protocol/SimpleFileSystem.h>
-#include <Protocol/BlockIo.h>
-#include <Protocol/DiskIo.h>
-#include <Guid/FileSystemInfo.h>
-#include <Guid/FileInfo.h>
-#include <Guid/FileSystemVolumeLabelInfo.h>
-#include <Protocol/ComponentName.h>
+
+#include "fsw_efi_edk2_base.h"
 
 #define FSW_LITTLE_ENDIAN (1)
+
 
 // types, reuse EFI types
 
@@ -89,10 +55,11 @@ typedef UINT32  fsw_u32;
 typedef INT64   fsw_s64;
 typedef UINT64  fsw_u64;
 
+
 // allocation functions
 
 #define fsw_alloc(size, ptrptr) (((*(ptrptr) = AllocatePool(size)) == NULL) ? FSW_OUT_OF_MEMORY : FSW_SUCCESS)
-#define fsw_free(ptr) if (ptr != NULL) FreePool(ptr)
+#define fsw_free(ptr) FreePool(ptr)
 
 // memory functions
 
@@ -100,25 +67,15 @@ typedef UINT64  fsw_u64;
 #define fsw_memcpy(dest,src,size) CopyMem(dest,src,size)
 #define fsw_memeq(p1,p2,size) (CompareMem(p1,p2,size) == 0)
 
-// Message printing
+// message printing
 
 #define FSW_MSGSTR(s) DEBUG_INFO, s
-#define FSW_MSGFUNC(...) DEBUG(__VA_ARGS__)
-
-// string handling
-
-int fsw_streq_ISO88591_UTF16(void *s1data, void *s2data, int len);
+#define FSW_MSGFUNC(params) DEBUG(params)
 
 // 64-bit hooks
 
 #define FSW_U64_SHR(val,shiftbits) RShiftU64((val), (shiftbits))
-#define FSW_U64_SHL(val,shiftbits) LShiftU64((val), (shiftbits))
-#define FSW_U64_DIV(val,divisor) DivU64x32((val), (divisor))
+#define FSW_U64_DIV(val,divisor) DivU64x32((val), (divisor), NULL)
 
-// byte swapping
-
-#define bswap16(x) SwapBytes16(x)
-#define bswap32(x) SwapBytes32(x)
-#define bswap64(x) SwapBytes64(x)
 
 #endif

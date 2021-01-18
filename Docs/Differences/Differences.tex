@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Sun Jan 10 13:38:23 2021
+%DIF DEL PreviousConfiguration.tex   Wed Jan  6 14:43:46 2021
+%DIF ADD ../Configuration.tex        Thu Jan 14 01:38:24 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4688,7 +4688,16 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
-  \texttt{SystemMemoryStatus}\\
+  \DIFaddbegin \texttt{\DIFadd{MaxBIOSVersion}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets }\texttt{\DIFadd{BIOSVersion}} \DIFadd{to }\texttt{\DIFadd{9999.999.999.999.999}}\DIFadd{, recommended for legacy 
+  Macs when using }\texttt{\DIFadd{Automatic}} \DIFadd{PlatformInfo to avoid BIOS updates in unofficially supported macOS 
+  versions.
+}
+
+\item
+  \DIFaddend \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Indicates whether system memory is upgradable in \texttt{PlatformFeature}.
@@ -4710,8 +4719,8 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
-  \textbf{Type}: \texttt{plist\ integer}\\
+  \texttt{ProcessorType}\DIFaddbegin \\
+  \DIFaddend \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
 \item
@@ -5498,7 +5507,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   have a flawed FAT support implementation that may lead to corrupted filesystems
   on write attempts. Embedding this driver within the firmware may be required in case
   writing to the EFI partition is needed during the boot process. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
 & NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmware starting with the Broadwell generation. For Haswell and earlier, embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
@@ -5516,25 +5525,38 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
   For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
   support and thus requires \texttt{KeySupport} to be enabled. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
   may not include this driver but it is necessary for the touchpad to work
   in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
-& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
+\DIFdelbegin \href{\DIFdel{https://github.com/acidanthera/audk}}%DIFAUXCMD
+%DIFDELCMD < {%%%
+\texttt{\DIFdel{UsbMouseDxe}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \href{\DIFadd{https://github.com/acidanthera/OpenCorePkg}}{\texttt{\DIFadd{OpenHfsPlus}}\DIFaddend }\textbf{*}
+& \DIFdelbegin \DIFdel{USB mouse driver from }\texttt{\DIFdel{MdeModulePkg}}%DIFAUXCMD
+\DIFdel{. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
-  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
-& HFS file system driver with bless support. This driver is an alternative to
+  in UEFI graphical interfaces such as }\texttt{\DIFdel{OpenCanopy}}%DIFAUXCMD
+\DIFdel{. }%DIFDELCMD < \\
+%DIFDELCMD < %%%
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFdel{VBoxHfs}}%DIFAUXCMD
+}
+%DIFAUXCMD
+%DIFDELCMD < & %%%
+\DIFdelend HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
-\href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{\DIFadd{UsbMouseDxe}}}\textbf{\DIFadd{*}}
+& \DIFadd{USB mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some virtual machine firmware
+  such as OVMF may not include this driver but it is necessary for the mouse to work
+  in UEFI graphical interfaces such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
+\DIFaddend \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
 & XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most types of firmware starting with the Sandy Bridge generation. For earlier firmware
   or legacy systems, it may be used to support external USB 3.0 PCI cards.
@@ -5682,7 +5704,8 @@ Full list of labels is provided below. All labels are mandatory.
 }
 
 \DIFaddend Label and icon generation can be performed with bundled utilities: \texttt{disklabel} and
-\texttt{icnspack}\DIFdelbegin \DIFdel{. Please refer to sample data for the details about the dimensions}\DIFdelend . Font is Helvetica 12 pt times scale factor.
+\texttt{icnspack}. \DIFdelbegin \DIFdel{Please refer to sample data for the details about the dimensions.
+}\DIFdelend Font is Helvetica 12 pt times scale factor.
 
 Font format corresponds to \href{https://www.angelcode.com/products/bmfont}{AngelCode binary BMF}.
 While there are many utilities to generate font files, currently it is recommended to use
@@ -6792,7 +6815,10 @@ Since it is not always accurate, the latest versions are listed below.
     images are limited to their target model identifiers and have no
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
-    \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here},
+    \DIFdelbegin \href{\DIFdel{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}}%DIFAUXCMD
+%DIFDELCMD < {%%%
+\DIFdelend \DIFaddbegin \href{\DIFadd{https://archive.org/details/10.6.7-10j3250-disk-images}}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
@@ -6842,7 +6868,10 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
     this image is not limited to the target model identifiers and can be used
     as is. The original \texttt{9J3050} image can be found
-    \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{here},
+    \DIFdelbegin \href{\DIFdel{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}}%DIFAUXCMD
+%DIFDELCMD < {%%%
+\DIFdelend \DIFaddbegin \href{\DIFadd{https://archive.org/details/10.5.7-9-j-3050}}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
@@ -6861,7 +6890,10 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     to their target model identifiers as on newer macOS versions.
     Modified \texttt{8R4088} images (with \texttt{ACDT} suffix) without
     model restrictions can be found
-    \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{here},
+    \DIFdelbegin \href{\DIFdel{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}}%DIFAUXCMD
+%DIFDELCMD < {%%%
+\DIFdelend \DIFaddbegin \href{\DIFadd{https://archive.org/details/10.4.10-8-r-4088-acdt}}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.

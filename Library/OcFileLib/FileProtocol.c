@@ -124,11 +124,24 @@ GetFileSize (
   OUT UINT32             *Size
   )
 {
-  EFI_STATUS  Status;
-  UINT64      Position;
+  EFI_STATUS     Status;
+  UINT64         Position;
+  EFI_FILE_INFO  *FileInfo;
 
   Status = File->SetPosition (File, 0xFFFFFFFFFFFFFFFFULL);
   if (EFI_ERROR (Status)) {
+    //
+    // Some drivers, like EfiFs, return EFI_UNSUPPORTED when trying to seek
+    // past the file size. Use slow method via attributes for them.
+    //
+    FileInfo = GetFileInfo (File, &gEfiFileInfoGuid, sizeof (*FileInfo), NULL);
+    if (FileInfo != NULL) {
+      if ((UINT32) FileInfo->FileSize == FileInfo->FileSize) {
+        *Size = (UINT32) FileInfo->FileSize;
+        Status = EFI_SUCCESS;
+      }
+      FreePool (FileInfo);
+    }
     return Status;
   }
 

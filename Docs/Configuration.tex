@@ -4628,6 +4628,14 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
+  \texttt{MaxBIOSVersion}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999.999.999}, recommended for legacy 
+  Macs when using \texttt{Automatic} PlatformInfo to avoid BIOS updates in unofficially supported macOS 
+  versions.
+
+\item
   \texttt{SystemMemoryStatus}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
@@ -4650,7 +4658,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   and assume that system memory is non-upgradable.
 
 \item
-  \texttt{ProcessorType}
+  \texttt{ProcessorType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Automatic)\\
   \textbf{Description}: Refer to SMBIOS \texttt{ProcessorType}.
@@ -5438,7 +5446,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   have a flawed FAT support implementation that may lead to corrupted filesystems
   on write attempts. Embedding this driver within the firmware may be required in case
   writing to the EFI partition is needed during the boot process. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{NvmExpressDxe}}\textbf{*}
 & NVMe support driver from \texttt{MdeModulePkg}. This driver is included in most
   firmware starting with the Broadwell generation. For Haswell and earlier, embedding it
   within the firmware may be more favourable in case a NVMe SSD drive is installed. \\
@@ -5456,24 +5464,24 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
   For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
   Note, unlike \texttt{OpenUsbKbDxe} this driver has no \texttt{AppleKeyMapAggregator}
   support and thus requires \texttt{KeySupport} to be enabled. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
+\href{https://github.com/acidanthera/audk}{\texttt{Ps2MouseDxe}}\textbf{*}
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
   may not include this driver but it is necessary for the touchpad to work
   in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-  \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
-& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
-  such as OVMF may not include this driver but it is necessary for the mouse to work
-  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenHfsPlus}}\textbf{*}
 & HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
+\href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{*}
+& USB mouse driver from \texttt{MdeModulePkg}. Some virtual machine firmware
+  such as OVMF may not include this driver but it is necessary for the mouse to work
+  in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
 \href{https://github.com/acidanthera/audk}{\texttt{XhciDxe}}\textbf{*}
 & XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most types of firmware starting with the Sandy Bridge generation. For earlier firmware
@@ -6730,7 +6738,8 @@ Since it is not always accurate, the latest versions are listed below.
     images are limited to their target model identifiers and have no
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
-    \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here},
+    \href{https://archive.org/details/10.6.7-10j3250-disk-images}{here}
+    (\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{MEGA Mirror}),
     assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
@@ -6780,7 +6789,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
     this image is not limited to the target model identifiers and can be used
     as is. The original \texttt{9J3050} image can be found
-    \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{here},
+    \href{https://archive.org/details/10.5.7-9-j-3050}{here}
+    (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
     assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
@@ -6799,7 +6809,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     to their target model identifiers as on newer macOS versions.
     Modified \texttt{8R4088} images (with \texttt{ACDT} suffix) without
     model restrictions can be found
-    \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{here},
+    \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{here}
+    (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
     assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.
