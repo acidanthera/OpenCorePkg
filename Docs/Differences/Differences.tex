@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Mon Jan 18 09:34:23 2021
+%DIF ADD ../Configuration.tex        Mon Jan 18 09:40:22 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6179,6 +6179,8 @@ functioning. Feature highlights:
   Currently the only supported variant is \texttt{ASUS}, using specialised protocol available
   on select Z87 and Z97 ASUS boards. More details can be found in
   \href{https://github.com/LongSoft/UEFITool/pull/116}{\texttt{LongSoft/UefiTool\#116}}.
+  \DIFaddbegin \DIFadd{The value of this property cannot be empty if }\texttt{\DIFadd{PointerSupport}} \DIFadd{is enabled.
+}\DIFaddend 
 
 \item
   \texttt{TimerResolution}\\
