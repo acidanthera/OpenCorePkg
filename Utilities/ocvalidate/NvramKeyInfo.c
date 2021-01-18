@@ -163,11 +163,80 @@ ValidateDefaultBackgroundColor (
   return DefaultBackgroundColorValue[3] == 0U;
 }
 
+// STATIC
+// INTN
+// BinarySearch (
+//   IN  CONST VOID  *First,
+//   IN  UINTN       Start,
+//   IN  UINTN       End,
+//   IN  UINTN       Key
+//   )
+// {
+//   CONST UINT8  *Array;
+//   INTN         RetVal;
+//   UINTN        Mid;
+
+//   Array  = (CONST UINT8 *) First; 
+//   RetVal = -1;
+
+//   while (Start <= End) {
+//     Mid = Start + (End - Start) / 2;
+
+//     if (Array[Mid] < Key) {
+//       Start = Mid + 1;
+//     } else if (Array[Mid] > Key) {
+//       End   = Mid - 1;
+//     } else {
+//       RetVal = Mid;
+//       break;
+//     }
+//   }
+
+//   return RetVal;
+// }
+
+// STATIC
+// BOOLEAN
+// ValidatePrevLangKbd (
+//   IN  CONST VOID   *Value,
+//   IN  UINT32       ValueSize
+//   )
+// {
+//   STATIC CONST CHAR8 *AllowedKeyboardLayouts[] = {
+//     "cs", "et", "hu", "lv", "lt", "pl", "sk",
+//     "bg", "be", "mk", "ru", "sr-Cyrl", "uk", "en",
+//     "ja", "fr", "de", "en_AU", "de_AT", "nl_BE", "pt_BR",
+//     "en_GB", "fr_CA", "da", "nl", "fi", "it", "nb",
+//     "pt_PT", "es", "sv", "fr_CH", "de_CH", "to", "en_US",
+//     "ko", "fa", "ps", "uz-Arab", "ta", "ar", "hy", "az-Latn",
+//     "bn", "zh-Hant", "chr", "hr", "hi", "fo", "ka", "el",
+//     "gu", "pa", "haw", "he", "is", "iu", "ga", "ms-Arab", "kn",
+//     "kk", "km", "ckb", "ml", "mt", "mi", "my", "ne", "se", "or",
+//     "ro", "st-Latn", "si", "sl", "sv", "ta", "te", "th", "bo",
+//     "tr", "ur", "ug", "vi", "cy"
+//   };
+//   UINTN        AllowedKeyboardLayoutsCount = ARRAY_SIZE (AllowedKeyboardLayouts);
+
+//   UINTN        Index;
+//   CONST UINT8  *PrevLangKbdValue;
+
+//   PrevLangKbdValue = (CONST UINT8 *) Value;
+
+//   for (Index = 0; Index < AllowedKeyboardLayoutsCount; ++Index) {
+//     // if (ArrayIsSubset (PrevLangKbdValue, AllowedKeyboardLayouts[Index], ValueSize, AsciiStrLen (AllowedKeyboardLayouts[Index]))) {
+//       return TRUE;
+//     // }
+//   }
+
+//   return FALSE;
+// }
+
 STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
   { "nvda_drv",          ValidateNvdaDrv        },
   { "boot-args",         ValidateBootArgs       },
   { "bootercfg",         ValidateBooterCfg      },
   { "csr-active-config", ValidateNvramKeySize32 },
+  // { "prev-lang:kbd",     ValidatePrevLangKbd    },
   { "StartupMute",       ValidateNvramKeySize8  },
   { "SystemAudioVolume", ValidateNvramKeySize8  },
 };
