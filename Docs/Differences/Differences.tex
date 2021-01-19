@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Mon Jan 18 09:40:22 2021
+%DIF ADD ../Configuration.tex        Tue Jan 19 10:58:25 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3362,7 +3362,10 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \textbf{Description}: Produce system report on ESP folder.
 
   This option will create a \texttt{SysReport} directory on ESP partition
-  unless it is already present. The directory will contain ACPI and SMBIOS dumps.
+  unless it is already present. The directory will contain ACPI\DIFdelbegin \DIFdel{and SMBIOSdumps.
+}\DIFdelend \DIFaddbegin \DIFadd{, SMBIOS, and audio codec dumps.
+  Audio codec dumps require an audio backend driver to be loaded.
+}\DIFaddend 
 
   \emph{Note}: For security reasons \texttt{SysReport} option is \textbf{not} available
   in \texttt{RELEASE} builds. Use a \texttt{DEBUG} build if this option is needed.
