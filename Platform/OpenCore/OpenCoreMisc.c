@@ -23,6 +23,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAcpiLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
+#include <Library/OcAudioLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcSmbiosLib.h>
@@ -154,7 +155,21 @@ ProduceDebugReport (
     Status = OcSmbiosDump (SubReport);
     SubReport->Close (SubReport);
   }
-  DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OC: SMBIOS dumping - %r\n", Status));
+
+  Status = SafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"Audio",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping audio for report...\n"));
+    Status = OcAudioDump (SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
   Fs->Close (Fs);
@@ -670,12 +685,6 @@ OcMiscMiddleInit (
     sizeof (BootProtectFlag),
     &BootProtectFlag
     );
-
-  DEBUG_CODE_BEGIN ();
-  if (LoadHandle != NULL && Config->Misc.Debug.SysReport) {
-    ProduceDebugReport (LoadHandle);
-  }
-  DEBUG_CODE_END ();
 }
 
 EFI_STATUS
@@ -715,6 +724,17 @@ OcMiscLateInit (
   OcAppleDebugLogConfigure (Config->Misc.Debug.AppleDebug);
 
   return EFI_SUCCESS;
+}
+
+VOID
+OcMiscLoadSystemReport (
+  IN  OC_GLOBAL_CONFIG          *Config,
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  )
+{
+  if (LoadHandle != NULL && Config->Misc.Debug.SysReport) {
+    ProduceDebugReport (LoadHandle);
+  }
 }
 
 VOID

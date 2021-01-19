@@ -674,9 +674,10 @@ HdaControllerInstallProtocols (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  HdaControllerInfoData->Signature                  = HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE;
-  HdaControllerInfoData->HdaControllerDev           = HdaControllerDev;
-  HdaControllerInfoData->HdaControllerInfo.GetName  = HdaControllerInfoGetName;
+  HdaControllerInfoData->Signature                     = HDA_CONTROLLER_PRIVATE_DATA_SIGNATURE;
+  HdaControllerInfoData->HdaControllerDev              = HdaControllerDev;
+  HdaControllerInfoData->HdaControllerInfo.GetName     = HdaControllerInfoGetName;
+  HdaControllerInfoData->HdaControllerInfo.GetVendorId = HdaControllerInfoGetVendorId;
 
   //
   // Install protocols.

@@ -669,6 +669,7 @@ HdaCodecInstallProtocols(
   // Populate info protocol data.
   HdaCodecInfoData->Signature = HDA_CODEC_PRIVATE_DATA_SIGNATURE;
   HdaCodecInfoData->HdaCodecDev = HdaCodecDev;
+  HdaCodecInfoData->HdaCodecInfo.GetAddress = HdaCodecInfoGetAddress;
   HdaCodecInfoData->HdaCodecInfo.GetName = HdaCodecInfoGetCodecName;
   HdaCodecInfoData->HdaCodecInfo.GetVendorId = HdaCodecInfoGetVendorId;
   HdaCodecInfoData->HdaCodecInfo.GetRevisionId = HdaCodecInfoGetRevisionId;

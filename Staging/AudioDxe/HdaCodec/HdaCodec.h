@@ -163,6 +163,13 @@ struct _AUDIO_IO_PRIVATE_DATA {
 //
 EFI_STATUS
 EFIAPI
+HdaCodecInfoGetAddress (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *Address
+  );
+
+EFI_STATUS
+EFIAPI
 HdaCodecInfoGetCodecName(
   IN  EFI_HDA_CODEC_INFO_PROTOCOL *This,
   OUT CONST CHAR16 **CodecName);

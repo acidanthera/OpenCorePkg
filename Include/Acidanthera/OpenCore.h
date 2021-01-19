@@ -276,7 +276,7 @@ OcMiscEarlyInit (
   );
 
 /**
-  Load middle miscellaneous support like device path and system report.
+  Load middle miscellaneous support like device path.
 
   @param[in]  Storage    OpenCore storage.
   @param[in]  Config     OpenCore configuration.
@@ -307,6 +307,19 @@ EFI_STATUS
 OcMiscLateInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config
+  );
+
+/**
+  Load system report.
+
+  @param[in]  LoadHandle OpenCore loading handle.
+
+  @retval EFI_SUCCESS on success, informational.
+**/
+VOID
+OcMiscLoadSystemReport (
+  IN  OC_GLOBAL_CONFIG          *Config,
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
   );
 
 /**

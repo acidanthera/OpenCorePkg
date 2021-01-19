@@ -24,6 +24,23 @@
 
 #include "HdaCodec.h"
 
+EFI_STATUS
+EFIAPI
+HdaCodecInfoGetAddress (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *Address
+  )
+{
+  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+
+  ASSERT (This != NULL);
+  ASSERT (Address != NULL);
+
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+
+  return HdaPrivateData->HdaCodecDev->HdaIo->GetAddress (HdaPrivateData->HdaCodecDev->HdaIo, Address);
+}
+
 /**
   Gets the codec's name.
 

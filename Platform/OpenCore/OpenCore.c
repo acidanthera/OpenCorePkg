@@ -134,6 +134,10 @@ OcMain (
   OcMiscMiddleInit (Storage, &mOpenCoreConfiguration, mStorageRoot, LoadPath, mStorageHandle);
   DEBUG ((DEBUG_INFO, "OC: OcLoadUefiSupport...\n"));
   OcLoadUefiSupport (Storage, &mOpenCoreConfiguration, &mOpenCoreCpuInfo);
+  DEBUG_CODE_BEGIN ();
+  DEBUG ((DEBUG_INFO, "OC: OcMiscLoadSystemReport...\n"));
+  OcMiscLoadSystemReport (&mOpenCoreConfiguration, mStorageHandle);
+  DEBUG_CODE_END ();
   DEBUG ((DEBUG_INFO, "OC: OcLoadAcpiSupport...\n"));
   OcLoadAcpiSupport (&mOpenCoreStorage, &mOpenCoreConfiguration);
   DEBUG ((DEBUG_INFO, "OC: OcLoadPlatformSupport...\n"));
