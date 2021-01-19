@@ -3302,7 +3302,8 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   \textbf{Description}: Produce system report on ESP folder.
 
   This option will create a \texttt{SysReport} directory on ESP partition
-  unless it is already present. The directory will contain ACPI and SMBIOS dumps.
+  unless it is already present. The directory will contain ACPI, SMBIOS, and audio codec dumps.
+  Audio codec dumps require an audio backend driver to be loaded.
 
   \emph{Note}: For security reasons \texttt{SysReport} option is \textbf{not} available
   in \texttt{RELEASE} builds. Use a \texttt{DEBUG} build if this option is needed.

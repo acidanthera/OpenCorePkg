@@ -8,6 +8,7 @@ OpenCore Changelog
 - Add `MaxBIOSVersion` option to `Generic`
 - Fix MLB verification feature in macrecovery
 - Replaced `VBoxHfs` driver with `OpenHfsPlus`
+- Added audio codec dumping to `SysReport`
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
