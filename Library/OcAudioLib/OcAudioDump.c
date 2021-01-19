@@ -176,6 +176,7 @@ CHAR8 *mColors[HDA_CONFIG_DEFAULT_COLOR_OTHER + 1] =
 };
 
 STATIC
+EFIAPI
 VOID
 PrintHdaBuffer (
   IN OUT CHAR8        **AsciiBuffer,
@@ -190,13 +191,13 @@ PrintHdaBuffer (
   CHAR8       *NewBuffer;
   UINTN       NewBufferSize;
 
-  VA_START (Marker, FormatString);
-  AsciiVSPrint (Tmp, sizeof (Tmp), FormatString, Marker);
-  VA_END (Marker);
-
   if (*AsciiBuffer == NULL) {
     return;
   }
+
+  VA_START (Marker, FormatString);
+  AsciiVSPrint (Tmp, sizeof (Tmp), FormatString, Marker);
+  VA_END (Marker);
 
   Status = AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
   if (Status == EFI_BUFFER_TOO_SMALL) {
@@ -205,6 +206,11 @@ PrintHdaBuffer (
     }
     NewBuffer = ReallocatePool (*AsciiBufferSize, NewBufferSize, *AsciiBuffer);
     if (NewBuffer == NULL) {
+      FreePool (*AsciiBuffer);
+
+      *AsciiBuffer     = NULL;
+      *AsciiBufferSize = 0;
+
       return;
     }
 
@@ -616,11 +622,13 @@ OcAudioDump (
     //
     // Save dumped controller data to file.
     //
-    UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Controller%u.txt", Index);
-    Status = SetFileData (Root, TmpFileName, FileBuffer, AsciiStrSize (FileBuffer));
-    DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA controller %u info result - %r\n", Index, Status));
+    if (FileBuffer != NULL) {
+      UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Controller%u.txt", Index);
+      Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
+      DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA controller %u info result - %r\n", Index, Status));
 
-    FreePool (FileBuffer);
+      FreePool (FileBuffer);
+    }
   }
 
   //
@@ -714,11 +722,13 @@ OcAudioDump (
     //
     // Save dumped codec data to file.
     //
-    UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Codec%u.txt", Index);
-    Status = SetFileData (Root, TmpFileName, FileBuffer, AsciiStrSize (FileBuffer));
-    DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA codec %u info result - %r\n", Index, Status));
+    if (FileBuffer != NULL) {
+      UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Codec%u.txt", Index);
+      Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
+      DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA codec %u info result - %r\n", Index, Status));
 
-    FreePool (FileBuffer);
+      FreePool (FileBuffer);
+    }
   }
 
   return EFI_SUCCESS;

@@ -33,8 +33,9 @@ HdaCodecInfoGetAddress (
 {
   HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
 
-  ASSERT (This != NULL);
-  ASSERT (Address != NULL);
+  if (This == NULL || Address == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
 

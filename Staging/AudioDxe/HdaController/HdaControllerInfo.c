@@ -33,8 +33,9 @@ HdaControllerInfoGetName (
 {
   HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
 
-  ASSERT (This != NULL);
-  ASSERT (Name != NULL);
+  if (This == NULL || Name == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   HdaPrivateData = HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS (This);
   *Name          = HdaPrivateData->HdaControllerDev->Name;
@@ -51,8 +52,9 @@ HdaControllerInfoGetVendorId (
 {
   HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
 
-  ASSERT (This != NULL);
-  ASSERT (VendorId != NULL);
+  if (This == NULL || VendorId == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
 
   HdaPrivateData = HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS (This);
   *VendorId      = HdaPrivateData->HdaControllerDev->VendorId;
