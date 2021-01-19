@@ -176,8 +176,8 @@ CHAR8 *mColors[HDA_CONFIG_DEFAULT_COLOR_OTHER + 1] =
 };
 
 STATIC
-EFIAPI
 VOID
+EFIAPI
 PrintHdaBuffer (
   IN OUT CHAR8        **AsciiBuffer,
   IN     UINTN        *AsciiBufferSize,
