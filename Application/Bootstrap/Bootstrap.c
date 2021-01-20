@@ -93,6 +93,12 @@ LoadOpenCore (
   // Try absolute path: EFI\\BOOT\\BOOTx64.efi -> EFI\\OC\\OpenCore.efi
   //
   if (Buffer == NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "BS: Fallback to absolute path - %s\n",
+      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH
+      ));
+
     Buffer = ReadFile (
       FileSystem,
       OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH,

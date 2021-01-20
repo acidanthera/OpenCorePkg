@@ -298,7 +298,7 @@ OcSetConsoleResolution (
         DEBUG ((DEBUG_WARN, "OCC: Failed to force resolution - %r\n", Result));
       }
     } else {
-      DEBUG ((DEBUG_WARN, "OCC: Missing OcForceResolution protocol - %r\n", Result));
+      DEBUG ((DEBUG_INFO, "OCC: Missing OcForceResolution protocol - %r\n", Result));
     }
   }
 
