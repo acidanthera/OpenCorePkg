@@ -586,7 +586,7 @@ OcAudioDump (
     );
   DEBUG ((DEBUG_INFO, "OCAU: %u HDA controllers installed - %r\n", (UINT32) HandleCount, Status));
 
-  if (Status == EFI_SUCCESS) {
+  if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < HandleCount; Index++) {
       Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaControllerInfoProtocolGuid, (VOID **) &HdaControllerInfo);
       DEBUG ((DEBUG_INFO, "OCAU: HDA controller %u info open result - %r\n", Index, Status));
@@ -650,7 +650,7 @@ OcAudioDump (
     );
   DEBUG ((DEBUG_INFO, "OCAU: %u HDA codecs installed - %r\n", (UINT32) HandleCount, Status));
 
-  if (Status == EFI_SUCCESS) {
+  if (!EFI_ERROR (Status)) {
     for (Index = 0; Index < HandleCount; Index++) {
       Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaCodecInfoProtocolGuid, (VOID **) &HdaCodecInfo);
       DEBUG ((DEBUG_INFO, "OCAU: HDA codec %u info open result - %r\n", Index, Status));
