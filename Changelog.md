@@ -9,6 +9,7 @@ OpenCore Changelog
 - Fix MLB verification feature in macrecovery
 - Replaced `VBoxHfs` driver with `OpenHfsPlus`
 - Added audio codec dumping to `SysReport`
+- Fix compatibility with page protection for all binaries
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
