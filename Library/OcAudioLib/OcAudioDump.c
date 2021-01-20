@@ -572,6 +572,8 @@ OcAudioDump (
   UINTN                             HdaWidgetCount;
   UINT32                            HdaWidgetIndex;
 
+  HandleCount = 0;
+
   //
   // Get all HDA controller instances.
   //
@@ -582,54 +584,59 @@ OcAudioDump (
     &HandleCount,
     &HandleBuffer
     );
+  DEBUG ((DEBUG_INFO, "OCAU: %u HDA controllers installed - %r\n", (UINT32) HandleCount, Status));
 
-  DEBUG ((DEBUG_INFO, "OCAU: %u HDA controllers installed\n", HandleCount));
+  if (Status == EFI_SUCCESS) {
+    for (Index = 0; Index < HandleCount; Index++) {
+      Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaControllerInfoProtocolGuid, (VOID **) &HdaControllerInfo);
+      DEBUG ((DEBUG_INFO, "OCAU: HDA controller %u info open result - %r\n", Index, Status));
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
 
-  for (Index = 0; Index < HandleCount; Index++) {
-    Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaControllerInfoProtocolGuid, (VOID **) &HdaControllerInfo);
-    DEBUG ((DEBUG_INFO, "OCAU: HDA controller %u info open result - %r\n", Index, Status));
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
+      FileBufferSize = SIZE_1KB;
+      FileBuffer     = AllocateZeroPool (FileBufferSize);
+      if (FileBuffer == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
 
-    FileBufferSize = SIZE_1KB;
-    FileBuffer     = AllocateZeroPool (FileBufferSize);
-    if (FileBuffer == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
+      //
+      // Get device path of controller.
+      //
+      DevicePath    = DevicePathFromHandle (HandleBuffer[Index]);
+      DevicePathStr = NULL;
+      if (DevicePath != NULL) {
+        DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      }
 
-    //
-    // Get device path of controller.
-    //
-    DevicePath    = DevicePathFromHandle (HandleBuffer[Index]);
-    DevicePathStr = NULL;
-    if (DevicePath != NULL) {
-      DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-    }
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
+      DEBUG ((DEBUG_INFO, "OCAU: Dumping controller at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
+      if (DevicePathStr != NULL) {
+        FreePool (DevicePathStr);
+      }
 
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
-    DEBUG ((DEBUG_INFO, "OCAU: Dumping controller at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
-    if (DevicePathStr != NULL) {
-      FreePool (DevicePathStr);
-    }
+      Status = HdaControllerInfo->GetName (HdaControllerInfo, &Name);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Controller: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
 
-    Status = HdaControllerInfo->GetName (HdaControllerInfo, &Name);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Controller: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
+      Status = HdaControllerInfo->GetVendorId (HdaControllerInfo, &Tmp32A);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
 
-    Status = HdaControllerInfo->GetVendorId (HdaControllerInfo, &Tmp32A);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
+      //
+      // Save dumped controller data to file.
+      //
+      if (FileBuffer != NULL) {
+        UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Controller%u.txt", Index);
+        Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
+        DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA controller %u info result - %r\n", Index, Status));
 
-    //
-    // Save dumped controller data to file.
-    //
-    if (FileBuffer != NULL) {
-      UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Controller%u.txt", Index);
-      Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
-      DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA controller %u info result - %r\n", Index, Status));
+        FreePool (FileBuffer);
+      }
 
-      FreePool (FileBuffer);
+      FreePool (HandleBuffer);
     }
   }
+
+  HandleCount = 0;
 
   //
   // Get all HDA codec instances.
@@ -641,94 +648,97 @@ OcAudioDump (
     &HandleCount,
     &HandleBuffer
     );
+  DEBUG ((DEBUG_INFO, "OCAU: %u HDA codecs installed - %r\n", (UINT32) HandleCount, Status));
 
-  DEBUG ((DEBUG_INFO, "OCAU: %u HDA codecs installed\n", HandleCount));
+  if (Status == EFI_SUCCESS) {
+    for (Index = 0; Index < HandleCount; Index++) {
+      Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaCodecInfoProtocolGuid, (VOID **) &HdaCodecInfo);
+      DEBUG ((DEBUG_INFO, "OCAU: HDA codec %u info open result - %r\n", Index, Status));
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
 
-  for (Index = 0; Index < HandleCount; Index++) {
-    Status = gBS->HandleProtocol (HandleBuffer[Index], &gEfiHdaCodecInfoProtocolGuid, (VOID **) &HdaCodecInfo);
-    DEBUG ((DEBUG_INFO, "OCAU: HDA codec %u info open result - %r\n", Index, Status));
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
+      Status = HdaCodecInfo->GetWidgets (HdaCodecInfo, &HdaWidgets, &HdaWidgetCount);
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+      
+      if (OcOverflowMulAddUN (SIZE_4KB, HdaWidgetCount, SIZE_4KB, &FileBufferSize)) {
+        HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
+        continue;
+      }
 
-    Status = HdaCodecInfo->GetWidgets (HdaCodecInfo, &HdaWidgets, &HdaWidgetCount);
-    if (EFI_ERROR (Status)) {
-      continue;
-    }
-    
-    if (OcOverflowMulAddUN (SIZE_4KB, HdaWidgetCount, SIZE_4KB, &FileBufferSize)) {
+      FileBuffer = AllocateZeroPool (FileBufferSize);
+      if (FileBuffer == NULL) {
+        HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
+        return EFI_OUT_OF_RESOURCES;
+      }
+
+      //
+      // Get device path of codec.
+      //
+      DevicePath    = DevicePathFromHandle (HandleBuffer[Index]);
+      DevicePathStr = NULL;
+      if (DevicePath != NULL) {
+        DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+      }
+
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
+      DEBUG ((DEBUG_INFO, "OCAU: Dumping codec at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
+      if (DevicePathStr != NULL) {
+        FreePool (DevicePathStr);
+      }
+
+      Status = HdaCodecInfo->GetAddress (HdaCodecInfo, &Tmp8);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Address: 0x%X\n\n", Tmp8);
+
+      Status = HdaCodecInfo->GetName (HdaCodecInfo, &Name);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Codec: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
+
+      Status = HdaCodecInfo->GetAudioFuncId (HdaCodecInfo, &Tmp8, &TmpBool);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "AFG Function Id: 0x%X (unsol %u)\n", Tmp8, TmpBool);
+
+      Status = HdaCodecInfo->GetVendorId (HdaCodecInfo, &Tmp32A);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
+
+      Status = HdaCodecInfo->GetRevisionId (HdaCodecInfo, &Tmp32A);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Revision Id: 0x%X\n", Tmp32A);
+
+      Status = HdaCodecInfo->GetDefaultRatesFormats (HdaCodecInfo, &Tmp32A, &Tmp32B);
+      if (!EFI_ERROR (Status) && (Tmp32A != 0 || Tmp32B != 0)) {
+        PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM:\n");
+        PrintRatesFormats (&FileBuffer, &FileBufferSize, Tmp32A, Tmp32B);
+      } else {
+        PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM: N/A\n");
+      }
+
+      Status = HdaCodecInfo->GetDefaultAmpCaps (HdaCodecInfo, &Tmp32A, &Tmp32B);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-In caps: ");
+      PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32A : 0);
+      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-Out caps: ");
+      PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32B : 0);
+
+      //
+      // Print all widgets.
+      //
+      for (HdaWidgetIndex = 0; HdaWidgetIndex < HdaWidgetCount; HdaWidgetIndex++) {
+        PrintWidget (&FileBuffer, &FileBufferSize, &HdaWidgets[HdaWidgetIndex]);
+      }
       HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
-      continue;
+
+      //
+      // Save dumped codec data to file.
+      //
+      if (FileBuffer != NULL) {
+        UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Codec%u.txt", Index);
+        Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
+        DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA codec %u info result - %r\n", Index, Status));
+
+        FreePool (FileBuffer);
+      }
     }
 
-    FileBuffer = AllocateZeroPool (FileBufferSize);
-    if (FileBuffer == NULL) {
-      HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    //
-    // Get device path of codec.
-    //
-    DevicePath    = DevicePathFromHandle (HandleBuffer[Index]);
-    DevicePathStr = NULL;
-    if (DevicePath != NULL) {
-      DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
-    }
-
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
-    DEBUG ((DEBUG_INFO, "OCAU: Dumping codec at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
-    if (DevicePathStr != NULL) {
-      FreePool (DevicePathStr);
-    }
-
-    Status = HdaCodecInfo->GetAddress (HdaCodecInfo, &Tmp8);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Address: 0x%X\n\n", Tmp8);
-
-    Status = HdaCodecInfo->GetName (HdaCodecInfo, &Name);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Codec: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
-
-    Status = HdaCodecInfo->GetAudioFuncId (HdaCodecInfo, &Tmp8, &TmpBool);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "AFG Function Id: 0x%X (unsol %u)\n", Tmp8, TmpBool);
-
-    Status = HdaCodecInfo->GetVendorId (HdaCodecInfo, &Tmp32A);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
-
-    Status = HdaCodecInfo->GetRevisionId (HdaCodecInfo, &Tmp32A);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Revision Id: 0x%X\n", Tmp32A);
-
-    Status = HdaCodecInfo->GetDefaultRatesFormats (HdaCodecInfo, &Tmp32A, &Tmp32B);
-    if (!EFI_ERROR (Status) && (Tmp32A != 0 || Tmp32B != 0)) {
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM:\n");
-      PrintRatesFormats (&FileBuffer, &FileBufferSize, Tmp32A, Tmp32B);
-    } else {
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM: N/A\n");
-    }
-
-    Status = HdaCodecInfo->GetDefaultAmpCaps (HdaCodecInfo, &Tmp32A, &Tmp32B);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-In caps: ");
-    PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32A : 0);
-    PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-Out caps: ");
-    PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32B : 0);
-
-    //
-    // Print all widgets.
-    //
-    for (HdaWidgetIndex = 0; HdaWidgetIndex < HdaWidgetCount; HdaWidgetIndex++) {
-      PrintWidget (&FileBuffer, &FileBufferSize, &HdaWidgets[HdaWidgetIndex]);
-    }
-    HdaCodecInfo->FreeWidgetsBuffer (HdaWidgets, HdaWidgetCount);
-
-    //
-    // Save dumped codec data to file.
-    //
-    if (FileBuffer != NULL) {
-      UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Codec%u.txt", Index);
-      Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrSize (FileBuffer));
-      DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA codec %u info result - %r\n", Index, Status));
-
-      FreePool (FileBuffer);
-    }
+    FreePool (HandleBuffer);
   }
 
   return EFI_SUCCESS;
