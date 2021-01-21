@@ -559,7 +559,7 @@ OcLoadBooterUefiSupport (
         Patch->Replace    = OC_BLOB_GET (&UserPatch->Replace);
 
         Patch->Comment    = OC_BLOB_GET (&UserPatch->Comment);
-        
+
         if (UserPatch->Mask.Size > 0) {
           Patch->Mask     = OC_BLOB_GET (&UserPatch->Mask);
         }

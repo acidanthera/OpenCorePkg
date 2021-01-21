@@ -94,7 +94,7 @@ OcApfsConnectParentDevice (
   @retval EFI_SUCCESS if the device was connected.
 **/
 EFI_STATUS
-OcApfsConnectDevice (
+OcApfsConnectHandle (
   IN EFI_HANDLE  Handle,
   IN BOOLEAN     VerifyPolicy
   );
