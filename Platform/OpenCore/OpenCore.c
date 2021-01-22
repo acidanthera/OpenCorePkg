@@ -17,6 +17,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/OcVariable.h>
 
+#include <Protocol/AmiSoftKbd.h>
+#include <Protocol/AmiSoftKbdRestore.h>
 #include <Protocol/DevicePath.h>
 #include <Protocol/LoadedImage.h>
 #include <Protocol/OcBootstrap.h>
@@ -85,10 +87,32 @@ OcStartImage (
 {
   EFI_STATUS                       Status;
   EFI_CONSOLE_CONTROL_SCREEN_MODE  OldMode;
+  AMI_SOFT_KBD_PROTOCOL            *SoftKbd;
+  AMI_SOFT_KBD_RESTORE_PROTOCOL    *SoftKbdRestore;
 
   OldMode = OcConsoleControlSetMode (
     LaunchInText ? EfiConsoleControlScreenText : EfiConsoleControlScreenGraphics
     );
+
+  Status = gBS->LocateProtocol (&gAmiSoftKbdRestoreProtocolGuid, NULL, (VOID **) &SoftKbdRestore);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: SoftKbdRestore found, active - %d\n", SoftKbdRestore->IsActive));
+    Status = SoftKbdRestore->Deactivate (SoftKbdRestore);
+    DEBUG ((DEBUG_INFO, "OC: SoftKbdRestore deactivate - %r (%d)\n", Status, SoftKbdRestore->IsActive));
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: SoftKbdRestore lookup - %r\n", Status));
+  }
+
+  Status = gBS->LocateProtocol (&gAmiSoftKbdProtocolGuid, NULL, (VOID **) &SoftKbd);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: SoftKbd found, active - %d\n", SoftKbd->IsActive));
+    Status = SoftKbd->Deactivate (SoftKbd);
+    DEBUG ((DEBUG_INFO, "OC: SoftKbd deactivate - %r\n", Status));
+    Status = SoftKbd->Stop (SoftKbd);
+    DEBUG ((DEBUG_INFO, "OC: SoftKbd stop - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: SoftKbd lookup - %r\n", Status));
+  }
 
   Status = gBS->StartImage (
     ImageHandle,
