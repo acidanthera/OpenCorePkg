@@ -95,6 +95,7 @@ OcAppleFbInfoInstallProtocol (
 {
   EFI_STATUS                      Status;
   APPLE_FRAMEBUFFER_INFO_PROTOCOL *Protocol;
+  EFI_HANDLE                      NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleFbInfoInstallProtocol\n"));
 
@@ -116,8 +117,9 @@ OcAppleFbInfoInstallProtocol (
     }
   }
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-     &gImageHandle,
+     &NewHandle,
      &gAppleFramebufferInfoProtocolGuid,
      (VOID *) &mAppleFramebufferInfo,
      NULL
