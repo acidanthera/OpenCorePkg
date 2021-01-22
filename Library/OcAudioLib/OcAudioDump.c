@@ -348,7 +348,8 @@ PrintWidget (
   PrintHdaBuffer (
     AsciiBuffer,
     AsciiBufferSize,
-    "Node 0x%2X [%a] wcaps 0x%X:",
+    "Node 0x%2X (%u) [%a] wcaps 0x%X:",
+    HdaWidget->NodeId,
     HdaWidget->NodeId,
     mWidgetNames[HDA_PARAMETER_WIDGET_CAPS_TYPE (HdaWidget->Capabilities)],
     HdaWidget->Capabilities
