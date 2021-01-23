@@ -156,6 +156,7 @@ typedef struct {
   UINTN                             KeyMapDbIndex;
 
   EFI_EVENT                         KeyMapInstallNotifyEvent;
+  VOID                              *KeyMapInstallRegistration;
 
   EFI_EVENT                         ExitBootServicesEvent;
 } USB_KB_DEV;
