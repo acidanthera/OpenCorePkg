@@ -108,7 +108,7 @@ ReleaseKeyboardLayoutResources (
 
   This function is the handler function for USB keyboard's asynchronous interrupt transfer
   to manage the keyboard. It parses the USB keyboard input report, and inserts data to
-  keyboard buffer according to state of modifer keys and normal keys. Timer for repeat key
+  keyboard buffer according to state of modifier keys and normal keys. Timer for repeat key
   is also set accordingly.
 
   @param  Data             A pointer to a buffer that is filled with key data which is
