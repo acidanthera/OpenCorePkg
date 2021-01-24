@@ -1890,6 +1890,71 @@ PatchForceSecureBootScheme (
   return EFI_SUCCESS;
 }
 
+STATIC
+UINT8
+mApfsTimeoutFind[] = {
+  0x48, 0x3D, 0x7F, 0x96, 0x98, 0x00
+};
+
+STATIC
+UINT8
+mApfsTimeoutReplace[] = {
+  0x48, 0x3D, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mApfsTimeoutPatch = {
+  .Comment     = DEBUG_POINTER ("ApfsTimeout"),
+  .Base        = NULL,
+  .Find        = mApfsTimeoutFind,
+  .Mask        = NULL,
+  .Replace     = mApfsTimeoutReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mApfsTimeoutFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+VOID
+PatchSetApfsTimeout (
+  IN UINT32  Timeout
+  )
+{
+  // FIXME: This is really ugly, make quirks take a context param.
+  DEBUG ((DEBUG_INFO, "OCAK: Registering %u APFS timeout\n", Timeout));
+  CopyMem (&mApfsTimeoutReplace[2], &Timeout, sizeof (Timeout));
+}
+
+STATIC
+EFI_STATUS
+PatchSetApfsTrimTimeout (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping apfs timeout on %u\n", KernelVersion));
+    return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+  }
+
+  return Status;
+}
+
 //
 // Quirks table.
 //
@@ -1916,6 +1981,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
   [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage },
   [KernelQuirkForceSecureBootScheme] = { "com.apple.security.AppleImage4", PatchForceSecureBootScheme },
+  [KernelQuirkSetApfsTrimTimeout] = { "com.apple.filesystems.apfs", PatchSetApfsTrimTimeout },
 };
 
 EFI_STATUS

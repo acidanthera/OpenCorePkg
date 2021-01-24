@@ -274,6 +274,11 @@ OcKernelApplyPatches (
           ));
       }
     }
+
+    if (Config->Kernel.Quirks.SetApfsTrimTimeout >= 0) {
+      PatchSetApfsTimeout ((UINT32) Config->Kernel.Quirks.SetApfsTrimTimeout);
+      OcKernelApplyQuirk (KernelQuirkSetApfsTrimTimeout, CacheType, DarwinVersion, NULL, &KernelPatcher);     
+    }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {
       OcKernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, CacheType, DarwinVersion, NULL, &KernelPatcher);

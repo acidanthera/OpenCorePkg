@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Sun Jan 24 10:54:55 2021
+%DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
+%DIF ADD ../Configuration.tex        Sun Jan 24 21:10:33 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -816,7 +816,9 @@ and clarifications.
 is available, and inline for \texttt{static} variables and functions.
 \item Use line length of 120 characters or less, preferably 100 characters.
 \item Use spaces after casts, e.g. \texttt{(VOID *)(UINTN) Variable}.
-\item Use \DIFaddbegin \DIFadd{two spaces as indentations as always.
+\item Use \DIFaddbegin \DIFadd{two spaces to indent function arguments when splitting lines.
+}\item \DIFadd{Prefix public functions with either }\texttt{\DIFadd{Oc}} \DIFadd{or another distinct name.
+}\item \DIFadd{Do not prefix private }\texttt{\DIFadd{static}} \DIFadd{functions, but use }\texttt{\DIFadd{Internal}} \DIFadd{for }\texttt{\DIFadd{non-static}}\DIFadd{.
 }\item \DIFadd{Use }\DIFaddend SPDX license headers as shown in
 \href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}.
 \end{itemize}
@@ -1490,7 +1492,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: While this quirk is required to run older macOS versions
   on platforms with used lower memory it is not compatible with some
-  hardware and macOS 11. In this case you may try to use
+  hardware and macOS 11. In this case \DIFdelbegin \DIFdel{you }\DIFdelend \DIFaddbegin \DIFadd{one }\DIFaddend may try to use
   \texttt{EnableSafeModeSlide} instead.
 
 \item
@@ -2615,7 +2617,30 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \texttt{ThirdPartyDrives}\\
+  \DIFaddbegin \texttt{\DIFadd{SetApfsTrimTimeout}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.14 (not required for older)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set trim timeout in microseconds for APFS filesystems on SSDs.
+}
+
+  \DIFadd{Depending on the SSD controller trim procedure may take considerable
+  amount of time, causing noticeable boot slowdown as this is when the
+  APFS driver executes the trim operation. If the SSD supports
+  over-provisioning or there exists a dedicated unused partition that
+  can be used to reserve blocks, trim operation may not be necessary.
+  On the other side if the SSD is slow, the default timeout (equals to
+  }\texttt{\DIFadd{9.999999}} \DIFadd{seconds) may not be enough. See more details
+  in this }\href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{\DIFadd{article}}\DIFadd{.
+}
+
+  \DIFadd{Set this value to }\texttt{\DIFadd{4294967295}} \DIFadd{for the maximum timeout to
+  guarantee trim success or to }\texttt{\DIFadd{999}} \DIFadd{to essentially disable
+  trim.
+}
+
+\item
+  \DIFaddend \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.6 (not required for older)\\
@@ -5538,20 +5563,24 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
   may not include this driver but it is necessary for the touchpad to work
   in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenHfsPlus}}\DIFaddend \textbf{*}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/audk}{%%%
+\texttt{\DIFdel{UsbMouseDxe}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenHfsPlus}}\DIFaddend }\textbf{*}
 & \DIFdelbegin \DIFdel{USB mouse driver from }\texttt{\DIFdel{MdeModulePkg}}%DIFAUXCMD
 \DIFdel{. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
   in UEFI graphical interfaces such as }\texttt{\DIFdel{OpenCanopy}}%DIFAUXCMD
 \DIFdel{. }%DIFDELCMD < \\
-%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
+%DIFDELCMD < %%%
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFdel{VBoxHfs}}%DIFAUXCMD
+}
+%DIFAUXCMD
 %DIFDELCMD < & %%%
 \DIFdelend HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
-\DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{\DIFadd{*}}
+\DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{\DIFadd{UsbMouseDxe}}}\textbf{\DIFadd{*}}
 & \DIFadd{USB mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
   in UEFI graphical interfaces such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
@@ -5613,7 +5642,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}%%%
+\DIFdelbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFdel{HdaCodecDump}}%DIFAUXCMD
+}%DIFAUXCMD
 \textbf{\DIFdel{*}}
 %DIFAUXCMD
 %DIFDELCMD < & %%%
@@ -6821,9 +6851,9 @@ Since it is not always accurate, the latest versions are listed below.
     images are limited to their target model identifiers and have no
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here}%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.6.7-10j3250-disk-images}{here}
-    \DIFadd{(}\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.6.7-10j3250-disk-images}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
@@ -6873,9 +6903,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
     this image is not limited to the target model identifiers and can be used
     as is. The original \texttt{9J3050} image can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{here}%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.5.7-9-j-3050}{here}
-    \DIFadd{(}\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.5.7-9-j-3050}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
@@ -6894,9 +6924,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     to their target model identifiers as on newer macOS versions.
     Modified \texttt{8R4088} images (with \texttt{ACDT} suffix) without
     model restrictions can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{here}%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{here}
-    \DIFadd{(}\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{\DIFaddend here}
+    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.

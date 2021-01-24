@@ -756,7 +756,9 @@ and clarifications.
 is available, and inline for \texttt{static} variables and functions.
 \item Use line length of 120 characters or less, preferably 100 characters.
 \item Use spaces after casts, e.g. \texttt{(VOID *)(UINTN) Variable}.
-\item Use two spaces as indentations as always.
+\item Use two spaces to indent function arguments when splitting lines.
+\item Prefix public functions with either \texttt{Oc} or another distinct name.
+\item Do not prefix private \texttt{static} functions, but use \texttt{Internal} for \texttt{non-static}.
 \item Use SPDX license headers as shown in
 \href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}.
 \end{itemize}
@@ -1430,7 +1432,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: While this quirk is required to run older macOS versions
   on platforms with used lower memory it is not compatible with some
-  hardware and macOS 11. In this case you may try to use
+  hardware and macOS 11. In this case one may try to use
   \texttt{EnableSafeModeSlide} instead.
 
 \item
@@ -2553,6 +2555,26 @@ blocking.
   issues on misconfigured hardware, notably digital audio, which sometimes fails
   to wake up. For debug kernels \texttt{setpowerstate\_panic=0} boot argument
   should be used, which is otherwise equivalent to this quirk.
+
+\item
+  \texttt{SetApfsTrimTimeout}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Requirement}: 10.14 (not required for older)\\
+  \textbf{Description}: Set trim timeout in microseconds for APFS filesystems on SSDs.
+
+  Depending on the SSD controller trim procedure may take considerable
+  amount of time, causing noticeable boot slowdown as this is when the
+  APFS driver executes the trim operation. If the SSD supports
+  over-provisioning or there exists a dedicated unused partition that
+  can be used to reserve blocks, trim operation may not be necessary.
+  On the other side if the SSD is slow, the default timeout (equals to
+  \texttt{9.999999} seconds) may not be enough. See more details
+  in this \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}.
+
+  Set this value to \texttt{4294967295} for the maximum timeout to
+  guarantee trim success or to \texttt{999} to essentially disable
+  trim.
 
 \item
   \texttt{ThirdPartyDrives}\\
