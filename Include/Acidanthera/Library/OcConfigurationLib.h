@@ -579,29 +579,29 @@ typedef enum {
 /// Audio is a set of options for sound configuration.
 ///
 #define OC_UEFI_AUDIO_FIELDS(_, __) \
-  _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(UINT32                      , SetupDelay         ,     , 0                             , ()) \
-  _(UINT16                      , VolumeAmplifier    ,     , 0                             , ()) \
-  _(BOOLEAN                     , AudioSupport       ,     , FALSE                         , ()) \
-  _(UINT8                       , AudioCodec         ,     , 0                             , ()) \
-  _(UINT8                       , AudioOut           ,     , 0                             , ()) \
-  _(UINT8                       , MinimumVolume      ,     , 0                             , ())
+  _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , SetupDelay         ,     , 0                                 , ()) \
+  _(UINT16                      , VolumeAmplifier    ,     , 0                                 , ()) \
+  _(BOOLEAN                     , AudioSupport       ,     , FALSE                             , ()) \
+  _(UINT8                       , AudioCodec         ,     , 0                                 , ()) \
+  _(UINT8                       , AudioOut           ,     , 0                                 , ()) \
+  _(UINT8                       , MinimumVolume      ,     , 0                                 , ())
   OC_DECLARE (OC_UEFI_AUDIO)
 
 ///
 /// Input is a set of options to support advanced input.
 ///
 #define OC_UEFI_INPUT_FIELDS(_, __) \
-  _(OC_STRING                   , KeySupportMode     ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(UINT32                      , TimerResolution    ,     , 0                             , ()) \
-  _(UINT8                       , KeyForgetThreshold ,     , 0                             , ()) \
-  _(UINT8                       , KeyMergeThreshold  ,     , 0                             , ()) \
-  _(BOOLEAN                     , KeySupport         ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , KeyFiltering       ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , KeySwap            ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , PointerSupport     ,     , FALSE                         , ())
+  _(OC_STRING                   , KeySupportMode     ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , TimerResolution    ,     , 0                                 , ()) \
+  _(UINT8                       , KeyForgetThreshold ,     , 0                                 , ()) \
+  _(UINT8                       , KeyMergeThreshold  ,     , 0                                 , ()) \
+  _(BOOLEAN                     , KeySupport         ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , KeyFiltering       ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , KeySwap            ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , PointerSupport     ,     , FALSE                             , ())
   OC_DECLARE (OC_UEFI_INPUT)
 
 ///

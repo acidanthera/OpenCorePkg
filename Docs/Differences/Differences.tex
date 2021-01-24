@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
-%DIF ADD ../Configuration.tex        Tue Jan 19 10:58:25 2021
+%DIF ADD ../Configuration.tex        Sun Jan 24 10:00:36 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6018,7 +6018,7 @@ functioning. Feature highlights:
 \item
   \texttt{PlayChime}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{Auto}}\DIFaddend \\
   \textbf{Description}: Play chime sound at startup.
 
   Enabling this setting plays boot chime through builtin audio support. Volume level
@@ -6139,7 +6139,7 @@ functioning. Feature highlights:
 \item
   \texttt{KeySupportMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{Auto}}\DIFaddend \\
   \textbf{Description}: Set internal keyboard input translation to
   \texttt{AppleKeyMapAggregator} protocol mode.
 
