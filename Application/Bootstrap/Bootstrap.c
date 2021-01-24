@@ -35,6 +35,7 @@ STATIC
 EFI_STATUS
 LoadOpenCore (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  EFI_HANDLE                       DeviceHandle,
   IN  EFI_DEVICE_PATH_PROTOCOL         *LoaderDevicePath,
   OUT EFI_HANDLE                       *ImageHandle,
   OUT EFI_DEVICE_PATH_PROTOCOL         **ImagePath
@@ -76,7 +77,7 @@ LoadOpenCore (
         DEBUG ((DEBUG_INFO, "BS: Startup path - %s (%p)\n", LoaderPath, Buffer));
 
         if (Buffer != NULL) {
-          *ImagePath = FileDevicePath (NULL, LoaderPath);
+          *ImagePath = FileDevicePath (DeviceHandle, LoaderPath);
           if (*ImagePath == NULL) {
             DEBUG ((DEBUG_INFO, "BS: File DP allocation failure, aborting\n"));
             FreePool (Buffer);
@@ -110,7 +111,7 @@ LoadOpenCore (
       // Failure to allocate this one is not too critical, as we will still be able
       // to choose it as a default path.
       //
-      *ImagePath = FileDevicePath (NULL, OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH);
+      *ImagePath = FileDevicePath (DeviceHandle, OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH);
     }
   }
 
@@ -127,7 +128,7 @@ LoadOpenCore (
   //
   *ImageHandle = NULL;
   Status = OcLoadAndRunImage (
-    NULL,
+    *ImagePath,
     Buffer,
     BufferSize,
     ImageHandle
@@ -250,7 +251,7 @@ UefiMain (
   }
 
   DEBUG ((DEBUG_INFO, "BS: Trying to load OpenCore image...\n"));
-  Status = LoadOpenCore (FileSystem, LoadedImage->FilePath, &OcImageHandle, &OcImagePath);
+  Status = LoadOpenCore (FileSystem, LoadedImage->DeviceHandle, LoadedImage->FilePath, &OcImageHandle, &OcImagePath);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "BS: Failed to load OpenCore from disk - %r\n", Status));
     return EFI_NOT_FOUND;
