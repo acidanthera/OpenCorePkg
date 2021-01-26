@@ -68,6 +68,8 @@
   gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
   gAmiSoftKbdProtocolGuid             ## SOMETIMES_CONSUMES
   gAmiSoftKbdRestoreProtocolGuid      ## SOMETIMES_CONSUMES
+  gEfiSecurityArchProtocolGuid        ## SOMETIMES_CONSUMES
+  gEfiSecurity2ArchProtocolGuid       ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   DevicePathLib
