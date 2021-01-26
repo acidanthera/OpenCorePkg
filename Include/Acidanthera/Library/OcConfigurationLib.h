@@ -273,7 +273,7 @@
 /// KernelSpace quirks.
 ///
 #define OC_KERNEL_QUIRKS_FIELDS(_, __) \
-  _(INT64                       , SetApfsTrimTimeout          ,     , FALSE  , ()) \
+  _(INT64                       , SetApfsTrimTimeout          ,     , -1     , ()) \
   _(BOOLEAN                     , AppleCpuPmCfgLock           ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmCfgLock            ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmExtraMsrs          ,     , FALSE  , ()) \
