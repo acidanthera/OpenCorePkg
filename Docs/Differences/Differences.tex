@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Sun Jan 24 21:10:33 2021
+%DIF ADD ../Configuration.tex        Tue Jan 26 22:41:34 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3979,7 +3979,7 @@ rm vault.pub
     \item Since \texttt{Default} value will increase with time to support the latest
       major release operating system, it is not recommended to use \texttt{ApECID}
       and \texttt{Default} value together.
-    \item Installing macOS with Apple Secure Boot enabled is not possible while using HFS+ 
+    \item Installing macOS with Apple Secure Boot enabled is not possible while using HFS+
       target volume. This may include HFS+ formatted drives when no spare APFS drive is available.
   \end{enumerate}
 
@@ -4720,8 +4720,8 @@ be used. Version with macOS specific enhancements can be downloaded from
   \DIFaddbegin \texttt{\DIFadd{MaxBIOSVersion}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Sets }\texttt{\DIFadd{BIOSVersion}} \DIFadd{to }\texttt{\DIFadd{9999.999.999.999.999}}\DIFadd{, recommended for legacy 
-  Macs when using }\texttt{\DIFadd{Automatic}} \DIFadd{PlatformInfo to avoid BIOS updates in unofficially supported macOS 
+  \textbf{\DIFadd{Description}}\DIFadd{: Sets }\texttt{\DIFadd{BIOSVersion}} \DIFadd{to }\texttt{\DIFadd{9999.999.999.999.999}}\DIFadd{, recommended for legacy
+  Macs when using }\texttt{\DIFadd{Automatic}} \DIFadd{PlatformInfo to avoid BIOS updates in unofficially supported macOS
   versions.
 }
 
@@ -6625,7 +6625,19 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{ExitBootServicesDelay}\\
+  \DIFaddbegin \texttt{\DIFadd{DisableSecurityPolicy}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Disable platform security policy.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This setting disables various security features of the firmware,
+  defeating the purpose of any kind of Secure Boot. Do NOT enable if you use
+  UEFI Secure Boot.
+}
+
+\item
+  \DIFaddend \texttt{ExitBootServicesDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Adds delay in microseconds after \texttt{EXIT\_BOOT\_SERVICES}
