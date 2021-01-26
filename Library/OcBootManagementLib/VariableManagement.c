@@ -408,6 +408,6 @@ InternalSystemActionResetNvram (
   )
 {
   OcDeleteVariables ();
-  DirectRestCold ();
+  DirectResetCold ();
   return EFI_DEVICE_ERROR;
 }

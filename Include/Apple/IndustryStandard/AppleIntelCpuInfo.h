@@ -41,6 +41,7 @@
 #define CPUFAMILY_INTEL_BROADWELL   0x582ed09c
 #define CPUFAMILY_INTEL_SKYLAKE     0x37fc219f
 #define CPUFAMILY_INTEL_KABYLAKE    0x0f817246
+#define CPUFAMILY_INTEL_ICELAKE     0x38435547
 
 /* CPU type, integer_t */
 typedef INT32 cpu_type_t;
