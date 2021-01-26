@@ -836,6 +836,9 @@
   OcInputLib|Include/Acidanthera/Library/OcInputLib.h
 
   ##  @libraryclass
+  OcMainLib|Include/Acidanthera/Library/OcMainLib.h
+
+  ##  @libraryclass
   OcMachoLib|Include/Acidanthera/Library/OcMachoLib.h
 
   ##  @libraryclass

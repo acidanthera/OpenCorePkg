@@ -91,6 +91,7 @@
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
+  OcMainLib|OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OcMp3Lib|OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
@@ -211,6 +212,7 @@
   OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
+  OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf

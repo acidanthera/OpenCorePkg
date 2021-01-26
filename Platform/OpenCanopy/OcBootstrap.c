@@ -5,7 +5,7 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 #include <Uefi.h>
 
 #include <Protocol/DevicePath.h>

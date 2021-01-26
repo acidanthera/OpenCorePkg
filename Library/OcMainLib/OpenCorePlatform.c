@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <Protocol/DataHub.h>
 

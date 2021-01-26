@@ -13,7 +13,7 @@
 **/
 
 #include <Uefi.h>
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 #include "BootManagementInternal.h"
 
 #include <Guid/AppleFile.h>

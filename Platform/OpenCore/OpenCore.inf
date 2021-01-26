@@ -36,20 +36,8 @@
 
 [Sources]
   OpenCore.c
-  OpenCoreAcpi.c
-  OpenCoreDevProps.c
-  OpenCoreKernel.c
-  OpenCoreKernelPatch.c
-  OpenCoreMisc.c
-  OpenCoreNvram.c
-  OpenCorePlatform.c
-  OpenCoreUefi.c
-  OpenCoreUefiAudio.c
-  OpenCoreUefiInOut.c
-  OpenCoreVault.c
 
 [Packages]
-  OpenCorePkg/OpenCorePkg.dec
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
@@ -68,44 +56,4 @@
   gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
-  DevicePathLib
-  IoLib
-  OcAcpiLib
-  OcAfterBootCompatLib
-  OcApfsLib
-  OcAppleBootPolicyLib
-  OcAppleEventLib
-  OcAppleImageConversionLib
-  OcAudioLib
-  OcInputLib
-  OcAppleImg4Lib
-  OcAppleKernelLib
-  OcAppleKeyMapLib
-  OcAppleSecureBootLib
-  OcAppleUserInterfaceThemeLib
-  OcBootManagementLib
-  OcConfigurationLib
-  OcConsoleLib
-  OcDataHubLib
-  OcDevicePathLib
-  OcDevicePropertyLib
-  OcDriverConnectionLib
-  OcFirmwareVolumeLib
-  OcGuardLib
-  OcHashServicesLib
-  OcMachoLib
-  OcMiscLib
-  OcOSInfoLib
-  OcSmbiosLib
-  OcSmcLib
-  OcStorageLib
-  OcUnicodeCollationEngGenericLib
-  OcVirtualFsLib
-  OcMacInfoLib
-  PcdLib
-  PrintLib
-  SerialPortLib
-  UefiBootServicesTableLib
-  UefiDriverEntryPoint
-  UefiLib
-  UefiRuntimeServicesTableLib
+  OcMainLib
