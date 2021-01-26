@@ -174,101 +174,71 @@ OcMain (
 
 STATIC
 EFI_STATUS
-EFIAPI
-OcBootstrapRerun (
-  IN OC_BOOTSTRAP_PROTOCOL            *This,
+OcBootstrap (
+  IN EFI_HANDLE                       DeviceHandle,
   IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN EFI_DEVICE_PATH_PROTOCOL         *LoadPath OPTIONAL
+  IN EFI_DEVICE_PATH_PROTOCOL         *LoadPath
   )
 {
   EFI_STATUS                Status;
   EFI_DEVICE_PATH_PROTOCOL  *RemainingPath;
   UINTN                     StoragePathSize;
 
-  DEBUG ((DEBUG_INFO, "OC: ReRun executed!\n"));
+  mOpenCoreVaultKey = OcGetVaultKey ();
+  mStorageHandle = DeviceHandle;
 
-  ++This->NestedCount;
-
-  if (This->NestedCount == 1) {
-    mOpenCoreVaultKey = OcGetVaultKey (This);
-
-    //
-    // Calculate root path (never freed).
-    //
-    RemainingPath = NULL;
-    if (LoadPath != NULL) {
-      ASSERT (mStorageRoot == NULL);
-      mStorageRoot = OcCopyDevicePathFullName (LoadPath, &RemainingPath);
-      //
-      // Skipping this or later failing to call UnicodeGetParentDirectory means
-      // we got valid path to the root of the partition. This happens when
-      // OpenCore.efi was loaded from e.g. firmware and then bootstrapped
-      // on a different partition.
-      //
-      if (mStorageRoot != NULL) {
-        if (UnicodeGetParentDirectory (mStorageRoot)) {
-          //
-          // This means we got valid path to ourselves.
-          //
-          DEBUG ((DEBUG_INFO, "OC: Got launch root path %s\n", mStorageRoot));
-        } else {
-          FreePool (mStorageRoot);
-          mStorageRoot = NULL;
-        }
-      }
-    }
-
-    if (mStorageRoot == NULL) {
-      mStorageRoot = OPEN_CORE_ROOT_PATH;
-      RemainingPath = NULL;
-      DEBUG ((DEBUG_INFO, "OC: Got default root path %s\n", mStorageRoot));
-    }
-
-    //
-    // Calculate storage path.
-    //
-    if (RemainingPath != NULL) {
-      StoragePathSize = (UINTN) RemainingPath - (UINTN) LoadPath;
-      mStoragePath = AllocatePool (StoragePathSize + END_DEVICE_PATH_LENGTH);
-      if (mStoragePath != NULL) {
-        CopyMem (mStoragePath, LoadPath, StoragePathSize);
-        SetDevicePathEndNode ((UINT8 *) mStoragePath + StoragePathSize);
-      }
-    } else {
-      mStoragePath = NULL;
-    }
-
-    RemainingPath = LoadPath;
-    gBS->LocateDevicePath (
-      &gEfiSimpleFileSystemProtocolGuid,
-      &RemainingPath,
-      &mStorageHandle
-      );
-
-    Status = OcStorageInitFromFs (
-      &mOpenCoreStorage,
-      FileSystem,
-      mStorageHandle,
-      mStoragePath,
-      mStorageRoot,
-      mOpenCoreVaultKey
-      );
-
-    if (!EFI_ERROR (Status)) {
-      OcMain (&mOpenCoreStorage, LoadPath);
-      OcStorageFree (&mOpenCoreStorage);
-    } else {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to open root FS - %r!\n", Status));
-      if (Status == EFI_SECURITY_VIOLATION) {
-        CpuDeadLoop (); ///< Should not return.
-      }
-    }
-  } else {
-    DEBUG ((DEBUG_WARN, "OC: Nested ReRun is not supported\n"));
-    Status = EFI_ALREADY_STARTED;
+  //
+  // Calculate root path (never freed).
+  //
+  RemainingPath = NULL;
+  mStorageRoot = OcCopyDevicePathFullName (LoadPath, &RemainingPath);
+  //
+  // Skipping this or later failing to call UnicodeGetParentDirectory means
+  // we got valid path to the root of the partition. This happens when
+  // OpenCore.efi was loaded from e.g. firmware and then bootstrapped
+  // on a different partition.
+  //
+  if (mStorageRoot == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to get launcher path\n"));
+    return EFI_UNSUPPORTED;
   }
 
-  --This->NestedCount;
+  ASSERT (RemainingPath != NULL);
+
+  if (!UnicodeGetParentDirectory (mStorageRoot)) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to get launcher root path\n"));
+    FreePool (mStorageRoot);
+    return EFI_UNSUPPORTED;
+  }
+
+  StoragePathSize = (UINTN) RemainingPath - (UINTN) LoadPath;
+  mStoragePath = AllocatePool (StoragePathSize + END_DEVICE_PATH_LENGTH);
+  if (mStoragePath == NULL) {
+    FreePool (mStorageRoot);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  CopyMem (mStoragePath, LoadPath, StoragePathSize);
+  SetDevicePathEndNode ((UINT8 *) mStoragePath + StoragePathSize);
+
+  Status = OcStorageInitFromFs (
+    &mOpenCoreStorage,
+    FileSystem,
+    mStorageHandle,
+    mStoragePath,
+    mStorageRoot,
+    mOpenCoreVaultKey
+    );
+
+  if (!EFI_ERROR (Status)) {
+    OcMain (&mOpenCoreStorage, LoadPath);
+    OcStorageFree (&mOpenCoreStorage);
+  } else {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to open root FS - %r!\n", Status));
+    if (Status == EFI_SECURITY_VIOLATION) {
+      CpuDeadLoop (); ///< Should not return.
+    }
+  }
 
   return Status;
 }
@@ -287,9 +257,6 @@ STATIC
 OC_BOOTSTRAP_PROTOCOL
 mOpenCoreBootStrap = {
   .Revision      = OC_BOOTSTRAP_PROTOCOL_REVISION,
-  .NestedCount   = 0,
-  .VaultKey      = NULL,
-  .ReRun         = OcBootstrapRerun,
   .GetLoadHandle = OcGetLoadHandle,
 };
 
@@ -339,6 +306,33 @@ UefiMain (
     return EFI_NOT_FOUND;
   }
 
+  if (LoadedImage->FilePath == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Missing boot path\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  DebugPrintDevicePath (DEBUG_INFO, "OC: Booter path", LoadedImage->FilePath);
+
+  //
+  // Obtain the file system device path
+  //
+  FileSystem = LocateFileSystem (
+    LoadedImage->DeviceHandle,
+    LoadedImage->FilePath
+    );
+  if (FileSystem == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to locate file system\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  AbsPath = AbsoluteDevicePath (LoadedImage->DeviceHandle, LoadedImage->FilePath);
+  if (AbsPath == NULL) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to allocate absolute path\n"));
+    return EFI_OUT_OF_RESOURCES;
+  }  
+
+  DebugPrintDevicePath (DEBUG_INFO, "OC: Absolute booter path", LoadedImage->FilePath);
+
   BootstrapHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
     &BootstrapHandle,
@@ -348,39 +342,13 @@ UefiMain (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install bootstrap protocol - %r\n", Status));
+    FreePool (AbsPath);
     return Status;
   }
 
-  DebugPrintDevicePath (DEBUG_INFO, "OC: Booter path", LoadedImage->FilePath);
-
-  if (LoadedImage->FilePath == NULL) {
-    DEBUG ((DEBUG_INFO, "OC: Booted from bootstrap\n"));
-    return EFI_SUCCESS;
-  }
-
-  //
-  // Obtain the file system device path
-  //
-  FileSystem = LocateFileSystem (
-    LoadedImage->DeviceHandle,
-    LoadedImage->FilePath
-    );
-
-  AbsPath = AbsoluteDevicePath (LoadedImage->DeviceHandle, LoadedImage->FilePath);
-
-  //
-  // Return success in either case to let rerun work afterwards.
-  //
-  if (FileSystem != NULL) {
-    mOpenCoreBootStrap.ReRun (&mOpenCoreBootStrap, FileSystem, AbsPath);
-    DEBUG ((DEBUG_ERROR, "OC: Failed to boot\n"));
-  } else {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to locate file system\n"));
-  }
-
-  if (AbsPath != NULL) {
-    FreePool (AbsPath);
-  }
+  OcBootstrap (LoadedImage->DeviceHandle, FileSystem, AbsPath);
+  DEBUG ((DEBUG_ERROR, "OC: Failed to boot\n"));
+  CpuDeadLoop ();
 
   return EFI_SUCCESS;
 }

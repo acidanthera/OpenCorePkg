@@ -81,7 +81,7 @@
 **/
 OC_RSA_PUBLIC_KEY *
 OcGetVaultKey (
-  IN  OC_BOOTSTRAP_PROTOCOL *Bootstrap
+  VOID
   );
 
 /**

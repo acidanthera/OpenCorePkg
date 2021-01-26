@@ -161,6 +161,7 @@
   OpenCorePkg/Application/KeyTester/KeyTester.inf
   OpenCorePkg/Application/MmapDump/MmapDump.inf
   OpenCorePkg/Application/OpenControl/OpenControl.inf
+  OpenCorePkg/Application/OpenCore/OpenCore.inf
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/ResetSystem/ResetSystem.inf
   OpenCorePkg/Application/RtcRw/RtcRw.inf
@@ -234,7 +235,6 @@
   OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
-  OpenCorePkg/Platform/OpenCore/OpenCore.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
