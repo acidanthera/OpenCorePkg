@@ -43,7 +43,7 @@ HdaCodecProbeWidget (
 
   UINT32                Response;
   UINT8                 ConnectionListThresh;
-  UINT8                 AmpInCount;
+  UINT32                 AmpInCount;
   UINT8                 ActualConnectionCount;
   UINT16                Connection;
   UINT16                ConnectionPrev;
@@ -248,7 +248,7 @@ HdaCodecProbeWidget (
     for (UINT8 i = 0; i < AmpInCount; i++) {
       // Get left.
       Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId,
-      HDA_CODEC_VERB(HDA_VERB_GET_AMP_GAIN_MUTE,
+      HDA_CODEC_VERB (HDA_VERB_GET_AMP_GAIN_MUTE,
       HDA_VERB_GET_AMP_GAIN_MUTE_PAYLOAD (i, TRUE, FALSE)), &Response);
       if (EFI_ERROR (Status)) {
         return Status;
