@@ -15,6 +15,7 @@ OpenCore Changelog
 - Added `SetApfsTrimTimeout` to tune APFS trim command
 - Changed `OpenCore.efi` to application to improve FW compatibility
 - Added `DisableSecurityPolicy` UEFI quirk to workaround driver loading
+- Added support for ranged widget connections in AudioDxe
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
