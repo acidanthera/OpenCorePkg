@@ -246,7 +246,7 @@ HdaCodecInfoGetWidgets(
   // Create variables.
   HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
   HDA_WIDGET_DEV *HdaWidgetDev;
-  UINT8 AmpInCount;
+  UINT32 AmpInCount;
   HDA_WIDGET *HdaWidgets;
   UINTN HdaWidgetsCount;
 
