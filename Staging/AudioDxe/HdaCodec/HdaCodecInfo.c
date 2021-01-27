@@ -273,7 +273,7 @@ HdaCodecInfoGetWidgets(
     HdaWidgets[w].DefaultEapd = HdaWidgetDev->DefaultEapd;
 
     // Get connections.
-    HdaWidgets[w].ConnectionListLength = HdaWidgetDev->ConnectionListLength;
+    HdaWidgets[w].ConnectionCount = HdaWidgetDev->ConnectionCount;
     HdaWidgets[w].Connections = AllocateZeroPool(sizeof(UINT16) * HdaWidgetDev->ConnectionCount);
     if (HdaWidgets[w].Connections == NULL)
       goto FREE_WIDGETS;

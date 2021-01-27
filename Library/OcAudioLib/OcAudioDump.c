@@ -383,7 +383,7 @@ PrintWidget (
     PrintAmpCaps (AsciiBuffer, AsciiBufferSize, HdaWidget->AmpInCapabilities);
 
     PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-In vals:");
-    for (Index = 0; Index < HDA_PARAMETER_CONN_LIST_LENGTH_LEN (HdaWidget->ConnectionListLength); Index++) {
+    for (Index = 0; Index < HdaWidget->ConnectionCount; Index++) {
       if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_STEREO) {
         PrintHdaBuffer (
           AsciiBuffer,
@@ -536,8 +536,8 @@ PrintWidget (
   // Connections to other widgets.
   //
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_CONN_LIST) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Connection: %u\n    ", HDA_PARAMETER_CONN_LIST_LENGTH_LEN (HdaWidget->ConnectionListLength));
-    for (Index = 0; Index < HDA_PARAMETER_CONN_LIST_LENGTH_LEN (HdaWidget->ConnectionListLength); Index++) {
+    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Connection: %u\n    ", HdaWidget->ConnectionCount);
+    for (Index = 0; Index < HdaWidget->ConnectionCount; Index++) {
       PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 0x%2X", HdaWidget->Connections[Index]);
     }
     PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");

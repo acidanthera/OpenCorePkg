@@ -47,7 +47,7 @@ struct _HDA_WIDGET_DEV {
   UINT32 ConnectionListLength;
   UINT16 *Connections;
   HDA_WIDGET_DEV **WidgetConnections;
-  UINT8 ConnectionCount;
+  UINT32 ConnectionCount;
   HDA_WIDGET_DEV *UpstreamWidget;
   UINT8 UpstreamIndex;
 

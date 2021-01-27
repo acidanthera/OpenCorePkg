@@ -51,7 +51,7 @@ typedef struct {
   ///
   /// Connections.
   ///
-  UINT32  ConnectionListLength;
+  UINT32  ConnectionCount;
   UINT16  *Connections;
   ///
   /// Power.
