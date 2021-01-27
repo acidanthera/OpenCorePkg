@@ -4,7 +4,7 @@ Kexts
 | Ethernet | MinKernel (Min macOS) | MaxKernel (Max macOS) |
 |----------|-----------------------|-----------------------|
 | [AppleRTL8169Ethernet](https://www.realtek.com/en/directly-download) | — | — |
-| [AtherosE2200Ethernet.kext](https://github.com/Mieze/AtherosE2200Ethernet) | — | — |
+| [AtherosE2200Ethernet.kext](https://github.com/Mieze/AtherosE2200Ethernet) | 16.0.0 (10.12) | — |
 | [AtherosL1cEthernet.kext](https://github.com/al3xtjames/AtherosL1cEthernet) | — | — |
 | [IntelMausi.kext](https://github.com/acidanthera/IntelMausi) | 13.0.0 (10.9) | — |
 | [IntelSnowMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.0.0 (10.6) Not tested | — |
@@ -12,7 +12,7 @@ Kexts
 | [NullEthernetInjector.kext](https://github.com/RehabMan/OS-X-Null-Ethernet) | — | — |
 | [RealtekR1000SL.kext](https://github.com/SergeySlice/RealtekLANv3) | — | — |
 | [RealtekRTL8100.kext](https://github.com/Mieze/RealtekRTL8100) | — | — |
-| [RealtekRTL8111.kext](https://github.com/Mieze/RTL8111_driver_for_OS_X) | — | — |
+| [RealtekRTL8111.kext](https://github.com/Mieze/RTL8111_driver_for_OS_X) | 12.0.0 (10.8) | — |
 
 | Wi-Fi and bluetooth | MinKernel (Min macOS) | MaxKernel (Max macOS) |
 |---------------------|-----------------------|-----------------------|
