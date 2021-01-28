@@ -42,6 +42,7 @@ STATIC EFI_GET_NEXT_VARIABLE_NAME    mStoredGetNextVariableName;
 STATIC EFI_SET_VARIABLE              mStoredSetVariable;
 STATIC EFI_GET_NEXT_HIGH_MONO_COUNT  mStoredGetNextHighMonotonicCount;
 STATIC EFI_RESET_SYSTEM              mStoredResetSystem;
+STATIC EFI_SET_VIRTUAL_ADDRESS_MAP   mSetVirtualAddressMap;
 
 /**
   Configurations to use.
@@ -55,6 +56,8 @@ OC_FWRT_CONFIG  *gCurrentConfig;
 **/
 STATIC EFI_EVENT                     mTranslateEvent;
 STATIC EFI_GET_VARIABLE              mCustomGetVariable;
+STATIC EFI_SET_VIRTUAL_ADDRESS_MAP   mCustomSetVirtualAddressMap;
+STATIC BOOLEAN                       mCustomSetVirtualAddressMapEnabled;
 STATIC BOOLEAN                       mKernelStarted;
 #ifdef OC_DEBUG_VAR_SERVICE ///< For file logging disable TPL checking in OcLogAddEntry.
 STATIC BOOLEAN                       mInsideVarService;
@@ -731,6 +734,46 @@ WrapResetSystem (
   WriteUnprotectorEpilogue (Ints, Wp);
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+WrapSetVirtualAddressMap (
+  IN UINTN                  MemoryMapSize,
+  IN UINTN                  DescriptorSize,
+  IN UINT32                 DescriptorVersion,
+  IN EFI_MEMORY_DESCRIPTOR  *MemoryMap
+  )
+{
+  EFI_STATUS   Status;
+
+  //
+  // This is the time for us to remove our hacks.
+  // Make SetVirtualAddressMap useable once again.
+  // We do not need to recover BS, since they already are invalid.
+  //
+  gRT->SetVirtualAddressMap = mSetVirtualAddressMap;
+  gRT->Hdr.CRC32 = 0;
+  gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
+
+  if (!mCustomSetVirtualAddressMapEnabled) {
+    Status = gRT->SetVirtualAddressMap (
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  } else {
+    Status = mCustomSetVirtualAddressMap (
+      MemoryMapSize,
+      DescriptorSize,
+      DescriptorVersion,
+      MemoryMap
+      );
+  }
+
+  return Status;
+}
+
 EFI_STATUS
 EFIAPI
 FwOnGetVariable (
@@ -748,6 +791,27 @@ FwOnGetVariable (
     *OrgGetVariable = mStoredGetVariable;
   }
 
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+FwOnSetAddressMap (
+  IN  EFI_SET_VIRTUAL_ADDRESS_MAP  SetAddressMap  OPTIONAL,
+  IN  BOOLEAN                      Enabled
+  )
+{
+  if (SetAddressMap != NULL) {
+    if (mCustomSetVirtualAddressMap != NULL) {
+      return EFI_ALREADY_STARTED;
+    }
+
+    mCustomSetVirtualAddressMap = SetAddressMap;
+  } else if (mCustomSetVirtualAddressMap == NULL) {
+    return EFI_NOT_FOUND;
+  }
+
+  mCustomSetVirtualAddressMapEnabled = Enabled;
   return EFI_SUCCESS;
 }
 
@@ -794,6 +858,7 @@ RedirectRuntimeServices (
   mStoredSetVariable               = gRT->SetVariable;
   mStoredGetNextHighMonotonicCount = gRT->GetNextHighMonotonicCount;
   mStoredResetSystem               = gRT->ResetSystem;
+  mSetVirtualAddressMap            = gRT->SetVirtualAddressMap;
 
   gRT->GetTime                     = WrapGetTime;
   gRT->SetTime                     = WrapSetTime;
@@ -804,6 +869,7 @@ RedirectRuntimeServices (
   gRT->SetVariable                 = WrapSetVariable;
   gRT->GetNextHighMonotonicCount   = WrapGetNextHighMonotonicCount;
   gRT->ResetSystem                 = WrapResetSystem;
+  gRT->SetVirtualAddressMap        = WrapSetVirtualAddressMap;
 
   gRT->Hdr.CRC32 = 0;
   gBS->CalculateCrc32 (gRT, gRT->Hdr.HeaderSize, &gRT->Hdr.CRC32);

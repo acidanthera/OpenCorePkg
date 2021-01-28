@@ -47,5 +47,11 @@ FwOnGetVariable (
   OUT EFI_GET_VARIABLE  *OrgGetVariable  OPTIONAL
   );
 
+EFI_STATUS
+EFIAPI
+FwOnSetAddressMap (
+  IN  EFI_SET_VIRTUAL_ADDRESS_MAP  SetAddressMap  OPTIONAL,
+  IN  BOOLEAN                      Enabled
+  );
 
-#endif // FIRMWARE_RUNTIME_SERVICES_PRIVATE_H
+#endif // OPEN_RUNTIME_PRIVATE_H

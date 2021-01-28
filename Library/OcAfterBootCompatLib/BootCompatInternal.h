@@ -228,13 +228,6 @@ typedef struct UEFI_SERVICES_POINTERS_ {
   /// boot.efi boot arguments for custom KASLR slide.
   ///
   EFI_GET_VARIABLE            GetVariable;
-  ///
-  /// Original virtual address mapping function. We override
-  /// it to perform runtime area protection to prevent boot.efi
-  /// defragmentation and setup virtual memory for firmware
-  /// accessing it after exit boot services.
-  ///
-  EFI_SET_VIRTUAL_ADDRESS_MAP SetVirtualAddressMap;
 } UEFI_SERVICES_POINTERS;
 
 /**
