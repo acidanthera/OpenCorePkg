@@ -74,6 +74,27 @@ STATIC UINT32                          mOriginalTableSize;
     } \
   } while (0)
 
+//
+// Byte order from original structure must be swapped.
+//
+#define SMBIOS_OVERRIDE_G(Table, Field, Original, Value, Fallback, SystemId) \
+  do { \
+    if ((Value) != NULL) { \
+      CopyMem (&(((Table)->CurrentPtr).Field), (Value), sizeof ((((Table)->CurrentPtr).Field))); \
+    } else if ((Original).Raw != NULL && (Original).Raw + (Original).Standard.Hdr->Length \
+      >= ((UINT8 *)&((Original).Field) + sizeof ((((Table)->CurrentPtr).Field)))) { \
+      (SystemId) = &(((Table)->CurrentPtr).Field); \
+      CopyMem ((SystemId), &((Original).Field), sizeof ((((Table)->CurrentPtr).Field))); \
+      (SystemId)->Data1 = SwapBytes32 ((SystemId)->Data1); \
+      (SystemId)->Data2 = SwapBytes16 ((SystemId)->Data2); \
+      (SystemId)->Data3 = SwapBytes16 ((SystemId)->Data3); \
+    } else if ((Fallback) != NULL) { \
+      CopyMem (&(((Table)->CurrentPtr).Field), (Fallback), sizeof ((((Table)->CurrentPtr).Field))); \
+    } else { \
+      /* No ZeroMem call as written area is guaranteed to be 0 */ \
+    } \
+  } while (0)
+
 #define SMBIOS_ACCESSIBLE(Table, Field) \
   (((UINT8 *) &(Table).Field - (Table).Raw + sizeof ((Table).Field)) <= (Table).Standard.Hdr->Length)
 
@@ -160,6 +181,7 @@ PatchSystemInformation (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
   UINT8                           StringIndex;
+  GUID                           *SystemId;
 
   Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type1);
@@ -173,7 +195,7 @@ PatchSystemInformation (
   SMBIOS_OVERRIDE_S (Table, Standard.Type1->ProductName, Original, Data->SystemProductName, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type1->Version, Original, Data->SystemVersion, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type1->SerialNumber, Original, Data->SystemSerialNumber, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type1->Uuid, Original, Data->SystemUUID, NULL);
+  SMBIOS_OVERRIDE_G (Table, Standard.Type1->Uuid, Original, Data->SystemUUID, NULL, SystemId);
   SMBIOS_OVERRIDE_V (Table, Standard.Type1->WakeUpType, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type1->SKUNumber, Original, Data->SystemSKUNumber, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type1->Family, Original, Data->SystemFamily, &StringIndex, NULL);
