@@ -343,7 +343,6 @@ CheckMiscSecurity (
   UINT32            Index;
   OC_KERNEL_CONFIG  *UserKernel;
   OC_MISC_CONFIG    *UserMisc;
-  OC_UEFI_CONFIG    *UserUefi;
   BOOLEAN           IsAuthRestartEnabled;
   BOOLEAN           HasVSMCKext;
   CONST CHAR8       *AsciiDmgLoading;
@@ -356,7 +355,6 @@ CheckMiscSecurity (
   ErrorCount        = 0;
   UserKernel        = &Config->Kernel;
   UserMisc          = &Config->Misc;
-  UserUefi          = &Config->Uefi;
 
   HasVSMCKext = FALSE;
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
