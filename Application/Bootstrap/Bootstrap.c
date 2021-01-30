@@ -57,7 +57,7 @@ LoadOpenCore (
   ImagePath = NULL;
 
   //
-  // Try relative path: EFI\\XXX\\Bootstrap\\Bootstrap.efi -> EFI\\XXX\\OpenCore.efi
+  // Try relative path: EFI\\XXX\\Subdir\\Launcher.efi -> EFI\\XXX\\OpenCore.efi
   //
   if (LoaderPath != NULL) {
     LoaderPathSize = StrSize (LoaderPath);

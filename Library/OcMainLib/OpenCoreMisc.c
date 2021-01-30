@@ -601,79 +601,91 @@ OcMiscEarlyInit (
 }
 
 /**
-  Registers Bootstrap according to the BootProtect mode.
+  Registers LauncherOption according to the BootProtect mode.
 
-  @param[in]  RootPath     Root load path.
-  @param[in]  LoadHandle   OpenCore loading handle.
-  @param[in]  BootProtect  Value of the BootProtect config option.
+  @param[in]  RootPath      Root load path.
+  @param[in]  LoadHandle    OpenCore loading handle.
+  @param[in]  LauncherPath  Launcher path to write.
+  @param[in]  ShortForm     Whether to encode a short option.
 
   @returns  BootProtect bitmask.
 **/
 STATIC
 UINT32
-RegisterBootstrap (
-  IN CONST CHAR16  *RootPath OPTIONAL,
-  IN  EFI_HANDLE   LoadHandle OPTIONAL,
-  IN CONST CHAR8   *BootProtect
+RegisterLauncherOption (
+  IN CONST CHAR16  *RootPath,
+  IN EFI_HANDLE    LoadHandle,
+  IN CONST CHAR8   *LauncherPath,
+  IN BOOLEAN       ShortForm
   )
 {
   CHAR16  *BootstrapPath;
   UINTN   BootstrapSize;
-  BOOLEAN ShortForm;
 
-  if (LoadHandle != NULL) {
-    //
-    // Full-form paths cause entry duplication on e.g. HP 15-ab237ne, InsydeH2O.
-    //
-    if (AsciiStrCmp (BootProtect, "Bootstrap") == 0) {
-      ShortForm = FALSE;
-    } else if (AsciiStrCmp (BootProtect, "BootstrapShort") == 0) {
-      ShortForm = TRUE;
-    } else {
-      return 0;
-    }
-
-    ASSERT (RootPath != NULL);
+  if (AsciiStrCmp (LauncherPath, "Default") == 0) {
     BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_BOOTSTRAP_PATH);
     BootstrapPath = AllocatePool (BootstrapSize);
-    if (BootstrapPath != NULL) {
-      UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
-      OcRegisterBootstrapBootOption (
-        L"OpenCore",
-        LoadHandle,
-        BootstrapPath,
-        ShortForm,
-        OPEN_CORE_BOOTSTRAP_PATH,
-        L_STR_LEN (OPEN_CORE_BOOTSTRAP_PATH)
-        );
-      FreePool (BootstrapPath);
-      return OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+    if (BootstrapPath == NULL) {
+      return 0;
+    }
+    UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_BOOTSTRAP_PATH);
+  } else {
+    BootstrapPath = AsciiStrCopyToUnicode (LauncherPath, 0);
+    if (BootstrapPath == NULL) {
+      return 0;
     }
   }
 
-  return 0;
+  OcRegisterBootstrapBootOption (
+    L"OpenCore",
+    LoadHandle,
+    BootstrapPath,
+    ShortForm,
+    OPEN_CORE_BOOTSTRAP_PATH,
+    L_STR_LEN (OPEN_CORE_BOOTSTRAP_PATH)
+    );
+  FreePool (BootstrapPath);
+
+  return OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
 }
 
 VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
-  IN  CONST CHAR16              *RootPath  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  CONST CHAR16              *RootPath,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath,
+  IN  EFI_HANDLE                LoadHandle
   )
 {
-  CONST CHAR8  *BootProtect;
+  CONST CHAR8  *LauncherOption;
+  CONST CHAR8  *LauncherPath;
   UINT32       BootProtectFlag;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
   }
 
-  BootProtect = OC_BLOB_GET (&Config->Misc.Security.BootProtect);
-  DEBUG ((DEBUG_INFO, "OC: LoadHandle %p with BootProtect in %a mode\n", LoadHandle, BootProtect));
-
-  BootProtectFlag = RegisterBootstrap (RootPath, LoadHandle, BootProtect);
+  BootProtectFlag = 0;
+  LauncherOption = OC_BLOB_GET (&Config->Misc.Boot.LauncherOption);
+  LauncherPath = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: LoadHandle %p with %a LauncherOption pointing to %a\n",
+    LoadHandle,
+    LauncherOption,
+    LauncherPath
+    ));
+  //
+  // Full-form paths cause entry duplication on e.g. HP 15-ab237ne, InsydeH2O.
+  //
+  if (AsciiStrCmp (LauncherOption, "Full") == 0) {
+    BootProtectFlag = RegisterLauncherOption (RootPath, LoadHandle, LauncherPath, FALSE);
+  } else if (AsciiStrCmp (LauncherOption, "Short") == 0) {
+    BootProtectFlag = RegisterLauncherOption (RootPath, LoadHandle, LauncherPath, TRUE);
+  } else {
+    BootProtectFlag = 0;
+  }
 
   //
   // Inform about boot protection.

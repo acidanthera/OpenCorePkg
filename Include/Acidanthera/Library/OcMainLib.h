@@ -290,9 +290,9 @@ VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
-  IN  CONST CHAR16              *RootPath  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  CONST CHAR16              *RootPath,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath,
+  IN  EFI_HANDLE                LoadHandle
   );
 
 /**

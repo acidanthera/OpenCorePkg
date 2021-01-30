@@ -19,6 +19,7 @@ OpenCore Changelog
 - Fixed supplying non-RT `SetVirtualAddressMap` for non-macOS systems
 - Fixed using `SystemUuid` from `DataHub` in non-Automatic mode for `SMBIOS`
 - Dropped failsafe defaults from `Generic` to match non-Automatic mode
+- Replaced `BootProtect` with `LauncherOption` and `LauncherPath`
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes

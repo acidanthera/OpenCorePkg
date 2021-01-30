@@ -109,7 +109,7 @@ STATIC
 VOID
 OcMain (
   IN OC_STORAGE_CONTEXT        *Storage,
-  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath OPTIONAL
+  IN EFI_DEVICE_PATH_PROTOCOL  *LoadPath
   )
 {
   EFI_STATUS                Status;

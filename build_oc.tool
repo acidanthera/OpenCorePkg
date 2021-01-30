@@ -79,7 +79,6 @@ package() {
   efidirs=(
     "EFI/BOOT"
     "EFI/OC/ACPI"
-    "EFI/OC/Bootstrap"
     "EFI/OC/Drivers"
     "EFI/OC/Kexts"
     "EFI/OC/Tools"
@@ -118,7 +117,6 @@ package() {
       suffix="x64"
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
-    cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/OC/Bootstrap"/ || exit 1
 
     efiTools=(
       "BootKicker.efi"
