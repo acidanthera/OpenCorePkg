@@ -17,6 +17,7 @@ OpenCore Changelog
 - Added `DisableSecurityPolicy` UEFI quirk to workaround driver loading
 - Added support for ranged widget connections in AudioDxe
 - Fixed supplying non-RT `SetVirtualAddressMap` for non-macOS systems
+- Fixed using `SystemUuid` from `DataHub` in non-Automatic mode for `SMBIOS`
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
