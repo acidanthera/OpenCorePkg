@@ -2563,18 +2563,39 @@ blocking.
   \textbf{Requirement}: 10.14 (not required for older)\\
   \textbf{Description}: Set trim timeout in microseconds for APFS filesystems on SSDs.
 
-  Depending on the SSD controller trim procedure may take considerable
-  amount of time, causing noticeable boot slowdown as this is when the
-  APFS driver executes the trim operation. If the SSD supports
-  over-provisioning or there exists a dedicated unused partition that
-  can be used to reserve blocks, trim operation may not be necessary.
-  On the other side if the SSD is slow, the default timeout (equals to
-  \texttt{9.999999} seconds) may not be enough. See more details
-  in this \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}.
+  APFS filesystem is designed in a way that the space controlled via
+  spaceman structure is either used or free. This may be different in
+  other filesystems where the areas can be marked as used, free, and
+  \emph{unmapped}. All free space is trimmed (unmapped/deallocated)
+  at macOS startup. The trimming procedure for NVMe drives happens
+  in LBA ranges due to the nature of \texttt{DSM} command with
+  up to 256 ranges per command. The more fragmented the memory
+  on the drive is, the more commands are necessary to trim all the
+  free space.
 
-  Set this value to \texttt{4294967295} for the maximum timeout to
-  guarantee trim success or to \texttt{999} to essentially disable
-  trim.
+  Depending on the SSD controller and the drive fragmenation trim procedure
+  may take considerable amount of time, causing noticeable boot slowdown
+  APFS driver explicitly ignores previously unmapped areas and trims
+  them on boot again and again. To workaround boot slowdown macOS
+  driver introduced a timeout (\texttt{9.999999} seconds) that stops
+  trim operation when it did not manage to complete in time. On many
+  controllers, such as Samsung, where the deallocation is not very fast,
+  the timeout is reached very quickly. Essentially it means that
+  macOS will try to trim all the same lower blocks that have already been
+  deallocated, but will never have enough time to deallocate higher blocks
+  once the fragmentation increases. This means that trimming on these SSDs
+  will be broken soon after the installation, causing extra wear to the flash.
+
+  One way to workaround the problem is to increase the timeout to a very
+  high value, which at the cost of slow boot times (extra minutes)
+  will ensure that all the blocks are trimmed. For this one can set
+  this option to a high value, e.g. \texttt{4294967295}.
+
+  Another way is to utilise over-provisioning if it is supported or create
+  a dedicated unmapped partition where the reserve blocks can be found
+  by the controller. In this case the trim operation can also be disabled
+  by setting a very low timeout. e.g. \texttt{999}. See more details
+  in this \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}.
 
 \item
   \texttt{ThirdPartyDrives}\\
