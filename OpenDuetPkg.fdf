@@ -104,7 +104,7 @@
   # Generic disk I/O (Unicode collation is used by e.g. FAT)
   INF  MdeModulePkg/Universal/Disk/DiskIoDxe/DiskIoDxe.inf
   INF  MdeModulePkg/Universal/Disk/UnicodeCollation/EnglishDxe/EnglishDxe.inf
-  INF  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  INF  OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
 
   # ACPI and SMBIOS (convenience protocols are optional)
   # INF  OpenCorePkg/Legacy/BootPlatform/SmbiosGenDxe/SmbiosGen.inf

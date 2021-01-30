@@ -1,0 +1,88 @@
+## @file
+#  Modules that produces the logic Block I/O protocol for every partition via the physical Block I/O.
+#
+#  This module produces the logical Block I/O device that represents
+#  the bytes from Start to End of the Parent Block I/O device.
+#  The partition of physical BlockIo device supported is one of legacy MBR, GPT,
+#  UDF and "El Torito" partitions.
+#
+#  Caution: This module requires additional review when modified.
+#  This driver will have external input - disk partition.
+#  This external input must be validated carefully to avoid security issue like
+#  buffer overflow, integer overflow.
+#
+#  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OpenPartitionDxe
+  MODULE_UNI_FILE                = PartitionDxe.uni
+  FILE_GUID                      = 861AD32A-F4C4-43BE-936A-239A814CB215
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = InitializePartition
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#
+#  DRIVER_BINDING                = gPartitionDriverBinding
+#  COMPONENT_NAME                = gPartitionComponentName
+#  COMPONENT_NAME2               = gPartitionComponentName2
+#
+
+[Sources]
+  ComponentName.c
+  Mbr.c
+  Gpt.c
+  Apm.c
+  ElTorito.c
+  Udf.c
+  Partition.c
+  Partition.h
+
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+
+[LibraryClasses]
+  DevicePathLib
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  UefiLib
+  BaseLib
+  UefiDriverEntryPoint
+  DebugLib
+
+
+[Guids]
+  gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES ## GUID
+  ## SOMETIMES_CONSUMES ## GUID
+  ## SOMETIMES_CONSUMES ## GUID # Install protocol
+  gEfiPartTypeSystemPartGuid
+
+
+[Protocols]
+  ## BY_START
+  ## TO_START
+  gEfiBlockIoProtocolGuid
+  ## BY_START
+  ## TO_START
+  gEfiBlockIo2ProtocolGuid
+  ## BY_START
+  ## TO_START
+  gEfiDevicePathProtocolGuid
+  gEfiPartitionInfoProtocolGuid                 ## BY_START
+  gEfiDiskIoProtocolGuid                        ## TO_START
+  gEfiDiskIo2ProtocolGuid                       ## TO_START
+  gApplePartitionInfoProtocolGuid               ## SOMETIMES_PRODUCES
+
+[UserExtensions.TianoCore."ExtraFiles"]
+  PartitionDxeExtra.uni

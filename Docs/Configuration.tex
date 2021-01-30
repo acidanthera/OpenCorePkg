@@ -5511,12 +5511,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-\href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
-& Proprietary partition management driver with Apple Partitioning Scheme support
-  commonly found in Apple firmware. This driver can be used to support loading
-  older DMG recoveries such as macOS 10.9 using Apple Partitioning Scheme.
-  For Sandy Bridge and earlier CPUs \texttt{PartitionDxeLegacy} driver should be
-  used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{OpenPartitionDxe}}\textbf{*}
+& Partition management driver with Apple Partitioning Scheme support.
+  This driver can be used to support loading older DMG recoveries such as
+  macOS 10.9 using Apple Partitioning Scheme. OpenDuet already includes this driver. \\
 \href{https://github.com/acidanthera/audk}{\texttt{Ps2KeyboardDxe}}\textbf{*}
 & PS/2 keyboard driver from \texttt{MdeModulePkg}. \texttt{OpenDuetPkg} and some types of firmware
   may not include this driver, but it is necessary for PS/2 keyboard to work.
@@ -6760,10 +6758,10 @@ Since it is not always accurate, the latest versions are listed below.
 
 \begin{itemize}
   \item Disk images on these systems use Apple Partitioning Scheme
-    and will require the proprietary \texttt{PartitionDxe} driver
-    to run DMG recovery and installation. It is possible to set
+    and require \texttt{OpenPartitionDxe} driver to run DMG recovery
+    and installation (included in OpenDuet). It is possible to set
     \texttt{DmgLoading} to \texttt{Disabled} to run the recovery
-    without DMG loading avoiding the need for \texttt{PartitionDxe}.
+    without DMG loading avoiding the need for \texttt{OpenPartitionDxe}.
   \item Cached kernel images often do not contain family drivers
     for networking (\texttt{IONetworkingFamily}) or audio
     (\texttt{IOAudioFamily}) requiring the use of \texttt{Force}

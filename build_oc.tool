@@ -143,6 +143,7 @@ package() {
       "AudioDxe.efi"
       "CrScreenshotDxe.efi"
       "OpenCanopy.efi"
+      "OpenPartitionDxe.efi"
       "OpenRuntime.efi"
       "OpenUsbKbDxe.efi"
       "Ps2MouseDxe.efi"

@@ -207,7 +207,7 @@
     <LibraryClasses>
       PcdLib|MdePkg/Library/DxePcdLib/DxePcdLib.inf
   }
-  MdeModulePkg/Universal/Disk/PartitionDxe/PartitionDxe.inf
+  OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
 
   # Bios Thunk
   OpenCorePkg/Legacy/BootPlatform/LegacyRegion2Dxe/LegacyRegion2Dxe.inf
