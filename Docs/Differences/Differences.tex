@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Sat Jan 30 08:57:17 2021
+%DIF ADD ../Configuration.tex        Sat Jan 30 09:06:04 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4755,27 +4755,30 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{MacPro6,1}\\
+  \textbf{Failsafe}: \DIFdelbegin \texttt{\DIFdel{MacPro6,1}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OEM specified or not installed}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{OPENCORE\_SN1}\\
+  \textbf{Failsafe}: \DIFdelbegin \texttt{\DIFdel{OPENCORE\_SN1}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OEM specified or not installed}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: OEM specified \DIFaddbegin \DIFadd{or not installed}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{OPENCORE\_MLB\_SN11}\\
+  \textbf{Failsafe}: \DIFdelbegin \texttt{\DIFdel{OPENCORE\_MLB\_SN11}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OEM specified or not installed}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: all zero\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{all zero}\DIFdelend \DIFaddbegin \DIFadd{OEM specified or not installed}\DIFaddend \\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
