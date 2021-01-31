@@ -84,7 +84,7 @@ EFI_STATUS
 ApfsVerifyDriverVersion (
   IN APFS_PRIVATE_DATA  *PrivateData,
   IN VOID               *DriverBuffer,
-  IN UINTN              DriverSize
+  IN UINT32             DriverSize
   )
 {
   EFI_STATUS            Status;
@@ -234,7 +234,7 @@ EFI_STATUS
 ApfsStartDriver (
   IN APFS_PRIVATE_DATA  *PrivateData,
   IN VOID               *DriverBuffer,
-  IN UINTN              DriverSize
+  IN UINT32             DriverSize
   )
 {
   EFI_STATUS                 Status;
@@ -401,7 +401,7 @@ ApfsConnectDevice (
   APFS_NX_SUPERBLOCK   *SuperBlock;
   APFS_PRIVATE_DATA    *PrivateData;
   VOID                 *DriverBuffer;
-  UINTN                DriverSize;
+  UINT32               DriverSize;
 
   //
   // This may still be not APFS but some other file system.

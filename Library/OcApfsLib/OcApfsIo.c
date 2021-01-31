@@ -205,7 +205,7 @@ EFI_STATUS
 ApfsReadDriver (
   IN  APFS_PRIVATE_DATA      *PrivateData,
   IN  APFS_NX_EFI_JUMPSTART  *JumpStart,
-  OUT UINTN                  *DriverSize,
+  OUT UINT32                 *DriverSize,
   OUT VOID                   **DriverBuffer
   )
 {
@@ -399,7 +399,7 @@ InternalApfsReadSuperBlock (
 EFI_STATUS
 InternalApfsReadDriver (
   IN  APFS_PRIVATE_DATA    *PrivateData,
-  OUT UINTN                *DriverSize,
+  OUT UINT32               *DriverSize,
   OUT VOID                 **DriverBuffer
   )
 {
@@ -445,7 +445,7 @@ InternalApfsReadDriver (
 EFI_STATUS
 InternalApfsGetDriverVersion (
   IN  VOID                 *DriverBuffer,
-  IN  UINTN                DriverSize,
+  IN  UINT32               DriverSize,
   OUT APFS_DRIVER_VERSION  **DriverVersionPtr
   )
 {
@@ -458,13 +458,12 @@ InternalApfsGetDriverVersion (
   EFI_IMAGE_NT_HEADERS64    *OptionalHeader;
   EFI_IMAGE_SECTION_HEADER  *SectionHeader;
   APFS_DRIVER_VERSION       *DriverVersion;
-  UINTN                     Result;
   UINT32                    ImageVersion;
 
   ImageStatus = PeCoffInitializeContext (
     &ImageContext,
     DriverBuffer,
-    (UINT32) DriverSize
+    DriverSize
     );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCJS: PeCoff init failure - %r\n", ImageStatus));
@@ -501,8 +500,7 @@ InternalApfsGetDriverVersion (
     return EFI_UNSUPPORTED;
   }
 
-  if (OcOverflowAddUN (SectionHeader->VirtualAddress, sizeof (APFS_DRIVER_VERSION), &Result)
-    || Result > DriverSize) {
+  if (sizeof (APFS_DRIVER_VERSION) > SectionHeader->SizeOfRawData) {
     return EFI_BUFFER_TOO_SMALL;
   }
 

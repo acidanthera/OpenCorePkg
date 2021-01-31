@@ -107,14 +107,14 @@ InternalApfsReadSuperBlock (
 EFI_STATUS
 InternalApfsReadDriver (
   IN  APFS_PRIVATE_DATA    *PrivateData,
-  OUT UINTN                *DriverSize,
+  OUT UINT32               *DriverSize,
   OUT VOID                 **DriverBuffer
   );
 
 EFI_STATUS
 InternalApfsGetDriverVersion (
   IN  VOID                 *DriverBuffer,
-  IN  UINTN                DriverSize,
+  IN  UINT32               DriverSize,
   OUT APFS_DRIVER_VERSION  **DriverVersionPtr
   );
 

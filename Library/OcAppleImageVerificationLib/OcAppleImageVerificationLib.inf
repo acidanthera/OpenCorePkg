@@ -19,7 +19,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcAppleImageVerificationLib
   FILE_GUID                      = 504C5C9C-BF67-421D-9592-EAD58CE17D01
-  MODULE_TYPE                    = DXE_DRIVER
+  MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcAppleImageVerificationLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
 
@@ -44,6 +44,7 @@
   UefiLib
   DebugLib
   OcAppleKeysLib
+  OcPeCoffLib
   OcCryptoLib
   OcGuardLib
 
