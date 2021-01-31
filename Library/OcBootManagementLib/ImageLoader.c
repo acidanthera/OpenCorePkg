@@ -208,12 +208,19 @@ OcImageLoaderLoad (
   ASSERT (SourceBuffer != NULL);
 
   //
+  // Reject very large files.
+  //
+  if (SourceSize > MAX_UINT32) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // Initialize the image context.
   //
   ImageStatus = PeCoffInitializeContext (
     &ImageContext,
     SourceBuffer,
-    SourceSize
+    (UINT32) SourceSize
     );
   if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %r\n", ImageStatus));

@@ -68,10 +68,10 @@
 
 
 #define IMAGE_RELOC_TYPE_SUPPORTED(Type) \
-  ((Type) == EFI_IMAGE_REL_BASED_ABSOLUTE) || \
+  (((Type) == EFI_IMAGE_REL_BASED_ABSOLUTE) || \
   ((Type) == EFI_IMAGE_REL_BASED_HIGHLOW) || \
   ((Type) == EFI_IMAGE_REL_BASED_DIR64) || \
-  ((Type) == EFI_IMAGE_REL_BASED_ARM_MOV32T && PcdGetBool (PcdImageLoaderSupportArmThumb))
+  ((Type) == EFI_IMAGE_REL_BASED_ARM_MOV32T && PcdGetBool (PcdImageLoaderSupportArmThumb)))
 
 #define IMAGE_RELOC_SUPPORTED(Reloc) \
   IMAGE_RELOC_TYPE_SUPPORTED (IMAGE_RELOC_TYPE (Reloc))
