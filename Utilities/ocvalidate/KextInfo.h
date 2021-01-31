@@ -19,32 +19,32 @@
 #define INDEX_KEXT_LILU  0U
 #define INDEX_KEXT_VSMC  1U
 
-//
-// Child kext must be put after Parent kext in OpenCore config->Kernel->Add.
-// This means that the index of Child kext must be greater than that of Parent kext.
-//
+/**
+  Child kext must be put after Parent kext in OpenCore config->Kernel->Add.
+  This means that the index of Child must succeed that of Parent.
+**/
 typedef struct KEXT_PRECEDENCE_ {
   CONST CHAR8  *Child;
   CONST CHAR8  *Parent;
 } KEXT_PRECEDENCE;
 
-//
-// Sanitiser for known kext info. Mainly those from Acidanthera.
-//
+/**
+  Known information of kexts. Mainly those from Acidanthera.
+**/
 typedef struct KEXT_INFO_ {
   CONST CHAR8  *KextBundlePath;
   CONST CHAR8  *KextExecutablePath;
   CONST CHAR8  *KextPlistPath;
 } KEXT_INFO;
 
-extern KEXT_PRECEDENCE mKextPrecedence[];
-extern UINTN mKextPrecedenceSize;
+extern KEXT_PRECEDENCE  mKextPrecedence[];
+extern UINTN            mKextPrecedenceSize;
 
-extern KEXT_INFO mKextInfo[];
-extern UINTN mKextInfoSize;
+extern KEXT_INFO        mKextInfo[];
+extern UINTN            mKextInfoSize;
 
 /**
-  ASSERT() on mismatched kext info.
+  ASSERT() on incorrect placed kext info, where a set of rules must be followed.
 **/
 VOID
 ValidateKextInfo (

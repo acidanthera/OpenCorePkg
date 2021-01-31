@@ -73,7 +73,7 @@ AsciiIdentifierIsLegal (
   Check if an OpenCore Configuration Arch matches specific conventions.
 
   @param[in]  Arch                     Arch to be checked.
-  @param[in]  IsKernelArch             Whether to perform special checks for Kernel->Scheme->KernelArch.
+  @param[in]  IsKernelArch             TRUE to perform special checks for Kernel->Scheme->KernelArch.
 
   @retval     TRUE                     If Arch matches conventions.
 **/
@@ -84,7 +84,8 @@ AsciiArchIsLegal (
   );
 
 /**
-  Check if an OpenCore Configuration Property contains only ASCII printable characters. Mainly used in device properties and NVRAM properties.
+  Check if an OpenCore Configuration Property contains only ASCII printable characters.
+  This is mainly used in Device Properties and NVRAM Properties.
 
   @param[in]  Property                 Property to be checked.
 
@@ -122,7 +123,7 @@ AsciiDevicePathIsLegal (
 /**
   Check if a GUID in ASCII is valid.
 
-  @param[in]  AsciiGuid                GUID to be checked.
+  @param[in]  AsciiGuid                GUID in ASCII format to be checked.
 
   @retval     TRUE                     If AsciiGuid has valid GUID format.
 **/
@@ -137,7 +138,7 @@ AsciiGuidIsLegal (
   This function assumes identical sizes of Data and Mask, which must be ensured before calling.
 
   @param[in]  Data                     Data to be checked.
-  @param[in]  Mask                     Mask to be paired with Data.
+  @param[in]  Mask                     Mask to be applied to Data.
   @param[in]  Size                     Size of Data and Mask.
 
   @retval     TRUE                     If corresponding bits of Mask to Data are active (set to non-zero).
@@ -152,23 +153,23 @@ DataHasProperMasking (
 /**
   Check if an OpenCore binary patch is valid.
 
-  If size of Find pattern cannot be zero, and size of Find pattern is different from that of Replace pattern, it is an error.
-  If Mask/ReplaceMask is used, but its size is different from that of Find/Replace, it is an error.
-  If Mask/ReplaceMask is used without corresponding bits being active for Find/Replace pattern, it is an error.
+  If size of Find cannot be zero and it is different from that of Replace, then error.
+  If Mask/ReplaceMask is set, but its size is different from that of Find/Replace, then error.
+  If Mask/ReplaceMask is set without corresponding bits being active for Find/Replace, then error.
 
   @param[in]   PatchSection            Patch section to which the patch to be checked belongs.
   @param[in]   PatchIndex              Index of the patch to be checked.
-  @param[in]   FindSizeCanBeZero       Whether size of Find pattern can be zero. Set to TRUE only when Kernel->Patch->Base is used and Find is empty.
+  @param[in]   FindSizeCanBeZero       Whether size of Find can be zero. This should be set to TRUE only when Kernel->Patch->Base is used and Find is empty.
   @param[in]   Find                    Find pattern to be checked.
-  @param[in]   FindSize                Size of Find pattern to be checked.
+  @param[in]   FindSize                Size of Find pattern above.
   @param[in]   Replace                 Replace pattern to be checked.
-  @param[in]   ReplaceSize             Size of Replace pattern to be checked.
+  @param[in]   ReplaceSize             Size of Replace pattern above.
   @param[in]   Mask                    Mask pattern to be checked.
-  @param[in]   MaskSize                Size of Mask pattern to be checked.
+  @param[in]   MaskSize                Size of Mask pattern above.
   @param[in]   ReplaceMask             ReplaceMask pattern to be checked.
-  @param[in]   ReplaceMaskSize         Size of ReplaceMask pattern to be checked.
+  @param[in]   ReplaceMaskSize         Size of ReplaceMask pattern above.
 
-  @return      Number of errors detected, which are treated as errors to be cumulated to the whole number of errors found in a single checker.
+  @return      Number of errors detected, which are counted to the total number of errors discovered.
 **/
 UINT32
 ValidatePatch (
@@ -203,7 +204,7 @@ BOOLEAN
   @param[in]  Size        Size in bytes of each element in the array.
   @param[in]  DupChecker  Pointer to a comparator function which returns TRUE if duplication is found. See DUPLICATION_CHECK for function prototype.
 
-  @return     Number of duplications detected, which are treated as errors to be cumulated to the whole number of errors found in a single checker.
+  @return     Number of duplications detected, which are counted to the total number of errors discovered.
 **/
 UINT32
 FindArrayDuplication (
@@ -216,23 +217,23 @@ FindArrayDuplication (
 /**
   Check if two strings are duplicated to each other. Used as a wrapper of AsciiStrCmp to print duplicated entries.
 
-  @param[in]  EntrySection    Section of strings to which they belong.
-  @param[in]  PrimaryEntry    Primary entry in string format.
-  @param[in]  SecondaryEntry  Secondary entry in string format.
+  @param[in]  EntrySection    Section of strings to which they belong throughout OpenCore Configuration.
+  @param[in]  FirstString     Primary entry in string format.
+  @param[in]  SecondString    Secondary entry in string format.
 
-  @retval     TRUE            If PrimaryEntry and SecondaryEntry are duplicated to each other.
+  @retval     TRUE            If FirstString and SecondString are duplicated.
 **/
 BOOLEAN
 StringIsDuplicated (
   IN  CONST CHAR8  *EntrySection,
-  IN  CONST CHAR8  *PrimaryEntry,
-  IN  CONST CHAR8  *SecondaryEntry
+  IN  CONST CHAR8  *FirstString,
+  IN  CONST CHAR8  *SecondString  
   );
 
 /**
-  Report status of errors in the end of each checker functions.
+  Report status of errors in the end of each checker function.
 
-  @param[in]  FuncName                 Checker function name. (__func__)
+  @param[in]  FuncName                 Checker function name. (__func__ in most cases)
   @param[in]  ErrorCount               Number of errors to be returned.
 
   @return     Number of errors detected in one checker.

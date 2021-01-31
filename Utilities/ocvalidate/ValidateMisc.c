@@ -23,7 +23,7 @@
 #include <Protocol/OcLog.h>
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Entries.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Entries.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -68,7 +68,7 @@ MiscEntriesHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Tools.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Tools.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -122,8 +122,8 @@ ValidateSecureBootModel (
   IN  CONST CHAR8  *SecureBootModel
   )
 {
-  UINTN   Index;
-  CONST CHAR8 *AllowedSecureBootModel[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedSecureBootModel[] = {
     "Default", "Disabled",
     "j137",  "j680",  "j132",  "j174",  "j140k",
     "j780",  "j213",  "j140a", "j152f", "j160",
@@ -138,6 +138,44 @@ ValidateSecureBootModel (
   }
 
   return FALSE;
+}
+
+STATIC
+UINT32
+CheckBlessOverride (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  UINT32              Index;
+  UINTN               Index2;
+  OC_MISC_CONFIG      *UserMisc;
+  CONST CHAR8         *BlessOverrideEntry;
+  STATIC CONST CHAR8  *DisallowedBlessOverrideValues[] = {
+    "\\EFI\\Microsoft\\Boot\\bootmgfw.efi",
+    "\\System\\Library\\CoreServices\\boot.efi",
+  };
+
+  ErrorCount          = 0;
+  UserMisc            = &Config->Misc;
+
+  for (Index = 0; Index < UserMisc->BlessOverride.Count; ++Index) {
+    BlessOverrideEntry = OC_BLOB_GET (UserMisc->BlessOverride.Values[Index]);
+
+    //
+    // &DisallowedBlessOverrideValues[][1] means no first '\\'.
+    //
+    for (Index2 = 0; Index2 < ARRAY_SIZE (DisallowedBlessOverrideValues); ++Index2) {
+      if (AsciiStrCmp (BlessOverrideEntry, DisallowedBlessOverrideValues[Index2]) == 0
+        || AsciiStrCmp (BlessOverrideEntry, &DisallowedBlessOverrideValues[Index2][1]) == 0) {
+        DEBUG ((DEBUG_WARN, "Misc->BlessOverride: %a is redundant!\n", BlessOverrideEntry));
+        ++ErrorCount;
+      }
+    }
+    
+  }
+
+  return ErrorCount;
 }
 
 STATIC
@@ -500,9 +538,10 @@ CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK MiscCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  MiscCheckers[] = {
+    &CheckBlessOverride,
     &CheckMiscBoot,
     &CheckMiscDebug,
     &CheckMiscEntries,

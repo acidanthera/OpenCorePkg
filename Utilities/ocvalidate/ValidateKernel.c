@@ -20,7 +20,7 @@
 #include <Library/OcAppleKernelLib.h>
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Add.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -52,7 +52,7 @@ KernelAddHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Identifier is duplicated in Kernel->Block.
+  Callback function to verify whether Identifier is duplicated in Kernel->Block.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -84,7 +84,7 @@ KernelBlockHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Force.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Force.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -355,6 +355,7 @@ CheckKernelEmulate (
   OC_KERNEL_CONFIG    *UserKernel;
   CONST CHAR8         *MaxKernel;
   CONST CHAR8         *MinKernel;
+  BOOLEAN             Result;
 
   ErrorCount          = 0;
   UserKernel          = &Config->Kernel; 
@@ -373,7 +374,13 @@ CheckKernelEmulate (
     ++ErrorCount;
   }
 
-  if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
+  Result = DataHasProperMasking (
+    UserKernel->Emulate.Cpuid1Data,
+    UserKernel->Emulate.Cpuid1Mask,
+    sizeof (UserKernel->Emulate.Cpuid1Data)
+    );
+
+  if (!Result) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
     ++ErrorCount;
   }
@@ -644,9 +651,9 @@ CheckKernel (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK KernelCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  KernelCheckers[] = {
     &CheckKernelAdd,
     &CheckKernelBlock,
     &CheckKernelEmulate,

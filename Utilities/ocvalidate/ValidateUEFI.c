@@ -19,7 +19,7 @@
 #include <Library/OcConsoleLib.h>
 
 /**
-  Callback funtion to verify whether one UEFI driver is duplicated in UEFI->Drivers.
+  Callback function to verify whether one UEFI driver is duplicated in UEFI->Drivers.
 
   @param[in]  PrimaryDriver    Primary driver to be checked.
   @param[in]  SecondaryDriver  Secondary driver to be checked.
@@ -47,7 +47,7 @@ UEFIDriverHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether one UEFI ReservedMemory entry overlaps the other,
+  Callback function to verify whether one UEFI ReservedMemory entry overlaps the other,
   in terms of Address and Size.
 
   @param[in]  PrimaryEntry     Primary entry to be checked.
@@ -95,8 +95,8 @@ ValidateReservedMemoryType (
   IN  CONST CHAR8  *Type
   )
 {
-  UINTN  Index;
-  CONST CHAR8  *AllowedType[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedType[] = {
     "Reserved",          "LoaderCode",    "LoaderData",     "BootServiceCode",         "BootServiceData",
     "RuntimeCode",       "RuntimeData",   "Available",      "Persistent",              "UnusableMemory",
     "ACPIReclaimMemory", "ACPIMemoryNVS", "MemoryMappedIO", "MemoryMappedIOPortSpace", "PalCode"
@@ -528,9 +528,9 @@ CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK UEFICheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  UEFICheckers[] = {
     &CheckUEFIAPFS,
     &CheckUEFIAudio,
     &CheckUEFIDrivers,
