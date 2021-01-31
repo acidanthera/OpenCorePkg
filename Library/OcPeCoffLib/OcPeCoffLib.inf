@@ -20,8 +20,6 @@
 [Sources]
   PeCoffDebug.c
   PeCoffHash.c
-  PeCoffInfo.c
-  PeCoffInfo.h
   PeCoffInit.c
   PeCoffLoad.c
   PeCoffRelocate.c
