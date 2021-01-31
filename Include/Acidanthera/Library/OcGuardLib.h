@@ -57,6 +57,27 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
 BOOLEAN
+OcOverflowAddU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  );
+
+BOOLEAN
+OcOverflowSubU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  );
+
+BOOLEAN
+OcOverflowMulU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  );
+
+BOOLEAN
 OcOverflowAddU32 (
   UINT32  A,
   UINT32  B,
