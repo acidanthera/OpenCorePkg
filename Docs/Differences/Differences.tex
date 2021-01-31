@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Sun Jan 31 01:02:01 2021
+%DIF ADD ../Configuration.tex        Sun Jan 31 03:37:46 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4867,31 +4867,66 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{Description}: Update all fields. This section is read only
-  when \texttt{Automatic} is active.
+  \textbf{Description}: Update all fields \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{in }\texttt{\DIFadd{Automatic}} \DIFadd{mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\DIFaddend This section is \DIFdelbegin \DIFdel{read only
+  }\DIFdelend \DIFaddbegin \DIFadd{ignored but may not be removed }\DIFaddend when
+  \texttt{Automatic} is \DIFdelbegin \DIFdel{active}\DIFdelend \DIFaddbegin \texttt{\DIFadd{false}}\DIFaddend .
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{\DIFdelbegin \DIFdel{Optional}\DIFdelend \DIFaddbegin \DIFadd{Ignored}\DIFaddend }: When \texttt{Automatic} is \texttt{true}\\
-  \textbf{Description}: Update Data Hub fields. This section is read
-  only when \texttt{Automatic} is not active.
+  \DIFdelbegin \textbf{\DIFdel{Optional}}%DIFAUXCMD
+\DIFdel{: When }\texttt{\DIFdel{Automatic}} %DIFAUXCMD
+\DIFdel{is }\texttt{\DIFdel{true}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Update Data Hub fields \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{in non-}\texttt{\DIFadd{Automatic}} \DIFadd{mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\DIFaddend This section is \DIFdelbegin \DIFdel{read
+  only }\DIFdelend \DIFaddbegin \DIFadd{ignored and may be removed }\DIFaddend when
+  \texttt{Automatic} is \DIFdelbegin \DIFdel{not active}\DIFdelend \DIFaddbegin \texttt{\DIFadd{true}}\DIFaddend .
 \item
   \texttt{Memory}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{\DIFdelbegin \DIFdel{Optional}\DIFdelend \DIFaddbegin \DIFadd{Ignored}\DIFaddend }: When \texttt{CustomMemory} is \texttt{false}\\
-  \textbf{Description}: Define custom memory configuration.
-\item
+  \DIFdelbegin \textbf{\DIFdel{Optional}}%DIFAUXCMD
+\DIFdel{: When }\texttt{\DIFdel{CustomMemory}} %DIFAUXCMD
+\DIFdel{is }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Define custom memory configuration.
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: This section is ignored and may be removed when
+  }\texttt{\DIFadd{CustomMemory}} \DIFadd{is }\texttt{\DIFadd{false}}\DIFadd{.
+}\DIFaddend \item
   \texttt{PlatformNVRAM}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{\DIFdelbegin \DIFdel{Optional}\DIFdelend \DIFaddbegin \DIFadd{Ignored}\DIFaddend }: When \texttt{Automatic} is \texttt{true}\\
-  \textbf{Description}: Update platform NVRAM fields. This section is
-  read only when \texttt{Automatic} is not active.
+  \DIFdelbegin \textbf{\DIFdel{Optional}}%DIFAUXCMD
+\DIFdel{: When }\texttt{\DIFdel{Automatic}} %DIFAUXCMD
+\DIFdel{is }\texttt{\DIFdel{true}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Update platform NVRAM fields \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{in non-}\texttt{\DIFadd{Automatic}} \DIFadd{mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\DIFaddend This section is \DIFdelbegin \DIFdel{read only }\DIFdelend \DIFaddbegin \DIFadd{ignored and may be removed }\DIFaddend when
+  \texttt{Automatic} is \DIFdelbegin \DIFdel{not active}\DIFdelend \DIFaddbegin \texttt{\DIFadd{true}}\DIFaddend .
 \item
   \texttt{SMBIOS}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
-  \textbf{\DIFdelbegin \DIFdel{Optional}\DIFdelend \DIFaddbegin \DIFadd{Ignored}\DIFaddend }: When \texttt{Automatic} is \texttt{true}\\
-  \textbf{Description}: Update SMBIOS fields. This section is read only
-  when \texttt{Automatic} is not active.
+  \DIFdelbegin \textbf{\DIFdel{Optional}}%DIFAUXCMD
+\DIFdel{: When }\texttt{\DIFdel{Automatic}} %DIFAUXCMD
+\DIFdel{is }\texttt{\DIFdel{true}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\DIFdelend \textbf{Description}: Update SMBIOS fields \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{in non-}\texttt{\DIFadd{Automatic}} \DIFadd{mode.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: }\DIFaddend This section is \DIFdelbegin \DIFdel{read only
+  }\DIFdelend \DIFaddbegin \DIFadd{ignored and may be removed }\DIFaddend when
+  \texttt{Automatic} is \DIFdelbegin \DIFdel{not active}\DIFdelend \DIFaddbegin \texttt{\DIFadd{true}}\DIFaddend .
 \end{enumerate}
 
 \subsection{Generic Properties}\label{platforminfogeneric}
