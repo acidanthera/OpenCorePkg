@@ -198,11 +198,11 @@ CheckNvramAdd (
     // Check duplicated properties in NVRAM->Add.
     //
     ErrorCount += FindArrayDuplication (
-                    VariableMap->Keys,
-                    VariableMap->Count,
-                    sizeof (VariableMap->Keys[0]),
-                    NvramAddHasDuplication
-                    );
+      VariableMap->Keys,
+      VariableMap->Count,
+      sizeof (VariableMap->Keys[0]),
+      NvramAddHasDuplication
+      );
 
     //
     // Check for accepted values for NVRAM keys.
@@ -214,11 +214,11 @@ CheckNvramAdd (
   // Check duplicated entries in NVRAM->Add.
   //
   ErrorCount += FindArrayDuplication (
-                  UserNvram->Add.Keys,
-                  UserNvram->Add.Count,
-                  sizeof (UserNvram->Add.Keys[0]),
-                  NvramAddHasDuplication
-                  );
+    UserNvram->Add.Keys,
+    UserNvram->Add.Count,
+    sizeof (UserNvram->Add.Keys[0]),
+    NvramAddHasDuplication
+    );
 
   return ErrorCount;
 }
@@ -268,22 +268,22 @@ CheckNvramDelete (
     // Check duplicated properties in NVRAM->Delete.
     //
     ErrorCount += FindArrayDuplication (
-                    UserNvram->Delete.Values[GuidIndex]->Values,
-                    UserNvram->Delete.Values[GuidIndex]->Count,
-                    sizeof (UserNvram->Delete.Values[GuidIndex]->Values[0]),
-                    NvramDeleteHasDuplication
-                    );
+      UserNvram->Delete.Values[GuidIndex]->Values,
+      UserNvram->Delete.Values[GuidIndex]->Count,
+      sizeof (UserNvram->Delete.Values[GuidIndex]->Values[0]),
+      NvramDeleteHasDuplication
+      );
   }
 
   //
   // Check duplicated entries in NVRAM->Delete.
   //
   ErrorCount += FindArrayDuplication (
-                  UserNvram->Delete.Keys,
-                  UserNvram->Delete.Count,
-                  sizeof (UserNvram->Delete.Keys[0]),
-                  NvramDeleteHasDuplication
-                  );
+    UserNvram->Delete.Keys,
+    UserNvram->Delete.Count,
+    sizeof (UserNvram->Delete.Keys[0]),
+    NvramDeleteHasDuplication
+    );
 
   return ErrorCount;
 }
@@ -333,22 +333,22 @@ CheckNvramSchema (
     // Check duplicated properties in NVRAM->LegacySchema.
     //
     ErrorCount += FindArrayDuplication (
-                    UserNvram->Legacy.Values[GuidIndex]->Values,
-                    UserNvram->Legacy.Values[GuidIndex]->Count,
-                    sizeof (UserNvram->Legacy.Values[GuidIndex]->Values[0]),
-                    NvramLegacySchemaHasDuplication
-                    );
+      UserNvram->Legacy.Values[GuidIndex]->Values,
+      UserNvram->Legacy.Values[GuidIndex]->Count,
+      sizeof (UserNvram->Legacy.Values[GuidIndex]->Values[0]),
+      NvramLegacySchemaHasDuplication
+      );
   }
 
   //
   // Check duplicated entries in NVRAM->LegacySchema.
   //
   ErrorCount += FindArrayDuplication (
-                  UserNvram->Legacy.Keys,
-                  UserNvram->Legacy.Count,
-                  sizeof (UserNvram->Legacy.Keys[0]),
-                  NvramLegacySchemaHasDuplication
-                  );
+    UserNvram->Legacy.Keys,
+    UserNvram->Legacy.Count,
+    sizeof (UserNvram->Legacy.Keys[0]),
+    NvramLegacySchemaHasDuplication
+    );
 
   return ErrorCount;
 }

@@ -86,8 +86,8 @@ CheckDevicePropertiesAdd (
   CONST CHAR8               *AsciiProperty;
   OC_ASSOC                  *PropertyMap;
 
-  ErrorCount                = 0;
-  UserDevProp               = &Config->DeviceProperties;
+  ErrorCount = 0;
+  UserDevProp = &Config->DeviceProperties;
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Add.Count; ++DeviceIndex) {
     AsciiDevicePath = OC_BLOB_GET (UserDevProp->Add.Keys[DeviceIndex]);
@@ -152,8 +152,8 @@ CheckDevicePropertiesDelete (
   CONST CHAR8               *AsciiDevicePath;
   CONST CHAR8               *AsciiProperty;
 
-  ErrorCount                = 0;
-  UserDevProp               = &Config->DeviceProperties;
+  ErrorCount = 0;
+  UserDevProp = &Config->DeviceProperties;
 
   for (DeviceIndex = 0; DeviceIndex < UserDevProp->Delete.Count; ++DeviceIndex) {
     AsciiDevicePath = OC_BLOB_GET (UserDevProp->Delete.Keys[DeviceIndex]);
@@ -184,22 +184,22 @@ CheckDevicePropertiesDelete (
     // Check duplicated properties in DeviceProperties->Delete[N].
     //
     ErrorCount += FindArrayDuplication (
-                    UserDevProp->Delete.Values[DeviceIndex]->Values,
-                    UserDevProp->Delete.Values[DeviceIndex]->Count,
-                    sizeof (UserDevProp->Delete.Values[DeviceIndex]->Values[0]),
-                    DevPropsDeleteHasDuplication
-                    );
+      UserDevProp->Delete.Values[DeviceIndex]->Values,
+      UserDevProp->Delete.Values[DeviceIndex]->Count,
+      sizeof (UserDevProp->Delete.Values[DeviceIndex]->Values[0]),
+      DevPropsDeleteHasDuplication
+      );
   }
 
   //
   // Check duplicated entries in DeviceProperties->Delete.
   //
   ErrorCount += FindArrayDuplication (
-                  UserDevProp->Delete.Keys,
-                  UserDevProp->Delete.Count,
-                  sizeof (UserDevProp->Delete.Keys[0]),
-                  DevPropsDeleteHasDuplication
-                  );
+    UserDevProp->Delete.Keys,
+    UserDevProp->Delete.Count,
+    sizeof (UserDevProp->Delete.Keys[0]),
+    DevPropsDeleteHasDuplication
+    );
 
   return ErrorCount;
 }

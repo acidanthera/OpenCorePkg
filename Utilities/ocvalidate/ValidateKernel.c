@@ -355,6 +355,7 @@ CheckKernelEmulate (
   OC_KERNEL_CONFIG    *UserKernel;
   CONST CHAR8         *MaxKernel;
   CONST CHAR8         *MinKernel;
+  BOOLEAN             Result;
 
   ErrorCount          = 0;
   UserKernel          = &Config->Kernel; 
@@ -373,11 +374,13 @@ CheckKernelEmulate (
     ++ErrorCount;
   }
 
-  if (!DataHasProperMasking (
-         UserKernel->Emulate.Cpuid1Data,
-         UserKernel->Emulate.Cpuid1Mask,
-         sizeof (UserKernel->Emulate.Cpuid1Data)
-         )) {
+  Result = DataHasProperMasking (
+    UserKernel->Emulate.Cpuid1Data,
+    UserKernel->Emulate.Cpuid1Mask,
+    sizeof (UserKernel->Emulate.Cpuid1Data)
+    );
+
+  if (!Result) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
     ++ErrorCount;
   }
