@@ -167,19 +167,6 @@ PeCoffGetAppleSignature (
 }
 
 STATIC
-BOOLEAN
-EFIAPI
-PeCoffHashAppleImageUpdate (
-  IN OUT VOID        *HashContext,
-  IN     CONST VOID  *Data,
-  IN     UINTN       DataSize
-  )
-{
-  Sha256Update (HashContext, Data, DataSize);
-  return TRUE;
-}
-
-STATIC
 EFI_STATUS
 PeCoffHashAppleImage (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
@@ -187,34 +174,6 @@ PeCoffHashAppleImage (
   OUT UINT8                           *Hash
   )
 {
-#if 0
-  BOOLEAN           Success;
-  SHA256_CONTEXT    HashContext;
-
-  //
-  // Initialise a SHA hash context
-  //
-  Sha256Init (&HashContext);
-
-  //
-  // Hash image.
-  //
-  Success = PeCoffHashImage (
-    Context,
-    PeCoffHashAppleImageUpdate,
-    &HashContext
-    );
-  if (!Success) {
-    return EFI_UNSUPPORTED;
-  }
-
-  //
-  // Return hash.
-  //
-  Sha256Final (&HashContext, Hash);
-  return EFI_SUCCESS;
-#else
-
   UINTN                    HashSize;
   UINT8                    *HashBase;
   SHA256_CONTEXT           HashContext;
@@ -280,7 +239,6 @@ PeCoffHashAppleImage (
 
   Sha256Final (&HashContext, Hash);
   return EFI_SUCCESS;
-#endif
 }
 
 EFI_STATUS
