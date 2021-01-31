@@ -21,6 +21,7 @@ OpenCore Changelog
 - Dropped failsafe defaults from `Generic` to match non-Automatic mode
 - Replaced `BootProtect` with `LauncherOption` and `LauncherPath`
 - Added `OpenPartitionDxe` with Apple Partition Management scheme
+- Improved ocvalidate checks in `Misc`, `NVRAM`, and `UEFI` sections
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes
