@@ -1392,9 +1392,7 @@ OcRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm,
-  IN CHAR16          *MatchSuffix,
-  IN UINTN           MatchSuffixLen
+  IN BOOLEAN         ShortForm
   );
 
 /**

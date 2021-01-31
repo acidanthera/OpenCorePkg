@@ -623,12 +623,12 @@ RegisterLauncherOption (
   UINTN   BootstrapSize;
 
   if (AsciiStrCmp (LauncherPath, "Default") == 0) {
-    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_DRIVER_PATH);
+    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_APP_PATH);
     BootstrapPath = AllocatePool (BootstrapSize);
     if (BootstrapPath == NULL) {
       return 0;
     }
-    UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_DRIVER_PATH);
+    UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_APP_PATH);
   } else {
     BootstrapPath = AsciiStrCopyToUnicode (LauncherPath, 0);
     if (BootstrapPath == NULL) {
@@ -640,9 +640,7 @@ RegisterLauncherOption (
     L"OpenCore",
     LoadHandle,
     BootstrapPath,
-    ShortForm,
-    BootstrapPath,
-    StrLen (BootstrapPath)
+    ShortForm
     );
   FreePool (BootstrapPath);
 

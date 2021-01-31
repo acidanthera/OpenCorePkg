@@ -65,10 +65,10 @@ LoadOpenCore (
       && UnicodeGetParentDirectory (LoaderPath)) {
       DEBUG ((DEBUG_INFO, "BS: Relative path - %s\n", LoaderPath));
       PrefixPathSize = StrSize (LoaderPath);
-      if (LoaderPathSize - PrefixPathSize >= L_STR_SIZE (OPEN_CORE_DRIVER_PATH)) {
+      if (LoaderPathSize - PrefixPathSize >= L_STR_SIZE (OPEN_CORE_APP_PATH)) {
         RootPathLength = PrefixPathSize / sizeof (CHAR16) - 1;
         LoaderPath[RootPathLength] = '\\';
-        CopyMem (&LoaderPath[RootPathLength + 1], OPEN_CORE_DRIVER_PATH, L_STR_SIZE (OPEN_CORE_DRIVER_PATH));
+        CopyMem (&LoaderPath[RootPathLength + 1], OPEN_CORE_APP_PATH, L_STR_SIZE (OPEN_CORE_APP_PATH));
         Buffer = ReadFile (FileSystem, LoaderPath, &BufferSize, BASE_16MB);
         DEBUG ((DEBUG_INFO, "BS: Startup path - %s (%p)\n", LoaderPath, Buffer));
 
@@ -93,12 +93,12 @@ LoadOpenCore (
     DEBUG ((
       DEBUG_INFO,
       "BS: Fallback to absolute path - %s\n",
-      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH
+      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH
       ));
 
     Buffer = ReadFile (
       FileSystem,
-      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH,
+      OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH,
       &BufferSize,
       BASE_16MB
       );
@@ -107,7 +107,7 @@ LoadOpenCore (
       // Failure to allocate this one is not too critical, as we will still be able
       // to choose it as a default path.
       //
-      ImagePath = FileDevicePath (DeviceHandle, OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_DRIVER_PATH);
+      ImagePath = FileDevicePath (DeviceHandle, OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH);
     }
   }
 
@@ -152,7 +152,7 @@ UefiMain (
   //
   // We have just started at EFI/BOOT/BOOTx64.efi.
   // We need to run OpenCore on this partition as it failed automatically.
-  // The image is optionally located at OPEN_CORE_DRIVER_PATH file.
+  // The image is optionally located at OPEN_CORE_APP_PATH file.
   //
 
   LoadedImage = NULL;

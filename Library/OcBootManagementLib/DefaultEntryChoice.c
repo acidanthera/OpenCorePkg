@@ -903,7 +903,7 @@ InternalGetBoostrapOptionData (
   OUT EFI_DEVICE_PATH_PROTOCOL **LoadPath,
   IN  UINT16                   *BootOptions,
   IN  UINTN                    NumBootOptions,
-  IN  CHAR16                   *MatchSuffix,
+  IN  CONST CHAR16             *MatchSuffix,
   IN  UINTN                    MatchSuffixLen
   )
 {
@@ -960,9 +960,7 @@ InternalRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm,
-  IN CHAR16          *MatchSuffix,
-  IN UINTN           MatchSuffixLen
+  IN BOOLEAN         ShortForm
   )
 {
   EFI_STATUS                 Status;
@@ -1061,8 +1059,8 @@ InternalRegisterBootstrapBootOption (
       &CurrDevicePath,
       &BootOrder[1],
       BootOrderSize / sizeof (*BootOrder),
-      MatchSuffix,
-      MatchSuffixLen
+      FilePath,
+      StrLen (FilePath)
       );
     CurrOptionExists = Option != NULL;
     if (CurrOptionExists) {
@@ -1210,9 +1208,7 @@ OcRegisterBootstrapBootOption (
   IN CONST CHAR16    *OptionName,
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
-  IN BOOLEAN         ShortForm,
-  IN CHAR16          *MatchSuffix,
-  IN UINTN           MatchSuffixLen
+  IN BOOLEAN         ShortForm
   )
 {
   EFI_STATUS                    Status;
@@ -1238,9 +1234,7 @@ OcRegisterBootstrapBootOption (
     OptionName,
     DeviceHandle,
     FilePath,
-    ShortForm,
-    MatchSuffix,
-    MatchSuffixLen
+    ShortForm
     );
 
   if (FwRuntime != NULL) {
