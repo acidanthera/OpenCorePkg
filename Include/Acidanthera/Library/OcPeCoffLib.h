@@ -237,7 +237,7 @@ PeCoffRelocationDataSize (
 RETURN_STATUS
 PeCoffRelocateImage (
   IN  CONST PE_COFF_IMAGE_CONTEXT  *Context,
-  IN  UINTN                        BaseAddress,
+  IN  UINT64                       BaseAddress,
   OUT PE_COFF_RUNTIME_CONTEXT      *RelocationData OPTIONAL,
   IN  UINT32                       RelocationDataSize
   );
@@ -259,7 +259,7 @@ RETURN_STATUS
 PeCoffRelocateImageForRuntime (
   IN OUT VOID                           *Image,
   IN     UINT32                         ImageSize,
-  IN     UINTN                          BaseAddress,
+  IN     UINT64                         BaseAddress,
   IN     CONST PE_COFF_RUNTIME_CONTEXT  *RelocationData
   );
 
