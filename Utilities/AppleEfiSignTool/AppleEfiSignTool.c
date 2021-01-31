@@ -19,60 +19,30 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <errno.h>
 #include <unistd.h>
 #include <stdlib.h>
-#include "AppleEfiPeImage.h"
+#include <stdbool.h>
+#include <UserFile.h>
+#include <Library/OcAppleImageVerificationLib.h>
+#include <Library/OcMachoLib.h>
+#include <Library/DebugLib.h>
 
-#ifdef DEBUG
-# define DEBUG_PRINT(x) printf x
-#else
-# define DEBUG_PRINT(x) do {} while (0)
-#endif
-
-static uint8_t *Image      = NULL;
-static uint32_t ImageSize  = 0;
-
-static char UsageBanner[] = "AppleEfiSignTool v1.0 – Tool for signing and verifying\n"
-                            "Apple EFI binaries. It supports PE and Fat binaries.\n"
+static char UsageBanner[] = "AppleEfiSignTool v1.0 – Tool for verifying Apple EFI binaries\n"
+                            "It supports PE and Fat binaries.\n"
                             "Usage:\n"
                             "  -i : input file\n"
                             "  -h : show this text\n"
                             "Example: ./AppleEfiSignTool -i apfs.efi\n";
 
 
-void
-OpenFile (
-  char *FileName
-  )
-{
-  FILE *ImageFp;
-  ImageFp = fopen (FileName, "rb");
-
-  if (ImageFp == NULL) {
-    fprintf (stderr, "File not exist, errno = %d\n",errno);
-    exit (EXIT_FAILURE);
-  }
-
-  //CHECKME: does not guarantee that the file was read correctly!
-  fseek (ImageFp, 0, SEEK_END);
-  ImageSize = (uint32_t) ftell (ImageFp);
-  rewind (ImageFp);
-  Image = malloc (ImageSize + 1);
-  if (fread (Image, ImageSize, 1, ImageFp) != 1)
-    abort();
-  fclose (ImageFp);
-}
-
-int
-main (
-  int   argc,
-  char  *argv[]
-  )
-{
+int main(int argc, char *argv[]) {
   int Opt;
 
-  if (argc == 1){
+  if (argc < 2) {
     puts(UsageBanner);
     exit(EXIT_FAILURE);
   }
+
+  uint8_t *Image      = NULL;
+  uint32_t ImageSize  = 0;
 
   while ((Opt = getopt (argc, argv, "i:vh")) != -1) {
     switch (Opt) {
@@ -80,29 +50,85 @@ main (
         //
         // Open input file
         //
-        OpenFile (optarg);
+        Image = UserReadFile(optarg, &ImageSize);
+        if (Image == NULL) {
+          printf("Cannot read: %s\n", optarg);
+          exit(EXIT_FAILURE);
+        }
         break;
       }
       case 'h': {
         puts(UsageBanner);
+        free(Image);
         exit(0);
         break;
       }
       default:
         puts(UsageBanner);
+        free(Image);
         exit(EXIT_FAILURE);
     }
   }
-  for(int i = optind; i < argc; i++) {
-    printf("Unknown argument: %s\n", argv[i]);
+
+  if (Image == NULL) {
     puts(UsageBanner);
     exit(EXIT_FAILURE);
   }
 
+  uint32_t OrgImageSize = ImageSize;
+  uint8_t *OrgImage = Image;
+  bool HasFat = false;
 
-  int code = VerifyAppleImageSignature (Image, ImageSize);
+  int code = EXIT_SUCCESS;
 
-  free(Image);
+  EFI_STATUS Status = FatFilterArchitecture32 (&Image, &ImageSize);
+  if (!EFI_ERROR (Status) && OrgImageSize != ImageSize) {
+    DEBUG ((DEBUG_ERROR, "SIGN: Discovered 32-bit slice\n"));
+    uint32_t BaseImageSize = ImageSize;
+    Status = VerifyApplePeImageSignature (
+      Image,
+      &ImageSize
+      );
+    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
+    HasFat = true;
+    if (EFI_ERROR (Status)) {
+      code = EXIT_FAILURE;
+    }
+  }
+
+  ImageSize = OrgImageSize;
+  Image = OrgImage;
+  Status = FatFilterArchitecture64 (&Image, &ImageSize);
+  if (!EFI_ERROR (Status) && OrgImageSize != ImageSize) {
+    DEBUG ((DEBUG_ERROR, "SIGN: Discovered 64-bit slice\n"));
+    uint32_t BaseImageSize = ImageSize;
+    Status = VerifyApplePeImageSignature (
+      Image,
+      &ImageSize
+      );
+    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
+    HasFat = true;
+    if (EFI_ERROR (Status)) {
+      code = EXIT_FAILURE;
+    }
+  }
+
+  ImageSize = OrgImageSize;
+  Image = OrgImage;
+  if (!HasFat) {
+    DEBUG ((DEBUG_ERROR, "SIGN: Discovered slim slice\n"));
+    uint32_t BaseImageSize = ImageSize;
+    Status = VerifyApplePeImageSignature (
+      Image,
+      &ImageSize
+      );
+    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
+    if (EFI_ERROR (Status)) {
+      code = EXIT_FAILURE;
+    }
+  }
+
+  free(OrgImage);
 
   return code;
 }
