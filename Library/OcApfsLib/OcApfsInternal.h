@@ -15,6 +15,7 @@
 #ifndef OC_APFS_INTERNAL_H
 #define OC_APFS_INTERNAL_H
 
+#include <Uefi.h>
 #include <IndustryStandard/Apfs.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/ApfsEfiBootRecordInfo.h>

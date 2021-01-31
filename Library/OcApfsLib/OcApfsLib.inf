@@ -20,7 +20,7 @@
   INF_VERSION                    = 0x00010005
   BASE_NAME                      = OcApfsLib
   FILE_GUID                      = D7CE048F-C527-45D2-9B77-7E49A50DC434
-  MODULE_TYPE                    = DXE_DRIVER
+  MODULE_TYPE                    = BASE
   VERSION_STRING                 = 1.0
   LIBRARY_CLASS                  = OcApfsLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
@@ -63,6 +63,7 @@
   OcDriverConnectionLib
   OcGuardLib
   OcMiscLib
+  OcPeCoffLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiLib

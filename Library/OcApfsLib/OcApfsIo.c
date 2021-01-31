@@ -13,13 +13,13 @@
 **/
 
 #include "OcApfsInternal.h"
-#include <IndustryStandard/PeImage.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcPeCoffLib.h>
 
 STATIC
 UINT64
@@ -451,78 +451,62 @@ InternalApfsGetDriverVersion (
 {
   //
   // apfs.efi versioning is more restricted than generic PE parsing.
-  // In future we can use our PE library, but for now we directly reimplement
-  // EfiGetAPFSDriverVersion from apfs kernel extension.
-  // Note, EfiGetAPFSDriverVersion is really badly implemented and is full of typos.
   //
 
-  EFI_IMAGE_DOS_HEADER      *DosHeader;
-  EFI_IMAGE_NT_HEADERS64    *NtHeaders;
+  EFI_STATUS                ImageStatus;
+  PE_COFF_IMAGE_CONTEXT     ImageContext;
+  EFI_IMAGE_NT_HEADERS64    *OptionalHeader;
   EFI_IMAGE_SECTION_HEADER  *SectionHeader;
   APFS_DRIVER_VERSION       *DriverVersion;
-  UINTN                     RemainingSize;
   UINTN                     Result;
   UINT32                    ImageVersion;
 
-  if (DriverSize < sizeof (*DosHeader)) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  DosHeader = DriverBuffer;
-
-  if (DosHeader->e_magic != EFI_IMAGE_DOS_SIGNATURE) {
+  ImageStatus = PeCoffInitializeContext (
+    &ImageContext,
+    DriverBuffer,
+    (UINT32) DriverSize
+    );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCJS: PeCoff init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
-  if (OcOverflowAddUN (DosHeader->e_lfanew, sizeof (*NtHeaders), &Result)
-    || Result > DriverSize) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  RemainingSize = DriverSize - DosHeader->e_lfanew - OFFSET_OF (EFI_IMAGE_NT_HEADERS64, OptionalHeader);
-  NtHeaders     = (VOID *) ((UINT8 *) DriverBuffer + DosHeader->e_lfanew);
-
-  if (NtHeaders->Signature != EFI_IMAGE_NT_SIGNATURE
-    || NtHeaders->FileHeader.Machine != IMAGE_FILE_MACHINE_X64
-    || (NtHeaders->FileHeader.Characteristics & EFI_IMAGE_FILE_EXECUTABLE_IMAGE) == 0
-    || NtHeaders->FileHeader.SizeOfOptionalHeader < sizeof (NtHeaders->OptionalHeader)
-    || NtHeaders->FileHeader.NumberOfSections == 0) {
+  if (ImageContext.Machine != IMAGE_FILE_MACHINE_X64
+    || ImageContext.ImageType != ImageTypePe32Plus
+    || ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
+    DEBUG ((DEBUG_INFO, "OCJS: PeCoff unsupported image\n"));
     return EFI_UNSUPPORTED;
   }
 
-  if (RemainingSize < NtHeaders->FileHeader.SizeOfOptionalHeader) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
+  //
+  // Get image version. The header is already verified for us.
+  //
+  OptionalHeader = (EFI_IMAGE_NT_HEADERS64 *)(
+    (CONST UINT8 *) ImageContext.FileBuffer
+    + ImageContext.ExeHdrOffset
+    + sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR)
+    );
+  ImageVersion = (UINT32) OptionalHeader->MajorImageVersion << 16
+    | (UINT32) OptionalHeader->MinorImageVersion;
 
-  RemainingSize -= NtHeaders->FileHeader.SizeOfOptionalHeader;
-
-  if ((NtHeaders->OptionalHeader.Magic != EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC
-      && NtHeaders->OptionalHeader.Magic != EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-    || NtHeaders->OptionalHeader.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
-    return EFI_UNSUPPORTED;
-  }
-
-  ImageVersion = (UINT32) NtHeaders->OptionalHeader.MajorImageVersion << 16
-    | (UINT32) NtHeaders->OptionalHeader.MinorImageVersion;
-
-  if (OcOverflowMulUN (NtHeaders->FileHeader.NumberOfSections, sizeof (*SectionHeader), &Result)
-    || Result > RemainingSize) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  SectionHeader = (VOID *) ((UINT8 *) &NtHeaders->OptionalHeader + NtHeaders->FileHeader.SizeOfOptionalHeader);
+  //
+  // Get .text contents. The sections are already verified for us.
+  //
+  SectionHeader = (EFI_IMAGE_SECTION_HEADER *)(
+    (CONST UINT8 *) ImageContext.FileBuffer
+    + ImageContext.SectionsOffset
+    );
 
   if (AsciiStrnCmp ((CHAR8*) SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
     return EFI_UNSUPPORTED;
   }
 
   if (OcOverflowAddUN (SectionHeader->VirtualAddress, sizeof (APFS_DRIVER_VERSION), &Result)
-    || RemainingSize < Result) {
+    || Result > DriverSize) {
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  DriverVersion = (VOID *) ((UINT8 *) DriverBuffer + SectionHeader->VirtualAddress);
-
+  DriverVersion = (VOID *) ((UINT8 *) ImageContext.FileBuffer + SectionHeader->VirtualAddress);
   if (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC
     || DriverVersion->ImageVersion != ImageVersion) {
     return EFI_INVALID_PARAMETER;
