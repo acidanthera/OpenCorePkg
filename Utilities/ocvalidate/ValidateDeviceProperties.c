@@ -119,22 +119,22 @@ CheckDevicePropertiesAdd (
     // Check duplicated properties in DeviceProperties->Add[N].
     //
     ErrorCount += FindArrayDuplication (
-                    PropertyMap->Keys,
-                    PropertyMap->Count,
-                    sizeof (PropertyMap->Keys[0]),
-                    DevPropsAddHasDuplication
-                    );
+      PropertyMap->Keys,
+      PropertyMap->Count,
+      sizeof (PropertyMap->Keys[0]),
+      DevPropsAddHasDuplication
+      );
   }
 
   //
   // Check duplicated entries in DeviceProperties->Add.
   //
   ErrorCount += FindArrayDuplication (
-                  UserDevProp->Add.Keys,
-                  UserDevProp->Add.Count,
-                  sizeof (UserDevProp->Add.Keys[0]),
-                  DevPropsAddHasDuplication
-                  );
+    UserDevProp->Add.Keys,
+    UserDevProp->Add.Count,
+    sizeof (UserDevProp->Add.Keys[0]),
+    DevPropsAddHasDuplication
+    );
 
   return ErrorCount;
 }

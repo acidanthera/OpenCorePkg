@@ -183,18 +183,18 @@ CheckACPIPatch (
     // Checks for size.
     //
     ErrorCount += ValidatePatch (
-                    "ACPI->Patch",
-                    Index,
-                    FALSE,
-                    Find,
-                    FindSize,
-                    Replace,
-                    ReplaceSize,
-                    Mask,
-                    MaskSize,
-                    ReplaceMask,
-                    ReplaceMaskSize
-                    ); 
+      "ACPI->Patch",
+      Index,
+      FALSE,
+      Find,
+      FindSize,
+      Replace,
+      ReplaceSize,
+      Mask,
+      MaskSize,
+      ReplaceMask,
+      ReplaceMaskSize
+      ); 
   }
 
   return ErrorCount;

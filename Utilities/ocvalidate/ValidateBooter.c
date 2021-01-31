@@ -22,13 +22,13 @@ CheckBooterMmioWhitelist (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32                       ErrorCount;
-  UINT32                       Index;
-  OC_BOOTER_CONFIG             *UserBooter;
-  CONST CHAR8                  *Comment;
-  BOOLEAN                      IsMmioWhitelistEnabled;
-  BOOLEAN                      ShouldEnableDevirtualiseMmio;
-  BOOLEAN                      IsDevirtualiseMmioEnabled;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_BOOTER_CONFIG  *UserBooter;
+  CONST CHAR8       *Comment;
+  BOOLEAN           IsMmioWhitelistEnabled;
+  BOOLEAN           ShouldEnableDevirtualiseMmio;
+  BOOLEAN           IsDevirtualiseMmioEnabled;
 
   ErrorCount                   = 0;
   UserBooter                   = &Config->Booter;
@@ -117,18 +117,18 @@ CheckBooterPatch (
     // Checks for size.
     //
     ErrorCount += ValidatePatch (
-                    "Booter->Patch",
-                    Index,
-                    FALSE,
-                    Find,
-                    FindSize,
-                    Replace,
-                    ReplaceSize,
-                    Mask,
-                    MaskSize,
-                    ReplaceMask,
-                    ReplaceMaskSize
-                    );
+      "Booter->Patch",
+      Index,
+      FALSE,
+      Find,
+      FindSize,
+      Replace,
+      ReplaceSize,
+      Mask,
+      MaskSize,
+      ReplaceMask,
+      ReplaceMaskSize
+      );
   }
 
   return ErrorCount;
@@ -140,18 +140,18 @@ CheckBooterQuirks (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32                          ErrorCount;
-  UINT32                          Index;
-  OC_BOOTER_CONFIG                *UserBooter;
-  OC_UEFI_CONFIG                  *UserUefi;
-  CONST CHAR8                     *Driver;
-  UINT8                           MaxSlide;
-  BOOLEAN                         IsAllowRelocationBlockEnabled;
-  BOOLEAN                         IsProvideCustomSlideEnabled;
-  BOOLEAN                         IsEnableSafeModeSlideEnabled;
-  BOOLEAN                         IsDisableVariableWriteEnabled;
-  BOOLEAN                         IsEnableWriteUnprotectorEnabled;
-  BOOLEAN                         HasOpenRuntimeEfiDriver;
+  UINT32            ErrorCount;
+  UINT32            Index;
+  OC_BOOTER_CONFIG  *UserBooter;
+  OC_UEFI_CONFIG    *UserUefi;
+  CONST CHAR8       *Driver;
+  UINT8             MaxSlide;
+  BOOLEAN           IsAllowRelocationBlockEnabled;
+  BOOLEAN           IsProvideCustomSlideEnabled;
+  BOOLEAN           IsEnableSafeModeSlideEnabled;
+  BOOLEAN           IsDisableVariableWriteEnabled;
+  BOOLEAN           IsEnableWriteUnprotectorEnabled;
+  BOOLEAN           HasOpenRuntimeEfiDriver;
 
   ErrorCount                      = 0;
   UserBooter                      = &Config->Booter;

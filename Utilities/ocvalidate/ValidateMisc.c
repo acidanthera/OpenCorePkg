@@ -362,11 +362,11 @@ CheckMiscEntries (
   // Check duplicated entries in Entries.
   //
   ErrorCount += FindArrayDuplication (
-                  UserMisc->Entries.Values,
-                  UserMisc->Entries.Count,
-                  sizeof (UserMisc->Entries.Values[0]),
-                  MiscEntriesHasDuplication
-                  );
+    UserMisc->Entries.Values,
+    UserMisc->Entries.Count,
+    sizeof (UserMisc->Entries.Values[0]),
+    MiscEntriesHasDuplication
+    );
 
   return ErrorCount;
 }
