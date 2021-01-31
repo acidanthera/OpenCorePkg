@@ -294,6 +294,7 @@ OcAppleRtcRamInstallProtocol (
   UINT8                   *RtcBlacklist;
   UINTN                   Index;
   UINTN                   RtcBlacklistSize;
+  EFI_HANDLE              NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OCRTC: OcAppleRtcRamInstallProtocol\n"));
 
@@ -351,9 +352,9 @@ OcAppleRtcRamInstallProtocol (
   //
   // Note, Apple implementation calls AppleRtcRamReset on checksum mismatch.
   //
-
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-     &gImageHandle,
+     &NewHandle,
      &gAppleRtcRamProtocolGuid,
      (VOID *) &mAppleRtcRamProtocol,
      NULL

@@ -82,6 +82,7 @@ mOcFirmwareRuntimeProtocol = {
   FwSetMain,
   FwSetOverride,
   FwOnGetVariable,
+  FwOnSetAddressMap,
   FwGetExecArea
 };
 

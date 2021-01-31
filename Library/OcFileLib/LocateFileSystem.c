@@ -18,7 +18,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcDevicePathLib.h>
@@ -33,16 +33,11 @@ LocateFileSystem (
 {
   EFI_STATUS                       Status;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
-  CHAR16                           *UnicodeFilePath;
 
   DEBUG_CODE_BEGIN ();
   DEBUG ((DEBUG_INFO, "OCFS: Trying to locate filesystem on %p %p\n", DeviceHandle, FilePath));
   if (FilePath != NULL) {
-    UnicodeFilePath = ConvertDevicePathToText (FilePath, FALSE, FALSE);
-    if (UnicodeFilePath != NULL) {
-      DEBUG ((DEBUG_INFO, "OCFS: Filesystem DP is %s\n", UnicodeFilePath));
-      FreePool (UnicodeFilePath);
-    }
+    DebugPrintDevicePath (DEBUG_INFO, "OCFS: Filesystem DP", FilePath);
   }
   DEBUG_CODE_END ();
 

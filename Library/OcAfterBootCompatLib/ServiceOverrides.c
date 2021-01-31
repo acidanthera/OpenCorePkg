@@ -964,6 +964,13 @@ OcExitBootServices (
       );
   }
 
+  //
+  // Enable custom SetVirtualAddressMap.
+  //
+  if (BootCompat->ServiceState.FwRuntime != NULL) {
+    BootCompat->ServiceState.FwRuntime->OnSetAddressMap (NULL, TRUE);
+  }
+
   if (BootCompat->Settings.ForceExitBootServices) {
     Status = ForceExitBootServices (
       ImageHandle,
@@ -1012,31 +1019,15 @@ OcSetVirtualAddressMap (
 
   BootCompat = GetBootCompatContext ();
 
-  //
-  // This is the time for us to remove our hacks.
-  // Make SetVirtualAddressMap useable once again.
-  // We do not need to recover BS, since they already are invalid.
-  //
-  gRT->SetVirtualAddressMap = BootCompat->ServicePtrs.SetVirtualAddressMap;
-  gRT->Hdr.CRC32 = 0;
-  gRT->Hdr.CRC32 = CalculateCrc32 (gRT, gRT->Hdr.HeaderSize);
-
-  if (BootCompat->ServiceState.AppleBootNestedCount == 0) {
-    Status = gRT->SetVirtualAddressMap (
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
-  } else {
-    Status = AppleMapPrepareMemState (
-      BootCompat,
-      MemoryMapSize,
-      DescriptorSize,
-      DescriptorVersion,
-      MemoryMap
-      );
-  }
+  ASSERT (BootCompat->ServiceState.AppleBootNestedCount > 0);
+  
+  Status = AppleMapPrepareMemState (
+    BootCompat,
+    MemoryMapSize,
+    DescriptorSize,
+    DescriptorVersion,
+    MemoryMap
+    );
 
   return Status;
 }
@@ -1133,6 +1124,23 @@ SetGetVariableHookHandler (
         DEBUG ((DEBUG_INFO, "OCABC: Got rendezvous with OpenRuntime r%u\n", OC_FIRMWARE_RUNTIME_REVISION));
         DEBUG ((DEBUG_INFO, "OCABC: MAT support is %d\n", OcGetMemoryAttributes (NULL) != NULL));
         Status = FwRuntime->OnGetVariable (OcGetVariable, &BootCompat->ServicePtrs.GetVariable);
+        if (!EFI_ERROR (Status)) {
+          //
+          // We override virtual address mapping function to perform
+          // runtime area protection to prevent boot.efi
+          // defragmentation and setup virtual memory for firmware
+          // accessing it after exit boot services.
+          //
+          // We cannot override it to non-RT area since this is prohibited
+          // by spec and at least Linux does not support it.
+          //
+          Status = FwRuntime->OnSetAddressMap (OcSetVirtualAddressMap, FALSE);
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_INFO, "OCABC: OnSetAddressMap failure - %r\n", Status));
+          }
+        } else {
+          DEBUG ((DEBUG_INFO, "OCABC: OnGetVariable failure - %r\n", Status));
+        }
       } else {
         DEBUG ((
           DEBUG_ERROR,
@@ -1177,7 +1185,6 @@ InstallServiceOverrides (
   ServicePtrs->FreePool             = gBS->FreePool;
   ServicePtrs->ExitBootServices     = gBS->ExitBootServices;
   ServicePtrs->StartImage           = gBS->StartImage;
-  ServicePtrs->SetVirtualAddressMap = gRT->SetVirtualAddressMap;
 
   gBS->AllocatePages        = OcAllocatePages;
   gBS->FreePages            = OcFreePages;
@@ -1186,7 +1193,6 @@ InstallServiceOverrides (
   gBS->FreePool             = OcFreePool;
   gBS->ExitBootServices     = OcExitBootServices;
   gBS->StartImage           = OcStartImage;
-  gRT->SetVirtualAddressMap = OcSetVirtualAddressMap;
 
   gBS->Hdr.CRC32 = 0;
   gBS->Hdr.CRC32 = CalculateCrc32 (gBS, gBS->Hdr.HeaderSize);

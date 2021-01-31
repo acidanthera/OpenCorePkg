@@ -123,7 +123,7 @@ ReleaseUsbOwnership (
   Supposed to work in any modern physical or virtual environment.
 **/
 VOID
-DirectRestCold (
+DirectResetCold (
   VOID
   );
 

@@ -1,7 +1,5 @@
 /** @file
-  Copyright (C) 2018, vit9696. All rights reserved.
-
-  All rights reserved.
+  Copyright (C) 2021, vit9696. All rights reserved.
 
   This program and the accompanying materials
   are licensed and made available under the terms and conditions of the BSD License
@@ -10,10 +8,12 @@
 
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+
 **/
 
-#ifndef OPEN_CORE_H
-#define OPEN_CORE_H
+#ifndef OC_MAIN_LIB
+#define OC_MAIN_LIB
+
 
 #include <Library/OcAppleKernelLib.h>
 #include <Library/OcBootManagementLib.h>
@@ -48,9 +48,7 @@
 
 #define OPEN_CORE_ROOT_PATH        L"EFI\\OC"
 
-#define OPEN_CORE_DRIVER_PATH      L"OpenCore.efi"
-
-#define OPEN_CORE_BOOTSTRAP_PATH   L"Bootstrap\\Bootstrap.efi"
+#define OPEN_CORE_APP_PATH         L"OpenCore.efi"
 
 #define OPEN_CORE_CONFIG_PATH      L"config.plist"
 
@@ -81,7 +79,7 @@
 **/
 OC_RSA_PUBLIC_KEY *
 OcGetVaultKey (
-  IN  OC_BOOTSTRAP_PROTOCOL *Bootstrap
+  VOID
   );
 
 /**
@@ -276,7 +274,7 @@ OcMiscEarlyInit (
   );
 
 /**
-  Load middle miscellaneous support like device path and system report.
+  Load middle miscellaneous support like device path.
 
   @param[in]  Storage    OpenCore storage.
   @param[in]  Config     OpenCore configuration.
@@ -290,9 +288,9 @@ VOID
 OcMiscMiddleInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config,
-  IN  CONST CHAR16              *RootPath  OPTIONAL,
-  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath  OPTIONAL,
-  IN  EFI_HANDLE                LoadHandle OPTIONAL
+  IN  CONST CHAR16              *RootPath,
+  IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath,
+  IN  EFI_HANDLE                LoadHandle
   );
 
 /**
@@ -307,6 +305,19 @@ EFI_STATUS
 OcMiscLateInit (
   IN  OC_STORAGE_CONTEXT        *Storage,
   IN  OC_GLOBAL_CONFIG          *Config
+  );
+
+/**
+  Load system report.
+
+  @param[in]  LoadHandle OpenCore loading handle.
+
+  @retval EFI_SUCCESS on success, informational.
+**/
+VOID
+OcMiscLoadSystemReport (
+  IN  OC_GLOBAL_CONFIG          *Config,
+  IN  EFI_HANDLE                LoadHandle OPTIONAL
   );
 
 /**
@@ -350,4 +361,4 @@ OcPlatformIs64BitSupported (
   IN UINT32     KernelVersion
   );
 
-#endif // OPEN_CORE_H
+#endif // OC_MAIN_LIB

@@ -16,7 +16,7 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <UserFile.h>
 

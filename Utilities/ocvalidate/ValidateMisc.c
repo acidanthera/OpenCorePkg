@@ -381,11 +381,8 @@ CheckMiscSecurity (
   UINT32            Index;
   OC_KERNEL_CONFIG  *UserKernel;
   OC_MISC_CONFIG    *UserMisc;
-  OC_UEFI_CONFIG    *UserUefi;
   BOOLEAN           IsAuthRestartEnabled;
   BOOLEAN           HasVSMCKext;
-  CONST CHAR8       *BootProtect;
-  BOOLEAN           IsRequestBootVarRoutingEnabled;
   CONST CHAR8       *AsciiDmgLoading;
   UINT32            ExposeSensitiveData;
   CONST CHAR8       *AsciiVault;
@@ -396,7 +393,6 @@ CheckMiscSecurity (
   ErrorCount        = 0;
   UserKernel        = &Config->Kernel;
   UserMisc          = &Config->Misc;
-  UserUefi          = &Config->Uefi;
 
   HasVSMCKext = FALSE;
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
@@ -408,24 +404,6 @@ CheckMiscSecurity (
   if (IsAuthRestartEnabled && !HasVSMCKext) {
     DEBUG ((DEBUG_WARN, "Misc->Security->AuthRestart is enabled, but VirtualSMC is not loaded at Kernel->Add!\n"));
     ++ErrorCount;
-  }
-
-  BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
-  IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
-  if (AsciiStrCmp (BootProtect, "None") != 0
-    && AsciiStrCmp (BootProtect, "Bootstrap") != 0
-    && AsciiStrCmp (BootProtect, "BootstrapShort") != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is borked (Can only be None, Bootstrap, or BootstrapShort)!\n"));
-    ++ErrorCount;
-  } else if (AsciiStrCmp (BootProtect, "Bootstrap") == 0
-    || AsciiStrCmp (BootProtect, "BootstrapShort") == 0) {
-    if (!IsRequestBootVarRoutingEnabled) {
-      DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is set to %a which requires UEFI->Quirks->RequestBootVarRouting to be enabled!\n", BootProtect));
-      ++ErrorCount;
-    }
-    //
-    // NOTE: RequestBootVarRouting requires OpenRuntime.efi, which will be checked in UEFI checker.
-    //
   }
 
   AsciiDmgLoading = OC_BLOB_GET (&UserMisc->Security.DmgLoading);

@@ -577,6 +577,10 @@ typedef enum {
   // Force SecureBoot support for all CPUs.
   //
   KernelQuirkForceSecureBootScheme,
+  //
+  // Set custom APFS trim timeout.
+  //
+  KernelQuirkSetApfsTrimTimeout,
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;
@@ -1097,6 +1101,16 @@ KextFindKmodAddress (
   IN  UINT64            LoadAddress,
   IN  UINT32            Size,
   OUT UINT64            *Kmod
+  );
+
+/**
+  Set timeout value in microseconds for KernelQuirkSetApfsTrimTimeout quirk.
+
+  @param[in]  Timeout   Timeout in microseconds.
+**/
+VOID
+PatchSetApfsTimeout (
+  IN UINT32  Timeout
   );
 
 /**

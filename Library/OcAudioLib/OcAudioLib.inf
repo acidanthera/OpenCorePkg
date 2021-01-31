@@ -32,6 +32,7 @@
 
 [Sources]
   OcAudio.c
+  OcAudioDump.c
   OcAudioGenBeep.c
   OcAudioLib.c
   OcAudioInternal.h
@@ -48,6 +49,8 @@
 [Protocols]
   gAppleVOAudioProtocolGuid
   gAppleBeepGenProtocolGuid
+  gEfiHdaControllerInfoProtocolGuid
+  gEfiHdaCodecInfoProtocolGuid
   gAppleHighDefinitionAudioProtocolGuid
   gEfiAudioIoProtocolGuid
   gOcAudioProtocolGuid

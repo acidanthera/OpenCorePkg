@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #pragma pack(push, 1)
 
@@ -38,33 +38,27 @@ mOpenCoreVaultKey = {
 
 OC_RSA_PUBLIC_KEY *
 OcGetVaultKey (
-  IN  OC_BOOTSTRAP_PROTOCOL *Bootstrap
+  VOID
   )
 {
   UINT32    Index;
   BOOLEAN   AllZero;
 
   //
-  // Return previously discovered key.
+  // TODO: Perhaps try to get the key from firmware too?
   //
-  if (Bootstrap->VaultKey == NULL) {
-    //
-    // TODO: Perhaps try to get the key from firmware too?
-    //
 
-    AllZero = TRUE;
-    for (Index = 0; Index < sizeof (OC_RSA_PUBLIC_KEY); ++Index) {
-      if (((UINT8 *) &mOpenCoreVaultKey.VaultKey)[Index] != 0) {
-        AllZero = FALSE;
-        break;
-      }
-    }
-
-    if (!AllZero) {
-      Bootstrap->VaultKey = (OC_RSA_PUBLIC_KEY *) &mOpenCoreVaultKey.VaultKey;
+  AllZero = TRUE;
+  for (Index = 0; Index < sizeof (OC_RSA_PUBLIC_KEY); ++Index) {
+    if (((UINT8 *) &mOpenCoreVaultKey.VaultKey)[Index] != 0) {
+      AllZero = FALSE;
+      break;
     }
   }
 
-  return (OC_RSA_PUBLIC_KEY *) Bootstrap->VaultKey;
-}
+  if (!AllZero) {
+    return (OC_RSA_PUBLIC_KEY *) &mOpenCoreVaultKey.VaultKey;
+  }
 
+  return NULL;
+}

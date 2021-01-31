@@ -73,6 +73,7 @@ KEXT_INFO mKextInfo[] = {
   { "IntelMausi.kext",                                                      "Contents/MacOS/IntelMausi",          "Contents/Info.plist" },
   { "IntelSnowMausi.kext",                                                  "Contents/MacOS/IntelSnowMausi",      "Contents/Info.plist" },
   { "BrcmBluetoothInjector.kext",                                           "",                                   "Contents/Info.plist" },
+  { "BrcmBluetoothInjectorLegacy.kext",                                     "",                                   "Contents/Info.plist" },
   { "BrcmFirmwareData.kext",                                                "Contents/MacOS/BrcmFirmwareData",    "Contents/Info.plist" },
   { "BrcmFirmwareRepo.kext",                                                "Contents/MacOS/BrcmFirmwareRepo",    "Contents/Info.plist" },
   { "BrcmNonPatchRAM.kext",                                                 "Contents/MacOS/BrcmNonPatchRAM",     "Contents/Info.plist" },

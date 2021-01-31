@@ -9,6 +9,7 @@
 #define OC_AUDIO_LIB_H
 
 #include <Uefi.h>
+#include <Library/OcFileLib.h>
 #include <Protocol/OcAudio.h>
 
 #define OC_AUDIO_DEFAULT_VOLUME_LEVEL  70
@@ -63,6 +64,18 @@ OcGetVolumeLevel (
 EFI_STATUS
 OcSetVoiceOverLanguage (
   CONST CHAR8   *Language  OPTIONAL
+  );
+
+/**
+  Dump audio data to the specified directory.
+
+  @param[in] Root  Directory to write audio data.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcAudioDump (
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 #endif // OC_AUDIO_LIB_H

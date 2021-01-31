@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
@@ -54,6 +54,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Protocol/DevicePath.h>
 #include <Protocol/GraphicsOutput.h>
+#include <Protocol/Security.h>
+#include <Protocol/Security2.h>
 
 #define OC_EXIT_BOOT_SERVICES_HANDLER_MAX 5
 
@@ -441,6 +443,72 @@ OcLoadAppleSecureBoot (
   }
 }
 
+STATIC
+EFI_STATUS
+EFIAPI
+OcSecurityFileAuthentication (
+  IN  CONST EFI_SECURITY_ARCH_PROTOCOL *This,
+  IN  UINT32                           AuthenticationStatus,
+  IN  CONST EFI_DEVICE_PATH_PROTOCOL   *File
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "OC: Security V1 %u\n", AuthenticationStatus));
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+EFIAPI
+OcSecurity2FileAuthentication (
+  IN CONST EFI_SECURITY2_ARCH_PROTOCOL *This,
+  IN CONST EFI_DEVICE_PATH_PROTOCOL    *File OPTIONAL,
+  IN VOID                              *FileBuffer,
+  IN UINTN                             FileSize,
+  IN BOOLEAN                           BootPolicy
+  )
+{
+  DEBUG ((DEBUG_VERBOSE, "OC: Security V2 %u\n", BootPolicy));
+  return EFI_SUCCESS;
+}
+
+STATIC
+VOID
+OcInstallPermissiveSecurityPolicy (
+  VOID
+  )
+{
+  EFI_STATUS                   Status;
+  EFI_SECURITY_ARCH_PROTOCOL   *Security;
+  EFI_SECURITY2_ARCH_PROTOCOL  *Security2;
+
+  DEBUG ((DEBUG_INFO, "OC: Installing DISABLING secure boot policy overrides\n"));
+
+  Status = gBS->LocateProtocol (
+    &gEfiSecurityArchProtocolGuid,
+    NULL,
+    (VOID **) &Security
+    );
+
+  DEBUG ((DEBUG_INFO, "OC: Security arch protocol - %r\n", Status));
+
+  if (!EFI_ERROR (Status)) {
+    Security->FileAuthenticationState = OcSecurityFileAuthentication;
+  }
+
+  Status = gBS->LocateProtocol (
+    &gEfiSecurity2ArchProtocolGuid,
+    NULL,
+    (VOID **) &Security2
+    );
+
+  DEBUG ((DEBUG_INFO, "OC: Security2 arch protocol - %r\n", Status));
+
+  if (!EFI_ERROR (Status)) {
+    Security2->FileAuthentication = OcSecurity2FileAuthentication;
+  }
+}
+
+
 VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config
@@ -559,7 +627,7 @@ OcLoadBooterUefiSupport (
         Patch->Replace    = OC_BLOB_GET (&UserPatch->Replace);
 
         Patch->Comment    = OC_BLOB_GET (&UserPatch->Comment);
-        
+
         if (UserPatch->Mask.Size > 0) {
           Patch->Mask     = OC_BLOB_GET (&UserPatch->Mask);
         }
@@ -689,6 +757,10 @@ OcLoadUefiSupport (
 
   if (Config->Uefi.Quirks.UnblockFsConnect) {
     OcUnblockUnmountedPartitions ();
+  }
+
+  if (Config->Uefi.Quirks.DisableSecurityPolicy) {
+    OcInstallPermissiveSecurityPolicy ();
   }
 
   OcMiscUefiQuirksLoaded (Config);

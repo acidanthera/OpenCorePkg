@@ -559,6 +559,7 @@ OcAppleEventInstallProtocol (
 {
   EFI_STATUS           Status;
   APPLE_EVENT_PROTOCOL *Protocol;
+  EFI_HANDLE           NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
@@ -583,8 +584,9 @@ OcAppleEventInstallProtocol (
   //
   // Apple code supports unloading, ours does not.
   //
+  NewHandle = NULL;
   Status      = gBS->InstallProtocolInterface (
-                       &gImageHandle,
+                       &NewHandle,
                        &gAppleEventProtocolGuid,
                        EFI_NATIVE_INTERFACE,
                        (VOID *)&mAppleEventProtocol

@@ -275,20 +275,21 @@ enum {
   //
   // ARM Family
   //
-  MachCpuFamilyArm9              = 0xE73283AE,
-  MachCpuFamilyArm11             = 0x8FF620D8,
-  MachCpuFamilyArmXscale         = 0x53B005F5,
-  MachCpuFamilyArm12             = 0xBD1B0AE9,
-  MachCpuFamilyArm13             = 0x0CC90E64,
-  MachCpuFamilyArm14             = 0x96077EF1,
-  MachCpuFamilyArm15             = 0xA8511BCA,
-  MachCpuFamilyArmSwift          = 0x1E2D6381,
-  MachCpuFamilyArmCyclone        = 0x37A09642,
-  MachCpuFamilyArmTyphoon        = 0x2C91A47E,
-  MachCpuFamilyArmTwister        = 0x92FB37C8,
-  MachCpuFamilyArmHurricane      = 0x67CEEE93,
-  MachCpuFamilyArmMonsoonMistral = 0xE81E7EF6,
-  MachCpuFamilyArmVortexTempest  = 0x07D34B9F,
+  MachCpuFamilyArm9                = 0xE73283AE,
+  MachCpuFamilyArm11               = 0x8FF620D8,
+  MachCpuFamilyArmXscale           = 0x53B005F5,
+  MachCpuFamilyArm12               = 0xBD1B0AE9,
+  MachCpuFamilyArm13               = 0x0CC90E64,
+  MachCpuFamilyArm14               = 0x96077EF1,
+  MachCpuFamilyArm15               = 0xA8511BCA,
+  MachCpuFamilyArmSwift            = 0x1E2D6381,
+  MachCpuFamilyArmCyclone          = 0x37A09642,
+  MachCpuFamilyArmTyphoon          = 0x2C91A47E,
+  MachCpuFamilyArmTwister          = 0x92FB37C8,
+  MachCpuFamilyArmHurricane        = 0x67CEEE93,
+  MachCpuFamilyArmMonsoonMistral   = 0xE81E7EF6,
+  MachCpuFamilyArmVortexTempest    = 0x07D34B9F,
+  MachCpuFamilyArmLightningThunder = 0x462504D2,
 };
 
 typedef UINT32 MACH_CPU_FAMILY;

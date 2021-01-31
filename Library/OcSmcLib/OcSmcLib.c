@@ -590,6 +590,7 @@ OcSmcIoInstallProtocol (
 {
   EFI_STATUS             Status;
   APPLE_SMC_IO_PROTOCOL  *Protocol;
+  EFI_HANDLE             NewHandle;
 
   if (AuthRestart) {
     LoadAuthenticationKey ();
@@ -614,8 +615,9 @@ OcSmcIoInstallProtocol (
     }
   }
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-     &gImageHandle,
+     &NewHandle,
      &gAppleSmcIoProtocolGuid,
      (VOID *) &mSmcIoProtocol,
      NULL

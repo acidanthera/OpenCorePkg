@@ -47,7 +47,7 @@ struct _HDA_WIDGET_DEV {
   UINT32 ConnectionListLength;
   UINT16 *Connections;
   HDA_WIDGET_DEV **WidgetConnections;
-  UINT8 ConnectionCount;
+  UINT32 ConnectionCount;
   HDA_WIDGET_DEV *UpstreamWidget;
   UINT8 UpstreamIndex;
 
@@ -161,6 +161,13 @@ struct _AUDIO_IO_PRIVATE_DATA {
 //
 // HDA Codec Info protocol functions.
 //
+EFI_STATUS
+EFIAPI
+HdaCodecInfoGetAddress (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *Address
+  );
+
 EFI_STATUS
 EFIAPI
 HdaCodecInfoGetCodecName(

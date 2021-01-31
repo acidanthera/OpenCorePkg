@@ -24,6 +24,24 @@
 
 #include "HdaCodec.h"
 
+EFI_STATUS
+EFIAPI
+HdaCodecInfoGetAddress (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *Address
+  )
+{
+  HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
+
+  if (This == NULL || Address == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  HdaPrivateData = HDA_CODEC_INFO_PRIVATE_DATA_FROM_THIS (This);
+
+  return HdaPrivateData->HdaCodecDev->HdaIo->GetAddress (HdaPrivateData->HdaCodecDev->HdaIo, Address);
+}
+
 /**
   Gets the codec's name.
 
@@ -228,7 +246,7 @@ HdaCodecInfoGetWidgets(
   // Create variables.
   HDA_CODEC_INFO_PRIVATE_DATA *HdaPrivateData;
   HDA_WIDGET_DEV *HdaWidgetDev;
-  UINT8 AmpInCount;
+  UINT32 AmpInCount;
   HDA_WIDGET *HdaWidgets;
   UINTN HdaWidgetsCount;
 
@@ -255,7 +273,7 @@ HdaCodecInfoGetWidgets(
     HdaWidgets[w].DefaultEapd = HdaWidgetDev->DefaultEapd;
 
     // Get connections.
-    HdaWidgets[w].ConnectionListLength = HdaWidgetDev->ConnectionListLength;
+    HdaWidgets[w].ConnectionCount = HdaWidgetDev->ConnectionCount;
     HdaWidgets[w].Connections = AllocateZeroPool(sizeof(UINT16) * HdaWidgetDev->ConnectionCount);
     if (HdaWidgets[w].Connections == NULL)
       goto FREE_WIDGETS;

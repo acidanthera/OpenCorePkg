@@ -13,7 +13,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
 #include "ProcessorBind.h"
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -273,6 +273,11 @@ OcKernelApplyPatches (
           MaxKernel
           ));
       }
+    }
+
+    if (Config->Kernel.Quirks.SetApfsTrimTimeout >= 0) {
+      PatchSetApfsTimeout ((UINT32) Config->Kernel.Quirks.SetApfsTrimTimeout);
+      OcKernelApplyQuirk (KernelQuirkSetApfsTrimTimeout, CacheType, DarwinVersion, Context, NULL);
     }
   } else {
     if (Config->Kernel.Quirks.AppleXcpmCfgLock) {

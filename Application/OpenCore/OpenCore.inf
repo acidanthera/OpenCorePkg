@@ -1,0 +1,60 @@
+## @file
+#  OpenCore primary application.
+#
+#  Copyright (c) 2019, vit9696. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                         = 0x00010005
+  BASE_NAME                           = OpenCore
+  FILE_GUID                           = 9E1F2D62-016E-4CE7-BF5B-6A47286AE984
+  MODULE_TYPE                         = UEFI_APPLICATION
+  VERSION_STRING                      = 1.0
+  INF_VERSION                         = 0x00010005
+  EDK_RELEASE_VERSION                 = 0x00020000
+  EFI_SPECIFICATION_VERSION           = 0x00010000
+  ENTRY_POINT                         = UefiMain
+
+#
+#  This flag specifies whether HII resource section is generated into PE image.
+#
+  UEFI_HII_RESOURCE_SECTION      = TRUE
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  OpenCore.c
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Guids]
+  gOcVendorVariableGuid
+
+[Protocols]
+  gEfiAudioDecodeProtocolGuid         ## SOMETIMES_CONSUMES
+  gEfiDevicePathProtocolGuid          ## CONSUMES
+  gEfiDevicePathProtocolGuid          ## CONSUMES
+  gEfiLoadedImageProtocolGuid         ## CONSUMES
+  gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
+  gOcBootstrapProtocolGuid            ## CONSUMES
+  gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
+
+[LibraryClasses]
+  OcMainLib
+  UefiApplicationEntryPoint

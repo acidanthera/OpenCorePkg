@@ -47,7 +47,7 @@ ApfsNewPartitionArrived (
       &Handle
       );
     if (!EFI_ERROR (Status)) {
-      OcApfsConnectDevice (Handle, TRUE);
+      OcApfsConnectHandle (Handle, TRUE);
     } else {
       break;
     }
@@ -148,7 +148,7 @@ OcApfsConnectParentDevice (
         }
       }
 
-      Status2 = OcApfsConnectDevice (
+      Status2 = OcApfsConnectHandle (
         HandleBuffer[Index],
         VerifyPolicy
         );

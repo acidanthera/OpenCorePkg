@@ -1,5 +1,5 @@
 ## @file
-#  General purpose test application.
+#  OpenCore primary coordination library
 #
 #  Copyright (c) 2019, vit9696. All rights reserved.<BR>
 #
@@ -14,28 +14,13 @@
 
 [Defines]
   INF_VERSION                         = 0x00010005
-  BASE_NAME                           = OpenCore
-  FILE_GUID                           = 9E1F2D62-016E-4CE7-BF5B-6A47286AE984
-  MODULE_TYPE                         = UEFI_DRIVER
+  BASE_NAME                           = OcMainLib
+  FILE_GUID                           = 1210D2A2-FA16-49DF-A7AA-E8C72DB7F2B5
+  MODULE_TYPE                         = DXE_DRIVER
   VERSION_STRING                      = 1.0
-  INF_VERSION                         = 0x00010005
-  EDK_RELEASE_VERSION                 = 0x00020000
-  EFI_SPECIFICATION_VERSION           = 0x00010000
-  ENTRY_POINT                         = UefiMain
-
-#
-#  This flag specifies whether HII resource section is generated into PE image.
-#
-  UEFI_HII_RESOURCE_SECTION      = TRUE
-
-#
-# The following information is for reference only and not required by the build tools.
-#
-#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
-#
+  LIBRARY_CLASS                       = OcMainLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 [Sources]
-  OpenCore.c
   OpenCoreAcpi.c
   OpenCoreDevProps.c
   OpenCoreKernel.c
@@ -50,7 +35,6 @@
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
-  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
@@ -64,8 +48,9 @@
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
-  gOcBootstrapProtocolGuid            ## CONSUMES
   gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
+  gEfiSecurityArchProtocolGuid        ## SOMETIMES_CONSUMES
+  gEfiSecurity2ArchProtocolGuid       ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   DevicePathLib
@@ -106,6 +91,5 @@
   PrintLib
   SerialPortLib
   UefiBootServicesTableLib
-  UefiDriverEntryPoint
   UefiLib
   UefiRuntimeServicesTableLib

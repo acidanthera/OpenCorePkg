@@ -476,7 +476,7 @@ OcApfsConfigure (
 }
 
 EFI_STATUS
-OcApfsConnectDevice (
+OcApfsConnectHandle (
   IN EFI_HANDLE  Handle,
   IN BOOLEAN     VerifyPolicy
   )

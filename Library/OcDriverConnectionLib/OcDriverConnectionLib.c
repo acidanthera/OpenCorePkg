@@ -169,6 +169,7 @@ OcRegisterDriversToHighestPriority (
 {
   EFI_PLATFORM_DRIVER_OVERRIDE_PROTOCOL  *PlatformDriverOverride;
   EFI_STATUS                             Status;
+  EFI_HANDLE                             NewHandle;
 
   ASSERT (PriorityDrivers != NULL);
 
@@ -185,8 +186,9 @@ OcRegisterDriversToHighestPriority (
     return Status;
   }
 
+  NewHandle = NULL;
   return gBS->InstallMultipleProtocolInterfaces (
-    &gImageHandle,
+    &NewHandle,
     &gEfiPlatformDriverOverrideProtocolGuid,
     &mOcPlatformDriverOverrideProtocol,
     NULL

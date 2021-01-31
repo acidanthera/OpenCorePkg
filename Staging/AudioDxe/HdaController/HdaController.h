@@ -423,9 +423,17 @@ HdaControllerHdaIoStopStream(
 //
 EFI_STATUS
 EFIAPI
-HdaControllerInfoGetName(
-  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL *This,
-  OUT CONST CHAR16 **ControllerName);
+HdaControllerInfoGetName (
+  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
+  OUT CONST CHAR16                      **Name
+  );
+
+EFI_STATUS
+EFIAPI
+HdaControllerInfoGetVendorId (
+  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
+  OUT UINT32                            *VendorId
+  );
 
 //
 // HDA controller internal functions.

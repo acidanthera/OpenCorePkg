@@ -59,8 +59,6 @@
   gEfiAbsolutePointerProtocolGuid
   gEfiUserInterfaceThemeProtocolGuid
   gAppleEventProtocolGuid
-
-  gOcBootstrapProtocolGuid
   gOcInterfaceProtocolGuid
   gEfiLoadedImageProtocolGuid
 

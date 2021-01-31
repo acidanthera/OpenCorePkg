@@ -51,7 +51,7 @@ typedef struct {
   ///
   /// Connections.
   ///
-  UINT32  ConnectionListLength;
+  UINT32  ConnectionCount;
   UINT16  *Connections;
   ///
   /// Power.
@@ -87,6 +87,22 @@ typedef struct {
   UINT32  VolumeCapabilities;
   UINT8   DefaultVolume;
 } HDA_WIDGET;
+
+/**
+  Gets the codec's address.
+
+  @param[in]  This              A pointer to the EFI_HDA_CODEC_INFO_PROTOCOL instance.
+  @param[out] VendorId          The address of the codec.
+
+  @retval EFI_SUCCESS           The address was retrieved.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_HDA_CODEC_INFO_GET_ADDRESS) (
+  IN  EFI_HDA_CODEC_INFO_PROTOCOL  *This,
+  OUT UINT8                        *Address
+  );
 
 /**
   Gets the codec's name.
@@ -228,6 +244,7 @@ EFI_STATUS
   Protocol struct.
 **/
 struct EFI_HDA_CODEC_INFO_PROTOCOL_ {
+  EFI_HDA_CODEC_INFO_GET_ADDRESS                  GetAddress;
   EFI_HDA_CODEC_INFO_GET_NAME                     GetName;
   EFI_HDA_CODEC_INFO_GET_VENDOR_ID                GetVendorId;
   EFI_HDA_CODEC_INFO_GET_REVISION_ID              GetRevisionId;

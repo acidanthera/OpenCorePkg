@@ -12,7 +12,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <Protocol/DataHub.h>
 
@@ -216,7 +216,7 @@ OcPlatformUpdateSmbios (
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
     }
 
-    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
+    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemUuid), &Uuid))) {
       Data.SystemUUID         = &Uuid;
     }
 
