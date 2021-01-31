@@ -483,7 +483,6 @@ InternalApfsGetDriverVersion (
   OptionalHeader = (EFI_IMAGE_NT_HEADERS64 *)(
     (CONST UINT8 *) ImageContext.FileBuffer
     + ImageContext.ExeHdrOffset
-    + sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR)
     );
   ImageVersion = (UINT32) OptionalHeader->MajorImageVersion << 16
     | (UINT32) OptionalHeader->MinorImageVersion;

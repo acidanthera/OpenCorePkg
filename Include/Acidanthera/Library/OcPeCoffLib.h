@@ -326,4 +326,13 @@ PeCoffHashImage (
   IN OUT VOID                         *HashContext
   );
 
+RETURN_STATUS
+PeCoffGetDataDirectoryEntry (
+  IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  UINT32                          FileSize,
+  IN  UINT32                          DirectoryEntryIndex,
+  OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry,
+  OUT UINT32                          *FileOffset
+  );
+
 #endif // OC_PE_COFF_LIB_H

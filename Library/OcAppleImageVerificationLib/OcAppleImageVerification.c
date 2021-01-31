@@ -44,20 +44,26 @@ PeCoffGetAppleSignature (
   OUT APPLE_SIGNATURE_CONTEXT         *SignatureContext
   )
 {
-  UINTN                       Index;
-  UINT32                      Result;
-  APPLE_EFI_CERTIFICATE       *Cert;
-  APPLE_EFI_CERTIFICATE_INFO  *CertInfo;
+  EFI_STATUS                      Status;
+  UINTN                           Index;
+  UINT32                          Result;
+  APPLE_EFI_CERTIFICATE           *Cert;
+  APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
+  CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
+  UINT32                          SecOffset;
 
-  //
-  // FIXME: Where to take it from???
-  //
-  EFI_IMAGE_DATA_DIRECTORY *SecDir = NULL;
+  Status = PeCoffGetDataDirectoryEntry (
+    Context,
+    ImageSize,
+    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
+    &SecDir,
+    &SecOffset
+    );
 
   //
   // Check SecDir extistence
   //
-  if (SecDir == NULL) {
+  if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -70,7 +76,7 @@ PeCoffGetAppleSignature (
   // Extract APPLE_EFI_CERTIFICATE_INFO
   //
   CertInfo = (APPLE_EFI_CERTIFICATE_INFO *) (
-    (UINT8 *) Context->ImageBuffer + SecDir->VirtualAddress
+    (UINT8 *) Context->FileBuffer + SecOffset
     );
 
   //
@@ -101,7 +107,7 @@ PeCoffGetAppleSignature (
   // Extract signature directory
   //
   Cert = (APPLE_EFI_CERTIFICATE *) (
-    (UINT8 *) Context->ImageBuffer + CertInfo->CertOffset
+    (UINT8 *) Context->FileBuffer + CertInfo->CertOffset
     );
 
   //
@@ -177,9 +183,11 @@ STATIC
 EFI_STATUS
 PeCoffHashAppleImage (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  UINT32                          ImageSize,
   OUT UINT8                           *Hash
   )
 {
+#if 0
   BOOLEAN           Success;
   SHA256_CONTEXT    HashContext;
 
@@ -205,10 +213,11 @@ PeCoffHashAppleImage (
   //
   Sha256Final (&HashContext, Hash);
   return EFI_SUCCESS;
+#else
 
-#if 0
   UINTN                    HashSize;
   UINT8                    *HashBase;
+  SHA256_CONTEXT           HashContext;
 
   //
   // Initialise a SHA hash context
@@ -218,7 +227,7 @@ PeCoffHashAppleImage (
   //
   // Hash DOS header and skip DOS stub
   //
-  Sha256Update (&HashContext, Image, sizeof (EFI_IMAGE_DOS_HEADER));
+  Sha256Update (&HashContext, Context->FileBuffer, sizeof (EFI_IMAGE_DOS_HEADER));
 
   /**
     Measuring PE/COFF Image Header;
@@ -227,25 +236,49 @@ PeCoffHashAppleImage (
     Hash the image header from its base to beginning of the image checksum
   **/
 
-  HashBase = (UINT8 *) Image + ((EFI_IMAGE_DOS_HEADER *) Image)->e_lfanew;
-  HashSize = (UINT8 *) Context->OptHdrChecksum - HashBase;
+  UINT8* OptHdrChecksum = (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset
+    + OFFSET_OF(EFI_IMAGE_NT_HEADERS64, CheckSum);
+  CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
+  CONST EFI_IMAGE_DATA_DIRECTORY  *RelocDir;
+
+  UINT32 SecOffset;
+  UINT32 RelocOffset;
+  EFI_STATUS Status = PeCoffGetDataDirectoryEntry (
+    Context,
+    ImageSize,
+    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
+    &SecDir,
+    &SecOffset
+    );
+  ASSERT_EFI_ERROR (Status);
+  Status = PeCoffGetDataDirectoryEntry (
+    Context,
+    ImageSize,
+    EFI_IMAGE_DIRECTORY_ENTRY_BASERELOC,
+    &RelocDir,
+    &RelocOffset
+    );
+  ASSERT_EFI_ERROR (Status);
+
+  HashBase = (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset;
+  HashSize = (UINT8 *) OptHdrChecksum - HashBase;
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
   // Hash everything from the end of the checksum to the start of the Cert Directory.
   //
-  HashBase = (UINT8 *) Context->OptHdrChecksum + sizeof (UINT32);
-  HashSize = (UINT8 *) Context->SecDir - HashBase;
+  HashBase = (UINT8 *) OptHdrChecksum + sizeof (UINT32);
+  HashSize = (UINT8 *) SecDir - HashBase;
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
   // Hash from the end of SecDirEntry till SecDir data
   //
-  HashBase = (UINT8 *) Context->RelocDir;
-  HashSize = (UINT8 *) Image + Context->SecDir->VirtualAddress - HashBase;
+  HashBase = (UINT8 *) RelocDir;
+  HashSize = (UINT8 *) Context->FileBuffer + SecOffset - HashBase;
   Sha256Update (&HashContext, HashBase, HashSize);
 
-  Sha256Final (&HashContext, Context->PeImageHash);
+  Sha256Final (&HashContext, Hash);
   return EFI_SUCCESS;
 #endif
 }
@@ -287,6 +320,7 @@ VerifyApplePeImageSignature (
 
   ImageStatus = PeCoffHashAppleImage (
     &ImageContext,
+    *ImageSize,
     &Hash[0]
     );
   if (EFI_ERROR (ImageStatus)) {
