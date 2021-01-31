@@ -18,7 +18,13 @@
   LIBRARY_CLASS                  = OcPeCoffLib
 
 [Sources]
-  OcPeCoffLib.c
+  PeCoffDebug.c
+  PeCoffHash.c
+  PeCoffInfo.c
+  PeCoffInfo.h
+  PeCoffInit.c
+  PeCoffLoad.c
+  PeCoffRelocate.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -32,5 +38,10 @@
   OcGuardLib
 
 [FixedPcd]
-  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderLoadHeader
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderRtRelocAllowTargetMismatch
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderHashProhibitOverlap
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderLoadHeader
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportArmThumb
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderForceLoadDebug
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderTolerantLoad
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportDebug

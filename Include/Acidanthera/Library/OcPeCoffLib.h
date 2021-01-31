@@ -13,50 +13,11 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #ifndef OC_PE_COFF_LIB_H
 #define OC_PE_COFF_LIB_H
 
-#include <IndustryStandard/OcPeImage.h>
+#include <IndustryStandard/PeCoffImage.h>
 
-// TODO: move?
-/**
-  Performs digest on a data buffer of the specified length. This function can
-  be called multiple times to compute the digest of long or discontinuous data streams.
-
-  If HashContext is NULL, then ASSERT().
-
-  @param[in,out]  HashContext  Pointer to the MD5 context.
-  @param[in]      Data         Pointer to the buffer containing the data to be hashed.
-  @param[in]      DataLength   Length of Data buffer in bytes.
-
-  @retval TRUE     HASH data digest succeeded.
-  @retval FALSE    Invalid HASH context. After HashFinal function has been called, the
-                   HASH context cannot be reused.
-
-**/
-typedef
-BOOLEAN
-(EFIAPI *HASH_UPDATE)(
-  IN OUT  VOID        *HashContext,
-  IN      CONST VOID  *Data,
-  IN      UINTN       DataLength
-  );
-
-//
-// Return status codes from the PE/COFF Loader services
-//
-#define IMAGE_ERROR_SUCCESS                      0U
-#define IMAGE_ERROR_IMAGE_READ                   1U
-#define IMAGE_ERROR_INVALID_PE_HEADER_SIGNATURE  2U
-#define IMAGE_ERROR_INVALID_MACHINE_TYPE         3U
-#define IMAGE_ERROR_INVALID_SUBSYSTEM            4U
-#define IMAGE_ERROR_INVALID_IMAGE_ADDRESS        5U
-#define IMAGE_ERROR_INVALID_IMAGE_SIZE           6U
-#define IMAGE_ERROR_INVALID_SECTION_ALIGNMENT    7U
-#define IMAGE_ERROR_SECTION_NOT_LOADED           8U
-#define IMAGE_ERROR_FAILED_RELOCATION            9U
-#define IMAGE_ERROR_FAILED_ICACHE_FLUSH          10U
-#define IMAGE_ERROR_UNSUPPORTED                  11U
-
-typedef UINTN IMAGE_STATUS;
-
+///
+/// Image type enumeration for Image format identification from the context.
+///
 typedef enum {
   ImageTypeTe,
   ImageTypePe32,
@@ -65,134 +26,304 @@ typedef enum {
 } IMAGE_LOADER_IMAGE_TYPE;
 
 ///
-/// The context structure used while PE/COFF image is being loaded and relocated.
+/// Image context structure used for abstraction and bookkeeping.
+/// This structure is publicly exposed for memory allocation reasons and must
+/// not be accessed directly outside of the library implementation.
 ///
 typedef struct {
   ///
-  /// Set by OcPeCoffLoaderInitializeContext() to the ImageBase in the PE/COFF header.
+  /// The preferred load address of the Image.
   ///
-  UINT64  ImageBase;
-  //
-  // Before LoadImage returns, a pointer to the raw file image.
-  // After LoadImage returns, a pointer to the loaded image.
-  //
-  VOID    *FileBuffer;
+  UINT64     ImageBase;
   ///
-  /// Set by OcPeCoffLoaderInitializeContext() to the SizeOfImage in the PE/COFF header.
-  /// Image size includes the size of Debug Entry if it is present.
+  /// A pointer to the Image raw file buffer.
   ///
-  UINT32  SizeOfImage;
-  UINT32  SectionAlignment;
+  CONST VOID *FileBuffer;
   ///
-  /// Set by OcPeCoffLoaderInitializeContext() to offset to the PE/COFF header.
-  /// If the PE/COFF image does not start with a DOS header, this value is zero.
-  /// Otherwise, it's the offset to the PE/COFF header.
+  /// A pointer to the loaded Image destination.
   ///
-  UINT32  ExeHdrOffset;
+  VOID       *ImageBuffer;
   ///
-  /// Is set by OcPeCoffLoaderInitializeContext() to the Section Alignment in the PE/COFF header.
+  /// The offset of the Section Headers from the beginning of the raw file.
   ///
-  UINT32  SizeOfHeaders;
-  UINT32  AddressOfEntryPoint;
+  UINT32     SectionsOffset;
   ///
-  /// Set by OcPeCoffLoaderInitializeContext() to TRUE if the PE/COFF image does not contain
-  /// relocation information.
+  /// The number of Sections in the Image.
   ///
-  BOOLEAN RelocsStripped;
+  UINT16     NumberOfSections;
   ///
-  /// Set by OcPeCoffLoaderInitializeContext() to TRUE if the image is a TE image.
-  /// For a definition of the TE Image format, see the Platform Initialization Pre-EFI
-  /// Initialization Core Interface Specification.
+  /// The size, in bytes, required to load the Image.
   ///
-  UINT8   ImageType;
-  UINT16  Subsystem;
-  UINT16  Machine;
-  UINT32  TeStrippedOffset;
+  UINT32     SizeOfImage;
+  ///
+  /// The additional size, in bytes, required to force-load debug information.
+  ///
+  UINT32     SizeOfImageDebugAdd;
+  ///
+  /// The alignment, in bytes, of Image Sections virtual addresses.
+  ///
+  UINT32     SectionAlignment;
+  ///
+  /// The offset of the Image Header from the beginning of the raw file.
+  ///
+  UINT32     ExeHdrOffset;
+  ///
+  /// The combined size, in bytes, of all Image Headers.
+  ///
+  UINT32     SizeOfHeaders;
+  ///
+  /// The RVA of the Image entry point.
+  ///
+  UINT32     AddressOfEntryPoint;
+  ///
+  /// Indicates whether relocation information has been stripped from the Image.
+  ///
+  BOOLEAN    RelocsStripped;
+  ///
+  /// The file format of the Image raw file, refer to IMAGE_LOADER_IMAGE_TYPE.
+  ///
+  UINT8      ImageType;
+  ///
+  /// The Subsystem value from the Image Header.
+  ///
+  UINT16     Subsystem;
+  ///
+  /// The Machine value from the Image Header.
+  ///
+  UINT16     Machine;
+  ///
+  /// The size, in bytes, stripped from the beginning of the Image raw file
+  /// during TE file generation. Always 0 for PE Images.
+  ///
+  UINT16     TeStrippedOffset;
+  ///
+  /// The RVA of the Relocation Directory.
+  ///
+  UINT32     RelocDirRva;
+  ///
+  /// The size, in bytes, of the Relocation Directory.
+  ///
+  UINT32     RelocDirSize;
+  ///
+  /// The RVA of the CodeView debug information.
+  ///
+  UINT32     CodeViewRva;
+} PE_COFF_IMAGE_CONTEXT;
 
-  UINT32  RelocDirRva;
-  UINT32  RelocDirSize;
-} PE_COFF_LOADER_IMAGE_CONTEXT;
+///
+/// Runtime Image context used to relocate the Image into virtual addressing.
+///
+typedef struct {
+  ///
+  /// The RVA of the Relocation Directory.
+  ///
+  UINT32 RelocDirRva;
+  ///
+  /// The size, in bytes, of the Relocation Directory.
+  ///
+  UINT32 RelocDirSize;
+  ///
+  /// Information bookkept during the initial Image Relocation.
+  ///
+  UINT64 FixupData[];
+} PE_COFF_RUNTIME_CONTEXT;
 
 /**
-  Retrieves information about a PE/COFF image.
+  Adds the digest of Data to HashContext. This function can be called multiple
+  times to compute the digest of discontinuous data.
 
-  Computes the ExeHdrOffset, IsTeImage, ImageType, ImageAddress, ImageSize,
-  DestinationAddress, RelocsStripped, SectionAlignment, SizeOfHeaders, and
-  DebugDirectoryEntryRva fields of the ImageContext structure.
-  If ImageContext is NULL, then return RETURN_INVALID_PARAMETER.
-  If the PE/COFF image accessed through the ImageRead service in the ImageContext
-  structure is not a supported PE/COFF image type, then return RETURN_UNSUPPORTED.
-  If any errors occur while computing the fields of ImageContext,
-  then the error status is returned in the ImageError field of ImageContext.
-  If the image is a TE image, then SectionAlignment is set to 0.
-  The ImageRead and Handle fields of ImageContext structure must be valid prior
-  to invoking this service.
+  @param[in,out] HashContext  The context of the current hash.
+  @param[in]     Data         Pointer to the data to be hashed.
+  @param[in]     DataSize     The size, in bytes, of Data.
 
-  @param  ImageContext              The pointer to the image context structure that
-                                    describes the PE/COFF image that needs to be
-                                    examined by this function.
-
-  @retval RETURN_SUCCESS            The information on the PE/COFF image was collected.
-  @retval RETURN_INVALID_PARAMETER  ImageContext is NULL.
-  @retval RETURN_UNSUPPORTED        The PE/COFF image is not supported.
-
+  @returns  Whether hashing has been successful.
 **/
-IMAGE_STATUS
-OcPeCoffLoaderInitializeContext (
-  OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
-  IN  CONST VOID                    *FileBuffer,
-  IN  UINTN                         FileSize
-  );
-
-/**
-  Loads a PE/COFF image into memory.
-
-  Loads the PE/COFF image accessed through the ImageRead service of ImageContext into the buffer
-  specified by the ImageAddress and ImageSize fields of ImageContext.  The caller must allocate
-  the load buffer and fill in the ImageAddress and ImageSize fields prior to calling this function.
-  The EntryPoint, FixupDataSize, CodeView, PdbPointer and HiiResourceData fields of ImageContext are computed.
-  The ImageRead, Handle, ExeHdrOffset, IsTeImage, Machine, ImageType, ImageAddress, ImageSize,
-  DestinationAddress, RelocsStripped, SectionAlignment, SizeOfHeaders, and DebugDirectoryEntryRva
-  fields of the ImageContext structure must be valid prior to invoking this service.
-
-  If ImageContext is NULL, then ASSERT().
-
-  Note that if the platform does not maintain coherency between the instruction cache(s) and the data
-  cache(s) in hardware, then the caller is responsible for performing cache maintenance operations
-  prior to transferring control to a PE/COFF image that is loaded using this library.
-
-  @param  ImageContext              The pointer to the image context structure that describes the PE/COFF
-                                    image that is being loaded.
-
-  @retval RETURN_SUCCESS            The PE/COFF image was loaded into the buffer specified by
-                                    the ImageAddress and ImageSize fields of ImageContext.
-                                    Extended status information is in the ImageError field of ImageContext.
-  @retval RETURN_BUFFER_TOO_SMALL   The caller did not provide a large enough buffer.
-                                    Extended status information is in the ImageError field of ImageContext.
-  @retval RETURN_LOAD_ERROR         The PE/COFF image is an EFI Runtime image with no relocations.
-                                    Extended status information is in the ImageError field of ImageContext.
-  @retval RETURN_INVALID_PARAMETER  The image address is invalid.
-                                    Extended status information is in the ImageError field of ImageContext.
-
-**/
-IMAGE_STATUS
-OcPeCoffLoaderLoadImage (
-  IN OUT PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
-  OUT    VOID                          *Destination,
-  IN     UINT32                        DestinationSize
-  );
-
-IMAGE_STATUS
-OcPeCoffLoaderRelocateImage (
-  IN CONST PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
-  IN UINTN                               BaseAddress
-  );
-
+typedef
 BOOLEAN
-OcPeCoffLoaderHashImage (
-  IN     CONST PE_COFF_LOADER_IMAGE_CONTEXT  *Context,
-  IN     HASH_UPDATE                         HashUpdate,
-  IN OUT VOID                                *HashContext
+(EFIAPI *PE_COFF_HASH_UPDATE)(
+  IN OUT VOID        *HashContext,
+  IN     CONST VOID  *Data,
+  IN     UINTN       DataSize
+  );
+
+/**
+  Verify the TE, PE32, or PE32+ Image and initialise Context.
+
+  Used offsets and ranges must be aligned and in the bounds of the raw file.
+  Image Section Headers and basic Relocation information must be correct.
+
+  @param[out] Context   The context describing the Image.
+  @param[in]  FileSize  The size, in bytes, of Context->FileBuffer.
+
+  @retval RETURN_SUCCESS  The file data is correct.
+  @retval other           The file data is malformed.
+**/
+RETURN_STATUS
+PeCoffInitializeContext (
+  OUT PE_COFF_IMAGE_CONTEXT  *Context,
+  IN  CONST VOID             *FileBuffer,
+  IN  UINT32                 FileSize
+  );
+
+/**
+  Load the Image into the destination memory space.
+
+  @param[in]  Context          The context describing the Image. Must have been
+                               initialised by PeCoffInitializeContext().
+  @param[out] Destination      The Image destination memory. Must be allocated
+                               from page memory.
+  @param[in]  DestinationSize  The size, in bytes, of Destination.
+                               Must be at least
+                               Context->SizeOfImage +
+                               Context->SizeOfImageDebugAdd. If the Section
+                               Alignment exceeds 4 KB, must be at least
+                               Context->SizeOfImage +
+                               Context->SizeOfImageDebugAdd
+                               Context->SectionAlignment.
+
+  @retval RETURN_SUCCESS  The Image was loaded successfully.
+  @retval other           The Image could not be loaded successfully.
+**/
+RETURN_STATUS
+PeCoffLoadImage (
+  IN OUT PE_COFF_IMAGE_CONTEXT  *Context,
+  OUT    VOID                   *Destination,
+  IN     UINT32                 DestinationSize
+  );
+
+/**
+  Discards optional Image Sections to disguise sensitive data.
+
+  @param[in] Context  The context describing the Image. Must have been loaded by
+                      PeCoffLoadImage().
+**/
+VOID
+PeCoffDiscardSections (
+  IN OUT PE_COFF_IMAGE_CONTEXT  *Context
+  );
+
+/**
+  Retrieves the size required to bookkeep Runtime Relocation information.
+
+  @param[in]  Context  The context describing the Image. Must have been loaded
+                       by PeCoffLoadImage().
+  @param[out] Size     On output, the size, in bytes, of the bookkeeping buffer.
+
+  @retval RETURN_SUCCESS  The Runtime context size for the Image was retrieved
+                          successfully.
+  @retval other           The Runtime context size for the Image could not be
+                          retrieved successfully.
+**/
+RETURN_STATUS
+PeCoffRelocationDataSize (
+  IN  CONST PE_COFF_IMAGE_CONTEXT  *Context,
+  OUT UINT32                       *Size
+  );
+
+/**
+  Relocate Image for boot-time usage.
+
+  @param[in]  Context             The context describing the Image. Must have
+                                  been loaded by PeCoffLoadImage().
+  @param[in]  BaseAddress         The address to relocate the Image to.
+  @param[out] RelocationData      If not NULL, on output, a buffer bookkeeping
+                                  data required for Runtime Relocation.
+  @param[in]  RelocationDataSize  The size, in bytes, of RelocationData. Must be
+                                  at least as big as PeCoffRelocationDataSize().
+
+  @retval RETURN_SUCCESS  The Image has been relocated successfully.
+  @retval other           The Image could not be relocated successfully.
+**/
+RETURN_STATUS
+PeCoffRelocateImage (
+  IN  CONST PE_COFF_IMAGE_CONTEXT  *Context,
+  IN  UINTN                        BaseAddress,
+  OUT PE_COFF_RUNTIME_CONTEXT      *RelocationData OPTIONAL,
+  IN  UINT32                       RelocationDataSize
+  );
+
+/**
+  Relocate Image for Runtime usage.
+
+  @param[in]  Image           The Image destination memory. Must have been
+                              relocated by PeCoffRelocateImage().
+  @param[in]  ImageSize       The size, in bytes, of Image.
+  @param[in]  BaseAddress     The address to relocate the Image to.
+  @param[in]  RelocationData  The Relocation context obtained by
+                              PeCoffRelocateImage().
+
+  @retval RETURN_SUCCESS  The Image has been relocated successfully.
+  @retval other           The Image could not be relocated successfully.
+**/
+RETURN_STATUS
+PeCoffRelocateImageForRuntime (
+  IN OUT VOID                           *Image,
+  IN     UINT32                         ImageSize,
+  IN     UINTN                          BaseAddress,
+  IN     CONST PE_COFF_RUNTIME_CONTEXT  *RelocationData
+  );
+
+/**
+  Retrieves information about the Image CodeView data.
+
+  The Image context is updated accordingly.
+
+  @param[in,out]  Context   The context describing the Image. Must have been
+                            initialised by PeCoffInitializeContext().
+  @param[in]      FileSize  The size, in bytes, of Context->FileBuffer.
+**/
+VOID
+PeCoffLoaderRetrieveCodeViewInfo (
+  IN OUT PE_COFF_IMAGE_CONTEXT  *Context,
+  IN     UINT32                 FileSize
+  );
+
+/**
+  Loads the Image CodeView data into memory.
+
+  @param[in,out]  Context   The context describing the Image. Must have been
+                            updated by PeCoffLoaderRetrieveCodeViewInfo().
+**/
+VOID
+PeCoffLoaderLoadCodeView (
+  IN OUT PE_COFF_IMAGE_CONTEXT  *Context
+  );
+
+/**
+  Retrieves the Image PDB path.
+
+  @param[in,out] Context      The context describing the Image. Must have been
+                              initialised by PeCoffInitializeContext().
+  @param[out]    PdbPath      On output, a pointer to the Image PDB path.
+  @param[out]    PdbPathSize  On output, the size, in bytes, of *PdbPath.
+
+  @retval RETURN_SUCCESS  The Image PDB path was retrieved successfully.
+  @retval other           The Image PDB path could not be retrieved
+                          successfully.
+**/
+RETURN_STATUS
+PeCoffGetPdbPath (
+  IN  CONST PE_COFF_IMAGE_CONTEXT  *Context,
+  OUT CHAR8                        **PdbPath,
+  OUT UINT32                       *PdbPathSize
+  );
+
+/**
+  Hashes the Image using the Authenticode (PE/COFF Specification 8.1 Appendix A)
+  algorithm.
+
+  @param[in]     Context      The context describing the Image. Must have been
+                              initialised by PeCoffInitializeContext().
+  @param[in]     HashUpdate   The data hashing function.
+  @param[in,out] HashContext  The context of the current hash.
+
+  @returns  Whether hashing has been successful.
+**/
+BOOLEAN
+PeCoffHashImage (
+  IN     CONST PE_COFF_IMAGE_CONTEXT  *Context,
+  IN     PE_COFF_HASH_UPDATE          HashUpdate,
+  IN OUT VOID                         *HashContext
   );
 
 #endif // OC_PE_COFF_LIB_H

@@ -2,22 +2,21 @@
   EFI image format for PE32, PE32+ and TE. Please note some data structures are
   different for PE32 and PE32+. EFI_IMAGE_NT_HEADERS32 is for PE32 and
   EFI_IMAGE_NT_HEADERS64 is for PE32+.
-
   This file is coded to the Visual Studio, Microsoft Portable Executable and
   Common Object File Format Specification, Revision 8.3 - February 6, 2013.
   This file also includes some definitions in PI Specification, Revision 1.0.
 
-Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
-Portions copyright (c) 2008 - 2009, Apple Inc. All rights reserved.<BR>
-Portions Copyright (c) 2016 - 2020, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
-
-SPDX-License-Identifier: BSD-2-Clause-Patent
-
+  Portions copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.<BR>
+  Portions copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
+  Portions Copyright (c) 2020, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
+  Copyright (c) 2020, Marvin Häuser. All rights reserved.<BR>
+  Copyright (c) 2020, Vitaly Cheptsov. All rights reserved.<BR>
+  Copyright (c) 2020, ISP RAS. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
-#ifndef OC_PE_IMAGE_H
-#define OC_PE_IMAGE_H
-
+#ifndef PE_COFF_IMAGE_H
+#define PE_COFF_IMAGE_H
 //
 // PE32+ Subsystem type for EFI images
 //
@@ -451,12 +450,7 @@ typedef struct {
   UINT32  VirtualAddress;
   UINT32  SizeOfBlock;
   UINT16  Relocations[];
-} EFI_IMAGE_BASE_RELOCATION;
-
-///
-/// Size of EFI_IMAGE_BASE_RELOCATION.
-///
-#define EFI_IMAGE_SIZEOF_BASE_RELOCATION  8
+} EFI_IMAGE_BASE_RELOCATION_BLOCK;
 
 //
 // Based relocation types.
@@ -627,7 +621,7 @@ typedef struct {
 #define CODEVIEW_SIGNATURE_MTOC  SIGNATURE_32('M', 'T', 'O', 'C')
 typedef struct {
   UINT32    Signature;                       ///< "MTOC".
-  UINT64    MachOUuid[2];
+  UINT8     Uuid[16];
   //
   //  Filename of .DLL (Mach-O with debug info) goes here
   //
@@ -663,7 +657,7 @@ typedef struct {
   UINT16  MinorVersion;
   UINT16  NumberOfNamedEntries;
   UINT16  NumberOfIdEntries;
-  EFI_IMAGE_RESOURCE_DIRECTORY_ENTRY Entires[];
+  EFI_IMAGE_RESOURCE_DIRECTORY_ENTRY Entries[];
 } EFI_IMAGE_RESOURCE_DIRECTORY;
 
 ///
@@ -671,7 +665,7 @@ typedef struct {
 ///
 typedef struct {
   UINT16  Length;
-  CHAR16  String[1];
+  CHAR16  String[];
 } EFI_IMAGE_RESOURCE_DIRECTORY_STRING;
 
 ///
@@ -719,4 +713,4 @@ typedef union {
   EFI_TE_IMAGE_HEADER             Te;
 } EFI_IMAGE_OPTIONAL_HEADER_UNION;
 
-#endif // OC_PE_IMAGE_H
+#endif // PE_COFF_IMAGE_H
