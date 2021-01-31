@@ -59,6 +59,17 @@ OcSetConsoleResolutionForProtocol (
     (UINT32) GraphicsOutput->Mode->MaxMode
     ));
 
+  DEBUG ((
+    DEBUG_INFO,
+    "OCC: Current FB at 0x%LX (0x%X), format %d, res %ux%u scan %u\n",
+    GraphicsOutput->Mode->FrameBufferBase,
+    (UINT32) GraphicsOutput->Mode->FrameBufferSize,
+    GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->PixelFormat : -1,
+    GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->HorizontalResolution : 0,
+    GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->VerticalResolution : 0,
+    GraphicsOutput->Mode->Info != NULL ? GraphicsOutput->Mode->Info->PixelsPerScanLine : 0
+    ));
+
   //
   // Find the resolution we need.
   //
