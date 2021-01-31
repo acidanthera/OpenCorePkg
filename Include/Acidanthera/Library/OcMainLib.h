@@ -50,8 +50,6 @@
 
 #define OPEN_CORE_DRIVER_PATH      L"OpenCore.efi"
 
-#define OPEN_CORE_BOOTSTRAP_PATH   L"Bootstrap\\Bootstrap.efi"
-
 #define OPEN_CORE_CONFIG_PATH      L"config.plist"
 
 #define OPEN_CORE_LOG_PREFIX_PATH  L"opencore"
