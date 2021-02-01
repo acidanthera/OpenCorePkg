@@ -22,8 +22,8 @@ TestImageLoad (
   )
 {
   EFI_STATUS                   Status;
-  IMAGE_STATUS                 ImageStatus;
-  PE_COFF_LOADER_IMAGE_CONTEXT ImageContext;      
+  EFI_STATUS                   ImageStatus;
+  PE_COFF_IMAGE_CONTEXT        ImageContext;      
   EFI_PHYSICAL_ADDRESS         DestinationArea;
   VOID                         *DestinationBuffer;
  
@@ -31,13 +31,13 @@ TestImageLoad (
   //
   // Initialize the image context.
   //
-  ImageStatus = OcPeCoffLoaderInitializeContext (
+  ImageStatus = PeCoffInitializeContext (
     &ImageContext,
     SourceBuffer,
     SourceSize
     );
-  if (ImageStatus != IMAGE_ERROR_SUCCESS) {
-    DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %d\n", ImageStatus));
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
   //
@@ -73,27 +73,29 @@ TestImageLoad (
   //
   // Load SourceBuffer into DestinationBuffer.
   //
-  ImageStatus = OcPeCoffLoaderLoadImage (
+  ImageStatus = PeCoffLoadImage (
     &ImageContext,
     DestinationBuffer,
     ImageContext.SizeOfImage
     );
-  if (ImageStatus != IMAGE_ERROR_SUCCESS) {
-    DEBUG ((DEBUG_INFO, "OCB: PeCoff load image error - %d\n", ImageStatus));
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff load image error - %r\n", ImageStatus));
     FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
     return EFI_UNSUPPORTED;
   }
   //
   // Relocate the loaded image to the destination address.
   //
-  ImageStatus = OcPeCoffLoaderRelocateImage (
+  ImageStatus = PeCoffRelocateImage (
     &ImageContext,
-    (UINTN) DestinationBuffer
+    (UINTN) DestinationBuffer,
+    NULL,
+    0
     );
 
   FreePages (DestinationBuffer, EFI_SIZE_TO_PAGES (ImageContext.SizeOfImage));
 
-  if (ImageStatus != IMAGE_ERROR_SUCCESS) {
+  if (EFI_ERROR (ImageStatus)) {
     DEBUG ((DEBUG_INFO, "OCB: PeCoff relocate image error - %d\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }

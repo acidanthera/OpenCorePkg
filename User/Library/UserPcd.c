@@ -17,8 +17,6 @@
 #define _PCD_VALUE_PcdVerifyNodeInList                        ((BOOLEAN)0U)
 #define _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs        0x2U
 #define _PCD_VALUE_PcdMaximumDevicePathNodeCount              0U
-#define _PCD_VALUE_PcdImageLoaderHashProhibitOverlap          1U
-#define _PCD_VALUE_PcdImageLoaderLoadHeader                   0U
 
 UINT32 _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize        = _PCD_VALUE_PcdUefiLibMaxPrintBufferSize;
 BOOLEAN _gPcd_FixedAtBuild_PcdUgaConsumeSupport               = _PCD_VALUE_PcdUgaConsumeSupport;
@@ -32,5 +30,10 @@ UINT32 _gPcd_FixedAtBuild_PcdMaximumLinkedListLength          = _PCD_VALUE_PcdMa
 BOOLEAN _gPcd_FixedAtBuild_PcdVerifyNodeInList                = _PCD_VALUE_PcdVerifyNodeInList;
 UINT32 _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs = _PCD_VALUE_PcdCpuNumberOfReservedVariableMtrrs;
 UINT32 _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount       = _PCD_VALUE_PcdMaximumDevicePathNodeCount;
-BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap  = _PCD_VALUE_PcdImageLoaderHashProhibitOverlap;
-BOOLEAN _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader           = _PCD_VALUE_PcdImageLoaderLoadHeader;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch = FALSE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap = TRUE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader = TRUE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb = FALSE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug = FALSE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad = TRUE;
+BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug = FALSE;

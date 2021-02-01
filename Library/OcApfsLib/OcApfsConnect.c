@@ -17,7 +17,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
-#include <Library/OcAppleImageVerificationLib.h>
+#include <Library/OcPeCoffExtLib.h>
 #include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
@@ -84,7 +84,7 @@ EFI_STATUS
 ApfsVerifyDriverVersion (
   IN APFS_PRIVATE_DATA  *PrivateData,
   IN VOID               *DriverBuffer,
-  IN UINTN              DriverSize
+  IN UINT32             DriverSize
   )
 {
   EFI_STATUS            Status;
@@ -94,7 +94,7 @@ ApfsVerifyDriverVersion (
   UINTN                 Index;
   BOOLEAN               HasLegitVersion;
 
-  Status = InternalApfsGetDriverVersion (
+  Status = PeCoffGetApfsDriverVersion (
     DriverBuffer,
     DriverSize,
     &DriverVersion
@@ -234,7 +234,7 @@ EFI_STATUS
 ApfsStartDriver (
   IN APFS_PRIVATE_DATA  *PrivateData,
   IN VOID               *DriverBuffer,
-  IN UINTN              DriverSize
+  IN UINT32             DriverSize
   )
 {
   EFI_STATUS                 Status;
@@ -245,7 +245,7 @@ ApfsStartDriver (
   APPLE_SECURE_BOOT_PROTOCOL *SecureBoot;
   UINT8                      Policy;
 
-  Status = VerifyApplePeImageSignature (
+  Status = PeCoffVerifyAppleSignature (
     DriverBuffer,
     &DriverSize
     );
@@ -401,7 +401,7 @@ ApfsConnectDevice (
   APFS_NX_SUPERBLOCK   *SuperBlock;
   APFS_PRIVATE_DATA    *PrivateData;
   VOID                 *DriverBuffer;
-  UINTN                DriverSize;
+  UINT32               DriverSize;
 
   //
   // This may still be not APFS but some other file system.

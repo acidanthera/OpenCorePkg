@@ -2,26 +2,21 @@
   EFI image format for PE32, PE32+ and TE. Please note some data structures are
   different for PE32 and PE32+. EFI_IMAGE_NT_HEADERS32 is for PE32 and
   EFI_IMAGE_NT_HEADERS64 is for PE32+.
-
   This file is coded to the Visual Studio, Microsoft Portable Executable and
   Common Object File Format Specification, Revision 8.3 - February 6, 2013.
   This file also includes some definitions in PI Specification, Revision 1.0.
 
-  Copyright (c) 2006 - 2010, Intel Corporation. All rights reserved.<BR>
-  Portions copyright (c) 2008 - 2009, Apple Inc. All rights reserved.<BR>
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-http://opensource.org/licenses/bsd-license.php.
+  Portions copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.<BR>
+  Portions copyright (c) 2008 - 2010, Apple Inc. All rights reserved.<BR>
+  Portions Copyright (c) 2020, Hewlett Packard Enterprise Development LP. All rights reserved.<BR>
+  Copyright (c) 2020, Marvin Häuser. All rights reserved.<BR>
+  Copyright (c) 2020, Vitaly Cheptsov. All rights reserved.<BR>
+  Copyright (c) 2020, ISP RAS. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
+**/
 
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
-
- **/
-
-#ifndef __PE_IMAGE_H__
-#define __PE_IMAGE_H__
-
+#ifndef PE_COFF_IMAGE_H
+#define PE_COFF_IMAGE_H
 //
 // PE32+ Subsystem type for EFI images
 //
@@ -30,22 +25,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define EFI_IMAGE_SUBSYSTEM_EFI_RUNTIME_DRIVER      12
 #define EFI_IMAGE_SUBSYSTEM_SAL_RUNTIME_DRIVER      13 ///< defined PI Specification, 1.0
 
-#define  BIT0     0x00000001
-#define  BIT1     0x00000002
-#define  BIT2     0x00000004
-#define  BIT3     0x00000008
-#define  BIT4     0x00000010
-#define  BIT5     0x00000020
-#define  BIT6     0x00000040
-#define  BIT7     0x00000080
-#define  BIT8     0x00000100
-#define  BIT9     0x00000200
-#define  BIT10    0x00000400
-#define  BIT11    0x00000800
-#define  BIT12    0x00001000
-#define  BIT13    0x00002000
-#define  BIT14    0x00004000
-#define  BIT15    0x00008000
 
 //
 // PE32+ Machine type for EFI images
@@ -60,8 +39,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 // EXE file formats
 //
-#define SIGNATURE_32(A, B, C, D)  (SIGNATURE_16 (A, B) | (SIGNATURE_16 (C, D) << 16))
-
 #define EFI_IMAGE_DOS_SIGNATURE     SIGNATURE_16('M', 'Z')
 #define EFI_IMAGE_OS2_SIGNATURE     SIGNATURE_16('N', 'E')
 #define EFI_IMAGE_OS2_SIGNATURE_LE  SIGNATURE_16('L', 'E')
@@ -72,38 +49,38 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 /// under DOS it can print an error message.
 ///
 typedef struct {
-    uint16_t  e_magic;    ///< Magic number.
-    uint16_t  e_cblp;     ///< Bytes on last page of file.
-    uint16_t  e_cp;       ///< Pages in file.
-    uint16_t  e_crlc;     ///< Relocations.
-    uint16_t  e_cparhdr;  ///< Size of header in paragraphs.
-    uint16_t  e_minalloc; ///< Minimum extra paragraphs needed.
-    uint16_t  e_maxalloc; ///< Maximum extra paragraphs needed.
-    uint16_t  e_ss;       ///< Initial (relative) SS value.
-    uint16_t  e_sp;       ///< Initial SP value.
-    uint16_t  e_csum;     ///< Checksum.
-    uint16_t  e_ip;       ///< Initial IP value.
-    uint16_t  e_cs;       ///< Initial (relative) CS value.
-    uint16_t  e_lfarlc;   ///< File address of relocation table.
-    uint16_t  e_ovno;     ///< Overlay number.
-    uint16_t  e_res[4];   ///< Reserved words.
-    uint16_t  e_oemid;    ///< OEM identifier (for e_oeminfo).
-    uint16_t  e_oeminfo;  ///< OEM information; e_oemid specific.
-    uint16_t  e_res2[10]; ///< Reserved words.
-    uint32_t  e_lfanew;   ///< File address of new exe header.
+  UINT16  e_magic;    ///< Magic number.
+  UINT16  e_cblp;     ///< Bytes on last page of file.
+  UINT16  e_cp;       ///< Pages in file.
+  UINT16  e_crlc;     ///< Relocations.
+  UINT16  e_cparhdr;  ///< Size of header in paragraphs.
+  UINT16  e_minalloc; ///< Minimum extra paragraphs needed.
+  UINT16  e_maxalloc; ///< Maximum extra paragraphs needed.
+  UINT16  e_ss;       ///< Initial (relative) SS value.
+  UINT16  e_sp;       ///< Initial SP value.
+  UINT16  e_csum;     ///< Checksum.
+  UINT16  e_ip;       ///< Initial IP value.
+  UINT16  e_cs;       ///< Initial (relative) CS value.
+  UINT16  e_lfarlc;   ///< File address of relocation table.
+  UINT16  e_ovno;     ///< Overlay number.
+  UINT16  e_res[4];   ///< Reserved words.
+  UINT16  e_oemid;    ///< OEM identifier (for e_oeminfo).
+  UINT16  e_oeminfo;  ///< OEM information; e_oemid specific.
+  UINT16  e_res2[10]; ///< Reserved words.
+  UINT32  e_lfanew;   ///< File address of new exe header.
 } EFI_IMAGE_DOS_HEADER;
 
 ///
 /// COFF File Header (Object and Image).
 ///
 typedef struct {
-    uint16_t  Machine;
-    uint16_t  NumberOfSections;
-    uint32_t  TimeDateStamp;
-    uint32_t  PointerToSymbolTable;
-    uint32_t  NumberOfSymbols;
-    uint16_t  SizeOfOptionalHeader;
-    uint16_t  Characteristics;
+  UINT16  Machine;
+  UINT16  NumberOfSections;
+  UINT32  TimeDateStamp;
+  UINT32  PointerToSymbolTable;
+  UINT32  NumberOfSymbols;
+  UINT16  SizeOfOptionalHeader;
+  UINT16  Characteristics;
 } EFI_IMAGE_FILE_HEADER;
 
 ///
@@ -114,23 +91,14 @@ typedef struct {
 //
 // Characteristics
 //
-#define EFI_IMAGE_FILE_RELOCS_STRIPPED      BIT0     ///< 0x0001  Relocation info stripped from file.
-#define EFI_IMAGE_FILE_EXECUTABLE_IMAGE     BIT1     ///< 0x0002  File is executable  (i.e. no unresolved externel references).
-#define EFI_IMAGE_FILE_LINE_NUMS_STRIPPED   BIT2     ///< 0x0004  Line nunbers stripped from file.
-#define EFI_IMAGE_FILE_LOCAL_SYMS_STRIPPED  BIT3     ///< 0x0008  Local symbols stripped from file.
-#define EFI_IMAGE_FILE_BYTES_REVERSED_LO    BIT7     ///< 0x0080  Bytes of machine word are reversed.
-#define EFI_IMAGE_FILE_32BIT_MACHINE        BIT8     ///< 0x0100  32 bit word machine.
-#define EFI_IMAGE_FILE_DEBUG_STRIPPED       BIT9     ///< 0x0200  Debugging info stripped from file in .DBG file.
-#define EFI_IMAGE_FILE_SYSTEM               BIT12    ///< 0x1000  System File.
-#define EFI_IMAGE_FILE_DLL                  BIT13    ///< 0x2000  File is a DLL.
-#define EFI_IMAGE_FILE_BYTES_REVERSED_HI    BIT15    ///< 0x8000  Bytes of machine word are reversed.
+#define EFI_IMAGE_FILE_RELOCS_STRIPPED      1     ///< 0x0001  Relocation info stripped from file.
 
 ///
 /// Header Data Directories.
 ///
 typedef struct {
-    uint32_t  VirtualAddress;
-    uint32_t  Size;
+  UINT32  VirtualAddress;
+  UINT32  Size;
 } EFI_IMAGE_DATA_DIRECTORY;
 
 //
@@ -159,49 +127,6 @@ typedef struct {
 #define EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC 0x10b
 
 ///
-/// Optional Header Standard Fields for PE32.
-///
-typedef struct {
-    ///
-    /// Standard fields.
-    ///
-    uint16_t                    Magic;
-    uint8_t                     MajorLinkerVersion;
-    uint8_t                     MinorLinkerVersion;
-    uint32_t                    SizeOfCode;
-    uint32_t                    SizeOfInitializedData;
-    uint32_t                    SizeOfUninitializedData;
-    uint32_t                    AddressOfEntryPoint;
-    uint32_t                    BaseOfCode;
-    uint32_t                    BaseOfData;  ///< PE32 contains this additional field, which is absent in PE32+.
-    ///
-    /// Optional Header Windows-Specific Fields.
-    ///
-    uint32_t                    ImageBase;
-    uint32_t                    SectionAlignment;
-    uint32_t                    FileAlignment;
-    uint16_t                    MajorOperatingSystemVersion;
-    uint16_t                    MinorOperatingSystemVersion;
-    uint16_t                    MajorImageVersion;
-    uint16_t                    MinorImageVersion;
-    uint16_t                    MajorSubsystemVersion;
-    uint16_t                    MinorSubsystemVersion;
-    uint32_t                    Win32VersionValue;
-    uint32_t                    SizeOfImage;
-    uint32_t                    SizeOfHeaders;
-    uint32_t                    CheckSum;
-    uint16_t                    Subsystem;
-    uint16_t                    DllCharacteristics;
-    uint32_t                    SizeOfStackReserve;
-    uint32_t                    SizeOfStackCommit;
-    uint32_t                    SizeOfHeapReserve;
-    uint32_t                    SizeOfHeapCommit;
-    uint32_t                    LoaderFlags;
-    uint32_t                    NumberOfRvaAndSizes;
-    EFI_IMAGE_DATA_DIRECTORY  DataDirectory[EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES];
-} EFI_IMAGE_OPTIONAL_HEADER32;
-
-///
 /// @attention
 /// EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC means PE32+ and
 /// EFI_IMAGE_OPTIONAL_HEADER64 must be used. The data structures only vary
@@ -209,72 +134,109 @@ typedef struct {
 ///
 #define EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC 0x20b
 
-///
-/// Optional Header Standard Fields for PE32+.
-///
-typedef struct {
-    ///
-    /// Standard fields.
-    ///
-    uint16_t                    Magic;
-    uint8_t                     MajorLinkerVersion;
-    uint8_t                     MinorLinkerVersion;
-    uint32_t                    SizeOfCode;
-    uint32_t                    SizeOfInitializedData;
-    uint32_t                    SizeOfUninitializedData;
-    uint32_t                    AddressOfEntryPoint;
-    uint32_t                    BaseOfCode;
-    ///
-    /// Optional Header Windows-Specific Fields.
-    ///
-    uint64_t                    ImageBase;
-    uint32_t                    SectionAlignment;
-    uint32_t                    FileAlignment;
-    uint16_t                    MajorOperatingSystemVersion;
-    uint16_t                    MinorOperatingSystemVersion;
-    uint16_t                    MajorImageVersion;
-    uint16_t                    MinorImageVersion;
-    uint16_t                    MajorSubsystemVersion;
-    uint16_t                    MinorSubsystemVersion;
-    uint32_t                    Win32VersionValue;
-    uint32_t                    SizeOfImage;
-    uint32_t                    SizeOfHeaders;
-    uint32_t                    CheckSum;
-    uint16_t                    Subsystem;
-    uint16_t                    DllCharacteristics;
-    uint64_t                    SizeOfStackReserve;
-    uint64_t                    SizeOfStackCommit;
-    uint64_t                    SizeOfHeapReserve;
-    uint64_t                    SizeOfHeapCommit;
-    uint32_t                    LoaderFlags;
-    uint32_t                    NumberOfRvaAndSizes;
-    EFI_IMAGE_DATA_DIRECTORY  DataDirectory[EFI_IMAGE_NUMBER_OF_DIRECTORY_ENTRIES];
-} EFI_IMAGE_OPTIONAL_HEADER64;
-
 
 ///
 /// @attention
 /// EFI_IMAGE_NT_HEADERS32 is for use ONLY by tools.
 ///
 typedef struct {
-    uint32_t                      Signature;
-    EFI_IMAGE_FILE_HEADER       FileHeader;
-    EFI_IMAGE_OPTIONAL_HEADER32 OptionalHeader;
-} EFI_IMAGE_NT_HEADERS32;
+  UINT32                      Signature;
+  EFI_IMAGE_FILE_HEADER       FileHeader;
+} EFI_IMAGE_NT_HEADERS_COMMON_HDR;
 
-#define EFI_IMAGE_SIZEOF_NT_OPTIONAL32_HEADER sizeof (EFI_IMAGE_NT_HEADERS32)
+STATIC_ASSERT (
+  sizeof (EFI_IMAGE_NT_HEADERS_COMMON_HDR) == sizeof (UINT32) + sizeof (EFI_IMAGE_FILE_HEADER),
+  "Unsupported padding."
+  );
+
+///
+/// @attention
+/// EFI_IMAGE_NT_HEADERS32 is for use ONLY by tools.
+///
+typedef struct {
+  EFI_IMAGE_NT_HEADERS_COMMON_HDR CommonHeader;
+  ///
+  /// Standard fields.
+  ///
+  UINT16                    Magic;
+  UINT8                     MajorLinkerVersion;
+  UINT8                     MinorLinkerVersion;
+  UINT32                    SizeOfCode;
+  UINT32                    SizeOfInitializedData;
+  UINT32                    SizeOfUninitializedData;
+  UINT32                    AddressOfEntryPoint;
+  UINT32                    BaseOfCode;
+  UINT32                    BaseOfData;  ///< PE32 contains this additional field, which is absent in PE32+.
+  ///
+  /// Optional Header Windows-Specific Fields.
+  ///
+  UINT32                    ImageBase;
+  UINT32                    SectionAlignment;
+  UINT32                    FileAlignment;
+  UINT16                    MajorOperatingSystemVersion;
+  UINT16                    MinorOperatingSystemVersion;
+  UINT16                    MajorImageVersion;
+  UINT16                    MinorImageVersion;
+  UINT16                    MajorSubsystemVersion;
+  UINT16                    MinorSubsystemVersion;
+  UINT32                    Win32VersionValue;
+  UINT32                    SizeOfImage;
+  UINT32                    SizeOfHeaders;
+  UINT32                    CheckSum;
+  UINT16                    Subsystem;
+  UINT16                    DllCharacteristics;
+  UINT32                    SizeOfStackReserve;
+  UINT32                    SizeOfStackCommit;
+  UINT32                    SizeOfHeapReserve;
+  UINT32                    SizeOfHeapCommit;
+  UINT32                    LoaderFlags;
+  UINT32                    NumberOfRvaAndSizes;
+  EFI_IMAGE_DATA_DIRECTORY  DataDirectory[];
+} EFI_IMAGE_NT_HEADERS32;
 
 ///
 /// @attention
 /// EFI_IMAGE_HEADERS64 is for use ONLY by tools.
 ///
 typedef struct {
-    uint32_t                      Signature;
-    EFI_IMAGE_FILE_HEADER       FileHeader;
-    EFI_IMAGE_OPTIONAL_HEADER64 OptionalHeader;
+  EFI_IMAGE_NT_HEADERS_COMMON_HDR CommonHeader;
+  ///
+  /// Standard fields.
+  ///
+  UINT16                    Magic;
+  UINT8                     MajorLinkerVersion;
+  UINT8                     MinorLinkerVersion;
+  UINT32                    SizeOfCode;
+  UINT32                    SizeOfInitializedData;
+  UINT32                    SizeOfUninitializedData;
+  UINT32                    AddressOfEntryPoint;
+  UINT32                    BaseOfCode;
+  ///
+  /// Optional Header Windows-Specific Fields.
+  ///
+  UINT64                    ImageBase;
+  UINT32                    SectionAlignment;
+  UINT32                    FileAlignment;
+  UINT16                    MajorOperatingSystemVersion;
+  UINT16                    MinorOperatingSystemVersion;
+  UINT16                    MajorImageVersion;
+  UINT16                    MinorImageVersion;
+  UINT16                    MajorSubsystemVersion;
+  UINT16                    MinorSubsystemVersion;
+  UINT32                    Win32VersionValue;
+  UINT32                    SizeOfImage;
+  UINT32                    SizeOfHeaders;
+  UINT32                    CheckSum;
+  UINT16                    Subsystem;
+  UINT16                    DllCharacteristics;
+  UINT64                    SizeOfStackReserve;
+  UINT64                    SizeOfStackCommit;
+  UINT64                    SizeOfHeapReserve;
+  UINT64                    SizeOfHeapCommit;
+  UINT32                    LoaderFlags;
+  UINT32                    NumberOfRvaAndSizes;
+  EFI_IMAGE_DATA_DIRECTORY  DataDirectory[];
 } EFI_IMAGE_NT_HEADERS64;
-
-#define EFI_IMAGE_SIZEOF_NT_OPTIONAL64_HEADER sizeof (EFI_IMAGE_NT_HEADERS64)
 
 //
 // Other Windows Subsystem Values
@@ -295,25 +257,17 @@ typedef struct {
 /// Section Table. This table immediately follows the optional header.
 ///
 typedef struct {
-    uint8_t Name[EFI_IMAGE_SIZEOF_SHORT_NAME];
-    union {
-        uint32_t  PhysicalAddress;
-        uint32_t  VirtualSize;
-    } Misc;
-    uint32_t  VirtualAddress;
-    uint32_t  SizeOfRawData;
-    uint32_t  PointerToRawData;
-    uint32_t  PointerToRelocations;
-    uint32_t  PointerToLinenumbers;
-    uint16_t  NumberOfRelocations;
-    uint16_t  NumberOfLinenumbers;
-    uint32_t  Characteristics;
+  UINT8 Name[EFI_IMAGE_SIZEOF_SHORT_NAME];
+  UINT32  VirtualSize;
+  UINT32  VirtualAddress;
+  UINT32  SizeOfRawData;
+  UINT32  PointerToRawData;
+  UINT32  PointerToRelocations;
+  UINT32  PointerToLinenumbers;
+  UINT16  NumberOfRelocations;
+  UINT16  NumberOfLinenumbers;
+  UINT32  Characteristics;
 } EFI_IMAGE_SECTION_HEADER;
-
-///
-/// Size of EFI_IMAGE_SECTION_HEADER.
-///
-#define EFI_IMAGE_SIZEOF_SECTION_HEADER       40
 
 //
 // Section Flags Values
@@ -353,9 +307,9 @@ typedef struct {
 // Symbols have a section number of the section in which they are
 // defined. Otherwise, section numbers have the following meanings:
 //
-#define EFI_IMAGE_SYM_UNDEFINED (uint16_t) 0  ///< Symbol is undefined or is common.
-#define EFI_IMAGE_SYM_ABSOLUTE  ((uint16_t) -1) ///< Symbol is an absolute value.
-#define EFI_IMAGE_SYM_DEBUG     ((uint16_t) -2) ///< Symbol is a special debug item.
+#define EFI_IMAGE_SYM_UNDEFINED (UINT16) 0  ///< Symbol is undefined or is common.
+#define EFI_IMAGE_SYM_ABSOLUTE  (UINT16) -1 ///< Symbol is an absolute value.
+#define EFI_IMAGE_SYM_DEBUG     (UINT16) -2 ///< Symbol is a special debug item.
 
 //
 // Symbol Type (fundamental) values.
@@ -388,7 +342,7 @@ typedef struct {
 //
 // Storage classes.
 //
-#define EFI_IMAGE_SYM_CLASS_END_OF_FUNCTION   ((uint8_t) -1)
+#define EFI_IMAGE_SYM_CLASS_END_OF_FUNCTION   ((UINT8) -1)
 #define EFI_IMAGE_SYM_CLASS_NULL              0
 #define EFI_IMAGE_SYM_CLASS_AUTOMATIC         1
 #define EFI_IMAGE_SYM_CLASS_EXTERNAL          2
@@ -445,9 +399,9 @@ typedef struct {
 /// Relocation format.
 ///
 typedef struct {
-    uint32_t  VirtualAddress;
-    uint32_t  SymbolTableIndex;
-    uint16_t  Type;
+  UINT32  VirtualAddress;
+  UINT32  SymbolTableIndex;
+  UINT16  Type;
 } EFI_IMAGE_RELOCATION;
 
 ///
@@ -493,14 +447,10 @@ typedef struct {
 /// Based relocation format.
 ///
 typedef struct {
-    uint32_t  VirtualAddress;
-    uint32_t  SizeOfBlock;
-} EFI_IMAGE_BASE_RELOCATION;
-
-///
-/// Size of EFI_IMAGE_BASE_RELOCATION.
-///
-#define EFI_IMAGE_SIZEOF_BASE_RELOCATION  8
+  UINT32  VirtualAddress;
+  UINT32  SizeOfBlock;
+  UINT16  Relocations[];
+} EFI_IMAGE_BASE_RELOCATION_BLOCK;
 
 //
 // Based relocation types.
@@ -521,11 +471,11 @@ typedef struct {
 /// Line number format.
 ///
 typedef struct {
-    union {
-        uint32_t  SymbolTableIndex; ///< Symbol table index of function name if Linenumber is 0.
-        uint32_t  VirtualAddress;   ///< Virtual address of line number.
-    } Type;
-    uint16_t  Linenumber;         ///< Line number.
+  union {
+    UINT32  SymbolTableIndex; ///< Symbol table index of function name if Linenumber is 0.
+    UINT32  VirtualAddress;   ///< Virtual address of line number.
+  } Type;
+  UINT16  Linenumber;         ///< Line number.
 } EFI_IMAGE_LINENUMBER;
 
 ///
@@ -547,13 +497,13 @@ typedef struct {
 /// Archive Member Headers
 ///
 typedef struct {
-    uint8_t Name[16];     ///< File member name - `/' terminated.
-    uint8_t Date[12];     ///< File member date - decimal.
-    uint8_t UserID[6];    ///< File member user id - decimal.
-    uint8_t GroupID[6];   ///< File member group id - decimal.
-    uint8_t Mode[8];      ///< File member mode - octal.
-    uint8_t Size[10];     ///< File member size - decimal.
-    uint8_t EndHeader[2]; ///< String to end header. (0x60 0x0A).
+  UINT8 Name[16];     ///< File member name - `/' terminated.
+  UINT8 Date[12];     ///< File member date - decimal.
+  UINT8 UserID[6];    ///< File member user id - decimal.
+  UINT8 GroupID[6];   ///< File member group id - decimal.
+  UINT8 Mode[8];      ///< File member mode - octal.
+  UINT8 Size[10];     ///< File member size - decimal.
+  UINT8 EndHeader[2]; ///< String to end header. (0x60 0x0A).
 } EFI_IMAGE_ARCHIVE_MEMBER_HEADER;
 
 ///
@@ -570,51 +520,51 @@ typedef struct {
 /// Export Directory Table.
 ///
 typedef struct {
-    uint32_t  Characteristics;
-    uint32_t  TimeDateStamp;
-    uint16_t  MajorVersion;
-    uint16_t  MinorVersion;
-    uint32_t  Name;
-    uint32_t  Base;
-    uint32_t  NumberOfFunctions;
-    uint32_t  NumberOfNames;
-    uint32_t  AddressOfFunctions;
-    uint32_t  AddressOfNames;
-    uint32_t  AddressOfNameOrdinals;
+  UINT32  Characteristics;
+  UINT32  TimeDateStamp;
+  UINT16  MajorVersion;
+  UINT16  MinorVersion;
+  UINT32  Name;
+  UINT32  Base;
+  UINT32  NumberOfFunctions;
+  UINT32  NumberOfNames;
+  UINT32  AddressOfFunctions;
+  UINT32  AddressOfNames;
+  UINT32  AddressOfNameOrdinals;
 } EFI_IMAGE_EXPORT_DIRECTORY;
 
 ///
 /// Hint/Name Table.
 ///
 typedef struct {
-    uint16_t  Hint;
-    uint8_t   Name[];
+  UINT16  Hint;
+  UINT8   Name[1];
 } EFI_IMAGE_IMPORT_BY_NAME;
 
 ///
 /// Import Address Table RVA (Thunk Table).
 ///
 typedef struct {
-    union {
-        uint32_t                    Function;
-        uint32_t                    Ordinal;
-        EFI_IMAGE_IMPORT_BY_NAME  *AddressOfData;
-    } u1;
+  union {
+    UINT32                    Function;
+    UINT32                    Ordinal;
+    EFI_IMAGE_IMPORT_BY_NAME  *AddressOfData;
+  } u1;
 } EFI_IMAGE_THUNK_DATA;
 
 #define EFI_IMAGE_ORDINAL_FLAG              BIT31    ///< Flag for PE32.
-#define EFI_IMAGE_SNAP_BY_ORDINAL(Ordinal)  (((Ordinal) & EFI_IMAGE_ORDINAL_FLAG) != 0)
-#define EFI_IMAGE_ORDINAL(Ordinal)          ((Ordinal) & 0xffff)
+#define EFI_IMAGE_SNAP_BY_ORDINAL(Ordinal)  ((Ordinal & EFI_IMAGE_ORDINAL_FLAG) != 0)
+#define EFI_IMAGE_ORDINAL(Ordinal)          (Ordinal & 0xffff)
 
 ///
 /// Import Directory Table
 ///
 typedef struct {
-    uint32_t                Characteristics;
-    uint32_t                TimeDateStamp;
-    uint32_t                ForwarderChain;
-    uint32_t                Name;
-    EFI_IMAGE_THUNK_DATA  *FirstThunk;
+  UINT32                Characteristics;
+  UINT32                TimeDateStamp;
+  UINT32                ForwarderChain;
+  UINT32                Name;
+  EFI_IMAGE_THUNK_DATA  *FirstThunk;
 } EFI_IMAGE_IMPORT_DESCRIPTOR;
 
 
@@ -622,14 +572,14 @@ typedef struct {
 /// Debug Directory Format.
 ///
 typedef struct {
-    uint32_t  Characteristics;
-    uint32_t  TimeDateStamp;
-    uint16_t  MajorVersion;
-    uint16_t  MinorVersion;
-    uint32_t  Type;
-    uint32_t  SizeOfData;
-    uint32_t  RVA;           ///< The address of the debug data when loaded, relative to the image base.
-    uint32_t  FileOffset;    ///< The file pointer to the debug data.
+  UINT32  Characteristics;
+  UINT32  TimeDateStamp;
+  UINT16  MajorVersion;
+  UINT16  MinorVersion;
+  UINT32  Type;
+  UINT32  SizeOfData;
+  UINT32  RVA;           ///< The address of the debug data when loaded, relative to the image base.
+  UINT32  FileOffset;    ///< The file pointer to the debug data.
 } EFI_IMAGE_DEBUG_DIRECTORY_ENTRY;
 
 #define EFI_IMAGE_DEBUG_TYPE_CODEVIEW 2     ///< The Visual C++ debug information.
@@ -639,13 +589,13 @@ typedef struct {
 ///
 #define CODEVIEW_SIGNATURE_NB10  SIGNATURE_32('N', 'B', '1', '0')
 typedef struct {
-    uint32_t  Signature;                        ///< "NB10"
-    uint32_t  Unknown;
-    uint32_t  Unknown2;
-    uint32_t  Unknown3;
-    //
-    // Filename of .PDB goes here
-    //
+  UINT32  Signature;                        ///< "NB10"
+  UINT32  Unknown;
+  UINT32  Unknown2;
+  UINT32  Unknown3;
+  //
+  // Filename of .PDB goes here
+  //
 } EFI_IMAGE_DEBUG_CODEVIEW_NB10_ENTRY;
 
 ///
@@ -653,15 +603,15 @@ typedef struct {
 ///
 #define CODEVIEW_SIGNATURE_RSDS  SIGNATURE_32('R', 'S', 'D', 'S')
 typedef struct {
-    uint32_t  Signature;                        ///< "RSDS".
-    uint32_t  Unknown;
-    uint32_t  Unknown2;
-    uint32_t  Unknown3;
-    uint32_t  Unknown4;
-    uint32_t  Unknown5;
-    //
-    // Filename of .PDB goes here
-    //
+  UINT32  Signature;                        ///< "RSDS".
+  UINT32  Unknown;
+  UINT32  Unknown2;
+  UINT32  Unknown3;
+  UINT32  Unknown4;
+  UINT32  Unknown5;
+  //
+  // Filename of .PDB goes here
+  //
 } EFI_IMAGE_DEBUG_CODEVIEW_RSDS_ENTRY;
 
 
@@ -670,79 +620,77 @@ typedef struct {
 ///
 #define CODEVIEW_SIGNATURE_MTOC  SIGNATURE_32('M', 'T', 'O', 'C')
 typedef struct {
-    uint32_t    Signature;                       ///< "MTOC".
-    EFI_GUID      MachOUuid;
-    //
-    //  Filename of .DLL (Mach-O with debug info) goes here
-    //
+  UINT32    Signature;                       ///< "MTOC".
+  UINT8     Uuid[16];
+  //
+  //  Filename of .DLL (Mach-O with debug info) goes here
+  //
 } EFI_IMAGE_DEBUG_CODEVIEW_MTOC_ENTRY;
-
-///
-/// Resource format.
-///
-typedef struct {
-    uint32_t  Characteristics;
-    uint32_t  TimeDateStamp;
-    uint16_t  MajorVersion;
-    uint16_t  MinorVersion;
-    uint16_t  NumberOfNamedEntries;
-    uint16_t  NumberOfIdEntries;
-    //
-    // Array of EFI_IMAGE_RESOURCE_DIRECTORY_ENTRY entries goes here.
-    //
-} EFI_IMAGE_RESOURCE_DIRECTORY;
 
 ///
 /// Resource directory entry format.
 ///
 typedef struct {
-    union {
-        struct {
-            uint32_t  NameOffset:31;
-            uint32_t  NameIsString:1;
-        } s;
-        uint32_t  Id;
-    } u1;
-    union {
-        uint32_t  OffsetToData;
-        struct {
-            uint32_t  OffsetToDirectory:31;
-            uint32_t  DataIsDirectory:1;
-        } s;
-    } u2;
+  union {
+    struct {
+      UINT32  NameOffset:31;
+      UINT32  NameIsString:1;
+    } s;
+    UINT32  Id;
+  } u1;
+  union {
+    UINT32  OffsetToData;
+    struct {
+      UINT32  OffsetToDirectory:31;
+      UINT32  DataIsDirectory:1;
+    } s;
+  } u2;
 } EFI_IMAGE_RESOURCE_DIRECTORY_ENTRY;
+
+///
+/// Resource format.
+///
+typedef struct {
+  UINT32  Characteristics;
+  UINT32  TimeDateStamp;
+  UINT16  MajorVersion;
+  UINT16  MinorVersion;
+  UINT16  NumberOfNamedEntries;
+  UINT16  NumberOfIdEntries;
+  EFI_IMAGE_RESOURCE_DIRECTORY_ENTRY Entries[];
+} EFI_IMAGE_RESOURCE_DIRECTORY;
 
 ///
 /// Resource directory entry for string.
 ///
 typedef struct {
-    uint16_t  Length;
-    uint16_t  String[];
+  UINT16  Length;
+  CHAR16  String[];
 } EFI_IMAGE_RESOURCE_DIRECTORY_STRING;
 
 ///
 /// Resource directory entry for data array.
 ///
 typedef struct {
-    uint32_t  OffsetToData;
-    uint32_t  Size;
-    uint32_t  CodePage;
-    uint32_t  Reserved;
+  UINT32  OffsetToData;
+  UINT32  Size;
+  UINT32  CodePage;
+  UINT32  Reserved;
 } EFI_IMAGE_RESOURCE_DATA_ENTRY;
 
 ///
 /// Header format for TE images, defined in the PI Specification, 1.0.
 ///
 typedef struct {
-    uint16_t                    Signature;            ///< The signature for TE format = "VZ".
-    uint16_t                    Machine;              ///< From the original file header.
-    uint8_t                     NumberOfSections;     ///< From the original file header.
-    uint8_t                     Subsystem;            ///< From original optional header.
-    uint16_t                    StrippedSize;         ///< Number of bytes we removed from the header.
-    uint32_t                    AddressOfEntryPoint;  ///< Offset to entry point -- from original optional header.
-    uint32_t                    BaseOfCode;           ///< From original image -- required for ITP debug.
-    uint64_t                    ImageBase;            ///< From original file header.
-    EFI_IMAGE_DATA_DIRECTORY  DataDirectory[2];     ///< Only base relocation and debug directory.
+  UINT16                    Signature;            ///< The signature for TE format = "VZ".
+  UINT16                    Machine;              ///< From the original file header.
+  UINT8                     NumberOfSections;     ///< From the original file header.
+  UINT8                     Subsystem;            ///< From original optional header.
+  UINT16                    StrippedSize;         ///< Number of bytes we removed from the header.
+  UINT32                    AddressOfEntryPoint;  ///< Offset to entry point -- from original optional header.
+  UINT32                    BaseOfCode;           ///< From original image -- required for ITP debug.
+  UINT64                    ImageBase;            ///< From original file header.
+  EFI_IMAGE_DATA_DIRECTORY  DataDirectory[2];     ///< Only base relocation and debug directory.
 } EFI_TE_IMAGE_HEADER;
 
 
@@ -759,18 +707,10 @@ typedef struct {
 /// Union of PE32, PE32+, and TE headers.
 ///
 typedef union {
-    EFI_IMAGE_NT_HEADERS32   Pe32;
-    EFI_IMAGE_NT_HEADERS64   Pe32Plus;
-    EFI_TE_IMAGE_HEADER      Te;
+  EFI_IMAGE_NT_HEADERS_COMMON_HDR PeCommon;
+  EFI_IMAGE_NT_HEADERS32          Pe32;
+  EFI_IMAGE_NT_HEADERS64          Pe32Plus;
+  EFI_TE_IMAGE_HEADER             Te;
 } EFI_IMAGE_OPTIONAL_HEADER_UNION;
 
-typedef union {
-    EFI_IMAGE_NT_HEADERS32            *Pe32;
-    EFI_IMAGE_NT_HEADERS64            *Pe32Plus;
-    EFI_TE_IMAGE_HEADER               *Te;
-    EFI_IMAGE_OPTIONAL_HEADER_UNION   *Union;
-} EFI_IMAGE_OPTIONAL_HEADER_PTR_UNION;
-
-#define PHYSICAL_ADDRESS EFI_PHYSICAL_ADDRESS
-
-#endif //APPLE_PE_SIGN_TOOL_H
+#endif // PE_COFF_IMAGE_H
