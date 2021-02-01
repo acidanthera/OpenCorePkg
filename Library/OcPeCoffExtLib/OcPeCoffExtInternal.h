@@ -12,8 +12,6 @@
 #include <Library/OcPeCoffExtLib.h>
 #include <Library/OcCryptoLib.h>
 
-#define APPLE_SIGNATURE_SECENTRY_SIZE 8
-
 STATIC_ASSERT (
   OFFSET_OF (EFI_IMAGE_NT_HEADERS64, CheckSum)
   == OFFSET_OF(EFI_IMAGE_NT_HEADERS32, CheckSum),

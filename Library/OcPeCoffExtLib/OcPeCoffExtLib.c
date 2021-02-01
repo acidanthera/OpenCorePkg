@@ -39,9 +39,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 STATIC
 RETURN_STATUS
-PeCoffGetDataDirectoryEntry (
+PeCoffGetSecurityDirectoryEntry (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          DirectoryEntryIndex,
+  IN  UINT32                          FileSize,
   OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry
   )
 {
@@ -59,11 +59,11 @@ PeCoffGetDataDirectoryEntry (
                   (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
                   );
 
-      if (Pe32Hdr->NumberOfRvaAndSizes <= DirectoryEntryIndex) {
+      if (Pe32Hdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
         return RETURN_UNSUPPORTED;
       }
 
-      *DirectoryEntry = &Pe32Hdr->DataDirectory[DirectoryEntryIndex];
+      *DirectoryEntry = &Pe32Hdr->DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY];
       break;
 
     case ImageTypePe32Plus:
@@ -71,18 +71,25 @@ PeCoffGetDataDirectoryEntry (
                       (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
                       );
 
-      if (Pe32PlusHdr->NumberOfRvaAndSizes <= DirectoryEntryIndex) {
+      if (Pe32PlusHdr->NumberOfRvaAndSizes <= EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
         return RETURN_UNSUPPORTED;
       }
 
-      *DirectoryEntry = &Pe32PlusHdr->DataDirectory[DirectoryEntryIndex];
+      *DirectoryEntry = &Pe32PlusHdr->DataDirectory[EFI_IMAGE_DIRECTORY_ENTRY_SECURITY];
       break;
 
     default:
       //
-      // TODO: Handle TE entries?
+      // TE entries do not have SecDir.
       //
       return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Security entry must be outside of the headers.
+  //
+  if ((*DirectoryEntry)->VirtualAddress < Context->SizeOfHeaders) {
+    return RETURN_INVALID_PARAMETER;
   }
 
   Result = OcOverflowAddU32 (
@@ -90,7 +97,7 @@ PeCoffGetDataDirectoryEntry (
              (*DirectoryEntry)->Size,
              &EntryTop
              );
-  if (Result || EntryTop > Context->SizeOfImage) {
+  if (Result || EntryTop > FileSize) {
     return RETURN_INVALID_PARAMETER;
   }
 
@@ -111,9 +118,9 @@ PeCoffGetAppleCertificateInfo (
   CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
   UINT32                          EndOffset;
 
-  Status = PeCoffGetDataDirectoryEntry (
+  Status = PeCoffGetSecurityDirectoryEntry (
     Context,
-    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
+    FileSize,
     &SecDir
     );
   if (EFI_ERROR (Status)) {
@@ -123,23 +130,13 @@ PeCoffGetAppleCertificateInfo (
 
   *SecDirOffset = (UINT32) ((UINT8 *) SecDir - (UINT8 *) Context->FileBuffer);
 
-  if (SecDir->Size != APPLE_SIGNATURE_SECENTRY_SIZE) {
+  if (SecDir->Size != sizeof (APPLE_EFI_CERTIFICATE_INFO)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate info size mismatch\n"));
     return EFI_UNSUPPORTED;
   }
 
   if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
     DEBUG ((DEBUG_INFO, "OCPE: Certificate info is misaligned %X\n", SecDir->VirtualAddress));
-    return EFI_UNSUPPORTED;
-  }
-
-  //
-  // Apple SecDir is special as its VirtualAddress is always file offset
-  // that cannot be translated via sections.
-  //
-  if (OcOverflowAddU32 (SecDir->VirtualAddress, SecDir->Size, &EndOffset)
-    || EndOffset > FileSize) {
-    DEBUG ((DEBUG_INFO, "OCPE: Certificate info is beyond file area\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -272,8 +269,20 @@ PeCoffSanitiseAppleImage (
   )
 {
   //
+  // While TE files cannot technically have SecDir,
+  // one might add more PE types in the future technically.
+  // Restrict file type as early as possible.
+  //
+  if (Context->ImageType != ImageTypePe32
+    && Context->ImageType != ImageTypePe32Plus) {
+    DEBUG ((DEBUG_INFO, "OCPE: Unsupported image type %d for Apple Image\n", Context->ImageType));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // Apple images are required to start with DOS header.
-  // TODO: Shall we check for EFI_IMAGE_DOS_SIGNATURE?
+  // DOS header is really the only reason ExeHdrOffset can be
+  // non-zero, do not bother extra checking.
   //
   if (Context->ExeHdrOffset < sizeof (EFI_IMAGE_DOS_HEADER)) {
     DEBUG ((DEBUG_INFO, "OCPE: DOS header is required for signed Apple Image\n"));
@@ -442,11 +451,11 @@ PeCoffVerifyAppleSignature (
     sizeof (Hash),
     OcSigHashTypeSha256
     );
-  if (Success) {
-    return EFI_SUCCESS;
+  if (!Success) {
+    return EFI_SECURITY_VIOLATION;
   }
 
-  return EFI_SECURITY_VIOLATION;
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -473,7 +482,7 @@ PeCoffGetApfsDriverVersion (
     DriverSize
     );
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init apfs failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
