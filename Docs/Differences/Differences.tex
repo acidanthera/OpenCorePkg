@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Mon Feb  1 23:40:14 2021
+%DIF DEL PreviousConfiguration.tex   Tue Jan  5 10:48:23 2021
+%DIF ADD ../Configuration.tex        Tue Feb  2 07:46:29 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -906,7 +906,7 @@ is available, and inline for \texttt{static} variables and functions.
 \item Use spaces after casts, e.g. \texttt{(VOID *)(UINTN) Variable}.
 \item Use \DIFaddbegin \DIFadd{two spaces to indent function arguments when splitting lines.
 }\item \DIFadd{Prefix public functions with either }\texttt{\DIFadd{Oc}} \DIFadd{or another distinct name.
-}\item \DIFadd{Do not prefix private }\texttt{\DIFadd{static}} \DIFadd{functions, but use }\texttt{\DIFadd{Internal}} \DIFadd{for }\texttt{\DIFadd{non-static}}\DIFadd{.
+}\item \DIFadd{Do not prefix private }\texttt{\DIFadd{static}} \DIFadd{functions, but prefix private }\texttt{\DIFadd{non-static}} \DIFadd{functions with }\texttt{\DIFadd{Internal}}\DIFadd{.
 }\item \DIFadd{Use }\DIFaddend SPDX license headers as shown in
 \href{https://github.com/acidanthera/bugtracker/issues/483}{acidanthera/bugtracker\#483}.
 \end{itemize}
@@ -2747,7 +2747,7 @@ blocking.
   a dedicated unmapped partition where the reserve blocks can be found
   by the controller. In this case the trim operation can also be disabled
   by setting a very low timeout. e.g. }\texttt{\DIFadd{999}}\DIFadd{. See more details
-  in this }\href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{\DIFadd{article}}\DIFadd{.
+  in this }\href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}\DIFadd{.
 }
 
 \item
@@ -3214,7 +3214,7 @@ entry choice will update till next manual reconfiguration.
   \emph{\DIFadd{Note 1}}\DIFadd{: Some types of firmware may have faulty NVRAM, no boot option support, or other
   incompatibilities. While unlikely, the use of this option may even cause boot failures.
   This option should be used without any warranty exclusively on the boards known to be compatible.
-  Check }\href{https://github.com/acidanthera/bugtracker/issues/1222}{\DIFadd{acidanthera/bugtracker\#1222}}
+  Check }\href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
   \DIFadd{for some known issues with Haswell and other boards.
 }
 
@@ -3857,8 +3857,8 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 \DIFdel{: Some types of firmware may have faulty NVRAM, no boot option support, or other
   incompatibilities. While unlikely, the use of this option may even cause boot failures.
   This option should be used without any warranty exclusively on the boards known to be compatible.
-  Check }\href{https://github.com/acidanthera/bugtracker/issues/1222}{\DIFdel{acidanthera/bugtracker\#1222}}
-  %DIFAUXCMD
+  Check }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
+%DIFDELCMD <   %%%
 \DIFdel{for some known issues with Haswell and other boards.
 }%DIFDELCMD < 
 
@@ -4884,7 +4884,7 @@ be used. Version with macOS specific enhancements can be downloaded from
     \tightlist
     \item \texttt{\DIFadd{Big Endian}} \DIFadd{--- by writing all the bytes as they are without making
       any order changes (}\texttt{\DIFadd{\{AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP\}}}\DIFadd{).
-      This method is also known as }\href{https://tools.ietf.org/html/rfc4122}{\DIFadd{RFC 4122}}
+      This method is also known as }\href{https://tools.ietf.org/html/rfc4122}{RFC 4122}
       \DIFadd{encoding or }\texttt{\DIFadd{Raw}} \DIFadd{encoding.
     }\item \texttt{\DIFadd{Little Endian}} \DIFadd{--- by interpreting the bytes as numbers and using
       Little Endian byte representation
@@ -4902,7 +4902,7 @@ be used. Version with macOS specific enhancements can be downloaded from
     \item \DIFadd{Apple uses }\texttt{\DIFadd{Big Endian}} \DIFadd{format everywhere but it ignores SMBIOS UUID within macOS.
     }\item \texttt{\DIFadd{dmidecode}} \DIFadd{uses }\texttt{\DIFadd{Big Endian}} \DIFadd{format for SMBIOS 2.5.x or lower
     and }\texttt{\DIFadd{Little Endian}} \DIFadd{for 2.6 and newer. Acidanthera
-    }\href{https://github.com/acidanthera/dmidecode}{\DIFadd{dmidecode}} \DIFadd{prints all the three.
+    }\href{https://github.com/acidanthera/dmidecode}{dmidecode} \DIFadd{prints all the three.
     }\item \DIFadd{Windows uses }\texttt{\DIFadd{Little Endian}} \DIFadd{format everywhere, but it only affects
     the visual representation of the values.
   }\end{itemize}
@@ -5848,8 +5848,9 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & USB keyboard driver adding the support of \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
   builtin \texttt{KeySupport}, which may work better or worse depending on the firmware. \\
-\href{https://github.com/acidanthera/OcBinaryData}{\DIFdelbegin \texttt{\DIFdel{PartitionDxe}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \texttt{\DIFadd{OpenPartitionDxe}}\DIFaddend }\DIFaddbegin \textbf{\DIFadd{*}}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OcBinaryData}{\texttt{PartitionDxe}}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OcBinaryData}{\texttt{OpenPartitionDxe}}\textbf{\DIFadd{*}}
 \DIFaddend & \DIFdelbegin \DIFdel{Proprietary partition }\DIFdelend \DIFaddbegin \DIFadd{Partition }\DIFaddend management driver with Apple Partitioning Scheme support\DIFdelbegin \DIFdel{commonly found in Apple firmware}\DIFdelend .
   This driver can be used to support loading older DMG recoveries such as
   macOS 10.9 using Apple Partitioning Scheme. \DIFdelbegin \DIFdel{For Sandy Bridge and earlier CPUs }\texttt{\DIFdel{PartitionDxeLegacy}} %DIFAUXCMD
@@ -5865,24 +5866,20 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & PS/2 mouse driver from \texttt{MdeModulePkg}. Some very old laptop firmware
   may not include this driver but it is necessary for the touchpad to work
   in UEFI graphical interfaces such as \texttt{OpenCanopy}. \\
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/audk}{%%%
-\texttt{\DIFdel{UsbMouseDxe}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{OpenHfsPlus}}\DIFaddend }\textbf{*}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenHfsPlus}}\DIFaddend \textbf{*}
 & \DIFdelbegin \DIFdel{USB mouse driver from }\texttt{\DIFdel{MdeModulePkg}}%DIFAUXCMD
 \DIFdel{. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
   in UEFI graphical interfaces such as }\texttt{\DIFdel{OpenCanopy}}%DIFAUXCMD
 \DIFdel{. }%DIFDELCMD < \\
-%DIFDELCMD < %%%
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFdel{VBoxHfs}}%DIFAUXCMD
-}
-%DIFAUXCMD
+%DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VBoxHfs}}
 %DIFDELCMD < & %%%
 \DIFdelend HFS file system driver with bless support. This driver is an alternative to
   a closed source \texttt{HfsPlus} driver commonly found in Apple firmware. While
   it is feature complete, it is approximately 3~times slower and is yet to undergo
   a security audit. \\
-\DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{\DIFadd{UsbMouseDxe}}}\textbf{\DIFadd{*}}
+\DIFaddbegin \href{https://github.com/acidanthera/audk}{\texttt{UsbMouseDxe}}\textbf{\DIFadd{*}}
 & \DIFadd{USB mouse driver from }\texttt{\DIFadd{MdeModulePkg}}\DIFadd{. Some virtual machine firmware
   such as OVMF may not include this driver but it is necessary for the mouse to work
   in UEFI graphical interfaces such as }\texttt{\DIFadd{OpenCanopy}}\DIFadd{. }\\
@@ -5944,8 +5941,7 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
-\DIFdelbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFdel{HdaCodecDump}}%DIFAUXCMD
-}%DIFAUXCMD
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{HdaCodecDump}}%%%
 \textbf{\DIFdel{*}}
 %DIFAUXCMD
 %DIFDELCMD < & %%%
@@ -7165,9 +7161,9 @@ Since it is not always accurate, the latest versions are listed below.
     images are limited to their target model identifiers and have no
     \texttt{-no\_compat\_check} boot argument support. Modified images
     (with \texttt{ACDT} suffix) without model restrictions can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.6.7-10j3250-disk-images}{\DIFaddend here}
-    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{here}%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.6.7-10j3250-disk-images}{here}
+    \DIFadd{(}\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
@@ -7217,9 +7213,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     build \texttt{9J3050} (for \texttt{MacBookPro5,3}). Unlike the others,
     this image is not limited to the target model identifiers and can be used
     as is. The original \texttt{9J3050} image can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.5.7-9-j-3050}{\DIFaddend here}
-    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{here}%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.5.7-9-j-3050}{here}
+    \DIFadd{(}\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
@@ -7238,9 +7234,9 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     to their target model identifiers as on newer macOS versions.
     Modified \texttt{8R4088} images (with \texttt{ACDT} suffix) without
     model restrictions can be found
-    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{%%%
-\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{\DIFaddend here}
-    \DIFaddbegin \DIFadd{(}\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{\DIFadd{MEGA Mirror}}\DIFadd{)}\DIFaddend ,
+    \DIFdelbegin %DIFDELCMD < \href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{here}%%%
+\DIFdelend \DIFaddbegin \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{here}
+    \DIFadd{(}\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}\DIFadd{)}\DIFaddend ,
     assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
     for more details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.
