@@ -636,17 +636,18 @@ mPlatformConfigurationSmbiosSchema[] = {
 STATIC
 OC_SCHEMA
 mPlatformConfigurationSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("Automatic",        OC_GLOBAL_CONFIG, PlatformInfo.Automatic),
-  OC_SCHEMA_BOOLEAN_IN ("CustomMemory",     OC_GLOBAL_CONFIG, PlatformInfo.CustomMemory),
-  OC_SCHEMA_DICT_OPT   ("DataHub",          mPlatformConfigurationDataHubSchema),
-  OC_SCHEMA_DICT       ("Generic",          mPlatformConfigurationGenericSchema),
-  OC_SCHEMA_DICT_OPT   ("Memory",           mPlatformConfigurationMemorySchema),
-  OC_SCHEMA_DICT_OPT   ("PlatformNVRAM",    mPlatformConfigurationNvramSchema),
-  OC_SCHEMA_DICT_OPT   ("SMBIOS",           mPlatformConfigurationSmbiosSchema),
-  OC_SCHEMA_BOOLEAN_IN ("UpdateDataHub",    OC_GLOBAL_CONFIG, PlatformInfo.UpdateDataHub),
-  OC_SCHEMA_BOOLEAN_IN ("UpdateNVRAM",      OC_GLOBAL_CONFIG, PlatformInfo.UpdateNvram),
-  OC_SCHEMA_BOOLEAN_IN ("UpdateSMBIOS",     OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbios),
-  OC_SCHEMA_STRING_IN  ("UpdateSMBIOSMode", OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbiosMode)
+  OC_SCHEMA_BOOLEAN_IN ("Automatic",          OC_GLOBAL_CONFIG, PlatformInfo.Automatic),
+  OC_SCHEMA_BOOLEAN_IN ("CustomMemory",       OC_GLOBAL_CONFIG, PlatformInfo.CustomMemory),
+  OC_SCHEMA_DICT_OPT   ("DataHub",            mPlatformConfigurationDataHubSchema),
+  OC_SCHEMA_DICT       ("Generic",            mPlatformConfigurationGenericSchema),
+  OC_SCHEMA_DICT_OPT   ("Memory",             mPlatformConfigurationMemorySchema),
+  OC_SCHEMA_DICT_OPT   ("PlatformNVRAM",      mPlatformConfigurationNvramSchema),
+  OC_SCHEMA_DICT_OPT   ("SMBIOS",             mPlatformConfigurationSmbiosSchema),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateDataHub",      OC_GLOBAL_CONFIG, PlatformInfo.UpdateDataHub),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateNVRAM",        OC_GLOBAL_CONFIG, PlatformInfo.UpdateNvram),
+  OC_SCHEMA_BOOLEAN_IN ("UpdateSMBIOS",       OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbios),
+  OC_SCHEMA_STRING_IN  ("UpdateSMBIOSMode",   OC_GLOBAL_CONFIG, PlatformInfo.UpdateSmbiosMode),
+  OC_SCHEMA_BOOLEAN_IN ("UseRawUuidEncoding", OC_GLOBAL_CONFIG, PlatformInfo.UseRawUuidEncoding),
 };
 
 //

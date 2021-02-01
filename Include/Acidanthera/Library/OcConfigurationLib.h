@@ -540,17 +540,18 @@ typedef enum {
   OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
 
 #define OC_PLATFORM_CONFIG_FIELDS(_, __) \
-  _(BOOLEAN                     , Automatic        ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , CustomMemory     ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
-  _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
-  _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
-  _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
-  _(OC_PLATFORM_MEMORY_CONFIG   , Memory           ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
-  _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
-  _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
+  _(BOOLEAN                     , Automatic          ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , CustomMemory       ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateDataHub      ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateNvram        ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateSmbios       ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UseRawUuidEncoding ,     , FALSE                                           , ()) \
+  _(OC_STRING                   , UpdateSmbiosMode   ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
+  _(OC_PLATFORM_GENERIC_CONFIG  , Generic            ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
+  _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub            ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_MEMORY_CONFIG   , Memory             ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
+  _(OC_PLATFORM_NVRAM_CONFIG    , Nvram              ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
+  _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios             ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)
 
 

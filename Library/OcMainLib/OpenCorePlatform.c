@@ -74,8 +74,8 @@ OcPlatformUpdateDataHub (
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemSerialNumber);
     }
 
-    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
-      Data.SystemUUID         = &Uuid;
+    if (!EFI_ERROR (OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.DataHub.SystemUuid), &Uuid))) {
+      Data.SystemUUID = &Uuid;
     }
 
     if (OC_BLOB_GET (&Config->PlatformInfo.DataHub.BoardProduct)[0] != '\0') {
@@ -139,8 +139,8 @@ OcPlatformUpdateDataHub (
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
     }
 
-    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid))) {
-      Data.SystemUUID         = &Uuid;
+    if (!EFI_ERROR (OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid))) {
+      Data.SystemUUID = &Uuid;
     }
 
     Data.BoardProduct  = MacInfo->DataHub.BoardProduct;
@@ -216,7 +216,19 @@ OcPlatformUpdateSmbios (
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemSerialNumber);
     }
 
-    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemUuid), &Uuid))) {
+    if (Config->PlatformInfo.UseRawUuidEncoding) {
+      Status = OcAsciiStrToRawGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemUuid),
+        &Uuid
+        );
+    } else {    
+      Status = AsciiStrToGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Smbios.SystemUuid),
+        &Uuid
+        );
+    }
+
+    if (!EFI_ERROR (Status)) {
       Data.SystemUUID         = &Uuid;
     }
 
@@ -310,7 +322,19 @@ OcPlatformUpdateSmbios (
       Data.SystemSerialNumber = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber);
     }
 
-    if (!EFI_ERROR (AsciiStrToGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid))) {
+    if (Config->PlatformInfo.UseRawUuidEncoding) {
+      Status = OcAsciiStrToRawGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+        &Uuid
+        );
+    } else {    
+      Status = AsciiStrToGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+        &Uuid
+        );
+    }
+
+    if (!EFI_ERROR (Status)) {
       Data.SystemUUID = &Uuid;
     }
 
@@ -583,7 +607,7 @@ OcPlatformUpdateNvram (
   // system-id is only visible in BS scope and may be used by EfiBoot
   // in macOS 11.0 to generate x86legacy ApECID from the first 8 bytes.
   //
-  Status = AsciiStrToGuid (AsciiUuid, &Uuid);
+  Status = OcAsciiStrToRawGuid (AsciiUuid, &Uuid);
   if (!EFI_ERROR (Status)) {
     Status = gRT->SetVariable (
       L"system-id",
