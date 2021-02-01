@@ -261,7 +261,7 @@ UpdateDataHub (
   DataHubSetAppleMiscUnicode (DataHub, OC_SYSTEM_PRODUCT_NAME, Data->SystemProductName);
   DataHubSetAppleMiscUnicode (DataHub, OC_SYSTEM_SERIAL_NUMBER, Data->SystemSerialNumber);
   if (Data->SystemUUID != NULL) {
-    DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, &Data->SystemUUID, sizeof (Data->SystemUUID));
+    DataHubSetAppleMiscData (DataHub, OC_SYSTEM_UUID, Data->SystemUUID, sizeof (*Data->SystemUUID));
   }
   DataHubSetAppleMiscAscii (DataHub, OC_BOARD_PRODUCT, Data->BoardProduct);
   DataHubSetAppleMiscData (DataHub, OC_BOARD_REVISION, Data->BoardRevision, sizeof (*Data->BoardRevision));
