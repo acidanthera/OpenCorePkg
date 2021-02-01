@@ -97,43 +97,6 @@ PeCoffGetDataDirectoryEntry (
   return RETURN_SUCCESS;
 }
 
-#if 0
-  //
-  // Determine the file offset of the debug directory...  This means we walk
-  // the sections to find which section contains the RVA of the debug
-  // directory
-  //
-  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
-               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
-               );
-
-  for (SectIndex = 0; SectIndex < Context->NumberOfSections; ++SectIndex) {
-    if ((*DirectoryEntry)->VirtualAddress >= Sections[SectIndex].VirtualAddress
-     && EntryTop <= Sections[SectIndex].VirtualAddress + Sections[SectIndex].VirtualSize) {
-       break;
-     }
-  }
-
-  if (SectIndex == Context->NumberOfSections
-    || DirectoryEntryIndex == EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
-    *FileOffset = (*DirectoryEntry)->VirtualAddress;
-    return EFI_SUCCESS;
-  }
-
-  SectionOffset = (*DirectoryEntry)->VirtualAddress - Sections[SectIndex].VirtualAddress;
-  SectionRawTop = SectionOffset + (*DirectoryEntry)->Size;
-  if (SectionRawTop > Sections[SectIndex].SizeOfRawData) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  *FileOffset = (Sections[SectIndex].PointerToRawData - Context->TeStrippedOffset) + SectionOffset;
-
-  CONST EFI_IMAGE_SECTION_HEADER        *Sections;
-  UINT32                                SectionOffset;
-  UINT32                                SectionRawTop;
-  UINT16                                SectIndex;
-#endif
-
 STATIC
 EFI_STATUS
 PeCoffGetAppleCertificateInfo (
@@ -210,7 +173,6 @@ PeCoffGetAppleSignature (
 {
   UINTN                           Index;
   UINT8                           PublicKeyHash[SHA256_DIGEST_SIZE];
-  UINT32                          Result;
   APPLE_EFI_CERTIFICATE           *Cert;
 
   //
@@ -278,8 +240,7 @@ PeCoffGetAppleSignature (
   // Verify public key existence in the database and store it in the context.
   //
   for (Index = 0; Index < NUM_OF_PK; ++Index) {
-    Result = CompareMem (PkDataBase[Index].Hash, PublicKeyHash, sizeof (PublicKeyHash));
-    if (Result == 0) {
+    if (CompareMem (PkDataBase[Index].Hash, PublicKeyHash, sizeof (PublicKeyHash)) == 0) {
       SignatureContext->PublicKey = (OC_RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
       break;
     }
