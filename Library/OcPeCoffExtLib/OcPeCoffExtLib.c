@@ -41,20 +41,17 @@ STATIC
 RETURN_STATUS
 PeCoffGetDataDirectoryEntry (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          FileSize,
   IN  UINT32                          DirectoryEntryIndex,
-  OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry,
-  OUT UINT32                          *FileOffset
+  OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry
   )
 {
-  CONST EFI_IMAGE_SECTION_HEADER        *Sections;
   CONST EFI_IMAGE_NT_HEADERS32          *Pe32Hdr;
   CONST EFI_IMAGE_NT_HEADERS64          *Pe32PlusHdr;
   UINT32                                EntryTop;
-  UINT32                                SectionOffset;
-  UINT32                                SectionRawTop;
-  UINT16                                SectIndex;
   BOOLEAN                               Result;
+
+  ASSERT (Context != NULL);
+  ASSERT (DirectoryEntry != NULL);
 
   switch (Context->ImageType) {
     case ImageTypePe32:
@@ -82,6 +79,9 @@ PeCoffGetDataDirectoryEntry (
       break;
 
     default:
+      //
+      // TODO: Handle TE entries?
+      //
       return RETURN_INVALID_PARAMETER;
   }
 
@@ -94,6 +94,10 @@ PeCoffGetDataDirectoryEntry (
     return RETURN_INVALID_PARAMETER;
   }
 
+  return RETURN_SUCCESS;
+}
+
+#if 0
   //
   // Determine the file offset of the debug directory...  This means we walk
   // the sections to find which section contains the RVA of the debug
@@ -124,75 +128,102 @@ PeCoffGetDataDirectoryEntry (
 
   *FileOffset = (Sections[SectIndex].PointerToRawData - Context->TeStrippedOffset) + SectionOffset;
 
+  CONST EFI_IMAGE_SECTION_HEADER        *Sections;
+  UINT32                                SectionOffset;
+  UINT32                                SectionRawTop;
+  UINT16                                SectIndex;
+#endif
 
-  return RETURN_SUCCESS;
+STATIC
+EFI_STATUS
+PeCoffGetAppleCertificateInfo (
+  IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  UINT32                          FileSize,
+  OUT APPLE_EFI_CERTIFICATE_INFO      **CertInfo,
+  OUT UINT32                          *SecDirOffset,
+  OUT UINT32                          *SignedFileSize
+  )
+{
+  EFI_STATUS                      Status;
+  CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
+  UINT32                          EndOffset;
+
+  Status = PeCoffGetDataDirectoryEntry (
+    Context,
+    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
+    &SecDir
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff has no SecDir - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  *SecDirOffset = (UINT32) ((UINT8 *) SecDir - (UINT8 *) Context->FileBuffer);
+
+  if (SecDir->Size != APPLE_SIGNATURE_SECENTRY_SIZE) {
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate info size mismatch\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE_INFO, SecDir->VirtualAddress)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate info is misaligned %X\n", SecDir->VirtualAddress));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Apple SecDir is special as its VirtualAddress is always file offset
+  // that cannot be translated via sections.
+  //
+  if (OcOverflowAddU32 (SecDir->VirtualAddress, SecDir->Size, &EndOffset)
+    || EndOffset > FileSize) {
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate info is beyond file area\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Obtain certificate info.
+  //
+  *CertInfo = (APPLE_EFI_CERTIFICATE_INFO *) (
+    (UINT8 *) Context->FileBuffer + SecDir->VirtualAddress
+    );
+  if (OcOverflowAddU32 ((*CertInfo)->CertOffset, (*CertInfo)->CertSize, &EndOffset)
+    || EndOffset > FileSize) {
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate entry is beyond file area\n"));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  //
+  // Update signed file size to signature location.
+  //
+  *SignedFileSize = SecDir->VirtualAddress;
+
+  return EFI_SUCCESS;
 }
 
 STATIC
 EFI_STATUS
 PeCoffGetAppleSignature (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          ImageSize,
+  IN  APPLE_EFI_CERTIFICATE_INFO      *CertInfo,
   OUT APPLE_SIGNATURE_CONTEXT         *SignatureContext
   )
 {
-  EFI_STATUS                      Status;
   UINTN                           Index;
+  UINT8                           PublicKeyHash[SHA256_DIGEST_SIZE];
   UINT32                          Result;
   APPLE_EFI_CERTIFICATE           *Cert;
-  APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
-  CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
-  UINT32                          SecOffset;
-
-  Status = PeCoffGetDataDirectoryEntry (
-    Context,
-    ImageSize,
-    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
-    &SecDir,
-    &SecOffset
-    );
-
-  //
-  // Check SecDir extistence
-  //
-  if (EFI_ERROR (Status)) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (SecDir->Size != APPLE_SIGNATURE_SECENTRY_SIZE) {
-    DEBUG ((DEBUG_WARN, "OCAV: Certificate entry size mismatch\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Extract APPLE_EFI_CERTIFICATE_INFO
-  //
-  CertInfo = (APPLE_EFI_CERTIFICATE_INFO *) (
-    (UINT8 *) Context->FileBuffer + SecOffset
-    );
-
-  //
-  // Check for overflow
-  //
-  if (OcOverflowAddU32 (CertInfo->CertOffset, CertInfo->CertSize, &Result)) {
-    DEBUG ((DEBUG_WARN, "OCAV: CertificateInfo causes overflow\n"));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  //
-  // Check that Offset+Size in ImageSize range
-  //
-  if (Result > ImageSize) {
-    DEBUG ((DEBUG_WARN, "OCAV: CertificateInfo out of bounds\n"));
-    return EFI_INVALID_PARAMETER;
-  }
 
   //
   // Check that certificate is expected.
   //
   if (CertInfo->CertSize != sizeof (APPLE_EFI_CERTIFICATE)) {
-    DEBUG ((DEBUG_WARN, "OCAV: CertificateInfo has invalid size %u\n", CertInfo->CertSize));
-    return EFI_INVALID_PARAMETER;
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate has invalid size %u\n", CertInfo->CertSize));
+    return EFI_UNSUPPORTED;
+  }
+
+  if (!OC_TYPE_ALIGNED (APPLE_EFI_CERTIFICATE, CertInfo->CertOffset)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate is misaligned %X\n", CertInfo->CertOffset));
+    return EFI_UNSUPPORTED;
   }
 
   //
@@ -206,15 +237,15 @@ PeCoffGetAppleSignature (
   // Compare size of signature directory with value from PE SecDir header
   //
   if (CertInfo->CertSize != Cert->CertSize) {
-    DEBUG ((DEBUG_WARN, "OCAV: Certificate size mismatch with CertificateInfo size value\n"));
-    return EFI_INVALID_PARAMETER;
+    DEBUG ((DEBUG_INFO, "OCPE: Certificate size mismatch %u vs %u\n", CertInfo->CertSize, Cert->CertSize));
+    return EFI_UNSUPPORTED;
   }
 
   //
   // Verify certificate type
   //
   if (Cert->CertType != APPLE_EFI_CERTIFICATE_TYPE) {
-    DEBUG ((DEBUG_WARN, "OCAV: Unknown certificate type\n"));
+    DEBUG ((DEBUG_INFO, "OCPE: Unknown certificate type %u\n", Cert->CertType));
     return EFI_UNSUPPORTED;
   }
 
@@ -222,6 +253,7 @@ PeCoffGetAppleSignature (
   // Verify certificate GUID
   //
   if (!CompareGuid (&Cert->AppleSignatureGuid, &gAppleEfiCertificateGuid)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Unknown certificate signature %g\n", Cert->AppleSignatureGuid));
     return EFI_UNSUPPORTED;
   }
 
@@ -229,28 +261,39 @@ PeCoffGetAppleSignature (
   // Verify HashType == Rsa2048Sha256
   //
   if (!CompareGuid (&Cert->CertData.HashType, &gEfiCertTypeRsa2048Sha256Guid)) {
+    DEBUG ((DEBUG_INFO, "OCPE: Unknown certificate hash %g\n", Cert->CertData.HashType));
     return EFI_UNSUPPORTED;
   }
 
   //
-  // Calc public key hash and add in sig context
+  // Calculate public key hash and find it.
   //
   Sha256 (
-    SignatureContext->PublicKeyHash,
+    PublicKeyHash,
     Cert->CertData.PublicKey,
     sizeof (Cert->CertData.PublicKey)
     );
 
   //
-  // Convert to big endian and add in sig context
+  // Verify public key existence in the database and store it in the context.
   //
-  STATIC_ASSERT (
-    sizeof (Cert->CertData.PublicKey) == sizeof (Cert->CertData.Signature),
-    "Unexpected CertData sizes"
-    );
+  for (Index = 0; Index < NUM_OF_PK; ++Index) {
+    Result = CompareMem (PkDataBase[Index].Hash, PublicKeyHash, sizeof (PublicKeyHash));
+    if (Result == 0) {
+      SignatureContext->PublicKey = (OC_RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
+      break;
+    }
+  }
+
+  if (Index == NUM_OF_PK) {
+    DEBUG ((DEBUG_INFO, "OCPE: Unknown publickey or malformed certificate\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Convert signature to big endian and store it in the context as well.
+  //
   for (Index = 0; Index < sizeof (Cert->CertData.PublicKey); Index++) {
-    SignatureContext->PublicKey[sizeof (Cert->CertData.PublicKey) - 1 - Index]
-      = Cert->CertData.PublicKey[Index];
     SignatureContext->Signature[sizeof (Cert->CertData.PublicKey) - 1 - Index]
       = Cert->CertData.Signature[Index];
   }
@@ -260,9 +303,63 @@ PeCoffGetAppleSignature (
 
 STATIC
 EFI_STATUS
+PeCoffSanitiseAppleImage (
+  IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  UINT32                          SecDirOffset,
+  IN  UINT32                          SignedFileSize,
+  IN  UINT32                          FileSize
+  )
+{
+  //
+  // Apple images are required to start with DOS header.
+  // TODO: Shall we check for EFI_IMAGE_DOS_SIGNATURE?
+  //
+  if (Context->ExeHdrOffset < sizeof (EFI_IMAGE_DOS_HEADER)) {
+    DEBUG ((DEBUG_INFO, "OCPE: DOS header is required for signed Apple Image\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Zero memory between DOS and optional header.
+  //
+  ZeroMem (
+    (UINT8 *) Context->FileBuffer + sizeof (EFI_IMAGE_DOS_HEADER),
+    Context->ExeHdrOffset - sizeof (EFI_IMAGE_DOS_HEADER)
+    );
+
+  //
+  // Zero checksum as we do not hash it.
+  //
+  ZeroMem (
+    (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset + APPLE_CHECKSUM_OFFSET,
+    APPLE_CHECKSUM_SIZE
+    );
+
+  //
+  // Zero sec entry as we do not hash it as well.
+  //
+  ZeroMem (
+    (UINT8 *) Context->FileBuffer + SecDirOffset,
+    sizeof (EFI_IMAGE_DATA_DIRECTORY)
+    );
+
+  //
+  // Zero signature as we do not hash it.
+  //
+  ZeroMem (
+    (UINT8 *) Context->FileBuffer + SignedFileSize,
+    FileSize - SignedFileSize
+    );
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+VOID
 PeCoffHashAppleImage (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINT32                          ImageSize,
+  IN  UINT32                          SecDirOffset,
+  IN  UINT32                          SignedFileSize,
   OUT UINT8                           *Hash
   )
 {
@@ -276,61 +373,34 @@ PeCoffHashAppleImage (
   Sha256Init (&HashContext);
 
   //
-  // Hash DOS header and skip DOS stub
+  // Hash DOS header and without DOS stub.
   //
-  Sha256Update (&HashContext, Context->FileBuffer, sizeof (EFI_IMAGE_DOS_HEADER));
-
-  /**
-    Measuring PE/COFF Image Header;
-    But CheckSum field and SECURITY data directory (certificate) are excluded.
-    Calculate the distance from the base of the image header to the image checksum address
-    Hash the image header from its base to beginning of the image checksum
-  **/
-
-  UINT8* OptHdrChecksum = (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset
-    + OFFSET_OF(EFI_IMAGE_NT_HEADERS64, CheckSum);
-  CONST EFI_IMAGE_DATA_DIRECTORY  *SecDir;
-  CONST EFI_IMAGE_DATA_DIRECTORY  *RelocDir;
-
-  UINT32 SecOffset;
-  UINT32 RelocOffset;
-  EFI_STATUS Status = PeCoffGetDataDirectoryEntry (
-    Context,
-    ImageSize,
-    EFI_IMAGE_DIRECTORY_ENTRY_SECURITY,
-    &SecDir,
-    &SecOffset
-    );
-  ASSERT_EFI_ERROR (Status);
-  Status = PeCoffGetDataDirectoryEntry (
-    Context,
-    ImageSize,
-    EFI_IMAGE_DIRECTORY_ENTRY_BASERELOC,
-    &RelocDir,
-    &RelocOffset
-    );
-  ASSERT_EFI_ERROR (Status);
-
-  HashBase = (UINT8 *) Context->FileBuffer + Context->ExeHdrOffset;
-  HashSize = (UINT8 *) OptHdrChecksum - HashBase;
+  HashBase = (UINT8 *) Context->FileBuffer;
+  HashSize = sizeof (EFI_IMAGE_DOS_HEADER);
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
-  // Hash everything from the end of the checksum to the start of the Cert Directory.
+  // Hash optional header prior to checksum.
   //
-  HashBase = (UINT8 *) OptHdrChecksum + sizeof (UINT32);
-  HashSize = (UINT8 *) SecDir - HashBase;
+  HashBase += Context->ExeHdrOffset;
+  HashSize = APPLE_CHECKSUM_OFFSET;
   Sha256Update (&HashContext, HashBase, HashSize);
 
   //
-  // Hash from the end of SecDirEntry till SecDir data
+  // Hash the rest of the header up to security directory.
   //
-  HashBase = (UINT8 *) RelocDir;
-  HashSize = (UINT8 *) Context->FileBuffer + SecOffset - HashBase;
+  HashBase += HashSize + APPLE_CHECKSUM_SIZE;
+  HashSize = SecDirOffset - (UINT32) (HashBase - (UINT8 *) Context->FileBuffer);
+  Sha256Update (&HashContext, HashBase, HashSize);
+
+  //
+  // Hash the rest of the image skipping security directory.
+  //
+  HashBase += HashSize + sizeof (EFI_IMAGE_DATA_DIRECTORY);
+  HashSize = SignedFileSize - (UINT32) (HashBase - (UINT8 *) Context->FileBuffer);
   Sha256Update (&HashContext, HashBase, HashSize);
 
   Sha256Final (&HashContext, Hash);
-  return EFI_SUCCESS;
 }
 
 EFI_STATUS
@@ -339,14 +409,14 @@ PeCoffVerifyAppleSignature (
   IN OUT UINT32                              *ImageSize
   )
 {
-  EFI_STATUS                ImageStatus;
-  PE_COFF_IMAGE_CONTEXT     ImageContext;
-  APPLE_SIGNATURE_CONTEXT   SignatureContext;
-  UINT8                     Hash[SHA256_DIGEST_SIZE];
-  UINTN                     Result;
-  UINTN                     Index;
-  OC_RSA_PUBLIC_KEY         *Pk;
-  BOOLEAN                   Success;
+  EFI_STATUS                      ImageStatus;
+  PE_COFF_IMAGE_CONTEXT           ImageContext;
+  APPLE_SIGNATURE_CONTEXT         SignatureContext;
+  UINT8                           Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN                         Success;
+  APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
+  UINT32                          SecDirOffset;
+  UINT32                          SignedFileSize;
 
   ImageStatus = PeCoffInitializeContext (
     &ImageContext,
@@ -354,68 +424,64 @@ PeCoffVerifyAppleSignature (
     *ImageSize
     );
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCAV: PeCoff init failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
+    return EFI_UNSUPPORTED;
+  }
+
+  ImageStatus = PeCoffGetAppleCertificateInfo (
+    &ImageContext,
+    *ImageSize,
+    &CertInfo,
+    &SecDirOffset,
+    &SignedFileSize
+    );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff no cert info - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
   ImageStatus = PeCoffGetAppleSignature (
     &ImageContext,
-    *ImageSize,
+    CertInfo,
     &SignatureContext
     );
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCAV: PeCoff apple signature failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff no valid signature - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
-  ImageStatus = PeCoffHashAppleImage (
+  ImageStatus = PeCoffSanitiseAppleImage (
     &ImageContext,
-    *ImageSize,
-    &Hash[0]
+    SecDirOffset,
+    SignedFileSize,
+    *ImageSize
     );
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCAV: PeCoff apple hash failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff cannot be sanitised - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
-  //
-  // Verify existence in DataBase
-  //
-  Pk = NULL;
-  for (Index = 0; Index < NUM_OF_PK; Index++) {
-    Result = CompareMem (
-      PkDataBase[Index].Hash,
-      SignatureContext.PublicKeyHash,
-      SHA256_DIGEST_SIZE
-      );
-    if (Result == 0) {
-      //
-      // PublicKey valid. Extract prepared publickey from database
-      //
-      Pk = (OC_RSA_PUBLIC_KEY *) PkDataBase[Index].PublicKey;
-      break;
-    }
-  }
+  *ImageSize = SignedFileSize;
 
-  if (Pk == NULL) {
-    DEBUG ((DEBUG_WARN, "OCAV: Unknown publickey or malformed certificate\n"));
-    return EFI_UNSUPPORTED;
-  }
+  PeCoffHashAppleImage (
+    &ImageContext,
+    SecDirOffset,
+    SignedFileSize,
+    &Hash[0]
+    );
 
   //
   // Verify signature
   //
   Success = RsaVerifySigHashFromKey (
-    Pk,
+    SignatureContext.PublicKey,
     SignatureContext.Signature,
     sizeof (SignatureContext.Signature),
     &Hash[0],
-    SHA256_DIGEST_SIZE,
+    sizeof (Hash),
     OcSigHashTypeSha256
     );
-
   if (Success) {
-    DEBUG ((DEBUG_INFO, "OCAV: Signature verified!\n"));
     return EFI_SUCCESS;
   }
 

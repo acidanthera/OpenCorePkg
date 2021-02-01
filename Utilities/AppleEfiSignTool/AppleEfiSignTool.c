@@ -20,10 +20,12 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <unistd.h>
 #include <stdlib.h>
 #include <stdbool.h>
+#include <string.h>
 #include <UserFile.h>
 #include <Library/OcPeCoffExtLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/DebugLib.h>
+#include <Library/PcdLib.h>
 
 static char UsageBanner[] = "AppleEfiSignTool v1.0 – Tool for verifying Apple EFI binaries\n"
                             "It supports PE and Fat binaries.\n"
@@ -56,6 +58,10 @@ static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int 
     return 0;
   }
 
+  if (OrgImageSize == ImageSize && arch != PE_ARCH_ANY) {
+    return 0;
+  }
+
   if (OrgImageSize != ImageSize) {
     *IsFat = true;
   }
@@ -81,6 +87,9 @@ static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int 
 
 int ENTRY_POINT(int argc, char *argv[]) {
   int Opt;
+
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
   if (argc < 2) {
     puts(UsageBanner);
@@ -147,6 +156,7 @@ int ENTRY_POINT(int argc, char *argv[]) {
 }
 
 INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+#if 0
   APFS_DRIVER_VERSION *DriverVersion;
   EFI_STATUS Status = PeCoffGetApfsDriverVersion ((UINT8*)Data, (UINT32)Size, &DriverVersion);
   if (!EFI_ERROR (Status)) {
@@ -155,6 +165,18 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
       p += ((uint8_t *)DriverVersion)[i];
     }
   }
+#endif
+
+  if (Size > 0 && Size <= 1024*1024*1024) {
+    void *Copy = malloc(Size);
+    if (Copy == NULL) {
+      abort();
+    }
+    memcpy(Copy, Data, Size);
+    UINT32  NewSize = (UINT32) Size;
+    PeCoffVerifyAppleSignature(Copy, &NewSize);
+    free(Copy);
+  }
+
   return 0;
 }
-

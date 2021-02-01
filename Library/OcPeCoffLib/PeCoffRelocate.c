@@ -667,11 +667,7 @@ PeCoffRelocateImageForRuntime (
       "The following accesses must be performed unaligned."
       );
 
-    //
-    // MAX_UINT32 is not used due to some weird GCC bug.
-    // REF: https://gcc.gnu.org/bugzilla/show_bug.cgi?id=38341
-    //
-    ASSERT (sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK) <= (0xFFFFFFFFU - RelocWalker->SizeOfBlock));
+    ASSERT ((UINT32) sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK) <= (MAX_UINT32 - RelocWalker->SizeOfBlock));
 
     SizeOfRelocs = RelocWalker->SizeOfBlock - sizeof (EFI_IMAGE_BASE_RELOCATION_BLOCK);
 
