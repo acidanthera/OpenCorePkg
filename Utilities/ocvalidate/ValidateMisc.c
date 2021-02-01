@@ -198,6 +198,7 @@ CheckMiscBoot (
   BOOLEAN           IsPickerAudioAssistEnabled;
   BOOLEAN           IsAudioSupportEnabled;
   CONST CHAR8       *LauncherOption;
+  CONST CHAR8       *LauncherPath;
 
   ErrorCount        = 0;
   UserMisc          = &Config->Misc;
@@ -261,6 +262,11 @@ CheckMiscBoot (
     && AsciiStrCmp (LauncherOption, "Full") != 0
     && AsciiStrCmp (LauncherOption, "Short") != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherOption is borked (Can only be Disabled, Full, or Short)!\n"));
+    ++ErrorCount;
+  }
+  LauncherPath = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
+  if (LauncherPath[0] == '\0') {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherPath cannot be empty!\n"));
     ++ErrorCount;
   }
 

@@ -68,6 +68,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - PickerMode: Only `Builtin`, `External`, or `Apple` are accepted.
 - `PickerAudioAssist` requires `AudioSupport` in `UEFI->Audio` to be enabled.
 - LauncherOption: Only `Disabled`, `Full`, or `Short` are accepted.
+- `LauncherPath` cannot be empty string.
 #### Security
 - AuthRestart: If enabled, `VirtualSMC.kext` should be present in `Kernel->Add`.
 - DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
