@@ -30,11 +30,103 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
 #include <Library/OcCryptoLib.h>
-#include <Library/OcAppleImageVerificationLib.h>
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcPeCoffLib.h>
 #include <Guid/AppleCertificate.h>
+
+#include "OcPeCoffExtInternal.h"
+
+STATIC
+RETURN_STATUS
+PeCoffGetDataDirectoryEntry (
+  IN  PE_COFF_IMAGE_CONTEXT           *Context,
+  IN  UINT32                          FileSize,
+  IN  UINT32                          DirectoryEntryIndex,
+  OUT CONST EFI_IMAGE_DATA_DIRECTORY  **DirectoryEntry,
+  OUT UINT32                          *FileOffset
+  )
+{
+  CONST EFI_IMAGE_SECTION_HEADER        *Sections;
+  CONST EFI_IMAGE_NT_HEADERS32          *Pe32Hdr;
+  CONST EFI_IMAGE_NT_HEADERS64          *Pe32PlusHdr;
+  UINT32                                EntryTop;
+  UINT32                                SectionOffset;
+  UINT32                                SectionRawTop;
+  UINT16                                SectIndex;
+  BOOLEAN                               Result;
+
+  switch (Context->ImageType) {
+    case ImageTypePe32:
+      Pe32Hdr = (CONST EFI_IMAGE_NT_HEADERS32 *) (CONST VOID *) (
+                  (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
+                  );
+
+      if (Pe32Hdr->NumberOfRvaAndSizes <= DirectoryEntryIndex) {
+        return RETURN_UNSUPPORTED;
+      }
+
+      *DirectoryEntry = &Pe32Hdr->DataDirectory[DirectoryEntryIndex];
+      break;
+
+    case ImageTypePe32Plus:
+      Pe32PlusHdr = (CONST EFI_IMAGE_NT_HEADERS64 *) (CONST VOID *) (
+                      (CONST CHAR8 *) Context->FileBuffer + Context->ExeHdrOffset
+                      );
+
+      if (Pe32PlusHdr->NumberOfRvaAndSizes <= DirectoryEntryIndex) {
+        return RETURN_UNSUPPORTED;
+      }
+
+      *DirectoryEntry = &Pe32PlusHdr->DataDirectory[DirectoryEntryIndex];
+      break;
+
+    default:
+      return RETURN_INVALID_PARAMETER;
+  }
+
+  Result = OcOverflowAddU32 (
+             (*DirectoryEntry)->VirtualAddress,
+             (*DirectoryEntry)->Size,
+             &EntryTop
+             );
+  if (Result || EntryTop > Context->SizeOfImage) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  //
+  // Determine the file offset of the debug directory...  This means we walk
+  // the sections to find which section contains the RVA of the debug
+  // directory
+  //
+  Sections = (CONST EFI_IMAGE_SECTION_HEADER *) (CONST VOID *) (
+               (CONST CHAR8 *) Context->FileBuffer + Context->SectionsOffset
+               );
+
+  for (SectIndex = 0; SectIndex < Context->NumberOfSections; ++SectIndex) {
+    if ((*DirectoryEntry)->VirtualAddress >= Sections[SectIndex].VirtualAddress
+     && EntryTop <= Sections[SectIndex].VirtualAddress + Sections[SectIndex].VirtualSize) {
+       break;
+     }
+  }
+
+  if (SectIndex == Context->NumberOfSections
+    || DirectoryEntryIndex == EFI_IMAGE_DIRECTORY_ENTRY_SECURITY) {
+    *FileOffset = (*DirectoryEntry)->VirtualAddress;
+    return EFI_SUCCESS;
+  }
+
+  SectionOffset = (*DirectoryEntry)->VirtualAddress - Sections[SectIndex].VirtualAddress;
+  SectionRawTop = SectionOffset + (*DirectoryEntry)->Size;
+  if (SectionRawTop > Sections[SectIndex].SizeOfRawData) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  *FileOffset = (Sections[SectIndex].PointerToRawData - Context->TeStrippedOffset) + SectionOffset;
+
+
+  return RETURN_SUCCESS;
+}
 
 STATIC
 EFI_STATUS
@@ -242,7 +334,7 @@ PeCoffHashAppleImage (
 }
 
 EFI_STATUS
-VerifyApplePeImageSignature (
+PeCoffVerifyAppleSignature (
   IN OUT VOID                                *PeImage,
   IN OUT UINT32                              *ImageSize
   )
@@ -328,4 +420,75 @@ VerifyApplePeImageSignature (
   }
 
   return EFI_SECURITY_VIOLATION;
+}
+
+EFI_STATUS
+PeCoffGetApfsDriverVersion (
+  IN  VOID                 *DriverBuffer,
+  IN  UINT32               DriverSize,
+  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
+  )
+{
+  //
+  // apfs.efi versioning is more restricted than generic PE parsing.
+  //
+
+  EFI_STATUS                ImageStatus;
+  PE_COFF_IMAGE_CONTEXT     ImageContext;
+  EFI_IMAGE_NT_HEADERS64    *OptionalHeader;
+  EFI_IMAGE_SECTION_HEADER  *SectionHeader;
+  APFS_DRIVER_VERSION       *DriverVersion;
+  UINT32                    ImageVersion;
+
+  ImageStatus = PeCoffInitializeContext (
+    &ImageContext,
+    DriverBuffer,
+    DriverSize
+    );
+  if (EFI_ERROR (ImageStatus)) {
+    DEBUG ((DEBUG_INFO, "OCJS: PeCoff init failure - %r\n", ImageStatus));
+    return EFI_UNSUPPORTED;
+  }
+
+  if (ImageContext.Machine != IMAGE_FILE_MACHINE_X64
+    || ImageContext.ImageType != ImageTypePe32Plus
+    || ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
+    DEBUG ((DEBUG_INFO, "OCJS: PeCoff unsupported image\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Get image version. The header is already verified for us.
+  //
+  OptionalHeader = (EFI_IMAGE_NT_HEADERS64 *)(
+    (CONST UINT8 *) ImageContext.FileBuffer
+    + ImageContext.ExeHdrOffset
+    );
+  ImageVersion = (UINT32) OptionalHeader->MajorImageVersion << 16
+    | (UINT32) OptionalHeader->MinorImageVersion;
+
+  //
+  // Get .text contents. The sections are already verified for us.
+  //
+  SectionHeader = (EFI_IMAGE_SECTION_HEADER *)(
+    (CONST UINT8 *) ImageContext.FileBuffer
+    + ImageContext.SectionsOffset
+    );
+
+  if (AsciiStrnCmp ((CHAR8*) SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  if (sizeof (APFS_DRIVER_VERSION) > SectionHeader->SizeOfRawData) {
+    return EFI_BUFFER_TOO_SMALL;
+  }
+
+  DriverVersion = (VOID *) ((UINT8 *) ImageContext.FileBuffer + SectionHeader->VirtualAddress);
+  if (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC
+    || DriverVersion->ImageVersion != ImageVersion) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  *DriverVersionPtr = DriverVersion;
+  return EFI_SUCCESS;
 }

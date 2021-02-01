@@ -111,13 +111,6 @@ InternalApfsReadDriver (
   OUT VOID                 **DriverBuffer
   );
 
-EFI_STATUS
-InternalApfsGetDriverVersion (
-  IN  VOID                 *DriverBuffer,
-  IN  UINT32               DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
-  );
-
 VOID
 InternalApfsInitFusionData (
   IN  APFS_NX_SUPERBLOCK   *SuperBlock,

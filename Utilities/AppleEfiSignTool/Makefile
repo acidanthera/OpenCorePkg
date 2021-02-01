@@ -12,9 +12,8 @@ OBJS    = $(PROJECT).o \
 	PeCoffInit.o \
 	PeCoffLoad.o \
 	PeCoffRelocate.o \
-	PeCoffEntry.o \
-	OcAppleImageVerification.o
+	OcPeCoffExtLib.o
 VPATH   = ../../Library/OcPeCoffLib:$\
-          ../../Library/OcAppleImageVerificationLib:$\
+          ../../Library/OcPeCoffExtLib:$\
 
 include ../../User/Makefile

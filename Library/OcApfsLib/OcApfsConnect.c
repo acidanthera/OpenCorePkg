@@ -17,7 +17,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
-#include <Library/OcAppleImageVerificationLib.h>
+#include <Library/OcPeCoffExtLib.h>
 #include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
@@ -94,7 +94,7 @@ ApfsVerifyDriverVersion (
   UINTN                 Index;
   BOOLEAN               HasLegitVersion;
 
-  Status = InternalApfsGetDriverVersion (
+  Status = PeCoffGetApfsDriverVersion (
     DriverBuffer,
     DriverSize,
     &DriverVersion
@@ -245,7 +245,7 @@ ApfsStartDriver (
   APPLE_SECURE_BOOT_PROTOCOL *SecureBoot;
   UINT8                      Policy;
 
-  Status = VerifyApplePeImageSignature (
+  Status = PeCoffVerifyAppleSignature (
     DriverBuffer,
     &DriverSize
     );

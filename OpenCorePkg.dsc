@@ -56,7 +56,6 @@
   OcAppleDiskImageLib|OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcAppleImageConversionLib|OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
-  OcAppleImageVerificationLib|OpenCorePkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleImg4Lib|OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleKernelLib|OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OcAppleKeyMapLib|OpenCorePkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
@@ -111,6 +110,7 @@
   OcVirtualFsLib|OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcWaveLib|OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
+  OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
   OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
@@ -179,7 +179,6 @@
   OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
-  OpenCorePkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OpenCorePkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
@@ -218,6 +217,8 @@
   OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
+  OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
+  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
@@ -232,7 +233,6 @@
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
-  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf

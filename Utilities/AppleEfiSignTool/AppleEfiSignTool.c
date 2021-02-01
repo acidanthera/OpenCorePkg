@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <stdlib.h>
 #include <stdbool.h>
 #include <UserFile.h>
-#include <Library/OcAppleImageVerificationLib.h>
+#include <Library/OcPeCoffExtLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/DebugLib.h>
 
@@ -32,6 +32,52 @@ static char UsageBanner[] = "AppleEfiSignTool v1.0 – Tool for verifying Apple 
                             "  -h : show this text\n"
                             "Example: ./AppleEfiSignTool -i apfs.efi\n";
 
+enum {
+  PE_ARCH_32,
+  PE_ARCH_64,
+  PE_ARCH_ANY
+};
+
+static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int arch) {
+  EFI_STATUS Status = EFI_SUCCESS;
+  uint32_t OrgImageSize = ImageSize;
+  const char *Slice;
+  if (arch == PE_ARCH_32) {
+    Status = FatFilterArchitecture32 (&Image, &ImageSize);
+    Slice = "32-bit";
+  } else if (arch == PE_ARCH_64) {
+    Status = FatFilterArchitecture64 (&Image, &ImageSize);
+    Slice = "64-bit";
+  } else {
+    Slice = "raw";
+  }
+
+  if (EFI_ERROR (Status)) {
+    return 0;
+  }
+
+  if (OrgImageSize != ImageSize) {
+    *IsFat = true;
+  }
+
+  DEBUG ((DEBUG_ERROR, "SIGN: Discovered %a slice\n", Slice));
+  OrgImageSize = ImageSize;
+  Status = PeCoffVerifyAppleSignature (
+    Image,
+    &ImageSize
+    );
+  DEBUG ((
+    DEBUG_ERROR,
+    "SIGN: Signature check - %r (%u -> %u)\n",
+    Status,
+    OrgImageSize,
+    ImageSize
+    ));
+  if (EFI_ERROR (Status)) {
+    return EXIT_FAILURE;
+  }
+  return 0;
+}
 
 int main(int argc, char *argv[]) {
   int Opt;
@@ -75,60 +121,27 @@ int main(int argc, char *argv[]) {
     exit(EXIT_FAILURE);
   }
 
-  uint32_t OrgImageSize = ImageSize;
-  uint8_t *OrgImage = Image;
   bool HasFat = false;
-
   int code = EXIT_SUCCESS;
-
-  EFI_STATUS Status = FatFilterArchitecture32 (&Image, &ImageSize);
-  if (!EFI_ERROR (Status) && OrgImageSize != ImageSize) {
-    DEBUG ((DEBUG_ERROR, "SIGN: Discovered 32-bit slice\n"));
-    uint32_t BaseImageSize = ImageSize;
-    Status = VerifyApplePeImageSignature (
-      Image,
-      &ImageSize
-      );
-    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
-    HasFat = true;
-    if (EFI_ERROR (Status)) {
-      code = EXIT_FAILURE;
-    }
-  }
-
-  ImageSize = OrgImageSize;
-  Image = OrgImage;
-  Status = FatFilterArchitecture64 (&Image, &ImageSize);
-  if (!EFI_ERROR (Status) && OrgImageSize != ImageSize) {
-    DEBUG ((DEBUG_ERROR, "SIGN: Discovered 64-bit slice\n"));
-    uint32_t BaseImageSize = ImageSize;
-    Status = VerifyApplePeImageSignature (
-      Image,
-      &ImageSize
-      );
-    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
-    HasFat = true;
-    if (EFI_ERROR (Status)) {
-      code = EXIT_FAILURE;
-    }
-  }
-
-  ImageSize = OrgImageSize;
-  Image = OrgImage;
+  code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_32);
+  code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_64);
   if (!HasFat) {
-    DEBUG ((DEBUG_ERROR, "SIGN: Discovered slim slice\n"));
-    uint32_t BaseImageSize = ImageSize;
-    Status = VerifyApplePeImageSignature (
-      Image,
-      &ImageSize
-      );
-    DEBUG ((DEBUG_ERROR, "SIGN: Signature check - %r (%u -> %u)\n", Status, BaseImageSize, ImageSize));
-    if (EFI_ERROR (Status)) {
-      code = EXIT_FAILURE;
-    }
+    code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_ANY);
   }
 
-  free(OrgImage);
+  APFS_DRIVER_VERSION *DriverVersion;
+  EFI_STATUS Status = PeCoffGetApfsDriverVersion (Image, ImageSize, &DriverVersion);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_ERROR,
+      "SIGN: Got APFS %Lu (%-16a %-16a)\n",
+      DriverVersion->Version,
+      DriverVersion->Date,
+      DriverVersion->Time
+      ));
+  }
+
+  free(Image);
 
   return code;
 }

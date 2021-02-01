@@ -58,12 +58,12 @@
   BaseMemoryLib
   DebugLib
   DevicePathLib
-  OcAppleImageVerificationLib
   OcConsoleLib
   OcDriverConnectionLib
   OcGuardLib
   OcMiscLib
   OcPeCoffLib
+  OcPeCoffExtLib
   MemoryAllocationLib
   UefiBootServicesTableLib
   UefiLib
