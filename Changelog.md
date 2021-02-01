@@ -23,6 +23,8 @@ OpenCore Changelog
 - Added `OpenPartitionDxe` with Apple Partition Management scheme
 - Improved ocvalidate checks in `Misc`, `NVRAM`, and `UEFI` sections
 - Fixed multiple flaws in EFI image loading, APFS driver in particular
+- Fixed NVRAM `system-id` being accidentally stored in Little Endian format
+- Added `UseRawUuidEncoding` to choose SMBIOS UUID encoding style
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes

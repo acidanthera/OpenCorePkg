@@ -381,6 +381,25 @@ OcAsciiStringNPrintable (
   );
 
 /**
+  Convert a Null-terminated ASCII GUID string to a value of type
+  EFI_GUID with RFC 4122 (raw) encoding.
+
+  @param  String                   Pointer to a Null-terminated ASCII string.
+  @param  Guid                     Pointer to the converted GUID.
+
+  @retval EFI_SUCCESS           Guid is translated from String.
+  @retval EFI_INVALID_PARAMETER If String is NULL.
+                                If Data is NULL.
+  @retval EFI_UNSUPPORTED       If String is not as the above format.
+**/
+EFI_STATUS
+EFIAPI
+OcAsciiStrToRawGuid (
+  IN  CONST CHAR8        *String,
+  OUT GUID               *Guid
+  );
+
+/**
   Returns the first occurrence of a Null-terminated Unicode sub-string
   in a Null-terminated Unicode string through a case insensitive comparison.
 

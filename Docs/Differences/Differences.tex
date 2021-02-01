@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Mon Feb  1 21:02:51 2021
+%DIF ADD ../Configuration.tex        Mon Feb  1 23:40:14 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4869,7 +4869,57 @@ be used. Version with macOS specific enhancements can be downloaded from
   Windows activation and custom OEM software but potentially breaking
   Apple-specific tools.
 \item
-  \texttt{Generic}\\
+  \DIFaddbegin \texttt{\DIFadd{UseRawUuidEncoding}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use raw encoding for SMBIOS UUIDs.
+}
+
+  \DIFadd{Each UUID }\texttt{\DIFadd{AABBCCDD-EEFF-GGHH-IIJJ-KKLLMMNNOOPP}} \DIFadd{is
+  essentially a hexadecimal 16-byte number. It can be encoded
+  in two ways:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Big Endian}} \DIFadd{--- by writing all the bytes as they are without making
+      any order changes (}\texttt{\DIFadd{\{AA BB CC DD EE FF GG HH II JJ KK LL MM NN OO PP\}}}\DIFadd{).
+      This method is also known as }\href{https://tools.ietf.org/html/rfc4122}{\DIFadd{RFC 4122}}
+      \DIFadd{encoding or }\texttt{\DIFadd{Raw}} \DIFadd{encoding.
+    }\item \texttt{\DIFadd{Little Endian}} \DIFadd{--- by interpreting the bytes as numbers and using
+      Little Endian byte representation
+      (}\texttt{\DIFadd{\{DD CC BB AA FF EE HH GG II JJ KK LL MM NN OO PP\}}}\DIFadd{).
+  }\end{itemize}
+
+  \DIFadd{SMBIOS specification did not explicitly specify the encoding format for the
+  UUID up to SMBIOS 2.6, where it stated that }\texttt{\DIFadd{Little Endian}} \DIFadd{encoding
+  shall be used. This led to the confusion in both firmware implementations
+  and system software as different vendors used different encodings prior to that.
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{Apple uses }\texttt{\DIFadd{Big Endian}} \DIFadd{format everywhere but it ignores SMBIOS UUID within macOS.
+    }\item \texttt{\DIFadd{dmidecode}} \DIFadd{uses }\texttt{\DIFadd{Big Endian}} \DIFadd{format for SMBIOS 2.5.x or lower
+    and }\texttt{\DIFadd{Little Endian}} \DIFadd{for 2.6 and newer. Acidanthera
+    }\href{https://github.com/acidanthera/dmidecode}{\DIFadd{dmidecode}} \DIFadd{prints all the three.
+    }\item \DIFadd{Windows uses }\texttt{\DIFadd{Little Endian}} \DIFadd{format everywhere, but it only affects
+    the visual representation of the values.
+  }\end{itemize}
+
+  \DIFadd{OpenCore always sets a recent SMBIOS version (currently 3.2) when generating
+  the modified DMI tables. If }\texttt{\DIFadd{UseRawUuidEncoding}} \DIFadd{is enabled, then }\texttt{\DIFadd{Big Endian}}
+  \DIFadd{format is used to store the }\texttt{\DIFadd{SystemUUID}} \DIFadd{data. Otherwise
+  }\texttt{\DIFadd{Little Endian}} \DIFadd{is used.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Since UUIDs used in DataHub and NVRAM are not standardised
+  and are added by Apple, this preference does not affect them. Unlike
+  SMBIOS they are always stored in the }\texttt{\DIFadd{Big Endian}} \DIFadd{format.
+}
+
+\item
+  \DIFaddend \texttt{Generic}\\
   \textbf{Type}: \texttt{plist\ dictionary}\\
   \textbf{Description}: Update all fields \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{in }\texttt{\DIFadd{Automatic}} \DIFadd{mode.
 }
