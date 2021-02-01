@@ -132,7 +132,7 @@ STATIC
 EFI_STATUS
 PeCoffGetAppleSignature (
   IN  PE_COFF_IMAGE_CONTEXT           *Context,
-  IN  UINTN                           ImageSize,
+  IN  UINT32                          ImageSize,
   OUT APPLE_SIGNATURE_CONTEXT         *SignatureContext
   )
 {
@@ -446,14 +446,14 @@ PeCoffGetApfsDriverVersion (
     DriverSize
     );
   if (EFI_ERROR (ImageStatus)) {
-    DEBUG ((DEBUG_INFO, "OCJS: PeCoff init failure - %r\n", ImageStatus));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff init failure - %r\n", ImageStatus));
     return EFI_UNSUPPORTED;
   }
 
   if (ImageContext.Machine != IMAGE_FILE_MACHINE_X64
     || ImageContext.ImageType != ImageTypePe32Plus
     || ImageContext.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
-    DEBUG ((DEBUG_INFO, "OCJS: PeCoff unsupported image\n"));
+    DEBUG ((DEBUG_INFO, "OCPE: PeCoff unsupported image\n"));
     return EFI_UNSUPPORTED;
   }
 
@@ -468,7 +468,8 @@ PeCoffGetApfsDriverVersion (
     | (UINT32) OptionalHeader->MinorImageVersion;
 
   //
-  // Get .text contents. The sections are already verified for us.
+  // Get .text contents. The sections are already verified for us,
+  // but it can be smaller than APFS version.
   //
   SectionHeader = (EFI_IMAGE_SECTION_HEADER *)(
     (CONST UINT8 *) ImageContext.FileBuffer
@@ -483,7 +484,14 @@ PeCoffGetApfsDriverVersion (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  DriverVersion = (VOID *) ((UINT8 *) ImageContext.FileBuffer + SectionHeader->VirtualAddress);
+  //
+  // Finally get driver version.
+  //
+  DriverVersion = (APFS_DRIVER_VERSION  *)(
+    (CONST UINT8 *) ImageContext.FileBuffer
+    + SectionHeader->PointerToRawData
+    );
+
   if (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC
     || DriverVersion->ImageVersion != ImageVersion) {
     return EFI_INVALID_PARAMETER;

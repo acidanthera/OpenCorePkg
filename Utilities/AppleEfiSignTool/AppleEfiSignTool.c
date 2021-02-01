@@ -79,7 +79,7 @@ static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int 
   return 0;
 }
 
-int main(int argc, char *argv[]) {
+int ENTRY_POINT(int argc, char *argv[]) {
   int Opt;
 
   if (argc < 2) {
@@ -145,3 +145,16 @@ int main(int argc, char *argv[]) {
 
   return code;
 }
+
+INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+  APFS_DRIVER_VERSION *DriverVersion;
+  EFI_STATUS Status = PeCoffGetApfsDriverVersion ((UINT8*)Data, (UINT32)Size, &DriverVersion);
+  if (!EFI_ERROR (Status)) {
+    volatile size_t p = 0;
+    for (size_t i = 0; i < sizeof (*DriverVersion); i++) {
+      p += ((uint8_t *)DriverVersion)[i];
+    }
+  }
+  return 0;
+}
+
