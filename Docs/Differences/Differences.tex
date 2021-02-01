@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri Jan 22 17:04:29 2021
-%DIF ADD ../Configuration.tex        Sun Jan 31 03:37:46 2021
+%DIF ADD ../Configuration.tex        Mon Feb  1 21:02:51 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3635,8 +3635,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCPAVP} --- PavpProvision
   \item \texttt{OCRST} --- ResetSystem
   \item \texttt{OCUI} --- OpenCanopy
-  \item \texttt{OC} --- OpenCore main
-  \item \texttt{VMOPT} --- VerifyMemOpt
+  \item \texttt{OC} --- OpenCore main\DIFaddbegin \DIFadd{, also OcMainLib
+  }\DIFaddend \item \texttt{VMOPT} --- VerifyMemOpt
   \end{itemize}
 
   \textbf{Libraries}:
@@ -3647,8 +3647,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCAE} --- OcAppleEventLib
   \item \texttt{OCAK} --- OcAppleKernelLib
   \item \texttt{OCAU} --- OcAudioLib
-  \item \texttt{OCAV} --- OcAppleImageVerificationLib
-  \item \texttt{OCA} ---- OcAcpiLib
+  \item \DIFdelbegin \texttt{\DIFdel{OCAV}} %DIFAUXCMD
+\DIFdel{--- OcAppleImageVerificationLib
+  }%DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\DIFdelend \texttt{OCA} ---- OcAcpiLib
   \item \texttt{OCBP} --- OcAppleBootPolicyLib
   \item \texttt{OCB} --- OcBootManagementLib
   \item \texttt{OCCL} --- OcAppleChunkListLib
@@ -3669,7 +3672,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCMCO} --- OcMachoLib
   \item \texttt{OCME} --- OcHeciLib
   \item \texttt{OCMM} --- OcMemoryLib
-  \item \texttt{OCPI} --- OcFileLib, partition info
+  \item \DIFaddbegin \texttt{\DIFadd{OCPE}} \DIFadd{--- OcPeCoffLib, OcPeCoffExtLib
+  }\item \DIFaddend \texttt{OCPI} --- OcFileLib, partition info
   \item \texttt{OCPNG} --- OcPngLib
   \item \texttt{OCRAM} --- OcAppleRamDiskLib
   \item \texttt{OCRTC} --- OcRtcLib
