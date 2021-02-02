@@ -135,7 +135,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   OcConfigurationFree (&Config);
   FreePool (ConfigFileBuffer);
 
-  return 0;
+  return ErrorCount;
 }
 
 INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
