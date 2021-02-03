@@ -6566,15 +6566,21 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
-  This will delete all previous properties if the protocol was already installed.
+
+  \emph{Note}: This will discard all previous entries if the protocol was already
+  installed, so all properties required for safe operation of the system must be
+  specified in your configuration.
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
-  version. This will delete all previous properties if it was already installed.
-  This may be used to ensure full compatibility on VMs or legacy Macs.
+  version. This may be used to ensure full compatibility on VMs or legacy Macs.
+
+  \emph{Note}: This will discard all previous entries if the protocol was already
+  installed, so all properties required for safe operation of the system must be
+  specified in your configuration.
 
 \item
   \texttt{FirmwareVolume}\\
