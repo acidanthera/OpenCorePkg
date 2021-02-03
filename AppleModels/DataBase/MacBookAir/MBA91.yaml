@@ -10,13 +10,9 @@ SystemSerialNumber: "FVFCC20JMNHP"
 SystemSKUNumber: ""
 SystemFamily: "MacBook Air"
 BoardManufacturer: "Apple Inc."
-# This and similar ones can be an array itself, like this:
-# BoardProduct:
-#  "Mac-0CFF9C7C2B63DF8D"
-#  "Mac-smthelse"
 BoardProduct: "Mac-0CFF9C7C2B63DF8D"
 BoardVersion: "MacBookAir9,1"
-BoardRevision: 0x3
+BoardRevision: 0x4
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -25,14 +21,13 @@ ChassisType: 0x9
 ChassisVersion: "Mac-0CFF9C7C2B63DF8D"
 ChassisAssetTag: ""
 PlatformFeature: 0x3A
-FirmwareFeatures: 0xFD8FF42E
-FirmwareFeaturesMask: 0xFF9FFF3F
-ExtendedFirmwareFeatures: 0x00000000FD8FF42E
-ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+FirmwareFeatures: 0xFFAFF06E
+FirmwareFeaturesMask: 0xFFFFFF7F
+ExtendedFirmwareFeatures: 0x00000000FFAFF06E
+ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
 MemoryFormFactor: 0xD
-# FIXME: Correct this one
 ProcessorType:
-  - 0x0601
+  - 0x070B
 # FIXME: Correct this one
 ProcessorBusSpeed:
   - 12345

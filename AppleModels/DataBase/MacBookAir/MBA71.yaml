@@ -8,29 +8,22 @@ SystemVersion: "1.0"
 # Note, this one is used by macserial
 SystemSerialNumber: "C02PCLGFGFWK"
 SystemSKUNumber: "System SKU#"
-SystemFamily: "MacBook Air"
+SystemFamily: "Mac"
 BoardManufacturer: "Apple Inc."
-# This and similar ones can be an array itself, like this:
-# BoardProduct:
-#  "Mac-00BE6ED71E35EB86"
-#  "Mac-smthelse"
 BoardProduct: "Mac-9F18E312C5C2BF0B"
 BoardVersion: "MacBookAir7,1"
-BoardAssetTag: "Board Asset Tag#"
+BoardAssetTag: "Base Board Asset Tag#"
 BoardType: 0xA
 BoardLocationInChassis: "Part Component"
 ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-9F18E312C5C2BF0B"
-ChassisAssetTag: ""
-# FIXME: check
-FirmwareFeatures: 0xE00FE137
-# FIXME: check
-FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000E00FE137
-# FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+ChassisAssetTag: "Chassis Board Asset Tag#"
+PlatformFeature: 0x2
+FirmwareFeatures: 0xFF0FF576
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000FF0FF576
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
@@ -39,7 +32,6 @@ ProcessorType:
 # FIXME: Correct this one
 ProcessorBusSpeed:
   - 12345
-# FIXME: check
 SmcGeneration: 2
 # FIXME: check
 SmcRevision:
@@ -49,7 +41,6 @@ SmcRevision:
   - 0x00
   - 0x00
   - 0x02
-# FIXME: check
 SmcBranch:
   - 0x6A
   - 0x31
@@ -59,7 +50,6 @@ SmcBranch:
   - 0x00
   - 0x00
   - 0x00
-# FIXME: check
 SmcPlatform:
   - 0x6A
   - 0x31
