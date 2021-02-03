@@ -4566,6 +4566,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
+
+  \emph{Note}: The implementation of the Data Hub protocol in EFI firmware on
+  essentially all systems, including Apple hardware, means that existing Data Hub
+  entries cannot be overridden, while new entries are added to the end with
+  macOS ignoring them. You can work around this by reinstalling the Data Hub
+  protocol using the \texttt{ProtocolOverrides} section. Refer to the \texttt{DataHub}
+  protocol override description for details.
 \item
   \texttt{UpdateNVRAM}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
