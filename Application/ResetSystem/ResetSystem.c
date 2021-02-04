@@ -116,7 +116,7 @@ UefiMain (
 
   DEBUG ((DEBUG_INFO, "OCRST: Failed to reset, trying direct\n"));
 
-  DirectRestCold ();
+  DirectResetCold ();
 
   DEBUG ((DEBUG_INFO, "OCRST: Failed to reset directly, entering dead loop\n"));
 

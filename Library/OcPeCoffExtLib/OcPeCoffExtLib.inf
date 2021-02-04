@@ -1,0 +1,53 @@
+## @file
+# OcAppleVerificationLib
+#
+# Copyright (c) 2017-2018, savvas
+#
+# All rights reserved.
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcPeCoffExtLib
+  FILE_GUID                      = 504C5C9C-BF67-421D-9592-EAD58CE17D01
+  MODULE_TYPE                    = BASE
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcPeCoffExtLib|DXE_CORE DXE_DRIVER DXE_RUNTIME_DRIVER DXE_SAL_DRIVER DXE_SMM_DRIVER SMM_CORE UEFI_APPLICATION UEFI_DRIVER
+
+
+#
+#  VALID_ARCHITECTURES           = X64
+#
+
+[Sources]
+  OcPeCoffExtLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiRuntimeServicesTableLib
+  UefiBootServicesTableLib
+  MemoryAllocationLib
+  BaseMemoryLib
+  BaseLib
+  UefiLib
+  DebugLib
+  OcAppleKeysLib
+  OcPeCoffLib
+  OcCryptoLib
+  OcGuardLib
+
+[Guids]
+  gAppleEfiCertificateGuid
+  gEfiCertTypeRsa2048Sha256Guid

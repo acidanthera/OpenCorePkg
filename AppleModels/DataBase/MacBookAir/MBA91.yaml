@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.60.15.0.0"
-BIOSLegacyVersion: "MBA91.88Z.F000.B00.2011302011"
-BIOSReleaseDate: "11/30/2020"
+BIOSVersion: "1554.80.3.0.0"
+BIOSLegacyVersion: "MBA91.88Z.F000.B00.2101062056"
+BIOSReleaseDate: "01/06/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir9,1"
 SystemVersion: "1.0"
@@ -10,13 +10,9 @@ SystemSerialNumber: "FVFCC20JMNHP"
 SystemSKUNumber: ""
 SystemFamily: "MacBook Air"
 BoardManufacturer: "Apple Inc."
-# This and similar ones can be an array itself, like this:
-# BoardProduct:
-#  "Mac-0CFF9C7C2B63DF8D"
-#  "Mac-smthelse"
 BoardProduct: "Mac-0CFF9C7C2B63DF8D"
 BoardVersion: "MacBookAir9,1"
-BoardRevision: 0x3
+BoardRevision: 0x4
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -25,14 +21,13 @@ ChassisType: 0x9
 ChassisVersion: "Mac-0CFF9C7C2B63DF8D"
 ChassisAssetTag: ""
 PlatformFeature: 0x3A
-FirmwareFeatures: 0xFD8FF42E
-FirmwareFeaturesMask: 0xFF9FFF3F
-ExtendedFirmwareFeatures: 0x00000000FD8FF42E
-ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+FirmwareFeatures: 0xFFAFF06E
+FirmwareFeaturesMask: 0xFFFFFF7F
+ExtendedFirmwareFeatures: 0x00000000FFAFF06E
+ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
 MemoryFormFactor: 0xD
-# FIXME: Correct this one
 ProcessorType:
-  - 0x0601
+  - 0x070B
 # FIXME: Correct this one
 ProcessorBusSpeed:
   - 12345
@@ -48,17 +43,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBA91.88Z.F000.B00.2011302011
+    BIOS ID:      MBA91.88Z.F000.B00.2101062056
     Model:        MBA91
-    EFI Version:  1554.60.15.0.0
-    Built by:     root@bb-g8-pdb18
-    Date:         Mon Nov 30 20:11:52 2020
-    Revision:     1554.60.15 (B&I)
+    EFI Version:  1554.80.3.0.0
+    Built by:     root@bb-g8-pdb175
+    Date:         Wed Jan  6 20:56:57 2021
+    Revision:     1554.80.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1200.0.30.4
-    UUID:         C66E4BDF-B087-3F04-BBED-36BF75A552DF
-    UUID:         433ACA54-8C6F-325D-8F4A-102F72091D90
+    UUID:         A928CCA0-421A-3BDC-B5A9-6CA8B022AAB6
+    UUID:         A71737C6-4469-3383-AF87-8A0ABBE50709
 Specifications:
   CPUCodename:
     - "Ice Lake Y"

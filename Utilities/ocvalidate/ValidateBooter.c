@@ -30,15 +30,19 @@ CheckBooterMmioWhitelist (
   BOOLEAN           ShouldEnableDevirtualiseMmio;
   BOOLEAN           IsDevirtualiseMmioEnabled;
 
-  ErrorCount                      = 0;
-  UserBooter                      = &Config->Booter;
-  IsMmioWhitelistEnabled          = FALSE;
-  ShouldEnableDevirtualiseMmio    = FALSE;
-  IsDevirtualiseMmioEnabled       = UserBooter->Quirks.DevirtualiseMmio;
+  ErrorCount                   = 0;
+  UserBooter                   = &Config->Booter;
+  IsDevirtualiseMmioEnabled    = UserBooter->Quirks.DevirtualiseMmio;
 
+  IsMmioWhitelistEnabled       = FALSE;
+  ShouldEnableDevirtualiseMmio = FALSE;
   for (Index = 0; Index < UserBooter->MmioWhitelist.Count; ++Index) {
     Comment                = OC_BLOB_GET (&UserBooter->MmioWhitelist.Values[Index]->Comment);
     IsMmioWhitelistEnabled = UserBooter->MmioWhitelist.Values[Index]->Enabled;
+    //
+    // DevirtualiseMmio should be enabled if at least one entry is enabled.
+    //
+    ShouldEnableDevirtualiseMmio = IsMmioWhitelistEnabled;
 
     //
     // Sanitise strings.
@@ -46,10 +50,6 @@ CheckBooterMmioWhitelist (
     if (!AsciiCommentIsLegal (Comment)) {
       DEBUG ((DEBUG_WARN, "Booter->MmioWhitelist[%u]->Comment contains illegal character!\n", Index));
       ++ErrorCount;
-    }
-
-    if (IsMmioWhitelistEnabled) {
-      ShouldEnableDevirtualiseMmio = TRUE;
     }
   }
 
@@ -214,9 +214,9 @@ CheckBooter (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK BooterCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  BooterCheckers[] = {
     &CheckBooterMmioWhitelist,
     &CheckBooterPatch,
     &CheckBooterQuirks

@@ -273,6 +273,7 @@
 /// KernelSpace quirks.
 ///
 #define OC_KERNEL_QUIRKS_FIELDS(_, __) \
+  _(INT64                       , SetApfsTrimTimeout          ,     , -1     , ()) \
   _(BOOLEAN                     , AppleCpuPmCfgLock           ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmCfgLock            ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmExtraMsrs          ,     , FALSE  , ()) \
@@ -323,6 +324,8 @@
 #define OC_MISC_BOOT_FIELDS(_, __) \
   _(OC_STRING                   , PickerMode                  ,     , OC_STRING_CONSTR ("Builtin", _, __) , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , HibernateMode               ,     , OC_STRING_CONSTR ("None", _, __)    , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , LauncherOption              ,     , OC_STRING_CONSTR ("Disabled", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , LauncherPath                ,     , OC_STRING_CONSTR ("Default", _, __) , OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ConsoleAttributes           ,     , 0                                   , ())                   \
   _(UINT32                      , PickerAttributes            ,     , 0                                   , ())                   \
   _(OC_STRING                   , PickerVariant               ,     , OC_STRING_CONSTR ("Auto", _, __)    , OC_DESTR (OC_STRING)) \
@@ -361,7 +364,6 @@ typedef enum {
 } OCS_VAULT_MODE;
 
 #define OC_MISC_SECURITY_FIELDS(_, __) \
-  _(OC_STRING                   , BootProtect                 ,      , OC_STRING_CONSTR ("None", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Vault                       ,      , OC_STRING_CONSTR ("Secure", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , DmgLoading                  ,      , OC_STRING_CONSTR ("Signed", _, __), OC_DESTR (OC_STRING) ) \
   _(UINT32                      , ScanPolicy                  ,      , OC_SCAN_DEFAULT_POLICY  , ()) \
@@ -443,10 +445,10 @@ typedef enum {
 **/
 
 #define OC_PLATFORM_GENERIC_CONFIG_FIELDS(_, __) \
-  _(OC_STRING                   , SystemProductName  ,     , OC_STRING_CONSTR ("MacPro6,1", _, __)        , OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , SystemSerialNumber ,     , OC_STRING_CONSTR ("OPENCORE_SN1", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemProductName  ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemSerialNumber ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemUuid         ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("OPENCORE_MLB_SN11", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Mlb                ,     , OC_STRING_CONSTR ("", _, __)                 , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemMemoryStatus ,     , OC_STRING_CONSTR ("Auto", _, __)             , OC_DESTR (OC_STRING) ) \
   _(UINT16                      , ProcessorType      ,     , 0                                            , () )                   \
   _(UINT8                       , Rom                , [6] , {0}                                          , () )                   \
@@ -538,17 +540,18 @@ typedef enum {
   OC_DECLARE (OC_PLATFORM_SMBIOS_CONFIG)
 
 #define OC_PLATFORM_CONFIG_FIELDS(_, __) \
-  _(BOOLEAN                     , Automatic        ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , CustomMemory     ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateDataHub    ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateNvram      ,     , FALSE                                           , ()) \
-  _(BOOLEAN                     , UpdateSmbios     ,     , FALSE                                           , ()) \
-  _(OC_STRING                   , UpdateSmbiosMode ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
-  _(OC_PLATFORM_GENERIC_CONFIG  , Generic          ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
-  _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub          ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
-  _(OC_PLATFORM_MEMORY_CONFIG   , Memory           ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
-  _(OC_PLATFORM_NVRAM_CONFIG    , Nvram            ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
-  _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios           ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
+  _(BOOLEAN                     , Automatic          ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , CustomMemory       ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateDataHub      ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateNvram        ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UpdateSmbios       ,     , FALSE                                           , ()) \
+  _(BOOLEAN                     , UseRawUuidEncoding ,     , FALSE                                           , ()) \
+  _(OC_STRING                   , UpdateSmbiosMode   ,     , OC_STRING_CONSTR ("Create", _, __)              , OC_DESTR (OC_STRING) ) \
+  _(OC_PLATFORM_GENERIC_CONFIG  , Generic            ,     , OC_CONSTR2 (OC_PLATFORM_GENERIC_CONFIG, _, __)  , OC_DESTR (OC_PLATFORM_GENERIC_CONFIG)) \
+  _(OC_PLATFORM_DATA_HUB_CONFIG , DataHub            ,     , OC_CONSTR2 (OC_PLATFORM_DATA_HUB_CONFIG, _, __) , OC_DESTR (OC_PLATFORM_DATA_HUB_CONFIG)) \
+  _(OC_PLATFORM_MEMORY_CONFIG   , Memory             ,     , OC_CONSTR2 (OC_PLATFORM_MEMORY_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_MEMORY_CONFIG)) \
+  _(OC_PLATFORM_NVRAM_CONFIG    , Nvram              ,     , OC_CONSTR2 (OC_PLATFORM_NVRAM_CONFIG, _, __)    , OC_DESTR (OC_PLATFORM_NVRAM_CONFIG)) \
+  _(OC_PLATFORM_SMBIOS_CONFIG   , Smbios             ,     , OC_CONSTR2 (OC_PLATFORM_SMBIOS_CONFIG, _, __)   , OC_DESTR (OC_PLATFORM_SMBIOS_CONFIG))
   OC_DECLARE (OC_PLATFORM_CONFIG)
 
 
@@ -579,29 +582,29 @@ typedef enum {
 /// Audio is a set of options for sound configuration.
 ///
 #define OC_UEFI_AUDIO_FIELDS(_, __) \
-  _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(UINT32                      , SetupDelay         ,     , 0                             , ()) \
-  _(UINT16                      , VolumeAmplifier    ,     , 0                             , ()) \
-  _(BOOLEAN                     , AudioSupport       ,     , FALSE                         , ()) \
-  _(UINT8                       , AudioCodec         ,     , 0                             , ()) \
-  _(UINT8                       , AudioOut           ,     , 0                             , ()) \
-  _(UINT8                       , MinimumVolume      ,     , 0                             , ())
+  _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , SetupDelay         ,     , 0                                 , ()) \
+  _(UINT16                      , VolumeAmplifier    ,     , 0                                 , ()) \
+  _(BOOLEAN                     , AudioSupport       ,     , FALSE                             , ()) \
+  _(UINT8                       , AudioCodec         ,     , 0                                 , ()) \
+  _(UINT8                       , AudioOut           ,     , 0                                 , ()) \
+  _(UINT8                       , MinimumVolume      ,     , 0                                 , ())
   OC_DECLARE (OC_UEFI_AUDIO)
 
 ///
 /// Input is a set of options to support advanced input.
 ///
 #define OC_UEFI_INPUT_FIELDS(_, __) \
-  _(OC_STRING                   , KeySupportMode     ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING)) \
-  _(UINT32                      , TimerResolution    ,     , 0                             , ()) \
-  _(UINT8                       , KeyForgetThreshold ,     , 0                             , ()) \
-  _(UINT8                       , KeyMergeThreshold  ,     , 0                             , ()) \
-  _(BOOLEAN                     , KeySupport         ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , KeyFiltering       ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , KeySwap            ,     , FALSE                         , ()) \
-  _(BOOLEAN                     , PointerSupport     ,     , FALSE                         , ())
+  _(OC_STRING                   , KeySupportMode     ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
+  _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
+  _(UINT32                      , TimerResolution    ,     , 0                                 , ()) \
+  _(UINT8                       , KeyForgetThreshold ,     , 0                                 , ()) \
+  _(UINT8                       , KeyMergeThreshold  ,     , 0                                 , ()) \
+  _(BOOLEAN                     , KeySupport         ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , KeyFiltering       ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , KeySwap            ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , PointerSupport     ,     , FALSE                             , ())
   OC_DECLARE (OC_UEFI_INPUT)
 
 ///
@@ -652,6 +655,7 @@ typedef enum {
 #define OC_UEFI_QUIRKS_FIELDS(_, __) \
   _(UINT32                      , ExitBootServicesDelay       ,     , 0      , ()) \
   _(UINT32                      , TscSyncTimeout              ,     , 0      , ()) \
+  _(BOOLEAN                     , DisableSecurityPolicy       ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \

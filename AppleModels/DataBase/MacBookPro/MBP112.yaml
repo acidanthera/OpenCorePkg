@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "429.0.0.0.0"
-BIOSLegacyVersion: "MBP112.88Z.F000.B00.2012022043"
-BIOSReleaseDate: "12/02/2020"
+BIOSVersion: "430.0.0.0.0"
+BIOSLegacyVersion: "MBP112.88Z.F000.B00.2012171744"
+BIOSReleaseDate: "12/17/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,2"
 SystemVersion: "1.0"
@@ -75,10 +75,10 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP112
-    EFI Version:  429.0.0.0.0
-    Built by:     root@osx372
-    Date:         Wed Dec  2 20:43:42 PST 2020
-    Revision:     429 (B&I)
+    EFI Version:  430.0.0.0.0
+    Built by:     root@osx358
+    Date:         Thu Dec 17 17:44:32 PST 2020
+    Revision:     430 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1200.0.30.4

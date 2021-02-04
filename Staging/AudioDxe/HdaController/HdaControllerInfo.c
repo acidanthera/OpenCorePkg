@@ -24,31 +24,40 @@
 
 #include "HdaController.h"
 
-/**
-  Gets the controller's name.
-
-  @param[in]  This              A pointer to the EFI_HDA_CONTROLLER_INFO_PROTOCOL instance.
-  @param[out] CodecName         A pointer to the buffer to return the codec name.
-
-  @retval EFI_SUCCESS           The controller name was retrieved.
-  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
-**/
 EFI_STATUS
 EFIAPI
-HdaControllerInfoGetName(
-  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL *This,
-  OUT CONST CHAR16 **ControllerName) {
-  //DEBUG((DEBUG_INFO, "HdaControllerInfoGetName(): start\n"));
+HdaControllerInfoGetName (
+  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
+  OUT CONST CHAR16                      **Name
+  )
+{
+  HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
 
-  // Create variables.
-  HDA_CONTROLLER_INFO_PRIVATE_DATA *HdaPrivateData;
-
-  // If parameters are null, fail.
-  if ((This == NULL) || (ControllerName == NULL))
+  if (This == NULL || Name == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
 
-  // Get private data and fill node ID parameter.
-  HdaPrivateData = HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS(This);
-  *ControllerName = HdaPrivateData->HdaControllerDev->Name;
+  HdaPrivateData = HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *Name          = HdaPrivateData->HdaControllerDev->Name;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+HdaControllerInfoGetVendorId (
+  IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
+  OUT UINT32                            *VendorId
+  )
+{
+  HDA_CONTROLLER_INFO_PRIVATE_DATA    *HdaPrivateData;
+
+  if (This == NULL || VendorId == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  HdaPrivateData = HDA_CONTROLLER_INFO_PRIVATE_DATA_FROM_THIS (This);
+  *VendorId      = HdaPrivateData->HdaControllerDev->VendorId;
+
   return EFI_SUCCESS;
 }

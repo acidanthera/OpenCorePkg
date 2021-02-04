@@ -19,7 +19,7 @@
 #include <Library/OcConsoleLib.h>
 
 /**
-  Callback funtion to verify whether one UEFI driver is duplicated in UEFI->Drivers.
+  Callback function to verify whether one UEFI driver is duplicated in UEFI->Drivers.
 
   @param[in]  PrimaryDriver    Primary driver to be checked.
   @param[in]  SecondaryDriver  Secondary driver to be checked.
@@ -47,7 +47,7 @@ UEFIDriverHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether one UEFI ReservedMemory entry overlaps the other,
+  Callback function to verify whether one UEFI ReservedMemory entry overlaps the other,
   in terms of Address and Size.
 
   @param[in]  PrimaryEntry     Primary entry to be checked.
@@ -95,8 +95,8 @@ ValidateReservedMemoryType (
   IN  CONST CHAR8  *Type
   )
 {
-  UINTN  Index;
-  CONST CHAR8  *AllowedType[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedType[] = {
     "Reserved",          "LoaderCode",    "LoaderData",     "BootServiceCode",         "BootServiceData",
     "RuntimeCode",       "RuntimeData",   "Available",      "Persistent",              "UnusableMemory",
     "ACPIReclaimMemory", "ACPIMemoryNVS", "MemoryMappedIO", "MemoryMappedIOPortSpace", "PalCode"
@@ -152,18 +152,30 @@ CheckUEFIAudio (
   OC_UEFI_CONFIG           *UserUefi;
   BOOLEAN                  IsAudioSupportEnabled;
   CONST CHAR8              *AsciiAudioDevicePath;
+  CONST CHAR8              *AsciiPlayChime;
 
   ErrorCount               = 0;
   UserUefi                 = &Config->Uefi;
 
   IsAudioSupportEnabled    = UserUefi->Audio.AudioSupport;
   AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
+  AsciiPlayChime           = OC_BLOB_GET (&UserUefi->Audio.PlayChime);
   if (IsAudioSupportEnabled) {
     if (AsciiAudioDevicePath[0] == '\0') {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevicePath cannot be empty when AudioSupport is enabled!\n"));
       ++ErrorCount;
     } else if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
+      ++ErrorCount;
+    }
+
+    if (AsciiPlayChime[0] == '\0') {
+      DEBUG ((DEBUG_WARN, "UEFI->Audio->PlayChime cannot be empty when AudioSupport is enabled!\n"));
+      ++ErrorCount;
+    } else if (AsciiStrCmp (AsciiPlayChime, "Auto") != 0
+      && AsciiStrCmp (AsciiPlayChime, "Enabled") != 0
+      && AsciiStrCmp (AsciiPlayChime, "Disabled") != 0) {
+      DEBUG ((DEBUG_WARN, "UEFI->Audio->PlayChime is borked (Can only be Auto, Enabled, or Disabled)!\n"));
       ++ErrorCount;
     }
   }
@@ -208,6 +220,10 @@ CheckUEFIDrivers (
   IndexAudioDxeEfiDriver       = 0;
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+
+    if (Driver[0] == '#') {
+      continue;
+    }
 
     //
     // Sanitise strings.
@@ -512,9 +528,9 @@ CheckUEFI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK UEFICheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  UEFICheckers[] = {
     &CheckUEFIAPFS,
     &CheckUEFIAudio,
     &CheckUEFIDrivers,

@@ -19,7 +19,7 @@
 #include <Library/OcConfigurationLib.h>
 
 /**
-  Validate OpenCore Configuration.
+  OpenCore Configuration checker.
 **/
 typedef
 UINT32
@@ -32,7 +32,7 @@ UINT32
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in ACPI Section.
 **/
 UINT32
 CheckACPI (
@@ -44,7 +44,7 @@ CheckACPI (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in Booter Section.
 **/
 UINT32
 CheckBooter (
@@ -56,7 +56,7 @@ CheckBooter (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in DeviceProperties.
 **/
 UINT32
 CheckDeviceProperties (
@@ -68,7 +68,7 @@ CheckDeviceProperties (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in Kernel Section.
 **/
 UINT32
 CheckKernel (
@@ -80,7 +80,7 @@ CheckKernel (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in Misc Section.
 **/
 UINT32
 CheckMisc (
@@ -92,10 +92,10 @@ CheckMisc (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in NVRAM Section.
 **/
 UINT32
-CheckNVRAM (
+CheckNvram (
   IN  OC_GLOBAL_CONFIG  *Config
   );
 
@@ -104,7 +104,7 @@ CheckNVRAM (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in PlatformInfo Section.
 **/
 UINT32
 CheckPlatformInfo (
@@ -116,7 +116,7 @@ CheckPlatformInfo (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected in UEFI Section.
 **/
 UINT32
 CheckUEFI (
@@ -128,7 +128,7 @@ CheckUEFI (
 
   @param[in]  Config   Configuration structure.
 
-  @return     Number of errors detected.
+  @return     Number of errors detected overall.
 **/
 UINT32
 CheckConfig (

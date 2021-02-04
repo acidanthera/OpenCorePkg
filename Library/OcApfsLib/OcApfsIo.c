@@ -13,13 +13,13 @@
 **/
 
 #include "OcApfsInternal.h"
-#include <IndustryStandard/PeImage.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcApfsLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcPeCoffLib.h>
 
 STATIC
 UINT64
@@ -205,7 +205,7 @@ EFI_STATUS
 ApfsReadDriver (
   IN  APFS_PRIVATE_DATA      *PrivateData,
   IN  APFS_NX_EFI_JUMPSTART  *JumpStart,
-  OUT UINTN                  *DriverSize,
+  OUT UINT32                 *DriverSize,
   OUT VOID                   **DriverBuffer
   )
 {
@@ -399,7 +399,7 @@ InternalApfsReadSuperBlock (
 EFI_STATUS
 InternalApfsReadDriver (
   IN  APFS_PRIVATE_DATA    *PrivateData,
-  OUT UINTN                *DriverSize,
+  OUT UINT32               *DriverSize,
   OUT VOID                 **DriverBuffer
   )
 {
@@ -439,95 +439,5 @@ InternalApfsReadDriver (
     return Status;
   }
 
-  return EFI_SUCCESS;
-}
-
-EFI_STATUS
-InternalApfsGetDriverVersion (
-  IN  VOID                 *DriverBuffer,
-  IN  UINTN                DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
-  )
-{
-  //
-  // apfs.efi versioning is more restricted than generic PE parsing.
-  // In future we can use our PE library, but for now we directly reimplement
-  // EfiGetAPFSDriverVersion from apfs kernel extension.
-  // Note, EfiGetAPFSDriverVersion is really badly implemented and is full of typos.
-  //
-
-  EFI_IMAGE_DOS_HEADER      *DosHeader;
-  EFI_IMAGE_NT_HEADERS64    *NtHeaders;
-  EFI_IMAGE_SECTION_HEADER  *SectionHeader;
-  APFS_DRIVER_VERSION       *DriverVersion;
-  UINTN                     RemainingSize;
-  UINTN                     Result;
-  UINT32                    ImageVersion;
-
-  if (DriverSize < sizeof (*DosHeader)) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  DosHeader = DriverBuffer;
-
-  if (DosHeader->e_magic != EFI_IMAGE_DOS_SIGNATURE) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (OcOverflowAddUN (DosHeader->e_lfanew, sizeof (*NtHeaders), &Result)
-    || Result > DriverSize) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  RemainingSize = DriverSize - DosHeader->e_lfanew - OFFSET_OF (EFI_IMAGE_NT_HEADERS64, OptionalHeader);
-  NtHeaders     = (VOID *) ((UINT8 *) DriverBuffer + DosHeader->e_lfanew);
-
-  if (NtHeaders->Signature != EFI_IMAGE_NT_SIGNATURE
-    || NtHeaders->FileHeader.Machine != IMAGE_FILE_MACHINE_X64
-    || (NtHeaders->FileHeader.Characteristics & EFI_IMAGE_FILE_EXECUTABLE_IMAGE) == 0
-    || NtHeaders->FileHeader.SizeOfOptionalHeader < sizeof (NtHeaders->OptionalHeader)
-    || NtHeaders->FileHeader.NumberOfSections == 0) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (RemainingSize < NtHeaders->FileHeader.SizeOfOptionalHeader) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  RemainingSize -= NtHeaders->FileHeader.SizeOfOptionalHeader;
-
-  if ((NtHeaders->OptionalHeader.Magic != EFI_IMAGE_NT_OPTIONAL_HDR32_MAGIC
-      && NtHeaders->OptionalHeader.Magic != EFI_IMAGE_NT_OPTIONAL_HDR64_MAGIC)
-    || NtHeaders->OptionalHeader.Subsystem != EFI_IMAGE_SUBSYSTEM_EFI_BOOT_SERVICE_DRIVER) {
-    return EFI_UNSUPPORTED;
-  }
-
-  ImageVersion = (UINT32) NtHeaders->OptionalHeader.MajorImageVersion << 16
-    | (UINT32) NtHeaders->OptionalHeader.MinorImageVersion;
-
-  if (OcOverflowMulUN (NtHeaders->FileHeader.NumberOfSections, sizeof (*SectionHeader), &Result)
-    || Result > RemainingSize) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  SectionHeader = (VOID *) ((UINT8 *) &NtHeaders->OptionalHeader + NtHeaders->FileHeader.SizeOfOptionalHeader);
-
-  if (AsciiStrnCmp ((CHAR8*) SectionHeader->Name, ".text", sizeof (SectionHeader->Name)) != 0) {
-    return EFI_UNSUPPORTED;
-  }
-
-  if (OcOverflowAddUN (SectionHeader->VirtualAddress, sizeof (APFS_DRIVER_VERSION), &Result)
-    || RemainingSize < Result) {
-    return EFI_BUFFER_TOO_SMALL;
-  }
-
-  DriverVersion = (VOID *) ((UINT8 *) DriverBuffer + SectionHeader->VirtualAddress);
-
-  if (DriverVersion->Magic != APFS_DRIVER_VERSION_MAGIC
-    || DriverVersion->ImageVersion != ImageVersion) {
-    return EFI_INVALID_PARAMETER;
-  }
-
-  *DriverVersionPtr = DriverVersion;
   return EFI_SUCCESS;
 }

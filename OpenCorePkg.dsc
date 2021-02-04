@@ -56,7 +56,6 @@
   OcAppleDiskImageLib|OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OcAppleEventLib|OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OcAppleImageConversionLib|OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
-  OcAppleImageVerificationLib|OpenCorePkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OcAppleImg4Lib|OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OcAppleKernelLib|OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OcAppleKeyMapLib|OpenCorePkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
@@ -91,6 +90,7 @@
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
+  OcMainLib|OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OcMemoryLib|OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OcMiscLib|OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OcMp3Lib|OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
@@ -110,6 +110,7 @@
   OcVirtualFsLib|OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OcWaveLib|OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
+  OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
   OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
@@ -157,10 +158,10 @@
   OpenCorePkg/Application/ChipTune/ChipTune.inf
   OpenCorePkg/Application/CleanNvram/CleanNvram.inf
   OpenCorePkg/Application/GopStop/GopStop.inf
-  OpenCorePkg/Application/HdaCodecDump/HdaCodecDump.inf
   OpenCorePkg/Application/KeyTester/KeyTester.inf
   OpenCorePkg/Application/MmapDump/MmapDump.inf
   OpenCorePkg/Application/OpenControl/OpenControl.inf
+  OpenCorePkg/Application/OpenCore/OpenCore.inf
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/ResetSystem/ResetSystem.inf
   OpenCorePkg/Application/RtcRw/RtcRw.inf
@@ -178,7 +179,6 @@
   OpenCorePkg/Library/OcAppleDiskImageLib/OcAppleDiskImageLib.inf
   OpenCorePkg/Library/OcAppleEventLib/OcAppleEventLib.inf
   OpenCorePkg/Library/OcAppleImageConversionLib/OcAppleImageConversionLib.inf
-  OpenCorePkg/Library/OcAppleImageVerificationLib/OcAppleImageVerificationLib.inf
   OpenCorePkg/Library/OcAppleImg4Lib/OcAppleImg4Lib.inf
   OpenCorePkg/Library/OcAppleKernelLib/OcAppleKernelLib.inf
   OpenCorePkg/Library/OcAppleKeyMapLib/OcAppleKeyMapLib.inf
@@ -212,10 +212,13 @@
   OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OpenCorePkg/Library/OcInputLib/OcInputLib.inf
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
+  OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf
   OpenCorePkg/Library/OcMiscLib/OcMiscLib.inf
   OpenCorePkg/Library/OcMp3Lib/OcMp3Lib.inf
   OpenCorePkg/Library/OcOSInfoLib/OcOSInfoLib.inf
+  OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
+  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Library/OcPngLib/OcPngLib.inf
   OpenCorePkg/Library/OcRngLib/OcRngLib.inf
   OpenCorePkg/Library/OcSerializeLib/OcSerializeLib.inf
@@ -230,14 +233,13 @@
   OpenCorePkg/Library/OcVirtualFsLib/OcVirtualFsLib.inf
   OpenCorePkg/Library/OcWaveLib/OcWaveLib.inf
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
-  OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
-  OpenCorePkg/Platform/OpenCore/OpenCore.inf
+  OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf
   OpenCorePkg/Staging/AudioDxe/AudioDxe.inf
-  OpenCorePkg/Staging/VBoxHfs/VBoxHfs.inf
+  OpenCorePkg/Staging/OpenHfsPlus/OpenHfsPlus.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTest.inf
   OpenCorePkg/Tests/AcpiTest/AcpiTestApp.inf
   OpenCorePkg/Tests/CryptoTest/CryptoTest.inf
@@ -290,23 +292,26 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel|0x80000042
 !endif
 
-[BuildOptions.common.EDKII.DXE_RUNTIME_DRIVER]
-  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
-  XCODE:*_*_*_DLINK_FLAGS = -seg1addr 0x1000 -segalign 0x1000
-  XCODE:*_*_*_MTOC_FLAGS = -align 0x1000
-  CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096
-
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.
   DEFINE OCPKG_BUILD_OPTIONS_GEN = -D DISABLE_NEW_DEPRECATED_INTERFACES $(OCPKG_BUILD_OPTIONS)
   DEFINE OCPKG_ANAL_OPTIONS_GEN = "-DANALYZER_UNREACHABLE=__builtin_unreachable" "-DANALYZER_NORETURN=__attribute__((noreturn))"
 
-  GCC:DEBUG_*_*_CC_FLAGS     = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
-  GCC:NOOPT_*_*_CC_FLAGS     = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
-  GCC:RELEASE_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
-  MSFT:DEBUG_*_*_CC_FLAGS    = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
-  MSFT:NOOPT_*_*_CC_FLAGS    = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
-  MSFT:RELEASE_*_*_CC_FLAGS  = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
-  XCODE:DEBUG_*_*_CC_FLAGS   = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
-  XCODE:NOOPT_*_*_CC_FLAGS   = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
-  XCODE:RELEASE_*_*_CC_FLAGS = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN) -Oz -flto
+  GCC:DEBUG_*_*_CC_FLAGS        = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  GCC:NOOPT_*_*_CC_FLAGS        = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  GCC:RELEASE_*_*_CC_FLAGS      = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  CLANGPDB:DEBUG_*_*_CC_FLAGS   = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  CLANGPDB:NOOPT_*_*_CC_FLAGS   = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  CLANGPDB:RELEASE_*_*_CC_FLAGS = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  MSFT:DEBUG_*_*_CC_FLAGS       = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
+  MSFT:NOOPT_*_*_CC_FLAGS       = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
+  MSFT:RELEASE_*_*_CC_FLAGS     = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) /wd4723
+  XCODE:DEBUG_*_*_CC_FLAGS      = -D OC_TARGET_DEBUG=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  XCODE:NOOPT_*_*_CC_FLAGS      = -D OC_TARGET_NOOPT=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN)
+  XCODE:RELEASE_*_*_CC_FLAGS    = -D OC_TARGET_RELEASE=1 $(OCPKG_BUILD_OPTIONS_GEN) $(OCPKG_ANAL_OPTIONS_GEN) -Oz -flto
+
+  # Force page alignment for all files allowing for page protection.
+  GCC:*_*_*_DLINK_FLAGS = -z common-page-size=0x1000
+  XCODE:*_*_*_DLINK_FLAGS = -seg1addr 0x1000 -segalign 0x1000
+  XCODE:*_*_*_MTOC_FLAGS = -align 0x1000
+  CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096

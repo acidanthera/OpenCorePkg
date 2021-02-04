@@ -394,3 +394,26 @@ OcAsciiStringNPrintable (
   //
   return FALSE;
 }
+
+EFI_STATUS
+EFIAPI
+OcAsciiStrToRawGuid (
+  IN  CONST CHAR8        *String,
+  OUT GUID               *Guid
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = AsciiStrToGuid (String, Guid);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Swap little endian numbers to their big endian counter parts.
+  //
+  Guid->Data1 = SwapBytes32 (Guid->Data1);
+  Guid->Data2 = SwapBytes16 (Guid->Data2);
+  Guid->Data3 = SwapBytes16 (Guid->Data3);
+  return EFI_SUCCESS;
+}

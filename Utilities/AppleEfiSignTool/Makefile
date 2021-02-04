@@ -7,6 +7,13 @@
 PROJECT = AppleEfiSignTool
 PRODUCT = $(PROJECT)$(SUFFIX)
 OBJS    = $(PROJECT).o \
-          AppleEfiBinary.o
-VPATH   = ../../Library/OcCryptoLib
+	PeCoffDebug.o \
+	PeCoffHash.o \
+	PeCoffInit.o \
+	PeCoffLoad.o \
+	PeCoffRelocate.o \
+	OcPeCoffExtLib.o
+VPATH   = ../../Library/OcPeCoffLib:$\
+          ../../Library/OcPeCoffExtLib:$\
+
 include ../../User/Makefile

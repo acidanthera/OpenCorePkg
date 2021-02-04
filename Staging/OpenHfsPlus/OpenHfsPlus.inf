@@ -1,0 +1,64 @@
+## @file
+#  File System Wrapper (FSW) based HFS+ driver.
+#
+#  Copyright (C) 2020, Vladislav Yaroshchuk <yaroshchuk2000@gmail.com>
+#  Copyright (C) 2017, Gabriel L. Somlo <gsomlo@gmail.com>
+#
+#  This program and the accompanying materials are licensed and made
+#  available under the terms and conditions of the BSD License which
+#  accompanies this distribution.   The full text of the license may
+#  be found at http://opensource.org/licenses/bsd-license.php
+#
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS"
+#  BASIS, WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER
+#  EXPRESS OR IMPLIED.
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OpenHfsPlus
+  FILE_GUID      = F474802F-26BB-4E4F-A923-2FC568E94125
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+  ENTRY_POINT    = fsw_efi_main
+
+[Sources]
+  fsw_base.h
+  fsw_efi_base.h
+  fsw_efi_edk2_base.h
+  fsw_strfunc.h
+  fsw_core.h
+  fsw_core.c
+  fsw_efi.h
+  fsw_efi.c
+  fsw_lib.c
+  fsw_efi_lib.c
+  fsw_hfsplus.h
+  fsw_hfsplus.c
+
+[BuildOptions]
+  GCC:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+  INTEL:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+  MSFT:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+  XCODE:*_*_*_CC_FLAGS = -DHOST_EFI -DFSTYPE=hfsplus
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiLib
+  UefiDriverEntryPoint
+
+[Guids]
+  gEfiFileSystemInfoGuid
+  gEfiFileSystemVolumeLabelInfoIdGuid
+  gEfiFileInfoGuid
+  gAppleBlessedOsxFolderInfoGuid        ## SOMETIMES_CONSUMES
+  gAppleBlessedSystemFileInfoGuid       ## SOMETIMES_CONSUMES
+  gAppleBlessedSystemFolderInfoGuid     ## SOMETIMES_CONSUMES
+
+[Protocols]
+  gEfiBlockIoProtocolGuid
+  gEfiDiskIoProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid

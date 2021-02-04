@@ -24,8 +24,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
     ASSERT ((UsbKbDev)->Signature == USB_KB_DEV_SIGNATURE);  \
   } while (FALSE)
 
-STATIC VOID *mAppleKeyMapDbRegistration = NULL;
-
 STATIC
 VOID
 UsbKbSetAppleKeyMapDb (
@@ -71,18 +69,19 @@ UsbKbAppleKeyMapDbInstallNotify (
   ASSERT_USB_KB_DEV_VALID ((USB_KB_DEV *)Context);
   ASSERT (((USB_KB_DEV *)Context)->KeyMapInstallNotifyEvent == Event);
 
+  UsbKeyboardDevice = (USB_KB_DEV *)Context;
   Status = gBS->LocateProtocol (
                   &gAppleKeyMapDatabaseProtocolGuid,
-                  mAppleKeyMapDbRegistration,
+                  UsbKeyboardDevice->KeyMapInstallRegistration,
                   (VOID **)&KeyMapDb
                   );
   ASSERT (Status != EFI_NOT_FOUND);
 
-  UsbKeyboardDevice = (USB_KB_DEV *)Context;
   UsbKbSetAppleKeyMapDb (UsbKeyboardDevice, KeyMapDb);
 
   gBS->CloseEvent (UsbKeyboardDevice->KeyMapInstallNotifyEvent);
   UsbKeyboardDevice->KeyMapInstallNotifyEvent = NULL;
+  UsbKeyboardDevice->KeyMapInstallRegistration = NULL;
 }
 
 VOID
@@ -115,7 +114,7 @@ UsbKbLocateAppleKeyMapDb (
     Status = gBS->RegisterProtocolNotify (
                     &gAppleKeyMapDatabaseProtocolGuid,
                     UsbKeyboardDevice->KeyMapInstallNotifyEvent,
-                    &mAppleKeyMapDbRegistration
+                    &UsbKeyboardDevice->KeyMapInstallRegistration
                     );
     ASSERT_EFI_ERROR (Status);
   }

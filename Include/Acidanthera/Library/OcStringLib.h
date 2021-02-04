@@ -240,8 +240,8 @@ OcAsciiEndsWith (
 INTN
 EFIAPI
 OcStriCmp (
-  IN CHAR16  *FirstString,
-  IN CHAR16  *SecondString
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR16  *SecondString
   );
 
 /**
@@ -378,6 +378,25 @@ BOOLEAN
 OcAsciiStringNPrintable (
   IN  CONST CHAR8  *String,
   IN  UINTN        Number
+  );
+
+/**
+  Convert a Null-terminated ASCII GUID string to a value of type
+  EFI_GUID with RFC 4122 (raw) encoding.
+
+  @param  String                   Pointer to a Null-terminated ASCII string.
+  @param  Guid                     Pointer to the converted GUID.
+
+  @retval EFI_SUCCESS           Guid is translated from String.
+  @retval EFI_INVALID_PARAMETER If String is NULL.
+                                If Data is NULL.
+  @retval EFI_UNSUPPORTED       If String is not as the above format.
+**/
+EFI_STATUS
+EFIAPI
+OcAsciiStrToRawGuid (
+  IN  CONST CHAR8        *String,
+  OUT GUID               *Guid
   );
 
 /**

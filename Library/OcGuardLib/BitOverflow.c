@@ -27,6 +27,73 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 
 BOOLEAN
+OcOverflowAddU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  )
+{
+#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_add_overflow(A, B, Result);
+#else
+  UINT32  Temp;
+
+  //
+  // I believe casting will be faster on X86 at least.
+  //
+  Temp    = A + B;
+  *Result = (UINT16) Temp;
+  if (Temp <= MAX_UINT16) {
+    return FALSE;
+  }
+
+  return TRUE;
+#endif
+}
+
+BOOLEAN
+OcOverflowSubU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  )
+{
+#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_sub_overflow(A, B, Result);
+#else
+  *Result = (UINT16) (A - B);
+
+  if (A >= B) {
+    return FALSE;
+  }
+
+  return TRUE;
+#endif
+}
+
+BOOLEAN
+OcOverflowMulU16 (
+  UINT16  A,
+  UINT16  B,
+  UINT16  *Result
+  )
+{
+#if defined(OC_HAS_TYPE_GENERIC_BUILTINS)
+  return __builtin_mul_overflow(A, B, Result);
+#else
+  UINT32  Temp;
+
+  Temp    = (UINT32) A * B;
+  *Result = (UINT16) Temp;
+  if (Temp <= MAX_UINT32) {
+    return FALSE;
+  }
+
+  return TRUE;
+#endif
+}
+
+BOOLEAN
 OcOverflowAddU32 (
   UINT32  A,
   UINT32  B,

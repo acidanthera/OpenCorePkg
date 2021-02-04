@@ -201,6 +201,7 @@ OcOSInfoInstallProtocol (
 {
   EFI_STATUS           Status;
   EFI_OS_INFO_PROTOCOL *Protocol;
+  EFI_HANDLE           NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcOSInfoInstallProtocol\n"));
 
@@ -222,8 +223,9 @@ OcOSInfoInstallProtocol (
     }
   }
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-     &gImageHandle,
+     &NewHandle,
      &gEfiOSInfoProtocolGuid,
      (VOID *) &mOSInfoProtocol,
      NULL

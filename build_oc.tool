@@ -58,7 +58,7 @@ package() {
   fi
 
   local ver
-  ver=$(grep OPEN_CORE_VERSION ./Include/Acidanthera/OpenCore.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
+  ver=$(grep OPEN_CORE_VERSION ./Include/Acidanthera/Library/OcMainLib.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ver" = "" ]; then
     echo "Invalid version $ver"
     ver="UNKNOWN"
@@ -79,7 +79,6 @@ package() {
   efidirs=(
     "EFI/BOOT"
     "EFI/OC/ACPI"
-    "EFI/OC/Bootstrap"
     "EFI/OC/Drivers"
     "EFI/OC/Kexts"
     "EFI/OC/Tools"
@@ -118,14 +117,12 @@ package() {
       suffix="x64"
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
-    cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/OC/Bootstrap"/ || exit 1
 
     efiTools=(
       "BootKicker.efi"
       "ChipTune.efi"
       "CleanNvram.efi"
       "GopStop.efi"
-      "HdaCodecDump.efi"
       "KeyTester.efi"
       "MmapDump.efi"
       "ResetSystem.efi"
@@ -146,12 +143,13 @@ package() {
       "AudioDxe.efi"
       "CrScreenshotDxe.efi"
       "OpenCanopy.efi"
+      "OpenPartitionDxe.efi"
       "OpenRuntime.efi"
       "OpenUsbKbDxe.efi"
       "Ps2MouseDxe.efi"
       "Ps2KeyboardDxe.efi"
       "UsbMouseDxe.efi"
-      "VBoxHfs.efi"
+      "OpenHfsPlus.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do

@@ -5,8 +5,27 @@ OpenCore Changelog
 - Added background image support in OpenCanopy
 - Fixed selector boot option choice in OpenCanopy
 - Relaxed selector dimensions for OpenCanopy
-- Add `MaxBIOSVersion` option to `Generic`
-- Fix MLB verification feature in macrecovery
+- Added `MaxBIOSVersion` option to `Generic`
+- Fixed MLB verification feature in macrecovery
+- Replaced `VBoxHfs` driver with `OpenHfsPlus`
+- Added audio codec dumping to `SysReport`
+- Fixed compatibility with page protection for all binaries
+- Fixed crashes in OpenUsbKbDxe when handling unsupported devices
+- Removed `HdaCodecDump` application in favor of `SysReport`
+- Added `SetApfsTrimTimeout` to tune APFS trim command
+- Changed `OpenCore.efi` to application to improve FW compatibility
+- Added `DisableSecurityPolicy` UEFI quirk to workaround driver loading
+- Added support for ranged widget connections in AudioDxe
+- Fixed supplying non-RT `SetVirtualAddressMap` for non-macOS systems
+- Fixed using `SystemUuid` from `DataHub` in non-Automatic mode for `SMBIOS`
+- Dropped failsafe defaults from `Generic` to match non-Automatic mode
+- Replaced `BootProtect` with `LauncherOption` and `LauncherPath`
+- Added `OpenPartitionDxe` with Apple Partition Management scheme
+- Improved ocvalidate checks in `Misc`, `NVRAM`, and `UEFI` sections
+- Fixed multiple flaws in EFI image loading, APFS driver in particular
+- Fixed NVRAM `system-id` being accidentally stored in Little Endian format
+- Added `UseRawUuidEncoding` to choose SMBIOS UUID encoding style
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.6.5
 - Fixed installing OpenDuet on protected volumes

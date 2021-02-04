@@ -404,7 +404,7 @@ OcGetNextLoadOptionDevicePath (
 BOOLEAN
 OcDevicePathHasFilePathSuffix (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath,
-  IN CHAR16                    *Suffix,
+  IN CONST CHAR16              *Suffix,
   IN UINTN                     SuffixLen
   );
 

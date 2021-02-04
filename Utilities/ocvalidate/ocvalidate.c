@@ -16,7 +16,7 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 
 #include <UserFile.h>
 
@@ -25,26 +25,36 @@ CheckConfig (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK ConfigCheckers[] = {
+  UINT32               ErrorCount;
+  UINT32               CurrErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  ConfigCheckers[] = {
     &CheckACPI,
     &CheckBooter,
     &CheckDeviceProperties,
     &CheckKernel,
     &CheckMisc,
-    &CheckNVRAM,
+    &CheckNvram,
     &CheckPlatformInfo,
     &CheckUEFI
   };
 
-  ErrorCount = 0;
+  ErrorCount     = 0;
+  CurrErrorCount = 0;
 
   //
   // Pass config structure to all checkers.
   //
   for (Index = 0; Index < ARRAY_SIZE (ConfigCheckers); ++Index) {
-    ErrorCount += ConfigCheckers[Index] (Config);
+    CurrErrorCount = ConfigCheckers[Index] (Config);
+
+    if (CurrErrorCount != 0) {
+      //
+      // Print an extra newline on error.
+      //
+      DEBUG ((DEBUG_WARN, "\n"));
+      ErrorCount += CurrErrorCount;
+    }
   }
 
   return ErrorCount;
@@ -99,7 +109,15 @@ int ENTRY_POINT(int argc, const char *argv[]) {
     return -1;
   }
 
+  //
+  // Print a newline that splits errors between OcConfigurationInit and config checkers.
+  //
+  DEBUG ((DEBUG_ERROR, "\n"));
   ErrorCount = CheckConfig (&Config);
+
+  OcConfigurationFree (&Config);
+  FreePool (ConfigFileBuffer);
+
   if (ErrorCount == 0) {
     DEBUG ((
       DEBUG_ERROR,
@@ -116,22 +134,24 @@ int ENTRY_POINT(int argc, const char *argv[]) {
       ErrorCount,
       ErrorCount > 1 ? "errors" : "error"
       ));
-  }
 
-  OcConfigurationFree (&Config);
-  free (ConfigFileBuffer);
+    return EXIT_FAILURE;
+  }
 
   return 0;
 }
 
 INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
-  VOID *NewData = AllocatePool (Size);
-  if (NewData) {
+  VOID              *NewData;
+  OC_GLOBAL_CONFIG  Config;
+
+  NewData = AllocatePool (Size);
+  if (NewData != NULL) {
     CopyMem (NewData, Data, Size);
-    OC_GLOBAL_CONFIG   Config;
     OcConfigurationInit (&Config, NewData, Size);
     OcConfigurationFree (&Config);
     FreePool (NewData);
   }
+  
   return 0;
 }

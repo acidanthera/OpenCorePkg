@@ -13,7 +13,7 @@
 #include <Library/IoLib.h>
 
 VOID
-DirectRestCold (
+DirectResetCold (
   VOID
   )
 {

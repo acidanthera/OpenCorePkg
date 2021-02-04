@@ -47,6 +47,7 @@
 [Sources]
   DataPatcher.c
   DirectReset.c
+  ImageRunner.c
   ReleaseUsbOwnership.c
   ProtocolSupport.c
   Math.c

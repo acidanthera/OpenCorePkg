@@ -51,8 +51,13 @@ extern UINT32   _gPcd_FixedAtBuild_PcdMaximumLinkedListLength;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdVerifyNodeInList;
 extern UINT32   _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs;
 extern UINT32   _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad;
+extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize         _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport               _gPcd_FixedAtBuild_PcdUgaConsumeSupport
@@ -74,7 +79,12 @@ extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader;
 #define _PCD_GET_MODE_64_PcdPciExpressBaseAddress             0
 #define _PCD_GET_MODE_64_PcdPciExpressBaseSize                0
 #define _PCD_GET_MODE_32_PcdMaximumDevicePathNodeCount        _gPcd_FixedAtBuild_PcdMaximumDevicePathNodeCount
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap  _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
-#define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader           _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderRtRelocAllowTargetMismatch _gPcd_FixedAtBuild_PcdImageLoaderRtRelocAllowTargetMismatch
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderHashProhibitOverlap        _gPcd_FixedAtBuild_PcdImageLoaderHashProhibitOverlap
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderLoadHeader                 _gPcd_FixedAtBuild_PcdImageLoaderLoadHeader
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportArmThumb            _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderForceLoadDebug             _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderTolerantLoad               _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad
+#define _PCD_GET_MODE_BOOL_PcdImageLoaderSupportDebug               _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug
 
 #endif // OC_USER_PCD_H

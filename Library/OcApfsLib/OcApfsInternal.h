@@ -15,6 +15,7 @@
 #ifndef OC_APFS_INTERNAL_H
 #define OC_APFS_INTERNAL_H
 
+#include <Uefi.h>
 #include <IndustryStandard/Apfs.h>
 #include <Protocol/BlockIo.h>
 #include <Protocol/ApfsEfiBootRecordInfo.h>
@@ -106,15 +107,8 @@ InternalApfsReadSuperBlock (
 EFI_STATUS
 InternalApfsReadDriver (
   IN  APFS_PRIVATE_DATA    *PrivateData,
-  OUT UINTN                *DriverSize,
+  OUT UINT32               *DriverSize,
   OUT VOID                 **DriverBuffer
-  );
-
-EFI_STATUS
-InternalApfsGetDriverVersion (
-  IN  VOID                 *DriverBuffer,
-  IN  UINTN                DriverSize,
-  OUT APFS_DRIVER_VERSION  **DriverVersionPtr
   );
 
 VOID

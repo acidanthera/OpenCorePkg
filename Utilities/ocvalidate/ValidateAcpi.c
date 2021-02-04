@@ -17,7 +17,7 @@
 #include "OcValidateLib.h"
 
 /**
-  Callback funtion to verify whether Path is duplicated in ACPI->Add.
+  Callback function to verify whether Path is duplicated in ACPI->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -59,11 +59,9 @@ CheckACPIAdd (
   OC_ACPI_CONFIG  *UserAcpi;
   CONST CHAR8     *Path;
   CONST CHAR8     *Comment;
-  BOOLEAN         HasCustomDSDT;
 
   ErrorCount      = 0;
   UserAcpi        = &Config->Acpi;
-  HasCustomDSDT   = FALSE;
 
   for (Index = 0; Index < UserAcpi->Add.Count; ++Index) {
     Path          = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Path);
@@ -86,10 +84,6 @@ CheckACPIAdd (
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has filename suffix other than .aml and .bin!\n", Index));
       ++ErrorCount;
     }
-
-    if (OcAsciiStriStr (Path, "DSDT") != NULL && UserAcpi->Add.Values[Index]->Enabled) {
-      HasCustomDSDT = TRUE;
-    }
   }
 
   //
@@ -101,14 +95,6 @@ CheckACPIAdd (
     sizeof (UserAcpi->Add.Values[0]),
     ACPIAddHasDuplication
     );
-
-  //
-  // Check for RebaseRegions when using customised DSDT.
-  //
-  if (HasCustomDSDT && !UserAcpi->Quirks.RebaseRegions) {
-    DEBUG ((DEBUG_WARN, "ACPI->Quirks->RebaseRegions is not enabled when customised DSDT table is in use!\n"));
-    ++ErrorCount;
-  }
 
   return ErrorCount;
 }
@@ -219,9 +205,9 @@ CheckACPI (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK ACPICheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  ACPICheckers[] = {
     &CheckACPIAdd,
     &CheckACPIDelete,
     &CheckACPIPatch

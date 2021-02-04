@@ -13,7 +13,7 @@
 **/
 
 #include <Uefi.h>
-#include <OpenCore.h>
+#include <Library/OcMainLib.h>
 #include "BootManagementInternal.h"
 
 #include <Guid/AppleFile.h>
@@ -903,7 +903,7 @@ InternalGetBoostrapOptionData (
   OUT EFI_DEVICE_PATH_PROTOCOL **LoadPath,
   IN  UINT16                   *BootOptions,
   IN  UINTN                    NumBootOptions,
-  IN  CHAR16                   *MatchSuffix,
+  IN  CONST CHAR16             *MatchSuffix,
   IN  UINTN                    MatchSuffixLen
   )
 {
@@ -961,7 +961,7 @@ InternalRegisterBootstrapBootOption (
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
   IN BOOLEAN         ShortForm,
-  IN CHAR16          *MatchSuffix,
+  IN CONST CHAR16    *MatchSuffix,
   IN UINTN           MatchSuffixLen
   )
 {
@@ -1211,7 +1211,7 @@ OcRegisterBootstrapBootOption (
   IN EFI_HANDLE      DeviceHandle,
   IN CONST CHAR16    *FilePath,
   IN BOOLEAN         ShortForm,
-  IN CHAR16          *MatchSuffix,
+  IN CONST CHAR16    *MatchSuffix,
   IN UINTN           MatchSuffixLen
   )
 {

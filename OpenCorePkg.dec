@@ -504,6 +504,12 @@
   ##  Include/AMI/Protocol/AmiKeycode.h
   gAmiEfiKeycodeProtocolGuid                 = { 0x0ADFB62D, 0xFF74, 0x484C, { 0x89, 0x44, 0xF8, 0x5C, 0x4B, 0xEA, 0x87, 0xA8 }}
 
+  ##  Include/AMI/Protocol/AmiSoftKbd.h
+  gAmiSoftKbdProtocolGuid                    = { 0x96FD60F3, 0x0BC8, 0x4A11, { 0x84, 0xF1, 0x2E, 0xB1, 0xCB, 0x5B, 0xA5, 0xA3 }}
+
+  ##  Include/AMI/Protocol/AmiSoftKbdRestore.h
+  gAmiSoftKbdRestoreProtocolGuid             = { 0x890DF583, 0x0D14, 0x4C82, { 0x99, 0x6D, 0xE5, 0xEA, 0xE8, 0xCA, 0x90, 0x5E }}
+
   ## Include/Intel/Protocol/ConsoleControl.h
   gEfiConsoleControlProtocolGuid             = { 0xF42F7782, 0x012E, 0x4C12, { 0x99, 0x56, 0x49, 0xF9, 0x43, 0x04, 0xF7, 0x21 }}
 
@@ -714,8 +720,13 @@
   ## @Prompt Allow these signature hashing algorithms for cryptographic usage.
   gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedSigHashTypes|0x07|UINT16|0x00000501
 
-  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderLoadHeader|TRUE|BOOLEAN|0x00000600
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderRtRelocAllowTargetMismatch|FALSE|BOOLEAN|0x00000600
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderHashProhibitOverlap|TRUE|BOOLEAN|0x00000601
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderLoadHeader|TRUE|BOOLEAN|0x00000602
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportArmThumb|FALSE|BOOLEAN|0x00000603
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderForceLoadDebug|FALSE|BOOLEAN|0x00000604
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderTolerantLoad|TRUE|BOOLEAN|0x00000605
+  gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportDebug|FALSE|BOOLEAN|0x00000606
 
 [LibraryClasses]
   ##  @libraryclass
@@ -741,9 +752,6 @@
 
   ##  @libraryclass
   OcAppleImageConversionLib|Include/Acidanthera/Library/OcAppleImageConversionLib.h
-
-  ##  @libraryclass
-  OcAppleImageVerificationLib|Include/Acidanthera/Library/OcAppleImageVerificationLib.h
 
   ##  @libraryclass
   OcAppleImg4Lib|Include/Acidanthera/Library/OcAppleImg4Lib.h
@@ -830,6 +838,9 @@
   OcInputLib|Include/Acidanthera/Library/OcInputLib.h
 
   ##  @libraryclass
+  OcMainLib|Include/Acidanthera/Library/OcMainLib.h
+
+  ##  @libraryclass
   OcMachoLib|Include/Acidanthera/Library/OcMachoLib.h
 
   ##  @libraryclass
@@ -843,6 +854,12 @@
 
   ##  @libraryclass
   OcOSInfoLib|Include/Acidanthera/Library/OcOSInfoLib.h
+
+  ##  @libraryclass
+  OcPeCoffExtLib|Include/Acidanthera/Library/OcPeCoffExtLib.h
+
+  ##  @libraryclass
+  OcPeCoffLib|Include/Acidanthera/Library/OcPeCoffLib.h
 
   ##  @libraryclass
   OcPngLib|Include/Acidanthera/Library/OcPngLib.h

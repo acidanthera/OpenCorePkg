@@ -25,8 +25,8 @@
 INTN
 EFIAPI
 OcStriCmp (
-  IN CHAR16  *FirstString,
-  IN CHAR16  *SecondString
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR16  *SecondString
   )
 {
   CHAR16  UpperFirstString;

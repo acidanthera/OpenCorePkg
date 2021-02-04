@@ -1,5 +1,6 @@
 DataBase list
 =============
+Non-x86 models are excluded.
 
 | Mac-model | DataBase |
 |:----------|:---------|

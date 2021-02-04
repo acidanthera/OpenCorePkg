@@ -23,7 +23,7 @@
 #include <Protocol/OcLog.h>
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Entries.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Entries.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -68,7 +68,7 @@ MiscEntriesHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Arguments and Path are duplicated in Misc->Tools.
+  Callback function to verify whether Arguments and Path are duplicated in Misc->Tools.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -122,8 +122,8 @@ ValidateSecureBootModel (
   IN  CONST CHAR8  *SecureBootModel
   )
 {
-  UINTN   Index;
-  CONST CHAR8 *AllowedSecureBootModel[] = {
+  UINTN               Index;
+  STATIC CONST CHAR8  *AllowedSecureBootModel[] = {
     "Default", "Disabled",
     "j137",  "j680",  "j132",  "j174",  "j140k",
     "j780",  "j213",  "j140a", "j152f", "j160",
@@ -138,6 +138,44 @@ ValidateSecureBootModel (
   }
 
   return FALSE;
+}
+
+STATIC
+UINT32
+CheckBlessOverride (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32              ErrorCount;
+  UINT32              Index;
+  UINTN               Index2;
+  OC_MISC_CONFIG      *UserMisc;
+  CONST CHAR8         *BlessOverrideEntry;
+  STATIC CONST CHAR8  *DisallowedBlessOverrideValues[] = {
+    "\\EFI\\Microsoft\\Boot\\bootmgfw.efi",
+    "\\System\\Library\\CoreServices\\boot.efi",
+  };
+
+  ErrorCount          = 0;
+  UserMisc            = &Config->Misc;
+
+  for (Index = 0; Index < UserMisc->BlessOverride.Count; ++Index) {
+    BlessOverrideEntry = OC_BLOB_GET (UserMisc->BlessOverride.Values[Index]);
+
+    //
+    // &DisallowedBlessOverrideValues[][1] means no first '\\'.
+    //
+    for (Index2 = 0; Index2 < ARRAY_SIZE (DisallowedBlessOverrideValues); ++Index2) {
+      if (AsciiStrCmp (BlessOverrideEntry, DisallowedBlessOverrideValues[Index2]) == 0
+        || AsciiStrCmp (BlessOverrideEntry, &DisallowedBlessOverrideValues[Index2][1]) == 0) {
+        DEBUG ((DEBUG_WARN, "Misc->BlessOverride: %a is redundant!\n", BlessOverrideEntry));
+        ++ErrorCount;
+      }
+    }
+    
+  }
+
+  return ErrorCount;
 }
 
 STATIC
@@ -159,6 +197,8 @@ CheckMiscBoot (
   CONST CHAR8       *PickerVariant;
   BOOLEAN           IsPickerAudioAssistEnabled;
   BOOLEAN           IsAudioSupportEnabled;
+  CONST CHAR8       *LauncherOption;
+  CONST CHAR8       *LauncherPath;
 
   ErrorCount        = 0;
   UserMisc          = &Config->Misc;
@@ -214,6 +254,19 @@ CheckMiscBoot (
   IsAudioSupportEnabled      = UserUefi->Audio.AudioSupport;
   if (IsPickerAudioAssistEnabled && !IsAudioSupportEnabled) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAudioAssist is enabled, but UEFI->Audio->AudioSupport is not enabled altogether!\n"));
+    ++ErrorCount;
+  }
+
+  LauncherOption = OC_BLOB_GET (&Config->Misc.Boot.LauncherOption);
+  if (AsciiStrCmp (LauncherOption, "Disabled") != 0
+    && AsciiStrCmp (LauncherOption, "Full") != 0
+    && AsciiStrCmp (LauncherOption, "Short") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherOption is borked (Can only be Disabled, Full, or Short)!\n"));
+    ++ErrorCount;
+  }
+  LauncherPath = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
+  if (LauncherPath[0] == '\0') {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->LauncherPath cannot be empty!\n"));
     ++ErrorCount;
   }
 
@@ -343,11 +396,8 @@ CheckMiscSecurity (
   UINT32            Index;
   OC_KERNEL_CONFIG  *UserKernel;
   OC_MISC_CONFIG    *UserMisc;
-  OC_UEFI_CONFIG    *UserUefi;
   BOOLEAN           IsAuthRestartEnabled;
   BOOLEAN           HasVSMCKext;
-  CONST CHAR8       *BootProtect;
-  BOOLEAN           IsRequestBootVarRoutingEnabled;
   CONST CHAR8       *AsciiDmgLoading;
   UINT32            ExposeSensitiveData;
   CONST CHAR8       *AsciiVault;
@@ -358,7 +408,6 @@ CheckMiscSecurity (
   ErrorCount        = 0;
   UserKernel        = &Config->Kernel;
   UserMisc          = &Config->Misc;
-  UserUefi          = &Config->Uefi;
 
   HasVSMCKext = FALSE;
   for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
@@ -370,24 +419,6 @@ CheckMiscSecurity (
   if (IsAuthRestartEnabled && !HasVSMCKext) {
     DEBUG ((DEBUG_WARN, "Misc->Security->AuthRestart is enabled, but VirtualSMC is not loaded at Kernel->Add!\n"));
     ++ErrorCount;
-  }
-
-  BootProtect                    = OC_BLOB_GET (&UserMisc->Security.BootProtect);
-  IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
-  if (AsciiStrCmp (BootProtect, "None") != 0
-    && AsciiStrCmp (BootProtect, "Bootstrap") != 0
-    && AsciiStrCmp (BootProtect, "BootstrapShort") != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is borked (Can only be None, Bootstrap, or BootstrapShort)!\n"));
-    ++ErrorCount;
-  } else if (AsciiStrCmp (BootProtect, "Bootstrap") == 0
-    || AsciiStrCmp (BootProtect, "BootstrapShort") == 0) {
-    if (!IsRequestBootVarRoutingEnabled) {
-      DEBUG ((DEBUG_WARN, "Misc->Security->BootProtect is set to %a which requires UEFI->Quirks->RequestBootVarRouting to be enabled!\n", BootProtect));
-      ++ErrorCount;
-    }
-    //
-    // NOTE: RequestBootVarRouting requires OpenRuntime.efi, which will be checked in UEFI checker.
-    //
   }
 
   AsciiDmgLoading = OC_BLOB_GET (&UserMisc->Security.DmgLoading);
@@ -522,9 +553,10 @@ CheckMisc (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK MiscCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  MiscCheckers[] = {
+    &CheckBlessOverride,
     &CheckMiscBoot,
     &CheckMiscDebug,
     &CheckMiscEntries,

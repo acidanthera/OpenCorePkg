@@ -5,7 +5,6 @@
 * OcAppleKernelLib — Apple kernelspace injector and patcher
 * OcCompressionLib — Misc compression and decompression (LZSS, LZVN, ZLIB)
 * OcAppleChunklistLib — Apple chunklist (e.g. for dmg hashes) handling library
-* OcAppleImageVerificationLib — Apple EFI image signature verification lib
 * OcBootManagementLib — Simple blessed-based boot management with UI
 * OcCpuLib — CPU feature scanning
 * OcCryptoLib — Misc cryptographic primitives (AES, RSA, MD5, SHA-1, SHA-256)
@@ -20,6 +19,8 @@
 * OcGuardLib — Basic sanity checking (static assertions, overflow maths)
 * OcMachoLib — Mach-O image handling and transformation
 * OcMiscLib — Miscellaneous stuff not fitting elsewhere
+* OcPeCoffLib - EFI image management
+* OcPeCoffExtLib — EFI image management extras for Apple
 * OcPngLib — PNG image decoding
 * OcRtcLib — CMOS memory access
 * OcSerializeLib — PLIST document deserialization

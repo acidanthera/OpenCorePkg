@@ -40,7 +40,7 @@ typedef struct EFI_HDA_CONTROLLER_INFO_PROTOCOL_ EFI_HDA_CONTROLLER_INFO_PROTOCO
   Gets the controller's name.
 
   @param[in]  This              A pointer to the EFI_HDA_CONTROLLER_INFO_PROTOCOL instance.
-  @param[out] CodecName         A pointer to the buffer to return the codec name.
+  @param[out] Name              A pointer to the buffer to return the controller name.
 
   @retval EFI_SUCCESS           The controller name was retrieved.
   @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
@@ -49,7 +49,7 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_HDA_CONTROLLER_INFO_GET_NAME) (
   IN  EFI_HDA_CONTROLLER_INFO_PROTOCOL  *This,
-  OUT CONST CHAR16                      **ControllerName
+  OUT CONST CHAR16                      **Name
   );
 
 /**

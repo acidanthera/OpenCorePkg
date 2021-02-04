@@ -20,7 +20,7 @@
 #include <Library/OcAppleKernelLib.h>
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Add.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Add.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -52,7 +52,7 @@ KernelAddHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether Identifier is duplicated in Kernel->Block.
+  Callback function to verify whether Identifier is duplicated in Kernel->Block.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -84,7 +84,7 @@ KernelBlockHasDuplication (
 }
 
 /**
-  Callback funtion to verify whether BundlePath is duplicated in Kernel->Force.
+  Callback function to verify whether BundlePath is duplicated in Kernel->Force.
 
   @param[in]  PrimaryEntry    Primary entry to be checked.
   @param[in]  SecondaryEntry  Secondary entry to be checked.
@@ -355,6 +355,7 @@ CheckKernelEmulate (
   OC_KERNEL_CONFIG    *UserKernel;
   CONST CHAR8         *MaxKernel;
   CONST CHAR8         *MinKernel;
+  BOOLEAN             Result;
 
   ErrorCount          = 0;
   UserKernel          = &Config->Kernel; 
@@ -373,7 +374,13 @@ CheckKernelEmulate (
     ++ErrorCount;
   }
 
-  if (!DataHasProperMasking (UserKernel->Emulate.Cpuid1Data, UserKernel->Emulate.Cpuid1Mask, sizeof (UserKernel->Emulate.Cpuid1Data))) {
+  Result = DataHasProperMasking (
+    UserKernel->Emulate.Cpuid1Data,
+    UserKernel->Emulate.Cpuid1Mask,
+    sizeof (UserKernel->Emulate.Cpuid1Data)
+    );
+
+  if (!Result) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->Cpuid1Data requires Cpuid1Mask to be active for replaced bits!\n"));
     ++ErrorCount;
   }
@@ -586,6 +593,7 @@ CheckKernelQuirks (
   OC_PLATFORM_CONFIG  *UserPlatformInfo;
   BOOLEAN             IsCustomSMBIOSGuidEnabled;
   CONST CHAR8         *UpdateSMBIOSMode;
+  INT64               SetApfsTrimTimeout;
 
   ErrorCount          = 0;
   UserKernel          = &Config->Kernel;
@@ -598,6 +606,13 @@ CheckKernelQuirks (
   UpdateSMBIOSMode          = OC_BLOB_GET (&UserPlatformInfo->UpdateSmbiosMode);
   if (IsCustomSMBIOSGuidEnabled && AsciiStrCmp (UpdateSMBIOSMode, "Custom") != 0) {
     DEBUG ((DEBUG_WARN, "Kernel->Quirks->CustomSMBIOSGuid is enabled, but PlatformInfo->UpdateSMBIOSMode is not set to Custom!\n"));
+    ++ErrorCount;
+  }
+
+  SetApfsTrimTimeout = UserKernel->Quirks.SetApfsTrimTimeout;
+  if (SetApfsTrimTimeout  > MAX_UINT32
+    || SetApfsTrimTimeout < -1) {
+    DEBUG ((DEBUG_WARN, "Kernel->Quirks->SetApfsTrimTimeout is invalid value %d!\n", SetApfsTrimTimeout));
     ++ErrorCount;
   }
 
@@ -644,9 +659,9 @@ CheckKernel (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32  ErrorCount;
-  UINTN   Index;
-  STATIC CONFIG_CHECK KernelCheckers[] = {
+  UINT32               ErrorCount;
+  UINTN                Index;
+  STATIC CONFIG_CHECK  KernelCheckers[] = {
     &CheckKernelAdd,
     &CheckKernelBlock,
     &CheckKernelEmulate,

@@ -593,6 +593,7 @@ OcAppleKeyMapInstallProtocols (
   KEY_MAP_AGGREGATOR_DATA           *KeyMapAggregatorData;
   APPLE_KEY_MAP_DATABASE_PROTOCOL   *Database;
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *Aggregator;
+  EFI_HANDLE                        NewHandle;
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleKeyMapDatabaseProtocolGuid);
@@ -649,8 +650,9 @@ OcAppleKeyMapInstallProtocols (
 
   InitializeListHead (&KeyMapAggregatorData->KeyStrokesInfoList);
 
+  NewHandle = NULL;
   Status = gBS->InstallMultipleProtocolInterfaces (
-    &gImageHandle,
+    &NewHandle,
     &gAppleKeyMapDatabaseProtocolGuid,
     (VOID *)&KeyMapAggregatorData->Database,
     &gAppleKeyMapAggregatorProtocolGuid,

@@ -482,6 +482,7 @@ ErrorExit:
       gBS->CloseEvent (UsbKeyboardDevice->KeyNotifyProcessEvent);
     }
     ReleaseKeyboardLayoutResources (UsbKeyboardDevice);
+    UsbKbFreeAppleKeyMapDb (UsbKeyboardDevice);
     FreePool (UsbKeyboardDevice);
     UsbKeyboardDevice = NULL;
   }
