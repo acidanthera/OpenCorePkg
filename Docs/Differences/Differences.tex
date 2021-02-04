@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Feb  2 21:33:12 2021
-%DIF ADD ../Configuration.tex        Tue Feb  2 21:35:18 2021
+%DIF DEL PreviousConfiguration.tex   Wed Feb  3 11:12:00 2021
+%DIF ADD ../Configuration.tex        Thu Feb  4 09:54:49 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4626,7 +4626,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
-\item
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: The implementation of the Data Hub protocol in EFI firmware on
+  essentially all systems, including Apple hardware, means that existing Data Hub
+  entries cannot be overridden, while new entries are added to the end with
+  macOS ignoring them. You can work around this by reinstalling the Data Hub
+  protocol using the }\texttt{\DIFadd{ProtocolOverrides}} \DIFadd{section. Refer to the }\texttt{\DIFadd{DataHub}}
+  \DIFadd{protocol override description for details.
+}\DIFaddend \item
   \texttt{UpdateNVRAM}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -6619,15 +6627,24 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
-  This will delete all previous properties if the protocol was already installed.
+\DIFdelbegin \DIFdel{This will delete all previous properties }\DIFdelend \DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: This will discard all previous entries }\DIFaddend if the protocol was already
+  installed\DIFaddbegin \DIFadd{, so all properties required for safe operation of the system must be
+  specified in your configuration}\DIFaddend .
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reinstalls Device Property protocol with a builtin
-  version. This will delete all previous properties if it was already installed.
-  This may be used to ensure full compatibility on VMs or legacy Macs.
+  version. This \DIFdelbegin \DIFdel{will delete all previous properties if it was already installed.
+  This }\DIFdelend may be used to ensure full compatibility on VMs or legacy Macs\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This will discard all previous entries if the protocol was already
+  installed, so all properties required for safe operation of the system must be
+  specified in your configuration}\DIFaddend .
 
 \item
   \texttt{FirmwareVolume}\\
