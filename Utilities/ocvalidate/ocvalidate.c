@@ -69,6 +69,8 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   EFI_STATUS         Status;
   UINT32             ErrorCount;
 
+  ErrorCount = 0;
+
   //
   // Enable PCD debug logging.
   //
@@ -103,7 +105,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   //
   // Initialise config structure to be checked, and exit on error.
   //
-  Status = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize);
+  Status = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize, &ErrorCount);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
@@ -113,7 +115,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   // Print a newline that splits errors between OcConfigurationInit and config checkers.
   //
   DEBUG ((DEBUG_ERROR, "\n"));
-  ErrorCount = CheckConfig (&Config);
+  ErrorCount += CheckConfig (&Config);
 
   OcConfigurationFree (&Config);
   FreePool (ConfigFileBuffer);
@@ -148,7 +150,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   NewData = AllocatePool (Size);
   if (NewData != NULL) {
     CopyMem (NewData, Data, Size);
-    OcConfigurationInit (&Config, NewData, Size);
+    OcConfigurationInit (&Config, NewData, Size, NULL);
     OcConfigurationFree (&Config);
     FreePool (NewData);
   }

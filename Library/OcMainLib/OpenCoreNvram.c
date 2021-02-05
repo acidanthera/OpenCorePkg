@@ -290,7 +290,7 @@ OcLoadLegacyNvram (
   }
 
   OC_NVRAM_STORAGE_CONSTRUCT (&Nvram, sizeof (Nvram));
-  IsValid = ParseSerialized (&Nvram, &mNvramStorageRootSchema, FileBuffer, FileSize);
+  IsValid = ParseSerialized (&Nvram, &mNvramStorageRootSchema, FileBuffer, FileSize, NULL);
   FreePool (FileBuffer);
 
   if (!IsValid || Nvram.Version != OC_NVRAM_STORAGE_VERSION) {

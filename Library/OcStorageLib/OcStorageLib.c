@@ -151,7 +151,7 @@ OcStorageInitializeVault (
   }
 
   OC_STORAGE_VAULT_CONSTRUCT (&Context->Vault, sizeof (Context->Vault));
-  if (!ParseSerialized (&Context->Vault, &mVaultSchema, Vault, VaultSize)) {
+  if (!ParseSerialized (&Context->Vault, &mVaultSchema, Vault, VaultSize, NULL)) {
     OC_STORAGE_VAULT_DESTRUCT (&Context->Vault, sizeof (Context->Vault));
     DEBUG ((DEBUG_ERROR, "OCST: Invalid vault data\n"));
     return EFI_INVALID_PARAMETER;

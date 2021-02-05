@@ -91,10 +91,11 @@ LookupConfigSchema (
 
 VOID
 ParseSerializedDict (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
   UINT32         DictSize;
@@ -112,6 +113,9 @@ ParseSerializedDict (
 
     if (CurrentKey == NULL) {
       DEBUG ((DEBUG_WARN, "OCS: No serialized key at %u index, context <%a>!\n", Index, Context));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -131,6 +135,9 @@ ParseSerializedDict (
 
     if (NewSchema == NULL) {
       DEBUG ((DEBUG_WARN, "OCS: No schema for %a at %u index, context <%a>!\n", CurrentKey, Index, Context));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -146,10 +153,13 @@ ParseSerializedDict (
         XmlNodeName (OldValue),
         Context
         ));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
-    NewSchema->Apply (Serialized, CurrentValue, &NewSchema->Info, CurrentKey);
+    NewSchema->Apply (Serialized, CurrentValue, &NewSchema->Info, CurrentKey, ErrorCount);
   }
 
   DEBUG_CODE_BEGIN ();
@@ -178,6 +188,9 @@ ParseSerializedDict (
         Info->Dict.Schema[Index].Name,
         Context
         ));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
     }
   }
 
@@ -186,10 +199,11 @@ ParseSerializedDict (
 
 VOID
 ParseSerializedValue (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
   BOOLEAN  Result;
@@ -227,15 +241,19 @@ ParseSerializedValue (
       XmlNodeContent (Node) != NULL ? XmlNodeContent (Node) : "empty",
       Context
       ));
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
   }
 }
 
 VOID
 ParseSerializedBlob (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
   BOOLEAN  Result;
@@ -267,6 +285,9 @@ ParseSerializedBlob (
       GetSchemaTypeName (Info->Blob.Type),
       Context
       ));
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
     return;
   }
 
@@ -282,6 +303,9 @@ ParseSerializedBlob (
       GetSchemaTypeName (Info->Value.Type),
       Context
       ));
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
     return;
   }
 
@@ -308,15 +332,19 @@ ParseSerializedBlob (
       XmlNodeContent (Node) != NULL ? XmlNodeContent (Node) : "empty",
       Context
       ));
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
   }
 }
 
 VOID
 ParseSerializedMap (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
   UINT32       DictSize;
@@ -337,6 +365,9 @@ ParseSerializedMap (
 
     if (CurrentKeyLen == 0) {
       DEBUG ((DEBUG_INFO, "OCS: No get serialized key at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -349,6 +380,9 @@ ParseSerializedMap (
 
     if (PlistNodeCast (ChildNode, Info->List.Schema->Type) == NULL) {
       DEBUG ((DEBUG_INFO, "OCS: No valid serialized value at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -359,6 +393,9 @@ ParseSerializedMap (
       );
     if (Success == FALSE) {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't insert dict serialized at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -367,18 +404,22 @@ ParseSerializedMap (
       AsciiStrnCpyS ((CHAR8 *) NewKeyValue, CurrentKeyLen, CurrentKey, CurrentKeyLen - 1);
     } else {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't allocate key name at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
     }
 
-    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, CurrentKey);
+    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, CurrentKey, ErrorCount);
   }
 }
 
 VOID
 ParseSerializedArray (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   )
 {
   UINT32    ArraySize;
@@ -396,6 +437,9 @@ ParseSerializedArray (
 
     if (ChildNode == NULL) {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't get array serialized at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
@@ -406,19 +450,23 @@ ParseSerializedArray (
       );
     if (Success == FALSE) {
       DEBUG ((DEBUG_INFO, "OCS: Couldn't insert array serialized at %u index!\n", Index));
+      if (ErrorCount != NULL) {
+        ++*ErrorCount;
+      }
       continue;
     }
 
-    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, Context);
+    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, Context, ErrorCount);
   }
 }
 
 BOOLEAN
 ParseSerialized (
-  OUT VOID            *Serialized,
-  IN  OC_SCHEMA_INFO  *RootSchema,
-  IN  VOID            *PlistBuffer,
-  IN  UINT32          PlistSize
+      OUT  VOID                *Serialized,
+  IN       OC_SCHEMA_INFO      *RootSchema,
+  IN       VOID                *PlistBuffer,
+  IN       UINT32              PlistSize,
+  IN  OUT  UINT32              *ErrorCount  OPTIONAL
   )
 {
   XML_DOCUMENT        *Document;
@@ -428,6 +476,9 @@ ParseSerialized (
 
   if (Document == NULL) {
     DEBUG ((DEBUG_INFO, "OCS: Couldn't parse serialized file!\n"));
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
     return FALSE;
   }
 
@@ -436,6 +487,9 @@ ParseSerialized (
   if (RootDict == NULL) {
     DEBUG ((DEBUG_INFO, "OCS: Couldn't get serialized root!\n"));
     XmlDocumentFree (Document);
+    if (ErrorCount != NULL) {
+      ++*ErrorCount;
+    }
     return FALSE;
   }
 
@@ -443,7 +497,8 @@ ParseSerialized (
     Serialized,
     RootDict,
     RootSchema,
-    "root"
+    "root",
+    ErrorCount
     );
 
   XmlDocumentFree (Document);

@@ -710,17 +710,19 @@ typedef enum {
 /**
   Initialize configuration with plist data.
 
-  @param[out]  Config   Configuration structure.
-  @param[in]   Buffer   Configuration buffer in plist format.
-  @param[in]   Size     Configuration buffer size.
+  @param[out]     Config      Configuration structure.
+  @param[in]      Buffer      Configuration buffer in plist format.
+  @param[in]      Size        Configuration buffer size.
+  @param[in,out]  ErrorCount  Errors detected duing initialisation. Optional.
 
   @retval  EFI_SUCCESS on success
 **/
 EFI_STATUS
 OcConfigurationInit (
-  OUT OC_GLOBAL_CONFIG   *Config,
-  IN  VOID               *Buffer,
-  IN  UINT32             Size
+      OUT  OC_GLOBAL_CONFIG   *Config,
+  IN       VOID               *Buffer,
+  IN       UINT32             Size,
+  IN  OUT  UINT32             *ErrorCount  OPTIONAL
   );
 
 /**
