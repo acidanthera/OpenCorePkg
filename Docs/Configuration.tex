@@ -991,24 +991,22 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Data to find. Must equal to \texttt{Replace} in size.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole ACPI table.
+  \textbf{Failsafe}: 0 (Search entire ACPI table)\\
+  \textbf{Description}: Maximum number of bytes to search for.
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{OemTableId}\\
@@ -1020,17 +1018,16 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Skip}\\
@@ -1345,7 +1342,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Data to find. This must equal to \texttt{Replace} in size.
 
 \item
@@ -1359,33 +1356,30 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole booter.
+  \textbf{Failsafe}: 0 (Search the entire booter)\\
+  \textbf{Description}: Maximum number of bytes to search for.
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Find} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  Must equal to \texttt{Find} in size if set.
 
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Skip}\\
@@ -2271,10 +2265,9 @@ blocking.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
-  \textbf{Description}: Data to find. Can be set to empty for immediate
-  replacement at \texttt{Base}. Must equal to \texttt{Replace} in size
-  otherwise.
+  \textbf{Failsafe}: Empty (Immediate replacement at \texttt{Base})\\
+  \textbf{Description}: Data to find. Must be equal to \texttt{Replace}
+  in size if set.
 
 \item
   \texttt{Identifier}\\
@@ -2286,18 +2279,16 @@ blocking.
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole kext or kernel.
+  \textbf{Failsafe}: 0 (Search entire kext or kernel)\\
+  \textbf{Description}: Maximum number of bytes to search for.
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  Must equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{MaxKernel}\\
@@ -2318,17 +2309,16 @@ blocking.
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  Must equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Skip}\\
@@ -6599,16 +6589,16 @@ functioning. Feature highlights:
   \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
   versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
   on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
-  cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
-  prior to APTIO V (Haswell and older) are affected.
+  cursor size with \texttt{UIScale} set to \texttt{02}. Platforms earlier
+  than APTIO V (Haswell and older) are generally affected.
 
 \item
   \texttt{OSInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Forcibly reinstalls OS Info protocol with builtin
-  versions. This protocol is generally used to receive notifications from macOS
-  bootloader, by the firmware or by other applications.
+  versions. This protocol is generally used by the firmware, or by other
+  applications, to receive notifications from the macOS bootloader.
 
 \item
   \texttt{UnicodeCollation}\\
