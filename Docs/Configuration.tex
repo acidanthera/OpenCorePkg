@@ -1427,7 +1427,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: While this quirk is required to run older macOS versions
   on platforms with used lower memory it is not compatible with some
-  hardware and macOS 11. In this case one may try to use
+  hardware and macOS 11. In such cases, consider using
   \texttt{EnableSafeModeSlide} instead.
 
 \item
@@ -2583,8 +2583,8 @@ blocking.
 
   One way to workaround the problem is to increase the timeout to a very
   high value, which at the cost of slow boot times (extra minutes)
-  will ensure that all the blocks are trimmed. For this one can set
-  this option to a high value, e.g. \texttt{4294967295}.
+  will ensure that all the blocks are trimmed. Set this option to a high value,
+  such as \texttt{4294967295}, to ensure all the blocks are trimmed.
 
   Another way is to utilise over-provisioning if it is supported or create
   a dedicated unmapped partition where the reserve blocks can be found
@@ -6811,12 +6811,11 @@ older macOS operating systems.
 
 While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
-release, so to get a compatible distribution one may have to download
-a device-specific image and mod it if necessary. To get the list of
-the bundled device-specific builds for legacy operating systems
-one can visit this archived Apple Support
-\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}.
-Since it is not always accurate, the latest versions are listed below.
+release. For compatible distributions of such, download a device-specific
+image and modify it if necessary. Visit this archived Apple Support
+\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
+for a list of the bundled device-specific builds for legacy operating systems.
+However, as this may not always be accurate, the latest versions are listed below.
 
 \subsubsection{macOS 10.8 and 10.9}\label{legacy108}
 
