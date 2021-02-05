@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.6.7
+- Fixed ocvalidate return code to be non-zero when issues are found
+
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy
 - Added background image support in OpenCanopy
