@@ -159,7 +159,7 @@ ParseSerializedDict (
       continue;
     }
 
-    NewSchema->Apply (Serialized, CurrentValue, &NewSchema->Info, CurrentKey, ErrorCount != NULL ? ErrorCount : ErrorCount);
+    NewSchema->Apply (Serialized, CurrentValue, &NewSchema->Info, CurrentKey, ErrorCount);
   }
 
   DEBUG_CODE_BEGIN ();
@@ -409,7 +409,7 @@ ParseSerializedMap (
       }
     }
 
-    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, CurrentKey, ErrorCount != NULL ? ErrorCount : ErrorCount);
+    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, CurrentKey, ErrorCount);
   }
 }
 
@@ -456,7 +456,7 @@ ParseSerializedArray (
       continue;
     }
 
-    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, Context, ErrorCount != NULL ? ErrorCount : ErrorCount);
+    Info->List.Schema->Apply (NewValue, ChildNode, &Info->List.Schema->Info, Context, ErrorCount);
   }
 }
 

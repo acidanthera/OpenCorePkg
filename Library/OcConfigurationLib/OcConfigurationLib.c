@@ -810,7 +810,7 @@ OcConfigurationInit (
   BOOLEAN  Success;
 
   OC_GLOBAL_CONFIG_CONSTRUCT (Config, sizeof (*Config));
-  Success = ParseSerialized (Config, &mRootConfigurationInfo, Buffer, Size, ErrorCount != NULL ? ErrorCount : NULL);
+  Success = ParseSerialized (Config, &mRootConfigurationInfo, Buffer, Size, ErrorCount);
 
   if (!Success) {
     OC_GLOBAL_CONFIG_DESTRUCT (Config, sizeof (*Config));
