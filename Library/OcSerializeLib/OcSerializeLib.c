@@ -91,7 +91,7 @@ LookupConfigSchema (
 
 VOID
 ParseSerializedDict (
-  OUT      VOID            *Serialized,
+      OUT  VOID            *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -199,7 +199,7 @@ ParseSerializedDict (
 
 VOID
 ParseSerializedValue (
-  OUT      VOID            *Serialized,
+      OUT  VOID            *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -249,7 +249,7 @@ ParseSerializedValue (
 
 VOID
 ParseSerializedBlob (
-  OUT      VOID            *Serialized,
+      OUT  VOID            *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -340,7 +340,7 @@ ParseSerializedBlob (
 
 VOID
 ParseSerializedMap (
-  OUT      VOID            *Serialized,
+      OUT  VOID            *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -415,7 +415,7 @@ ParseSerializedMap (
 
 VOID
 ParseSerializedArray (
-  OUT      VOID            *Serialized,
+      OUT  VOID            *Serialized,
   IN       XML_NODE        *Node,
   IN       OC_SCHEMA_INFO  *Info,
   IN       CONST CHAR8     *Context     OPTIONAL,
@@ -462,7 +462,7 @@ ParseSerializedArray (
 
 BOOLEAN
 ParseSerialized (
-  OUT      VOID                *Serialized,
+      OUT  VOID                *Serialized,
   IN       OC_SCHEMA_INFO      *RootSchema,
   IN       VOID                *PlistBuffer,
   IN       UINT32              PlistSize,

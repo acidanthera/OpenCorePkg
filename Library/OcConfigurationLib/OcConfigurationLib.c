@@ -801,7 +801,7 @@ mRootConfigurationInfo = {
 
 EFI_STATUS
 OcConfigurationInit (
-  OUT      OC_GLOBAL_CONFIG   *Config,
+      OUT  OC_GLOBAL_CONFIG   *Config,
   IN       VOID               *Buffer,
   IN       UINT32             Size,
   IN  OUT  UINT32             *ErrorCount  OPTIONAL
