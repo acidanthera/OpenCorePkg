@@ -106,7 +106,6 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   // Initialise config structure to be checked, and exit on error.
   //
   Status = OcConfigurationInit (&Config, ConfigFileBuffer, ConfigFileSize, &ErrorCount);
-  DEBUG ((DEBUG_WARN, "ErrorCount after OcConfigurationInit - %u!\n", ErrorCount));
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
