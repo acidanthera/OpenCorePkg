@@ -60,7 +60,7 @@ IsAsciiPrint (
 
   @retval  TRUE, if character is alphabetical.
 **/
-INTN
+BOOLEAN
 IsAsciiAlpha (
   IN CHAR8  Char
   );
@@ -71,7 +71,7 @@ IsAsciiAlpha (
 
   @retval  TRUE, if character is a white space character.
 **/
-INTN
+BOOLEAN
 IsAsciiSpace (
   IN CHAR8  Char
   );
