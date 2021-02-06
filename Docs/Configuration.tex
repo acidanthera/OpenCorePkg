@@ -992,12 +992,12 @@ of the suggested solutions will vary from case to case.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Data to find. Must equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 0 (Search entire ACPI table)\\
+  \textbf{Failsafe}: \texttt{0} (Search entire ACPI table)\\
   \textbf{Description}: Maximum number of bytes to search for.
 
 \item
@@ -1077,7 +1077,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   newer systems. Please switch to built-in brightness key discovery of
   \href{https://github.com/acidanthera/BrightnessKeys}{BrightnessKeys} instead.
 \item
-  Try to avoid hacky changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
+  Avoid making ad hoc changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
@@ -1343,20 +1343,19 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Data to find. This must equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size.
 
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
+  \textbf{Failsafe}:  \texttt{Any} (Match any booter)\\
   \textbf{Description}: \texttt{Apple} for macOS booter (generally \texttt{boot.efi});
-  or a name with suffix (e.g. \texttt{bootmgfw.efi}) for a specific booter;
-  or \texttt{Any} / empty string (failsafe) to match any booter.
+  or a name with a suffix, such as \texttt{bootmgfw.efi}, for a specific booter.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 0 (Search the entire booter)\\
+  \textbf{Failsafe}: \texttt{0} (Search the entire booter)\\
   \textbf{Description}: Maximum number of bytes to search for.
 
 \item
@@ -1365,7 +1364,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during find comparison.
   Allows fuzzy search by ignoring not masked (set to zero) bits.
-  Must equal to \texttt{Find} in size if set.
+  Must be equal to \texttt{Find} in size if set.
 
 \item
   \texttt{Replace}\\
@@ -2235,10 +2234,9 @@ blocking.
 \item
   \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
+  \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
-  replacement) by obtaining the address of provided symbol name. Set to an empty string
-  to ignore.
+  replacement) by obtaining the address of provided symbol name.
 
 \item
   \texttt{Comment}\\
@@ -2279,7 +2277,7 @@ blocking.
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 0 (Search entire kext or kernel)\\
+  \textbf{Failsafe}: \texttt{0} (Search entire kext or kernel)\\
   \textbf{Description}: Maximum number of bytes to search for.
 
 \item
@@ -2288,7 +2286,7 @@ blocking.
   \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during find comparison.
   Allows fuzzy search by ignoring not masked (set to zero) bits.
-  Must equal to \texttt{Replace} in size if set.
+  Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{MaxKernel}\\
@@ -2318,7 +2316,7 @@ blocking.
   \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Data bitwise mask used during replacement.
   Allows fuzzy replacement by updating masked (set to non-zero) bits.
-  Must equal to \texttt{Replace} in size if set.
+  Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Skip}\\
@@ -4931,7 +4929,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: 0 (Not installed)\\
+  \textbf{Failsafe}: \texttt{0} (Not installed)\\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
   \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
   AppleACPIPlatform.kext to append SATA device paths to
@@ -5399,7 +5397,7 @@ Apple ROM Version
 \item
   \texttt{BoardType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 0 (OEM specified)\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
   Type\\
   \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
@@ -5423,7 +5421,7 @@ Apple ROM Version
 \item
   \texttt{ChassisType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: 0 (OEM specified)\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified)\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
   \textbf{Description}: Chassis type, refer to Table 17 --- System
   Enclosure or Chassis Types for more details.
@@ -6288,30 +6286,28 @@ functioning. Feature highlights:
 \item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
+  \textbf{Failsafe}: Empty (Maintain current console mode)\\
   \textbf{Description}: Sets console output mode as specified
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
 
-  Set to an empty string to maintain current console mode. Set to \texttt{Max}
-  to attempt using the largest available console mode. This option is currently
-  ignored as the \texttt{Builtin} text renderer only supports one console mode.
+  Set to \texttt{Max} to attempt using the largest available console mode.
+  This option is currently ignored as the \texttt{Builtin} text renderer
+  only supports one console mode.
 
   \emph{Note}: This field is best left empty on most types of firmware.
 
 \item
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty\\
+  \textbf{Failsafe}: Empty (Maintain current screen resolution)\\
   \textbf{Description}: Sets console output screen resolution.
 
   \begin{itemize}
   \tightlist
   \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available.
-  \item Set to an empty string to maintain the current screen resolution.
-  \item Set to \texttt{Max} to attempt using the largest available screen resolution.
-  \end{itemize}
+  from GOP if available. Set to \texttt{Max} to attempt using the largest
+  available screen resolution.
 
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
   NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
@@ -6417,15 +6413,15 @@ functioning. Feature highlights:
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
-  \emph{Note}: This option only applies to \texttt{System} renderer.
-   On all known affected systems \texttt{ConsoleMode} had to be set to
-   an empty string for this to work.
+  \emph{Note}: This option only applies to the \texttt{System} renderer.
+   On all known affected systems, \texttt{ConsoleMode} must be set to
+   an empty string for this option to work.
 
 \item
   \texttt{UgaPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol.
+  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol instances.
 
   Some types of firmware do not implement the legacy UGA protocol but this may be required
   for screen output by older EFI applications such as EfiBoot from 10.4.
@@ -6441,7 +6437,7 @@ functioning. Feature highlights:
   \texttt{AppleAudio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple audio protocols with builtin
+  \textbf{Description}: Replaces Apple audio protocols with builtin
   versions.
 
   Apple audio protocols allow macOS bootloader and OpenCore to play
@@ -6462,7 +6458,7 @@ functioning. Feature highlights:
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
+  \textbf{Description}: Replaces Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
@@ -6473,21 +6469,21 @@ functioning. Feature highlights:
   \texttt{AppleDebugLog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Debug Log protocol with a builtin
+  \textbf{Description}: Replaces Apple Debug Log protocol with a builtin
   version.
 
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Event protocol with a builtin
+  \textbf{Description}: Replaces Apple Event protocol with a builtin
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
 
 \item
   \texttt{AppleFramebufferInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Framebuffer Info protocol with a builtin
+  \textbf{Description}: Replaces Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
   to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
 
@@ -6495,14 +6491,14 @@ functioning. Feature highlights:
   \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
+  \textbf{Description}: Replaces Apple Image Conversion protocol with a builtin
   version.
 
 \item
   \texttt{AppleImg4Verification}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple IMG4 Verification protocol with a builtin
+  \textbf{Description}: Replaces Apple IMG4 Verification protocol with a builtin
   version. This protocol is used to verify \texttt{im4m} manifest files used by
   Apple Secure Boot.
 
@@ -6510,14 +6506,14 @@ functioning. Feature highlights:
   \texttt{AppleKeyMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
+  \textbf{Description}: Replaces Apple Key Map protocols with builtin
   versions.
 
 \item
   \texttt{AppleRtcRam}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple RTC RAM protocol with builtin
+  \textbf{Description}: Replaces Apple RTC RAM protocol with a builtin
   version.
 
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
@@ -6529,14 +6525,14 @@ functioning. Feature highlights:
   \texttt{AppleSecureBoot}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Secure Boot protocol with a builtin
+  \textbf{Description}: Replaces Apple Secure Boot protocol with a builtin
   version.
 
 \item
   \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin
+  \textbf{Description}: Replaces Apple SMC I/O protocol with a builtin
   version.
 
   This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
@@ -6547,14 +6543,14 @@ functioning. Feature highlights:
   \texttt{AppleUserInterfaceTheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
+  \textbf{Description}: Replaces Apple User Interface Theme protocol with a builtin
   version.
 
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
+  \textbf{Description}: Replaces Data Hub protocol with a builtin version.
 
   \emph{Note}: This will discard all previous entries if the protocol was already
   installed, so all properties required for safe operation of the system must be
@@ -6564,7 +6560,7 @@ functioning. Feature highlights:
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Device Property protocol with a builtin
+  \textbf{Description}: Replaces Device Property protocol with a builtin
   version. This may be used to ensure full compatibility on VMs or legacy Macs.
 
   \emph{Note}: This will discard all previous entries if the protocol was already
@@ -6575,7 +6571,7 @@ functioning. Feature highlights:
   \texttt{FirmwareVolume}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
+  \textbf{Description}: Wraps Firmware Volume protocols or installs a new version
   to support custom cursor images for File Vault 2. Should be set to \texttt{true}
   to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
 
@@ -6586,9 +6582,9 @@ functioning. Feature highlights:
   \texttt{HashServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
-  versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
-  on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
+  \textbf{Description}: Replaces Hash Services protocols with builtin versions.
+  Should be set to \texttt{true} to ensure File Vault 2 compatibility on
+  platforms with flawed SHA-1 hash implementation. Can be diagnosed by invalid
   cursor size with \texttt{UIScale} set to \texttt{02}. Platforms earlier
   than APTIO V (Haswell and older) are generally affected.
 
@@ -6596,18 +6592,18 @@ functioning. Feature highlights:
   \texttt{OSInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls OS Info protocol with builtin
-  versions. This protocol is generally used by the firmware, or by other
+  \textbf{Description}: Replaces OS Info protocol with a builtin
+  version. This protocol is generally used by the firmware, or by other
   applications, to receive notifications from the macOS bootloader.
 
 \item
   \texttt{UnicodeCollation}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls unicode collation services with builtin
-  version. Should be set to \texttt{true} to ensure UEFI Shell compatibility
-  on platforms providing broken unicode collation. In general legacy Insyde and APTIO
-  platforms on Ivy Bridge and earlier are affected.
+  \textbf{Description}: Replaces unicode collation services with builtin
+  versions. Should be set to \texttt{true} to ensure UEFI Shell compatibility on
+  platforms with flawed unicode collation implementation. Legacy Insyde and APTIO
+  platforms on Ivy Bridge, and earlier, are typically affected.
 
 \end{enumerate}
 
@@ -7234,7 +7230,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{MacRumors.com}.
 
 \item
-  \textbf{Why do Find\&Replace patches must equal in length?}
+  \textbf{Why must Find\&Replace patches be equal in size?}
 
   For machine code (x86 code) it is not possible to do differently sized replacements due to
   \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.
