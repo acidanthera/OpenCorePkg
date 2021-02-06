@@ -1531,7 +1531,7 @@ BuildFileSystemList (
   EFI_HANDLE       *Handles;
   UINTN            Index;
 
-  BootContext = AllocatePool (sizeof (*Context));
+  BootContext = AllocatePool (sizeof (*BootContext));
   if (BootContext == NULL) {
     return NULL;
   }
