@@ -14,6 +14,15 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "AWAC", 0x00000000)
 
     Scope (_SB)
     {
+       /* 
+        * Uncomment if your ACPI have method _INI an AWAC device.
+        */
+       /*
+        If (_OSI ("Darwin"))
+        {
+            STAS = One
+        }
+        */
         Method (_INI, 0, NotSerialized)  // _INI: Initialize
         {
             If (_OSI ("Darwin"))
