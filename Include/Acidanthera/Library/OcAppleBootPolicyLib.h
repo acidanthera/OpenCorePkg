@@ -48,7 +48,7 @@ OcGetBooterFromPredefinedPathList (
   EFI_FILE_PROTOCOL.GetInfo(). The related identifier definitions are to be
   found in AppleBless.h.
 
-  @param[in]  Device              Thed device's Handle to perform the search on.
+  @param[in]  Device              The device's Handle to perform the search on.
   @param[in]  PredefinedPaths     An array of file paths to scan for if no file
                                   was blessed.
   @param[in]  NumPredefinedPaths  The number of paths in PredefinedPaths.
@@ -76,7 +76,7 @@ OcBootPolicyGetBootFile (
   Please refer to OcBootPolicyGetBootFile. This function extends the
   functionality by supporting the APFS Preboot scheme.
 
-  @param[in]  Device              Thed device's Handle to perform the search on.
+  @param[in]  Device              The device's Handle to perform the search on.
   @param[in]  PredefinedPaths     An array of file paths to scan for if no file
                                   was blessed.
   @param[in]  NumPredefinedPaths  The number of paths in PredefinedPaths.
