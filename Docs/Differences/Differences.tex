@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Feb 11 16:16:08 2021
-%DIF ADD ../Configuration.tex        Thu Feb 11 16:19:44 2021
+%DIF DEL PreviousConfiguration.tex   Fri Feb 12 00:56:51 2021
+%DIF ADD ../Configuration.tex        Fri Feb 12 00:56:51 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6396,12 +6396,11 @@ functioning. Feature highlights:
   \tightlist
   \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
-  from GOP if available. \DIFdelbegin %DIFDELCMD < \item %%%
-\item %DIFAUXCMD
-\DIFdel{Set to empty string not to change screen resolution.
+  from GOP if available.
+  \item Set to \DIFdelbegin \DIFdel{empty string not to change screen resolution.
   }%DIFDELCMD < \item %%%
 \item %DIFAUXCMD
-\DIFdel{Set to }\DIFdelend \DIFaddbegin \DIFadd{Set to }\DIFaddend \texttt{Max} to \DIFdelbegin \DIFdel{try to use }\DIFdelend \DIFaddbegin \DIFadd{attempt using the }\DIFaddend largest
+\DIFdel{Set to }\DIFdelend \texttt{Max} to \DIFdelbegin \DIFdel{try to use }\DIFdelend \DIFaddbegin \DIFadd{attempt using the }\DIFaddend largest
   available screen resolution.
   \end{itemize}
 
