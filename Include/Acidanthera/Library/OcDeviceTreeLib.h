@@ -125,7 +125,7 @@ DTLookupEntry (
 /**
   An Entry Iterator maintains three variables that are of interest to clients.
   First is an "OutermostScope" which defines the outer boundry of the iteration.
-  This is defined by the starting entry and includes that entry plus all of it's
+  This is defined by the starting entry and includes that entry plus all of its
   embedded entries. Second is a "currentScope" which is the entry the iterator is
   currently in. And third is a "currentPosition" which is the last entry returned
   during an iteration.
@@ -165,7 +165,7 @@ DTEnterEntry (
 
 /**
   Exit to Parent Entry
-  Move an Entry Iterator out of the current entry back into the scope of it's parent
+  Move an Entry Iterator out of the current entry back into the scope of its parent
   entry. The currentPosition of the iterator is reset to the current entry (the
   previous currentScope), so the next iteration call will continue where it left off.
   This position is returned in parameter "currentPosition".
