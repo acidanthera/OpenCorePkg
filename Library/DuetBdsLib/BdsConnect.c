@@ -219,7 +219,7 @@ BdsLibConnectDevicePath (
   If the handle is bus type handler, all childrens also will be connected recursively
   by gBS->ConnectController().
 
-  @retval EFI_SUCCESS           All handles and it's child handle have been connected
+  @retval EFI_SUCCESS           All handles and their child handles have been connected
   @retval EFI_STATUS            Error status returned by of gBS->LocateHandleBuffer().
 
 **/

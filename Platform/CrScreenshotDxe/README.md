@@ -21,7 +21,7 @@ It's a normal EDK2-compatible DXE driver, just add it to your package's DSC file
 ## Usage
 Load the driver, insert FAT32-formatted USB drive and press F10 to take screenshots from primary graphic console available at the moment. 
 
-To indicate it's status, the driver shows a small colored rectangle in top-left corner of the screen for half a second.
+To indicate its status, the driver shows a small colored rectangle in top-left corner of the screen for half a second.
 
 Rectangle color codes:
 - Yellow - no writable FS found, screenshot is not taken

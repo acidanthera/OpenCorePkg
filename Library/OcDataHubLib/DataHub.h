@@ -85,7 +85,7 @@ typedef struct {
 #define DATA_ENTRY_FROM_LINK(link)  CR (link, EFI_DATA_ENTRY, Link, EFI_DATA_ENTRY_SIGNATURE)
 
 //
-// Private data to contain the filter driver Event and it's
+// Private data to contain the filter driver Event and its
 //  associated EFI_TPL.
 //
 #define EFI_DATA_HUB_FILTER_DRIVER_SIGNATURE  SIGNATURE_32 ('D', 'h', 'F', 'd')

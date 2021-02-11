@@ -174,7 +174,7 @@ MultThenDivU64x64x32 (
   bit of PcdDebugProperyMask is set, then this macro evaluates the integer
   expression specified by Expression.  If the value of Expression differs from ExpectedValue, then
   DebugPrint() is called passing in the source filename, source line number,
-  Expression, it's value and ExpectedValue; then ASSERT(FALSE) is called to
+  Expression, its value and ExpectedValue; then ASSERT(FALSE) is called to
   cause a breakpoint, deadloop or no-op depending on PcdDebugProperyMask.
 
   @param  Expression  Integer expression (should be convertible to INTN).

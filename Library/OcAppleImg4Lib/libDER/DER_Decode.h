@@ -69,7 +69,7 @@ DERReturn DERParseBitString(
 
 /* 
  * Given a BOOLEAN, in the form of its raw content bytes, 
- * obtain it's value.
+ * obtain its value.
  */
 DERReturn DERParseBoolean(
 	const DERItem	*contents,
