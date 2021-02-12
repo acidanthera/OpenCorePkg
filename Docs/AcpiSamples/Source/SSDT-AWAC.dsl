@@ -12,17 +12,8 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "AWAC", 0x00000000)
 {
     External (STAS, IntObj)
 
-    Scope (_SB)
+    Scope (\)
     {
-       /* 
-        * Uncomment if your ACPI has method _INI an AWAC device.
-        */
-       /*
-        If (_OSI ("Darwin"))
-        {
-            STAS = One
-        }
-        */
         Method (_INI, 0, NotSerialized)  // _INI: Initialize
         {
             If (_OSI ("Darwin"))
