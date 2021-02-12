@@ -3092,16 +3092,33 @@ entry choice will update till next manual reconfiguration.
       \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
 
-    For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    For all other entries OpenCore will try to load a volume icon by searching
+    as follows, and will fallback to the default icon otherwise:
     \begin{itemize}
     \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume directory for APFS (if present).
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS (otherwise).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume in per-volume directory
+       (\texttt{/System/Volumes/Preboot/\{GUID\}/} when mounted at default location within
+       macOS) for APFS (if present).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root
+      (\texttt{/System/Volumes/Preboot/} when mounted at default location within macOS)
+      for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
+    
+    \emph{Note 1}: Apple's boot picker partially supports placing a volume icon file
+    at the operating system's \texttt{Data} volume root (\texttt{/System/Volumes/Data/} when
+    mounted at default location within macOS). This approach is broken: that file is not
+    accessible either by OpenCanopy or by Apple's own boot picker when FaultVault 2 is
+    enabled, which should be most people's default choice. Therefore OpenCanopy does not
+    try to support it. You may place a volume icon file at \texttt{Preboot} root for
+    compatibility with both the Apple and OpenCanopy boot pickers, or use the \texttt{Preboot}
+    per-volume location as above with OpenCanopy as a preferred alternative to Apple's
+    existing approach. \medskip
 
-    Volume icons can be set in Finder. Note, that enabling this may result in
-    external and internal icons to be indistinguishable.
+    \emph{Note 2}: Be aware that using a volume icon on any drive overrides the normal
+    boot picker behaviour for that drive of selecting the appropriate icon depending on
+    whether the drive is internal or external. \medskip
+
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
