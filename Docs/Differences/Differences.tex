@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Feb 12 00:56:51 2021
-%DIF ADD ../Configuration.tex        Fri Feb 12 00:56:51 2021
+%DIF DEL PreviousConfiguration.tex   Wed Feb  3 11:12:00 2021
+%DIF ADD ../Configuration.tex        Fri Feb 12 10:24:39 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3179,17 +3179,35 @@ entry choice will update till next manual reconfiguration.
       \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
 
-    For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    For all other entries OpenCore will try to load a volume icon \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{by searching
+    as follows, and will }\DIFaddend fallback to the default icon \DIFaddbegin \DIFadd{otherwise}\DIFaddend :
     \begin{itemize}
     \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume directory for APFS (if present).
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS (otherwise).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume \DIFdelbegin \DIFdel{directory }\DIFdelend \DIFaddbegin \DIFadd{in per-volume directory
+       (}\texttt{\DIFadd{/System/Volumes/Preboot/\{GUID\}/}} \DIFadd{when mounted at default location within
+       macOS) }\DIFaddend for APFS (if present).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root
+      \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{/System/Volumes/Preboot/}} \DIFadd{when mounted at default location within macOS)
+      }\DIFaddend for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
 
-    Volume icons can be set in Finder. Note, that enabling this may result in
-    external and internal icons to be indistinguishable.
-  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+    \DIFdelbegin \DIFdel{Volume icons can be set in Finder. Note, that enabling this may result in
+    external and internal icons to be indistinguishable. }\DIFdelend \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: Apple's boot picker partially supports placing a volume icon file
+    at the operating system's }\texttt{\DIFadd{Data}} \DIFadd{volume root (}\texttt{\DIFadd{/System/Volumes/Data/}} \DIFadd{when
+    mounted at default location within macOS). This approach is broken: that file is not
+    accessible either by OpenCanopy or by Apple's own boot picker when FaultVault 2 is
+    enabled, which should be most people's default choice. Therefore OpenCanopy does not
+    try to support it. You may place a volume icon file at }\texttt{\DIFadd{Preboot}} \DIFadd{root for
+    compatibility with both the Apple and OpenCanopy boot pickers, or use the }\texttt{\DIFadd{Preboot}}
+    \DIFadd{per-volume location as above with OpenCanopy as a preferred alternative to Apple's
+    existing approach. }\medskip
+
+    \emph{\DIFadd{Note 2}}\DIFadd{: Be aware that using a volume icon on any drive overrides the normal
+    boot picker behaviour for that drive of selecting the appropriate icon depending on
+    whether the drive is internal or external. }\medskip
+
+  \DIFaddend \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
     \tightlist
