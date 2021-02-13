@@ -31,10 +31,11 @@ typedef union OC_SCHEMA_INFO_ OC_SCHEMA_INFO;
 typedef
 VOID
 (*OC_APPLY) (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //
@@ -165,10 +166,11 @@ LookupConfigSchema (
 //
 VOID
 ParseSerializedDict (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //
@@ -176,10 +178,11 @@ ParseSerializedDict (
 //
 VOID
 ParseSerializedValue (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //
@@ -187,21 +190,11 @@ ParseSerializedValue (
 //
 VOID
 ParseSerializedBlob (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
-  );
-
-//
-// Apply interface to parse serialized array
-//
-VOID
-ParseSerializedArray (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //
@@ -210,10 +203,23 @@ ParseSerializedArray (
 //
 VOID
 ParseSerializedMap (
-  OUT VOID            *Serialized,
-  IN  XML_NODE        *Node,
-  IN  OC_SCHEMA_INFO  *Info,
-  IN  CONST CHAR8     *Context  OPTIONAL
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
+  );
+
+//
+// Apply interface to parse serialized array
+//
+VOID
+ParseSerializedArray (
+      OUT  VOID            *Serialized,
+  IN       XML_NODE        *Node,
+  IN       OC_SCHEMA_INFO  *Info,
+  IN       CONST CHAR8     *Context     OPTIONAL,
+  IN  OUT  UINT32          *ErrorCount  OPTIONAL
   );
 
 //
@@ -222,10 +228,11 @@ ParseSerializedMap (
 //
 BOOLEAN
 ParseSerialized (
-  OUT VOID                *Serialized,
-  IN  OC_SCHEMA_INFO      *RootSchema,
-  IN  VOID                *PlistBuffer,
-  IN  UINT32              PlistSize
+      OUT  VOID                *Serialized,
+  IN       OC_SCHEMA_INFO      *RootSchema,
+  IN       VOID                *PlistBuffer,
+  IN       UINT32              PlistSize,
+  IN  OUT  UINT32              *ErrorCount  OPTIONAL
   );
 
 //

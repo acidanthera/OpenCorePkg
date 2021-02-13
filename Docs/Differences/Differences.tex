@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Feb  2 21:33:12 2021
-%DIF ADD ../Configuration.tex        Tue Feb  2 21:35:18 2021
+%DIF DEL PreviousConfiguration.tex   Wed Feb  3 11:12:00 2021
+%DIF ADD ../Configuration.tex        Fri Feb 12 10:24:39 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -941,7 +941,7 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -956,7 +956,7 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: File paths meant to be loaded as ACPI tables.
   Example values include \texttt{DSDT.aml}, \texttt{SubDir/SSDT-8.aml},
   \texttt{SSDT-USBX.aml}, etc.
@@ -983,7 +983,7 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1029,7 +1029,7 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1051,24 +1051,27 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
-  \textbf{Description}: Data to find. Must equal to \texttt{Replace} in size.
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
+  \textbf{Description}: Data to find. Must \DIFaddbegin \DIFadd{be }\DIFaddend equal to \texttt{Replace} in size.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole ACPI table.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Search entire ACPI table)}\DIFaddend \\
+  \textbf{Description}: Maximum number of bytes to search for.
+\DIFdelbegin \DIFdel{Can be set to
+  }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{to look through the whole ACPI table.
+}\DIFdelend 
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{OemTableId}\\
@@ -1080,17 +1083,17 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Skip}\\
@@ -1140,7 +1143,7 @@ In the majority of the cases ACPI patches are not useful and harmful:
   newer systems. Please switch to built-in brightness key discovery of
   \href{https://github.com/acidanthera/BrightnessKeys}{BrightnessKeys} instead.
 \item
-  Try to avoid hacky changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
+  \DIFdelbegin \DIFdel{Try to avoid hacky }\DIFdelend \DIFaddbegin \DIFadd{Avoid making ad hoc }\DIFaddend changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
@@ -1358,7 +1361,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1383,7 +1386,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -1405,47 +1408,51 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
-  \textbf{Description}: Data to find. This must equal to \texttt{Replace} in size.
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
+  \textbf{Description}: Data to find. \DIFdelbegin \DIFdel{This must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size.
 
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}:  \DIFdelbegin \DIFdel{Empty string}\DIFdelend \DIFaddbegin \texttt{\DIFadd{Any}} \DIFadd{(Match any booter)}\DIFaddend \\
   \textbf{Description}: \texttt{Apple} for macOS booter (generally \texttt{boot.efi});
-  or a name with suffix (e.g. \texttt{bootmgfw.efi}) for a specific booter;
-  or \texttt{Any} / empty string (failsafe) to match any booter.
+  or a name with \DIFdelbegin \DIFdel{suffix (e.g. }\DIFdelend \DIFaddbegin \DIFadd{a suffix, such as }\DIFaddend \texttt{bootmgfw.efi}\DIFdelbegin \DIFdel{) }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend for a specific booter\DIFdelbegin \DIFdel{;
+  or }\texttt{\DIFdel{Any}} %DIFAUXCMD
+\DIFdel{/ empty string (failsafe) to match any booter}\DIFdelend .
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole booter.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Search the entire booter)}\DIFaddend \\
+  \textbf{Description}: Maximum number of bytes to search for.
+\DIFdelbegin \DIFdel{Can be set to
+  }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{to look through the whole booter.
+}\DIFdelend 
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Find} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Find} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Skip}\\
@@ -1487,8 +1494,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   \emph{Note}: While this quirk is required to run older macOS versions
   on platforms with used lower memory it is not compatible with some
-  hardware and macOS 11. In this case one may try to use
-  \texttt{EnableSafeModeSlide} instead.
+  hardware and macOS 11. In \DIFdelbegin \DIFdel{this case one may try to use
+  }\DIFdelend \DIFaddbegin \DIFadd{such cases, consider using
+  }\DIFaddend \texttt{EnableSafeModeSlide} instead.
 
 \item
   \texttt{AvoidRuntimeDefrag}\\
@@ -1988,14 +1996,14 @@ blocking.
 \item
   \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext bundle path (e.g. \texttt{Lilu.kext}
   or \texttt{MyKext.kext/Contents/PlugIns/MySubKext.kext}).
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -2010,14 +2018,14 @@ blocking.
 \item
   \texttt{ExecutablePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext executable path relative to bundle
   (e.g. \texttt{Contents/MacOS/Lilu}).
 
 \item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or older.
 
   \hypertarget{kernmatch}Kernel version can be obtained with \texttt{uname -r} command,
@@ -2060,7 +2068,7 @@ blocking.
 \item
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2068,7 +2076,7 @@ blocking.
 \item
   \texttt{PlistPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
   (e.g. \texttt{Contents/Info.plist}).
 
@@ -2086,7 +2094,7 @@ blocking.
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -2101,14 +2109,14 @@ blocking.
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext bundle identifier
     (e.g. \texttt{com.apple.driver.AppleTyMCEDriver}).
 
 \item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Blocks kernel driver on specified macOS version or older.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2116,7 +2124,7 @@ blocking.
 \item
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2202,7 +2210,7 @@ blocking.
 \item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Emulates CPUID and applies \texttt{DummyPowerManagement} on specified macOS version or older.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2210,7 +2218,7 @@ blocking.
 \item
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Emulates CPUID and applies \texttt{DummyPowerManagement} on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2229,14 +2237,14 @@ blocking.
 \item
   \texttt{BundlePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext bundle path (e.g.
   \texttt{System\textbackslash Library \textbackslash Extensions \textbackslash IONetworkingFamily.kext}).
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -2251,14 +2259,14 @@ blocking.
 \item
   \texttt{ExecutablePath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext executable path relative to bundle
   (e.g. \texttt{Contents/MacOS/IONetworkingFamily}).
 
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext identifier to perform presence checking
   before adding (e.g. \texttt{com.apple.iokit.IONetworkingFamily}).
   Only drivers which identifiers are not be found in the cache will be added.
@@ -2266,7 +2274,7 @@ blocking.
 \item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or older.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
@@ -2274,7 +2282,7 @@ blocking.
 \item
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
@@ -2282,7 +2290,7 @@ blocking.
 \item
   \texttt{PlistPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext \texttt{Info.plist} path relative to bundle
   (e.g. \texttt{Contents/Info.plist}).
 
@@ -2301,15 +2309,17 @@ blocking.
 \item
   \texttt{Base}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
-  replacement) by obtaining the address of provided symbol name. Can be set to
+  replacement) by obtaining the address of provided symbol name.
+\DIFdelbegin \DIFdel{Can be set to
   empty string to be ignored.
+}\DIFdelend 
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -2331,38 +2341,42 @@ blocking.
 \item
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
-  \textbf{Description}: Data to find. Can be set to empty for immediate
-  replacement at \texttt{Base}. Must equal to \texttt{Replace} in size
-  otherwise.
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Immediate replacement at }\texttt{\DIFadd{Base}}\DIFadd{)}\DIFaddend \\
+  \textbf{Description}: Data to find. \DIFdelbegin \DIFdel{Can be set to empty for immediate
+  replacement at }\texttt{\DIFdel{Base}}%DIFAUXCMD
+\DIFdel{. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace}
+  in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Kext bundle identifier (e.g. \texttt{com.apple.driver.AppleHDA})
   or \texttt{kernel} for kernel patch.
 
 \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Maximum number of bytes to search for. Can be set to
-  \texttt{0} to look through the whole kext or kernel.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Search entire kext or kernel)}\DIFaddend \\
+  \textbf{Description}: Maximum number of bytes to search for.
+\DIFdelbegin \DIFdel{Can be set to
+  }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{to look through the whole kext or kernel.
+}\DIFdelend 
 
 \item
   \texttt{Mask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during find comparison.
-  Allows fuzzy search by ignoring not masked (set to zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy search by ignoring not masked (set to zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Patches data on specified macOS version or older.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2370,7 +2384,7 @@ blocking.
 \item
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Patches data on specified macOS version or newer.
 
   \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
@@ -2378,17 +2392,17 @@ blocking.
 \item
   \texttt{Replace}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
   \textbf{Description}: Replacement data of one or more bytes.
 
 \item
   \texttt{ReplaceMask}\\
   \textbf{Type}: \texttt{plist\ data}\\
-  \textbf{Failsafe}: Empty data\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Data bitwise mask used during replacement.
-  Allows fuzzy replacement by updating masked (set to non-zero) bits. Can be
-  set to empty data to be ignored. Must equal to \texttt{Replace} in size
-  otherwise.
+  Allows fuzzy replacement by updating masked (set to non-zero) bits.
+  \DIFdelbegin \DIFdel{Can be
+  set to empty data to be ignored. Must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFdelbegin \DIFdel{otherwise}\DIFdelend \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Skip}\\
@@ -2643,8 +2657,9 @@ blocking.
 
   One way to workaround the problem is to increase the timeout to a very
   high value, which at the cost of slow boot times (extra minutes)
-  will ensure that all the blocks are trimmed. For this one can set
-  this option to a high value, e.g. \texttt{4294967295}.
+  will ensure that all the blocks are trimmed. \DIFdelbegin \DIFdel{For this one can set
+  this }\DIFdelend \DIFaddbegin \DIFadd{Set this }\DIFaddend option to a high value,
+  \DIFdelbegin \DIFdel{e.g. }\DIFdelend \DIFaddbegin \DIFadd{such as }\DIFaddend \texttt{4294967295}\DIFaddbegin \DIFadd{, to ensure all the blocks are trimmed}\DIFaddend .
 
   Another way is to utilise over-provisioning if it is supported or create
   a dedicated unmapped partition where the reserve blocks can be found
@@ -3164,17 +3179,35 @@ entry choice will update till next manual reconfiguration.
       \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
     \end{itemize} \medskip
 
-    For all other entries OpenCore will try to load a volume icon and fallback to the default icon:
+    For all other entries OpenCore will try to load a volume icon \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{by searching
+    as follows, and will }\DIFaddend fallback to the default icon \DIFaddbegin \DIFadd{otherwise}\DIFaddend :
     \begin{itemize}
     \tightlist
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume directory for APFS (if present).
-      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root for APFS (otherwise).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} volume \DIFdelbegin \DIFdel{directory }\DIFdelend \DIFaddbegin \DIFadd{in per-volume directory
+       (}\texttt{\DIFadd{/System/Volumes/Preboot/\{GUID\}/}} \DIFadd{when mounted at default location within
+       macOS) }\DIFaddend for APFS (if present).
+      \item \texttt{.VolumeIcon.icns} file at \texttt{Preboot} root
+      \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{/System/Volumes/Preboot/}} \DIFadd{when mounted at default location within macOS)
+      }\DIFaddend for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
 
-    Volume icons can be set in Finder. Note, that enabling this may result in
-    external and internal icons to be indistinguishable.
-  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
+    \DIFdelbegin \DIFdel{Volume icons can be set in Finder. Note, that enabling this may result in
+    external and internal icons to be indistinguishable. }\DIFdelend \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: Apple's boot picker partially supports placing a volume icon file
+    at the operating system's }\texttt{\DIFadd{Data}} \DIFadd{volume root (}\texttt{\DIFadd{/System/Volumes/Data/}} \DIFadd{when
+    mounted at default location within macOS). This approach is broken: that file is not
+    accessible either by OpenCanopy or by Apple's own boot picker when FaultVault 2 is
+    enabled, which should be most people's default choice. Therefore OpenCanopy does not
+    try to support it. You may place a volume icon file at }\texttt{\DIFadd{Preboot}} \DIFadd{root for
+    compatibility with both the Apple and OpenCanopy boot pickers, or use the }\texttt{\DIFadd{Preboot}}
+    \DIFadd{per-volume location as above with OpenCanopy as a preferred alternative to Apple's
+    existing approach. }\medskip
+
+    \emph{\DIFadd{Note 2}}\DIFadd{: Be aware that using a volume icon on any drive overrides the normal
+    boot picker behaviour for that drive of selecting the appropriate icon depending on
+    whether the drive is internal or external. }\medskip
+
+  \DIFaddend \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
     rendered titles for boot entries:
     \begin{itemize}
     \tightlist
@@ -4028,7 +4061,7 @@ rm vault.pub
 \item
   \texttt{Arguments}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used as boot arguments (load options)
   of the specified entry.
 
@@ -4042,7 +4075,7 @@ rm vault.pub
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -4057,13 +4090,13 @@ rm vault.pub
 \item
   \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Human readable entry name displayed in boot picker.
 
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Entry location depending on entry type.
 
   \begin{itemize}
@@ -4626,7 +4659,15 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Update Data Hub fields. These fields are read
   from \texttt{Generic} or \texttt{DataHub} sections depending on
   \texttt{Automatic} value.
-\item
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: The implementation of the Data Hub protocol in EFI firmware on
+  essentially all systems, including Apple hardware, means that existing Data Hub
+  entries cannot be overridden, while new entries are added to the end with
+  macOS ignoring them. You can work around this by reinstalling the Data Hub
+  protocol using the }\texttt{\DIFadd{ProtocolOverrides}} \DIFadd{section. Refer to the }\texttt{\DIFadd{DataHub}}
+  \DIFadd{protocol override description for details.
+}\DIFaddend \item
   \texttt{UpdateNVRAM}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -4830,27 +4871,27 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified or not installed\\
+  \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemProductName}.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified or not installed\\
+  \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: OEM specified or not installed\\
+  \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified or not installed\\
+  \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: OEM specified or not installed\\
+  \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
@@ -4862,35 +4903,35 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{PlatformName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{name} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is
   \texttt{platform} in ASCII.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{Model} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemProductName} in Unicode.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{SystemSerialNumber} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemSerialNumber} in Unicode.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{system-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{SystemUUID} (with swapped byte order).
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{board-id} in
   \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
   \texttt{BoardProduct} in ASCII.
@@ -4994,7 +5035,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{DevicePathsSupported}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{DevicePathsSupported} in
   \texttt{gEfiMiscSubClassGuid}. Must be set to \texttt{1} for
   AppleACPIPlatform.kext to append SATA device paths to
@@ -5003,7 +5044,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{REV} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{REV}
@@ -5011,7 +5052,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcBranch}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{RBr} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RBr}
@@ -5019,7 +5060,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SmcPlatform}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{RPlt} in
   \texttt{gEfiMiscSubClassGuid}. Custom property read by
   \texttt{VirtualSMC} or \texttt{FakeSMC} to generate SMC \texttt{RPlt}
@@ -5249,14 +5290,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{BID}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the value of NVRAM variable
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_BID}.
 
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_ROM} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
@@ -5264,7 +5305,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the values of NVRAM variables
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_MLB} and
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:MLB}.
@@ -5272,7 +5313,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeaturesMask}.
   Specifies the values of NVRAM variables:
   \begin{itemize}
@@ -5284,7 +5325,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{FirmwareFeaturesMask}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: This variable comes in pair with \texttt{FirmwareFeatures}.
   Specifies the values of NVRAM variables:
   \begin{itemize}
@@ -5296,7 +5337,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Not installed\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the value of NVRAM variable
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:system-id}
   for boot services only. Value found on Macs is equal to SMBIOS
@@ -5310,14 +5351,14 @@ be used. Version with macOS specific enhancements can be downloaded from
 \item
   \texttt{BIOSVendor}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- Vendor\\
   \textbf{Description}: BIOS Vendor. All rules of
   \texttt{SystemManufacturer} do apply.
 \item
   \texttt{BIOSVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Version\\
   \textbf{Description}: Firmware version. This value gets updated and
   takes part in update delivery configuration and macOS version
@@ -5347,14 +5388,14 @@ Apple ROM Version
 \item
   \texttt{BIOSReleaseDate}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: BIOS Information (Type 0) --- BIOS Release Date\\
   \textbf{Description}: Firmware release date. Similar to
   \texttt{BIOSVersion}. May look like \texttt{12/08/2017}.
 \item
   \texttt{SystemManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- Manufacturer\\
   \textbf{Description}: OEM manufacturer of the particular board. Shall
   not be specified unless strictly required. Should \emph{not} contain
@@ -5366,7 +5407,7 @@ Apple ROM Version
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1), Product Name\\
   \textbf{Description}: Preferred Mac model used to mark the device as
   supported by the operating system. This value must be specified by any
@@ -5383,14 +5424,14 @@ Apple ROM Version
 \item
   \texttt{SystemVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- Version\\
   \textbf{Description}: Product iteration version number. May look like
   \texttt{1.1}.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- Serial Number\\
   \textbf{Description}: Product serial number in defined format. Known
   formats are described in
@@ -5398,7 +5439,7 @@ Apple ROM Version
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- UUID\\
   \textbf{Description}: A UUID is an identifier that is designed to be
   unique across both time and space. It requires no central registration
@@ -5406,7 +5447,7 @@ Apple ROM Version
 \item
   \texttt{SystemSKUNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- SKU Number\\
   \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
   \texttt{Mac-7BA5B2D9E42DDD94} or \texttt{Mac-F221BEC8} in older
@@ -5414,13 +5455,13 @@ Apple ROM Version
 \item
   \texttt{SystemFamily}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- Family\\
   \textbf{Description}: Family name. May look like \texttt{iMac\ Pro}.
 \item
   \texttt{BoardManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Manufacturer\\
   \textbf{Description}: Board manufacturer. All rules of
@@ -5428,7 +5469,7 @@ Apple ROM Version
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Product\\
   \textbf{Description}: Mac Board ID (\texttt{board-id}). May look like
@@ -5437,7 +5478,7 @@ Apple ROM Version
 \item
   \texttt{BoardVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) -
   Version\\
   \textbf{Description}: Board version number. Varies, may match
@@ -5445,7 +5486,7 @@ Apple ROM Version
 \item
   \texttt{BoardSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Serial
   Number\\
   \textbf{Description}: Board serial number in defined format. Known
@@ -5454,7 +5495,7 @@ Apple ROM Version
 \item
   \texttt{BoardAssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Asset
   Tag\\
   \textbf{Description}: Asset tag number. Varies, may be empty or
@@ -5462,7 +5503,7 @@ Apple ROM Version
 \item
   \texttt{BoardType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
   Type\\
   \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
@@ -5471,7 +5512,7 @@ Apple ROM Version
 \item
   \texttt{BoardLocationInChassis}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Location
   in Chassis\\
   \textbf{Description}: Varies, may be empty or
@@ -5479,33 +5520,33 @@ Apple ROM Version
 \item
   \texttt{ChassisManufacturer}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Manufacturer\\
   \textbf{Description}: Board manufacturer. All rules of
   \texttt{SystemManufacturer} do apply.
 \item
   \texttt{ChassisType}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \texttt{\DIFadd{0}} \DIFadd{(OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
   \textbf{Description}: Chassis type, refer to Table 17 --- System
   Enclosure or Chassis Types for more details.
 \item
   \texttt{ChassisVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
   \textbf{Description}: Should match \texttt{BoardProduct}.
 \item
   \texttt{ChassisSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Version\\
   \textbf{Description}: Should match \texttt{SystemSerialNumber}.
 \item
   \texttt{ChassisAssetTag}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: OEM specified\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Asset Tag
   Number\\
   \textbf{Description}: Chassis type name. Varies, could be empty or
@@ -6051,7 +6092,7 @@ functioning. Feature highlights:
 \item
   \texttt{AudioDevice}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \DIFadd{Empty}\DIFaddend \\
   \textbf{Description}: Device path of the specified audio controller for audio support.
 
   Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
@@ -6261,7 +6302,7 @@ functioning. Feature highlights:
 \item
   \texttt{PointerSupportMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: empty string\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{empty string}\DIFdelend \DIFaddbegin \DIFadd{Empty}\DIFaddend \\
   \textbf{Description}: Set OEM protocol used for internal pointer driver.
 
   Currently the only supported variant is \texttt{ASUS}, using specialised protocol available
@@ -6351,21 +6392,22 @@ functioning. Feature highlights:
 \item
   \texttt{ConsoleMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{(Maintain current console mode)}\DIFaddend \\
   \textbf{Description}: Sets console output mode as specified
   with the \texttt{WxH} (e.g. \texttt{80x24}) formatted string.
 
-  Set to empty string not to change console mode. Set to \texttt{Max}
-  to try to use largest available console mode. Currently
-  \texttt{Builtin} text renderer supports only one console mode, so
-  this option is ignored.
+  Set to \DIFdelbegin \DIFdel{empty string not to change console mode. Set to }\DIFdelend \texttt{Max} to \DIFdelbegin \DIFdel{try to use }\DIFdelend \DIFaddbegin \DIFadd{attempt using the }\DIFaddend largest available console mode.
+  \DIFdelbegin \DIFdel{Currently
+  }\DIFdelend \DIFaddbegin \DIFadd{This option is currently ignored as the }\DIFaddend \texttt{Builtin} text renderer
+  \DIFdelbegin \DIFdel{supports only }\DIFdelend \DIFaddbegin \DIFadd{only supports }\DIFaddend one console mode\DIFdelbegin \DIFdel{, so
+  this option is ignored}\DIFdelend .
 
   \emph{Note}: This field is best left empty on most types of firmware.
 
 \item
   \texttt{Resolution}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{(Maintain current screen resolution)}\DIFaddend \\
   \textbf{Description}: Sets console output screen resolution.
 
   \begin{itemize}
@@ -6373,8 +6415,11 @@ functioning. Feature highlights:
   \item Set to \texttt{WxH@Bpp} (e.g. \texttt{1920x1080@32}) or \texttt{WxH}
   (e.g. \texttt{1920x1080}) formatted string to request custom resolution
   from GOP if available.
-  \item Set to empty string not to change screen resolution.
-  \item Set to \texttt{Max} to try to use largest available screen resolution.
+  \item Set to \DIFdelbegin \DIFdel{empty string not to change screen resolution.
+  }%DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\DIFdel{Set to }\DIFdelend \texttt{Max} to \DIFdelbegin \DIFdel{try to use }\DIFdelend \DIFaddbegin \DIFadd{attempt using the }\DIFaddend largest
+  available screen resolution.
   \end{itemize}
 
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
@@ -6481,15 +6526,15 @@ functioning. Feature highlights:
   when large display (e.g. 2K or 4K) is used. This option attempts to apply
   a workaround.
 
-  \emph{Note}: This option only applies to \texttt{System} renderer.
-   On all known affected systems \texttt{ConsoleMode} had to be set to
-   empty string for this to work.
+  \emph{Note}: This option only applies to \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{System} renderer.
+   On all known affected systems\DIFaddbegin \DIFadd{, }\DIFaddend \texttt{ConsoleMode} \DIFdelbegin \DIFdel{had to }\DIFdelend \DIFaddbegin \DIFadd{must }\DIFaddend be set to
+   \DIFaddbegin \DIFadd{an }\DIFaddend empty string for this \DIFaddbegin \DIFadd{option }\DIFaddend to work.
 
 \item
   \texttt{UgaPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol.
+  \textbf{Description}: Provide UGA protocol instances on top of GOP protocol \DIFaddbegin \DIFadd{instances}\DIFaddend .
 
   Some types of firmware do not implement the legacy UGA protocol but this may be required
   for screen output by older EFI applications such as EfiBoot from 10.4.
@@ -6505,7 +6550,7 @@ functioning. Feature highlights:
   \texttt{AppleAudio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple audio protocols with builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple audio protocols with builtin
   versions.
 
   Apple audio protocols allow macOS bootloader and OpenCore to play
@@ -6526,7 +6571,7 @@ functioning. Feature highlights:
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Boot Policy protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
@@ -6537,21 +6582,21 @@ functioning. Feature highlights:
   \texttt{AppleDebugLog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Debug Log protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Debug Log protocol with a builtin
   version.
 
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Event protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Event protocol with a builtin
   version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
 
 \item
   \texttt{AppleFramebufferInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Framebuffer Info protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
   to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
 
@@ -6559,14 +6604,14 @@ functioning. Feature highlights:
   \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Image Conversion protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Image Conversion protocol with a builtin
   version.
 
 \item
   \texttt{AppleImg4Verification}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple IMG4 Verification protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple IMG4 Verification protocol with a builtin
   version. This protocol is used to verify \texttt{im4m} manifest files used by
   Apple Secure Boot.
 
@@ -6574,14 +6619,14 @@ functioning. Feature highlights:
   \texttt{AppleKeyMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Key Map protocols with builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Key Map protocols with builtin
   versions.
 
 \item
   \texttt{AppleRtcRam}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple RTC RAM protocol with builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple RTC RAM protocol with \DIFaddbegin \DIFadd{a }\DIFaddend builtin
   version.
 
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
@@ -6593,14 +6638,14 @@ functioning. Feature highlights:
   \texttt{AppleSecureBoot}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple Secure Boot protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Secure Boot protocol with a builtin
   version.
 
 \item
   \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple SMC I/O protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple SMC I/O protocol with a builtin
   version.
 
   This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
@@ -6611,30 +6656,40 @@ functioning. Feature highlights:
   \texttt{AppleUserInterfaceTheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Apple User Interface Theme protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple User Interface Theme protocol with a builtin
   version.
 
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Data Hub protocol with a builtin version.
-  This will delete all previous properties if the protocol was already installed.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Data Hub protocol with a builtin version.
+\DIFdelbegin \DIFdel{This will delete all previous properties }\DIFdelend \DIFaddbegin 
+
+  \emph{\DIFadd{Note}}\DIFadd{: This will discard all previous entries }\DIFaddend if the protocol was already
+  installed\DIFaddbegin \DIFadd{, so all properties required for safe operation of the system must be
+  specified in your configuration}\DIFaddend .
 
 \item
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Reinstalls Device Property protocol with a builtin
-  version. This will delete all previous properties if it was already installed.
-  This may be used to ensure full compatibility on VMs or legacy Macs.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Device Property protocol with a builtin
+  version. This \DIFdelbegin \DIFdel{will delete all previous properties if it was already installed.
+  This }\DIFdelend may be used to ensure full compatibility on VMs or legacy Macs.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: This will discard all previous entries if the protocol was already
+  installed, so all properties required for safe operation of the system must be
+  specified in your configuration.
+}
+
+\DIFaddend \item
   \texttt{FirmwareVolume}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly wraps Firmware Volume protocols or installs new
-  to support custom cursor images for File Vault 2. Should be set to \texttt{true}
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly wraps }\DIFdelend \DIFaddbegin \DIFadd{Wraps }\DIFaddend Firmware Volume protocols or installs \DIFdelbegin \DIFdel{new
+  }\DIFdelend \DIFaddbegin \DIFadd{a new version
+  }\DIFaddend to support custom cursor images for File Vault 2. Should be set to \texttt{true}
   to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
 
   \emph{Note}: Several virtual machines including VMware may have corrupted
@@ -6644,28 +6699,31 @@ functioning. Feature highlights:
   \texttt{HashServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls Hash Services protocols with builtin
-  versions. Should be set to \texttt{true} to ensure File Vault 2 compatibility
-  on platforms providing broken SHA-1 hashing. Can be diagnosed by invalid
-  cursor size with \texttt{UIScale} set to \texttt{02}, in general platforms
-  prior to APTIO V (Haswell and older) are affected.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Hash Services protocols with builtin versions.
+  Should be set to \texttt{true} to ensure File Vault 2 compatibility on
+  platforms \DIFdelbegin \DIFdel{providing broken }\DIFdelend \DIFaddbegin \DIFadd{with flawed }\DIFaddend SHA-1 \DIFdelbegin \DIFdel{hashing}\DIFdelend \DIFaddbegin \DIFadd{hash implementation}\DIFaddend . Can be diagnosed by invalid
+  cursor size with \texttt{UIScale} set to \texttt{02}\DIFdelbegin \DIFdel{, in general platforms
+  prior to }\DIFdelend \DIFaddbegin \DIFadd{. Platforms earlier
+  than }\DIFaddend APTIO V (Haswell and older) are \DIFaddbegin \DIFadd{generally }\DIFaddend affected.
 
 \item
   \texttt{OSInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls OS Info protocol with builtin
-  versions. This protocol is generally used to receive notifications from macOS
-  bootloader, by the firmware or by other applications.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend OS Info protocol with \DIFdelbegin \DIFdel{builtin
+  versions}\DIFdelend \DIFaddbegin \DIFadd{a builtin
+  version}\DIFaddend . This protocol is generally used \DIFdelbegin \DIFdel{to receive notifications from macOS
+  bootloader, }\DIFdelend by the firmware\DIFaddbegin \DIFadd{, }\DIFaddend or by other
+  applications\DIFaddbegin \DIFadd{, to receive notifications from the macOS bootloader}\DIFaddend .
 
 \item
   \texttt{UnicodeCollation}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forcibly reinstalls unicode collation services with builtin
-  version. Should be set to \texttt{true} to ensure UEFI Shell compatibility
-  on platforms providing broken unicode collation. In general legacy Insyde and APTIO
-  platforms on Ivy Bridge and earlier are affected.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend unicode collation services with builtin
+  \DIFdelbegin \DIFdel{version}\DIFdelend \DIFaddbegin \DIFadd{versions}\DIFaddend . Should be set to \texttt{true} to ensure UEFI Shell compatibility on
+  platforms \DIFdelbegin \DIFdel{providing broken unicode collation . In general legacy }\DIFdelend \DIFaddbegin \DIFadd{with flawed unicode collation implementation. Legacy }\DIFaddend Insyde and APTIO
+  platforms on Ivy Bridge\DIFdelbegin \DIFdel{and earlier are }\DIFdelend \DIFaddbegin \DIFadd{, and earlier, are typically }\DIFaddend affected.
 
 \end{enumerate}
 
@@ -6801,7 +6859,7 @@ functioning. Feature highlights:
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: Empty string\\
+  \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. It is implementation defined whether this value is
   used.
@@ -6859,12 +6917,14 @@ older macOS operating systems.
 
 While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
-release, so to get a compatible distribution one may have to download
-a device-specific image and mod it if necessary. To get the list of
-the bundled device-specific builds for legacy operating systems
-one can visit this archived Apple Support
-\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}.
-Since it is not always accurate, the latest versions are listed below.
+release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
+image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
+\DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
+}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
+\DIFdel{.
+Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
+However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.
 
 \subsubsection{macOS 10.8 and 10.9}\label{legacy108}
 
@@ -7293,7 +7353,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \href{https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814}{MacRumors.com}.
 
 \item
-  \textbf{Why do Find\&Replace patches must equal in length?}
+  \textbf{Why \DIFdelbegin \DIFdel{do }\DIFdelend \DIFaddbegin \DIFadd{must }\DIFaddend Find\&Replace patches \DIFdelbegin \DIFdel{must }\DIFdelend \DIFaddbegin \DIFadd{be }\DIFaddend equal in \DIFdelbegin \DIFdel{length}\DIFdelend \DIFaddbegin \DIFadd{size}\DIFaddend ?}
 
   For machine code (x86 code) it is not possible to do differently sized replacements due to
   \href{https://en.wikipedia.org/w/index.php?title=Relative_addressing}{relative addressing}.

@@ -504,7 +504,7 @@ OcMiscEarlyInit (
   if (ConfigData != NULL) {
     DEBUG ((DEBUG_INFO, "OC: Loaded configuration of %u bytes\n", ConfigDataSize));
 
-    Status = OcConfigurationInit (Config, ConfigData, ConfigDataSize);
+    Status = OcConfigurationInit (Config, ConfigData, ConfigDataSize, NULL);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to parse configuration!\n"));
       CpuDeadLoop ();

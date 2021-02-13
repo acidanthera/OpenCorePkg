@@ -801,15 +801,16 @@ mRootConfigurationInfo = {
 
 EFI_STATUS
 OcConfigurationInit (
-  OUT OC_GLOBAL_CONFIG   *Config,
-  IN  VOID               *Buffer,
-  IN  UINT32             Size
+      OUT  OC_GLOBAL_CONFIG   *Config,
+  IN       VOID               *Buffer,
+  IN       UINT32             Size,
+  IN  OUT  UINT32             *ErrorCount  OPTIONAL
   )
 {
   BOOLEAN  Success;
 
   OC_GLOBAL_CONFIG_CONSTRUCT (Config, sizeof (*Config));
-  Success = ParseSerialized (Config, &mRootConfigurationInfo, Buffer, Size);
+  Success = ParseSerialized (Config, &mRootConfigurationInfo, Buffer, Size, ErrorCount);
 
   if (!Success) {
     OC_GLOBAL_CONFIG_DESTRUCT (Config, sizeof (*Config));

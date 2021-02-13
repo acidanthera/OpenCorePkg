@@ -115,7 +115,7 @@
   _(UINT32                      , Count            ,     , 0                           , ()                   ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
   _(OC_DATA                     , Find             ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_DATA                     , Mask             ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
   _(OC_DATA                     , Replace          ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
   _(OC_DATA                     , ReplaceMask      ,     , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
@@ -710,17 +710,19 @@ typedef enum {
 /**
   Initialize configuration with plist data.
 
-  @param[out]  Config   Configuration structure.
-  @param[in]   Buffer   Configuration buffer in plist format.
-  @param[in]   Size     Configuration buffer size.
+  @param[out]     Config      Configuration structure.
+  @param[in]      Buffer      Configuration buffer in plist format.
+  @param[in]      Size        Configuration buffer size.
+  @param[in,out]  ErrorCount  Errors detected duing initialisation. Optional.
 
   @retval  EFI_SUCCESS on success
 **/
 EFI_STATUS
 OcConfigurationInit (
-  OUT OC_GLOBAL_CONFIG   *Config,
-  IN  VOID               *Buffer,
-  IN  UINT32             Size
+      OUT  OC_GLOBAL_CONFIG   *Config,
+  IN       VOID               *Buffer,
+  IN       UINT32             Size,
+  IN  OUT  UINT32             *ErrorCount  OPTIONAL
   );
 
 /**

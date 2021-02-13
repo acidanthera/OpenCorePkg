@@ -124,7 +124,7 @@ static bool verify_mlb_checksum(const char *mlb, size_t len) {
 // I am not positive what is better to use here (especially on Windows).
 // Fortunately we only need something only looking random.
 static uint32_t pseudo_random(void) {
- #ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__EMSCRIPTEN__)
     if (arc4random)
       return arc4random();
 #endif
@@ -149,7 +149,7 @@ static uint32_t pseudo_random(void) {
 static uint32_t pseudo_random_between(uint32_t from, uint32_t to) {
   uint32_t upper_bound = to + 1 - from;
 
-#ifdef __GNUC__
+#if defined(__GNUC__) && !defined(__EMSCRIPTEN__)
   // Prefer native implementation if available.
   if (arc4random_uniform)
     return from + arc4random_uniform(upper_bound);

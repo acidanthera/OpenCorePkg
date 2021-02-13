@@ -2178,9 +2178,9 @@ typedef union {
 // sections in different files.
 //
 // The n_value field for all symbol table entries (including N_STAB's) gets
-// updated by the link editor based on the value of it's n_sect field and where
+// updated by the link editor based on the value of its n_sect field and where
 // the section n_sect references gets relocated.  If the value of the n_sect
-// field is NO_SECT then it's n_value field is not changed by the link editor.
+// field is NO_SECT then its n_value field is not changed by the link editor.
 //
 #define NO_SECT     0  ///< symbol is not in any section
 #define MAX_SECT  255  ///< 1 thru 255 inclusive
@@ -2314,7 +2314,7 @@ typedef struct {
 #define MACH_RELOC_ABSOLUTE  0U    ///< absolute relocation type for Mach-O files
 
 //
-// The r_address is not really the address as it's name indicates but an
+// The r_address is not really the address as its name indicates but an
 // offset.  In 4.3BSD a.out objects this offset is from the start of the
 // "segment" for which relocation entry is for (text or data).  For Mach-O
 // object files it is also an offset but from the start of the "section" for

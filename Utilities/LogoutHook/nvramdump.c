@@ -26,7 +26,7 @@ static io_registry_entry_t gOptionsRef;
 // GetOFVariable(name, nameRef, valueRef)
 //
 //   Get the named firmware variable.
-//   Return it and it's symbol in valueRef and nameRef.
+//   Return it and its symbol in valueRef and nameRef.
 //
 static kern_return_t GetOFVariable(char *name, CFStringRef *nameRef,
                                    CFTypeRef *valueRef)

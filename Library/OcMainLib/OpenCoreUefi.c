@@ -131,7 +131,7 @@ OcLoadDrivers (
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
-        "OC: Driver %s%a doex not fit path!\n",
+        "OC: Driver %s%a does not fit path!\n",
         OPEN_CORE_UEFI_DRIVER_PATH,
         OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
         ));
