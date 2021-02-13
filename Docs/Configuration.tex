@@ -558,11 +558,11 @@ entries include:
 
 \emph{Note}: It is not guaranteed that paths longer than
 \texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
-\texttt{\\0}-terminator) will be accessible within OpenCore.
+the \texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
 
-To install OpenCore reflect the
+To install OpenCore, replicate the
 \hyperref[configuration-structure]{Configuration Structure} described
 in the previous section on a EFI volume of a GPT partition. While
 corresponding sections of this document do provide some information
@@ -571,28 +571,28 @@ or kernel extensions (kexts), completeness of the matter is out of
 the scope of this document. Information about kernel extensions may
 be found in a separate
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Kexts.md}{Kext List}
-document available in OpenCore repository. Vaulting information is provided in
-\hyperref[miscsecurityprops]{Security Properties} section of this document.
+document available in the OpenCore repository. Vaulting information is provided in
+the \hyperref[miscsecurityprops]{Security Properties} section of this document.
 
-\texttt{OC\ config}, just like any property lists can be edited with any
-stock textual editor (e.g. nano, vim), but specialised software may provide
-better experience. On macOS the preferred GUI application is
+The \texttt{OC\ config} file, as with any property list file, can be edited with
+any text editor such as nano and vim. However, specialised software may provide
+a better experience. On macOS, the preferred GUI application is
 \href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
-cross-platform and open-source alternative
+cross-platform and open-source alternative, the
 \href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
 utilised.
 
-For BIOS booting a third-party UEFI environment provider will have to
+For BIOS booting, a third-party UEFI environment provider will have to
 be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system, \texttt{OpenDuetPkg}
 can be installed with a dedicated tool --- BootInstall (bundled with OpenCore).
 \href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
 perform this on systems other than macOS.
 
-For upgrade purposes refer to \texttt{Differences.pdf} document, providing
-the information about the changes affecting the configuration compared
-to the previous release, and \texttt{Changelog.md} document, containing
-the list of modifications across all published updates.
+For upgrade purposes, refer to the \texttt{Differences.pdf} document which provides
+information about changes to the configuration as compared to the previous release
+as well as to the \texttt{Changelog.md} document, which contains a list of
+modifications across all published updates.
 
 \subsection{Contribution}\label{configuration-comp}
 
@@ -601,20 +601,20 @@ OpenCore can be compiled as an ordinary
 Since \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
 development was abandoned by TianoCore, OpenCore requires the use of
 \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}.
-Currently supported EDK II release is hosted in
-\href{https://github.com/acidanthera/audk}{acidanthera/audk}. The required patches
-for the package are present in \texttt{Patches} directory.
+The currently supported EDK II release is hosted in
+\href{https://github.com/acidanthera/audk}{acidanthera/audk}. Required patches
+for this package can be found in the \texttt{Patches} directory.
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
-might work, but are neither supported, nor recommended. Contribution of clean
-patches is welcome. Please do follow
+might work but are neither supported nor recommended. Contributions of clean
+patches are welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
-one should also install \href{https://www.nasm.us}{NASM} and
+users should also install \href{https://www.nasm.us}{NASM} and
 \href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}.
-The latest Xcode version is recommended for use despite the toolchain name. Example
-command sequence may look as follows:
+The latest Xcode version is recommended for use despite the toolchain name.
+An example command sequence is as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone --depth=1 https://github.com/acidanthera/audk UDK
@@ -667,12 +667,11 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 \end{lstlisting}
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
-files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
-(see \hyperref[miscdebugprops]{Debug Properties} section below) and warn the user
-if the version listed is unsupported or prerelease. OpenCore configuration may change
-across the releases and the tool shall ensure that it carefully follows this document.
-Failure to do so may result in this tool to be considered as malware and blocked with
-all possible means.
+files must ensure that their tool checks the \texttt{opencore-version} NVRAM variable
+(see \hyperref[miscdebugprops]{Debug Properties} section below) and warns users
+if the version listed is unsupported or prerelease. The OpenCore configuration may change
+across releases and such tools shall ensure they carefully follow this document. Failure
+to do so may result in such tools being considered to be malware and blocked by any means.
 
 \subsection{Coding conventions}\label{configuration-conv}
 
@@ -883,8 +882,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -925,8 +923,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -971,8 +968,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Count}\\
@@ -992,7 +988,7 @@ of the suggested solutions will vary from case to case.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Limit}\\
@@ -1297,8 +1293,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -1322,8 +1317,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Count}\\
@@ -1343,7 +1337,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size if set.
 
 \item
   \texttt{Identifier}\\
@@ -1930,8 +1924,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -2021,8 +2014,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -2171,8 +2163,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -2236,15 +2227,14 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (Ignored)\\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
-  replacement) by obtaining the address of provided symbol name.
+  replacement) by obtaining the address of the provided symbol name.
 
 \item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Count}\\
@@ -3104,7 +3094,7 @@ entry choice will update till next manual reconfiguration.
       for APFS (otherwise).
       \item \texttt{.VolumeIcon.icns} file at volume root for other filesystems.
     \end{itemize} \medskip
-    
+
     \emph{Note 1}: Apple's boot picker partially supports placing a volume icon file
     at the operating system's \texttt{Data} volume root (\texttt{/System/Volumes/Data/} when
     mounted at default location within macOS). This approach is broken: that file is not
@@ -3989,8 +3979,7 @@ rm vault.pub
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Enabled}\\
@@ -6492,7 +6481,7 @@ functioning. Feature highlights:
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Boot Policy protocol with a builtin
+  \textbf{Description}: Replaces the Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
@@ -6503,21 +6492,21 @@ functioning. Feature highlights:
   \texttt{AppleDebugLog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Debug Log protocol with a builtin
+  \textbf{Description}: Replaces the Apple Debug Log protocol with a builtin
   version.
 
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Event protocol with a builtin
-  version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
+  \textbf{Description}: Replaces the Apple Event protocol with a builtin
+  version. This may be used to ensure FileVault 2 compatibility on VMs or legacy Macs.
 
 \item
   \texttt{AppleFramebufferInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Framebuffer Info protocol with a builtin
+  \textbf{Description}: Replaces the Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
   to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
 
@@ -6525,14 +6514,14 @@ functioning. Feature highlights:
   \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Image Conversion protocol with a builtin
+  \textbf{Description}: Replaces the Apple Image Conversion protocol with a builtin
   version.
 
 \item
   \texttt{AppleImg4Verification}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple IMG4 Verification protocol with a builtin
+  \textbf{Description}: Replaces the Apple IMG4 Verification protocol with a builtin
   version. This protocol is used to verify \texttt{im4m} manifest files used by
   Apple Secure Boot.
 
@@ -6547,7 +6536,7 @@ functioning. Feature highlights:
   \texttt{AppleRtcRam}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple RTC RAM protocol with a builtin
+  \textbf{Description}: Replaces the Apple RTC RAM protocol with a builtin
   version.
 
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
@@ -6559,14 +6548,14 @@ functioning. Feature highlights:
   \texttt{AppleSecureBoot}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple Secure Boot protocol with a builtin
+  \textbf{Description}: Replaces the Apple Secure Boot protocol with a builtin
   version.
 
 \item
   \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple SMC I/O protocol with a builtin
+  \textbf{Description}: Replaces the Apple SMC I/O protocol with a builtin
   version.
 
   This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
@@ -6577,14 +6566,14 @@ functioning. Feature highlights:
   \texttt{AppleUserInterfaceTheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Apple User Interface Theme protocol with a builtin
+  \textbf{Description}: Replaces the Apple User Interface Theme protocol with a builtin
   version.
 
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Data Hub protocol with a builtin version.
+  \textbf{Description}: Replaces the Data Hub protocol with a builtin version.
 
   \emph{Note}: This will discard all previous entries if the protocol was already
   installed, so all properties required for safe operation of the system must be
@@ -6594,7 +6583,7 @@ functioning. Feature highlights:
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces Device Property protocol with a builtin
+  \textbf{Description}: Replaces the Device Property protocol with a builtin
   version. This may be used to ensure full compatibility on VMs or legacy Macs.
 
   \emph{Note}: This will discard all previous entries if the protocol was already
@@ -6606,38 +6595,38 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Wraps Firmware Volume protocols or installs a new version
-  to support custom cursor images for File Vault 2. Should be set to \texttt{true}
-  to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
+  to support custom cursor images for FileVault 2. Set to \texttt{true} to ensure
+  FileVault 2 compatibility on anything other than VMs and legacy Macs.
 
   \emph{Note}: Several virtual machines including VMware may have corrupted
-  cursor image in HiDPI mode and thus may also require this setting to be enabled.
+  cursor images in HiDPI mode and thus, may also require enabling this setting.
 
 \item
   \texttt{HashServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces Hash Services protocols with builtin versions.
-  Should be set to \texttt{true} to ensure File Vault 2 compatibility on
-  platforms with flawed SHA-1 hash implementation. Can be diagnosed by invalid
-  cursor size with \texttt{UIScale} set to \texttt{02}. Platforms earlier
-  than APTIO V (Haswell and older) are generally affected.
+  Set to \texttt{true} to ensure FileVault 2 compatibility on platforms with
+  flawed SHA-1 hash implementations. This can be determined by an invalid
+  cursor size when \texttt{UIScale} is set to \texttt{02}. Platforms earlier
+  than APTIO V (Haswell and older) are typically affected.
 
 \item
   \texttt{OSInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces OS Info protocol with a builtin
-  version. This protocol is generally used by the firmware, or by other
-  applications, to receive notifications from the macOS bootloader.
+  \textbf{Description}: Replaces the OS Info protocol with a builtin
+  version. This protocol is typically used by the firmware and other
+  applications to receive notifications from the macOS bootloader.
 
 \item
   \texttt{UnicodeCollation}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces unicode collation services with builtin
-  versions. Should be set to \texttt{true} to ensure UEFI Shell compatibility on
-  platforms with flawed unicode collation implementation. Legacy Insyde and APTIO
-  platforms on Ivy Bridge, and earlier, are typically affected.
+  versions. Set to \texttt{true} to ensure UEFI Shell compatibility on platforms
+  with flawed unicode collation implementations. Legacy Insyde and APTIO platforms
+  on Ivy Bridge, and earlier, are typically affected.
 
 \end{enumerate}
 
@@ -6665,8 +6654,8 @@ functioning. Feature highlights:
   This is a very rough workaround to circumvent the \texttt{Still\ waiting\ for\ root\ device} message
   on some APTIO IV firmware (ASUS Z87-Pro) particularly when using FileVault 2.
   It appears that for some reason, they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
-  which results in the SATA controller being inaccessible from macOS. A better approach should be
-  found in some future. Expect 3 to 5 seconds to be adequate when this quirk is needed.
+  which results in the SATA controller being inaccessible from macOS. A better approach is required
+  and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
@@ -6677,16 +6666,16 @@ functioning. Feature highlights:
   macOS boot failures on Intel platforms.
 
   \emph{Note}: While the option is not expected to harm unaffected firmware,
-  its use is only recommended when it is specifically required.
+  its use is recommended only when specifically required.
 
 \item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to detach USB controller ownership from
-  the firmware driver. While most types of firmware manage to do that properly,
-  or at least have an option for this, some do not. As a result,
-  the operating system may freeze upon boot. Not recommended unless required.
+  the firmware driver. While most types of firmware manage to do this properly,
+  or at least have an option for this, some do not. As a result, the operating
+  system may freeze upon boot. Not recommended unless specifically required.
 
 \item
   \texttt{RequestBootVarRouting}\\
@@ -6712,7 +6701,7 @@ functioning. Feature highlights:
   fluent updates and hibernation wakes for cases that require reboots with OpenCore
   in the middle.
   \item Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
+  or corrupted in any way.
   \end{itemize}
 
 \item
@@ -6728,26 +6717,26 @@ functioning. Feature highlights:
   amount of cores present on the platform, the recommended starting value is \texttt{500000}.
 
   This is an experimental quirk, which should only be used for the aforementioned problem.
-  In all other cases the quirk may render the operating system unstable and is not recommended.
+  In all other cases, the quirk may render the operating system unstable and is not recommended.
   The recommended solution in the other cases is to install a kernel driver such as
   \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
   \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
   or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
   variant of VoodooTSCSync for newer laptops).
 
-  \emph{Note}: The reason this quirk cannot replace the kernel driver is
-  because it cannot operate in ACPI S3 mode (sleep wake) and because the UEFI firmware
-  provides very limited multicore support preventing the precise update of the MSR
-  registers.
+  \emph{Note}: This quirk cannot replace the kernel driver because it cannot operate in
+  ACPI S3 (sleep wake) mode and because the UEFI firmware only provides very limited
+  multicore support which prevents precise updates of the MSR registers.
 
 \item
   \texttt{UnblockFsConnect}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some types of firmware block partition handles by opening them
-  in \texttt{By\ Driver} mode, resulting in being unable to install File System protocols.
+  in \texttt{By\ Driver} mode, resulting in an inability to install File System protocols.
 
-  \emph{Note}: The quirk is mostly relevant for select HP laptops with no drives listed.
+  \emph{Note}: This quirk is useful in cases where unsuccessful drive detection
+  results in an absence of boot entries.
 
 \end{enumerate}
 
@@ -6762,8 +6751,8 @@ functioning. Feature highlights:
   \textbf{Description}: Start address of the reserved memory region, which should be allocated
   as reserved effectively marking the memory of this type inaccessible to the operating system.
 
-  The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
-  type, and page-aligned (4 KBs).
+  The addresses written here must be part of the memory map, have a \texttt{EfiConventionalMemory}
+  type, and be page-aligned (4 KBs).
 
   \emph{Note}: Some types of firmware may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
@@ -6775,8 +6764,7 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. Whether this value is used is implementation defined.
 
 \item
   \texttt{Size}\\

@@ -275,7 +275,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //
 #define EB_FEATURE_BOOT_IS_NOT_ROOT             0x00000100U
 //
-// Boot (or wake) with File Vault 2 enabled.
+// Boot (or wake) with FileVault 2 enabled.
 //
 #define EB_FEATURE_HAS_FILE_VAULT2_CONFIG       0x00000200U
 #define EB_FEATURE_X                            0x00000400U

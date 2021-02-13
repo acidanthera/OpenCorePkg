@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Sat Feb 13 15:51:31 2021
+%DIF DEL PreviousConfiguration.tex   Sat Feb  6 19:45:31 2021
+%DIF ADD ../Configuration.tex        Sat Feb 13 20:04:26 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -618,11 +618,11 @@ entries include:
 
 \emph{Note}: It is not guaranteed that paths longer than
 \texttt{OC\_STORAGE\_SAFE\_PATH\_MAX} (128 characters including
-\texttt{\\0}-terminator) will be accessible within OpenCore.
+\DIFaddbegin \DIFadd{the }\DIFaddend \texttt{\\0}-terminator) will be accessible within OpenCore.
 
 \subsection{Installation and Upgrade}\label{configuration-install}
 
-To install OpenCore reflect the
+To install OpenCore\DIFdelbegin \DIFdel{reflect }\DIFdelend \DIFaddbegin \DIFadd{, replicate }\DIFaddend the
 \hyperref[configuration-structure]{Configuration Structure} described
 in the previous section on a EFI volume of a GPT partition. While
 corresponding sections of this document do provide some information
@@ -631,28 +631,30 @@ or kernel extensions (kexts), completeness of the matter is out of
 the scope of this document. Information about kernel extensions may
 be found in a separate
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Kexts.md}{Kext List}
-document available in OpenCore repository. Vaulting information is provided in
-\hyperref[miscsecurityprops]{Security Properties} section of this document.
+document available in \DIFaddbegin \DIFadd{the }\DIFaddend OpenCore repository. Vaulting information is provided in
+\DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[miscsecurityprops]{Security Properties} section of this document.
 
-\texttt{OC\ config}, just like any property lists can be edited with any
-stock textual editor (e.g. nano, vim), but specialised software may provide
-better experience. On macOS the preferred GUI application is
+\DIFaddbegin \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{, just like any property lists }\DIFdelend \DIFaddbegin \DIFadd{file, as with any property list file, }\DIFaddend can be edited with
+any \DIFdelbegin \DIFdel{stock textual editor (e.g. nano , vim), but }\DIFdelend \DIFaddbegin \DIFadd{text editor such as nano and vim. However, }\DIFaddend specialised software may provide
+\DIFaddbegin \DIFadd{a }\DIFaddend better experience. On macOS\DIFaddbegin \DIFadd{, }\DIFaddend the preferred GUI application is
 \href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
-cross-platform and open-source alternative
-\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
+cross-platform and open-source alternative\DIFaddbegin \DIFadd{, the
+}\DIFaddend \href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
 utilised.
 
-For BIOS booting a third-party UEFI environment provider will have to
+For BIOS booting\DIFaddbegin \DIFadd{, }\DIFaddend a third-party UEFI environment provider will have to
 be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
 for legacy systems. To run OpenCore on such a legacy system, \texttt{OpenDuetPkg}
 can be installed with a dedicated tool --- BootInstall (bundled with OpenCore).
 \href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
 perform this on systems other than macOS.
 
-For upgrade purposes refer to \texttt{Differences.pdf} document, providing
-the information about the changes affecting the configuration compared
-to the previous release, and \texttt{Changelog.md} document, containing
-the list of modifications across all published updates.
+For upgrade purposes\DIFdelbegin \DIFdel{refer to }\DIFdelend \DIFaddbegin \DIFadd{, refer to the }\DIFaddend \texttt{Differences.pdf} document \DIFdelbegin \DIFdel{, providing
+the information about the changes affecting the configuration }\DIFdelend \DIFaddbegin \DIFadd{which provides
+information about changes to the configuration as }\DIFaddend compared to the previous release
+\DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{as well as to the }\DIFaddend \texttt{Changelog.md} document, \DIFdelbegin \DIFdel{containing
+the }\DIFdelend \DIFaddbegin \DIFadd{which contains a }\DIFaddend list of
+modifications across all published updates.
 
 \subsection{Contribution}\label{configuration-comp}
 
@@ -661,20 +663,22 @@ OpenCore can be compiled as an ordinary
 Since \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
 development was abandoned by TianoCore, OpenCore requires the use of
 \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}.
-Currently supported EDK II release is hosted in
-\href{https://github.com/acidanthera/audk}{acidanthera/audk}. The required patches
-for the package are present in \texttt{Patches} directory.
+\DIFdelbegin \DIFdel{Currently }\DIFdelend \DIFaddbegin \DIFadd{The currently }\DIFaddend supported EDK II release is hosted in
+\href{https://github.com/acidanthera/audk}{acidanthera/audk}. \DIFdelbegin \DIFdel{The required patches
+for the package are present in }\DIFdelend \DIFaddbegin \DIFadd{Required patches
+for this package can be found in the }\DIFaddend \texttt{Patches} directory.
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
-might work, but are neither supported, nor recommended. Contribution of clean
-patches is welcome. Please do follow
+might work \DIFdelbegin \DIFdel{, }\DIFdelend but are neither supported \DIFdelbegin \DIFdel{, }\DIFdelend nor recommended. \DIFdelbegin \DIFdel{Contribution }\DIFdelend \DIFaddbegin \DIFadd{Contributions }\DIFaddend of clean
+patches \DIFdelbegin \DIFdel{is }\DIFdelend \DIFaddbegin \DIFadd{are }\DIFaddend welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
 
 To compile with \texttt{XCODE5}, besides \href{https://developer.apple.com/xcode}{Xcode},
-one should also install \href{https://www.nasm.us}{NASM} and
+\DIFdelbegin \DIFdel{one }\DIFdelend \DIFaddbegin \DIFadd{users }\DIFaddend should also install \href{https://www.nasm.us}{NASM} and
 \href{https://github.com/acidanthera/ocbuild/tree/master/external}{MTOC}.
-The latest Xcode version is recommended for use despite the toolchain name. Example
-command sequence may look as follows:
+The latest Xcode version is recommended for use despite the toolchain name.
+\DIFdelbegin \DIFdel{Example
+command sequence may look }\DIFdelend \DIFaddbegin \DIFadd{An example command sequence is }\DIFaddend as follows:
 
 \begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
 git clone --depth=1 https://github.com/acidanthera/audk UDK
@@ -727,12 +731,13 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 \end{lstlisting}
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
-files must ensure that their tool checks for \texttt{opencore-version} NVRAM variable
-(see \hyperref[miscdebugprops]{Debug Properties} section below) and warn the user
-if the version listed is unsupported or prerelease. OpenCore configuration may change
-across the releases and the tool shall ensure that it carefully follows this document.
-Failure to do so may result in this tool to be considered as malware and blocked with
-all possible means.
+files must ensure that their tool checks \DIFdelbegin \DIFdel{for }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{opencore-version} NVRAM variable
+(see \hyperref[miscdebugprops]{Debug Properties} section below) and \DIFdelbegin \DIFdel{warn the user
+}\DIFdelend \DIFaddbegin \DIFadd{warns users
+}\DIFaddend if the version listed is unsupported or prerelease. \DIFaddbegin \DIFadd{The }\DIFaddend OpenCore configuration may change
+across \DIFdelbegin \DIFdel{the releases and the tool shall ensure that it carefully follows }\DIFdelend \DIFaddbegin \DIFadd{releases and such tools shall ensure they carefully follow }\DIFaddend this document. Failure
+to do so may result in \DIFdelbegin \DIFdel{this tool to be considered as }\DIFdelend \DIFaddbegin \DIFadd{such tools being considered to be }\DIFaddend malware and blocked \DIFdelbegin \DIFdel{with
+all possible }\DIFdelend \DIFaddbegin \DIFadd{by any }\DIFaddend means.
 
 \subsection{Coding conventions}\label{configuration-conv}
 
@@ -943,8 +948,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -985,8 +989,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -1031,8 +1034,7 @@ of the suggested solutions will vary from case to case.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Count}\\
@@ -1052,7 +1054,7 @@ of the suggested solutions will vary from case to case.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
-  \textbf{Description}: Data to find. Must \DIFaddbegin \DIFadd{be }\DIFaddend equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. Must \DIFaddbegin \DIFadd{be }\DIFaddend equal to \texttt{Replace} in size \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Limit}\\
@@ -1363,8 +1365,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -1388,8 +1389,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Count}\\
@@ -1409,7 +1409,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{Find}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{data}\DIFdelend \\
-  \textbf{Description}: Data to find. \DIFdelbegin \DIFdel{This must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size.
+  \textbf{Description}: Data to find. \DIFdelbegin \DIFdel{This must }\DIFdelend \DIFaddbegin \DIFadd{Must be }\DIFaddend equal to \texttt{Replace} in size \DIFaddbegin \DIFadd{if set}\DIFaddend .
 
 \item
   \texttt{Identifier}\\
@@ -2005,8 +2005,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -2096,8 +2095,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -2246,8 +2244,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -2311,7 +2308,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{(Ignored)}\DIFaddend \\
   \textbf{Description}: Selects symbol-matched base for patch lookup (or immediate
-  replacement) by obtaining the address of provided symbol name.
+  replacement) by obtaining the address of \DIFaddbegin \DIFadd{the }\DIFaddend provided symbol name.
 \DIFdelbegin \DIFdel{Can be set to
   empty string to be ignored.
 }\DIFdelend 
@@ -2321,8 +2318,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Count}\\
@@ -4077,8 +4073,7 @@ rm vault.pub
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
@@ -6589,7 +6584,7 @@ functioning. Feature highlights:
   \texttt{AppleBootPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Boot Policy protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Boot Policy protocol with a builtin
   version. This may be used to ensure APFS compatibility on VMs or legacy Macs.
 
   \emph{Note}: Some Macs, namely \texttt{MacPro5,1}, do have APFS compatibility,
@@ -6600,21 +6595,21 @@ functioning. Feature highlights:
   \texttt{AppleDebugLog}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Debug Log protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Debug Log protocol with a builtin
   version.
 
 \item
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Event protocol with a builtin
-  version. This may be used to ensure File Vault 2 compatibility on VMs or legacy Macs.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Event protocol with a builtin
+  version. This may be used to ensure \DIFdelbegin \DIFdel{File Vault }\DIFdelend \DIFaddbegin \DIFadd{FileVault }\DIFaddend 2 compatibility on VMs or legacy Macs.
 
 \item
   \texttt{AppleFramebufferInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Framebuffer Info protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Framebuffer Info protocol with a builtin
   version. This may be used to override framebuffer information on VMs or legacy Macs
   to improve compatibility with legacy EfiBoot such as the one in macOS 10.4.
 
@@ -6622,14 +6617,14 @@ functioning. Feature highlights:
   \texttt{AppleImageConversion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Image Conversion protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Image Conversion protocol with a builtin
   version.
 
 \item
   \texttt{AppleImg4Verification}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple IMG4 Verification protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple IMG4 Verification protocol with a builtin
   version. This protocol is used to verify \texttt{im4m} manifest files used by
   Apple Secure Boot.
 
@@ -6644,7 +6639,7 @@ functioning. Feature highlights:
   \texttt{AppleRtcRam}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple RTC RAM protocol with \DIFaddbegin \DIFadd{a }\DIFaddend builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple RTC RAM protocol with \DIFaddbegin \DIFadd{a }\DIFaddend builtin
   version.
 
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
@@ -6656,14 +6651,14 @@ functioning. Feature highlights:
   \texttt{AppleSecureBoot}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple Secure Boot protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple Secure Boot protocol with a builtin
   version.
 
 \item
   \texttt{AppleSmcIo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple SMC I/O protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple SMC I/O protocol with a builtin
   version.
 
   This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
@@ -6674,14 +6669,14 @@ functioning. Feature highlights:
   \texttt{AppleUserInterfaceTheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Apple User Interface Theme protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Apple User Interface Theme protocol with a builtin
   version.
 
 \item
   \texttt{DataHub}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Data Hub protocol with a builtin version.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Data Hub protocol with a builtin version.
 \DIFdelbegin \DIFdel{This will delete all previous properties }\DIFdelend \DIFaddbegin 
 
   \emph{\DIFadd{Note}}\DIFadd{: This will discard all previous entries }\DIFaddend if the protocol was already
@@ -6692,7 +6687,7 @@ functioning. Feature highlights:
   \texttt{DeviceProperties}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Device Property protocol with a builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend Device Property protocol with a builtin
   version. This \DIFdelbegin \DIFdel{will delete all previous properties if it was already installed.
   This }\DIFdelend may be used to ensure full compatibility on VMs or legacy Macs.
 
@@ -6707,41 +6702,41 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly wraps }\DIFdelend \DIFaddbegin \DIFadd{Wraps }\DIFaddend Firmware Volume protocols or installs \DIFdelbegin \DIFdel{new
   }\DIFdelend \DIFaddbegin \DIFadd{a new version
-  }\DIFaddend to support custom cursor images for File Vault 2. Should be set to \texttt{true}
-  to ensure File Vault 2 compatibility on everything but VMs and legacy Macs.
+  }\DIFaddend to support custom cursor images for \DIFdelbegin \DIFdel{File Vault }\DIFdelend \DIFaddbegin \DIFadd{FileVault }\DIFaddend 2. \DIFdelbegin \DIFdel{Should be set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} to ensure
+  \DIFdelbegin \DIFdel{File Vault }\DIFdelend \DIFaddbegin \DIFadd{FileVault }\DIFaddend 2 compatibility on \DIFdelbegin \DIFdel{everything but }\DIFdelend \DIFaddbegin \DIFadd{anything other than }\DIFaddend VMs and legacy Macs.
 
   \emph{Note}: Several virtual machines including VMware may have corrupted
-  cursor image in HiDPI mode and thus may also require this setting to be enabled.
+  cursor \DIFdelbegin \DIFdel{image }\DIFdelend \DIFaddbegin \DIFadd{images }\DIFaddend in HiDPI mode and thus\DIFaddbegin \DIFadd{, }\DIFaddend may also require \DIFdelbegin \DIFdel{this setting to be enabled}\DIFdelend \DIFaddbegin \DIFadd{enabling this setting}\DIFaddend .
 
 \item
   \texttt{HashServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend Hash Services protocols with builtin versions.
-  Should be set to \texttt{true} to ensure File Vault 2 compatibility on
-  platforms \DIFdelbegin \DIFdel{providing broken }\DIFdelend \DIFaddbegin \DIFadd{with flawed }\DIFaddend SHA-1 \DIFdelbegin \DIFdel{hashing}\DIFdelend \DIFaddbegin \DIFadd{hash implementation}\DIFaddend . Can be diagnosed by invalid
-  cursor size with \texttt{UIScale} set to \texttt{02}\DIFdelbegin \DIFdel{, in general platforms
+  \DIFdelbegin \DIFdel{Should be set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} to ensure \DIFdelbegin \DIFdel{File Vault }\DIFdelend \DIFaddbegin \DIFadd{FileVault }\DIFaddend 2 compatibility on platforms \DIFdelbegin \DIFdel{providing broken }\DIFdelend \DIFaddbegin \DIFadd{with
+  flawed }\DIFaddend SHA-1 \DIFdelbegin \DIFdel{hashing. Can be diagnosed by }\DIFdelend \DIFaddbegin \DIFadd{hash implementations. This can be determined by an }\DIFaddend invalid
+  cursor size \DIFdelbegin \DIFdel{with }\DIFdelend \DIFaddbegin \DIFadd{when }\DIFaddend \texttt{UIScale} \DIFaddbegin \DIFadd{is }\DIFaddend set to \texttt{02}\DIFdelbegin \DIFdel{, in general platforms
   prior to }\DIFdelend \DIFaddbegin \DIFadd{. Platforms earlier
-  than }\DIFaddend APTIO V (Haswell and older) are \DIFaddbegin \DIFadd{generally }\DIFaddend affected.
+  than }\DIFaddend APTIO V (Haswell and older) are \DIFaddbegin \DIFadd{typically }\DIFaddend affected.
 
 \item
   \texttt{OSInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend OS Info protocol with \DIFdelbegin \DIFdel{builtin
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces the }\DIFaddend OS Info protocol with \DIFdelbegin \DIFdel{builtin
   versions}\DIFdelend \DIFaddbegin \DIFadd{a builtin
-  version}\DIFaddend . This protocol is generally used \DIFdelbegin \DIFdel{to receive notifications from macOS
-  bootloader, }\DIFdelend by the firmware\DIFaddbegin \DIFadd{, }\DIFaddend or by other
-  applications\DIFaddbegin \DIFadd{, to receive notifications from the macOS bootloader}\DIFaddend .
+  version}\DIFaddend . This protocol is \DIFdelbegin \DIFdel{generally used }\DIFdelend \DIFaddbegin \DIFadd{typically used by the firmware and other
+  applications }\DIFaddend to receive notifications from \DIFdelbegin \DIFdel{macOS
+  bootloader, by the firmware or by other applications}\DIFdelend \DIFaddbegin \DIFadd{the macOS bootloader}\DIFaddend .
 
 \item
   \texttt{UnicodeCollation}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: \DIFdelbegin \DIFdel{Forcibly reinstalls }\DIFdelend \DIFaddbegin \DIFadd{Replaces }\DIFaddend unicode collation services with builtin
-  \DIFdelbegin \DIFdel{version}\DIFdelend \DIFaddbegin \DIFadd{versions}\DIFaddend . Should be set to \texttt{true} to ensure UEFI Shell compatibility on
-  platforms \DIFdelbegin \DIFdel{providing broken unicode collation . In general legacy }\DIFdelend \DIFaddbegin \DIFadd{with flawed unicode collation implementation. Legacy }\DIFaddend Insyde and APTIO
-  platforms on Ivy Bridge\DIFdelbegin \DIFdel{and earlier are }\DIFdelend \DIFaddbegin \DIFadd{, and earlier, are typically }\DIFaddend affected.
+  \DIFdelbegin \DIFdel{version. Should be set }\DIFdelend \DIFaddbegin \DIFadd{versions. Set }\DIFaddend to \texttt{true} to ensure UEFI Shell compatibility on platforms
+  \DIFdelbegin \DIFdel{providing broken unicode collation . In general legacy }\DIFdelend \DIFaddbegin \DIFadd{with flawed unicode collation implementations. Legacy }\DIFaddend Insyde and APTIO platforms
+  on Ivy Bridge\DIFdelbegin \DIFdel{and earlier are }\DIFdelend \DIFaddbegin \DIFadd{, and earlier, are typically }\DIFaddend affected.
 
 \end{enumerate}
 
@@ -6769,8 +6764,9 @@ functioning. Feature highlights:
   This is a very rough workaround to circumvent the \texttt{Still\ waiting\ for\ root\ device} message
   on some APTIO IV firmware (ASUS Z87-Pro) particularly when using FileVault 2.
   It appears that for some reason, they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
-  which results in the SATA controller being inaccessible from macOS. A better approach should be
-  found in some future. Expect 3 to 5 seconds to be adequate when this quirk is needed.
+  which results in the SATA controller being inaccessible from macOS. A better approach \DIFdelbegin \DIFdel{should be
+  found in some future}\DIFdelend \DIFaddbegin \DIFadd{is required
+  and Acidanthera is open to suggestions}\DIFaddend . Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
   \texttt{IgnoreInvalidFlexRatio}\\
@@ -6781,16 +6777,16 @@ functioning. Feature highlights:
   macOS boot failures on Intel platforms.
 
   \emph{Note}: While the option is not expected to harm unaffected firmware,
-  its use is only recommended when it is specifically required.
+  its use is \DIFdelbegin \DIFdel{only recommended when it is }\DIFdelend \DIFaddbegin \DIFadd{recommended only when }\DIFaddend specifically required.
 
 \item
   \texttt{ReleaseUsbOwnership}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Attempt to detach USB controller ownership from
-  the firmware driver. While most types of firmware manage to do that properly,
-  or at least have an option for this, some do not. As a result,
-  the operating system may freeze upon boot. Not recommended unless required.
+  the firmware driver. While most types of firmware manage to do \DIFdelbegin \DIFdel{that }\DIFdelend \DIFaddbegin \DIFadd{this }\DIFaddend properly,
+  or at least have an option for this, some do not. As a result, the operating
+  system may freeze upon boot. Not recommended unless \DIFaddbegin \DIFadd{specifically }\DIFaddend required.
 
 \item
   \texttt{RequestBootVarRouting}\\
@@ -6816,7 +6812,7 @@ functioning. Feature highlights:
   fluent updates and hibernation wakes for cases that require reboots with OpenCore
   in the middle.
   \item Potentially incompatible boot entries, such as macOS entries, are not deleted
-  or anyhow corrupted.
+  or \DIFdelbegin \DIFdel{anyhow corrupted }\DIFdelend \DIFaddbegin \DIFadd{corrupted in any way}\DIFaddend .
   \end{itemize}
 
 \item
@@ -6832,26 +6828,27 @@ functioning. Feature highlights:
   amount of cores present on the platform, the recommended starting value is \texttt{500000}.
 
   This is an experimental quirk, which should only be used for the aforementioned problem.
-  In all other cases the quirk may render the operating system unstable and is not recommended.
+  In all other cases\DIFaddbegin \DIFadd{, }\DIFaddend the quirk may render the operating system unstable and is not recommended.
   The recommended solution in the other cases is to install a kernel driver such as
   \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
   \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
   or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
   variant of VoodooTSCSync for newer laptops).
 
-  \emph{Note}: The reason this quirk cannot replace the kernel driver is
-  because it cannot operate in ACPI S3 mode (sleep wake) and because the UEFI firmware
-  provides very limited multicore support preventing the precise update of the MSR
-  registers.
+  \emph{Note}: \DIFdelbegin \DIFdel{The reason this }\DIFdelend \DIFaddbegin \DIFadd{This }\DIFaddend quirk cannot replace the kernel driver \DIFdelbegin \DIFdel{is
+  }\DIFdelend because it cannot operate in
+  ACPI S3 \DIFdelbegin \DIFdel{mode }\DIFdelend (sleep wake) \DIFaddbegin \DIFadd{mode }\DIFaddend and because the UEFI firmware \DIFaddbegin \DIFadd{only }\DIFaddend provides very limited
+  multicore support \DIFdelbegin \DIFdel{preventing the precise update }\DIFdelend \DIFaddbegin \DIFadd{which prevents precise updates }\DIFaddend of the MSR registers.
 
 \item
   \texttt{UnblockFsConnect}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some types of firmware block partition handles by opening them
-  in \texttt{By\ Driver} mode, resulting in being unable to install File System protocols.
+  in \texttt{By\ Driver} mode, resulting in \DIFdelbegin \DIFdel{being unable }\DIFdelend \DIFaddbegin \DIFadd{an inability }\DIFaddend to install File System protocols.
 
-  \emph{Note}: The quirk is mostly relevant for select HP laptops with no drives listed.
+  \emph{Note}: \DIFdelbegin \DIFdel{The quirk is mostly relevant for select HP laptops with no drives listed}\DIFdelend \DIFaddbegin \DIFadd{This quirk is useful in cases where unsuccessful drive detection
+  results in an absence of boot entries}\DIFaddend .
 
 \end{enumerate}
 
@@ -6866,8 +6863,8 @@ functioning. Feature highlights:
   \textbf{Description}: Start address of the reserved memory region, which should be allocated
   as reserved effectively marking the memory of this type inaccessible to the operating system.
 
-  The addresses written here must be part of the memory map, have \texttt{EfiConventionalMemory}
-  type, and page-aligned (4 KBs).
+  The addresses written here must be part of the memory map, have \DIFaddbegin \DIFadd{a }\DIFaddend \texttt{EfiConventionalMemory}
+  type, and \DIFaddbegin \DIFadd{be }\DIFaddend page-aligned (4 KBs).
 
   \emph{Note}: Some types of firmware may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
@@ -6879,8 +6876,7 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
-  reference for the entry. It is implementation defined whether this value is
-  used.
+  reference for the entry. \DIFdelbegin \DIFdel{It is implementation defined whether }\DIFdelend \DIFaddbegin \DIFadd{Whether }\DIFaddend this value is used \DIFaddbegin \DIFadd{is implementation defined}\DIFaddend .
 
 \item
   \texttt{Size}\\
@@ -6937,9 +6933,9 @@ While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
 release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
 image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFadd{article}}
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
 \DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFdel{article}}%DIFAUXCMD
+}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
 \DIFdel{.
 Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
 However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.
