@@ -407,6 +407,8 @@ OcKernelBlockKexts (
       Status = MkextContextBlock (Context, Target);
     } else if (CacheType == CacheTypePrelinked) {
       Status = PrelinkedContextBlock (Context, Target);
+    } else {
+      Status = EFI_UNSUPPORTED;
     }
 
     DEBUG ((
