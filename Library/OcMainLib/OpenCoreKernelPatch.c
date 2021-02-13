@@ -196,6 +196,8 @@ OcKernelApplyPatches (
         Status = MkextContextApplyPatch (Context, Target, &Patch);
       } else if (CacheType == CacheTypePrelinked) {
         Status = PrelinkedContextApplyPatch (Context, Target, &Patch);
+      } else {
+        Status = EFI_UNSUPPORTED;
       }
     }
 
