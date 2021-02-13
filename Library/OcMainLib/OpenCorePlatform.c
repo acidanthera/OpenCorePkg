@@ -491,24 +491,24 @@ OcPlatformUpdateNvram (
   if (MacInfo == NULL) {
     Bid            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Bid);
     BidSize        = Config->PlatformInfo.Nvram.Bid.Size - 1;
-    Mlb            = MacInfo->Oem.BoardSerialNumber;
+    Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
     MlbSize        = Config->PlatformInfo.Nvram.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Nvram.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Nvram.Rom);
-    CopyGuid (&Uuid, &MacInfo->Oem.SystemUuid);
+    Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&Uuid, sizeof (Uuid));
+    }
     ExFeatures     = Config->PlatformInfo.Nvram.FirmwareFeatures;
     ExFeaturesMask = Config->PlatformInfo.Nvram.FirmwareFeaturesMask;
   } else {
     Bid            = MacInfo->Smbios.BoardProduct;
     BidSize        = AsciiStrLen (Bid);
-    Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb);
+    Mlb            = MacInfo->Oem.BoardSerialNumber;
     MlbSize        = Config->PlatformInfo.Generic.Mlb.Size - 1;
     Rom            = &Config->PlatformInfo.Generic.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Generic.Rom);
-    Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), &Uuid);
-    if (EFI_ERROR (Status)) {
-      ZeroMem (&Uuid, sizeof (Uuid));
-    }
+    CopyGuid (&Uuid, &MacInfo->Oem.SystemUuid);
     ExFeatures     = MacInfo->Smbios.FirmwareFeatures;
     ExFeaturesMask = MacInfo->Smbios.FirmwareFeaturesMask;
 
