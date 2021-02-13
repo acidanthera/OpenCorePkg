@@ -21,6 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/OcCpuLib.h>
 #include <Library/OcFileLib.h>
+#include <Library/OcMacInfoLib.h>
 #include <IndustryStandard/AppleSmBios.h>
 #include <Guid/OcSmBios.h>
 
@@ -30,11 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // This breaks many internal and external OS mechanisms.
 //
 #define OC_SMBIOS_VENDOR_NAME "Acidanthera"
-
-//
-// Maximum characters for valid Mac-like OEM name.
-//
-#define OC_SMBIOS_OEM_NAME_MAX 48
 
 typedef struct OC_SMBIOS_MEMORY_DEVICE_DATA_ {
   //
@@ -241,13 +237,26 @@ OcSmbiosCreate (
 
   @param[in,out] SmbiosTable         SMBIOS Table handle.
   @param[out]    ProductName         Export SMBIOS Type 1 product name,
-                                     requiring OC_SMBIOS_OEM_NAME_MAX bytes.
+                                     requiring OC_OEM_NAME_MAX bytes.
+  @param[out]    SerialNumber        Export SMBIOS Type 1 product serial,
+                                     requiring OC_OEM_SERIAL_MAX bytes.
+  @param[out]    SystemUuid          Export SMBIOS Type 1 system UUID.
+                                     UUID is always returned in RAW format.
+  @param[out]    BoardSerialNumber   Export SMBIOS Type 2 board serial,
+                                     requiring OC_OEM_SERIAL_MAX bytes.
+  @param[out]    UuidIsRawEncoded    Pass FALSE to assume SMBIOS stores
+                                     SystemUuid in Little Endian format
+                                     and needs byte-swap.
   @param[in]     UseVariableStorage  Export OEM information to NVRAM.
 **/
 VOID
 OcSmbiosExtractOemInfo (
   IN  OC_SMBIOS_TABLE   *SmbiosTable,
-  OUT CHAR8             *ProductName   OPTIONAL,
+  OUT CHAR8             *ProductName        OPTIONAL,
+  OUT CHAR8             *SerialNumber       OPTIONAL,
+  OUT EFI_GUID          *SystemUuid         OPTIONAL,
+  OUT CHAR8             *BoardSerialNumber  OPTIONAL,
+  IN  BOOLEAN           UuidIsRawEncoded,
   IN  BOOLEAN           UseVariableStorage
   );
 

@@ -2005,7 +2005,11 @@ OcSmbiosCreate (
 VOID
 OcSmbiosExtractOemInfo (
   IN  OC_SMBIOS_TABLE   *SmbiosTable,
-  OUT CHAR8             *ProductName   OPTIONAL,
+  OUT CHAR8             *ProductName        OPTIONAL,
+  OUT CHAR8             *SerialNumber       OPTIONAL,
+  OUT EFI_GUID          *SystemUuid         OPTIONAL,
+  OUT CHAR8             *BoardSerialNumber  OPTIONAL,
+  IN  BOOLEAN           UuidIsRawEncoded,
   IN  BOOLEAN           UseVariableStorage
   )
 {
@@ -2013,6 +2017,11 @@ OcSmbiosExtractOemInfo (
   CONST CHAR8                     *SmProductName;
   CONST CHAR8                     *SmManufacturer;
   CONST CHAR8                     *SmBoard;
+  CONST CHAR8                     *SmTmp;
+  UINTN                           Index;
+  UINT32                          MinCount;
+  UINT32                          MaxCount;
+  UINT8                           *UuidWalker;
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
 
   SmProductName  = NULL;
@@ -2020,8 +2029,57 @@ OcSmbiosExtractOemInfo (
   SmBoard        = NULL;
 
   Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
-  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
-    SmProductName = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
+  if (Original.Raw != NULL) {
+    if (SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
+      SmProductName = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
+      if (SmProductName != NULL && ProductName != NULL) {
+        Status = AsciiStrCpyS (ProductName, OC_OEM_NAME_MAX, SmProductName);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS product name %a\n", SmProductName));
+        }
+      }
+    }
+
+    if (SerialNumber != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->SerialNumber)) {
+      SmTmp = SmbiosGetString (Original, Original.Standard.Type1->SerialNumber);
+      if (SmTmp != NULL) {
+        Status = AsciiStrCpyS (SerialNumber, OC_OEM_SERIAL_MAX, SmTmp);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS product serial %a\n", SmTmp));
+        }
+      }
+    }
+
+    if (SystemUuid != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->Uuid)) {
+      MinCount = 0;
+      MaxCount = 0;
+      UuidWalker = (UINT8 *) &Original.Standard.Type1->Uuid;
+      for (Index = 0; Index < sizeof (Original.Standard.Type1->Uuid); ++Index) {
+        if (UuidWalker[Index] == 0x00) {
+          ++MinCount;
+        } else if (UuidWalker[Index] == 0xFF) {
+          ++MaxCount;
+        }
+      }
+
+      if (MinCount < 4 && MaxCount < 4) {
+        CopyGuid (SystemUuid, &Original.Standard.Type1->Uuid);
+        //
+        // Convert LE to RAW (assuming SMBIOS stores in LE format).
+        //
+        if (!UuidIsRawEncoded) {
+          SystemUuid->Data1 = SwapBytes32 (SystemUuid->Data1);
+          SystemUuid->Data2 = SwapBytes16 (SystemUuid->Data2);
+          SystemUuid->Data3 = SwapBytes16 (SystemUuid->Data3);
+        }
+      } else {
+        DEBUG ((
+          DEBUG_WARN,
+          "OCSMB: Ignoring UUID %g due to low entropy\n",
+          &Original.Standard.Type1->Uuid
+          ));
+      }
+    }
   }
 
   Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
@@ -2031,6 +2089,15 @@ OcSmbiosExtractOemInfo (
     }
     if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
       SmBoard = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
+    }
+    if (BoardSerialNumber != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type2->SerialNumber)) {
+      SmTmp = SmbiosGetString (Original, Original.Standard.Type2->SerialNumber);
+      if (SmTmp != NULL) {
+        Status = AsciiStrCpyS (BoardSerialNumber, OC_OEM_SERIAL_MAX, SmTmp);
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS board serial %a\n", SmTmp));
+        }
+      }
     }
   }
 
@@ -2043,9 +2110,9 @@ OcSmbiosExtractOemInfo (
     ));
 
   if (ProductName != NULL && SmProductName != NULL) {
-    Status = AsciiStrCpyS (ProductName, OC_SMBIOS_OEM_NAME_MAX, SmProductName);
+    Status = AsciiStrCpyS (ProductName, OC_OEM_NAME_MAX, SmProductName);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OC: Failed to copy SMBIOS product name %a\n", SmProductName));
+      DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS product name %a\n", SmProductName));
     }
   }
 

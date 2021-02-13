@@ -4789,16 +4789,31 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
+
+  Specify \texttt{OEM} value to extract current value from SMBIOS
+  and use it throughout the sections. This feature can only be
+  used on Mac-compatible firmwares.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
+
+  Specify \texttt{OEM} value to extract current value from SMBIOS
+  and use it throughout the sections. Since not all firmwares
+  have valid (and unique) values, this feature is not applicable
+  to some setups, and may provide unexpected results. It is highly
+  recommended to specify the UUID explicitly. Refer to
+  \texttt{UseRawUuidEncoding} to determine how SMBIOS value is parsed.
 \item
   \texttt{MLB}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
+
+  Specify \texttt{OEM} value to extract current value from SMBIOS
+  and use it throughout the sections. This feature can only be
+  used on Mac-compatible firmwares.
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
