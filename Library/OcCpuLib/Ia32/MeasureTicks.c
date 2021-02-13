@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "OcCpuInternals.h"
+#include "../OcCpuInternals.h"
 
 #include <Library/BaseLib.h>
 #include <Library/IoLib.h>

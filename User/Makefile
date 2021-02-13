@@ -172,7 +172,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcCpuLib targets.
 	#
-	OBJS    += FrequencyDetect.o AppleCpuSupport.o OcCpuLib.o
+	OBJS    += FrequencyDetect.o AppleCpuSupport.o OcCpuLib.o MeasureTicks.o
 	#
 	# OcMiscLib targets.
 	#
@@ -208,6 +208,7 @@ ifneq ($(STANDALONE),1)
 				$(OC_USER)/Library/OcMachoLib:$\
 				$(OC_USER)/Library/OcAppleKeysLib:$\
 				$(OC_USER)/Library/OcCpuLib:$\
+				$(OC_USER)/Library/OcCpuLib/Ia32:$\
 				$(OC_USER)/Library/OcMiscLib:$\
 				$(OC_USER)/Library/OcAppleKernelLib
 endif
