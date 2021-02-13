@@ -33,7 +33,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/AppleVariable.h>
 
-STATIC CHAR8    mCurrentSmbiosProductName[48];
+STATIC CHAR8    mCurrentSmbiosProductName[OC_SMBIOS_OEM_NAME_MAX];
 
 STATIC
 VOID
@@ -414,6 +414,8 @@ OcPlatformUpdateSmbios (
   // Inject custom memory info.
   //
   if (Config->PlatformInfo.CustomMemory) {
+    Data.HasCustomMemory = TRUE;
+
     if (Config->PlatformInfo.Memory.Devices.Count <= MAX_UINT16) {
       Data.MemoryDevicesCount   = (UINT16) Config->PlatformInfo.Memory.Devices.Count;
     } else {
@@ -435,7 +437,7 @@ OcPlatformUpdateSmbios (
         Data.MemoryDevicesCount = 0;
       }
 
-      for (Index = 0; Index < Data.MemoryDevicesCount; Index++) {
+      for (Index = 0; Index < Data.MemoryDevicesCount; ++Index) {
         MemoryEntry = Config->PlatformInfo.Memory.Devices.Values[Index];
 
         Data.MemoryDevices[Index].AssetTag      = OC_BLOB_GET (&MemoryEntry->AssetTag);
@@ -458,7 +460,7 @@ OcPlatformUpdateSmbios (
     }
   }
 
-  Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo, Config->PlatformInfo.CustomMemory);
+  Status = OcSmbiosCreate (SmbiosTable, &Data, UpdateMode, CpuInfo);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OC: Failed to update SMBIOS - %r\n", Status));
   }
@@ -689,14 +691,12 @@ OcLoadPlatformSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  CONST CHAR8            *SmbiosUpdateStr;
   OC_SMBIOS_UPDATE_MODE  SmbiosUpdateMode;
   MAC_INFO_DATA          InfoData;
   MAC_INFO_DATA          *UsedMacInfo;
   EFI_STATUS             Status;
   OC_SMBIOS_TABLE        SmbiosTable;
   BOOLEAN                ExposeOem;
-  CONST CHAR8            *SmbiosProductName;
 
   if (Config->PlatformInfo.Automatic) {
     GetMacInfo (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName), &InfoData);
@@ -705,49 +705,38 @@ OcLoadPlatformSupport (
     UsedMacInfo = NULL;
   }
 
-  if (Config->PlatformInfo.UpdateDataHub) {
-    OcPlatformUpdateDataHub (Config, CpuInfo, UsedMacInfo);
-  }
-
   ExposeOem = (Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_OEM_INFO) != 0;
 
   if (ExposeOem || Config->PlatformInfo.UpdateSmbios) {
     Status = OcSmbiosTablePrepare (&SmbiosTable);
     if (!EFI_ERROR (Status)) {
-      if (ExposeOem) {
-        OcSmbiosExposeOemInfo (&SmbiosTable);
-      }
-
-      SmbiosProductName = OcSmbiosGetProductName (&SmbiosTable);
-      DEBUG ((DEBUG_INFO, "OC: Current SMBIOS: %a model %a\n", OcSmbiosGetManufacturer (&SmbiosTable), SmbiosProductName));
-      Status = AsciiStrCpyS (mCurrentSmbiosProductName, sizeof (mCurrentSmbiosProductName), SmbiosProductName);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OC: Failed to copy SMBIOS product name %a\n", SmbiosProductName));
-      }
+      OcSmbiosExtractOemInfo (
+        &SmbiosTable,
+        mCurrentSmbiosProductName,
+        ExposeOem
+        );
 
       if (Config->PlatformInfo.UpdateSmbios) {
-        SmbiosUpdateStr  = OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode);
-
-        if (AsciiStrCmp (SmbiosUpdateStr, "TryOverwrite") == 0) {
-          SmbiosUpdateMode = OcSmbiosUpdateTryOverwrite;
-        } else if (AsciiStrCmp (SmbiosUpdateStr, "Create") == 0) {
-          SmbiosUpdateMode = OcSmbiosUpdateCreate;
-        } else if (AsciiStrCmp (SmbiosUpdateStr, "Overwrite") == 0) {
-          SmbiosUpdateMode = OcSmbiosUpdateOverwrite;
-        } else if (AsciiStrCmp (SmbiosUpdateStr, "Custom") == 0) {
-          SmbiosUpdateMode = OcSmbiosUpdateCustom;
-        } else {
-          DEBUG ((DEBUG_WARN, "OC: Invalid SMBIOS update mode %a\n", SmbiosUpdateStr));
-          SmbiosUpdateMode = OcSmbiosUpdateCreate;
-        }
-
-        OcPlatformUpdateSmbios (Config, CpuInfo, UsedMacInfo, &SmbiosTable, SmbiosUpdateMode);
+        SmbiosUpdateMode = OcSmbiosGetUpdateMode (
+          OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode)
+          );
+        OcPlatformUpdateSmbios (
+          Config,
+          CpuInfo,
+          UsedMacInfo,
+          &SmbiosTable,
+          SmbiosUpdateMode
+          );
       }
 
       OcSmbiosTableFree (&SmbiosTable);
     } else {
       DEBUG ((DEBUG_WARN, "OC: Unable to obtain SMBIOS - %r\n", Status));
     }
+  }
+
+  if (Config->PlatformInfo.UpdateDataHub) {
+    OcPlatformUpdateDataHub (Config, CpuInfo, UsedMacInfo);
   }
 
   if (Config->PlatformInfo.UpdateNvram) {

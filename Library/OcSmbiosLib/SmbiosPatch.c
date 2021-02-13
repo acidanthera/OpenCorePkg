@@ -1783,13 +1783,37 @@ OcSmbiosGetSmcVersion (
   }
 }
 
+OC_SMBIOS_UPDATE_MODE
+OcSmbiosGetUpdateMode (
+  IN CONST CHAR8  *UpdateMode
+  )
+{
+  if (AsciiStrCmp (UpdateMode, "TryOverwrite") == 0) {
+    return OcSmbiosUpdateTryOverwrite;
+  }
+
+  if (AsciiStrCmp (UpdateMode, "Create") == 0) {
+    return OcSmbiosUpdateCreate;
+  }
+
+  if (AsciiStrCmp (UpdateMode, "Overwrite") == 0) {
+    return OcSmbiosUpdateOverwrite;
+  }
+
+  if (AsciiStrCmp (UpdateMode, "Custom") == 0) {
+    return OcSmbiosUpdateCustom;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCSMB: Invalid SMBIOS update mode %a\n", UpdateMode));
+  return OcSmbiosUpdateCreate;
+}
+
 EFI_STATUS
 OcSmbiosCreate (
   IN OUT OC_SMBIOS_TABLE        *SmbiosTable,
   IN     OC_SMBIOS_DATA         *Data,
   IN     OC_SMBIOS_UPDATE_MODE  Mode,
-  IN     OC_CPU_INFO            *CpuInfo,
-  IN     BOOLEAN                UseCustomMemory
+  IN     OC_CPU_INFO            *CpuInfo
   )
 {
   EFI_STATUS                      Status;
@@ -1837,7 +1861,7 @@ OcSmbiosCreate (
   // Create new memory tables if custom memory is desired.
   // Otherwise we'll patch the existing memory information.
   //
-  if (UseCustomMemory) {
+  if (Data->HasCustomMemory) {
     CreateMemoryArray (
       SmbiosTable,
       Data,
@@ -1979,107 +2003,88 @@ OcSmbiosCreate (
 }
 
 VOID
-OcSmbiosExposeOemInfo (
-  IN OC_SMBIOS_TABLE   *SmbiosTable
+OcSmbiosExtractOemInfo (
+  IN  OC_SMBIOS_TABLE   *SmbiosTable,
+  OUT CHAR8             *ProductName   OPTIONAL,
+  IN  BOOLEAN           UseVariableStorage
   )
 {
   EFI_STATUS                      Status;
+  CONST CHAR8                     *SmProductName;
+  CONST CHAR8                     *SmManufacturer;
+  CONST CHAR8                     *SmBoard;
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  CHAR8                           *Value;
-  UINTN                           Length;
+
+  SmProductName  = NULL;
+  SmManufacturer = NULL;
+  SmBoard        = NULL;
 
   Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
-
   if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
-    Value = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
-    if (Value != NULL) {
-      Length = AsciiStrLen (Value);
+    SmProductName = SmbiosGetString (Original, Original.Standard.Type1->ProductName);
+  }
+
+  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
+  if (Original.Raw != NULL) {
+    if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->Manufacturer)) {
+      SmManufacturer = SmbiosGetString (Original, Original.Standard.Type2->Manufacturer);
+    }
+    if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
+      SmBoard = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
+    }
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCSMB: Current SMBIOS %a (%a made by %a)\n",
+    SmProductName,
+    SmBoard,
+    SmManufacturer
+    ));
+
+  if (ProductName != NULL && SmProductName != NULL) {
+    Status = AsciiStrCpyS (ProductName, OC_SMBIOS_OEM_NAME_MAX, SmProductName);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OC: Failed to copy SMBIOS product name %a\n", SmProductName));
+    }
+  }
+
+  if (UseVariableStorage) {
+    if (SmProductName != NULL) {
       Status = gRT->SetVariable (
         OC_OEM_PRODUCT_VARIABLE_NAME,
         &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        Length,
-        Value
+        AsciiStrLen (SmProductName),
+        (VOID *) SmProductName
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM product\n"));
       }
-    } else {
-      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM product\n"));
     }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCSMB: Cannot access OEM Type1\n"));
-  }
 
-  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_BASEBOARD_INFORMATION, 1);
-
-  if (Original.Raw != NULL
-    && SMBIOS_ACCESSIBLE (Original, Standard.Type2->Manufacturer)
-    && SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
-    Value = SmbiosGetString (Original, Original.Standard.Type2->Manufacturer);
-    if (Value != NULL) {
-      Length = AsciiStrLen (Value);
+    if (SmManufacturer != NULL && SmBoard != NULL) {
       Status = gRT->SetVariable (
         OC_OEM_VENDOR_VARIABLE_NAME,
         &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        Length,
-        Value
+        AsciiStrLen (SmManufacturer),
+        (VOID *) SmManufacturer
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM vendor\n"));
+        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board manufacturer - %r\n", Status));
       }
-    } else {
-      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM vendor\n"));
-    }
 
-    Value = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
-    if (Value != NULL) {
-      Length = AsciiStrLen (Value);
       Status = gRT->SetVariable (
         OC_OEM_BOARD_VARIABLE_NAME,
         &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
-        Length,
-        Value
+        AsciiStrLen (SmBoard),
+        (VOID *) SmBoard
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board\n"));
+        DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board - %r\n", Status));
       }
-    } else {
-      DEBUG ((DEBUG_INFO, "OCSMB: Cannot find OEM board\n"));
     }
-  } else {
-    DEBUG ((DEBUG_INFO, "OCSMB: Cannot access OEM Type2\n"));
   }
-}
-
-CHAR8*
-OcSmbiosGetManufacturer (
-  IN OC_SMBIOS_TABLE   *SmbiosTable
-  )
-{
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-
-  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
-  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->Manufacturer)) {
-    return SmbiosGetString (Original, Original.Standard.Type1->Manufacturer);
-  }
-
-  return NULL;
-}
-
-CHAR8*
-OcSmbiosGetProductName (
-  IN OC_SMBIOS_TABLE   *SmbiosTable
-  )
-{
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-
-  Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_SYSTEM_INFORMATION, 1);
-  if (Original.Raw != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type1->ProductName)) {
-    return SmbiosGetString (Original, Original.Standard.Type1->ProductName);
-  }
-
-  return NULL;
 }

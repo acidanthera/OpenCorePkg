@@ -96,7 +96,7 @@ int ENTRY_POINT(int argc, char** argv) {
   OC_SMBIOS_TABLE  SmbiosTable;
   Status = OcSmbiosTablePrepare (&SmbiosTable);
   if (!EFI_ERROR (Status)) {
-    Status = OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo, FALSE);
+    Status = OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo);
     if (!EFI_ERROR (Status)) {
       SMBIOS_TABLE_3_0_ENTRY_POINT *patchedTablePtr = NULL;
       Status = EfiGetSystemConfigurationTable (&gEfiSmbios3TableGuid, (VOID **) &patchedTablePtr);
@@ -141,7 +141,7 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
       OC_SMBIOS_TABLE  SmbiosTable;
       Status = OcSmbiosTablePrepare (&SmbiosTable);
       if (!EFI_ERROR (Status)) {
-        OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo, FALSE);
+        OcSmbiosCreate (&SmbiosTable, &SmbiosData, OcSmbiosUpdateCreate, &CpuInfo);
         OcSmbiosTableFree (&SmbiosTable);
       }
 
