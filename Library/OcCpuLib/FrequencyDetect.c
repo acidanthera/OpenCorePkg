@@ -129,15 +129,14 @@ InternalCalculateTSCFromPMTimer (
   //
   STATIC UINT64 TSCFrequency = 0;
 
-  UINTN       TimerAddr;
+  UINT16      TimerAddr;
   UINTN       VariableSize;
-  UINT64      Tsc0;
-  UINT64      Tsc1;
+  UINT64      TscTicksDelta;
   UINT32      AcpiTick0;
   UINT32      AcpiTick1;
   UINT32      AcpiTicksDelta;
-  UINT32      AcpiTicksTarget;
-  UINT32      TimerResolution;
+  UINT32      AcpiTicksDuration;
+  BOOLEAN     HasInterrupts;
   EFI_TPL     PrevTpl;
   EFI_STATUS  Status;
 
@@ -169,8 +168,7 @@ InternalCalculateTSCFromPMTimer (
   }
 
   if (TSCFrequency == 0) {
-    TimerAddr       = InternalGetPmTimerAddr (NULL);
-    TimerResolution = 10;
+    TimerAddr       = (UINT16) InternalGetPmTimerAddr (NULL);
 
     if (TimerAddr != 0) {
       //
@@ -187,63 +185,24 @@ InternalCalculateTSCFromPMTimer (
         // The code below can handle overflow with AcpiTicksTarget of up to 24-bit size,
         // on both available sizes of ACPI PM Timers (24-bit and 32-bit).
         //
-        // 357954 clocks of ACPI timer (100ms)
+        // 357954 clocks of ACPI timer (200ms)
         //
-        AcpiTicksTarget = V_ACPI_TMR_FREQUENCY / TimerResolution;
+        AcpiTicksDuration = V_ACPI_TMR_FREQUENCY / 10;
 
         //
         // Disable all events to ensure that nobody interrupts us.
         //
         PrevTpl   = gBS->RaiseTPL (TPL_HIGH_LEVEL);
-
-        AcpiTick0 = IoRead32 (TimerAddr);
-        Tsc0      = AsmReadTsc ();
-
-        do {
-          CpuPause ();
-
-          //
-          // Check how many AcpiTicks have passed since we started.
-          //
-          AcpiTick1 = IoRead32 (TimerAddr);
-
-          if (AcpiTick0 <= AcpiTick1) {
-            //
-            // No overflow.
-            //
-            AcpiTicksDelta = AcpiTick1 - AcpiTick0;
-          } else if (AcpiTick0 - AcpiTick1 <= 0x00FFFFFF) {
-            //
-            // Overflow, 24-bit timer.
-            //
-            AcpiTicksDelta = 0x00FFFFFF - AcpiTick0 + AcpiTick1;
-          } else {
-            //
-            // Overflow, 32-bit timer.
-            //
-            AcpiTicksDelta = MAX_UINT32 - AcpiTick0 + AcpiTick1;
-          }
-
-          //
-          // Keep checking AcpiTicks until target is reached.
-          //
-        } while (AcpiTicksDelta < AcpiTicksTarget);
-
-        Tsc1 = AsmReadTsc ();
-
-        //
-        // On some systems we may end up waiting for notably longer than 100ms,
-        // despite disabling all events. Divide by actual time passed as suggested
-        // by asava's Clover patch r2668.
-        //
-        TSCFrequency = DivU64x32 (
-          MultU64x32 (Tsc1 - Tsc0, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
-          );
-
-        //
-        // Restore to normal TPL.
-        //
+        HasInterrupts = SaveAndDisableInterrupts ();
+        AsmMeasureTicks (AcpiTicksDuration, TimerAddr, &AcpiTicksDelta, &TscTicksDelta);
+        if (HasInterrupts) {
+          EnableInterrupts ();
+        }
         gBS->RestoreTPL (PrevTpl);
+
+        TSCFrequency = DivU64x32 (
+          MultU64x32 (TscTicksDelta, V_ACPI_TMR_FREQUENCY), AcpiTicksDelta
+          );
       }
     }
 

@@ -42,6 +42,23 @@ AsmReadIntelMicrocodeRevision (
   );
 
 /**
+  Measures TSC and ACPI ticks over specified ACPI tick amount.
+
+  @param[in]  AcpiTicksDuration  Number of ACPI ticks for calculation.
+  @param[in]  TimerAddr          ACPI timer address.
+  @param[out] AcpiTicksDelta     Reported ACPI ticks delta.
+  @param[out] TscTicksDelta      Reported TSC ticks delta.
+**/
+VOID
+EFIAPI
+AsmMeasureTicks (
+  IN  UINT32  AcpiTicksDuration,
+  IN  UINT16  TimerAddr,
+  OUT UINT32  *AcpiTicksDelta,
+  OUT UINT64  *TscTicksDelta
+  );
+
+/**
   Detect Apple CPU major type.
 
   @param[in] BrandString   CPU Brand String from CPUID.

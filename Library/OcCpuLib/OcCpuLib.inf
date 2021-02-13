@@ -52,8 +52,10 @@
 
 [Sources.Ia32]
   Ia32/Atomic.nasm
+  Ia32/MeasureTicks.c
   Ia32/Microcode.nasm
 
 [Sources.X64]
   X64/Atomic.nasm
+  X64/MeasureTicks.nasm
   X64/Microcode.nasm
