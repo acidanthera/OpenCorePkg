@@ -588,7 +588,7 @@ PartitionCheckGptEntryArrayCRC (
     return FALSE;
   }
 
-  Size    = PartHeader->NumberOfPartitionEntries * PartHeader->SizeOfPartitionEntry;
+  Size    = ((UINTN) PartHeader->NumberOfPartitionEntries) * PartHeader->SizeOfPartitionEntry;
 
   Status  = gBS->CalculateCrc32 (Ptr, Size, &Crc);
   if (EFI_ERROR (Status)) {
