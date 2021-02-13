@@ -928,8 +928,8 @@ InternalGetBoostrapOptionData (
       CurrLoadOption,
       *LoadOptionSize
       );
-    if (CurrLoadOption == NULL) {
-      FreePool (CurrLoadOption);
+    if (CurrDevicePath == NULL) {
+      FreePool (CurrDevicePath);
       continue;
     }
 
