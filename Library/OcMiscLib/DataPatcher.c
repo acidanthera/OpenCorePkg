@@ -15,55 +15,88 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 
-INT32
+STATIC
+BOOLEAN
+InternalFindPattern (
+  IN CONST UINT8   *Pattern,
+  IN CONST UINT8   *PatternMask OPTIONAL,
+  IN CONST UINT32  PatternSize,
+  IN CONST UINT8   *Data,
+  IN UINT32        DataSize,
+  IN UINT32        *DataOff
+  )
+{
+  UINT32   Index;
+  UINT32   LastOffset;
+  UINT32   CurrentOffset;
+
+  ASSERT (DataSize >= PatternSize);
+
+  if (PatternSize == 0) {
+    return FALSE;
+  }
+
+  CurrentOffset = *DataOff;
+  LastOffset = DataSize - PatternSize;
+
+  if (PatternMask == NULL) {
+    while (CurrentOffset <= LastOffset) {
+      for (Index = 0; Index < PatternSize; ++Index) {
+        if (Data[CurrentOffset + Index] != Pattern[Index]) {
+          break;
+        }
+      }
+
+      if (Index == PatternSize) {
+        *DataOff = CurrentOffset;
+        return TRUE;
+      }
+      ++CurrentOffset;
+    }
+  } else {
+    while (CurrentOffset <= LastOffset) {
+      for (Index = 0; Index < PatternSize; ++Index) {
+        if ((Data[CurrentOffset + Index] & PatternMask[Index]) != Pattern[Index]) {
+          break;
+        }
+      }
+
+      if (Index == PatternSize) {
+        *DataOff = CurrentOffset;
+        return TRUE;
+      }
+      ++CurrentOffset;
+    }
+  }
+
+  return FALSE;
+}
+
+BOOLEAN
 FindPattern (
   IN CONST UINT8   *Pattern,
   IN CONST UINT8   *PatternMask OPTIONAL,
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Data,
   IN UINT32        DataSize,
-  IN INT32         DataOff
+  IN UINT32        *DataOff
   )
 {
-  UINT32   Index;
-
-  ASSERT (DataOff >= 0);
-
-  if (PatternSize == 0 || DataSize == 0 || (DataOff < 0) || (UINT32)DataOff >= DataSize || DataSize - DataOff < PatternSize) {
-    return -1;
+  if (DataSize < PatternSize) {
+    return FALSE;
   }
 
-  if (PatternMask == NULL) {
-    while (DataOff + PatternSize <= DataSize) {
-      for (Index = 0; Index < PatternSize; ++Index) {
-        if (Data[DataOff + Index] != Pattern[Index]) {
-          break;
-        }
-      }
-
-      if (Index == PatternSize) {
-        return DataOff;
-      }
-      ++DataOff;
-    }
-  } else {
-    while (DataOff + PatternSize <= DataSize) {
-      for (Index = 0; Index < PatternSize; ++Index) {
-        if ((Data[DataOff + Index] & PatternMask[Index]) != Pattern[Index]) {
-          break;
-        }
-      }
-
-      if (Index == PatternSize) {
-        return DataOff;
-      }
-      ++DataOff;
-    }
-  }
-
-  return -1;
+  return InternalFindPattern (
+    Pattern,
+    PatternMask,
+    PatternSize,
+    Data,
+    DataSize,
+    DataOff
+    );
 }
 
 UINT32
@@ -80,49 +113,68 @@ ApplyPatch (
   )
 {
   UINT32  ReplaceCount;
-  INT32   DataOff;
+  UINT32  DataOff;
+  BOOLEAN Found;
+
+  if (DataSize < PatternSize) {
+    return 0;
+  }
 
   ReplaceCount = 0;
   DataOff = 0;
 
-  do {
-    DataOff = FindPattern (Pattern, PatternMask, PatternSize, Data, DataSize, DataOff);
+  while (TRUE) {
+    Found = InternalFindPattern (
+      Pattern,
+      PatternMask,
+      PatternSize,
+      Data,
+      DataSize,
+      &DataOff
+      );
 
-    if (DataOff >= 0) {
-      //
-      // Skip this finding if requested.
-      //
-      if (Skip > 0) {
-        --Skip;
-        DataOff += PatternSize;
-        continue;
-      }
-
-      //
-      // Perform replacement.
-      //
-      if (ReplaceMask == NULL) {
-        CopyMem (&Data[DataOff], Replace, PatternSize);
-      } else {
-        for (UINTN Index = 0; Index < PatternSize; ++Index) {
-          Data[DataOff + Index] = (Data[DataOff + Index] & ~ReplaceMask[Index]) | (Replace[Index] & ReplaceMask[Index]);
-        }
-      }
-      ++ReplaceCount;
-      DataOff += PatternSize;
-
-      //
-      // Check replace count if requested.
-      //
-      if (Count > 0) {
-        --Count;
-        if (Count == 0) {
-          break;
-        }
-      }
+    if (!Found) {
+      break;
     }
 
-  } while (DataOff >= 0);
+    //
+    // DataOff + PatternSize - 1 is guaranteed to be a valid offset here. As
+    // DataSize can at most be MAX_UINT32, the maximum valid offset is
+    // MAX_UINT32 - 1. In consequence, DataOff + PatternSize cannot wrap around.
+    //
+
+    //
+    // Skip this finding if requested.
+    //
+    if (Skip > 0) {
+      --Skip;
+      DataOff += PatternSize;
+      continue;
+    }
+
+    //
+    // Perform replacement.
+    //
+    if (ReplaceMask == NULL) {
+      CopyMem (&Data[DataOff], Replace, PatternSize);
+    } else {
+      for (UINTN Index = 0; Index < PatternSize; ++Index) {
+        Data[DataOff + Index] = (Data[DataOff + Index] & ~ReplaceMask[Index]) | (Replace[Index] & ReplaceMask[Index]);
+      }
+    }
+    ++ReplaceCount;
+    DataOff += PatternSize;
+
+    //
+    // Check replace count if requested.
+    //
+    if (Count > 0) {
+      --Count;
+      if (Count == 0) {
+        break;
+      }
+    }
+  }
 
   return ReplaceCount;
 }

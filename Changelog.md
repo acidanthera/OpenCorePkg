@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed ocvalidate return code to be non-zero when issues are found
 - Added `OEM` values to `PlatformInfo` in `Automatic` mode
 - Improved CPU frequency calculation on Haswell and earlier
+- Fixed issues when applying certain patches
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

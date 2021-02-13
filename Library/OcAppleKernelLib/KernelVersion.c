@@ -118,22 +118,23 @@ OcKernelReadDarwinVersion (
   IN  UINT32        KernelSize
   )
 {
-  INT32   Offset;
+  BOOLEAN Exists;
+  UINT32  Offset;
   UINT32  Index;
   CHAR8   DarwinVersion[32];
   UINT32  DarwinVersionInteger;
 
-
-  Offset = FindPattern (
+  Offset = 0;
+  Exists = FindPattern (
     (CONST UINT8 *) "Darwin Kernel Version ",
     NULL,
     L_STR_LEN ("Darwin Kernel Version "),
     Kernel,
     KernelSize,
-    0
+    &Offset
     );
 
-  if (Offset < 0) {
+  if (!Exists) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to determine kernel version\n"));
     return 0;
   }
@@ -141,7 +142,7 @@ OcKernelReadDarwinVersion (
   Offset += L_STR_LEN ("Darwin Kernel Version ");
 
   for (Index = 0; Index < ARRAY_SIZE (DarwinVersion) - 1; ++Index, ++Offset) {
-    if ((UINT32) Offset >= KernelSize || Kernel[Offset] == ':') {
+    if (Offset >= KernelSize || Kernel[Offset] == ':') {
       break;
     }
     DarwinVersion[Index] = (CHAR8) Kernel[Offset];

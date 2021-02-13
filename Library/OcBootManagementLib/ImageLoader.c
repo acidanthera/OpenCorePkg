@@ -613,19 +613,21 @@ DetectCapabilities (
   IN  UINT32                       SourceSize
   )
 {
-  INT32  Result;
+  BOOLEAN Exists;
+  UINT32  Result;
 
   //
   // Find Mac OS X version pattern.
   // This pattern started to appear with 10.7.
   //
-  Result = FindPattern (
+  Result = 0;
+  Exists = FindPattern (
     (CONST UINT8 *)"Mac OS X 10.",
     NULL,
     L_STR_LEN ("Mac OS X 10."),
     SourceBuffer,
     SourceSize - sizeof (UINT32),
-    0
+    &Result
     );
 
 #ifdef MDE_CPU_IA32
@@ -635,7 +637,7 @@ DetectCapabilities (
   // developer preview 10.8 images, so simply decide on Mac OS X
   // version pattern presence.
   //
-  if (Result >= 0) {
+  if (Exists) {
     return OC_KERN_CAPABILITY_K32_U64;
   }
   return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;
@@ -644,7 +646,7 @@ DetectCapabilities (
   // For X64 mode, when the pattern is found, this can be 10.7 or 10.8+.
   // 10.7 supports K32_64 and K64, while newer versions have only K64.
   //
-  if (Result >= 0) {
+  if (Exists) {
     if (((UINT8 *)SourceBuffer)[Result + L_STR_LEN ("Mac OS X 10.")] == '7') {
       return OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64;
     }
@@ -656,15 +658,16 @@ DetectCapabilities (
   // 10.6 supports K32 and K64, while older versions have only K32.
   // Detect 10.6 by x86_64 pattern presence.
   //
-  Result = FindPattern (
+  Result = SourceSize / 2;
+  Exists = FindPattern (
     (CONST UINT8 *)"x86_64",
     NULL,
     L_STR_SIZE ("x86_64"),
     SourceBuffer,
     SourceSize - sizeof (UINT32),
-    (INT32) (SourceSize / 2)
+    &Result
     );
-  if (Result >= 0) {
+  if (Exists) {
     return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64 | OC_KERN_CAPABILITY_K64_U64;
   }
   return OC_KERN_CAPABILITY_K32_U32 | OC_KERN_CAPABILITY_K32_U64;

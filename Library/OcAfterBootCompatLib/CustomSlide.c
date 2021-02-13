@@ -660,6 +660,7 @@ AppleSlideUnlockForSafeMode (
   UINTN       SearchSeqNewSize;
   BOOLEAN     NewWay;
   BOOLEAN     IsSur;
+  UINT32      SurOffset;
 
   StartOff = ImageBase;
   EndOff   = StartOff + ImageSize - sizeof (SearchSeq) - MaxDist;
@@ -667,14 +668,15 @@ AppleSlideUnlockForSafeMode (
   //
   // Rebranding started with macOS 11. All the ones before had Mac OS X or none.
   //
+  SurOffset = 0;
   IsSur = FindPattern (
     (CONST UINT8 *) "macOS ",
     NULL,
     L_STR_LEN ("macOS "),
     ImageBase,
     (UINT32) ImageSize,
-    0
-    ) >= 0;
+    &SurOffset
+    );
 
   if (IsSur) {
     for (FirstOff = 0; StartOff + FirstOff <= EndOff; ++FirstOff) {

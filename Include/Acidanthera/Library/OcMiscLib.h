@@ -28,14 +28,14 @@
 **/
 #define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
 
-INT32
+BOOLEAN
 FindPattern (
   IN CONST UINT8   *Pattern,
   IN CONST UINT8   *PatternMask OPTIONAL,
   IN CONST UINT32  PatternSize,
   IN CONST UINT8   *Data,
   IN UINT32        DataSize,
-  IN INT32         DataOff
+  IN UINT32        *DataOff
   );
 
 UINT32
