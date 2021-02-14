@@ -730,21 +730,17 @@ OcLoadPlatformSupport (
       Config->PlatformInfo.UseRawUuidEncoding,
       ExposeOem
       );
-  } else {
-    UseOemSerial = FALSE;
-    UseOemUuid   = FALSE;
-    UseOemMlb    = FALSE;
-    UseOemRom    = FALSE;
   }
 
   DEBUG ((
     DEBUG_INFO,
-    "OC: PlatformInfo auto %d OEM SN %d OEM UUID %d OEM MLB %d OEM ROM %d\n",
+    "OC: PlatformInfo auto %d OEM SN %d OEM UUID %d OEM MLB %d OEM ROM %d - %r\n",
     Config->PlatformInfo.Automatic,
     UseOemSerial,
     UseOemUuid,
     UseOemMlb,
-    UseOemRom
+    UseOemRom,
+    Status
     ));
 
   if (Config->PlatformInfo.Automatic) {
@@ -777,7 +773,7 @@ OcLoadPlatformSupport (
   }
 
   if (!EFI_ERROR (Status)) {
-    if (Config->PlatformInfo.UpdateSMBIOS) {
+    if (Config->PlatformInfo.UpdateSmbios) {
       SmbiosUpdateMode = OcSmbiosGetUpdateMode (
         OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode)
         );
