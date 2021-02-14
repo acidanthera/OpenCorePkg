@@ -5312,9 +5312,9 @@ Apple ROM Version
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty (OEM specified)\\
   \textbf{SMBIOS}: System Information (Type 1) --- Manufacturer\\
-  \textbf{Description}: OEM manufacturer of the particular board. Shall
-  not be specified unless strictly required. Should \emph{not} contain
-  \texttt{Apple\ Inc.}, as this confuses numerous services present in
+  \textbf{Description}: OEM manufacturer of the particular board. Use failsafe
+  unless strictly required. Do not override to contain \texttt{Apple\ Inc.}
+  on non-Apple hardware, as this confuses numerous services present in
   the operating system, such as firmware updates, eficheck, as well as
   kernel extensions developed in Acidanthera, such as Lilu and its
   plugins. In addition it will also make some operating systems
