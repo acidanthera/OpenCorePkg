@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 19:45:31 2021
-%DIF ADD ../Configuration.tex        Sat Feb 13 20:04:26 2021
+%DIF DEL PreviousConfiguration.tex   Wed Feb  3 11:12:00 2021
+%DIF ADD ../Configuration.tex        Sun Feb 14 08:04:58 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5410,9 +5410,11 @@ Apple ROM Version
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{OEM specified}\DIFdelend \DIFaddbegin \DIFadd{Empty (OEM specified)}\DIFaddend \\
   \textbf{SMBIOS}: System Information (Type 1) --- Manufacturer\\
-  \textbf{Description}: OEM manufacturer of the particular board. Shall
-  not be specified unless strictly required. Should \emph{not} contain
-  \texttt{Apple\ Inc.}, as this confuses numerous services present in
+  \textbf{Description}: OEM manufacturer of the particular board. \DIFdelbegin \DIFdel{Shall
+  not be specified }\DIFdelend \DIFaddbegin \DIFadd{Use failsafe
+  }\DIFaddend unless strictly required. \DIFdelbegin \DIFdel{Should }\emph{\DIFdel{not}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{Do not override to }\DIFaddend contain \texttt{Apple\ Inc.}
+  \DIFaddbegin \DIFadd{on non-Apple hardware}\DIFaddend , as this confuses numerous services present in
   the operating system, such as firmware updates, eficheck, as well as
   kernel extensions developed in Acidanthera, such as Lilu and its
   plugins. In addition it will also make some operating systems
