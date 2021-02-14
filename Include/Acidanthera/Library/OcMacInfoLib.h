@@ -23,7 +23,7 @@
 //
 // Maximum characters for valid Mac-like serial name.
 //
-#define OC_OEM_SERIAL_MAX 16
+#define OC_OEM_SERIAL_MAX 24
 
 //
 // Maximum characters for ROM address.
