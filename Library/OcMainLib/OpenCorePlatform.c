@@ -718,66 +718,81 @@ OcLoadPlatformSupport (
 
   ExposeOem = (Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_OEM_INFO) != 0;
 
-  if (ExposeOem || Config->PlatformInfo.UpdateSmbios) {
-    Status = OcSmbiosTablePrepare (&SmbiosTable);
-    if (!EFI_ERROR (Status)) {
-      OcSmbiosExtractOemInfo (
-        &SmbiosTable,
-        mCurrentSmbiosProductName,
-        UseOemSerial ? InfoData.Oem.SystemSerialNumber : NULL,
-        UseOemUuid ? &InfoData.Oem.SystemUuid : NULL,
-        UseOemMlb ? InfoData.Oem.Mlb : NULL,
-        UseOemRom ? InfoData.Oem.Rom : NULL,
-        Config->PlatformInfo.UseRawUuidEncoding,
-        ExposeOem
+  Status = OcSmbiosTablePrepare (&SmbiosTable);
+  if (!EFI_ERROR (Status)) {
+    OcSmbiosExtractOemInfo (
+      &SmbiosTable,
+      mCurrentSmbiosProductName,
+      UseOemSerial ? InfoData.Oem.SystemSerialNumber : NULL,
+      UseOemUuid ? &InfoData.Oem.SystemUuid : NULL,
+      UseOemMlb ? InfoData.Oem.Mlb : NULL,
+      UseOemRom ? InfoData.Oem.Rom : NULL,
+      Config->PlatformInfo.UseRawUuidEncoding,
+      ExposeOem
+      );
+  } else {
+    UseOemSerial = FALSE;
+    UseOemUuid   = FALSE;
+    UseOemMlb    = FALSE;
+    UseOemRom    = FALSE;
+  }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: PlatformInfo auto %d OEM SN %d OEM UUID %d OEM MLB %d OEM ROM %d\n",
+    Config->PlatformInfo.Automatic,
+    UseOemSerial,
+    UseOemUuid,
+    UseOemMlb,
+    UseOemRom
+    ));
+
+  if (Config->PlatformInfo.Automatic) {
+    if (!UseOemSerial) {
+      AsciiStrCpyS (
+        InfoData.Oem.SystemSerialNumber,
+        OC_OEM_SERIAL_MAX,
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)
         );
-
-      if (Config->PlatformInfo.UpdateSmbios) {
-        if (Config->PlatformInfo.Automatic) {
-          if (!UseOemSerial) {
-            AsciiStrCpyS (
-              InfoData.Oem.SystemSerialNumber,
-              OC_OEM_SERIAL_MAX,
-              OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemSerialNumber)
-              );
-          }
-
-          if (!UseOemUuid) {
-            OcAsciiStrToRawGuid (
-              OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
-              &InfoData.Oem.SystemUuid
-              );
-          }
-
-          if (!UseOemMlb) {
-            AsciiStrCpyS (
-              InfoData.Oem.Mlb,
-              OC_OEM_SERIAL_MAX,
-              OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb)
-              );
-          }
-
-          if (!UseOemRom) {
-            CopyMem (InfoData.Oem.Rom, Config->PlatformInfo.Generic.Rom, OC_OEM_ROM_MAX);
-          }
-        }
-
-        SmbiosUpdateMode = OcSmbiosGetUpdateMode (
-          OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode)
-          );
-        OcPlatformUpdateSmbios (
-          Config,
-          CpuInfo,
-          UsedMacInfo,
-          &SmbiosTable,
-          SmbiosUpdateMode
-          );
-      }
-
-      OcSmbiosTableFree (&SmbiosTable);
-    } else {
-      DEBUG ((DEBUG_WARN, "OC: Unable to obtain SMBIOS - %r\n", Status));
     }
+
+    if (!UseOemUuid) {
+      OcAsciiStrToRawGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+        &InfoData.Oem.SystemUuid
+        );
+    }
+
+    if (!UseOemMlb) {
+      AsciiStrCpyS (
+        InfoData.Oem.Mlb,
+        OC_OEM_SERIAL_MAX,
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.Mlb)
+        );
+    }
+
+    if (!UseOemRom) {
+      CopyMem (InfoData.Oem.Rom, Config->PlatformInfo.Generic.Rom, OC_OEM_ROM_MAX);
+    }
+  }
+
+  if (!EFI_ERROR (Status)) {
+    if (Config->PlatformInfo.UpdateSMBIOS) {
+      SmbiosUpdateMode = OcSmbiosGetUpdateMode (
+        OC_BLOB_GET (&Config->PlatformInfo.UpdateSmbiosMode)
+        );
+      OcPlatformUpdateSmbios (
+        Config,
+        CpuInfo,
+        UsedMacInfo,
+        &SmbiosTable,
+        SmbiosUpdateMode
+        );
+    }
+
+    OcSmbiosTableFree (&SmbiosTable);
+  } else {
+    DEBUG ((DEBUG_WARN, "OC: Unable to obtain SMBIOS - %r\n", Status));
   }
 
   if (Config->PlatformInfo.UpdateDataHub) {
