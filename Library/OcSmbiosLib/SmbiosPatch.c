@@ -2126,7 +2126,7 @@ OcSmbiosExtractOemInfo (
       &gAppleVendorVariableGuid,
       NULL,
       &TmpSize,
-      Mlb
+      Rom
       );
     if (!EFI_ERROR (Status) && TmpSize != OC_OEM_ROM_MAX) {
       ZeroMem (Rom, OC_OEM_ROM_MAX);
