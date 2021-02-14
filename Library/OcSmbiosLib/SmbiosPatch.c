@@ -16,6 +16,7 @@
 
 #include <Protocol/PciRootBridgeIo.h>
 
+#include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 #include <Guid/SmBios.h>
 
@@ -2008,7 +2009,8 @@ OcSmbiosExtractOemInfo (
   OUT CHAR8             *ProductName        OPTIONAL,
   OUT CHAR8             *SerialNumber       OPTIONAL,
   OUT EFI_GUID          *SystemUuid         OPTIONAL,
-  OUT CHAR8             *BoardSerialNumber  OPTIONAL,
+  OUT CHAR8             *Mlb                OPTIONAL,
+  OUT UINT8             *Rom                OPTIONAL,
   IN  BOOLEAN           UuidIsRawEncoded,
   IN  BOOLEAN           UseVariableStorage
   )
@@ -2019,6 +2021,7 @@ OcSmbiosExtractOemInfo (
   CONST CHAR8                     *SmBoard;
   CONST CHAR8                     *SmTmp;
   UINTN                           Index;
+  UINTN                           TmpSize;
   UINT32                          MinCount;
   UINT32                          MaxCount;
   UINT8                           *UuidWalker;
@@ -2090,14 +2093,43 @@ OcSmbiosExtractOemInfo (
     if (SMBIOS_ACCESSIBLE (Original, Standard.Type2->ProductName)) {
       SmBoard = SmbiosGetString (Original, Original.Standard.Type2->ProductName);
     }
-    if (BoardSerialNumber != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type2->SerialNumber)) {
+    if (Mlb != NULL && SMBIOS_ACCESSIBLE (Original, Standard.Type2->SerialNumber)) {
       SmTmp = SmbiosGetString (Original, Original.Standard.Type2->SerialNumber);
       if (SmTmp != NULL) {
-        Status = AsciiStrCpyS (BoardSerialNumber, OC_OEM_SERIAL_MAX, SmTmp);
+        Status = AsciiStrCpyS (Mlb, OC_OEM_SERIAL_MAX, SmTmp);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "OCSMB: Failed to copy SMBIOS board serial %a\n", SmTmp));
         }
       }
+    }
+  }
+
+  if (Mlb != NULL) {
+    TmpSize = OC_OEM_SERIAL_MAX - 1;
+    Status = gRT->GetVariable (
+      L"MLB",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &TmpSize,
+      Mlb
+      );
+    if (!EFI_ERROR (Status)) {
+      ZeroMem (Mlb + TmpSize, OC_OEM_SERIAL_MAX - TmpSize);
+      DEBUG ((DEBUG_INFO, "OCSMB: MLB from NVRAM took precedence: %a\n", Mlb));
+    }
+  }
+
+  if (Rom != NULL) {
+    TmpSize = OC_OEM_ROM_MAX;
+    Status = gRT->GetVariable (
+      L"ROM",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &TmpSize,
+      Mlb
+      );
+    if (!EFI_ERROR (Status) && TmpSize != OC_OEM_ROM_MAX) {
+      ZeroMem (Rom, OC_OEM_ROM_MAX);
     }
   }
 

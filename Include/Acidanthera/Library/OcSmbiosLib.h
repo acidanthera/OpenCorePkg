@@ -234,6 +234,7 @@ OcSmbiosCreate (
 
 /**
   Extract OEM information from SMBIOS to different places.
+  Note, for MLB and ROM NVRAM values take precedence.
 
   @param[in,out] SmbiosTable         SMBIOS Table handle.
   @param[out]    ProductName         Export SMBIOS Type 1 product name,
@@ -242,8 +243,10 @@ OcSmbiosCreate (
                                      requiring OC_OEM_SERIAL_MAX bytes.
   @param[out]    SystemUuid          Export SMBIOS Type 1 system UUID.
                                      UUID is always returned in RAW format.
-  @param[out]    BoardSerialNumber   Export SMBIOS Type 2 board serial,
+  @param[out]    Mlb                 Export SMBIOS Type 2 board serial,
                                      requiring OC_OEM_SERIAL_MAX bytes.
+  @param[out]    Rom                 Export ROM serial, requiring
+                                     OC_OEM_ROM_MAX bytes.
   @param[out]    UuidIsRawEncoded    Pass FALSE to assume SMBIOS stores
                                      SystemUuid in Little Endian format
                                      and needs byte-swap.
@@ -255,7 +258,8 @@ OcSmbiosExtractOemInfo (
   OUT CHAR8             *ProductName        OPTIONAL,
   OUT CHAR8             *SerialNumber       OPTIONAL,
   OUT EFI_GUID          *SystemUuid         OPTIONAL,
-  OUT CHAR8             *BoardSerialNumber  OPTIONAL,
+  OUT CHAR8             *Mlb                OPTIONAL,
+  OUT UINT8             *Rom                OPTIONAL,
   IN  BOOLEAN           UuidIsRawEncoded,
   IN  BOOLEAN           UseVariableStorage
   );

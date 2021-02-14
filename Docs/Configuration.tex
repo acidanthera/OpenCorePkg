@@ -4800,15 +4800,19 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
 
-  Specify \texttt{OEM} value to extract current value from SMBIOS
-  and use it throughout the sections. This feature can only be
-  used on Mac-compatible firmwares.
+  Specify \texttt{OEM} value to extract current value from NVRAM
+  (\texttt{MLB} variable) or SMBIOS and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmwares.
 \item
   \texttt{ROM}\\
-  \textbf{Type}: \texttt{plist\ data}, 6 bytes\\
+  \textbf{Type}: \texttt{plist\ metadata}, 6 bytes\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
+
+  Specify \texttt{OEM} value to extract current value from NVRAM
+  (\texttt{ROM} variable) and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmwares.
 
 \end{enumerate}
 

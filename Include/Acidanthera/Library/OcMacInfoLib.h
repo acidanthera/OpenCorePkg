@@ -25,6 +25,11 @@
 //
 #define OC_OEM_SERIAL_MAX 16
 
+//
+// Maximum characters for ROM address.
+//
+#define OC_OEM_ROM_MAX 6
+
 typedef struct MAC_INFO_DATA_SMBIOS_ {
   //
   // Type 0
@@ -83,7 +88,8 @@ typedef struct MAC_INFO_DATA_DATAHUB_ {
 
 typedef struct MAC_INFO_DATA_OEM_ {
   CHAR8         SystemSerialNumber[OC_OEM_SERIAL_MAX];
-  CHAR8         BoardSerialNumber[OC_OEM_SERIAL_MAX];
+  CHAR8         Mlb[OC_OEM_SERIAL_MAX];
+  UINT8         Rom[OC_OEM_ROM_MAX];
   EFI_GUID      SystemUuid;
 } MAC_INFO_DATA_OEM;
 
