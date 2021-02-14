@@ -505,7 +505,7 @@ OcPlatformUpdateNvram (
     Bid            = MacInfo->Smbios.BoardProduct;
     BidSize        = AsciiStrLen (Bid);
     Mlb            = MacInfo->Oem.BoardSerialNumber;
-    MlbSize        = Config->PlatformInfo.Generic.Mlb.Size - 1;
+    MlbSize        = AsciiStrLen (Mlb);
     Rom            = &Config->PlatformInfo.Generic.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Generic.Rom);
     CopyGuid (&Uuid, &MacInfo->Oem.SystemUuid);
