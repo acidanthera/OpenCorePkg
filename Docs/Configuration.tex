@@ -1394,10 +1394,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Allows booting macOS through a relocation block.
 
   Relocation block is a scratch buffer allocated in lower 4 GB to be used for
-  loading the kernel and related structures by EfiBoot on firmwares where
-  lower memory is otherwise occupied by the (assumed to be) non-runtime data.
-  Right before kernel startup the relocation block is copied back to lower
-  addresses. Similarly all the other addresses pointing to relocation block
+  loading the kernel and related structures by EfiBoot on firmware where the
+  lower memory region is otherwise occupied by (assumed) non-runtime data.
+  Right before kernel startup, the relocation block is copied back to lower
+  addresses. Similarly, all the other addresses pointing to relocation block
   are also carefully adjusted. Relocation block can be used when:
 
   \begin{itemize}
@@ -3017,8 +3017,8 @@ entry choice will update till next manual reconfiguration.
   boot option in UEFI variable storage at bootloader startup. For this option
   to work \texttt{RequestBootVarRouting} is required to be enabled.
   \item \texttt{Short} --- create a short boot option instead of a complete one.
-  This variant is useful for some older firmwares, Insyde in particular,
-  but possibly others, which cannot handle full device paths.
+  This variant is useful for some older types of firmware, typically from Insyde,
+  that are unable to manage full device paths.
   \end{itemize}
 
   This option provides integration with third-party operating system installation and upgrade
@@ -4781,7 +4781,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   Specify special string value \texttt{OEM} to extract current value from SMBIOS
   and use it throughout the sections. This feature can only be
-  used on Mac-compatible firmwares.
+  used on Mac-compatible firmware.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
@@ -4789,8 +4789,8 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 
   Specify special string value \texttt{OEM} to extract current value from SMBIOS
-  and use it throughout the sections. Since not all firmwares
-  have valid (and unique) values, this feature is not applicable
+  and use it throughout the sections. Since not every firmware implementation
+  has valid (and unique) values, this feature is not applicable
   to some setups, and may provide unexpected results. It is highly
   recommended to specify the UUID explicitly. Refer to
   \texttt{UseRawUuidEncoding} to determine how SMBIOS value is parsed.
@@ -4802,7 +4802,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   Specify special string value \texttt{OEM} to extract current value from NVRAM
   (\texttt{MLB} variable) or SMBIOS and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmwares.
+  This feature can only be used on Mac-compatible firmware.
 \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ metadata}, 6 bytes\\
@@ -4812,7 +4812,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   Specify special string value \texttt{OEM} to extract current value from NVRAM
   (\texttt{ROM} variable) and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmwares.
+  This feature can only be used on Mac-compatible firmware.
 
 \end{enumerate}
 

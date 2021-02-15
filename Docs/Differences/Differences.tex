@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Feb 14 13:02:39 2021
-%DIF ADD ../Configuration.tex        Mon Feb 15 00:42:21 2021
+%DIF DEL PreviousConfiguration.tex   Sat Feb  6 19:45:31 2021
+%DIF ADD ../Configuration.tex        Mon Feb 15 10:03:52 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1474,10 +1474,10 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Allows booting macOS through a relocation block.
 
   Relocation block is a scratch buffer allocated in lower 4 GB to be used for
-  loading the kernel and related structures by EfiBoot on firmwares where
-  lower memory is otherwise occupied by the (assumed to be) non-runtime data.
-  Right before kernel startup the relocation block is copied back to lower
-  addresses. Similarly all the other addresses pointing to relocation block
+  loading the kernel and related structures by EfiBoot on \DIFdelbegin \DIFdel{firmwares where lower memory }\DIFdelend \DIFaddbegin \DIFadd{firmware where the
+  lower memory region }\DIFaddend is otherwise occupied by \DIFdelbegin \DIFdel{the (assumedto be}\DIFdelend \DIFaddbegin \DIFadd{(assumed}\DIFaddend ) non-runtime data.
+  Right before kernel startup\DIFaddbegin \DIFadd{, }\DIFaddend the relocation block is copied back to lower
+  addresses. Similarly\DIFaddbegin \DIFadd{, }\DIFaddend all the other addresses pointing to relocation block
   are also carefully adjusted. Relocation block can be used when:
 
   \begin{itemize}
@@ -3110,8 +3110,9 @@ entry choice will update till next manual reconfiguration.
   boot option in UEFI variable storage at bootloader startup. For this option
   to work \texttt{RequestBootVarRouting} is required to be enabled.
   \item \texttt{Short} --- create a short boot option instead of a complete one.
-  This variant is useful for some older firmwares, Insyde in particular,
-  but possibly others, which cannot handle full device paths.
+  This variant is useful for some older \DIFdelbegin \DIFdel{firmwares, Insyde in particular,
+  but possibly others, which cannot handle }\DIFdelend \DIFaddbegin \DIFadd{types of firmware, typically from Insyde,
+  that are unable to manage }\DIFaddend full device paths.
   \end{itemize}
 
   This option provides integration with third-party operating system installation and upgrade
@@ -4877,7 +4878,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
   and use it throughout the sections. This feature can only be
-  used on Mac-compatible firmwares.
+  used on Mac-compatible firmware.
 }\DIFaddend \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
@@ -4886,8 +4887,8 @@ be used. Version with macOS specific enhancements can be downloaded from
 \DIFaddbegin 
 
   \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
-  and use it throughout the sections. Since not all firmwares
-  have valid (and unique) values, this feature is not applicable
+  and use it throughout the sections. Since not every firmware implementation
+  has valid (and unique) values, this feature is not applicable
   to some setups, and may provide unexpected results. It is highly
   recommended to specify the UUID explicitly. Refer to
   }\texttt{\DIFadd{UseRawUuidEncoding}} \DIFadd{to determine how SMBIOS value is parsed.
@@ -4900,7 +4901,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
   (}\texttt{\DIFadd{MLB}} \DIFadd{variable) or SMBIOS and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmwares.
+  This feature can only be used on Mac-compatible firmware.
 }\DIFaddend \item
   \texttt{ROM}\\
   \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{metadata}\DIFaddend }, 6 bytes\\
@@ -4910,7 +4911,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   \DIFaddbegin \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
   (}\texttt{\DIFadd{ROM}} \DIFadd{variable) and use it throughout the sections.
-  This feature can only be used on Mac-compatible firmwares.
+  This feature can only be used on Mac-compatible firmware.
 }
 
 \DIFaddend \end{enumerate}
