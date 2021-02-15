@@ -309,7 +309,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define EB_FEATURE_HAS_APPLE_SECURE_BOOT        0x00200000U
 //
 // Apple Trusted Boot enabled configuration (detected via proto & policy).
-// Some unfinished(?) variant of Secure Boot found in preview firmwares.
+// Some unfinished(?) variant of Secure Boot found in preview firmware.
 // 24B73556-2197-4702-82A8-3E1337DAFBF3 GUID.
 //
 #define EB_FEATURE_HAS_APPLE_TRUSTED_BOOT       0x01000000U

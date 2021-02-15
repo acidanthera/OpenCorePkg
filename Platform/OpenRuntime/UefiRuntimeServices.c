@@ -139,11 +139,11 @@ IsEfiBootVar (
   // every Boot#### variable as a potential boot option regardless
   // of the GUID namespace it is in.
   //
-  // The correct way to do it is to only check Boot#### variables in
-  // gEfiGlobalVariableGuid VendorGuid. However, since they made a mistake,
-  // most ASUS firmwares (and perhaps other vendors) get corrupted boot option
-  // list (with e.g. duplicated options) if Boot#### variables are present
-  // outside of gEfiGlobalVariableGuid.
+  // The correct way is to only check for Boot#### variables under the
+  // gEfiGlobalVariableGuid VendorGuid. Due to these bugs however, the
+  // boot option list on most ASUS firmware, and perhaps other vendors, is
+  // corrupted (e.g. duplicated options) if Boot#### variables are present
+  // outside gEfiGlobalVariableGuid.
   //
   // This is the case with OpenCore as we store macOS-specific boot options
   // in a separate GUID (gOcVendorVariableGuid). To workaround the issue

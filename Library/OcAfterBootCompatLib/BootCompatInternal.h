@@ -119,7 +119,7 @@
 #define CALL_GATE_JUMP_SIZE      (sizeof (CALL_GATE_JUMP))
 
 /**
-  Command used to perform an absolute 64-bit jump from Call Gate to our code.  
+  Command used to perform an absolute 64-bit jump from Call Gate to our code.
 **/
 #pragma pack(push,1)
 typedef struct CALL_GATE_JUMP_ {
@@ -315,12 +315,12 @@ typedef struct KERNEL_SUPPORT_STATE_ {
   UINTN                    VmMapDescSize;
   ///
   /// Relocation block is a scratch buffer allocated in lower 4GB to be used for
-  /// loading the kernel and related structures by EfiBoot on firmwares where
-  /// lower memory is otherwise occupied (assumed to be) non-runtime data.
+  /// loading the kernel and related structures by EfiBoot on firmware where the
+  /// lower memory region is otherwise occupied by (assumed) non-runtime data.
   /// Relocation block can be used when:
   /// - no better slide exists (all the memory is used)
   /// - slide=0 is forced (by an argument or safe mode)
-  /// - KASLR (slide) is unsupported (macOS 10.7 or older) 
+  /// - KASLR (slide) is unsupported (macOS 10.7 or older)
   /// Right before kernel startup the relocation block is copied back to lower
   /// addresses. Similarly all the other addresses pointing to relocation block
   /// are also carefully adjusted.
