@@ -94,8 +94,10 @@ CheckPlatformInfoGeneric (
   }
 
   AsciiSystemUUID     = OC_BLOB_GET (&UserPlatformInfo->Generic.SystemUuid);
-  if (AsciiSystemUUID[0] != '\0' && !AsciiGuidIsLegal (AsciiSystemUUID)) {
-    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked!\n"));
+  if (AsciiSystemUUID[0] != '\0'
+    && AsciiStrCmp (AsciiSystemUUID, "OEM") != 0
+    && !AsciiGuidIsLegal (AsciiSystemUUID)) {
+    DEBUG ((DEBUG_WARN, "PlatformInfo->Generic->SystemUUID is borked (Can only be empty, special string OEM or valid UUID)!\n"));
     ++ErrorCount;
   }
 
