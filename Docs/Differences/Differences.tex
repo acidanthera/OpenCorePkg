@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Sun Feb 14 16:01:13 2021
+%DIF DEL PreviousConfiguration.tex   Sun Feb 14 13:02:39 2021
+%DIF ADD ../Configuration.tex        Mon Feb 15 00:42:21 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4875,7 +4875,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 \DIFaddbegin 
 
-  \DIFadd{Specify }\texttt{\DIFadd{OEM}} \DIFadd{value to extract current value from SMBIOS
+  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
   and use it throughout the sections. This feature can only be
   used on Mac-compatible firmwares.
 }\DIFaddend \item
@@ -4885,7 +4885,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 \DIFaddbegin 
 
-  \DIFadd{Specify }\texttt{\DIFadd{OEM}} \DIFadd{value to extract current value from SMBIOS
+  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
   and use it throughout the sections. Since not all firmwares
   have valid (and unique) values, this feature is not applicable
   to some setups, and may provide unexpected results. It is highly
@@ -4898,7 +4898,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{BoardSerialNumber}.
 \DIFaddbegin 
 
-  \DIFadd{Specify }\texttt{\DIFadd{OEM}} \DIFadd{value to extract current value from NVRAM
+  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
   (}\texttt{\DIFadd{MLB}} \DIFadd{variable) or SMBIOS and use it throughout the sections.
   This feature can only be used on Mac-compatible firmwares.
 }\DIFaddend \item
@@ -4908,7 +4908,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
 
-  \DIFaddbegin \DIFadd{Specify }\texttt{\DIFadd{OEM}} \DIFadd{value to extract current value from NVRAM
+  \DIFaddbegin \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
   (}\texttt{\DIFadd{ROM}} \DIFadd{variable) and use it throughout the sections.
   This feature can only be used on Mac-compatible firmwares.
 }
@@ -6940,9 +6940,9 @@ While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
 release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
 image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFadd{article}}
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
 \DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFdel{article}}%DIFAUXCMD
+}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
 \DIFdel{.
 Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
 However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.
