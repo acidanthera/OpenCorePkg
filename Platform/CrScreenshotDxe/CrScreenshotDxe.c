@@ -215,7 +215,7 @@ TakeScreenshot (
   //
   ScreenWidth  = GraphicsOutput->Mode->Info->HorizontalResolution;
   ScreenHeight = GraphicsOutput->Mode->Info->VerticalResolution;
-  ImageSize    = ScreenWidth * ScreenHeight;
+  ImageSize    = (UINTN) ScreenWidth * ScreenHeight;
 
   if (ImageSize == 0) {
     DEBUG ((DEBUG_INFO, "OCSCR: Empty screen size\n"));
