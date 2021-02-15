@@ -717,6 +717,8 @@ OcKernelInjectKexts (
       );
     
     Status = PrelinkedInjectComplete (Context);
+  } else {
+    Status = EFI_UNSUPPORTED;
   }
 
   if (EFI_ERROR (Status)) {
