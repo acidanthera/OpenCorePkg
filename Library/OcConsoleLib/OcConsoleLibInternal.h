@@ -29,6 +29,11 @@ typedef struct {
   EFI_UGA_DRAW_PROTOCOL         Uga;
 } OC_UGA_PROTOCOL;
 
+typedef struct {
+  EFI_UGA_DRAW_PROTOCOL         *Uga;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  GraphicsOutput;
+} OC_GOP_PROTOCOL;
+
 EFI_STATUS
 OcSetConsoleResolutionForProtocol (
   IN  EFI_GRAPHICS_OUTPUT_PROTOCOL    *GraphicsOutput,
