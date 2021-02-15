@@ -435,7 +435,9 @@ InternalKxldStateRebasePlist (
 
         KxldState += Delta;
 
-        AsciiUint64ToLowerHex (ScratchWalker, KEXT_OFFSET_STR_LEN, KxldState);
+        if (!AsciiUint64ToLowerHex (ScratchWalker, KEXT_OFFSET_STR_LEN, KxldState)) {
+          return EFI_INVALID_PARAMETER;
+        }
         XmlNodeChangeContent (KextPlistValue, ScratchWalker);
         ScratchWalker += AsciiStrSize (ScratchWalker);
       }
