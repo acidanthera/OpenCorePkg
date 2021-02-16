@@ -283,13 +283,45 @@ CpuFlushTlb (
 {
 }
 
+UINT8
+EFIAPI
+IoRead8 (
+  IN      UINTN                     Port
+  )
+{
+  return 0;
+}
+
+UINT8
+EFIAPI
+IoWrite8 (
+  IN      UINTN                     Port,
+  IN      UINT8                     Value
+  )
+{
+  (void) Port;
+  return Value;
+}
+
 UINT32
 EFIAPI
 IoRead32 (
   IN      UINTN                     Port
   )
 {
+  ASSERT ((Port & 3) == 0);
   return 0;
+}
+
+UINT32
+EFIAPI
+IoWrite32 (
+  IN      UINTN                     Port,
+  IN      UINT32                    Value
+  )
+{
+  ASSERT ((Port & 3) == 0);
+  return Value;
 }
 
 UINT16
