@@ -123,18 +123,18 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   if (ErrorCount == 0) {
     DEBUG ((
       DEBUG_ERROR,
-      "Done checking %a in %llu ms\n",
+      "Completed validating %a in %llu ms. No issues found.\n",
       ConfigFileName,
       GetCurrentTimestamp () - ExecTimeStart
       ));
   } else {
     DEBUG ((
       DEBUG_ERROR,
-      "Done checking %a in %llu ms, but it has %u %a to be fixed\n",
+      "Completed validating %a in %llu ms. Found %u %a requiring attention.\n",
       ConfigFileName,
       GetCurrentTimestamp () - ExecTimeStart,
       ErrorCount,
-      ErrorCount > 1 ? "errors" : "error"
+      ErrorCount > 1 ? "issues" : "issue"
       ));
 
     return EXIT_FAILURE;
@@ -154,6 +154,6 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
     OcConfigurationFree (&Config);
     FreePool (NewData);
   }
-  
+
   return 0;
 }
