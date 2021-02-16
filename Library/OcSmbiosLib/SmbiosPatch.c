@@ -2119,6 +2119,21 @@ OcSmbiosExtractOemInfo (
     }
   }
 
+  if (SerialNumber != NULL) {
+    TmpSize = OC_OEM_SERIAL_MAX - 1;
+    Status = gRT->GetVariable (
+      L"SSN",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &TmpSize,
+      SerialNumber
+      );
+    if (!EFI_ERROR (Status)) {
+      ZeroMem (SerialNumber + TmpSize, OC_OEM_SERIAL_MAX - TmpSize);
+      DEBUG ((DEBUG_INFO, "OCSMB: SSN from NVRAM took precedence: %a\n", SerialNumber));
+    }
+  }
+
   if (Rom != NULL) {
     TmpSize = OC_OEM_ROM_MAX;
     Status = gRT->GetVariable (
@@ -2130,6 +2145,22 @@ OcSmbiosExtractOemInfo (
       );
     if (!EFI_ERROR (Status) && TmpSize != OC_OEM_ROM_MAX) {
       ZeroMem (Rom, OC_OEM_ROM_MAX);
+    }
+  }
+
+  if (SystemUuid != NULL) {
+    TmpSize = sizeof (EFI_GUID);
+    Status = gRT->GetVariable (
+      L"system-id",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &TmpSize,
+      SystemUuid
+      );
+    if (!EFI_ERROR (Status) && TmpSize == sizeof (EFI_GUID)) {
+      DEBUG ((DEBUG_INFO, "OCSMB: UUID from NVRAM took precedence: %g\n", SystemUuid));
+    } else if (TmpSize != sizeof (EFI_GUID)) {
+      ZeroMem (SystemUuid, sizeof (EFI_GUID));
     }
   }
 

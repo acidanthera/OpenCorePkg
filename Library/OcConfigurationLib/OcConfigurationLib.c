@@ -598,6 +598,7 @@ mPlatformConfigurationNvramSchema[] = {
   OC_SCHEMA_DATAF_IN  ("FirmwareFeaturesMask", OC_GLOBAL_CONFIG, PlatformInfo.Nvram.FirmwareFeaturesMask),
   OC_SCHEMA_STRING_IN ("MLB",                  OC_GLOBAL_CONFIG, PlatformInfo.Nvram.Mlb),
   OC_SCHEMA_DATAF_IN  ("ROM",                  OC_GLOBAL_CONFIG, PlatformInfo.Nvram.Rom),
+  OC_SCHEMA_STRING_IN ("SystemSerialNumber",   OC_GLOBAL_CONFIG, PlatformInfo.Nvram.SystemSerialNumber),
   OC_SCHEMA_STRING_IN ("SystemUUID",           OC_GLOBAL_CONFIG, PlatformInfo.Nvram.SystemUuid),
 };
 

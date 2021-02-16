@@ -480,6 +480,8 @@ OcPlatformUpdateNvram (
   UINTN        BidSize;
   CONST CHAR8  *Mlb;
   UINTN        MlbSize;
+  CONST CHAR8  *Ssn;
+  UINTN        SsnSize;
   CONST  UINT8 *Rom;
   UINTN        RomSize;
   EFI_GUID     Uuid;
@@ -493,6 +495,8 @@ OcPlatformUpdateNvram (
     BidSize        = Config->PlatformInfo.Nvram.Bid.Size - 1;
     Mlb            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.Mlb);
     MlbSize        = Config->PlatformInfo.Nvram.Mlb.Size - 1;
+    Ssn            = OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemSerialNumber);
+    SsnSize        = Config->PlatformInfo.Nvram.SystemSerialNumber.Size - 1;
     Rom            = &Config->PlatformInfo.Nvram.Rom[0];
     RomSize        = sizeof (Config->PlatformInfo.Nvram.Rom);
     Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
@@ -506,6 +510,8 @@ OcPlatformUpdateNvram (
     BidSize        = AsciiStrLen (Bid);
     Mlb            = MacInfo->Oem.Mlb;
     MlbSize        = AsciiStrLen (Mlb);
+    Ssn            = MacInfo->Oem.SystemSerialNumber;
+    SsnSize        = AsciiStrLen (Ssn);
     Rom            = &MacInfo->Oem.Rom[0];
     RomSize        = OC_OEM_ROM_MAX;
     CopyGuid (&Uuid, &MacInfo->Oem.SystemUuid);
@@ -601,6 +607,36 @@ OcPlatformUpdateNvram (
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
       "OC: Setting MLB %a - %r\n",
       Mlb,
+      Status
+      ));
+  }
+
+  if (Ssn[0] != '\0') {
+    Status = gRT->SetVariable (
+      L"HW_SSN",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      SsnSize,
+      (CHAR8 *) Ssn
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting HW_SSN %a - %r\n",
+      Ssn,
+      Status
+      ));
+
+    Status = gRT->SetVariable (
+      L"SSN",
+      &gAppleVendorVariableGuid,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      SsnSize,
+      (CHAR8 *) Ssn
+      );
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "OC: Setting SSN %a - %r\n",
+      Ssn,
       Status
       ));
   }

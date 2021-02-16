@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 19:45:31 2021
-%DIF ADD ../Configuration.tex        Mon Feb 15 10:03:52 2021
+%DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
+%DIF ADD ../Configuration.tex        Tue Feb 16 15:51:52 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4348,7 +4348,11 @@ improvements:
   \break
   Hardware ROM. Override for ROM. Present on newer Macs (2013+ at least).
 \item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:prev-lang:kbd}
+  \DIFaddbegin \texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:SSN}}
+  \break
+  \DIFadd{Serial number. Present on newer Macs (2013+ at least).
+}\item
+  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:prev-lang:kbd}
   \break
   ASCII string defining default keyboard layout. Format is \texttt{lang-COUNTRY:keyboard},
   e.g. \texttt{ru-RU:252} for Russian locale and ABC keyboard. Also accepts short forms:
@@ -4876,9 +4880,9 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 \DIFaddbegin 
 
-  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
-  and use it throughout the sections. This feature can only be
-  used on Mac-compatible firmware.
+  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
+  (}\texttt{\DIFadd{SSN}} \DIFadd{variable) or SMBIOS and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmware.
 }\DIFaddend \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
@@ -4886,11 +4890,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 \DIFaddbegin 
 
-  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from SMBIOS
-  and use it throughout the sections. Since not every firmware implementation
-  has valid (and unique) values, this feature is not applicable
-  to some setups, and may provide unexpected results. It is highly
-  recommended to specify the UUID explicitly. Refer to
+  \DIFadd{Specify special string value }\texttt{\DIFadd{OEM}} \DIFadd{to extract current value from NVRAM
+  (}\texttt{\DIFadd{system-id}} \DIFadd{variable) or SMBIOS and use it throughout the sections.
+  Since not every firmware implementation has valid (and unique) values, this
+  feature is not applicable to some setups, and may provide unexpected results.
+  It is highly recommended to specify the UUID explicitly. Refer to
   }\texttt{\DIFadd{UseRawUuidEncoding}} \DIFadd{to determine how SMBIOS value is parsed.
 }\DIFaddend \item
   \texttt{MLB}\\
@@ -5354,7 +5358,16 @@ be used. Version with macOS specific enhancements can be downloaded from
   \end{itemize}
 
 \item
-  \texttt{SystemUUID}\\
+  \DIFaddbegin \texttt{\DIFadd{SystemSerialNumber}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty (Not installed)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Specifies the values of NVRAM variables
+  }\texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_SSN}} \DIFadd{and
+  }\texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:SSN}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the value of NVRAM variable
@@ -6941,9 +6954,9 @@ While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
 release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
 image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFadd{article}}
 \DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
-}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFdel{article}}%DIFAUXCMD
 \DIFdel{.
 Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
 However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.

@@ -503,6 +503,7 @@ typedef enum {
 #define OC_PLATFORM_NVRAM_CONFIG_FIELDS(_, __) \
   _(OC_STRING                   , Bid                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Mlb                   ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , SystemSerialNumber    ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , SystemUuid            ,     , OC_STRING_CONSTR ("", _, __)     , OC_DESTR (OC_STRING) ) \
   _(UINT8                       , Rom                   , [6] , {0}                              , ()                   ) \
   _(UINT64                      , FirmwareFeatures      ,     , 0                                , ()                   ) \

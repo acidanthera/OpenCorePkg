@@ -4253,6 +4253,10 @@ improvements:
   \break
   Hardware ROM. Override for ROM. Present on newer Macs (2013+ at least).
 \item
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:SSN}
+  \break
+  Serial number. Present on newer Macs (2013+ at least).
+\item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:prev-lang:kbd}
   \break
   ASCII string defining default keyboard layout. Format is \texttt{lang-COUNTRY:keyboard},
@@ -4779,20 +4783,20 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemSerialNumber}.
 
-  Specify special string value \texttt{OEM} to extract current value from SMBIOS
-  and use it throughout the sections. This feature can only be
-  used on Mac-compatible firmware.
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{SSN} variable) or SMBIOS and use it throughout the sections.
+  This feature can only be used on Mac-compatible firmware.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to SMBIOS \texttt{SystemUUID}.
 
-  Specify special string value \texttt{OEM} to extract current value from SMBIOS
-  and use it throughout the sections. Since not every firmware implementation
-  has valid (and unique) values, this feature is not applicable
-  to some setups, and may provide unexpected results. It is highly
-  recommended to specify the UUID explicitly. Refer to
+  Specify special string value \texttt{OEM} to extract current value from NVRAM
+  (\texttt{system-id} variable) or SMBIOS and use it throughout the sections.
+  Since not every firmware implementation has valid (and unique) values, this
+  feature is not applicable to some setups, and may provide unexpected results.
+  It is highly recommended to specify the UUID explicitly. Refer to
   \texttt{UseRawUuidEncoding} to determine how SMBIOS value is parsed.
 \item
   \texttt{MLB}\\
@@ -5252,6 +5256,14 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:FirmwareFeaturesMask}
   \item \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ExtendedFirmwareFeaturesMask}
   \end{itemize}
+
+\item
+  \texttt{SystemSerialNumber}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Not installed)\\
+  \textbf{Description}: Specifies the values of NVRAM variables
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:HW\_SSN} and
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:SSN}.
 
 \item
   \texttt{SystemUUID}\\
