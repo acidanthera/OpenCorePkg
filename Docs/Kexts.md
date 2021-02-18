@@ -31,7 +31,7 @@ Kexts
 | [GK701HIDDevice.kext](https://github.com/osy86/GK701HIDDevice) | — | — |
 | [NoTouchID.kext](https://github.com/al3xtjames/NoTouchID) | 17.0.0 (10.13) | — |
 | [SerialMouse.kext](https://github.com/Goldfish64/SerialMouse) | — | — |
-| [VoodooI2C.kext](https://github.com/alexandred/VoodooI2C) | 16.0.0 (10.12) | — |
+| [VoodooI2C.kext](https://github.com/VoodooI2C/VoodooI2C) | 16.0.0 (10.12) | — |
 | [VoodooPS2Controller.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooPS2Keyboard.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
 | [VoodooPS2Mouse.kext](https://github.com/acidanthera/VoodooPS2) | 15.0.0 (10.11) | — |
