@@ -546,10 +546,6 @@ HdaCodecProbeFuncGroup(
         // Get widget index.
         // This can be gotten using the node ID of the connection minus our starting node ID.
         UINT16 WidgetIndex = HdaWidget->Connections[c] - WidgetStart;
-        if (WidgetIndex < 0) {
-          DEBUG((DEBUG_INFO, "Widget @ 0x%X error connection to index %u (0x%X) is invalid\n", WidgetIndex, HdaWidget->Connections[c]));
-          continue;
-        }
 
         // Save pointer to widget.
         HdaConnectedWidget = FuncGroup->Widgets + WidgetIndex;
