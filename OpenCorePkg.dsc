@@ -154,14 +154,26 @@
   MdeModulePkg/Bus/Usb/UsbMouseDxe/UsbMouseDxe.inf
   MdeModulePkg/Universal/HiiDatabaseDxe/HiiDatabaseDxe.inf
   OpenCorePkg/Application/BootKicker/BootKicker.inf
-  OpenCorePkg/Application/Bootstrap/Bootstrap.inf
+  OpenCorePkg/Application/Bootstrap/Bootstrap.inf {
+    <LibraryClasses>
+      !if $(TARGET) != RELEASE
+        # Force onscreen visible logging in DEBUG/NOOPT builds.
+        NULL|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeGenericLib.inf
+      !endif
+  }
   OpenCorePkg/Application/ChipTune/ChipTune.inf
   OpenCorePkg/Application/CleanNvram/CleanNvram.inf
   OpenCorePkg/Application/GopStop/GopStop.inf
   OpenCorePkg/Application/KeyTester/KeyTester.inf
   OpenCorePkg/Application/MmapDump/MmapDump.inf
   OpenCorePkg/Application/OpenControl/OpenControl.inf
-  OpenCorePkg/Application/OpenCore/OpenCore.inf
+  OpenCorePkg/Application/OpenCore/OpenCore.inf {
+    <LibraryClasses>
+      !if $(TARGET) != RELEASE
+        # Force onscreen visible logging in DEBUG/NOOPT builds.
+        NULL|OpenCorePkg/Library/OcConsoleControlEntryModeLib/OcConsoleControlEntryModeGenericLib.inf
+      !endif
+  }
   OpenCorePkg/Application/PavpProvision/PavpProvision.inf
   OpenCorePkg/Application/ResetSystem/ResetSystem.inf
   OpenCorePkg/Application/RtcRw/RtcRw.inf

@@ -147,7 +147,7 @@ UefiMain (
   EFI_LOADED_IMAGE_PROTOCOL         *LoadedImage;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL   *FileSystem;
 
-  DEBUG ((DEBUG_INFO, "BS: Starting OpenCore...\n"));
+  DEBUG ((DEBUG_INFO, "BS: Starting OpenCore application...\n"));
 
   //
   // We have just started at EFI/BOOT/BOOTx64.efi.
