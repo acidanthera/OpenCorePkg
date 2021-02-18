@@ -14,7 +14,11 @@
 
 #include <Uefi.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Protocol/LoadedImage.h>
+#include <Protocol/SimpleFileSystem.h>
 
 EFI_STATUS
 OcLoadAndRunImage (
@@ -24,8 +28,9 @@ OcLoadAndRunImage (
   OUT  EFI_HANDLE                *ImageHandle OPTIONAL
   )
 {
-  EFI_STATUS  Status;
-  EFI_HANDLE  NewHandle;
+  EFI_STATUS                 Status;
+  EFI_HANDLE                 NewHandle;
+  EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
 
   //
   // Run OpenCore image
@@ -45,6 +50,48 @@ OcLoadAndRunImage (
   }
 
   DEBUG ((DEBUG_INFO, "OCM: Loaded image at %p handle\n", NewHandle));
+
+  Status = gBS->HandleProtocol (
+    NewHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **) &LoadedImage
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCM: Loaded image has DeviceHandle %p FilePath %p ours DevicePath %p\n",
+      LoadedImage->DeviceHandle,
+      LoadedImage->FilePath,
+      DevicePath
+      ));
+
+    //
+    // Some fragile firmware fail to properly set LoadedImage when buffer is provided.
+    // REF: https://github.com/acidanthera/bugtracker/issues/712
+    // REF: https://github.com/acidanthera/bugtracker/issues/1502
+    //
+    if (DevicePath != NULL && LoadedImage->DeviceHandle == NULL) {
+      Status = gBS->LocateDevicePath (
+        &gEfiSimpleFileSystemProtocolGuid,
+        &DevicePath,
+        &LoadedImage->DeviceHandle
+        );
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OCM: LocateDevicePath on loaded handle %p - %r\n",
+        LoadedImage->DeviceHandle,
+        Status
+        ));
+
+      if (!EFI_ERROR (Status)) {
+        if (LoadedImage->FilePath != NULL) {
+          FreePool (LoadedImage->FilePath);
+        }
+        LoadedImage->FilePath = DuplicateDevicePath (DevicePath);
+      }
+    }
+  }
 
   Status = gBS->StartImage (
     NewHandle,

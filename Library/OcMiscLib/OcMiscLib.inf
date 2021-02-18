@@ -35,6 +35,7 @@
   gEfiPciIoProtocolGuid
   gEfiShellParametersProtocolGuid
   gEfiLoadedImageProtocolGuid
+  gEfiSimpleFileSystemProtocolGuid
 
 [LibraryClasses]
   BaseLib

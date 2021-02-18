@@ -306,6 +306,13 @@ UefiMain (
     return EFI_NOT_FOUND;
   }
 
+  if (LoadedImage->DeviceHandle == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Missing boot device\n"));
+    //
+    // This is not critical as boot path may be complete.
+    //
+  }
+
   if (LoadedImage->FilePath == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Missing boot path\n"));
     return EFI_INVALID_PARAMETER;
