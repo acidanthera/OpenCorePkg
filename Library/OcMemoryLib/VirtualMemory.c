@@ -26,17 +26,47 @@ OcGetCurrentPageTable (
   )
 {
   PAGE_MAP_AND_DIRECTORY_POINTER  *PageTable;
-  UINTN                           CR3;
+  UINTN                           Cr3;
 
-  CR3 = AsmReadCr3 ();
+  Cr3 = AsmReadCr3 ();
 
-  PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN) (CR3 & CR3_ADDR_MASK);
+  PageTable = (PAGE_MAP_AND_DIRECTORY_POINTER *)(UINTN) (Cr3 & CR3_ADDR_MASK);
 
   if (Flags != NULL) {
-    *Flags = CR3 & (CR3_FLAG_PWT | CR3_FLAG_PCD);
+    *Flags = Cr3 & (CR3_FLAG_PWT | CR3_FLAG_PCD);
   }
 
   return PageTable;
+}
+
+STATIC
+BOOLEAN
+DisablePageTableWriteProtection (
+  VOID
+  )
+{
+  UINTN  Cr0;
+
+  Cr0 = AsmReadCr0 ();
+
+  if ((Cr0 & CR0_WP) != 0) {
+    AsmWriteCr0 (Cr0 & ~CR0_WP);
+    return TRUE;
+  }
+
+  return FALSE;
+}
+
+STATIC
+VOID
+EnablePageTableWriteProtection (
+  VOID
+  )
+{
+  UINTN  Cr0;
+
+  Cr0 = AsmReadCr0 ();
+  AsmWriteCr0 (Cr0 | CR0_WP);
 }
 
 EFI_STATUS
@@ -208,10 +238,13 @@ VmMapVirtualPage (
   PAGE_TABLE_2M_ENTRY             *PTE2M;
   PAGE_TABLE_1G_ENTRY             *PTE1G;
   UINTN                           Index;
+  BOOLEAN                         WriteProtected;
 
   if (PageTable == NULL) {
     PageTable = OcGetCurrentPageTable (NULL);
   }
+
+  WriteProtected = DisablePageTableWriteProtection ();
 
   VA.Uint64 = (UINT64) VirtualAddr;
 
@@ -242,6 +275,9 @@ VmMapVirtualPage (
     PDPE = (PAGE_MAP_AND_DIRECTORY_POINTER *) VmAllocatePages (Context, 1);
 
     if (PDPE == NULL) {
+      if (WriteProtected) {
+        EnablePageTableWriteProtection ();
+      }
       return EFI_NO_MAPPING;
     }
 
@@ -282,6 +318,9 @@ VmMapVirtualPage (
     PDE = (PAGE_MAP_AND_DIRECTORY_POINTER *) VmAllocatePages(Context, 1);
 
     if (PDE == NULL) {
+      if (WriteProtected) {
+        EnablePageTableWriteProtection ();
+      }
       return EFI_NO_MAPPING;
     }
 
@@ -325,6 +364,9 @@ VmMapVirtualPage (
     PTE4K = (PAGE_TABLE_4K_ENTRY *) VmAllocatePages (Context, 1);
 
     if (PTE4K == NULL) {
+      if (WriteProtected) {
+        EnablePageTableWriteProtection ();
+      }
       return EFI_NO_MAPPING;
     }
 
@@ -369,6 +411,10 @@ VmMapVirtualPage (
   PTE4K->Uint64 = ((UINT64) PhysicalAddr) & PAGING_4K_ADDRESS_MASK_64;
   PTE4K->Bits.ReadWrite = 1;
   PTE4K->Bits.Present = 1;
+
+  if (WriteProtected) {
+    EnablePageTableWriteProtection ();
+  }
 
   return EFI_SUCCESS;
 }

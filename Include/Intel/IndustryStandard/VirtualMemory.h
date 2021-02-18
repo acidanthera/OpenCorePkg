@@ -142,6 +142,8 @@ typedef union {
 
 #pragma pack(pop)
 
+#define CR0_WP                      BIT16
+
 #define CR3_ADDR_MASK               0x000FFFFFFFFFF000ull
 #define CR3_FLAG_PWT                0x0000000000000008ull
 #define CR3_FLAG_PCD                0x0000000000000010ull
