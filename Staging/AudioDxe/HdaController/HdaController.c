@@ -380,10 +380,10 @@ HdaControllerScanCodecs (
   IN HDA_CONTROLLER_DEV *HdaControllerDev
   )
 {
-  DEBUG((DEBUG_VERBOSE, "HdaControllerScanCodecs(): start\n"));
+  DEBUG ((DEBUG_VERBOSE, "HdaControllerScanCodecs(): start\n"));
 
   EFI_STATUS            Status;
-  EFI_PCI_IO_PROTOCOL   *PciIo = HdaControllerDev->PciIo;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
   UINT16                HdaStatests;
   EFI_HDA_IO_VERB_LIST  HdaCodecVerbList;
   UINT32                VendorVerb;
@@ -398,6 +398,8 @@ HdaControllerScanCodecs (
   if (HdaControllerDev == NULL) {
     return EFI_INVALID_PARAMETER;
   }
+
+  PciIo = HdaControllerDev->PciIo;
 
   //
   // Get STATESTS register.
