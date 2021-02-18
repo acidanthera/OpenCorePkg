@@ -204,7 +204,7 @@ with the full list available in
   \texttt{plist\ real} --- floating point number, conforms to
   \texttt{real}, unsupported.
 \item
-  \texttt{plist\ metadata} --- value cast to data by the implementation.
+  \texttt{plist\ multidata} --- value cast to data by the implementation.
   Permits passing \texttt{plist\ string}, in which case the result is
   represented by a null-terminated sequence of bytes (aka C string),
   \texttt{plist\ integer}, in which case the result is represented by
@@ -1766,7 +1766,7 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets device properties from a map (\texttt{plist\ dict})
   of device paths to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ metadata} format. Device paths must be provided in canonic string
+  in \texttt{plist\ multidata} format. Device paths must be provided in canonic string
   format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
   be set if not present and not deleted.
 
@@ -4097,7 +4097,7 @@ use.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets NVRAM variables from a map (\texttt{plist\ dict})
   of GUIDs to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ metadata} format. GUIDs must be provided in canonic string
+  in \texttt{plist\ multidata} format. GUIDs must be provided in canonic string
   format in upper or lower case (e.g. \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}).
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
@@ -4809,7 +4809,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   This feature can only be used on Mac-compatible firmware.
 \item
   \texttt{ROM}\\
-  \textbf{Type}: \texttt{plist\ metadata}, 6 bytes\\
+  \textbf{Type}: \texttt{plist\ multidata}, 6 bytes\\
   \textbf{Failsafe}: Empty (OEM specified or not installed)\\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.

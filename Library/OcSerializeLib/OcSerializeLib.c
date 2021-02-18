@@ -228,7 +228,7 @@ ParseSerializedValue (
       Result = PlistStringValue (Node, Field, &Size);
       break;
     case OC_SCHEMA_VALUE_MDATA:
-      Result = PlistMetaDataValue (Node, Field, &Size);
+      Result = PlistMultiDataValue (Node, Field, &Size);
       break;
   }
 
@@ -272,7 +272,7 @@ ParseSerializedBlob (
       Result = PlistStringSize (Node, &Size);
       break;
     case OC_SCHEMA_BLOB_MDATA:
-      Result = PlistMetaDataSize (Node, &Size);
+      Result = PlistMultiDataSize (Node, &Size);
       break;
   }
 
@@ -319,7 +319,7 @@ ParseSerializedBlob (
       Result = PlistStringValue (Node, (CHAR8 *) BlobMemory, BlobSize);
       break;
     case OC_SCHEMA_BLOB_MDATA:
-      Result = PlistMetaDataValue (Node, (UINT8 *) BlobMemory, BlobSize);
+      Result = PlistMultiDataValue (Node, (UINT8 *) BlobMemory, BlobSize);
       break;
   }
 

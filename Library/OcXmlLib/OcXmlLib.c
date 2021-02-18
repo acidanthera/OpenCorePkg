@@ -1684,7 +1684,7 @@ PlistIntegerValue (
 }
 
 BOOLEAN
-PlistMetaDataValue (
+PlistMultiDataValue (
   XML_NODE  *Node,
   VOID      *Buffer,
   UINT32    *Size
@@ -1794,7 +1794,7 @@ PlistDataSize (
 }
 
 BOOLEAN
-PlistMetaDataSize (
+PlistMultiDataSize (
   XML_NODE  *Node,
   UINT32    *Size
   )
