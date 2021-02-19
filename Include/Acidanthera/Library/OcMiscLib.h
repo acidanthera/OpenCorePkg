@@ -95,6 +95,18 @@ OcHandleProtocolFallback (
   );
 
 /**
+  Count instances found under a specific protocol.
+
+  @param[in]  Protocol      Protocol to search for.
+
+  @return     Number of instances found.
+**/
+UINTN
+OcCountProtocolInstances (
+  IN EFI_GUID  *Protocol
+  );
+
+/**
   Run and execute image file from buffer.
 
   @param[in]  DevicePath   Image device path, optional.

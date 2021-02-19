@@ -121,17 +121,47 @@ OcHandleProtocolFallback (
   EFI_STATUS Status;
 
   Status = gBS->HandleProtocol (
-                  Handle,
-                  Protocol,
-                  Interface
-                  );
+    Handle,
+    Protocol,
+    Interface
+    );
   if (EFI_ERROR (Status)) {
     Status = gBS->LocateProtocol (
-                    Protocol,
-                    NULL,
-                    Interface
-                    );
+      Protocol,
+      NULL,
+      Interface
+      );
   }
 
   return Status;
+}
+
+UINTN
+OcCountProtocolInstances (
+  IN EFI_GUID  *Protocol
+  )
+{
+  EFI_STATUS  Status;
+  UINTN       HandleCount;
+  EFI_HANDLE  *HandleBuffer;
+
+  HandleCount = 0;
+
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    Protocol,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+  if (EFI_ERROR (Status)) {
+    //
+    // No instance can be found on error.
+    //
+    return 0;
+  }
+
+  FreePool (HandleBuffer);
+
+  return HandleCount;
 }
