@@ -110,6 +110,9 @@ int ENTRY_POINT(int argc, const char *argv[]) {
     DEBUG ((DEBUG_ERROR, "Invalid config\n"));
     return -1;
   }
+  if (ErrorCount > 0) {
+    DEBUG ((DEBUG_ERROR, "Serialisation returns %u %a!\n", ErrorCount, ErrorCount > 1 ? "errors" : "error"));
+  }
 
   //
   // Print a newline that splits errors between OcConfigurationInit and config checkers.
