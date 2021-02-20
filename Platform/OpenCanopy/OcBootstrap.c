@@ -33,9 +33,48 @@
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
 extern CONST GUI_IMAGE         mBackgroundImage;
 
+STATIC GUI_DRAWING_CONTEXT              mDrawContext;
+STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
+
 STATIC
-GUI_DRAWING_CONTEXT
-mDrawContext;
+EFI_STATUS
+OcShowMenuByOcEnter (
+  IN     OC_BOOT_CONTEXT          *BootContext
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = GuiLibConstruct (
+    BootContext->PickerContext,
+    mGuiContext.CursorDefaultX,
+    mGuiContext.CursorDefaultY
+    );
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Extension for OpenCore builtin renderer to mark that we control text output here.
+  //
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
+  mPreviousMode = OcConsoleControlSetMode (EfiConsoleControlScreenGraphics);
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+VOID
+OcShowMenuByOcLeave (
+  VOID
+  )
+{
+  GuiLibDestruct ();
+  //
+  // Extension for OpenCore builtin renderer to mark that we no longer control text output here.
+  //
+  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
+  OcConsoleControlSetMode (mPreviousMode);
+}
 
 EFI_STATUS
 EFIAPI
@@ -56,19 +95,10 @@ OcShowMenuByOc (
   mGuiContext.PickerContext = BootContext->PickerContext;
   mGuiContext.AudioPlaybackTimeout = -1;
 
-  Status = GuiLibConstruct (
-    BootContext->PickerContext,
-    mGuiContext.CursorDefaultX,
-    mGuiContext.CursorDefaultY
-    );
+  Status = OcShowMenuByOcEnter (BootContext);
   if (EFI_ERROR (Status)) {
     return Status;
   }
-
-  //
-  // Extension for OpenCore builtin renderer to mark that we control text output here.
-  //
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   //
   // Do not play intro animation for blind.
@@ -83,7 +113,7 @@ OcShowMenuByOc (
     InternalGetCursorImage
     );
   if (EFI_ERROR (Status)) {
-    GuiLibDestruct ();
+    OcShowMenuByOcLeave ();
     return Status;
   }
 
@@ -95,7 +125,7 @@ OcShowMenuByOc (
       Index == BootContext->DefaultEntry->EntryIndex - 1
       );
     if (EFI_ERROR (Status)) {
-      GuiLibDestruct ();
+      OcShowMenuByOcLeave ();
       return Status;
     }
   }
@@ -138,12 +168,7 @@ OcShowMenuByOc (
   //
   GuiClearScreen (&mDrawContext, mBackgroundImage.Buffer);
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
-  GuiLibDestruct ();
-
-  //
-  // Extension for OpenCore builtin renderer to mark that we no longer control text output here.
-  //
-  gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_UNCONTROLLED);
+  OcShowMenuByOcLeave ();
 
   *ChosenBootEntry = mGuiContext.BootEntry;
   BootContext->PickerContext->HideAuxiliary = mGuiContext.HideAuxiliary;

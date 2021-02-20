@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Tue Feb 16 15:51:52 2021
+%DIF DEL PreviousConfiguration.tex   Sat Feb 20 14:08:32 2021
+%DIF ADD ../Configuration.tex        Sat Feb 20 14:08:32 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -39,7 +39,11 @@
 \makeatother
 
 % Newer LaTeX versions should not add ligatures to listings, but for some reason
-% it is not the case for me. As a result select PDF viewers copy wrong data.
+%DIF 39c39
+%DIF < % it is not the case for me. As a result select PDF viewers copy wrong data.
+%DIF -------
+% it is not the case for me. As a result, certain PDF viewers copy wrong data. %DIF > 
+%DIF -------
 \lstdefinestyle{ocbash}{
   language=bash,
   frame=tb,
@@ -175,12 +179,12 @@
 
 \section{Introduction}\label{introduction}
 
-This document provides information on
-\href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
+This document provides information on \DIFaddbegin \DIFadd{the
+}\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
 configuration file format used to set up the correct functioning of the macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
-shall be considered to be documentation or implementation bugs which should be
+shall be considered to be documentation or implementation \DIFdelbegin \DIFdel{bugs }\DIFdelend \DIFaddbegin \DIFadd{flaws }\DIFaddend which should be
 reported via the \href{https://github.com/acidanthera/bugtracker}{Acidanthera Bugtracker}.
 An errata sheet is available in
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Errata/Errata.pdf}{OpenCorePkg repository}.
@@ -264,7 +268,7 @@ with the full list available in
   \texttt{plist\ real} --- floating point number, conforms to
   \texttt{real}, unsupported.
 \item
-  \texttt{plist\ metadata} --- value cast to data by the implementation.
+  \texttt{plist\ \DIFdelbegin \DIFdel{metadata}\DIFdelend \DIFaddbegin \DIFadd{multidata}\DIFaddend } --- value cast to data by the implementation.
   Permits passing \texttt{plist\ string}, in which case the result is
   represented by a null-terminated sequence of bytes (aka C string),
   \texttt{plist\ integer}, in which case the result is represented by
@@ -282,38 +286,40 @@ with the full list available in
 \begin{itemize}
 \item
   \texttt{OC\ config} --- OpenCore Configuration file in \texttt{plist}
-  format named \texttt{config.plist}. It has to provide extensible way
+  format named \texttt{config.plist}. It \DIFdelbegin \DIFdel{has to provide }\DIFdelend \DIFaddbegin \DIFadd{provides an }\DIFaddend extensible way
   to configure OpenCore and is structured to be separated into multiple
-  named sections situated in the root \texttt{plist\ dictionary}. These
-  sections are permitted to have \texttt{plist\ array} or
+  named sections situated \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{under }\DIFaddend the root \texttt{plist\ dictionary}. These
+  sections \DIFdelbegin \DIFdel{are permitted to }\DIFdelend \DIFaddbegin \DIFadd{may }\DIFaddend have \texttt{plist\ array} or
   \texttt{plist\ dictionary} types and are described in corresponding
   sections of this document.
 \item
   \texttt{valid\ key} --- \texttt{plist\ key} object of
   \texttt{OC\ config} described in this document or its future
   revisions. Besides explicitly described \texttt{valid\ keys}, keys
-  starting with \texttt{\#} symbol (e.g. \texttt{\#Hello}) are also
-  considered \texttt{valid\ keys} and behave as comments, effectively
-  discarding their value, which is still required to be a valid
-  \texttt{plist\ object}. All other \texttt{plist\ keys} are not valid,
-  and their presence yields to \texttt{undefined\ behaviour}.
+  starting with \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{\#} symbol (e.g. \texttt{\#Hello}) are also
+  considered \texttt{valid\ keys} and \DIFaddbegin \DIFadd{while they }\DIFaddend behave as comments, effectively
+  discarding their \DIFdelbegin \DIFdel{value, which is }\DIFdelend \DIFaddbegin \DIFadd{values, they are }\DIFaddend still required to be \DIFdelbegin \DIFdel{a valid
+  }\DIFdelend \DIFaddbegin \DIFadd{valid
+  }\DIFaddend \texttt{plist\ \DIFdelbegin \DIFdel{object}\DIFdelend \DIFaddbegin \DIFadd{objects}\DIFaddend }. All other \texttt{plist\ keys} are not valid,
+  and their presence \DIFdelbegin \DIFdel{yields to }\DIFdelend \DIFaddbegin \DIFadd{results in }\DIFaddend \texttt{undefined\ behaviour}.
 \item
   \texttt{valid\ value} --- valid \texttt{plist\ object} of
   \texttt{OC\ config} described in this document that matches all the
-  additional requirements in specific \texttt{plist\ object} description
-  if any.
+  additional requirements in specific \texttt{plist\ object} \DIFdelbegin \DIFdel{description
+  }\DIFdelend \DIFaddbegin \DIFadd{descriptions
+  }\DIFaddend if any.
 \item
   \texttt{invalid\ value} --- valid \texttt{plist\ object} of
   \texttt{OC\ config} described in this document that is of other
   \texttt{plist\ type}, does not conform to additional requirements
-  found in specific \texttt{plist\ object} description (e.g.~value
+  found in specific \texttt{plist\ object} \DIFdelbegin \DIFdel{description }\DIFdelend \DIFaddbegin \DIFadd{descriptions }\DIFaddend (e.g.~value
   range), or missing from the corresponding collection.
-  \texttt{Invalid\ value} is read with or without an error message as
+  \texttt{Invalid\ \DIFdelbegin \DIFdel{value}\DIFdelend \DIFaddbegin \DIFadd{values}\DIFaddend } \DIFdelbegin \DIFdel{is }\DIFdelend \DIFaddbegin \DIFadd{are }\DIFaddend read with or without an error message as
   any possible value of this \texttt{plist\ object} in an undetermined
   manner (i.e.~the values may not be same across the reboots). Whilst
   reading an \texttt{invalid\ value} is equivalent to reading certain
-  defined \texttt{valid\ value}, applying incompatible value to the host
-  system may yield to \texttt{undefined\ behaviour}.
+  defined \texttt{valid\ \DIFdelbegin \DIFdel{value}\DIFdelend \DIFaddbegin \DIFadd{values}\DIFaddend }, applying incompatible \DIFdelbegin \DIFdel{value }\DIFdelend \DIFaddbegin \DIFadd{values }\DIFaddend to the host
+  system may \DIFdelbegin \DIFdel{yield to }\DIFdelend \DIFaddbegin \DIFadd{result in }\DIFaddend \texttt{undefined\ behaviour}.
 \item
   \texttt{optional\ value} --- \texttt{valid\ value} of
   \texttt{OC\ config} described in this document that reads in a certain
@@ -325,55 +331,82 @@ with the full list available in
   \texttt{invalid\ value} if missing.
 \item
   \texttt{fatal\ behaviour} --- behaviour leading to boot termination.
-  Implementation must stop the boot process from going any further until
-  next host system boot. It is allowed but not required to perform cold
-  reboot or show any warning message.
+  \DIFdelbegin \DIFdel{Implementation must stop }\DIFdelend \DIFaddbegin \DIFadd{Implementations shall prevent }\DIFaddend the boot process from \DIFdelbegin \DIFdel{going any further until
+  }\DIFdelend \DIFaddbegin \DIFadd{continuing until
+  the }\DIFaddend next host system boot. It is \DIFdelbegin \DIFdel{allowed }\DIFdelend \DIFaddbegin \DIFadd{permitted, }\DIFaddend but not required\DIFdelbegin \DIFdel{to perform cold reboot or show any warning message}\DIFdelend \DIFaddbegin \DIFadd{, to
+  execute cold reboots or to show warning messages in such cases}\DIFaddend .
 \item
   \texttt{undefined\ behaviour} --- behaviour not prescribed by this
-  document. Implementation is allowed to take any measures including but
-  not limited to \texttt{fatal\ behaviour}, assuming any states or
-  values, or ignoring, unless these measures negatively affect system
-  security in general.
+  document. \DIFdelbegin \DIFdel{Implementation is allowed to }\DIFdelend \DIFaddbegin \DIFadd{Implementations may }\DIFaddend take any measures including\DIFaddbegin \DIFadd{, }\DIFaddend but not
+  limited to\DIFaddbegin \DIFadd{, measures associated with }\DIFaddend \texttt{fatal\ behaviour}, \DIFdelbegin \DIFdel{assuming any states or values, or ignoring, unless these measures negatively affect system security in general}\DIFdelend \DIFaddbegin \DIFadd{assumptions
+  of any state or value, or disregarding any associated states or values. This is
+  however subject to such measures not negatively impacting upon system integrity}\DIFaddend .
 \end{itemize}
 
 \subsection{Configuration Processing}\label{configuration-processing}
 
-\texttt{OC\ config} is guaranteed to be processed at least once if it
-was found. Depending on OpenCore bootstrapping mechanism multiple
-\texttt{OC\ config} files may lead to reading any of them. No
-\texttt{OC\ Config} may be present on disk, in which case all the values
-read follow the rules of \texttt{invalid\ value} and
-\texttt{optional\ value}.
+\DIFaddbegin \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFaddbegin \DIFadd{file }\DIFaddend is guaranteed to be processed at least once if \DIFdelbegin \DIFdel{it
+was }\DIFdelend found.
+Depending on OpenCore bootstrapping mechanism\DIFaddbegin \DIFadd{, the presence of }\DIFaddend multiple
+\texttt{OC\ config} files may lead to \DIFdelbegin \DIFdel{reading }\DIFdelend \DIFaddbegin \DIFadd{the reading of }\DIFaddend any of them. \DIFdelbegin \DIFdel{No
+}\DIFdelend \DIFaddbegin \DIFadd{It is
+permissible for no }\DIFaddend \texttt{OC\ Config} \DIFdelbegin \DIFdel{may }\DIFdelend \DIFaddbegin \DIFadd{file to }\DIFaddend be present on disk\DIFdelbegin \DIFdel{, in which case all the values
+read }\DIFdelend \DIFaddbegin \DIFadd{. In such cases,
+if the implementation does not abort the boot process, all values shall }\DIFaddend follow the
+rules of \texttt{invalid\ \DIFdelbegin \DIFdel{value}\DIFdelend \DIFaddbegin \DIFadd{values}\DIFaddend } and \texttt{optional\ \DIFdelbegin \DIFdel{value}\DIFdelend \DIFaddbegin \DIFadd{values}\DIFaddend }.
 
-\texttt{OC\ config} has size, nesting, and key amount limitations.
-\texttt{OC\ config} size does not exceed \texttt{16\ MBs}.
-\texttt{OC\ config} has no more than \texttt{8} nesting levels.
-\texttt{OC\ config} has up to \texttt{16384} XML nodes (i.e.~one
-\texttt{plist\ dictionary} item is counted as a pair of nodes) within
-each \texttt{plist\ object}.
-
-Reading malformed \texttt{OC\ config} file leads to
-\texttt{undefined\ behaviour}. Examples of malformed \texttt{OC\ config}
-cover at least the following cases:
+\DIFaddbegin \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{has }\DIFdelend \DIFaddbegin \DIFadd{file has restrictions on }\DIFaddend size, nesting \DIFdelbegin \DIFdel{, and key amount limitations.
+}\DIFdelend \DIFaddbegin \DIFadd{levels, and number of keys:
+}
 
 \begin{itemize}
 \tightlist
 \item
-  files non-conformant to \texttt{plist} DTD
-\item
-  files with unsupported or non-conformant \texttt{plist\ objects} found
-  in this document
-\item
-  files violating size, nesting, and key amount limitations
+  \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{size does not exceed }\DIFdelend \DIFaddbegin \DIFadd{file size shall not exceed }\DIFaddend \texttt{\DIFdelbegin \DIFdel{16}\DIFdelend \DIFaddbegin \DIFadd{32}\DIFaddend \ MBs}.
+\DIFaddbegin \item
+  \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{has no more than }\DIFdelend \DIFaddbegin \DIFadd{file shall not have more than }\DIFaddend \texttt{\DIFdelbegin \DIFdel{8}\DIFdelend \DIFaddbegin \DIFadd{32}\DIFaddend } nesting levels.
+\DIFaddbegin \item
+  \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{has up to }\DIFdelend \DIFaddbegin \DIFadd{file may have up to }\DIFaddend \texttt{\DIFdelbegin \DIFdel{16384}\DIFdelend \DIFaddbegin \DIFadd{32,768}\DIFaddend } XML nodes \DIFdelbegin \DIFdel{(i.
+  e.~one
+}\DIFdelend \DIFaddbegin \DIFadd{within
+  each }\texttt{\DIFadd{plist\ object}}\DIFadd{.
+  }\begin{itemize}
+  \tightlist
+    \item \DIFadd{One }\DIFaddend \texttt{plist\ dictionary} item is counted as a pair of nodes
+  \DIFdelbegin \DIFdel{) within
+each }\texttt{\DIFdel{plist\ object}}%DIFAUXCMD
+\DIFdel{.
+}\DIFdelend \DIFaddbegin \end{itemize} \medskip
 \end{itemize}
+\DIFaddend 
 
-It is recommended but not required to abort loading malformed
-\texttt{OC\ config} and continue as if no \texttt{OC\ config} was
-present. For forward compatibility it is recommended but not required
-for the implementation to warn about the use of
-\texttt{invalid\ values}. Recommended practice of interpreting
-\texttt{invalid\ values} is to conform to the following convention where
-applicable:
+Reading malformed \texttt{OC\ config} \DIFdelbegin \DIFdel{file leads to
+}\DIFdelend \DIFaddbegin \DIFadd{files results in
+}\DIFaddend \texttt{undefined\ behaviour}. Examples of malformed \texttt{OC\ config} \DIFdelbegin \DIFdel{cover at least the followingcases}\DIFdelend \DIFaddbegin \DIFadd{files
+include the following}\DIFaddend :
+
+\begin{itemize}
+\tightlist
+\item
+  \DIFdelbegin \DIFdel{files non-conformant to }\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\ config}} \DIFadd{files that do not conform to }\DIFaddend \texttt{\DIFdelbegin \DIFdel{plist}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdelend DTD \DIFaddbegin \DIFadd{PLIST 1.0}}\DIFadd{.
+}\DIFaddend \item
+  \DIFaddbegin \texttt{\DIFadd{OC\ config}} \DIFaddend files with unsupported or non-conformant \texttt{plist\ objects} found
+  in this document\DIFaddbegin \DIFadd{.
+}\DIFaddend \item
+  \DIFdelbegin \DIFdel{files violating }\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\ config}} \DIFadd{files violating restrictions on }\DIFaddend size, nesting \DIFdelbegin \DIFdel{, and key amount limitations
+}\DIFdelend \DIFaddbegin \DIFadd{levels, and number of keys.
+}\DIFaddend \end{itemize}
+
+It is recommended\DIFaddbegin \DIFadd{, }\DIFaddend but not required\DIFaddbegin \DIFadd{, }\DIFaddend to abort loading malformed
+\texttt{OC\ config} \DIFdelbegin \DIFdel{and }\DIFdelend \DIFaddbegin \DIFadd{files and to }\DIFaddend continue as if \DIFdelbegin \DIFdel{no }\DIFdelend \DIFaddbegin \DIFadd{an }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{was
+}\DIFdelend \DIFaddbegin \DIFadd{file is
+not }\DIFaddend present. For forward compatibility\DIFaddbegin \DIFadd{, }\DIFaddend it is recommended\DIFaddbegin \DIFadd{, }\DIFaddend but not required\DIFaddbegin \DIFadd{,
+}\DIFaddend for the implementation to warn about the use of \texttt{invalid\ values}.
+\DIFdelbegin \DIFdel{Recommended practice of }\DIFdelend \DIFaddbegin 
+
+\DIFadd{The recommended practice for }\DIFaddend interpreting \texttt{invalid\ values}
+is to conform to the following convention where applicable:
 
 \begin{center}
 \begin{tabular}{|l|l|}
@@ -400,11 +433,15 @@ applicable:
 
 \subsection{Configuration Structure}\label{configuration-structure}
 
-\texttt{OC\ config} is separated into following sections, which are described
-in separate sections of this document. By default it is tried to not enable
-anything and optionally provide kill switches with \texttt{Enable} property
-for \texttt{plist dict} entries. In general the configuration is written
-idiomatically to group similar actions in subsections:
+\DIFaddbegin \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFaddbegin \DIFadd{file }\DIFaddend is separated into \DIFdelbegin \DIFdel{following sections, which are }\DIFdelend \DIFaddbegin \DIFadd{subsections, as }\DIFaddend described in
+separate sections of this document\DIFdelbegin \DIFdel{. By default it is tried to not enable
+anything and optionally }\DIFdelend \DIFaddbegin \DIFadd{, and is designed so as to attempt not to
+enable anything by default as well as to }\DIFaddend provide kill switches \DIFdelbegin \DIFdel{with }\DIFdelend \DIFaddbegin \DIFadd{via an }\DIFaddend \texttt{Enable}
+property for \texttt{plist dict} entries \DIFdelbegin \DIFdel{. In general the configuration is written
+idiomatically to group similar actions in subsections }\DIFdelend \DIFaddbegin \DIFadd{that represent optional plugins and similar.
+}
+
+\DIFadd{The file is structured to group related elements in subsections as follows}\DIFaddend :
 
 \begin{itemize}
 \tightlist
@@ -442,14 +479,19 @@ Root configuration entries consist of the following:
   \hyperref[uefi]{\texttt{UEFI}}
 \end{itemize}
 
-It is possible to perform basic validation of the configuration by using
-\texttt{ocvalidate} utility. Please note, that \texttt{ocvalidate}
-must match the used OpenCore release and may not be able to detect all
-configuration flaws present in the file.
+\DIFdelbegin \DIFdel{It is possible to perform basic validation of the configuration by using
+}\DIFdelend \DIFaddbegin \DIFadd{Basic validation of an }\texttt{\DIFadd{OC\ config}} \DIFadd{file is possible using
+the }\DIFaddend \texttt{ocvalidate} utility. Please note \DIFdelbegin \DIFdel{, that }\DIFdelend \DIFaddbegin \DIFadd{that the version of }\DIFaddend \texttt{ocvalidate}
+\DIFaddbegin \DIFadd{used }\DIFaddend must match the \DIFdelbegin \DIFdel{used }\DIFdelend OpenCore release and \DIFdelbegin \DIFdel{may not be able to }\DIFdelend \DIFaddbegin \DIFadd{that nothwithstanding this, it may not
+}\DIFaddend detect all configuration \DIFdelbegin \DIFdel{flaws present in the }\DIFdelend \DIFaddbegin \DIFadd{issues present in an }\texttt{\DIFadd{OC\ config}} \DIFaddend file.
 
-\emph{Note}: Currently most properties try to have defined values even if not
-specified in the configuration for safety reasons. This behaviour should not
-be relied upon, and all fields must be properly specified in the configuration.
+\emph{Note}: \DIFdelbegin \DIFdel{Currently most properties try to have defined values even
+if }\DIFdelend \DIFaddbegin \DIFadd{To maintain system integrity, properties typically have predefined values even
+when such predefined values are }\DIFaddend not specified in the \DIFdelbegin \DIFdel{configuration for safety reasons. This behaviour should not
+be relied upon, and all
+fields must be properly }\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\ config}} \DIFadd{file. However, all
+properties must be explicitly }\DIFaddend specified in the \DIFdelbegin \DIFdel{configuration}\DIFdelend \DIFaddbegin \texttt{\DIFadd{OC\ config}} \DIFadd{file and this behaviour
+should not be relied on}\DIFaddend .
 
 \section{Setup}\label{setup-overview}
 
@@ -545,29 +587,30 @@ be relied upon, and all fields must be properly specified in the configuration.
 Figure 1. Directory Structure
 \end{center}
 
-When directory boot is used the directory structure used should follow
-the description on \hyperref[fig:DS]{Directory Structure} figure. Available
-entries include:
+When directory boot is used\DIFaddbegin \DIFadd{, }\DIFaddend the directory structure used should follow
+the \DIFdelbegin \DIFdel{description on }\DIFdelend \DIFaddbegin \DIFadd{descriptions in the }\DIFaddend \hyperref[fig:DS]{Directory Structure} figure.
+Available entries include:
 
 \begin{itemize}
 \tightlist
 \item
   \texttt{BOOTx64.efi} or \texttt{BOOTIa32.efi} \\
   Initial bootstrap loaders, which load \texttt{OpenCore.efi}. \texttt{BOOTx64.efi}
-  is loaded by the firmware by default according to UEFI specification, yet it can
-  also be renamed and put to a custom location to let OpenCore coexist with operating
-  systems using \texttt{BOOTx64.efi} as their own loaders (e.g. Windows), see
-  \texttt{LauncherOption} for more details.
+  is loaded by the firmware by default according to \DIFdelbegin \DIFdel{UEFI specification, yet }\DIFdelend \DIFaddbegin \DIFadd{the UEFI specification. However, }\DIFaddend it can
+  also be renamed and put \DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{in }\DIFaddend a custom location to \DIFdelbegin \DIFdel{let OpenCore }\DIFdelend \DIFaddbegin \DIFadd{allow OpenCore to }\DIFaddend coexist with operating
+  systems using \texttt{BOOTx64.efi} as their own loaders (e.g. Windows)\DIFdelbegin \DIFdel{, see
+  }\DIFdelend \DIFaddbegin \DIFadd{. See
+  the }\DIFaddend \texttt{LauncherOption} \DIFaddbegin \DIFadd{property }\DIFaddend for more details.
 \item
   \texttt{boot} \\
-  Duet bootstrap loader, which initialises UEFI environment on legacy BIOS firmware
-  and loads \texttt{OpenCore.efi} similarly to other bootstrap loaders. Modern Duet
+  Duet bootstrap loader, which initialises \DIFaddbegin \DIFadd{the }\DIFaddend UEFI environment on legacy BIOS firmware
+  and loads \texttt{OpenCore.efi} similarly to other bootstrap loaders. \DIFdelbegin \DIFdel{Modern }\DIFdelend \DIFaddbegin \DIFadd{A modern }\DIFaddend Duet
   bootstrap loader will default to \texttt{OpenCore.efi} on the same partition when
   present.
 \item
   \texttt{ACPI} \\
   Directory used for storing supplemental ACPI information
-  for \hyperref[acpi]{\texttt{ACPI}} section.
+  for \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[acpi]{\texttt{ACPI}} section.
 \item
   \texttt{Drivers} \\
   Directory used for storing supplemental \texttt{UEFI}
@@ -575,24 +618,26 @@ entries include:
 \item
   \texttt{Kexts} \\
   Directory used for storing supplemental kernel information
-  for \hyperref[kernel]{\texttt{Kernel}} section.
+  for \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernel]{\texttt{Kernel}} section.
 \item
   \texttt{Resources} \\
-  Directory used for storing media resources, such as audio files
-  for screen reader support. See \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+  Directory used for storing media resources \DIFdelbegin \DIFdel{, }\DIFdelend such as audio files
+  for screen reader support. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
   section for more details. This directory also contains image files
-  for graphical user interface. See \hyperref[ueficanopy]{OpenCanopy} section for more details.
+  for graphical user interface. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[ueficanopy]{OpenCanopy} section for more details.
 \item
   \texttt{Tools} \\
   Directory used for storing supplemental tools.
 \item
   \texttt{OpenCore.efi} \\
   Main booter application responsible for operating system loading. The directory
-  \texttt{OpenCore.efi} resides is called the \texttt{root directory}.
-  By default \texttt{root directory} is set to \texttt{EFI\textbackslash OC},
-  however, when launching \texttt{OpenCore.efi} directly or through
-  a custom launcher, other directories containing \texttt{OpenCore.efi}
-  can also be supported.
+  \texttt{OpenCore.efi} resides \DIFaddbegin \DIFadd{in }\DIFaddend is called the \texttt{root directory}\DIFdelbegin \DIFdel{.
+  By default }\texttt{\DIFdel{root directory}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{, which }\DIFaddend is
+  set to \texttt{EFI\textbackslash OC} \DIFdelbegin \DIFdel{,
+  however, when }\DIFdelend \DIFaddbegin \DIFadd{by default. When }\DIFaddend launching \texttt{OpenCore.efi}
+  directly or through a custom launcher \DIFaddbegin \DIFadd{however}\DIFaddend , other directories containing
+  \texttt{OpenCore.efi} \DIFdelbegin \DIFdel{can also be }\DIFdelend \DIFaddbegin \DIFadd{files are also }\DIFaddend supported.
 \item
   \texttt{config.plist} \\
   \texttt{OC Config}.
@@ -624,8 +669,8 @@ entries include:
 
 To install OpenCore\DIFdelbegin \DIFdel{reflect }\DIFdelend \DIFaddbegin \DIFadd{, replicate }\DIFaddend the
 \hyperref[configuration-structure]{Configuration Structure} described
-in the previous section on a EFI volume of a GPT partition. While
-corresponding sections of this document do provide some information
+in the previous section \DIFdelbegin \DIFdel{on a }\DIFdelend \DIFaddbegin \DIFadd{in the }\DIFaddend EFI volume of a GPT partition. While
+corresponding sections of this document \DIFdelbegin \DIFdel{do }\DIFdelend provide some information
 regarding external resources such as ACPI tables, UEFI drivers,
 or kernel extensions (kexts), completeness of the matter is out of
 the scope of this document. Information about kernel extensions may
@@ -635,35 +680,43 @@ document available in \DIFaddbegin \DIFadd{the }\DIFaddend OpenCore repository. 
 \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[miscsecurityprops]{Security Properties} section of this document.
 
 \DIFaddbegin \DIFadd{The }\DIFaddend \texttt{OC\ config} \DIFdelbegin \DIFdel{, just like any property lists }\DIFdelend \DIFaddbegin \DIFadd{file, as with any property list file, }\DIFaddend can be edited with
-any \DIFdelbegin \DIFdel{stock textual editor (e.g. nano , vim), but }\DIFdelend \DIFaddbegin \DIFadd{text editor such as nano and vim. However, }\DIFaddend specialised software may provide
-\DIFaddbegin \DIFadd{a }\DIFaddend better experience. On macOS\DIFaddbegin \DIFadd{, }\DIFaddend the preferred GUI application is
+any \DIFdelbegin \DIFdel{stock textual editor(e.g. nano, vim), but }\DIFdelend \DIFaddbegin \DIFadd{text editor, such as nano or vim. However, }\DIFaddend specialised software
+may provide \DIFaddbegin \DIFadd{a }\DIFaddend better experience. On macOS\DIFaddbegin \DIFadd{, }\DIFaddend the preferred GUI application is
 \href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
 cross-platform and open-source alternative\DIFaddbegin \DIFadd{, the
 }\DIFaddend \href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
 utilised.
 
-For BIOS booting\DIFaddbegin \DIFadd{, }\DIFaddend a third-party UEFI environment provider will have to
-be used. \texttt{OpenDuetPkg} is one of the known UEFI environment providers
-for legacy systems. To run OpenCore on such a legacy system, \texttt{OpenDuetPkg}
-can be installed with a dedicated tool --- BootInstall (bundled with OpenCore).
-\href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used to
-perform this on systems other than macOS.
+For BIOS booting\DIFaddbegin \DIFadd{, }\DIFaddend a third-party UEFI environment provider \DIFdelbegin \DIFdel{will have to
+be used. }\DIFdelend \DIFaddbegin \DIFadd{is required and
+}\DIFaddend \texttt{OpenDuetPkg} is one \DIFdelbegin \DIFdel{of the known UEFI environment providers
+}\DIFdelend \DIFaddbegin \DIFadd{such UEFI environment provider }\DIFaddend for legacy systems.
+To run OpenCore on such a legacy system, \texttt{OpenDuetPkg} can be installed
+with a dedicated tool --- BootInstall (bundled with OpenCore).
+\href{https://github.com/corpnewt/gibMacOS}{Third-party utilities} can be used
+to perform this on systems other than macOS.
 
 For upgrade purposes\DIFdelbegin \DIFdel{refer to }\DIFdelend \DIFaddbegin \DIFadd{, refer to the }\DIFaddend \texttt{Differences.pdf} document \DIFdelbegin \DIFdel{, providing
 the information about the changes affecting the configuration }\DIFdelend \DIFaddbegin \DIFadd{which provides
-information about changes to the configuration as }\DIFaddend compared to the previous release
-\DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{as well as to the }\DIFaddend \texttt{Changelog.md} document, \DIFdelbegin \DIFdel{containing
-the }\DIFdelend \DIFaddbegin \DIFadd{which contains a }\DIFaddend list of
-modifications across all published updates.
+information about changes to the configuration (as }\DIFaddend compared to the previous release\DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{)
+as well as to the }\DIFaddend \texttt{Changelog.md} document \DIFdelbegin \DIFdel{, containing
+the }\DIFdelend \DIFaddbegin \DIFadd{(which contains a }\DIFaddend list of
+modifications across all published updates\DIFaddbegin \DIFadd{)}\DIFaddend .
 
 \subsection{Contribution}\label{configuration-comp}
 
-OpenCore can be compiled as an ordinary
-\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II} package.
-Since \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
-development was abandoned by TianoCore, OpenCore requires the use of
-\href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}.
-\DIFdelbegin \DIFdel{Currently }\DIFdelend \DIFaddbegin \DIFadd{The currently }\DIFaddend supported EDK II release is hosted in
+OpenCore can be compiled as \DIFdelbegin \DIFdel{an ordinary
+}\DIFdelend \DIFaddbegin \DIFadd{a standard
+}\DIFaddend \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II}
+package \DIFdelbegin \DIFdel{.
+Since }%DIFDELCMD < \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
+%DIFDELCMD < %%%
+\DIFdel{development was abandoned by TianoCore, OpenCore requires the
+use of
+}\DIFdelend \DIFaddbegin \DIFadd{and requires the
+}\DIFaddend \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II#stable-tags}{EDK II Stable}
+\DIFdelbegin \DIFdel{.
+Currently }\DIFdelend \DIFaddbegin \DIFadd{package. The currently }\DIFaddend supported EDK II release is hosted in
 \href{https://github.com/acidanthera/audk}{acidanthera/audk}. \DIFdelbegin \DIFdel{The required patches
 for the package are present in }\DIFdelend \DIFaddbegin \DIFadd{Required patches
 for this package can be found in the }\DIFaddend \texttt{Patches} directory.
@@ -731,11 +784,11 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 \end{lstlisting}
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
-files must ensure that their tool checks \DIFdelbegin \DIFdel{for }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{opencore-version} NVRAM variable
-(see \hyperref[miscdebugprops]{Debug Properties} section below) and \DIFdelbegin \DIFdel{warn the user
-}\DIFdelend \DIFaddbegin \DIFadd{warns users
+files must ensure that their \DIFdelbegin \DIFdel{tool checks for }\DIFdelend \DIFaddbegin \DIFadd{tools check the }\DIFaddend \texttt{opencore-version} NVRAM variable
+(see \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[miscdebugprops]{Debug Properties} section below) and warn \DIFdelbegin \DIFdel{the user
+}\DIFdelend \DIFaddbegin \DIFadd{users
 }\DIFaddend if the version listed is unsupported or prerelease. \DIFaddbegin \DIFadd{The }\DIFaddend OpenCore configuration may change
-across \DIFdelbegin \DIFdel{the releases and the tool shall ensure that it carefully follows }\DIFdelend \DIFaddbegin \DIFadd{releases and such tools shall ensure they carefully follow }\DIFaddend this document. Failure
+across \DIFdelbegin \DIFdel{the releases and the tool }\DIFdelend \DIFaddbegin \DIFadd{releases and such tools }\DIFaddend shall ensure that \DIFdelbegin \DIFdel{it carefully follows }\DIFdelend \DIFaddbegin \DIFadd{they carefully follow }\DIFaddend this document. Failure
 to do so may result in \DIFdelbegin \DIFdel{this tool to be considered as }\DIFdelend \DIFaddbegin \DIFadd{such tools being considered to be }\DIFaddend malware and blocked \DIFdelbegin \DIFdel{with
 all possible }\DIFdelend \DIFaddbegin \DIFadd{by any }\DIFaddend means.
 
@@ -807,9 +860,9 @@ to be always used when \texttt{BOOLEAN} is not enough.
 \item Security violations should halt the system or cause a forced reboot.
 \end{itemize}
 
-\textbf{Codestyle}. The codebase follows
-\href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II codestyle} with few changes
-and clarifications.
+\textbf{Codestyle}. The codebase follows \DIFaddbegin \DIFadd{the
+}\DIFaddend \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II codestyle}
+with \DIFaddbegin \DIFadd{a }\DIFaddend few changes and clarifications.
 \begin{itemize}
 \tightlist
 \item Write inline documentation for the functions and variables only once: in headers, where a header prototype
@@ -838,17 +891,20 @@ that may potentially reduce the performance of release builds and are otherwise 
 debugging after \texttt{EXIT\_BOOT\_SERVICES}.
 \item Use \texttt{DEBUG\_VERBOSE} debug level to leave debug messages for future debugging of the code, which
 are currently not necessary. By default \texttt{DEBUG\_VERBOSE} messages are ignored even in \texttt{DEBUG} builds.
-\item Use \texttt{DEBUG\_INFO} debug level for all non critical messages (including errors) and \texttt{DEBUG\_BULK\_INFO}
-for extensive messages that should not appear in NVRAM log that is heavily limited in size. These messages are ignored in
-\texttt{RELEASE} builds.
-\item Use \texttt{DEBUG\_ERROR} to print critical human visible messages that may potentially halt the boot process, and
-\texttt{DEBUG\_WARN} for all other human visible errors, \texttt{RELEASE} builds included.
+\item Use \texttt{DEBUG\_INFO} debug level for all non critical messages (including errors)
+and \texttt{DEBUG\_BULK\_INFO}
+for extensive messages that should not appear in NVRAM log that is heavily limited in size.
+These messages are ignored in \texttt{RELEASE} builds.
+\item Use \texttt{DEBUG\_ERROR} to print critical human visible messages that may potentially halt the boot process,
+and \texttt{DEBUG\_WARN} for all other human visible errors, \texttt{RELEASE} builds included.
 \end{itemize}
 
-When trying to find the problematic change it is useful to rely on
-\href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} functionality.
-There also are some unofficial resources that provide per-commit binary
-builds of OpenCore, such as \href{https://dortania.github.io/builds}{Dortania}.
+\DIFdelbegin \DIFdel{When }\DIFdelend \DIFaddbegin \DIFadd{The }\href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} \DIFadd{functionality may be useful when }\DIFaddend trying
+to find \DIFdelbegin \DIFdel{the problematic change it is useful to rely on
+}%DIFDELCMD < \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} %%%
+\DIFdel{functionality. There also are some unofficial resources that provide per-commit binary
+builds of OpenCore}\DIFdelend \DIFaddbegin \DIFadd{problematic changes. Unofficial sources of }\texttt{\DIFadd{per-commit}} \DIFadd{OpenCore binary builds}\DIFaddend ,
+such as \href{https://dortania.github.io/builds}{Dortania}\DIFaddbegin \DIFadd{, may also be useful}\DIFaddend .
 
 \section{ACPI}\label{acpi}
 
@@ -856,14 +912,14 @@ builds of OpenCore, such as \href{https://dortania.github.io/builds}{Dortania}.
 
 ACPI (Advanced Configuration and Power Interface) is an open standard to
 discover and configure computer hardware.
-\href{https://uefi.org/specifications}{ACPI specification} defines the
+\DIFaddbegin \DIFadd{The }\DIFaddend \href{https://uefi.org/specifications}{ACPI specification} \DIFdelbegin \DIFdel{defines }\DIFdelend \DIFaddbegin \DIFadd{define }\DIFaddend the
 standard tables (e.g.~\texttt{DSDT}, \texttt{SSDT}, \texttt{FACS}, \texttt{DMAR})
 and various methods (e.g. \texttt{\_DSM}, \texttt{\_PRW}) for implementation.
 Modern hardware needs little changes to maintain ACPI compatibility, yet
 some of those are provided as a part of OpenCore.
 
-To compile and disassemble ACPI tables \href{https://github.com/acpica/acpica}{iASL compiler}
-can be used developed by \href{https://www.acpica.org}{ACPICA}. GUI front-end to iASL compiler
+To compile and disassemble ACPI tables\DIFaddbegin \DIFadd{, the }\DIFaddend \href{https://github.com/acpica/acpica}{iASL compiler}
+\DIFdelbegin \DIFdel{can be used }\DIFdelend developed by \href{https://www.acpica.org}{ACPICA} \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{can be used. A }\DIFaddend GUI front-end to iASL compiler
 can be downloaded from \href{https://github.com/acidanthera/MaciASL/releases}{Acidanthera/MaciASL}.
 
 ACPI changes apply globally (to every operating system) with the following effective order:
@@ -886,19 +942,21 @@ Applying the patches early makes it possible to write so called ``proxy'' patche
 where the original method is patched in the original table and is implemented in
 the patched table.
 
-There are many places providing ACPI tables and workarounds. Commonly used
+There are \DIFdelbegin \DIFdel{many places providing }\DIFdelend \DIFaddbegin \DIFadd{several sources of }\DIFaddend ACPI tables and workarounds. Commonly used
 ACPI tables are provided with OpenCore, VirtualSMC, VoodooPS2, and WhateverGreen
-releases. Besides those there are several third-party instructions commonly found
-on AppleLife in \href{https://applelife.ru/forums/xakintosh.67}{Laboratory}
+releases. Besides those\DIFdelbegin \DIFdel{there are }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend several third-party instructions \DIFdelbegin \DIFdel{commonly found on
+AppleLife in }\DIFdelend \DIFaddbegin \DIFadd{may be found on
+the AppleLife }\DIFaddend \href{https://applelife.ru/forums/xakintosh.67}{Laboratory}
 and \href{https://applelife.ru/forums/dsdt.129}{DSDT} subforums
 (e.g. \href{https://applelife.ru/posts/498967}{Battery register splitting} guide).
 A slightly more user-friendly explanation of some tables included with OpenCore
 can also be found in \href{https://dortania.github.io}{Dortania}'s
 \href{https://dortania.github.io/Getting-Started-With-ACPI}{Getting started with ACPI} guide.
-For more exotic cases there also are several other places including
-\href{https://github.com/daliansky}{daliansky}'s
-\href{https://github.com/daliansky/OC-little}{ACPI sample collection}, but the quality
-of the suggested solutions will vary from case to case.
+For more exotic cases\DIFdelbegin \DIFdel{there also are several other places including
+}\DIFdelend \DIFaddbegin \DIFadd{, there are several alternatives such as
+}\DIFaddend \href{https://github.com/daliansky}{daliansky}'s
+\href{https://github.com/daliansky/OC-little}{ACPI sample collection}\DIFdelbegin \DIFdel{, but }\DIFdelend \DIFaddbegin \DIFadd{. Note however that }\DIFaddend the
+quality of the suggested solutions will \DIFdelbegin \DIFdel{vary from case to case}\DIFdelend \DIFaddbegin \DIFadd{be variable}\DIFaddend .
 
 \subsection{Properties}\label{acpiprops}
 
@@ -907,20 +965,20 @@ of the suggested solutions will vary from case to case.
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Load selected tables from \texttt{OC/ACPI}
+  \textbf{Description}: Load selected tables from \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{OC/ACPI}
   directory.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each add entry.
-  See \hyperref[acpipropsadd]{Add Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[acpipropsadd]{Add Properties} section below.
 
 \item
   \texttt{Delete}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Remove selected tables from ACPI stack.
+  \textbf{Description}: Remove selected tables from \DIFaddbegin \DIFadd{the }\DIFaddend ACPI stack.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each delete entry.
-  See \hyperref[acpipropsdelete]{Delete Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[acpipropsdelete]{Delete Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -930,13 +988,13 @@ of the suggested solutions will vary from case to case.
   table addition or removal.
 
   Designed to be filled with \texttt{plist\ dictionary} values describing each
-  patch entry. See \hyperref[acpipropspatch]{Patch Properties} section below.
+  patch entry. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[acpipropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual ACPI quirks described
-  in \hyperref[acpipropsquirks]{Quirks Properties} section below.
+  in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[acpipropsquirks]{Quirks Properties} section below.
 
 \end{enumerate}
 
@@ -954,8 +1012,7 @@ of the suggested solutions will vary from case to case.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This ACPI table will not be added unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This ACPI table will not be added unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to add this ACPI table}\DIFaddend .
 
 \item
   \texttt{Path}\\
@@ -968,9 +1025,9 @@ of the suggested solutions will vary from case to case.
   ACPI table load order follows the item order in the array. All ACPI tables
   load from \texttt{OC/ACPI} directory.
 
-  \textbf{Note}: All tables but tables with \texttt{DSDT} table identifier
-  (determined by parsing data not by filename) insert new tables into ACPI stack.
-  \texttt{DSDT}, unlike the rest, performs replacement of DSDT table.
+  \textbf{Note}: All tables \DIFdelbegin \DIFdel{but tables with }\DIFdelend \DIFaddbegin \DIFadd{apart from tables with a }\DIFaddend \texttt{DSDT} table identifier
+  (determined by parsing data\DIFaddbegin \DIFadd{, }\DIFaddend not by filename) insert new tables into \DIFaddbegin \DIFadd{the }\DIFaddend ACPI stack.
+  \texttt{DSDT} \DIFdelbegin \DIFdel{, unlike the rest, performs }\DIFdelend \DIFaddbegin \DIFadd{tables perform a }\DIFaddend replacement of DSDT \DIFdelbegin \DIFdel{table}\DIFdelend \DIFaddbegin \DIFadd{tables instead}\DIFaddend .
 
 \end{enumerate}
 
@@ -980,9 +1037,12 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{All}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: If set to \texttt{true}, all ACPI tables matching the
-  condition will be deleted. Otherwise only first matched table.
+  \textbf{Failsafe}: \texttt{false} \DIFaddbegin \DIFadd{(Only delete the first matched table)}\DIFaddend \\
+  \textbf{Description}: \DIFdelbegin \DIFdel{If set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFdelbegin \DIFdel{, }\DIFdelend \DIFaddbegin \DIFadd{to delete }\DIFaddend all ACPI tables matching the
+  condition\DIFdelbegin \DIFdel{will be deleted.
+Otherwise only first matched table.
+}\DIFdelend \DIFaddbegin \DIFadd{.
+}\DIFaddend 
 
 \item
   \texttt{Comment}\\
@@ -995,33 +1055,30 @@ of the suggested solutions will vary from case to case.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This ACPI table will not be removed unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This ACPI table will not be removed unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to remove this ACPI table}\DIFaddend .
 
 \item
   \texttt{OemTableId}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: All zero\\
-  \textbf{Description}: Match table OEM ID to be equal to this value
-  unless all zero.
+  \textbf{Failsafe}: All zero \DIFaddbegin \DIFadd{(Match any table OEM ID)}\DIFaddend \\
+  \textbf{Description}: Match table OEM ID \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless all zero}\DIFdelend .
 
 \item
   \texttt{TableLength}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Match table size to be equal to this value
-  unless \texttt{0}.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Match any table size)}\DIFaddend \\
+  \textbf{Description}: Match table size \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless }\texttt{\DIFdel{0}}%DIFAUXCMD
+\DIFdelend .
 
 \item
   \texttt{TableSignature}\\
   \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
-  \textbf{Failsafe}: All zero\\
-  \textbf{Description}: Match table signature to be equal to this value
-  unless all zero.
+  \textbf{Failsafe}: All zero \DIFaddbegin \DIFadd{(Match any table signature)}\DIFaddend \\
+  \textbf{Description}: Match table signature \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless all zero}\DIFdelend .
 
-  \emph{Note}: Make sure not to specify table signature when the sequence
-  needs to be replaced in multiple places. Especially when performing
-  different kinds of renames.
+  \emph{Note}: \DIFdelbegin \DIFdel{Make sure not to specify table signature }\DIFdelend \DIFaddbegin \DIFadd{Do not use table signatures }\DIFaddend when the sequence
+  \DIFdelbegin \DIFdel{needs to }\DIFdelend \DIFaddbegin \DIFadd{must }\DIFaddend be replaced in multiple places. \DIFdelbegin \DIFdel{Especially }\DIFdelend \DIFaddbegin \DIFadd{This is particularly relevant
+  }\DIFaddend when performing different \DIFdelbegin \DIFdel{kinds }\DIFdelend \DIFaddbegin \DIFadd{types }\DIFaddend of renames.
 
 \end{enumerate}
 
@@ -1039,16 +1096,16 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Count}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
-  the patch to all occurrences found.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Apply patch to all occurrences found)}\DIFaddend \\
+  \textbf{Description}: Number of \DIFdelbegin \DIFdel{patch occurrences to apply. }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{applies
+  the patchto all occurrences found}\DIFdelend \DIFaddbegin \DIFadd{occurrences to patch}\DIFaddend .
 
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This ACPI patch will not be used unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This ACPI patch will not be used unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to apply this ACPI patch}\DIFaddend .
 
 \item
   \texttt{Find}\\
@@ -1078,9 +1135,8 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{OemTableId}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: All zero\\
-  \textbf{Description}: Match table OEM ID to be equal to this value
-  unless all zero.
+  \textbf{Failsafe}: All zero \DIFaddbegin \DIFadd{(Match any table OEM ID)}\DIFaddend \\
+  \textbf{Description}: Match table OEM ID \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless all zero}\DIFdelend .
 
 \item
   \texttt{Replace}\\
@@ -1100,56 +1156,61 @@ of the suggested solutions will vary from case to case.
 \item
   \texttt{Skip}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Number of found occurrences to be skipped before replacement
-  is done.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Do not skip any occurrences)}\DIFaddend \\
+  \textbf{Description}: Number of found occurrences to \DIFdelbegin \DIFdel{be skipped before
+  replacement
+  is done}\DIFdelend \DIFaddbegin \DIFadd{skip before
+  replacements are applied}\DIFaddend .
 
 \item
   \texttt{TableLength}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Match table size to be equal to this value
-  unless \texttt{0}.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Match any table size)}\DIFaddend \\
+  \textbf{Description}: Match table size \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless }\texttt{\DIFdel{0}}%DIFAUXCMD
+\DIFdelend .
 
 \item
   \texttt{TableSignature}\\
   \textbf{Type}: \texttt{plist\ data}, 4 bytes\\
-  \textbf{Failsafe}: All zero\\
-  \textbf{Description}: Match table signature to be equal to this value
-  unless all zero.
+  \textbf{Failsafe}: All zero \DIFaddbegin \DIFadd{(Match any table signature)}\DIFaddend \\
+  \textbf{Description}: Match table signature \DIFdelbegin \DIFdel{to be }\DIFdelend equal to this value\DIFdelbegin \DIFdel{unless all zero}\DIFdelend .
 
 \end{enumerate}
 
-In the majority of the cases ACPI patches are not useful and harmful:
+In \DIFdelbegin \DIFdel{the majority of the cases}\DIFdelend \DIFaddbegin \DIFadd{most cases, }\DIFaddend ACPI patches are not useful and \DIFaddbegin \DIFadd{are }\DIFaddend harmful:
 
 \begin{itemize}
 \item
   Avoid renaming devices with ACPI patches. This may fail or perform
   improper renaming of unrelated devices (e.g. \texttt{EC} and
-  \texttt{EC0}), be unnecessary, or even fail to rename devices in select tables. For
-  ACPI consistency it is much safer to rename devices at I/O Registry
+  \texttt{EC0}), be unnecessary, or even fail to rename devices in \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend tables. For
+  ACPI consistency it is much safer to rename devices at \DIFaddbegin \DIFadd{the }\DIFaddend I/O Registry
   level, as done by
   \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}.
 \item
-  Try to avoid patching \texttt{\_OSI} to support a higher level of feature sets
-  whenever possible. Commonly this enables a number of hacks on APTIO
-  firmware, which result in the need to add more patches. Modern firmware
-  generally does not need it, and those that do are fine with much
-  smaller patches. However, laptop vendors usually rely on this method to
+  \DIFdelbegin \DIFdel{Try to avoid }\DIFdelend \DIFaddbegin \DIFadd{Avoid }\DIFaddend patching \texttt{\_OSI} to support a higher \DIFdelbegin \DIFdel{level of feature sets
+  }\DIFdelend \DIFaddbegin \DIFadd{feature set level
+  }\DIFaddend whenever possible. \DIFdelbegin \DIFdel{Commonly }\DIFdelend \DIFaddbegin \DIFadd{While }\DIFaddend this enables a number of hacks on APTIO
+  firmware, \DIFdelbegin \DIFdel{which result in the need to add more }\DIFdelend \DIFaddbegin \DIFadd{it typically results in a need for additional }\DIFaddend patches. Modern
+  firmware generally does not need \DIFdelbegin \DIFdel{it, and those that do are fine with much
+  smaller patches }\DIFdelend \DIFaddbegin \DIFadd{this and smaller patches work well on
+  firmware that does}\DIFaddend . However, laptop vendors \DIFdelbegin \DIFdel{usually }\DIFdelend \DIFaddbegin \DIFadd{often }\DIFaddend rely on this method to
   determine the availability of functions such as modern I2C input support, thermal
   adjustment and custom feature additions.
 \item
-  Avoid patching embedded controller event \texttt{\_Qxx} just for enabling
-  brightness keys. The conventional process to find these keys usually involves
-  massive modification on DSDT and SSDTs and the debug kext is not stable on
-  newer systems. Please switch to built-in brightness key discovery of
-  \href{https://github.com/acidanthera/BrightnessKeys}{BrightnessKeys} instead.
+  Avoid patching embedded controller event \texttt{\_Qxx} just \DIFdelbegin \DIFdel{for enabling
+  }\DIFdelend \DIFaddbegin \DIFadd{to enable
+  }\DIFaddend brightness keys. The conventional process to find these keys usually involves
+  \DIFdelbegin \DIFdel{massive modification on DSDT and SSDTs and }\DIFdelend \DIFaddbegin \DIFadd{significant modifications to DSDT and SSDT files and in addition, }\DIFaddend the debug kext
+  is not stable on newer systems. Please \DIFdelbegin \DIFdel{switch to }\DIFdelend \DIFaddbegin \DIFadd{use the }\DIFaddend built-in brightness key discovery \DIFdelbegin \DIFdel{of
+  }\DIFdelend \DIFaddbegin \DIFadd{in
+  }\DIFaddend \href{https://github.com/acidanthera/BrightnessKeys}{BrightnessKeys} instead.
 \item
   \DIFdelbegin \DIFdel{Try to avoid hacky }\DIFdelend \DIFaddbegin \DIFadd{Avoid making ad hoc }\DIFaddend changes such as renaming \texttt{\_PRW} or \texttt{\_DSM}
   whenever possible.
 \end{itemize}
 
-Several cases, where patching actually does make sense, include:
+\DIFdelbegin \DIFdel{Several cases , where patching actually does make sense, }\DIFdelend \DIFaddbegin \DIFadd{Some cases where patching is actually useful }\DIFaddend include:
 
 \begin{itemize}
 \item
@@ -1159,19 +1220,19 @@ Several cases, where patching actually does make sense, include:
   content may be forced to always return 0xF by replacing
   \texttt{A0 10 93 4F 53 46 4C 00} with \texttt{A4 0A 0F A3 A3 A3 A3 A3}.
 \item
-  To provide custom method implementation with in an SSDT, for instance,
-  to inject shutdown fix on certain computers, the original method can be
-  replaced with a dummy name by patching \texttt{\_PTS} with \texttt{ZPTS}
-  and adding a callback to original method.
+  To provide \DIFaddbegin \DIFadd{a }\DIFaddend custom method implementation \DIFdelbegin \DIFdel{with in }\DIFdelend \DIFaddbegin \DIFadd{within }\DIFaddend an SSDT, \DIFdelbegin \DIFdel{for instance,
+  }\DIFdelend to inject
+  shutdown \DIFdelbegin \DIFdel{fix }\DIFdelend \DIFaddbegin \DIFadd{fixes }\DIFaddend on certain computers \DIFaddbegin \DIFadd{for instance}\DIFaddend , the original method can
+  be replaced with a dummy name by patching \texttt{\_PTS} with \texttt{ZPTS}
+  and adding a callback to \DIFaddbegin \DIFadd{the }\DIFaddend original method.
 \end{itemize}
 
-Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h}
-source file may help understanding ACPI opcodes.
+\DIFaddbegin \DIFadd{The }\DIFaddend Tianocore \href{https://github.com/acidanthera/audk/blob/master/MdePkg/Include/IndustryStandard/AcpiAml.h}{AcpiAml.h} source file may help \DIFaddbegin \DIFadd{with better }\DIFaddend understanding ACPI opcodes.
 
 \emph{Note}: Patches of different \texttt{Find} and \texttt{Replace} lengths
 are unsupported as they may corrupt ACPI tables and make the system unstable
 due to area relocation. If such changes are needed, the utilisation of ``proxy''
-patching or the padding of \texttt{NOP} to the remaining area might be taken into account.
+patching or the padding of \texttt{NOP} to the remaining area \DIFdelbegin \DIFdel{might be taken into account}\DIFdelend \DIFaddbegin \DIFadd{could be considered}\DIFaddend .
 
 \subsection{Quirks Properties}\label{acpipropsquirks}
 
@@ -1184,8 +1245,8 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
   \textbf{Description}: Provide reset register and flag in FADT table to enable
   reboot and shutdown.
 
-  Mainly required on legacy hardware and few laptops. Can also fix power-button
-  shortcuts. Not recommended unless required.
+  Mainly required on legacy hardware and \DIFdelbegin \DIFdel{few }\DIFdelend \DIFaddbegin \DIFadd{a few newer }\DIFaddend laptops.
+  Can also fix power-button shortcuts. Not recommended unless required.
 
 \item
   \texttt{NormalizeHeaders}\\
@@ -1204,27 +1265,30 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
   \textbf{Description}: Attempt to heuristically relocate ACPI memory
   regions. Not recommended.
 
-  ACPI tables are often generated dynamically by underlying firmware
+  ACPI tables are often generated dynamically by \DIFaddbegin \DIFadd{the }\DIFaddend underlying firmware
   implementation. Among the position-independent code, ACPI tables may
-  contain physical addresses of MMIO areas used for device
-  configuration, usually grouped in regions (e.g.
+  contain \DIFaddbegin \DIFadd{the }\DIFaddend physical addresses of MMIO areas used for device
+  configuration, usually grouped \DIFdelbegin \DIFdel{in regions }\DIFdelend \DIFaddbegin \DIFadd{by region }\DIFaddend (e.g.
   \texttt{OperationRegion}). Changing firmware settings or hardware
   configuration, upgrading or patching the firmware inevitably leads to
-  changes in dynamically generated ACPI code, which sometimes lead to
-  the shift of the addresses in aforementioned \texttt{OperationRegion}
+  changes in dynamically generated ACPI code, which sometimes \DIFdelbegin \DIFdel{lead to
+  }\DIFdelend \DIFaddbegin \DIFadd{results in
+  }\DIFaddend the shift of the addresses in \DIFaddbegin \DIFadd{the }\DIFaddend aforementioned \texttt{OperationRegion}
   constructions.
 
-  For this reason it is very dangerous to apply any kind of
-  modifications to ACPI tables. The most reasonable approach is to make
-  as few as possible changes to ACPI and try to not replace any tables,
-  especially DSDT. When this is not possible, then at least attempt to
-  ensure that custom DSDT is based on the most recent DSDT or remove
-  writes and reads for the affected areas.
+  For this reason\DIFdelbegin \DIFdel{it is very dangerous to apply any kind }\DIFdelend \DIFaddbegin \DIFadd{, the application }\DIFaddend of modifications to ACPI tables \DIFdelbegin \DIFdel{. The most reasonable }\DIFdelend \DIFaddbegin \DIFadd{is extremely
+  risky. The best }\DIFaddend approach is to make as few as possible changes to ACPI \DIFdelbegin \DIFdel{and try to not replace }\DIFdelend \DIFaddbegin \DIFadd{tables
+  and to avoid replacing }\DIFaddend any tables, \DIFdelbegin \DIFdel{especially DSDT }\DIFdelend \DIFaddbegin \DIFadd{particularly DSDT tables}\DIFaddend . When this \DIFdelbegin \DIFdel{is not possible, then at least attempt to
+  ensure that custom DSDT is }\DIFdelend \DIFaddbegin \DIFadd{cannot be
+  avoided, ensure that any custom DSDT tables are }\DIFaddend based on the most recent DSDT
+  \DIFdelbegin \DIFdel{or remove
+  writes and reads }\DIFdelend \DIFaddbegin \DIFadd{tables or attempt to remove reads and writes }\DIFaddend for the affected areas.
 
-  When nothing else helps this option could be tried to avoid stalls at
-  \texttt{PCI\ Configuration\ Begin} phase of macOS booting by
-  attempting to fix the ACPI addresses. It does not do magic, and only
-  works with most common cases. Do not use unless absolutely required.
+  When nothing else helps\DIFaddbegin \DIFadd{, }\DIFaddend this option could be tried to avoid stalls at
+  \texttt{PCI\ Configuration\ Begin} phase of macOS booting by attempting to fix
+  the ACPI addresses. It \DIFdelbegin \DIFdel{does not do magic }\DIFdelend \DIFaddbegin \DIFadd{is not a magic bullet however}\DIFaddend , and only works with \DIFdelbegin \DIFdel{most common }\DIFdelend \DIFaddbegin \DIFadd{the
+  most typical }\DIFaddend cases. Do not use unless absolutely required \DIFaddbegin \DIFadd{as it can have the
+  opposite effect on certain platforms and result in boot failures}\DIFaddend .
 
 \item
   \texttt{ResetHwSig}\\
@@ -1253,16 +1317,18 @@ patching or the padding of \texttt{NOP} to the remaining area might be taken int
 
 \subsection{Introduction}\label{booterintro}
 
-This section allows to apply different kinds of UEFI modifications on
-Apple bootloader (\texttt{boot.efi}). The modifications currently provide
-various patches and environment alterations for different firmware. Some
-of these features were originally implemented as a part of
-\href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
-which is no longer maintained. See \hyperref[troubleshootingtricks]{Tips and Tricks}
-section for migration steps.
+This section allows \DIFdelbegin \DIFdel{to apply different kinds }\DIFdelend \DIFaddbegin \DIFadd{the application of different types }\DIFaddend of UEFI modifications \DIFdelbegin \DIFdel{on
+}\DIFdelend \DIFaddbegin \DIFadd{to
+operating system bootloaders, primarily the }\DIFaddend Apple bootloader (\texttt{boot.efi}).
+The modifications currently provide various patches and environment alterations for
+different firmware \DIFaddbegin \DIFadd{types}\DIFaddend . Some of these features were originally implemented as \DIFdelbegin \DIFdel{a }\DIFdelend part
+of \href{https://github.com/acidanthera/AptioFixPkg}{\text{AptioMemoryFix.efi}},
+which is no longer maintained. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \hyperref[troubleshootingtricks]{Tips and Tricks}
+section for \DIFdelbegin \DIFdel{migration steps}\DIFdelend \DIFaddbegin \DIFadd{instructions on migration}\DIFaddend .
 
-If this is used for the first time on a customised firmware, there is a
-list of checks to do first. Prior to starting, the following requirements should be fulfilled:
+If this is used for the first time on \DIFdelbegin \DIFdel{a }\DIFdelend customised firmware, \DIFdelbegin \DIFdel{there is a
+list of checks to do first. Prior to starting, }\DIFdelend the following requirements
+should be \DIFdelbegin \DIFdel{fulfilled}\DIFdelend \DIFaddbegin \DIFadd{met before starting}\DIFaddend :
 
 \begin{itemize}
 \tightlist
@@ -1270,8 +1336,9 @@ list of checks to do first. Prior to starting, the following requirements should
 \item \texttt{Fast Boot} and \texttt{Hardware Fast Boot} disabled in firmware
   settings if present.
 \item \texttt{Above 4G Decoding} or similar enabled in firmware
-  settings if present. Note, that on some motherboards (notably ASUS WS-X299-PRO) this
-  option causes adverse effects, and must be disabled. While no other motherboards
+  settings if present. Note \DIFdelbegin \DIFdel{, }\DIFdelend that on some motherboards\DIFdelbegin \DIFdel{(notably }\DIFdelend \DIFaddbegin \DIFadd{, notably the }\DIFaddend ASUS WS-X299-PRO\DIFdelbegin \DIFdel{) this
+  option causes adverse effects , }\DIFdelend \DIFaddbegin \DIFadd{, this
+  option results in adverse effects }\DIFaddend and must be disabled. While no other motherboards
   with the same issue are known, this option should be checked first whenever erratic boot
   failures are encountered.
 \item \texttt{DisableIoMapper} quirk enabled, or \texttt{VT-d} disabled in
@@ -1299,20 +1366,21 @@ list of checks to do first. Prior to starting, the following requirements should
   may have to be disabled in firmware settings present.
 \end{itemize}
 
-When debugging sleep issues Power Nap and automatic power off may be (temporarily) disabled,
-which appear to sometimes cause wake to black screen or boot loop
-issues on older platforms. The particular issues may vary, but in general ACPI tables should be looked up first.
+When debugging sleep issues\DIFaddbegin \DIFadd{, }\DIFaddend Power Nap and automatic power off \DIFdelbegin \DIFdel{may be (temporarily) disabled,
+}\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend which appear to sometimes cause
+wake to black screen or boot loop issues on older platforms\DIFdelbegin \DIFdel{. The particular }\DIFdelend \DIFaddbegin \DIFadd{) may be temporarily disabled.
+The specific }\DIFaddend issues may vary, but \DIFdelbegin \DIFdel{in general }\DIFdelend \DIFaddbegin \DIFadd{generally }\DIFaddend ACPI tables should be looked \DIFdelbegin \DIFdel{up }\DIFdelend \DIFaddbegin \DIFadd{at }\DIFaddend first.
 Here is an example of a bug found in some
 \href{http://www.insanelymac.com/forum/topic/329624-need-cmos-reset-after-sleep-only-after-login/#entry2534645}{Z68 motherboards}.
-To turn Power Nap and the others off run the following commands in Terminal:
+To turn Power Nap and the others off\DIFaddbegin \DIFadd{, }\DIFaddend run the following commands in Terminal:
 \begin{lstlisting}[label=powernap, style=ocbash]
 sudo pmset autopoweroff 0
 sudo pmset powernap 0
 sudo pmset standby 0
 \end{lstlisting}
 
-\emph{Note}: These settings may reset at hardware change and in certain other circumstances.
-To view their current state use \texttt{pmset -g} command in Terminal.
+\emph{Note}: These settings may \DIFdelbegin \DIFdel{reset at hardware change }\DIFdelend \DIFaddbegin \DIFadd{be reset by hardware changes }\DIFaddend and in certain other circumstances.
+To view their current state\DIFdelbegin \DIFdel{use }\DIFdelend \DIFaddbegin \DIFadd{, use the }\DIFaddend \texttt{pmset -g} command in Terminal.
 
 \subsection{Properties}\label{booterprops}
 
@@ -1323,8 +1391,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
-  \texttt{DevirtualiseMmio} quirk is in use. See \hyperref[booterpropsmmio]{MmioWhitelist Properties}
-  section below.
+  \texttt{DevirtualiseMmio} quirk is in use.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -1333,13 +1401,13 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Perform binary patches in booter.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See \hyperref[booterpropspatch]{Patch Properties} section below.
+  patch. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[booterpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual booter quirks described
-  in \hyperref[booterpropsquirks]{Quirks Properties} section below.
+  in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[booterpropsquirks]{Quirks Properties} section below.
 
 \end{enumerate}
 
@@ -1357,8 +1425,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   because the region this value is in will be assigned a virtual address.
 
   The addresses written here must be part of the memory map, have \texttt{EfiMemoryMappedIO}
-  type and \texttt{EFI\_MEMORY\_RUNTIME} attribute (highest bit) set. To find the list of the
-  candidates the debug log can be used.
+  type and \texttt{EFI\_MEMORY\_RUNTIME} attribute (highest bit) set. \DIFdelbegin \DIFdel{To }\DIFdelend \DIFaddbegin \DIFadd{The debug log can be used
+  to }\DIFaddend find the list of the candidates\DIFdelbegin \DIFdel{the debug log can be used}\DIFdelend .
 
 \item
   \texttt{Comment}\\
@@ -1371,7 +1439,8 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This address will be devirtualised unless set to \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This address will be devirtualised unless set to }\texttt{\DIFdel{true}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{Exclude MMIO address from the devirtualisation procedure}\DIFaddend .
 
 \end{enumerate}
 
@@ -1381,8 +1450,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Arch}\\
   \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Any}\\
-  \textbf{Description}: Booter patch architecture (\texttt{Any}, \texttt{i386}, \texttt{x86\_64}).
+  \textbf{Failsafe}: \texttt{Any} \DIFaddbegin \DIFadd{(Apply to any supported architecture)}\DIFaddend \\
+  \textbf{Description}: Booter patch architecture (\DIFdelbegin \texttt{\DIFdel{Any}}%DIFAUXCMD
+\DIFdel{, }\DIFdelend \texttt{i386}, \texttt{x86\_64}).
 
 \item
   \texttt{Comment}\\
@@ -1394,16 +1464,18 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Count}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Number of patch occurrences to apply. \texttt{0} applies
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Apply to all occurrences found)}\DIFaddend \\
+  \textbf{Description}: Number of patch occurrences to apply.
+\DIFdelbegin \texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{applies
   the patch to all occurrences found.
+}\DIFdelend 
 
 \item
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This booter patch will not be used unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This booter patch will not be used unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to activate this booter patch}\DIFaddend .
 
 \item
   \texttt{Find}\\
@@ -1457,9 +1529,11 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 \item
   \texttt{Skip}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Number of found occurrences to be skipped before replacement
-  is done.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Do not skip any occurrences)}\DIFaddend \\
+  \textbf{Description}: Number of found occurrences to \DIFdelbegin \DIFdel{be skipped before
+  replacement
+  is done}\DIFdelend \DIFaddbegin \DIFadd{skip before
+  replacements are applied}\DIFaddend .
 
 \end{enumerate}
 
@@ -1473,12 +1547,13 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allows booting macOS through a relocation block.
 
-  Relocation block is a scratch buffer allocated in lower 4 GB to be used for
-  loading the kernel and related structures by EfiBoot on \DIFdelbegin \DIFdel{firmwares where lower memory }\DIFdelend \DIFaddbegin \DIFadd{firmware where the
-  lower memory region }\DIFaddend is otherwise occupied by \DIFdelbegin \DIFdel{the (assumedto be}\DIFdelend \DIFaddbegin \DIFadd{(assumed}\DIFaddend ) non-runtime data.
+  \DIFdelbegin \DIFdel{Relocation }\DIFdelend \DIFaddbegin \DIFadd{The relocation }\DIFaddend block is a scratch buffer allocated in \DIFaddbegin \DIFadd{the }\DIFaddend lower 4 GB \DIFdelbegin \DIFdel{to be }\DIFdelend used
+  for loading the kernel and related structures by EfiBoot on \DIFdelbegin \DIFdel{firmwares where
+  lower memory }\DIFdelend \DIFaddbegin \DIFadd{firmware where
+  the lower memory region }\DIFaddend is otherwise occupied by \DIFdelbegin \DIFdel{the (assumedto be}\DIFdelend \DIFaddbegin \DIFadd{(assumed}\DIFaddend ) non-runtime data.
   Right before kernel startup\DIFaddbegin \DIFadd{, }\DIFaddend the relocation block is copied back to lower
-  addresses. Similarly\DIFaddbegin \DIFadd{, }\DIFaddend all the other addresses pointing to relocation block
-  are also carefully adjusted. Relocation block can be used when:
+  addresses. Similarly\DIFaddbegin \DIFadd{, }\DIFaddend all the other addresses pointing to \DIFaddbegin \DIFadd{the }\DIFaddend relocation
+  block are also carefully adjusted. \DIFdelbegin \DIFdel{Relocation }\DIFdelend \DIFaddbegin \DIFadd{The relocation }\DIFaddend block can be used when:
 
   \begin{itemize}
     \tightlist
@@ -1488,12 +1563,12 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \end{itemize}
 
   This quirk requires \texttt{ProvideCustomSlide} to also be enabled
-  and generally needs \texttt{AvoidRuntimeDefrag} to work correctly.
-  Hibernation is not supported when booting with a relocation block
-  (but relocation block is not always used when the quirk is enabled).
+  and \DIFdelbegin \DIFdel{generally }\DIFdelend \DIFaddbegin \DIFadd{typically }\DIFaddend needs \texttt{AvoidRuntimeDefrag} to \DIFaddbegin \DIFadd{be set for this to
+  }\DIFaddend work correctly. Hibernation is not supported when booting with a relocation
+  block (but relocation block is not always used when the quirk is enabled).
 
   \emph{Note}: While this quirk is required to run older macOS versions
-  on platforms with used lower memory it is not compatible with some
+  on platforms with used lower memory\DIFaddbegin \DIFadd{, }\DIFaddend it is not compatible with some
   hardware and macOS 11. In \DIFdelbegin \DIFdel{this case one may try to use
   }\DIFdelend \DIFaddbegin \DIFadd{such cases, consider using
   }\DIFaddend \texttt{EnableSafeModeSlide} instead.
@@ -1505,8 +1580,12 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Protect from boot.efi runtime memory defragmentation.
 
   This option fixes UEFI runtime services (date, time, NVRAM, power control, etc.)
-  support on firmware that uses SMM backing for select services such as variable
-  storage. SMM may try to access physical addresses, but they get moved by boot.efi.
+  support on firmware that uses SMM backing for \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend services such as variable
+  storage. SMM may try to access \DIFdelbegin \DIFdel{physical addresses, but
+  they get }\DIFdelend \DIFaddbegin \DIFadd{memory by physical addresses in non-SMM areas but
+  this may sometimes have been }\DIFaddend moved by boot.efi. \DIFaddbegin \DIFadd{This option prevents boot.efi
+  from moving such data.
+}\DIFaddend 
 
   \emph{Note}: Most types of firmware, apart from Apple and VMware, need this quirk.
 
@@ -1514,19 +1593,19 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{DevirtualiseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Remove runtime attribute from select MMIO regions.
+  \textbf{Description}: Remove runtime attribute from \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend MMIO regions.
 
-  This option reduces stolen memory footprint from the memory map by removing
-  runtime bit for known memory regions. This quirk may result in the increase
-  of KASLR slides available, but is not necessarily compatible with the target
-  board without additional measures. In general this frees from 64 to 256
-  megabytes of memory (present in the debug log), and on some platforms it
-  is the only way to boot macOS, which otherwise fails with allocation
-  error at bootloader stage.
+  This \DIFdelbegin \DIFdel{option reduces }\DIFdelend \DIFaddbegin \DIFadd{quirk reduces the }\DIFaddend stolen memory footprint \DIFdelbegin \DIFdel{from }\DIFdelend \DIFaddbegin \DIFadd{in }\DIFaddend the memory map by removing
+  \DIFaddbegin \DIFadd{the }\DIFaddend runtime bit for known memory regions. This quirk may result in \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{an }\DIFaddend increase
+  of KASLR slides available \DIFdelbegin \DIFdel{, but }\DIFdelend \DIFaddbegin \DIFadd{but without additional measures, it }\DIFaddend is not necessarily
+  compatible with the target board\DIFdelbegin \DIFdel{without additional measures. In general this frees from }\DIFdelend \DIFaddbegin \DIFadd{. This quirk typically frees between }\DIFaddend 64 \DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{and }\DIFaddend 256
+  megabytes of memory\DIFdelbegin \DIFdel{(}\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend present in the debug log\DIFdelbegin \DIFdel{)}\DIFdelend , and on some platforms\DIFdelbegin \DIFdel{it
+  }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend is the only way
+  to boot macOS, which otherwise fails with allocation \DIFdelbegin \DIFdel{error at }\DIFdelend \DIFaddbegin \DIFadd{errors at the }\DIFaddend bootloader stage.
 
-  This option is generally useful on all types of firmware, except some very old ones
-  such as Sandy Bridge. On some types of firmware, a list of addresses that need virtual
-  addresses for proper NVRAM and hibernation functionality may be required.
+  This option is \DIFdelbegin \DIFdel{generally }\DIFdelend useful on all types of firmware, except \DIFaddbegin \DIFadd{for }\DIFaddend some very old
+  ones such as Sandy Bridge. On \DIFdelbegin \DIFdel{some types of }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend firmware, a list of addresses that need
+  virtual addresses for proper NVRAM and hibernation functionality may be required.
   Use the \texttt{MmioWhitelist} section for this.
 
 \item
@@ -1536,9 +1615,12 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Disable single user mode.
 
   This is a security option that restricts the activation of single user mode
-  by ignoring \texttt{CMD+S} hotkey and \texttt{-s} boot argument. The
-  behaviour with this quirk enabled is supposed to match T2-based model
-  behaviour. Refer to \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article} to understand how to use single user mode with this quirk enabled.
+  by ignoring \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{CMD+S} hotkey and \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{-s} boot argument. The
+  behaviour with this quirk enabled is supposed to match T2-based model behaviour.
+  Refer to \DIFdelbegin %DIFDELCMD < \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article} %%%
+\DIFdelend \DIFaddbegin \DIFadd{this
+  }\href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{archived article}
+  \DIFaddend to understand how to use single user mode with this quirk enabled.
 
 \item
   \texttt{DisableVariableWrite}\\
@@ -1550,9 +1632,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME} protocol implemented
   in \texttt{OpenRuntime.efi}.
 
-  \emph{Note}: This quirk can also be used as an ugly workaround to buggy UEFI
-  runtime services implementations that fail to write variables to NVRAM and
-  break the rest of the operating system.
+  \emph{Note}: This quirk can also be used as an \DIFdelbegin \DIFdel{ugly workaround to buggy }\DIFdelend \DIFaddbegin \DIFadd{ad hoc workaround for flawed }\DIFaddend UEFI
+  runtime services implementations that \DIFdelbegin \DIFdel{fail }\DIFdelend \DIFaddbegin \DIFadd{are unable }\DIFaddend to write variables to NVRAM
+  and \DIFdelbegin \DIFdel{break the rest of the operating system }\DIFdelend \DIFaddbegin \DIFadd{results in operating system failures}\DIFaddend .
 
 \item
   \texttt{DiscardHibernateMap}\\
@@ -1560,16 +1642,20 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reuse original hibernate memory map.
 
-  This option forces XNU kernel to ignore newly supplied memory map and assume
-  that it did not change after waking from hibernation. This behaviour is required
-  to work by Windows, which mandates to
-  \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
-  runtime memory size and location after S4 wake.
+  This option forces \DIFaddbegin \DIFadd{the }\DIFaddend XNU kernel to ignore \DIFaddbegin \DIFadd{a }\DIFaddend newly supplied memory map and assume
+  that it did not change after waking from hibernation. This behaviour is required \DIFdelbegin \DIFdel{to work by Windows , which mandates
+  to
+  }%DIFDELCMD < \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \DIFadd{by
+   Windows to work. Windows mandates
+  }\href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserving}
+  \DIFaddend runtime memory size and location after S4 wake.
 
-  \emph{Note}: This may be used to workaround buggy memory maps on older hardware,
-  and is now considered rare legacy. Examples of such hardware are Ivy Bridge laptops
-  with Insyde firmware, such as Acer V3-571G. Do not use this unless a complete understanding of
-  the consequences can be ensured.
+  \emph{Note}: This may be used to workaround \DIFdelbegin \DIFdel{buggy memory maps on olderhardware,
+  and is now considered rare legacy }\DIFdelend \DIFaddbegin \DIFadd{flawed memory map implementations on older,
+  rare legacy hardware}\DIFaddend . Examples of such hardware are Ivy Bridge laptops with Insyde firmware
+  \DIFdelbegin \DIFdel{, such as }\DIFdelend \DIFaddbegin \DIFadd{such as the }\DIFaddend Acer V3-571G. Do not use this \DIFdelbegin \DIFdel{unless a complete }\DIFdelend \DIFaddbegin \DIFadd{option without a full }\DIFaddend understanding of the \DIFdelbegin \DIFdel{consequences can be ensured}\DIFdelend \DIFaddbegin \DIFadd{implications}\DIFaddend .
 
 \item
   \texttt{EnableSafeModeSlide}\\
@@ -1577,15 +1663,17 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Patch bootloader to have KASLR enabled in safe mode.
 
-  This option is relevant to the users that have issues booting to safe mode
-  (e.g. by holding \texttt{shift} or using \texttt{-x} boot argument). By default
-  safe mode forces \texttt{0} slide as if the system was launched with \texttt{slide=0}
-  boot argument. This quirk tries to patch \texttt{boot.efi} to lift that limitation
-  and let some other value (from \texttt{1} to \texttt{255}) be used. This quirk requires
-  \texttt{ProvideCustomSlide} to be enabled.
+  This option is relevant to \DIFdelbegin \DIFdel{the users that have }\DIFdelend \DIFaddbegin \DIFadd{users with }\DIFaddend issues booting to safe mode
+  (e.g. by holding \texttt{shift} or \DIFdelbegin \DIFdel{using }\DIFdelend \DIFaddbegin \DIFadd{with using the }\DIFaddend \texttt{-x} boot argument). By
+  default\DIFaddbegin \DIFadd{, }\DIFaddend safe mode forces \texttt{0} slide as if the system was launched with \DIFaddbegin \DIFadd{the
+  }\DIFaddend \texttt{slide=0} boot argument. This quirk \DIFdelbegin \DIFdel{tries }\DIFdelend \DIFaddbegin \DIFadd{attempts }\DIFaddend to patch \texttt{boot.efi} to \DIFdelbegin \DIFdel{lift that }\DIFdelend \DIFaddbegin \DIFadd{remove
+  this }\DIFaddend limitation and let some other value (from \texttt{1} to \texttt{255}) be used.
+  This quirk requires \DIFaddbegin \DIFadd{enabling }\DIFaddend \texttt{ProvideCustomSlide}\DIFdelbegin \DIFdel{to be enabled}\DIFdelend .
 
-  \emph{Note}: The necessity of this quirk is determined by safe mode availability. If
-  booting to safe mode fails, this option can be tried to be enabled.
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of this quirk is determined by safe modeavailability.
+  If
+  }\DIFdelend \DIFaddbegin \DIFadd{need for this option is dependent on the availability of safe mode.
+  It can be enabled when }\DIFaddend booting to safe mode fails\DIFdelbegin \DIFdel{, this option can be tried to be enabled}\DIFdelend .
 
 \item
   \texttt{EnableWriteUnprotector}\\
@@ -1598,9 +1686,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
   protocol implemented in \texttt{OpenRuntime.efi}.
 
-  \emph{Note}: This quirk may potentially weaken firmware security, please use
+  \emph{Note}: This quirk may potentially weaken firmware security\DIFdelbegin \DIFdel{, please }\DIFdelend \DIFaddbegin \DIFadd{. Please }\DIFaddend use
   \texttt{RebuildAppleMemoryMap} if the firmware supports memory attributes table (MAT).
-  Refer to \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
+  Refer to \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
   \texttt{ForceExitBootServices}\\
@@ -1608,11 +1696,13 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Retry \texttt{ExitBootServices} with new memory map on failure.
 
-  Try to ensure that \texttt{ExitBootServices} call succeeds even with outdated MemoryMap
-  key argument by obtaining current memory map and retrying \texttt{ExitBootServices} call.
+  Try to ensure that \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{ExitBootServices} call succeeds\DIFdelbegin \DIFdel{even with outdated MemoryMap
+  key argument by obtaining }\DIFdelend \DIFaddbegin \DIFadd{. If required, an
+  outdated }\texttt{\DIFadd{MemoryMap}} \DIFadd{key argument can be used by obtaining the }\DIFaddend current
+  memory map and retrying \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{ExitBootServices} call.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot crashes
-  of the firmware. Do not use this without a full understanding of the consequences.
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by early boot crashes of the
+  firmware. Do not use this \DIFaddbegin \DIFadd{option }\DIFaddend without a full understanding of the \DIFdelbegin \DIFdel{consequences}\DIFdelend \DIFaddbegin \DIFadd{implications}\DIFaddend .
 
 \item
   \texttt{ProtectMemoryRegions}\\
@@ -1620,22 +1710,24 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Protect memory regions from incorrect access.
 
-  Some types of firmware incorrectly map select memory regions:
+  Some types of firmware incorrectly map \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend memory regions:
 
   \begin{itemize}
     \tightlist
-    \item CSM region can be marked as boot services code or data, which
+    \item \DIFaddbegin \DIFadd{The }\DIFaddend CSM region can be marked as boot services code\DIFaddbegin \DIFadd{, }\DIFaddend or data, which
       leaves it as free memory for XNU kernel.
-    \item MMIO regions can be marked as reserved memory and stay unmapped,
-      but may be required to be accessible at runtime for NVRAM support.
+    \item MMIO regions can be marked as reserved memory and stay unmapped\DIFdelbegin \DIFdel{,
+      but may }\DIFdelend \DIFaddbegin \DIFadd{.
+      They may however }\DIFaddend be required to be accessible at runtime for NVRAM support.
   \end{itemize}
 
-  This quirk attempts to fix types of these regions, e.g. ACPI NVS for
+  This quirk attempts to fix \DIFaddbegin \DIFadd{various }\DIFaddend types of these regions, e.g. ACPI NVS for
   CSM or MMIO for MMIO.
 
-  \emph{Note}: The necessity of this quirk is determined by artifacts, sleep
-  wake issues, and boot failures. Only very old firmware typically need
-  this quirk.
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by artifacts, sleep
+  wake issues, and boot failures. \DIFdelbegin \DIFdel{Only }\DIFdelend \DIFaddbegin \DIFadd{This quirk is typically only required by
+  }\DIFaddend very old firmware\DIFdelbegin \DIFdel{typically need
+  this quirk}\DIFdelend .
 
 \item
   \texttt{ProtectSecureBoot}\\
@@ -1646,8 +1738,9 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   Reports security violation during attempts to write to \texttt{db}, \texttt{dbx},
   \texttt{PK}, and \texttt{KEK} variables from the operating system.
 
-  \emph{Note}: This quirk mainly attempts to avoid issues with NVRAM implementations
-  with problematic defragmentation, such as select Insyde or \texttt{MacPro5,1}.
+  \emph{Note}: This quirk \DIFdelbegin \DIFdel{mainly }\DIFdelend attempts to avoid issues with NVRAM implementations with
+  \DIFdelbegin \DIFdel{problematic defragmentation}\DIFdelend \DIFaddbegin \DIFadd{fragmentation issues}\DIFaddend , such as \DIFdelbegin \DIFdel{select Insyde or }\DIFdelend \DIFaddbegin \DIFadd{on the }\DIFaddend \texttt{MacPro5,1} \DIFaddbegin \DIFadd{as well as on certain
+  Insyde firmware without garbage collection or with faulty garbage collection}\DIFaddend .
 
 \item
   \texttt{ProtectUefiServices}\\
@@ -1657,12 +1750,12 @@ To view their current state use \texttt{pmset -g} command in Terminal.
 
   Some modern firmware, including on virtual machines such as VMware,
   may update pointers to UEFI services during driver loading and related actions.
-  Consequentially this directly breaks other quirks that affect memory management,
+  \DIFdelbegin \DIFdel{Consequentially }\DIFdelend \DIFaddbegin \DIFadd{Consequently, }\DIFaddend this directly breaks other quirks that affect memory management,
   such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
-  and may also break other quirks depending on the effects of these.
+  and may also break other quirks depending on the \DIFdelbegin \DIFdel{effects of these}\DIFdelend \DIFaddbegin \DIFadd{scope of such}\DIFaddend .
 
-  \emph{Note}: On VMware the need for this quirk may be diagnosed by ``Your Mac OS guest
-  might run unreliably with more than one virtual core.'' message.
+  \emph{Note}: On VMware\DIFaddbegin \DIFadd{, }\DIFaddend the need for this quirk may be \DIFdelbegin \DIFdel{diagnosed by }\DIFdelend \DIFaddbegin \DIFadd{determined by the appearance of the
+  }\DIFaddend ``Your Mac OS guest might run unreliably with more than one virtual core.'' message.
 
 \item
   \texttt{ProvideCustomSlide}\\
@@ -1673,14 +1766,17 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   This option performs memory map analysis of the firmware and checks whether
   all slides (from \texttt{1} to \texttt{255}) can be used. As \texttt{boot.efi}
   generates this value randomly with \texttt{rdrand} or pseudo randomly \texttt{rdtsc},
-  there is a chance of boot failure when it chooses a conflicting slide. In case
-  potential conflicts exist, this option forces macOS to use a pseudo random value
-  among the available ones. This also ensures that \texttt{slide=} argument is never
-  passed to the operating system for security reasons.
+  there is a chance of boot failure when it chooses a conflicting slide. In \DIFdelbegin \DIFdel{case
+  }\DIFdelend \DIFaddbegin \DIFadd{cases where
+  }\DIFaddend potential conflicts exist, this option forces macOS to \DIFdelbegin \DIFdel{use }\DIFdelend \DIFaddbegin \DIFadd{select }\DIFaddend a pseudo random value
+  \DIFdelbegin \DIFdel{among the available ones}\DIFdelend \DIFaddbegin \DIFadd{from the available values}\DIFaddend . This also ensures that \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{slide=} argument is
+  never passed to the operating system \DIFaddbegin \DIFadd{(}\DIFaddend for security reasons\DIFaddbegin \DIFadd{)}\DIFaddend .
 
-  \emph{Note}: The necessity of this quirk is determined by \texttt{OCABC: Only N/256
-  slide values are usable!} message in the debug log. If the message is present,
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{OCABC: Only N/256
+  slide values are usable!} message in the debug log.
+\DIFdelbegin \DIFdel{If the message is present,
   this option is to be enabled.
+}\DIFdelend 
 
 \item
   \texttt{ProvideMaxSlide}\\
@@ -1688,37 +1784,41 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Provide maximum KASLR slide when higher ones are unavailable.
 
-  This option overrides the maximum slide of 255 by a user specified value between 1 and 254 inclusive
-  when \texttt{ProvideCustomSlide} is enabled.
-  It is believed that modern firmware allocates pool memory from top to bottom, effectively resulting in
-  free memory when slide scanning is used later as temporary memory during kernel loading.
-  When such memory is not available, this option can stop the evaluation of higher slides.
+  This option overrides the maximum slide of 255 by a user specified value between 1 and 254
+  \DIFdelbegin \DIFdel{inclusive
+  }\DIFdelend \DIFaddbegin \DIFadd{(inclusive) }\DIFaddend when \texttt{ProvideCustomSlide} is enabled. It is \DIFdelbegin \DIFdel{believed }\DIFdelend \DIFaddbegin \DIFadd{assumed }\DIFaddend that modern firmware
+  allocates pool memory from top to bottom, effectively resulting in free memory when slide
+  scanning is used later as temporary memory during kernel loading. When such memory is not
+  available, this option \DIFdelbegin \DIFdel{can stop }\DIFdelend \DIFaddbegin \DIFadd{stops }\DIFaddend the evaluation of higher slides.
 
-  \emph{Note}: The necessity of this quirk is determined by random boot failure
-  when \texttt{ProvideCustomSlide} is enabled and the randomized slide fall
-  into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by random boot \DIFdelbegin \DIFdel{failure
+  }\DIFdelend \DIFaddbegin \DIFadd{failures
+  }\DIFaddend when \texttt{ProvideCustomSlide} is enabled and the randomized slide \DIFdelbegin \DIFdel{fall
+  }\DIFdelend \DIFaddbegin \DIFadd{falls
+  }\DIFaddend into the unavailable range. When \texttt{AppleDebug} is enabled, usually the
   debug log may contain messages such as \texttt{AAPL: [EB|`LD:LKC] \} Err(0x9)}.
-  To find the optimal value, manually append \texttt{slide=X} to \texttt{boot-args}
-  and log the largest one that will not result in boot failures.
+  To find the optimal value, \DIFdelbegin \DIFdel{manually }\DIFdelend append \texttt{slide=X}\DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{, where }\texttt{\DIFadd{X}} \DIFadd{is the slide value,
+  to the }\DIFaddend \texttt{boot-args} and \DIFdelbegin \DIFdel{log }\DIFdelend \DIFaddbegin \DIFadd{select }\DIFaddend the largest one that \DIFdelbegin \DIFdel{will }\DIFdelend \DIFaddbegin \DIFadd{does }\DIFaddend not result in boot failures.
 
 \item
   \texttt{RebuildAppleMemoryMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Generate Memory Map compatible with macOS.
+  \textbf{Description}: Generate \DIFdelbegin \DIFdel{Memory Map compatible with macOS}\DIFdelend \DIFaddbegin \DIFadd{macOS compatible Memory Map}\DIFaddend .
 
-  Apple kernel has several limitations in parsing UEFI memory map:
+  \DIFaddbegin \DIFadd{The }\DIFaddend Apple kernel has several limitations \DIFdelbegin \DIFdel{in parsing }\DIFdelend \DIFaddbegin \DIFadd{on parsing the }\DIFaddend UEFI memory map:
 
   \begin{itemize}
   \tightlist
-  \item Memory map size must not exceed 4096 bytes as Apple kernel maps
-    it as a single 4K page. Since some types of firmware can have very large memory maps,
+  \item \DIFaddbegin \DIFadd{The }\DIFaddend Memory map size must not exceed 4096 bytes as \DIFaddbegin \DIFadd{the }\DIFaddend Apple kernel maps
+    it as a single 4K page. \DIFdelbegin \DIFdel{Since }\DIFdelend \DIFaddbegin \DIFadd{As }\DIFaddend some types of firmware can have very large memory maps,
     potentially over 100 entries, the Apple kernel will crash on boot.
-  \item Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
-    memory statically gets \texttt{RX} permissions, and all other memory types
-    get \texttt{RW} permissions. Since some firmware drivers may write to global
-    variables at runtime, Apple kernel will crash at calling UEFI runtime services,
-    unless driver \texttt{.data} section has \texttt{EfiRuntimeServicesData}
+  \item \DIFaddbegin \DIFadd{The }\DIFaddend Memory attributes table is ignored. \texttt{EfiRuntimeServicesCode}
+    memory statically gets \texttt{RX} permissions \DIFdelbegin \DIFdel{, and }\DIFdelend \DIFaddbegin \DIFadd{while }\DIFaddend all other memory types
+    get \texttt{RW} permissions. \DIFdelbegin \DIFdel{Since }\DIFdelend \DIFaddbegin \DIFadd{As }\DIFaddend some firmware drivers may write to global
+    variables at runtime, \DIFaddbegin \DIFadd{the }\DIFaddend Apple kernel will crash at calling UEFI runtime services
+    \DIFdelbegin \DIFdel{,
+    unless }\DIFdelend \DIFaddbegin \DIFadd{unless the }\DIFaddend driver \texttt{.data} section has \DIFaddbegin \DIFadd{a }\DIFaddend \texttt{EfiRuntimeServicesData}
     type.
   \end{itemize}
 
@@ -1730,11 +1830,11 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \emph{Note 1}: Since several types of firmware come with incorrect memory protection
   tables, this quirk often comes paired with \texttt{SyncRuntimePermissions}.
 
-  \emph{Note 2}: The necessity of this quirk is determined by early boot failures.
+  \emph{Note 2}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by early boot failures.
   This quirk replaces \texttt{EnableWriteUnprotector} on firmware supporting
   Memory Attribute Tables (MAT). This quirk is usually unnecessary when using
-  \texttt{OpenDuetPkg}, but may be required to boot macOS 10.6, and earlier, for
-  reasons that are not clear.
+  \texttt{OpenDuetPkg} \DIFdelbegin \DIFdel{, }\DIFdelend but may be required to boot macOS 10.6, and earlier, for
+  reasons that are \DIFdelbegin \DIFdel{not clear}\DIFdelend \DIFaddbegin \DIFadd{as yet unclear}\DIFaddend .
 
 \item
   \texttt{SetupVirtualMap}\\
@@ -1747,9 +1847,12 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   performing early boot identity mapping of assigned virtual addresses to physical
   memory.
 
-  \emph{Note}: The necessity of this quirk is determined by early boot failures. Currently,
+  \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by early boot failures.
+\DIFdelbegin \DIFdel{Currently,
   new firmware with memory protection support (such as OVMF) do not support this quirk. See
-  \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}.
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}%%%
+\DIFdel{.
+}\DIFdelend 
 
 \item
   \texttt{SignalAppleOS}\\
@@ -1757,7 +1860,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Report macOS being loaded through OS Info for any OS.
 
-  This quirk is useful on Mac firmware, which behaves differently in different OS.
+  This quirk is useful on Mac firmware, which behaves differently \DIFdelbegin \DIFdel{in }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend different OS.
   For example, it is supposed to enable Intel GPU in Windows and Linux in some
   dual-GPU MacBook models.
 
@@ -1765,7 +1868,7 @@ To view their current state use \texttt{pmset -g} command in Terminal.
   \texttt{SyncRuntimePermissions}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Update memory permissions for runtime environment.
+  \textbf{Description}: Update memory permissions for \DIFaddbegin \DIFadd{the }\DIFaddend runtime environment.
 
   Some types of firmware fail to properly handle runtime permissions:
   \begin{itemize}
@@ -1795,7 +1898,7 @@ map of DevicePaths to a map of property names and their values.
 
 Property data can be debugged with
 \href{https://github.com/acidanthera/gfxutil}{gfxutil}.
-To obtain current property data use the following command in macOS:
+To obtain current property data\DIFaddbegin \DIFadd{, }\DIFaddend use the following command in macOS:
 \begin{lstlisting}[label=gfxutil, style=ocbash]
 ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
   sed 's/.*<//;s/>.*//' > /tmp/device-properties.hex &&
@@ -1804,7 +1907,7 @@ ioreg -lw0 -p IODeviceTree -n efi -r -x | grep device-properties |
 \end{lstlisting}
 
 Device properties are part of the \texttt{IODeviceTree} (\texttt{gIODT})
-plane of macOS I/O Registry. This plane has several construction stages
+plane of \DIFaddbegin \DIFadd{the }\DIFaddend macOS I/O Registry. This plane has several construction stages
 relevant for the platform initialisation. While the early construction
 stage is performed by the XNU kernel in the \texttt{IODeviceTreeAlloc}
 method, the majority of the construction is performed by the platform expert,
@@ -1832,10 +1935,12 @@ The first stage applies very early but exclusively to the devices present in ACP
 The second stage applies to all devices much later after the PCI configuration
 and may repeat the first stage if the device was not present in ACPI.
 
-For all kernel drivers, which may inspect the \texttt{IODeviceTree} plane without
-probing (e.g. \texttt{Lilu} and its plugins such as \texttt{WhateverGreen}) it is particularly
-important to ensure device presence in the ACPI tables. Failing to do so may result
-\textbf{in all kinds of erratic behaviour} caused by ignoring the injected device properties
+For all kernel drivers \DIFdelbegin \DIFdel{, which }\DIFdelend \DIFaddbegin \DIFadd{that }\DIFaddend may inspect the \texttt{IODeviceTree} plane without probing\DIFaddbegin \DIFadd{,
+such as }\texttt{\DIFadd{Lilu}} \DIFadd{and its plugins }\DIFaddend (e.g. \DIFdelbegin \texttt{\DIFdel{Lilu}} %DIFAUXCMD
+\DIFdel{and its plugins such as }\DIFdelend \texttt{WhateverGreen})\DIFdelbegin \DIFdel{it is particularly
+}\DIFdelend \DIFaddbegin \DIFadd{, it is especially
+}\DIFaddend important to ensure device presence in the ACPI tables. \DIFdelbegin \DIFdel{Failing }\DIFdelend \DIFaddbegin \DIFadd{A failure }\DIFaddend to do so may result
+\textbf{in \DIFdelbegin \DIFdel{all kinds of }\DIFdelend erratic behaviour} caused by ignoring the injected device properties
 as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
 \texttt{SSDT-BRG0.dsl} for an example.
 
@@ -1847,7 +1952,7 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets device properties from a map (\texttt{plist\ dict})
   of device paths to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ metadata} format. Device paths must be provided in canonic string
+  in \texttt{plist\ \DIFdelbegin \DIFdel{metadata}\DIFdelend \DIFaddbegin \DIFadd{multidata}\DIFaddend } format. Device paths must be provided in canonic string
   format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
   be set if not present and not deleted.
 
@@ -1898,7 +2003,7 @@ Some known properties include:
 
 \subsection{Introduction}\label{kernelintro}
 
-This section allows to apply different kinds of kernelspace modifications on
+This section allows \DIFdelbegin \DIFdel{to apply }\DIFdelend \DIFaddbegin \DIFadd{the application of }\DIFaddend different kinds of kernelspace modifications on
 Apple Kernel (\href{https://opensource.apple.com/source/xnu}{XNU}). The modifications
 currently provide driver (kext) injection, kernel and driver patching, and driver
 blocking.
@@ -1913,7 +2018,7 @@ blocking.
   \textbf{Description}: Load selected kernel drivers from \texttt{OC/Kexts} directory.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
   order follows the item order in the array, thus the dependencies should be written
   prior to their consumers.
 
@@ -1931,13 +2036,13 @@ blocking.
   \textbf{Description}: Remove selected kernel drivers from prelinked kernel.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  blocked driver. See \hyperref[kernelpropsblock]{Block Properties} section below.
+  blocked driver. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsblock]{Block Properties} section below.
 
 \item
   \texttt{Emulate}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Emulate select hardware in kernelspace via parameters
-  described in \hyperref[kernelpropsemu]{Emulate Properties} section below.
+  \textbf{Description}: Emulate \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend hardware in kernelspace via parameters
+  described in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsemu]{Emulate Properties} section below.
 
 \item
   \texttt{Force}\\
@@ -1946,7 +2051,7 @@ blocking.
   \textbf{Description}: Load kernel drivers from system volume if they are not cached.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See \hyperref[kernelpropsforce]{Force Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsforce]{Force Properties} section below.
   This section resolves the problem of injecting drivers that depend on other
   drivers, which are not cached otherwise. The issue normally affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
@@ -1967,19 +2072,19 @@ blocking.
   driver addition and removal.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See \hyperref[kernelpropspatch]{Patch Properties} section below.
+  patch. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply individual kernel and driver quirks described
-  in \hyperref[kernelpropsquirks]{Quirks Properties} section below.
+  in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsquirks]{Quirks Properties} section below.
 
 \item
   \texttt{Scheme}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Define kernelspace operation mode via parameters
-  described in \hyperref[kernelpropsscheme]{Scheme Properties} section below.
+  described in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[kernelpropsscheme]{Scheme Properties} section below.
 
 
 \end{enumerate}
@@ -2070,7 +2175,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or newer.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{PlistPath}\\
@@ -2117,7 +2223,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Blocks kernel driver on specified macOS version or older.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{MinKernel}\\
@@ -2125,7 +2232,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \end{enumerate}
 
@@ -2211,7 +2319,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Emulates CPUID and applies \texttt{DummyPowerManagement} on specified macOS version or older.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{MinKernel}\\
@@ -2219,7 +2328,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Emulates CPUID and applies \texttt{DummyPowerManagement} on specified macOS version or newer.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \end{enumerate}
 
@@ -2274,7 +2384,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or older.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{MinKernel}\\
@@ -2282,7 +2393,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Adds kernel driver on specified macOS version or newer.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{Add MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{PlistPath}\\
@@ -2375,7 +2487,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Patches data on specified macOS version or older.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{MinKernel}\\
@@ -2383,7 +2496,8 @@ blocking.
   \textbf{Failsafe}: Empty\DIFdelbegin \DIFdel{string}\DIFdelend \\
   \textbf{Description}: Patches data on specified macOS version or newer.
 
-  \emph{Note}: Refer to \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} for matching logic.
+  \emph{Note}: Refer to \DIFdelbegin %DIFDELCMD < \hyperlink{kernmatch}{\texttt{Add} \texttt{MaxKernel} description} %%%
+\DIFdelend \DIFaddbegin \DIFadd{the }\hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} \DIFaddend for matching logic.
 
 \item
   \texttt{Replace}\\
@@ -2403,9 +2517,11 @@ blocking.
 \item
   \texttt{Skip}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Number of found occurrences to be skipped before replacement
-  is done.
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(Do not skip any occurrences)}\DIFaddend \\
+  \textbf{Description}: Number of found occurrences to \DIFdelbegin \DIFdel{be skipped before
+  replacement
+  is done}\DIFdelend \DIFaddbegin \DIFadd{skip before
+  replacements are applied}\DIFaddend .
 
 \end{enumerate}
 
@@ -2470,7 +2586,7 @@ blocking.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.8 (not required for older)\\
-  \textbf{Description}: Disables multiple MSR access critical for select CPUs,
+  \textbf{Description}: Disables multiple MSR access critical for \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend CPUs,
   which have no native XCPM support.
 
   This is normally used in conjunction with \texttt{Emulate} section on Haswell-E,
@@ -2521,9 +2637,9 @@ blocking.
   \textbf{Requirement}: 11\\
   \textbf{Description}: Disables \texttt{\_\_LINKEDIT} jettison code.
 
-  This option lets \texttt{Lilu.kext} and possibly some others function
-  in macOS Big Sur with best performance without \texttt{keepsyms=1}
-  boot argument.
+  This option lets \texttt{Lilu.kext}\DIFdelbegin \DIFdel{and possibly some others }\DIFdelend \DIFaddbegin \DIFadd{, and possibly other kexts, }\DIFaddend function
+  in macOS Big Sur \DIFdelbegin \DIFdel{with best performance without }\DIFdelend \DIFaddbegin \DIFadd{at their best performance levels without requiring the
+  }\DIFaddend \texttt{keepsyms=1} boot argument.
 
 \item
   \texttt{DisableRtcChecksum}\\
@@ -2697,8 +2813,10 @@ blocking.
 \subsection{Scheme Properties}\label{kernelpropsscheme}
 
 These properties are particularly relevant for older macOS operating systems.
-For more details on how to install and troubleshoot such macOS installation
-refer to \hyperref[legacyapple]{Legacy Apple OS}.
+\DIFdelbegin \DIFdel{For more }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\hyperref[legacyapple]{Legacy Apple OS} \DIFadd{section for }\DIFaddend details on how
+to install and troubleshoot such macOS \DIFdelbegin \DIFdel{installation
+refer to }%DIFDELCMD < \hyperref[legacyapple]{Legacy Apple OS}%%%
+\DIFdelend \DIFaddbegin \DIFadd{installations}\DIFaddend .
 
 \begin{enumerate}
 
@@ -2774,7 +2892,7 @@ refer to \hyperref[legacyapple]{Legacy Apple OS}.
       \texttt{x86\_64}, \texttt{i386}, \texttt{i386-user32}.
   \end{enumerate}
 
-  Unlike macOS~10.7, where select boards identifiers are treated as the \texttt{i386}
+  Unlike macOS~10.7, where \DIFdelbegin \DIFdel{select boards }\DIFdelend \DIFaddbegin \DIFadd{certain board }\DIFaddend identifiers are treated as the \texttt{i386}
   only machines, and macOS~10.5 or earlier, where \texttt{x86\_64} is not supported
   by the macOS kernel, macOS~10.6 is very special. The architecture choice on macOS~10.6
   depends on many factors including not only the board identifier, but also macOS
@@ -2877,8 +2995,11 @@ produce multiple primary and alternate options. Primary options describe operati
 on this media. Alternate options describe recovery options for the operating systems on the media.
 It is possible for alternate options to exist without primary options and vice versa. Be warned
 that the options may not necessarily describe the operating systems on the same partition.
-Each primary and alternate option can be an auxiliary option or not, refer to \texttt{HideAuxiliary}
-for more details. Algorithm to determine boot options behaves as follows:
+Each primary and alternate option can be an auxiliary option or not\DIFdelbegin \DIFdel{, refer to }\DIFdelend \DIFaddbegin \DIFadd{. Refer to the }\DIFaddend \texttt{HideAuxiliary}
+\DIFaddbegin \DIFadd{section }\DIFaddend for more details.
+\DIFdelbegin \DIFdel{Algorithm }\DIFdelend \DIFaddbegin 
+
+\DIFadd{The algorithm }\DIFaddend to determine boot options behaves as follows:
 
 \begin{enumerate}
 \tightlist
@@ -2962,8 +3083,8 @@ entry choice will update till next manual reconfiguration.
 \item
   \texttt{Boot}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Apply boot configuration described in
-  \hyperref[miscbootprops]{Boot Properties} section below.
+  \textbf{Description}: Apply boot configuration described in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[miscbootprops]{Boot Properties} section below.
 
 \item
   \texttt{BlessOverride}\\
@@ -2982,8 +3103,8 @@ entry choice will update till next manual reconfiguration.
 \item
   \texttt{Debug}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Apply debug configuration described in
-  \hyperref[miscdebugprops]{Debug Properties} section below.
+  \textbf{Description}: Apply debug configuration described in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[miscdebugprops]{Debug Properties} section below.
 
 \item
   \texttt{Entries}\\
@@ -2991,13 +3112,13 @@ entry choice will update till next manual reconfiguration.
   \textbf{Description}: Add boot entries to boot picker.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See \hyperref[miscentryprops]{Entry Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[miscentryprops]{Entry Properties} section below.
 
 \item
   \texttt{Security}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Apply security configuration described in
-  \hyperref[miscsecurityprops]{Security Properties} section below.
+  \textbf{Description}: Apply security configuration described in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[miscsecurityprops]{Security Properties} section below.
 
 \item
   \texttt{Tools}\label{misctools}\\
@@ -3005,7 +3126,7 @@ entry choice will update till next manual reconfiguration.
   \textbf{Description}: Add tool entries to boot picker.
 
   Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See \hyperref[miscentryprops]{Entry Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Select tools, for example, UEFI Shell, are very
   dangerous and \textbf{MUST NOT} appear in production configurations, especially
@@ -3099,7 +3220,7 @@ entry choice will update till next manual reconfiguration.
   \texttt{LauncherOption}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Disabled}\\
-  \textbf{Description}: Register launcher option in firmware preferences for persistence.
+  \textbf{Description}: Register \DIFaddbegin \DIFadd{the }\DIFaddend launcher option in firmware preferences for persistence.
 
   Valid values:
 
@@ -3128,9 +3249,12 @@ entry choice will update till next manual reconfiguration.
   Check \href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
   for some known issues with Haswell and other boards.
 
-  \emph{Note 2}: Be aware that while NVRAM reset executed from OpenCore should not erase the boot
-  option created in \texttt{Bootstrap}, executing NVRAM reset prior to loading OpenCore will remove it. For significant implementation updates (e.g. in OpenCore 0.6.4) make sure to perform
-  NVRAM reset with \texttt{Bootstrap} disabled before reenabling.
+  \emph{Note 2}: \DIFdelbegin \DIFdel{Be aware that while NVRAM reset }\DIFdelend \DIFaddbegin \DIFadd{While NVRAM resets }\DIFaddend executed from OpenCore \DIFdelbegin \DIFdel{should not }\DIFdelend \DIFaddbegin \DIFadd{would not typically }\DIFaddend erase the boot option
+  created in \texttt{Bootstrap}, executing NVRAM \DIFdelbegin \DIFdel{reset }\DIFdelend \DIFaddbegin \DIFadd{resets }\DIFaddend prior to loading OpenCore will remove \DIFdelbegin \DIFdel{it. For }\DIFdelend \DIFaddbegin \DIFadd{the boot
+  option. Therefore, for }\DIFaddend significant implementation updates (e.g. in OpenCore 0.6.4)\DIFdelbegin \DIFdel{make sure to perform
+  NVRAM reset
+  }\DIFdelend \DIFaddbegin \DIFadd{, an NVRAM reset
+  should be performed }\DIFaddend with \texttt{Bootstrap} disabled \DIFdelbegin \DIFdel{before reenabling}\DIFdelend \DIFaddbegin \DIFadd{after which it can be reenabled}\DIFaddend .
 
 \item
   \texttt{LauncherPath}\\
@@ -3254,7 +3378,7 @@ entry choice will update till next manual reconfiguration.
   allow to change operating system behaviour by providing different boot modes.
 
   On some types of firmware, it may be problematic to use modifier keys due to driver
-  incompatibilities. To workaround this problem this option allows registering select hotkeys
+  incompatibilities. To workaround this problem this option allows registering \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend hotkeys
   in a more permissive manner from within boot picker. Such extensions include the support
   of tapping on keys in addition to holding and pressing \texttt{Shift} along with
   other keys instead of just \texttt{Shift} alone, which is not detectable on many
@@ -3331,8 +3455,8 @@ entry choice will update till next manual reconfiguration.
   \item \texttt{ShowPicker} --- this option forces picker to show. Normally it can be
   achieved by holding \texttt{OPT} key during boot. Setting \texttt{ShowPicker} to
   \texttt{true} will make \texttt{ShowPicker} the default option.
-  \item \texttt{ResetNvram} --- this option performs select UEFI variable erase and is
-  normally achieved by holding \texttt{CMD+OPT+P+R} key combination during boot.
+  \item \texttt{ResetNvram} --- this option \DIFdelbegin \DIFdel{performs select UEFI variable erase }\DIFdelend \DIFaddbegin \DIFadd{erases certain UEFI variables }\DIFaddend and is
+  normally \DIFdelbegin \DIFdel{achieved by holding }\DIFdelend \DIFaddbegin \DIFadd{executed by holding the }\DIFaddend \texttt{CMD+OPT+P+R} key combination during boot.
   Another way to erase UEFI variables is to choose \texttt{Reset NVRAM} in the picker.
   This option requires \texttt{AllowNvramReset} to be set to \texttt{true}.
   \item \texttt{BootApple} --- this options performs booting to the first found Apple
@@ -3896,7 +4020,7 @@ rm vault.pub
   \textbf{Description}: Define operating system detection policy.
 
   This value allows to prevent scanning (and booting) from untrusted
-  source based on a bitmask (sum) of select flags. As it is not possible
+  source based on a bitmask (sum) of \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend flags. As it is not possible
   to reliably detect every file system or device type, this feature
   cannot be fully relied upon in open environments, and the additional
   measures are to be applied.
@@ -4008,8 +4132,8 @@ rm vault.pub
   achieve \texttt{Full Security}. Check \texttt{ForceSecureBootScheme}
   when using Apple Secure Boot on a virtual machine.
 
-  Enabling Apple Secure Boot is more demanding to incorrect configurations,
-  buggy macOS installations, and unsupported setups. Things to consider:
+  Enabling Apple Secure Boot is more demanding \DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{on }\DIFaddend incorrect configurations,
+  \DIFdelbegin \DIFdel{buggy }\DIFdelend \DIFaddbegin \DIFadd{faulty }\DIFaddend macOS installations, and unsupported setups. Things to consider:
 
   \begin{enumerate}
     \tightlist
@@ -4047,8 +4171,8 @@ rm vault.pub
   is the system volume identifier. On HFS+ installations the manifests should be
   copied to \texttt{/System/Library/CoreServices} on the system volume.
 
-  For more details on how to configure Apple Secure Boot with UEFI Secure Boot
-  refer to \hyperref[uefisecureboot]{UEFI Secure Boot} section.
+  For more details on how to configure Apple Secure Boot with UEFI Secure Boot\DIFdelbegin \DIFdel{refer to }\DIFdelend \DIFaddbegin \DIFadd{,
+  refer to the }\DIFaddend \hyperref[uefisecureboot]{UEFI Secure Boot} section.
 
 \end{enumerate}
 
@@ -4129,7 +4253,7 @@ rm vault.pub
 
   This setting may be benefitial to some older tools that require text output.
   By default all the tools are launched in graphics mode. Read more about text
-  modes in \hyperref[uefioutputprops]{Output Properties} section below.
+  modes in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[uefioutputprops]{Output Properties} section below.
 
 \end{enumerate}
 
@@ -4192,7 +4316,7 @@ use.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets NVRAM variables from a map (\texttt{plist\ dict})
   of GUIDs to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ metadata} format. GUIDs must be provided in canonic string
+  in \texttt{plist\ \DIFdelbegin \DIFdel{metadata}\DIFdelend \DIFaddbegin \DIFadd{multidata}\DIFaddend } format. GUIDs must be provided in canonic string
   format in upper or lower case (e.g. \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}).
 
   Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
@@ -4250,11 +4374,11 @@ use.
 \item
   \texttt{LegacySchema}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Allows setting select NVRAM variables from a map
+  \textbf{Description}: Allows setting \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend NVRAM variables from a map
   (\texttt{plist\ dict}) of GUIDs to an array (\texttt{plist\ array}) of
   variable names in \texttt{plist\ string} format.
 
-  \texttt{*} value can be used to accept all variables for select GUID.
+  \texttt{*} value can be used to accept all variables for \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend GUID.
 
   \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
   For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
@@ -4591,7 +4715,7 @@ base part of the configuration may be obtained from
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/AppleModels}{\texttt{AppleModels}},
 which itself generates a set of interfaces based on a database
 in \href{https://yaml.org/spec/1.2/spec.html}{YAML} format. These fields
-are written to three select destinations:
+are written to three \DIFdelbegin \DIFdel{select }\DIFdelend destinations:
 
 \begin{itemize}
 \tightlist
@@ -4611,7 +4735,7 @@ header file. However, several important fields reside in Data Hub and
 NVRAM. Some of the values can be found in more than one field and/or
 destination, so there are two ways to control their update process:
 manual, where all the values are specified (the default), and semi-automatic,
-where (\texttt{Automatic}) only select values are specified, and later used
+where (\texttt{Automatic}) only \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend values are specified, and later used
 for system configuration.
 
 To inspect SMBIOS contents \href{http://www.nongnu.org/dmidecode}{dmidecode} utility can
@@ -4638,10 +4762,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
 
-  \textbf{Warning}: It is strongly discouraged set this option to \texttt{false}
-  when intending to update platform information. The only reason to do that is
-  when doing minor correction of the SMBIOS present and similar. In all other
-  cases not using \texttt{Automatic} may lead to hard to debug errors.
+  \textbf{Warning}: It is strongly discouraged \DIFaddbegin \DIFadd{to }\DIFaddend set this option to \texttt{false}
+  when intending to update platform information. The only reason to do \DIFdelbegin \DIFdel{that is when doing minor correction of the SMBIOS present and similar}\DIFdelend \DIFaddbegin \DIFadd{so is if
+  making minor corrections to SMBIOS values on legacy Apple hardware}\DIFaddend . In all other
+  cases \DIFdelbegin \DIFdel{not using }\DIFdelend \DIFaddbegin \DIFadd{setting }\DIFaddend \texttt{Automatic} \DIFaddbegin \DIFadd{to }\texttt{\DIFadd{false}} \DIFaddend may lead to hard to debug errors\DIFaddbegin \DIFadd{,
+  due to inconsistent or invalid settings}\DIFaddend .
 
 \item
   \texttt{CustomMemory}\\
@@ -4908,7 +5033,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   This feature can only be used on Mac-compatible firmware.
 }\DIFaddend \item
   \texttt{ROM}\\
-  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{metadata}\DIFaddend }, 6 bytes\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{data}\DIFdelend \DIFaddbegin \DIFadd{multidata}\DIFaddend }, 6 bytes\\
   \textbf{Failsafe}: \DIFaddbegin \DIFadd{Empty (}\DIFaddend OEM specified or not installed\DIFaddbegin \DIFadd{)}\DIFaddend \\
   \textbf{Description}: Refer to
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:ROM}.
@@ -4928,49 +5053,49 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{name} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is
   \texttt{platform} in ASCII.
 \item
   \texttt{SystemProductName}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{Model} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is equal to SMBIOS
   \texttt{SystemProductName} in Unicode.
 \item
   \texttt{SystemSerialNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{SystemSerialNumber} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is equal to SMBIOS
   \texttt{SystemSerialNumber} in Unicode.
 \item
   \texttt{SystemUUID}\\
   \textbf{Type}: \texttt{plist\ string}, GUID\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{system-id} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is equal to SMBIOS
   \texttt{SystemUUID} (with swapped byte order).
 \item
   \texttt{BoardProduct}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Sets \texttt{board-id} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is equal to SMBIOS
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is equal to SMBIOS
   \texttt{BoardProduct} in ASCII.
 \item
   \texttt{BoardRevision}\\
   \textbf{Type}: \texttt{plist\ data}, 1 byte\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{board-rev} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs seems to correspond
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs seems to correspond
   to internal board revision (e.g. \texttt{01}).
 \item
   \texttt{StartupPowerEvents}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{StartupPowerEvents} in
-  \texttt{gEfiMiscSubClassGuid}. Value found on Macs is power management
+  \texttt{gEfiMiscSubClassGuid}. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is power management
   state bitmask, normally 0. Known bits read by
   \texttt{X86PlatformPlugin.kext}:
 
@@ -5110,7 +5235,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Description}: Specifies the custom memory devices to be added.
 
   Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  memory device. See \hyperref[platforminfomemorydevice]{Memory Devices Properties}
+  memory device. See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[platforminfomemorydevice]{Memory Devices Properties}
   section below. This should include all memory slots, even if unpopulated.
 
 \item
@@ -5372,7 +5497,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: \DIFdelbegin \DIFdel{Not installed}\DIFdelend \DIFaddbegin \DIFadd{Empty (Not installed)}\DIFaddend \\
   \textbf{Description}: Specifies the value of NVRAM variable
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:system-id}
-  for boot services only. Value found on Macs is equal to SMBIOS
+  for boot services only. \DIFdelbegin \DIFdel{Value }\DIFdelend \DIFaddbegin \DIFadd{The value }\DIFaddend found on Macs is equal to SMBIOS
   \texttt{SystemUUID}.
 
 \end{enumerate}
@@ -5588,23 +5713,25 @@ Apple ROM Version
 \item
   \texttt{PlatformFeature}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: \texttt{0xFFFFFFFF}\\
+  \textbf{Failsafe}: \texttt{0xFFFFFFFF} \DIFaddbegin \DIFadd{(OEM specified on Apple hardware, do not provide the table otherwise)}\DIFaddend \\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Use \texttt{0xFFFFFFFF} value to not provide this table.
+  for more details. \DIFdelbegin \DIFdel{Use }\texttt{\DIFdel{0xFFFFFFFF}} %DIFAUXCMD
+\DIFdel{value to not provide this table}\DIFdelend \DIFaddbegin \DIFadd{Missing on older Macs}\DIFaddend .
 \item
   \texttt{SmcVersion}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
-  \textbf{Failsafe}: All zero\\
+  \textbf{Failsafe}: All zero \DIFaddbegin \DIFadd{(OEM specified on Apple hardware, do not provide the table otherwise)}\DIFaddend \\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
   \textbf{Description}: ASCII string containing SMC version in upper case.
-  Missing on T2 based Macs. Ignored when zero.
-\item
+  Missing on T2 based Macs.
+\DIFdelbegin \DIFdel{Ignored when zero.
+}\DIFdelend \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(OEM specified on Apple hardware, 0 otherwise)}\DIFaddend \\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
@@ -5614,7 +5741,7 @@ Apple ROM Version
 \item
   \texttt{FirmwareFeaturesMask}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0} \DIFaddbegin \DIFadd{(OEM specified on Apple hardware, 0 otherwise)}\DIFaddend \\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeaturesMask} and
   \texttt{ExtendedFirmwareFeaturesMask}\\
@@ -5897,15 +6024,15 @@ functioning. Feature highlights:
   \texttt{APFS}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
-  \textbf{Description}: Provide APFS support as configured in
-  \hyperref[uefiapfsprops]{APFS Properties} section below.
+  \textbf{Description}: Provide APFS support as configured in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[uefiapfsprops]{APFS Properties} section below.
 
 \item
   \texttt{Audio}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
-  in \hyperref[uefiaudioprops]{Audio Properties} section below.
+  in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[uefiaudioprops]{Audio Properties} section below.
 
   Audio support provides a way for upstream protocols to interact with the
   selected hardware and audio resources. All audio resources should reside
@@ -5972,22 +6099,22 @@ functioning. Feature highlights:
   \texttt{Input}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
-  \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in
-  \hyperref[uefiinputprops]{Input Properties} section below.
+  \textbf{Description}: Apply individual settings designed for input (keyboard and mouse) in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[uefiinputprops]{Input Properties} section below.
 
 \item
   \texttt{Output}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
-  \textbf{Description}: Apply individual settings designed for output (text and graphics) in
-  \hyperref[uefioutputprops]{Output Properties} section below.
+  \textbf{Description}: Apply individual settings designed for output (text and graphics) in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[uefioutputprops]{Output Properties} section below.
 
 \item
   \texttt{ProtocolOverrides}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
-  \textbf{Description}: Force builtin versions of select protocols described
-  in \hyperref[uefiprotoprops]{ProtocolOverrides Properties} section below.
+  \textbf{Description}: Force builtin versions of \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend protocols described
+  in \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[uefiprotoprops]{ProtocolOverrides Properties} section below.
 
   \emph{Note}: all protocol instances are installed prior to driver loading.
 
@@ -5995,8 +6122,8 @@ functioning. Feature highlights:
   \texttt{Quirks}\\
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
-  \textbf{Description}: Apply individual firmware quirks described in
-  \hyperref[uefiquirkprops]{Quirks Properties} section below.
+  \textbf{Description}: Apply individual firmware quirks described in \DIFaddbegin \DIFadd{the
+  }\DIFaddend \hyperref[uefiquirkprops]{Quirks Properties} section below.
 
 \item
   \texttt{ReservedMemory}\\
@@ -6005,7 +6132,7 @@ functioning. Feature highlights:
   describing memory areas exquisite to particular firmware and hardware functioning,
   which should not be used by the operating system. An example of such memory region
   could be second 256 MB corrupted by Intel HD 3000 or an area with faulty RAM.
-  See \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+  See \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
 
 \end{enumerate}
 
@@ -6330,7 +6457,7 @@ functioning. Feature highlights:
   \textbf{Description}: Enable internal pointer driver.
 
   This option implements standard UEFI pointer protocol (\texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL})
-  through select OEM protocols. The option may be useful on Z87 ASUS boards, where
+  through \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend OEM protocols. The option may be useful on Z87 ASUS boards, where
   \texttt{EFI\_SIMPLE\_POINTER\_PROTOCOL} is broken.
 
 \item
@@ -6340,7 +6467,7 @@ functioning. Feature highlights:
   \textbf{Description}: Set OEM protocol used for internal pointer driver.
 
   Currently the only supported variant is \texttt{ASUS}, using specialised protocol available
-  on select Z87 and Z97 ASUS boards. More details can be found in
+  on \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend Z87 and Z97 ASUS boards. More details can be found in
   \href{https://github.com/LongSoft/UEFITool/pull/116}{\texttt{LongSoft/UefiTool\#116}}.
   The value of this property cannot be empty if \texttt{PointerSupport} is enabled.
 
@@ -6408,8 +6535,8 @@ functioning. Feature highlights:
   The use of \texttt{BuiltinGraphics} is generally straightforward.
   For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
   set \texttt{Resolution} to \texttt{Max}. \texttt{BuiltinText} variant is
-  an alternative \texttt{BuiltinGraphics} for some very old and buggy laptop
-  firmware, which can only draw in \texttt{Text} mode.
+  an alternative \texttt{BuiltinGraphics} for some very old and \DIFdelbegin \DIFdel{buggy }\DIFdelend \DIFaddbegin \DIFadd{faulty
+  }\DIFaddend laptop firmware, which can only draw in \texttt{Text} mode.
 
   The use of \texttt{System} protocols is more complicated. In general
   the preferred setting is \texttt{SystemGraphics} or \texttt{SystemText}.
@@ -6459,7 +6586,7 @@ functioning. Feature highlights:
   On HiDPI screens \texttt{APPLE\_VENDOR\_VARIABLE\_GUID} \texttt{UIScale}
   NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
   in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
-  and boot screen logo. Refer to \hyperref[nvramvarsrec]{Recommended Variables}
+  and boot screen logo. Refer to \DIFaddbegin \DIFadd{the }\DIFaddend \hyperref[nvramvarsrec]{Recommended Variables}
   section for more details.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
@@ -6664,7 +6791,7 @@ functioning. Feature highlights:
   version.
 
   \emph{Note}: Builtin version of Apple RTC RAM protocol may filter out
-  I/O attempts to select RTC memory addresses. The list of addresses
+  I/O attempts to \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend RTC memory addresses. The list of addresses
   can be specified in \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:rtc-blacklist}
   variable as a data array.
 
@@ -6954,9 +7081,9 @@ While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
 release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
 image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFadd{article}}
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
 \DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFdel{article}}%DIFAUXCMD
+}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
 \DIFdel{.
 Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
 However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.
@@ -7092,7 +7219,7 @@ Not only OpenCore fully supports this model, but it also extends its capabilitie
 to ensure sealed configuration via \hyperref[securevaulting]{vaulting} and
 provide trusted loading to the operating systems using custom verification,
 such as \hyperref[secureapplesb]{Apple Secure Boot}. Proper secure boot chain
-requires several steps and careful configuration of select settings as explained below:
+requires several steps and careful configuration of \DIFdelbegin \DIFdel{select }\DIFdelend \DIFaddbegin \DIFadd{certain }\DIFaddend settings as explained below:
 
 \begin{enumerate}
 \item Enable Apple Secure Boot by setting \texttt{SecureBootModel} to

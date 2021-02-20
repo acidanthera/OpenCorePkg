@@ -9,6 +9,8 @@ OpenCore Changelog
 - Added onscreen early logging in DEBUG builds for legacy firmware
 - Added workaround for firmware not specifying DeviceHandle at bootstrap
 - Added support for R/O page tables in `SetupVirtualMap` quirk
+- Added OEM preservation for certain Apple SMBIOS tables
+- Fixed switching to graphics mode when entering OpenCanopy
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

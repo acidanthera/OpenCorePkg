@@ -71,6 +71,7 @@
   MtrrLib
   OcAppleKeyMapLib
   OcCompressionLib
+  OcConsoleLib
   OcGuardLib
   OcMiscLib
   OcPngLib

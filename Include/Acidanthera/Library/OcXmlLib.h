@@ -358,7 +358,7 @@ PlistIntegerValue (
 
 //
 // Decodes data content for valid type or sets *Size to 0.
-// Valid type for MetaData is DATA itself, STRING, INTEGER,
+// Valid type for MultiData is DATA itself, STRING, INTEGER,
 // or BOOLEAN (as 1 byte with 1 or 0 value).
 //
 // @param Buffer output buffer.
@@ -367,7 +367,7 @@ PlistIntegerValue (
 // @warn Buffer must be at least 1 byte long.
 //
 BOOLEAN
-PlistMetaDataValue (
+PlistMultiDataValue (
   XML_NODE  *Node,
   VOID      *Buffer,
   UINT32    *Size
@@ -395,7 +395,7 @@ PlistDataSize (
 // Estimates meta data content size.
 //
 BOOLEAN
-PlistMetaDataSize (
+PlistMultiDataSize (
   XML_NODE  *Node,
   UINT32    *Size
   );
