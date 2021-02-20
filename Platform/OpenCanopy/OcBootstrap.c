@@ -38,7 +38,7 @@ STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
 
 STATIC
 EFI_STATUS
-OcShowMenyByOcEnter (
+OcShowMenuByOcEnter (
   IN     OC_BOOT_CONTEXT          *BootContext
   )
 {
@@ -64,7 +64,7 @@ OcShowMenyByOcEnter (
 
 STATIC
 VOID
-OcShowMenyByOcLeave (
+OcShowMenuByOcLeave (
   VOID
   )
 {
@@ -95,7 +95,7 @@ OcShowMenuByOc (
   mGuiContext.PickerContext = BootContext->PickerContext;
   mGuiContext.AudioPlaybackTimeout = -1;
 
-  Status = OcShowMenyByOcEnter (BootContext);
+  Status = OcShowMenuByOcEnter (BootContext);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -113,7 +113,7 @@ OcShowMenuByOc (
     InternalGetCursorImage
     );
   if (EFI_ERROR (Status)) {
-    OcShowMenyByOcLeave ();
+    OcShowMenuByOcLeave ();
     return Status;
   }
 
@@ -125,7 +125,7 @@ OcShowMenuByOc (
       Index == BootContext->DefaultEntry->EntryIndex - 1
       );
     if (EFI_ERROR (Status)) {
-      OcShowMenyByOcLeave ();
+      OcShowMenuByOcLeave ();
       return Status;
     }
   }
@@ -168,7 +168,7 @@ OcShowMenuByOc (
   //
   GuiClearScreen (&mDrawContext, mBackgroundImage.Buffer);
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
-  OcShowMenyByOcLeave ();
+  OcShowMenuByOcLeave ();
 
   *ChosenBootEntry = mGuiContext.BootEntry;
   BootContext->PickerContext->HideAuxiliary = mGuiContext.HideAuxiliary;
