@@ -109,9 +109,12 @@ SmbiosGetOriginalStructureCount (
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Data                   Pointer to tocation containing SMBIOS data.
+
+  @retval TRUE                      Apple SMBIOS detected
+  @retval FALSE                     Apple SMBIOS not detected
 **/
 STATIC
-VOID
+BOOLEAN
 PatchBiosInformation (
   IN OUT OC_SMBIOS_TABLE *Table,
   IN     OC_SMBIOS_DATA  *Data
@@ -120,13 +123,15 @@ PatchBiosInformation (
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
   UINT8                           StringIndex;
+  CHAR8                           *Vendor;
+  BOOLEAN                         IsApple;
 
   Original    = SmbiosGetOriginalStructure (SMBIOS_TYPE_BIOS_INFORMATION, 1);
   MinLength   = sizeof (*Original.Standard.Type0);
   StringIndex = 0;
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_BIOS_INFORMATION, MinLength, 1))) {
-    return;
+    return FALSE;
   }
 
   SMBIOS_OVERRIDE_S (Table, Standard.Type0->Vendor, Original, Data->BIOSVendor, &StringIndex, NULL);
@@ -143,7 +148,19 @@ PatchBiosInformation (
   SMBIOS_OVERRIDE_V (Table, Standard.Type0->EmbeddedControllerFirmwareMajorRelease, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type0->EmbeddedControllerFirmwareMinorRelease, Original, NULL, NULL);
 
+  IsApple = FALSE;
+
+  Vendor = SmbiosGetString (Table->CurrentPtr, (Table->CurrentPtr).Standard.Type0->Vendor);
+
+  if (Vendor != NULL && AsciiStrStr (Vendor, "Apple") != NULL) {
+    IsApple = TRUE;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCSMB: Post-override BIOS vendor %a %d\n", Vendor, IsApple));
+
   SmbiosFinaliseStruct (Table);
+
+  return IsApple;
 }
 
 /** Type 1
@@ -1017,15 +1034,29 @@ PatchBootInformation (
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
 **/
 STATIC
 VOID
-CreateAppleFirmwareVolume (
+CreateOrPatchAppleFirmwareVolume (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     BOOLEAN          HasAppleSMBIOS
   )
 {
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
+
+  UINT32 FirmwareFeatures;
+  UINT32 FirmwareFeaturesMask;
+  UINT32 ExtendedFirmwareFeatures;
+  UINT32 ExtendedFirmwareFeaturesMask;
+
+  if (HasAppleSMBIOS) {
+    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_FIRMWARE_INFORMATION, 1);
+  } else {
+    Original.Raw  = NULL;
+  }
 
   MinLength   = sizeof (*Table->CurrentPtr.Type128);
 
@@ -1033,10 +1064,15 @@ CreateAppleFirmwareVolume (
     return;
   }
 
-  Table->CurrentPtr.Type128->FirmwareFeatures             = (UINT32)BitFieldRead64 (Data->FirmwareFeatures,     0,  31);
-  Table->CurrentPtr.Type128->FirmwareFeaturesMask         = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 0,  31);
-  Table->CurrentPtr.Type128->ExtendedFirmwareFeatures     = (UINT32)BitFieldRead64 (Data->FirmwareFeatures,     32, 63);
-  Table->CurrentPtr.Type128->ExtendedFirmwareFeaturesMask = (UINT32)BitFieldRead64 (Data->FirmwareFeaturesMask, 32, 63);
+  FirmwareFeatures             = (UINT32) BitFieldRead64 (Data->FirmwareFeatures    ,  0, 31);
+  FirmwareFeaturesMask         = (UINT32) BitFieldRead64 (Data->FirmwareFeaturesMask,  0, 31);
+  ExtendedFirmwareFeatures     = (UINT32) BitFieldRead64 (Data->FirmwareFeatures    , 32, 63);
+  ExtendedFirmwareFeaturesMask = (UINT32) BitFieldRead64 (Data->FirmwareFeaturesMask, 32, 63);
+
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeatures            , Original, Data->FirmwareFeatures     == 0 ? NULL : &FirmwareFeatures            , NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->FirmwareFeaturesMask        , Original, Data->FirmwareFeaturesMask == 0 ? NULL : &FirmwareFeaturesMask        , NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeatures    , Original, Data->FirmwareFeatures     == 0 ? NULL : &ExtendedFirmwareFeatures    , NULL);
+  SMBIOS_OVERRIDE_V (Table, Type128->ExtendedFirmwareFeaturesMask, Original, Data->FirmwareFeaturesMask == 0 ? NULL : &ExtendedFirmwareFeaturesMask, NULL);
 
   SmbiosFinaliseStruct (Table);
 }
@@ -1110,20 +1146,29 @@ CreateAppleProcessorSpeed (
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
 **/
 STATIC
 VOID
-CreateApplePlatformFeature (
+CreateOrPatchApplePlatformFeature (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     BOOLEAN          HasAppleSMBIOS
   )
 {
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
+
+  if (HasAppleSMBIOS) {
+    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_PLATFORM_FEATURE, 1);
+  } else {
+    Original.Raw  = NULL;
+  }
 
   //
   // Older Macs do not support PlatformFeature table.
   //
-  if (Data->PlatformFeature == NULL) {
+  if (Data->PlatformFeature == NULL && Original.Raw == NULL) {
     return;
   }
 
@@ -1133,7 +1178,7 @@ CreateApplePlatformFeature (
     return;
   }
 
-  Table->CurrentPtr.Type133->PlatformFeature = *Data->PlatformFeature;
+  SMBIOS_OVERRIDE_V (Table, Type133->PlatformFeature, Original, Data->PlatformFeature, NULL);
 
   SmbiosFinaliseStruct (Table);
 }
@@ -1142,20 +1187,29 @@ CreateApplePlatformFeature (
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
   @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
 **/
 STATIC
 VOID
-CreateAppleSmcInformation (
+CreateOrPatchAppleSmcInformation (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN     OC_SMBIOS_DATA   *Data,
+  IN     BOOLEAN          HasAppleSMBIOS
   )
 {
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
   UINT8                           MinLength;
+
+  if (HasAppleSMBIOS) {
+    Original      = SmbiosGetOriginalStructure (APPLE_SMBIOS_TYPE_SMC_INFORMATION, 1);
+  } else {
+    Original.Raw  = NULL;
+  }
 
   //
   // Newer Macs do not support SmcVersion table.
   //
-  if (Data->SmcVersion == NULL) {
+  if (Data->SmcVersion == NULL && Original.Raw == NULL) {
     return;
   }
 
@@ -1165,11 +1219,7 @@ CreateAppleSmcInformation (
     return;
   }
 
-  CopyMem (
-    Table->CurrentPtr.Type134->SmcVersion,
-    Data->SmcVersion,
-    sizeof (Table->CurrentPtr.Type134->SmcVersion)
-    );
+  SMBIOS_OVERRIDE_V (Table, Type134->SmcVersion, Original, Data->SmcVersion, NULL);
 
   SmbiosFinaliseStruct (Table);
 }
@@ -1840,6 +1890,8 @@ OcSmbiosCreate (
   OC_SMBIOS_MAPPING               *Mapping;
   UINT16                          MappingNum;
 
+  BOOLEAN                         HasAppleSMBIOS;
+
   ASSERT (Data != NULL);
 
   Mapping = AllocatePool (OC_SMBIOS_MAX_MAPPING * sizeof (*Mapping));
@@ -1849,7 +1901,7 @@ OcSmbiosCreate (
   }
   MappingNum = 0;
 
-  PatchBiosInformation (SmbiosTable, Data);
+  HasAppleSMBIOS = PatchBiosInformation (SmbiosTable, Data);
   PatchSystemInformation (SmbiosTable, Data);
   PatchBaseboardInformation (SmbiosTable, Data);
   PatchSystemEnclosure (SmbiosTable, Data);
@@ -1991,9 +2043,9 @@ OcSmbiosCreate (
   PatchBootInformation (SmbiosTable, Data);
   CreateAppleProcessorType (SmbiosTable, Data, CpuInfo);
   CreateAppleProcessorSpeed (SmbiosTable, Data, CpuInfo);
-  CreateAppleFirmwareVolume (SmbiosTable, Data);
-  CreateApplePlatformFeature (SmbiosTable, Data);
-  CreateAppleSmcInformation (SmbiosTable, Data);
+  CreateOrPatchAppleFirmwareVolume (SmbiosTable, Data, HasAppleSMBIOS);
+  CreateOrPatchApplePlatformFeature (SmbiosTable, Data, HasAppleSMBIOS);
+  CreateOrPatchAppleSmcInformation (SmbiosTable, Data, HasAppleSMBIOS);
   CreateSmBiosEndOfTable (SmbiosTable, Data);
 
   FreePool (Mapping);

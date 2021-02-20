@@ -4544,10 +4544,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
 
-  \textbf{Warning}: It is strongly discouraged set this option to \texttt{false}
-  when intending to update platform information. The only reason to do that is
-  when doing minor correction of the SMBIOS present and similar. In all other
-  cases not using \texttt{Automatic} may lead to hard to debug errors.
+  \textbf{Warning}: It is strongly discouraged to set this option to \texttt{false}
+  when intending to update platform information. The only reason to do so is if
+  making minor corrections to SMBIOS values on legacy Apple hardware. In all other
+  cases setting \texttt{Automatic} to \texttt{false} may lead to hard to debug errors,
+  due to inconsistent or invalid settings.
 
 \item
   \texttt{CustomMemory}\\
@@ -5486,23 +5487,23 @@ Apple ROM Version
 \item
   \texttt{PlatformFeature}\\
   \textbf{Type}: \texttt{plist\ integer}, 32-bit\\
-  \textbf{Failsafe}: \texttt{0xFFFFFFFF}\\
+  \textbf{Failsafe}: \texttt{0xFFFFFFFF} (OEM specified on Apple hardware, do not provide the table otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
   \textbf{Description}: Platform features bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Use \texttt{0xFFFFFFFF} value to not provide this table.
+  for more details. Missing on older Macs.
 \item
   \texttt{SmcVersion}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
-  \textbf{Failsafe}: All zero\\
+  \textbf{Failsafe}: All zero (OEM specified on Apple hardware, do not provide the table otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE134} - \texttt{Version}\\
   \textbf{Description}: ASCII string containing SMC version in upper case.
-  Missing on T2 based Macs. Ignored when zero.
+  Missing on T2 based Macs.
 \item
   \texttt{FirmwareFeatures}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
@@ -5512,7 +5513,7 @@ Apple ROM Version
 \item
   \texttt{FirmwareFeaturesMask}\\
   \textbf{Type}: \texttt{plist\ data}, 8 bytes\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{0} (OEM specified on Apple hardware, 0 otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE128} -
   \texttt{FirmwareFeaturesMask} and
   \texttt{ExtendedFirmwareFeaturesMask}\\
