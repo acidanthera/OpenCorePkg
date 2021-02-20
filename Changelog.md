@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added support for R/O page tables in `SetupVirtualMap` quirk
 - Added OEM preservation for certain Apple SMBIOS tables
 - Fixed switching to graphics mode when entering OpenCanopy
+- Fixed installing Apple FB Info protocol when no GOP exists
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy
