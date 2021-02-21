@@ -753,10 +753,15 @@ InternalCachedPrelinkedKernel (
     &NewKext->Context.MachContext,
     "__TEXT"
     );
+  if (Segment == NULL) {
+    FreePool (NewKext);
+    return NULL;
+  }
+  
   VirtualAddress = Prelinked->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
   FileOffset     = Prelinked->Is32Bit ? Segment->Segment32.FileOffset : Segment->Segment64.FileOffset;
 
-  if (Segment == NULL || VirtualAddress < FileOffset) {
+  if (VirtualAddress < FileOffset) {
     FreePool (NewKext);
     return NULL;
   }
