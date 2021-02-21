@@ -128,6 +128,19 @@ OcProvideGopPassThrough (
   EFI_GRAPHICS_PIXEL_FORMAT        PixelFormat;
   UINT32                           ColorDepth;
   UINT32                           RefreshRate;
+  BOOLEAN                          HasAppleFramebuffer;
+
+  //
+  // We should not proxy UGA when there is no AppleFramebuffer,
+  // but on systems where there is nothing, it is the only option.
+  // REF: https://github.com/acidanthera/bugtracker/issues/1498
+  //
+  Status = gBS->LocateProtocol (
+    &gAppleFramebufferInfoProtocolGuid,
+    NULL,
+    (VOID *) &FramebufferInfo
+    );
+  HasAppleFramebuffer = !EFI_ERROR (Status);
 
   DEBUG_CODE_BEGIN ();
   HandleCount = (UINT32) OcCountProtocolInstances (&gEfiGraphicsOutputProtocolGuid);
@@ -135,38 +148,32 @@ OcProvideGopPassThrough (
 
   HandleCount = (UINT32) OcCountProtocolInstances (&gAppleFramebufferInfoProtocolGuid);
   DEBUG ((DEBUG_INFO, "OCC: Found %u handles with Apple Framebuffer info\n", HandleCount));
-  if (HandleCount > 0) {
-    Status = gBS->LocateProtocol (
-      &gAppleFramebufferInfoProtocolGuid,
-      NULL,
-      (VOID *) &FramebufferInfo
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCC: Failed to locate AppleFramebufferInfo protocol - %r\n", Status));
+  } else {
+    Status = FramebufferInfo->GetInfo (
+      FramebufferInfo,
+      &FramebufferBase,
+      &FramebufferSize,
+      &ScreenRowBytes,
+      &ScreenWidth,
+      &ScreenHeight,
+      &ScreenDepth
       );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCC: Failed to locate AppleFramebufferInfo protocol - %r\n", Status));
+    if (!EFI_ERROR (Status)) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCC: AppleFramebufferInfo - Got Base %Lx, Size %u, RowBytes %u, Width %u, Height %u, Depth %u\n",
+        FramebufferBase,
+        FramebufferSize,
+        ScreenRowBytes,
+        ScreenWidth,
+        ScreenHeight,
+        ScreenDepth
+        ));
     } else {
-      Status = FramebufferInfo->GetInfo (
-        FramebufferInfo,
-        &FramebufferBase,
-        &FramebufferSize,
-        &ScreenRowBytes,
-        &ScreenWidth,
-        &ScreenHeight,
-        &ScreenDepth
-        );
-      if (!EFI_ERROR (Status)) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCC: AppleFramebufferInfo - Got Base %Lx, Size %u, RowBytes %u, Width %u, Height %u, Depth %u\n",
-          FramebufferBase,
-          FramebufferSize,
-          ScreenRowBytes,
-          ScreenWidth,
-          ScreenHeight,
-          ScreenDepth
-          ));
-      } else {
-        DEBUG ((DEBUG_INFO, "OCC: AppleFramebufferInfo failed to retrieve info - %r\n", Status));
-      }
+      DEBUG ((DEBUG_INFO, "OCC: AppleFramebufferInfo failed to retrieve info - %r\n", Status));
     }
   }
   DEBUG_CODE_END ();
@@ -227,6 +234,9 @@ OcProvideGopPassThrough (
         HandleBuffer[Index],
         Status
         ));
+      if (HasAppleFramebuffer) {
+        continue;
+      }
     } else {
       DEBUG ((
         DEBUG_INFO,
@@ -267,6 +277,9 @@ OcProvideGopPassThrough (
           HandleBuffer[Index],
           Status
           ));
+        if (HasAppleFramebuffer) {
+          continue;
+        }
       }
     }
 
