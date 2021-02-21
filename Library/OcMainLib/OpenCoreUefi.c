@@ -357,7 +357,7 @@ OcReinstallProtocols (
   }
 
   if (OcAppleFbInfoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleFramebufferInfo) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install fb info protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install fb info protocol\n"));
   }
 }
 
