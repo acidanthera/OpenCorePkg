@@ -622,6 +622,7 @@ typedef enum {
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
+  _(BOOLEAN                     , GopPassThrough              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_OUTPUT)

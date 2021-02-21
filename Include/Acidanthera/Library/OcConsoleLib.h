@@ -183,6 +183,16 @@ OcProvideUgaPassThrough (
   );
 
 /**
+  Provide GOP protocol instances on top of existing UGA instances.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcProvideGopPassThrough (
+  VOID
+  );
+
+/**
   Install and initialise Apple Framebuffer Info protocol
   on top of GOP protocol. For EfiBoot 10.4, which can only
   use UGA, this is the only way to obtain framebuffer base

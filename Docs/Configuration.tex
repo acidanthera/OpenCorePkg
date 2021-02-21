@@ -6396,6 +6396,15 @@ functioning. Feature highlights:
   there is an obvious benefit as it may result in issues such as slower scrolling.
 
 \item
+  \texttt{GopPassThrough}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
+  
+  Some types of firmware do not implement the GOP protocol, this option provides it via 
+  a UGA-based proxy. This option requires \texttt{ProvideConsoleGop} to be enabled. (TODO)
+
+\item
   \texttt{IgnoreTextInGraphics}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

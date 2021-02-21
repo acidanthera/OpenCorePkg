@@ -41,6 +41,7 @@
 [Sources]
   ConsoleControl.c
   ConsoleGop.c
+  GopPassThrough.c
   FramebufferInfo.c
   OcConsoleLib.c
   OcConsoleLibInternal.h
