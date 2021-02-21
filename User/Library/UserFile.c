@@ -15,8 +15,8 @@ uint8_t *UserReadFile(const char *str, uint32_t *size) {
   fseek(f, 0, SEEK_SET);
 
   uint8_t *string = malloc(fsize + 1);
-  if (fread(string, fsize, 1, f) != 1)
-    abort(); 
+  if (fsize > 0 && fread(string, fsize, 1, f) != 1)
+    abort();
   fclose(f);
 
   string[fsize] = 0;
