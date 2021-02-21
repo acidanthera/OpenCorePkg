@@ -1229,7 +1229,21 @@ GuiDrawLoop (
         //
         // If detected key press then disable menu timeout
         //
-        TimeOutSeconds = 0;
+        if (TimeOutSeconds > 0) {
+          //
+          // Voice only unrelated key press.
+          //
+          if (!DrawContext->GuiContext->ReadyToBoot
+            && DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileAbortTimeout,
+              FALSE
+              );
+          }
+
+          TimeOutSeconds = 0;
+        }
       }
     }
 
