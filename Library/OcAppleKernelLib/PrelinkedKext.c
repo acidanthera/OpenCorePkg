@@ -796,58 +796,57 @@ InternalCachedPrelinkedKernel (
         PRELINK_STATE_SECTION_KEXTS
         );
 
-      KernelSize = Prelinked->Is32Bit ?
-        Prelinked->PrelinkedStateSectionKernel->Section32.Size :
-        Prelinked->PrelinkedStateSectionKernel->Section64.Size;
-      KextsSize = Prelinked->Is32Bit ?
-        Prelinked->PrelinkedStateSectionKexts->Section32.Size :
-        Prelinked->PrelinkedStateSectionKexts->Section64.Size;
-      KernelOffset = Prelinked->Is32Bit ?
-        Prelinked->PrelinkedStateSectionKernel->Section32.Offset :
-        Prelinked->PrelinkedStateSectionKernel->Section64.Offset;
-      KextsOffset = Prelinked->Is32Bit ?
-        Prelinked->PrelinkedStateSectionKexts->Section32.Offset :
-        Prelinked->PrelinkedStateSectionKexts->Section64.Offset;
-
       if (Prelinked->PrelinkedStateSectionKernel != NULL
-        && Prelinked->PrelinkedStateSectionKexts != NULL
-        && KernelSize > 0
-        && KextsSize > 0) {
-        Prelinked->PrelinkedStateKernelSize = (UINT32) KernelSize;
-        Prelinked->PrelinkedStateKextsSize = (UINT32) KextsSize;
-        Prelinked->PrelinkedStateKernel = AllocateCopyPool (
-          Prelinked->PrelinkedStateKernelSize,
-          &Prelinked->Prelinked[KernelOffset]
-          );
-        Prelinked->PrelinkedStateKexts = AllocateCopyPool (
-          Prelinked->PrelinkedStateKextsSize,
-          &Prelinked->Prelinked[KextsOffset]
-          );
-      }
+        && Prelinked->PrelinkedStateSectionKexts != NULL) {
+        KernelSize = Prelinked->Is32Bit ?
+          Prelinked->PrelinkedStateSectionKernel->Section32.Size :
+          Prelinked->PrelinkedStateSectionKernel->Section64.Size;
+        KextsSize = Prelinked->Is32Bit ?
+          Prelinked->PrelinkedStateSectionKexts->Section32.Size :
+          Prelinked->PrelinkedStateSectionKexts->Section64.Size;
+        KernelOffset = Prelinked->Is32Bit ?
+          Prelinked->PrelinkedStateSectionKernel->Section32.Offset :
+          Prelinked->PrelinkedStateSectionKernel->Section64.Offset;
+        KextsOffset = Prelinked->Is32Bit ?
+          Prelinked->PrelinkedStateSectionKexts->Section32.Offset :
+          Prelinked->PrelinkedStateSectionKexts->Section64.Offset;
 
-      if (Prelinked->PrelinkedStateKernel != NULL
-        && Prelinked->PrelinkedStateKexts != NULL) {
-        Prelinked->PrelinkedStateKextsAddress = Prelinked->Is32Bit ?
-          Prelinked->PrelinkedStateSectionKexts->Section32.Address :
-          Prelinked->PrelinkedStateSectionKexts->Section64.Address;
-        NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
-        NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Ignoring unused PK state __kernel %p __kexts %p\n",
-          Prelinked->PrelinkedStateSectionKernel,
-          Prelinked->PrelinkedStateSectionKexts
-          ));
-        if (Prelinked->PrelinkedStateKernel != NULL) {
-          FreePool (Prelinked->PrelinkedStateKernel);
+        if (KernelSize > 0 && KextsSize > 0) {
+          Prelinked->PrelinkedStateKernelSize = (UINT32) KernelSize;
+          Prelinked->PrelinkedStateKextsSize = (UINT32) KextsSize;
+          Prelinked->PrelinkedStateKernel = AllocateCopyPool (
+            Prelinked->PrelinkedStateKernelSize,
+            &Prelinked->Prelinked[KernelOffset]
+            );
+          Prelinked->PrelinkedStateKexts = AllocateCopyPool (
+            Prelinked->PrelinkedStateKextsSize,
+            &Prelinked->Prelinked[KextsOffset]
+            );
+          if (Prelinked->PrelinkedStateKernel != NULL
+            && Prelinked->PrelinkedStateKexts != NULL) {
+            Prelinked->PrelinkedStateKextsAddress = Prelinked->Is32Bit ?
+              Prelinked->PrelinkedStateSectionKexts->Section32.Address :
+              Prelinked->PrelinkedStateSectionKexts->Section64.Address;
+            NewKext->Context.KxldState = Prelinked->PrelinkedStateKernel;
+            NewKext->Context.KxldStateSize = Prelinked->PrelinkedStateKernelSize;
+          } else {
+            DEBUG ((
+              DEBUG_INFO,
+              "OCAK: Ignoring unused PK state __kernel %p __kexts %p\n",
+              Prelinked->PrelinkedStateSectionKernel,
+              Prelinked->PrelinkedStateSectionKexts
+              ));
+            if (Prelinked->PrelinkedStateKernel != NULL) {
+              FreePool (Prelinked->PrelinkedStateKernel);
+            }
+            if (Prelinked->PrelinkedStateKexts != NULL) {
+              FreePool (Prelinked->PrelinkedStateKexts);
+            }
+            Prelinked->PrelinkedStateSectionKernel = NULL;
+            Prelinked->PrelinkedStateSectionKexts = NULL;
+            Prelinked->PrelinkedStateSegment = NULL;
+          }
         }
-        if (Prelinked->PrelinkedStateKexts != NULL) {
-          FreePool (Prelinked->PrelinkedStateKexts);
-        }
-        Prelinked->PrelinkedStateSectionKernel = NULL;
-        Prelinked->PrelinkedStateSectionKexts = NULL;
-        Prelinked->PrelinkedStateSegment = NULL;
       }
     }
   }
