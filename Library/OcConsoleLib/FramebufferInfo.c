@@ -118,7 +118,7 @@ OcAppleFbInfoInstallProtocol (
   }
 
   if (OcCountProtocolInstances (&gEfiGraphicsOutputProtocolGuid) == 0) {
-    DEBUG ((DEBUG_ERROR, "OCOS: No GOP protocols for FB info\n"));
+    DEBUG ((DEBUG_INFO, "OCOS: No GOP protocols for FB info\n"));
     return NULL;
   }
 
