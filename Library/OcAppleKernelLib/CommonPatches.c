@@ -1547,7 +1547,7 @@ PatchSegmentJettison (
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "_ml_static_mfree", (UINT8 **) &StaticMfree);
-  if (EFI_ERROR (Status) || RemoveBs > Last) {
+  if (EFI_ERROR (Status) || StaticMfree > Last) {
     DEBUG ((DEBUG_INFO, "OCAK: Missing ml_static_mfree - %r\n", Status));
     return EFI_NOT_FOUND;
   }
