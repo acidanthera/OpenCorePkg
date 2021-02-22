@@ -375,6 +375,8 @@ PatchProcessorInformation (
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;
   }
 
+  DEBUG ((DEBUG_INFO, "OCSMB: CPU display frequency is %uMHz\n", MhzSpeed));
+
   Table->CurrentPtr.Standard.Type4->MaxSpeed = MhzSpeed;
   Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
 
