@@ -331,6 +331,7 @@ PatchProcessorInformation (
   UINT8                           MinLength;
   UINT8                           StringIndex;
   UINT8                           TmpCount;
+  UINT16                          MhzSpeed;
 
   Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
   MinLength     = sizeof (*Original.Standard.Type4);
@@ -348,11 +349,28 @@ PatchProcessorInformation (
   SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
   Table->CurrentPtr.Standard.Type4->ExternalClock = CpuInfo->ExternalClock;
-  Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) DivU64x32 (CpuInfo->CPUFrequency, 1000000);
-  if (Table->CurrentPtr.Standard.Type4->MaxSpeed % 100 != 0) {
-    Table->CurrentPtr.Standard.Type4->MaxSpeed = (UINT16) (((Table->CurrentPtr.Standard.Type4->MaxSpeed + 50) / 100) * 100);
+
+  //
+  // Round to nearest in MHz
+  //
+  MhzSpeed = (UINT16) DivU64x32 (CpuInfo->CPUFrequency + 500000, 1000000);
+
+  //
+  // Round to two digits when the second digit is above zero or to one otherwise.
+  // REF: https://github.com/acidanthera/bugtracker/issues/1521
+  // 3506084610 Hz -> 3506 MHz i7 4770k (3.5)
+  // 3324999575 Hz -> 3325 MHz Xeon X5680 (3.33)
+  // 3324999977 Hz -> 3325 MHz Xeon X5680 (3.33)
+  // 3457999888 Hz -> 3458 MHz Xeon X5690 (3.46)
+  // ???        Hz -> ???  MHz Xeon X5675 (3.06)
+  //
+  if (MhzSpeed % 100 >= 10) {
+    MhzSpeed = (MhzSpeed + 5) / 10 * 10;
+  } else {
+    MhzSpeed = (MhzSpeed + 50) / 100 * 100;
   }
 
+  Table->CurrentPtr.Standard.Type4->MaxSpeed = MhzSpeed;
   Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
 
   SMBIOS_OVERRIDE_V (Table, Standard.Type4->Status, Original, NULL, NULL);

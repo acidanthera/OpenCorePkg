@@ -14,6 +14,7 @@ OpenCore Changelog
 - Fixed installing Apple FB Info protocol when no GOP exists
 - Fixed abort timeout sound in OpenCanopy on key press
 - Added `GopPassThrough` option to support GOP protocol over UGA
+- Fixed CPU speed rounding for certain Xeon and Core 2 CPUs
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy
