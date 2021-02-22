@@ -332,6 +332,7 @@ PatchProcessorInformation (
   UINT8                           StringIndex;
   UINT8                           TmpCount;
   UINT16                          MhzSpeed;
+  UINT16                          MhzRemainder;
 
   Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
   MinLength     = sizeof (*Original.Standard.Type4);
@@ -354,17 +355,20 @@ PatchProcessorInformation (
   // Round to nearest in MHz
   //
   MhzSpeed = (UINT16) DivU64x32 (CpuInfo->CPUFrequency + 500000, 1000000);
-
+  MhzRemainder = MhzSpeed % 100;
   //
   // Round to two digits when the second digit is above zero or to one otherwise.
   // REF: https://github.com/acidanthera/bugtracker/issues/1521
-  // 3506084610 Hz -> 3506 MHz i7 4770k (3.5)
+  // 3506084610 Hz -> 3506 MHz i7   4770k (3.5)
   // 3324999575 Hz -> 3325 MHz Xeon X5680 (3.33)
   // 3324999977 Hz -> 3325 MHz Xeon X5680 (3.33)
   // 3457999888 Hz -> 3458 MHz Xeon X5690 (3.46)
+  // 2666362112 Hz -> 2666 MHz C2Q  Q9450 (2.66)
   // ???        Hz -> ???  MHz Xeon X5675 (3.06)
   //
-  if (MhzSpeed % 100 >= 10) {
+  if (MhzRemainder >= 50 && MhzRemainder <= 95) {
+    MhzSpeed = (MhzSpeed) / 10 * 10;
+  } else if (MhzRemainder >= 10 && MhzRemainder <= 95) {
     MhzSpeed = (MhzSpeed + 5) / 10 * 10;
   } else {
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;
