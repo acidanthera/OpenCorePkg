@@ -359,16 +359,17 @@ PatchProcessorInformation (
   //
   // Round to two digits when the second digit is above zero or to one otherwise.
   // REF: https://github.com/acidanthera/bugtracker/issues/1521
-  // 3506084610 Hz -> 3506 MHz i7   4770k (3.5)
-  // 3324999575 Hz -> 3325 MHz Xeon X5680 (3.33)
-  // 3324999977 Hz -> 3325 MHz Xeon X5680 (3.33)
-  // 3457999888 Hz -> 3458 MHz Xeon X5690 (3.46)
-  // 2666362112 Hz -> 2666 MHz C2Q  Q9450 (2.66)
-  // ???        Hz -> ???  MHz Xeon X5675 (3.06)
+  // 3506084610 Hz -> 3506 MHz i7   4770k  (3.5)
+  // 3324999575 Hz -> 3325 MHz Xeon X5680  (3.33)
+  // 3324999977 Hz -> 3325 MHz Xeon X5680  (3.33)
+  // 3457999888 Hz -> 3458 MHz Xeon X5690  (3.46)
+  // 2666362112 Hz -> 2666 MHz C2Q  Q9450  (2.66)
+  // ???        Hz -> ???  MHz Xeon X5675  (3.06)
+  // 1992617296 Hz -> 1993 MHz i7   2630QM (2.0)
   //
-  if (MhzRemainder >= 50 && MhzRemainder <= 95) {
+  if (MhzRemainder >= 50 && MhzRemainder < 90) {
     MhzSpeed = (MhzSpeed) / 10 * 10;
-  } else if (MhzRemainder >= 10 && MhzRemainder <= 95) {
+  } else if (MhzRemainder >= 10 && MhzRemainder < 90) {
     MhzSpeed = (MhzSpeed + 5) / 10 * 10;
   } else {
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;
