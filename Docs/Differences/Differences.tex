@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Sun Feb 21 20:53:23 2021
+%DIF DEL PreviousConfiguration.tex   Fri Feb 19 16:12:21 2021
+%DIF ADD ../Configuration.tex        Tue Feb 23 21:48:35 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -709,8 +709,8 @@ OpenCore can be compiled as \DIFdelbegin \DIFdel{an ordinary
 }\DIFdelend \DIFaddbegin \DIFadd{a standard
 }\DIFaddend \href{https://github.com/tianocore/tianocore.github.io/wiki/EDK-II}{EDK II}
 package \DIFdelbegin \DIFdel{.
-Since }\href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{\DIFdel{UDK}}
-%DIFAUXCMD
+Since }%DIFDELCMD < \href{https://github.com/tianocore/tianocore.github.io/wiki/UDK}{UDK}
+%DIFDELCMD < %%%
 \DIFdel{development was abandoned by TianoCore, OpenCore requires the
 use of
 }\DIFdelend \DIFaddbegin \DIFadd{and requires the
@@ -899,10 +899,9 @@ These messages are ignored in \texttt{RELEASE} builds.
 and \texttt{DEBUG\_WARN} for all other human visible errors, \texttt{RELEASE} builds included.
 \end{itemize}
 
-\DIFdelbegin \DIFdel{When }\DIFdelend \DIFaddbegin \DIFadd{The }\href{https://git-scm.com/docs/git-bisect}{\texttt{\DIFadd{git-bisect}}} \DIFadd{functionality may be useful when }\DIFaddend trying
+\DIFdelbegin \DIFdel{When }\DIFdelend \DIFaddbegin \DIFadd{The }\href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} \DIFadd{functionality may be useful when }\DIFaddend trying
 to find \DIFdelbegin \DIFdel{the problematic change it is useful to rely on
-}\href{https://git-scm.com/docs/git-bisect}{\texttt{\DIFdel{git-bisect}}%DIFAUXCMD
-} %DIFAUXCMD
+}%DIFDELCMD < \href{https://git-scm.com/docs/git-bisect}{\texttt{git-bisect}} %%%
 \DIFdel{functionality. There also are some unofficial resources that provide per-commit binary
 builds of OpenCore}\DIFdelend \DIFaddbegin \DIFadd{problematic changes. Unofficial sources of }\texttt{\DIFadd{per-commit}} \DIFadd{OpenCore binary builds}\DIFaddend ,
 such as \href{https://dortania.github.io/builds}{Dortania}\DIFaddbegin \DIFadd{, may also be useful}\DIFaddend .
@@ -1618,10 +1617,10 @@ To view their current state\DIFdelbegin \DIFdel{use }\DIFdelend \DIFaddbegin \DI
   This is a security option that restricts the activation of single user mode
   by ignoring \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{CMD+S} hotkey and \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{-s} boot argument. The
   behaviour with this quirk enabled is supposed to match T2-based model behaviour.
-  Refer to \DIFdelbegin %DIFDELCMD < \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{%%%
-\DIFdelend this
-  \DIFaddbegin \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{\DIFaddend archived article}
-  to understand how to use single user mode with this quirk enabled.
+  Refer to \DIFdelbegin %DIFDELCMD < \href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{this archived article} %%%
+\DIFdelend \DIFaddbegin \DIFadd{this
+  }\href{https://web.archive.org/web/20200517125051/https://support.apple.com/en-us/HT201573}{archived article}
+  \DIFaddend to understand how to use single user mode with this quirk enabled.
 
 \item
   \texttt{DisableVariableWrite}\\
@@ -1646,10 +1645,12 @@ To view their current state\DIFdelbegin \DIFdel{use }\DIFdelend \DIFaddbegin \DI
   This option forces \DIFaddbegin \DIFadd{the }\DIFaddend XNU kernel to ignore \DIFaddbegin \DIFadd{a }\DIFaddend newly supplied memory map and assume
   that it did not change after waking from hibernation. This behaviour is required \DIFdelbegin \DIFdel{to work by Windows , which mandates
   to
-  }\DIFdelend \DIFaddbegin \DIFadd{by
+  }%DIFDELCMD < \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserve}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \DIFadd{by
    Windows to work. Windows mandates
-  }\DIFaddend \href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{\DIFdelbegin \DIFdel{preserve}\DIFdelend \DIFaddbegin \DIFadd{preserving}\DIFaddend }
-  runtime memory size and location after S4 wake.
+  }\href{https://docs.microsoft.com/en-us/windows-hardware/design/device-experiences/oem-uefi#hibernation-state-s4-transition-requirements}{preserving}
+  \DIFaddend runtime memory size and location after S4 wake.
 
   \emph{Note}: This may be used to workaround \DIFdelbegin \DIFdel{buggy memory maps on olderhardware,
   and is now considered rare legacy }\DIFdelend \DIFaddbegin \DIFadd{flawed memory map implementations on older,
@@ -1849,7 +1850,7 @@ To view their current state\DIFdelbegin \DIFdel{use }\DIFdelend \DIFaddbegin \DI
   \emph{Note}: The \DIFdelbegin \DIFdel{necessity of }\DIFdelend \DIFaddbegin \DIFadd{need for }\DIFaddend this quirk is determined by early boot failures.
 \DIFdelbegin \DIFdel{Currently,
   new firmware with memory protection support (such as OVMF) do not support this quirk. See
-  }\href{https://github.com/acidanthera/bugtracker/issues/719}{\DIFdel{acidanthera/bugtracker\#719}}%DIFAUXCMD
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/719}{acidanthera/bugtracker\#719}%%%
 \DIFdel{.
 }\DIFdelend 
 
@@ -2802,7 +2803,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible \DIFdelbegin \DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{and may no longer
-  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFadd{function correctly}} \DIFadd{in macOS 11.
+  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} \DIFadd{in macOS 11.
   }\DIFaddend USB port limit is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).
@@ -5800,7 +5801,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
   firmware. For Sandy Bridge and earlier CPUs \texttt{ExFatDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
-& Proprietary HFS file system driver with bless support commonly found in Apple
+& \DIFaddbegin \DIFadd{Recommended. }\DIFaddend Proprietary HFS file system driver with bless support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs \texttt{HfsPlusLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
 \href{https://github.com/acidanthera/audk}{\texttt{HiiDatabase}}\textbf{*}
@@ -6386,32 +6387,58 @@ functioning. Feature highlights:
   it is possible to set a slightly lower value on faster platforms
   and slightly higher value on slower platforms for more responsive input.
 
-  \emph{Note}: Some platforms may require different values, higher or lower.
+  \DIFaddbegin \DIFadd{Pressing keys one after the other results in delays of at least }\texttt{\DIFadd{6}} \DIFadd{and
+  }\texttt{\DIFadd{10}} \DIFadd{milliseconds for the same platforms.
+}
+
+  \DIFaddend \emph{Note}: Some platforms may require different values, higher or lower.
   For example, when detecting key misses in OpenCanopy try increasing this value
   (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
   Since every platform is different it may be reasonable to check every value
   from \texttt{1} to \texttt{25}.
 
 \item
-  \texttt{KeyMergeThreshold}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Assume simultaneous combination for keys submitted within
+  \DIFdelbegin \texttt{\DIFdel{KeyMergeThreshold}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ integer}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{0}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Assume simultaneous combination for keys submitted within
   this timeout in milliseconds.
+}%DIFDELCMD < 
 
-  Similarly to \texttt{KeyForgetThreshold}, this option works around the sequential
+%DIFDELCMD <   %%%
+\DIFdel{Similarly to }\texttt{\DIFdel{KeyForgetThreshold}}%DIFAUXCMD
+\DIFdel{, this option works around the sequential
   nature of key submission. To be able to recognise simultaneously pressed keys
   in the situation when all keys arrive sequentially, we are required to set
   a timeout within which we assume the keys were pressed together.
+}%DIFDELCMD < 
 
-  Holding multiple keys results in reports every \texttt{2} and \texttt{1} milliseconds
+%DIFDELCMD <   %%%
+\DIFdel{Holding multiple keys results in reports every }\texttt{\DIFdel{2}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{1}} %DIFAUXCMD
+\DIFdel{milliseconds
   for VMware and APTIO V respectively. Pressing keys one after the other results in
-  delays of at least \texttt{6} and \texttt{10} milliseconds for the same platforms.
-  The recommended value for this option is \texttt{2} milliseconds, but it may be
+  delays of at least }\texttt{\DIFdel{6}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{10}} %DIFAUXCMD
+\DIFdel{milliseconds for the same platforms.
+  The recommended value for this option is }\texttt{\DIFdel{2}} %DIFAUXCMD
+\DIFdel{milliseconds, but it may be
   decreased for faster platforms and increased for slower.
+}%DIFDELCMD < 
 
-\item
-  \texttt{KeySupport}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{KeySupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable internal keyboard input translation to
@@ -6636,7 +6663,10 @@ functioning. Feature highlights:
   }
 
   \DIFadd{Some types of firmware do not implement the GOP protocol, this option provides it via 
-  a UGA-based proxy. This option requires }\texttt{\DIFadd{ProvideConsoleGop}} \DIFadd{to be enabled. (TODO)
+  a UGA-based proxy.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option requires }\texttt{\DIFadd{ProvideConsoleGop}} \DIFadd{to be enabled.
 }
 
 \item
@@ -7092,9 +7122,9 @@ While newer operating systems can be downloaded over the internet,
 older operating systems did not have installation media for every minor
 release\DIFdelbegin \DIFdel{, so to get a compatible distribution one may have to }\DIFdelend \DIFaddbegin \DIFadd{. For compatible distributions of such, }\DIFaddend download a device-specific
 image and \DIFdelbegin \DIFdel{mod }\DIFdelend \DIFaddbegin \DIFadd{modify }\DIFaddend it if necessary. \DIFdelbegin \DIFdel{To get the }\DIFdelend \DIFaddbegin \DIFadd{Visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFadd{article}}
+}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}
 \DIFadd{for a }\DIFaddend list of the bundled device-specific builds for legacy operating systems\DIFdelbegin \DIFdel{one can visit this archived Apple Support
-}\href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{\DIFdel{article}}%DIFAUXCMD
+}%DIFDELCMD < \href{https://web.archive.org/web/20170705003629/https://support.apple.com/en-us/HT204319}{article}%%%
 \DIFdel{.
 Since it is not always }\DIFdelend \DIFaddbegin \DIFadd{.
 However, as this may not always be }\DIFaddend accurate, the latest versions are listed below.
