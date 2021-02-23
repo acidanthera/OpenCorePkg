@@ -160,7 +160,6 @@ OcLoadUefiInputSupport (
       Status = OcAppleGenericInputKeycodeInit (
                  KeyMode,
                  Config->Uefi.Input.KeyForgetThreshold,
-                 Config->Uefi.Input.KeyMergeThreshold,
                  Config->Uefi.Input.KeySwap,
                  Config->Uefi.Input.KeyFiltering
                  );

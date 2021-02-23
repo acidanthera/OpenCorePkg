@@ -52,7 +52,6 @@ EFI_STATUS
 OcAppleGenericInputKeycodeInit (
   IN OC_INPUT_KEY_MODE  Mode,
   IN UINT8              KeyForgotThreshold,
-  IN UINT8              KeyMergeThreshold,
   IN BOOLEAN            KeySwap,
   IN BOOLEAN            KeyFiltering
   );

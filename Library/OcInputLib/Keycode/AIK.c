@@ -174,8 +174,7 @@ AIKInstall (
 
   Status = AIKTargetInstall (
              &Keycode->Target,
-             Keycode->KeyForgotThreshold,
-             Keycode->KeyMergeThreshold
+             Keycode->KeyForgotThreshold
              );
 
   if (EFI_ERROR (Status)) {
@@ -245,7 +244,6 @@ EFI_STATUS
 OcAppleGenericInputKeycodeInit (
   IN OC_INPUT_KEY_MODE  Mode,
   IN UINT8              KeyForgotThreshold,
-  IN UINT8              KeyMergeThreshold,
   IN BOOLEAN            KeySwap,
   IN BOOLEAN            KeyFiltering
   )
@@ -256,7 +254,6 @@ OcAppleGenericInputKeycodeInit (
 
   gAikSelf.Mode               = Mode;
   gAikSelf.KeyForgotThreshold = KeyForgotThreshold;
-  gAikSelf.KeyMergeThreshold  = KeyMergeThreshold;
   gAikSelf.KeyFiltering       = KeyFiltering;
   Status = AIKInstall (&gAikSelf);
   if (EFI_ERROR (Status)) {

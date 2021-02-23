@@ -22,8 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 EFI_STATUS
 AIKTargetInstall (
   IN OUT AIK_TARGET  *Target,
-  IN     UINT8       KeyForgotThreshold,
-  IN     UINT8       KeyMergeThreshold
+  IN     UINT8       KeyForgotThreshold
   )
 {
   EFI_STATUS  Status;
@@ -31,7 +30,6 @@ AIKTargetInstall (
   Status = EFI_SUCCESS;
 
   Target->KeyForgotThreshold = KeyForgotThreshold;
-  Target->KeyMergeThreshold  = KeyMergeThreshold;
 
   if (Target->KeyMapDb == NULL) {
     Status = gBS->LocateProtocol (&gAppleKeyMapDatabaseProtocolGuid, NULL, (VOID **) &Target->KeyMapDb);

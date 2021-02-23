@@ -6166,24 +6166,6 @@ functioning. Feature highlights:
   from \texttt{1} to \texttt{25}.
 
 \item
-  \texttt{KeyMergeThreshold}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Assume simultaneous combination for keys submitted within
-  this timeout in milliseconds.
-
-  Similarly to \texttt{KeyForgetThreshold}, this option works around the sequential
-  nature of key submission. To be able to recognise simultaneously pressed keys
-  in the situation when all keys arrive sequentially, we are required to set
-  a timeout within which we assume the keys were pressed together.
-
-  Holding multiple keys results in reports every \texttt{2} and \texttt{1} milliseconds
-  for VMware and APTIO V respectively. Pressing keys one after the other results in
-  delays of at least \texttt{6} and \texttt{10} milliseconds for the same platforms.
-  The recommended value for this option is \texttt{2} milliseconds, but it may be
-  decreased for faster platforms and increased for slower.
-
-\item
   \texttt{KeySupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

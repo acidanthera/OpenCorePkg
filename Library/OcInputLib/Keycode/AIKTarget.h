@@ -78,18 +78,12 @@ typedef struct {
   // Remove key if it was not submitted after this value.
   //
   UINT8                              KeyForgotThreshold;
-
-  //
-  // Assume simultaneous press if within this value.
-  //
-  UINT8                              KeyMergeThreshold;
 } AIK_TARGET;
 
 EFI_STATUS
 AIKTargetInstall (
   IN OUT AIK_TARGET  *Target,
-  IN     UINT8       KeyForgotThreshold,
-  IN     UINT8       KeyMergeThreshold
+  IN     UINT8       KeyForgotThreshold
   );
 
 VOID

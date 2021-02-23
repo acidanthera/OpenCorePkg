@@ -44,11 +44,6 @@ typedef struct {
   UINT8                 KeyForgotThreshold;
 
   //
-  // Assume simultaneous press if within this value.
-  //
-  UINT8                 KeyMergeThreshold;
-
-  //
   // Perform ASCII and scan code input key filtering.
   //
   BOOLEAN               KeyFiltering;
