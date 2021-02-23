@@ -37,14 +37,14 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
      // Name(_ADR, Zero)
         Name(_HID, EisaId("APP0002"))
         Name(_CID, "backlight")
-        // _UID is set depending on PWMMax to match profiles in AppleBacklight.kext Info.plist
+        // _UID is set depending on PWMMax to match profiles in WhateverGreen.kext https://github.com/acidanthera/WhateverGreen/blob/1.4.7/WhateverGreen/kern_weg.cpp#L32
         // 14: Sandy/Ivy 0x710
         // 15: Haswell/Broadwell 0xad9
         // 16: Skylake/KabyLake 0x56c (and some Haswell, example 0xa2e0008)
         // 17: custom LMAX=0x7a1
         // 18: custom LMAX=0x1499
         // 19: CoffeeLake 0xffff
-        // 99: Other (requires custom AppleBacklightInjector.kext)
+        // 99: Other (requires custom profile using WhateverGreen.kext via DeviceProperties applbkl-name and applbkl-data)
         Name(_UID, 0)
         Method (_STA, 0, NotSerialized)  // _STA: Status
         {
@@ -128,7 +128,7 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
             If (CondRefOf(\RMCF.BKLT)) { Local4 = \RMCF.BKLT }
             If (!(1 & Local4)) { Return }
 
-            // Adjustment required when using AppleBacklight.kext
+            // Adjustment required when using WhateverGreen.kext
             Local0 = ^GDID
             Local2 = Ones
             If (CondRefOf(\RMCF.LMAX)) { Local2 = \RMCF.LMAX }
@@ -253,7 +253,7 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
             }
 
             // Now Local2 is the new PWMMax, set _UID accordingly
-            // The _UID selects the correct entry in AppleBacklight.kext
+            // The _UID selects the correct entry in WhateverGreen.kext
             If (Local2 == SANDYIVY_PWMMAX) { _UID = 14 }
             ElseIf (Local2 == HASWELL_PWMMAX) { _UID = 15 }
             ElseIf (Local2 == SKYLAKE_PWMMAX) { _UID = 16 }
