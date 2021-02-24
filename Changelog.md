@@ -16,6 +16,7 @@ OpenCore Changelog
 - Added `GopPassThrough` option to support GOP protocol over UGA
 - Fixed CPU speed rounding for certain Xeon and Core 2 CPUs
 - Removed `KeyMergeThreshold` as it never functioned anyway
+- Added `acdtinfo` utility to lookup certain products
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

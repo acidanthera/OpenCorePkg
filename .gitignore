@@ -8,6 +8,7 @@ xcuserdata
 project.xcworkspace
 *.dSYM
 Utilities/AppleEfiSignTool/AppleEfiSignTool
+Utilities/acdtinfo/acdtinfo
 Utilities/disklabel/disklabel
 Utilities/EfiResTool/EfiResTool
 Utilities/macserial/macserial
