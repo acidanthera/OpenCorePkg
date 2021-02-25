@@ -26,6 +26,31 @@
 #define OC_FALLBACK_CPU_FREQUENCY 1000000000
 #endif
 
+/**
+  Sorted Intel CPU generations.
+**/
+typedef enum {
+  OcCpuGenerationUnknown,
+  OcCpuGenerationBanias,
+  OcCpuGenerationPrePenryn,
+  OcCpuGenerationPenryn,
+  OcCpuGenerationNehalem,
+  OcCpuGenerationBonnel,
+  OcCpuGenerationWestmere,
+  OcCpuGenerationSandyBridge,
+  OcCpuGenerationPostSandyBridge,
+  OcCpuGenerationIvyBridge,
+  OcCpuGenerationHaswell,
+  OcCpuGenerationBroadwell,
+  OcCpuGenerationSkylake,
+  OcCpuGenerationKabyLake,
+  OcCpuGenerationCoffeeLake,
+  OcCpuGenerationCometLake,
+  OcCpuGenerationCannonLake,
+  OcCpuGenerationIceLake,
+  OcCpuGenerationMaxGeneration
+} OC_CPU_GENERATION;
+
 typedef struct {
   //
   // Note, Vendor and BrandString are reordered for proper alignment.
@@ -57,18 +82,10 @@ typedef struct {
   UINT16                      AppleProcessorType;
   BOOLEAN                     CstConfigLock;
 
+  OC_CPU_GENERATION           CpuGeneration;
+
   UINT32                      MaxId;
   UINT32                      MaxExtId;
-
-  UINT8                       MaxDiv;
-  UINT8                       CurBusRatio;  ///< Current Multiplier
-  UINT8                       MinBusRatio;  ///< Min Bus Ratio
-  UINT8                       MaxBusRatio;  ///< Max Bus Ratio
-
-  UINT8                       TurboBusRatio1;
-  UINT8                       TurboBusRatio2;
-  UINT8                       TurboBusRatio3;
-  UINT8                       TurboBusRatio4;
 
   UINT16                      PackageCount;
   UINT16                      CoreCount;
@@ -133,22 +150,6 @@ typedef struct {
   UINT64                      FSBFrequency;
 } OC_CPU_INFO;
 
-typedef enum {
-  OcCpuGenerationUnknown,
-  OcCpuGenerationPenryn,
-  OcCpuGenerationNehalem,
-  OcCpuGenerationWestmere,
-  OcCpuGenerationSandyBridge,
-  OcCpuGenerationIvyBridge,
-  OcCpuGenerationHaswell,
-  OcCpuGenerationBroadwell,
-  OcCpuGenerationSkylake,
-  OcCpuGenerationKabyLake,
-  OcCpuGenerationCoffeeLake,
-  OcCpuGenerationCannonLake,
-  OcCpuGenerationMaxGeneration
-} OC_CPU_GENERATION;
-
 /**
   Scan the processor and fill the cpu info structure with results.
 
@@ -201,16 +202,6 @@ OcCpuCorrectTscSync (
 UINT32
 OcCpuModelToAppleFamily (
   IN CPUID_VERSION_INFO_EAX  VersionEax
-  );
-
-/**
-  Obtain CPU's generation.
-
-  @retval CPU's generation (e.g. OcCpuGenerationUnknown).
- */
-OC_CPU_GENERATION
-OcCpuGetGeneration (
-  VOID
   );
 
 /**

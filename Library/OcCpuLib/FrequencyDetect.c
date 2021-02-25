@@ -24,7 +24,7 @@
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
-#include <Library/OcMiscLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>

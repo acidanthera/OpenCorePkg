@@ -96,7 +96,8 @@ GetBootCompatContext (
 
 EFI_STATUS
 OcAbcInitialize (
-  IN OC_ABC_SETTINGS  *Settings
+  IN OC_ABC_SETTINGS  *Settings,
+  IN OC_CPU_INFO      *CpuInfo
   )
 {
   EFI_STATUS           Status;

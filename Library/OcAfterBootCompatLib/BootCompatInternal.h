@@ -412,6 +412,10 @@ typedef struct BOOT_COMPAT_CONTEXT_ {
   /// Apple booter KASLR slide support internal state.
   ///
   SLIDE_SUPPORT_STATE      SlideSupport;
+  ///
+  /// CPU information.
+  ///
+  OC_CPU_INFO              *CpuInfo;
 } BOOT_COMPAT_CONTEXT;
 
 /**

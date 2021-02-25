@@ -31,6 +31,25 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1U)))
 #define OC_TYPE_ALIGNED(Type, Ptr) (OC_POT_ALIGNED (OC_ALIGNOF (Type), Ptr))
 
+/**
+ Return the result of (Multiplicand * Multiplier / Divisor).
+
+ @param Multiplicand A 64-bit unsigned value.
+ @param Multiplier   A 64-bit unsigned value.
+ @param Divisor      A 32-bit unsigned value.
+ @param Remainder    A pointer to a 32-bit unsigned value. This parameter is
+ optional and may be NULL.
+
+ @return Multiplicand * Multiplier / Divisor.
+ **/
+UINT64
+MultThenDivU64x64x32 (
+  IN  UINT64  Multiplicand,
+  IN  UINT64  Multiplier,
+  IN  UINT32  Divisor,
+  OUT UINT32  *Remainder  OPTIONAL
+  );
+
 //
 // The interfaces below provide base safe arithmetics, reporting
 // signed integer overflow and unsigned integer wraparound similarly to

@@ -24,7 +24,6 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcCpuLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDeviceTreeLib.h>
 #include <Library/OcMachoLib.h>
@@ -229,7 +228,8 @@ ShouldUseCustomSlideOffset (
   IN OUT SLIDE_SUPPORT_STATE   *SlideSupport,
   IN     EFI_GET_MEMORY_MAP    GetMemoryMap       OPTIONAL,
   IN     OC_MEMORY_FILTER      FilterMap          OPTIONAL,
-  IN     VOID                  *FilterMapContext  OPTIONAL
+  IN     VOID                  *FilterMapContext  OPTIONAL,
+  IN     BOOLEAN               HasSandyOrIvy
   )
 {
   EFI_PHYSICAL_ADDRESS   AllocatedMapPages;
@@ -240,7 +240,6 @@ ShouldUseCustomSlideOffset (
   EFI_STATUS             Status;
   UINTN                  DescriptorSize;
   UINT32                 DescriptorVersion;
-  OC_CPU_GENERATION      CpuGeneration;
   UINTN                  Index;
   UINTN                  Slide;
   UINTN                  NumEntries;
@@ -280,9 +279,7 @@ ShouldUseCustomSlideOffset (
     FilterMap (FilterMapContext, MemoryMapSize, MemoryMap, DescriptorSize);
   }
 
-  CpuGeneration = OcCpuGetGeneration ();
-  SlideSupport->HasSandyOrIvy = CpuGeneration == OcCpuGenerationSandyBridge ||
-                                CpuGeneration == OcCpuGenerationIvyBridge;
+  SlideSupport->HasSandyOrIvy = HasSandyOrIvy;
 
   SlideSupport->EstimatedKernelArea = (UINTN) EFI_PAGES_TO_SIZE (
     OcCountRuntimePages (MemoryMapSize, MemoryMap, DescriptorSize, NULL)
@@ -807,7 +804,13 @@ AppleSlideGetVariable (
         );
     } else if (StrCmp (VariableName, L"boot-args") == 0
       && (!BootCompat->ServiceState.AppleCustomSlide || BootCompat->Settings.AllowRelocationBlock)
-      && ShouldUseCustomSlideOffset (&BootCompat->SlideSupport, GetMemoryMap, FilterMap, FilterMapContext)
+      && ShouldUseCustomSlideOffset (
+        &BootCompat->SlideSupport,
+        GetMemoryMap,
+        FilterMap,
+        FilterMapContext,
+        BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationSandyBridge
+          || BootCompat->CpuInfo->CpuGeneration == OcCpuGenerationIvyBridge)
       && !BootCompat->ServiceState.AppleCustomSlide) {
       //
       // When we cannot allow some KASLR values due to used address we generate

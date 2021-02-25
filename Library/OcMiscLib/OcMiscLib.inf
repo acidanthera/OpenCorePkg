@@ -51,4 +51,3 @@
   ImageRunner.c
   ReleaseUsbOwnership.c
   ProtocolSupport.c
-  Math.c

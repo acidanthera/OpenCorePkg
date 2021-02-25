@@ -17,6 +17,7 @@ OpenCore Changelog
 - Fixed CPU speed rounding for certain Xeon and Core 2 CPUs
 - Removed `KeyMergeThreshold` as it never functioned anyway
 - Added `acdtinfo` utility to lookup certain products
+- Fixed `FSBFrequency` calculation with fractional multiplier
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

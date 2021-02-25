@@ -15,6 +15,8 @@
 #ifndef OC_CPU_INTERNALS_H
 #define OC_CPU_INTERNALS_H
 
+#include <Library/OcCpuLib.h>
+
 //
 // Tolerance within which we consider two frequency values to be roughly
 // equivalent.
@@ -83,11 +85,24 @@ InternalDetectAppleMajorType (
 **/
 UINT16
 InternalDetectAppleProcessorType (
-  IN UINT8  Model,
-  IN UINT8  Stepping,
-  IN UINT8  AppleMajorType,
-  IN UINT16 CoreCount,
+  IN UINT8   Model,
+  IN UINT8   Stepping,
+  IN UINT8   AppleMajorType,
+  IN UINT16  CoreCount,
   IN BOOLEAN Is64Bit
+  );
+
+
+/**
+  Obtain Intel CPU generation.
+
+  @param[in] Model           CPU model from CPUID.
+
+  @retval CPU's generation (e.g. OcCpuGenerationUnknown).
+ */
+OC_CPU_GENERATION
+InternalDetectIntelProcessorGeneration (
+  IN  OC_CPU_INFO  *CpuInfo
   );
 
 /**
