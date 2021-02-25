@@ -1076,6 +1076,8 @@ InternalDetectIntelProcessorGeneration (
           CpuGeneration = OcCpuGenerationPostSandyBridge;         
         }
     }
+  } else {
+    CpuGeneration = OcCpuGenerationPrePenryn;
   }
 
   DEBUG ((
