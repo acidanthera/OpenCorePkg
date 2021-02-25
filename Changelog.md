@@ -18,6 +18,7 @@ OpenCore Changelog
 - Removed `KeyMergeThreshold` as it never functioned anyway
 - Added `acdtinfo` utility to lookup certain products
 - Fixed `FSBFrequency` calculation with fractional multiplier
+- Fixed showing core count for some AMD CPUs
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

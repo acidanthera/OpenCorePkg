@@ -526,13 +526,6 @@ ScanAmdProcessor (
   DEBUG_CODE_END ();
 
   //
-  // Faking an Intel Core i5 Processor.
-  // This value is purely cosmetic, but it makes sense to fake something
-  // that is somewhat representative of the kind of Processor that's actually
-  // in the system
-  //
-  Cpu->AppleProcessorType = AppleProcessorTypeCorei5Type5;
-  //
   // get TSC Frequency calculated in OcTimerLib, unless we got it already from virtualization extensions.
   // FIXME(1): This code assumes the CPU operates in P0.  Either ensure it does
   //           and raise the mode on demand, or adapt the logic to consider
@@ -549,6 +542,18 @@ ScanAmdProcessor (
   if (Cpu->MaxExtId >= 0x80000008) {
     AsmCpuid (0x80000008, NULL, NULL, &CpuidEcx, NULL);
     Cpu->ThreadCount = (UINT16) (BitFieldRead32 (CpuidEcx, 0, 7) + 1);
+  }
+
+  //
+  // Faking an Intel processor with matching core count if possible.
+  // This value is purely cosmetic, but it makes sense to fake something
+  // that is somewhat representative of the kind of Processor that's actually
+  // in the system
+  //
+  if (Cpu->ThreadCount >= 8) {
+    Cpu->AppleProcessorType = AppleProcessorTypeXeonW;
+  } else {
+    Cpu->AppleProcessorType = AppleProcessorTypeCorei5Type5;
   }
 
   if (Cpu->Family == AMD_CPU_FAMILY) {
