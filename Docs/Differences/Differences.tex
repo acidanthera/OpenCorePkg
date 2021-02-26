@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Feb 19 16:12:21 2021
-%DIF ADD ../Configuration.tex        Tue Feb 23 21:48:35 2021
+%DIF DEL PreviousConfiguration.tex   Fri Feb 26 16:59:24 2021
+%DIF ADD ../Configuration.tex        Fri Feb 26 16:59:24 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4547,8 +4547,8 @@ troubleshooting:
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
   \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
   \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
-  \item \texttt{-nehalem\_error\_disable}
-  \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
+  \item \texttt{-nehalem\_error\_disable} \DIFaddbegin \DIFadd{(disables the AppleTyMCEDriver)
+  }\DIFaddend \item \texttt{-no\_compat\_check} (disable model checking on 10.7+)
   \item \texttt{-s} (single mode)
   \item \texttt{-v} (verbose mode)
   \item \texttt{-x} (safe mode)
