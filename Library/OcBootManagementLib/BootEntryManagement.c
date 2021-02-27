@@ -613,6 +613,8 @@ AddBootEntryFromCustomEntry (
     }
   }
 
+  BootEntry->IsCustom = TRUE;
+
   RegisterBootOption (
     BootContext,
     FileSystem,
@@ -996,7 +998,9 @@ EFI_STATUS
 AddBootEntryFromBootOption (
   IN OUT OC_BOOT_CONTEXT     *BootContext,
   IN     UINT16              BootOption,
-  IN     BOOLEAN             LazyScan
+  IN     BOOLEAN             LazyScan,
+  IN OUT OC_BOOT_FILESYSTEM  *CustomFileSystem,
+  IN OUT UINT32              *CustomIndex
   )
 {
   EFI_STATUS                 Status;
@@ -1011,6 +1015,10 @@ AddBootEntryFromBootOption (
   BOOLEAN                    IsRoot;
   EFI_LOAD_OPTION            *LoadOption;
   UINTN                      LoadOptionSize;
+
+  CONST OC_CUSTOM_BOOT_DEVICE_PATH *CustomDevPath;
+  UINT32                           Index;
+  INTN                             CmpResult;
 
   DEBUG ((DEBUG_INFO, "OCB: Building entry from Boot%04x\n", BootOption));
 
@@ -1179,6 +1187,31 @@ AddBootEntryFromBootOption (
         NULL
         );
     } while (NumPatchedNodes > 0);
+    //
+    // If requested, pre-construct a custom entry found in BOOT#### so it can be
+    // set as default.
+    //
+    if (ExpandedDevicePath == NULL && CustomFileSystem != NULL) {
+      ASSERT (CustomIndex != NULL);
+
+      CustomDevPath = InternetGetOcCustomDevPath (DevicePath);
+
+      for (Index = 0; Index < BootContext->PickerContext->AllCustomEntryCount; ++Index) {
+        CmpResult = MixedStrCmp (
+          CustomDevPath->EntryName.PathName,
+          BootContext->PickerContext->CustomEntries[Index].Name
+          );
+        if (CmpResult == 0) {
+          *CustomIndex = Index;
+          AddBootEntryFromCustomEntry (
+            BootContext,
+            CustomFileSystem,
+            &BootContext->PickerContext->CustomEntries[Index]
+            );
+          break;
+        }
+      }
+    }
 
     FreePool (DevicePath);
     DevicePath = ExpandedDevicePath;
@@ -1397,13 +1430,42 @@ AddFileSystemEntry (
 }
 
 STATIC
+OC_BOOT_FILESYSTEM *
+CreateFileSystemForCustom (
+  IN OUT CONST OC_BOOT_CONTEXT  *BootContext
+  )
+{
+  OC_BOOT_FILESYSTEM  *FileSystem;
+
+  FileSystem = AllocateZeroPool (sizeof (*FileSystem));
+  if (FileSystem == NULL) {
+    return NULL;
+  }
+
+  FileSystem->Handle = OC_CUSTOM_FS_HANDLE;
+  InitializeListHead (&FileSystem->BootEntries);
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCB: Adding fs %p for %u custom entries%a%a\n",
+    OC_CUSTOM_FS_HANDLE,
+    BootContext->PickerContext->AllCustomEntryCount,
+    BootContext->PickerContext->ShowNvramReset ? " and nvram reset" : "",
+    BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : " (aux shown)"
+    ));
+
+  return FileSystem;
+}
+
+STATIC
 EFI_STATUS
 AddFileSystemEntryForCustom (
-  IN OUT OC_BOOT_CONTEXT     *BootContext
+  IN OUT OC_BOOT_CONTEXT     *BootContext,
+  IN OUT OC_BOOT_FILESYSTEM  *FileSystem,
+  IN     UINT32              PrecreatedCustomIndex
   )
 {
   EFI_STATUS          Status;
-  OC_BOOT_FILESYSTEM  *FileSystem;
   UINTN               Index;
 
   //
@@ -1416,28 +1478,16 @@ AddFileSystemEntryForCustom (
     return EFI_NOT_FOUND;
   }
 
-  DEBUG ((
-    DEBUG_INFO,
-    "OCB: Adding fs %p for %u custom entries%a%a\n",
-    OC_CUSTOM_FS_HANDLE,
-    BootContext->PickerContext->AllCustomEntryCount,
-    BootContext->PickerContext->ShowNvramReset ? " and nvram reset" : "",
-    BootContext->PickerContext->HideAuxiliary ? " (aux hidden)" : " (aux shown)"
-    ));
-
-  FileSystem = AllocateZeroPool (sizeof (*FileSystem));
-  if (FileSystem == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
-  FileSystem->Handle = OC_CUSTOM_FS_HANDLE;
-  InitializeListHead (&FileSystem->BootEntries);
-  InsertTailList (&BootContext->FileSystems, &FileSystem->Link);
-  ++BootContext->FileSystemCount;
-
   Status = EFI_NOT_FOUND;
   for (Index = 0; Index < BootContext->PickerContext->AllCustomEntryCount; ++Index) {
-    Status = AddBootEntryFromCustomEntry (
+    //
+    // Skip the custom boot entry that has already been created.
+    //
+    if (Index == PrecreatedCustomIndex) {
+      continue;
+    }
+
+    AddBootEntryFromCustomEntry (
       BootContext,
       FileSystem,
       &BootContext->PickerContext->CustomEntries[Index]
@@ -1681,6 +1731,9 @@ OcScanForBootEntries (
   UINTN                            Index;
   LIST_ENTRY                       *Link;
   OC_BOOT_FILESYSTEM               *FileSystem;
+  OC_BOOT_FILESYSTEM               *CustomFileSystem;
+  OC_BOOT_FILESYSTEM               *CustomFileSystemDefault;
+  UINT32                           DefaultCustomIndex;
 
   //
   // Obtain the list of filesystems filtered by scan policy.
@@ -1706,9 +1759,33 @@ OcScanForBootEntries (
       );
   }
 
+  CustomFileSystem = CreateFileSystemForCustom (BootContext);
+
+  //
+  // Delay CustomFileSystem insertion to have custom entries and the end.
+  //
+
+  DefaultCustomIndex = MAX_UINT32;
+
   if (Context->BootOrder != NULL) {
+    CustomFileSystemDefault = CustomFileSystem;
+
     for (Index = 0; Index < Context->BootOrderCount; ++Index) {
-      AddBootEntryFromBootOption (BootContext, Context->BootOrder[Index], FALSE);
+      AddBootEntryFromBootOption (
+        BootContext,
+        Context->BootOrder[Index],
+        FALSE,
+        CustomFileSystemDefault,
+        &DefaultCustomIndex
+        );
+
+      //
+      // Pre-create at most one custom entry. Under normal circumstances, no
+      // more than one entry should exist anyway.
+      //
+      if (DefaultCustomIndex != MAX_UINT32) {
+        CustomFileSystemDefault = NULL;
+      }
     }
   }
 
@@ -1744,10 +1821,18 @@ OcScanForBootEntries (
     AddBootEntryFromSelfRecovery (BootContext, FileSystem);
   }
 
-  //
-  // Build custom and system options.
-  //
-  AddFileSystemEntryForCustom (BootContext);
+  if (CustomFileSystem != NULL) {
+    //
+    // Insert the custom file system last for entry order.
+    //
+    InsertTailList (&BootContext->FileSystems, &CustomFileSystem->Link);
+    ++BootContext->FileSystemCount;
+
+    //
+    // Build custom and system options.
+    //
+    AddFileSystemEntryForCustom (BootContext, CustomFileSystem, DefaultCustomIndex);
+  }
 
   if (BootContext->BootEntryCount == 0) {
     OcFreeBootContext (BootContext);
@@ -1775,6 +1860,8 @@ OcScanForDefaultBootEntry (
   EFI_STATUS                       Status;
   UINTN                            NoHandles;
   EFI_HANDLE                       *Handles;
+  UINT32                           DefaultCustomIndex;
+  OC_BOOT_FILESYSTEM               *CustomFileSystem;
 
   //
   // Obtain empty list of filesystems.
@@ -1797,9 +1884,27 @@ OcScanForDefaultBootEntry (
       );
   }
 
+  CustomFileSystem = CreateFileSystemForCustom (BootContext);
+  if (CustomFileSystem != NULL) {
+    //
+    // The entry order does not matter, UI will not be shown.
+    //
+    InsertTailList (&BootContext->FileSystems, &CustomFileSystem->Link);
+    ++BootContext->FileSystemCount;
+  }
+
   if (Context->BootOrder != NULL) {
     for (Index = 0; Index < Context->BootOrderCount; ++Index) {
-      AddBootEntryFromBootOption (BootContext, Context->BootOrder[Index], TRUE);
+      //
+      // DefaultCustomIndex is not used as the entry list will never be shown.
+      //
+      AddBootEntryFromBootOption (
+        BootContext,
+        Context->BootOrder[Index],
+        TRUE,
+        CustomFileSystem,
+        &DefaultCustomIndex
+        );
 
       //
       // Return as long as we are good.
@@ -1865,10 +1970,13 @@ OcScanForDefaultBootEntry (
     FreePool (Handles);
   }
 
-  //
-  // Build custom and system options.
-  //
-  AddFileSystemEntryForCustom (BootContext);
+  if (CustomFileSystem != NULL) {
+    //
+    // Build custom and system options. Do not try to deduplicate custom options
+    // as the list is never shown.
+    //
+    AddFileSystemEntryForCustom (BootContext, CustomFileSystem, MAX_UINT32);
+  }
 
   if (BootContext->DefaultEntry == NULL) {
     OcFreeBootContext (BootContext);

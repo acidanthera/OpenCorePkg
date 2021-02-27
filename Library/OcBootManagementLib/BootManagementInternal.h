@@ -26,6 +26,41 @@
 
 #define OC_CUSTOM_FS_HANDLE ((EFI_HANDLE)(UINTN) 0x2007C5F5U)
 
+///
+/// Identifies the DevicePath structure for OpenCore custom entries.
+///
+#define OC_CUSTOM_BOOT_DEVICE_PATH_GUID  \
+  { 0xd6f263f9, 0x0b19, 0x4670,          \
+    { 0xb0, 0xa4, 0x9d, 0x95, 0x9f, 0x58, 0xdf, 0x65 } }
+
+#pragma pack(1)
+
+///
+/// DevicePath to describe OpenCore custom entries.
+///
+typedef PACKED struct {
+  VENDOR_DEVICE_PATH   Hdr;
+  FILEPATH_DEVICE_PATH EntryName;
+} OC_CUSTOM_BOOT_DEVICE_PATH;
+
+//
+// Ideally, a variant of FILEPATH_DEVICE_PATH will be used with PathName as a
+// flexible array. Such cannot be used for declarations, so provide an
+// alternative.
+//
+typedef PACKED struct {
+  VENDOR_DEVICE_PATH       Header;
+  EFI_DEVICE_PATH_PROTOCOL EntryName;
+} OC_CUSTOM_BOOT_DEVICE_PATH_DECL;
+
+#pragma pack()
+
+///
+/// The size of a OC_CUSTOM_BOOT_DEVICE_PATH structure excluding the name.
+///
+#define SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH  \
+  (sizeof (VENDOR_DEVICE_PATH) + SIZE_OF_FILEPATH_DEVICE_PATH)
+
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
   OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
@@ -167,6 +202,16 @@ InternalFileSystemForHandle (
 EFI_STATUS
 InternalSystemActionResetNvram (
   VOID
+  );
+
+/**
+  Determines whether DevicePath is an OpenCore custom boot entry.
+
+  @returns  The OpenCore custom boot entry, or NULL.
+**/
+CONST OC_CUSTOM_BOOT_DEVICE_PATH *
+InternetGetOcCustomDevPath (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
 #endif // BOOT_MANAGEMENET_INTERNAL_H

@@ -39,6 +39,57 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+///
+/// Template for an OpenCore custom boot entry DevicePath node.
+///
+STATIC CONST OC_CUSTOM_BOOT_DEVICE_PATH_DECL mOcCustomBootDevPathTemplate = {
+  {
+    {
+      HARDWARE_DEVICE_PATH,
+      HW_VENDOR_DP,
+      { sizeof (VENDOR_DEVICE_PATH), 0 }
+    },
+    OC_CUSTOM_BOOT_DEVICE_PATH_GUID
+  },
+  {
+    MEDIA_DEVICE_PATH,
+    MEDIA_FILEPATH_DP,
+    { SIZE_OF_FILEPATH_DEVICE_PATH, 0 }
+  }
+};
+
+CONST OC_CUSTOM_BOOT_DEVICE_PATH *
+InternetGetOcCustomDevPath (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  UINTN                            DevicePathSize;
+  INTN                             CmpResult;
+  CONST OC_CUSTOM_BOOT_DEVICE_PATH *CustomDevPath;
+
+  DevicePathSize = GetDevicePathSize (DevicePath);
+  if (DevicePathSize < SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH) {
+    return NULL;
+  }
+
+  CmpResult = CompareMem (
+    DevicePath,
+    &mOcCustomBootDevPathTemplate.Header,
+    sizeof (mOcCustomBootDevPathTemplate.Header)
+    );
+  if (CmpResult != 0) {
+    return NULL;
+  }
+
+  CustomDevPath = (CONST OC_CUSTOM_BOOT_DEVICE_PATH *) DevicePath;
+  if (CustomDevPath->EntryName.Header.Type != MEDIA_DEVICE_PATH
+   || CustomDevPath->EntryName.Header.SubType != MEDIA_FILEPATH_DP) {
+    return NULL;
+  }
+
+  return CustomDevPath;
+}
+
 EFI_LOAD_OPTION *
 InternalGetBootOptionData (
   OUT UINTN           *OptionSize,
@@ -226,10 +277,9 @@ InternalDebugBootEnvironment (
 }
 
 STATIC
-OC_BOOT_ENTRY *
-InternalGetBootEntryByDevicePath (
-  IN OUT OC_BOOT_ENTRY             *BootEntries,
-  IN     UINTN                     NumBootEntries,
+BOOLEAN
+InternalMatchBootEntryByDevicePath (
+  IN OUT OC_BOOT_ENTRY             *BootEntry,
   IN     EFI_DEVICE_PATH_PROTOCOL  *UefiDevicePath,
   IN     EFI_DEVICE_PATH_PROTOCOL  *UefiRemainingDevicePath,
   IN     UINTN                     UefiDevicePathSize,
@@ -243,68 +293,81 @@ InternalGetBootEntryByDevicePath (
   EFI_DEVICE_PATH_PROTOCOL *OcDevicePath;
   EFI_DEVICE_PATH_PROTOCOL *OcRemainingDevicePath;
 
-  OC_BOOT_ENTRY            *BootEntry;
-  UINTN                    Index;
-
   RootDevicePathSize = ((UINT8 *)UefiRemainingDevicePath - (UINT8 *)UefiDevicePath);
 
-  for (Index = 0; Index < NumBootEntries; ++Index) {
-    BootEntry = &BootEntries[Index];
-    if (BootEntry->DevicePath == NULL || BootEntry->Type == OC_BOOT_SYSTEM) {
-      continue;
-    }
-
-    OcDevicePath = BootEntry->DevicePath;
-
-    if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
-      continue;
-    }
-
-    CmpResult = CompareMem (OcDevicePath, UefiDevicePath, RootDevicePathSize);
-    if (CmpResult != 0) {
-      continue;
-    }
-    //
-    // FIXME: Ensure that all the entries get properly filtered against any
-    // malicious sources. The drive itself should already be safe, but it is
-    // unclear whether a potentially safe device path can be transformed into
-    // an unsafe one.
-    //
-    OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
-                              (UINT8 *)OcDevicePath + RootDevicePathSize
-                              );
-    if (!IsBootNext) {
-      //
-      // For non-BootNext boot, the File Paths must match for the entries to be
-      // matched. Startup Disk however only stores the drive's Device Path
-      // excluding the booter path, which we treat as a match as well.
-      //
-      if (!IsDevicePathEnd (UefiRemainingDevicePath)
-       && !IsDevicePathEqual (UefiRemainingDevicePath, OcRemainingDevicePath)
-        ) {
-        continue;
-      }
-    } else {
-      //
-      // Only use the BootNext path when it has a file path.
-      //
-      if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
-        //
-        // TODO: Investigate whether macOS adds BootNext entries that are not
-        //       possibly located by bless.
-        //
-        FreePool (BootEntry->DevicePath);
-        BootEntry->DevicePath = AllocateCopyPool (
-          UefiDevicePathSize,
-          UefiDevicePath
-          );
-      }
-    }
-
-    return BootEntry;
+  if (BootEntry->DevicePath == NULL || BootEntry->Type == OC_BOOT_SYSTEM) {
+    return FALSE;
   }
 
-  return NULL;
+  OcDevicePath = BootEntry->DevicePath;
+
+  if ((GetDevicePathSize (OcDevicePath) - END_DEVICE_PATH_LENGTH) < RootDevicePathSize) {
+    return FALSE;
+  }
+
+  CmpResult = CompareMem (OcDevicePath, UefiDevicePath, RootDevicePathSize);
+  if (CmpResult != 0) {
+    return FALSE;
+  }
+  //
+  // FIXME: Ensure that all the entries get properly filtered against any
+  // malicious sources. The drive itself should already be safe, but it is
+  // unclear whether a potentially safe device path can be transformed into
+  // an unsafe one.
+  //
+  OcRemainingDevicePath = (EFI_DEVICE_PATH_PROTOCOL *)(
+                            (UINT8 *)OcDevicePath + RootDevicePathSize
+                            );
+  if (!IsBootNext) {
+    //
+    // For non-BootNext boot, the File Paths must match for the entries to be
+    // matched. Startup Disk however only stores the drive's Device Path
+    // excluding the booter path, which we treat as a match as well.
+    //
+    if (!IsDevicePathEnd (UefiRemainingDevicePath)
+      && !IsDevicePathEqual (UefiRemainingDevicePath, OcRemainingDevicePath)
+      ) {
+      return FALSE;
+    }
+  } else {
+    //
+    // Only use the BootNext path when it has a file path.
+    //
+    if (!IsDevicePathEnd (UefiRemainingDevicePath)) {
+      //
+      // TODO: Investigate whether macOS adds BootNext entries that are not
+      //       possibly located by bless.
+      //
+      FreePool (BootEntry->DevicePath);
+      BootEntry->DevicePath = AllocateCopyPool (
+        UefiDevicePathSize,
+        UefiDevicePath
+        );
+    }
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+InternalMatchCustomBootEntryByDevicePath (
+  IN OUT OC_BOOT_ENTRY                     *BootEntry,
+  IN     CONST OC_CUSTOM_BOOT_DEVICE_PATH  *DevicePath
+  )
+{
+  INTN CmpResult;
+
+  if (!BootEntry->IsCustom) {
+    return FALSE;
+  }
+
+  CmpResult = StrCmp (BootEntry->Name, DevicePath->EntryName.PathName);
+  if (CmpResult != 0) {
+    return FALSE;
+  }
+
+  return TRUE;
 }
 
 STATIC
@@ -671,7 +734,7 @@ OcSetDefaultBootEntry (
   EFI_DEVICE_PATH  *BootOptionDevicePath;
   EFI_DEVICE_PATH  *BootOptionRemainingDevicePath;
   EFI_HANDLE       DeviceHandle;
-  OC_BOOT_ENTRY    *MatchedEntry;
+  BOOLEAN          MatchedEntry;
   EFI_GUID         *BootVariableGuid;
   CHAR16           *BootOrderName;
   CHAR16           *BootVariableName;
@@ -685,6 +748,10 @@ OcSetDefaultBootEntry (
   UINTN            LoadOptionSize;
   UINTN            LoadOptionNameSize;
   EFI_LOAD_OPTION  *LoadOption;
+
+  CONST OC_CUSTOM_BOOT_DEVICE_PATH *CustomDevPath;
+  OC_CUSTOM_BOOT_DEVICE_PATH       *DestCustomDevPath;
+  EFI_DEVICE_PATH_PROTOCOL         *DestCustomEndNode;
 
   //
   // Do not allow when prohibited.
@@ -718,14 +785,14 @@ OcSetDefaultBootEntry (
     NULL
     );
 
-  MatchedEntry    = NULL;
+  MatchedEntry    = FALSE;
   BootChosenIndex = BootOrderCount;
   for (Index = 0; Index < BootOrderCount; ++Index) {
     if (BootOrder[Index] == 0x80) {
       BootChosenIndex = Index;
     }
 
-    if (MatchedEntry != NULL) {
+    if (MatchedEntry) {
       if (BootChosenIndex != BootOrderCount) {
         break;
       }
@@ -758,25 +825,38 @@ OcSetDefaultBootEntry (
       );
 
     if (!EFI_ERROR (Status)) {
-      MatchedEntry = InternalGetBootEntryByDevicePath (
+      MatchedEntry = InternalMatchBootEntryByDevicePath (
         Entry,
-        1,
         BootOptionDevicePath,
         BootOptionRemainingDevicePath,
         LoadOption->FilePathListLength,
         FALSE
         );
+    } else {
+      CustomDevPath = InternetGetOcCustomDevPath (BootOptionDevicePath);
+      if (CustomDevPath != NULL) {
+        MatchedEntry = InternalMatchCustomBootEntryByDevicePath (
+          Entry,
+          CustomDevPath
+          );
+      }
     }
 
     FreePool (LoadOption);
   }
 
-  if (MatchedEntry == NULL) {
+  if (!MatchedEntry) {
     //
     // Write to Boot0080
     //
     LoadOptionNameSize = StrSize (Entry->Name);
-    DevicePathSize     = GetDevicePathSize (Entry->DevicePath);
+    
+    if (!Entry->IsCustom) {
+      DevicePathSize = GetDevicePathSize (Entry->DevicePath);
+    } else {
+      DevicePathSize = SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH + LoadOptionNameSize + sizeof (EFI_DEVICE_PATH_PROTOCOL);
+    }
+
     LoadOptionSize     = sizeof (EFI_LOAD_OPTION) + LoadOptionNameSize + DevicePathSize;
 
     LoadOption = AllocatePool (LoadOptionSize);
@@ -791,7 +871,35 @@ OcSetDefaultBootEntry (
     LoadOption->Attributes         = LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_BOOT;
     LoadOption->FilePathListLength = (UINT16) DevicePathSize;
     CopyMem (LoadOption + 1, Entry->Name, LoadOptionNameSize);
-    CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
+
+    if (!Entry->IsCustom) {
+      CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
+    } else {
+      DestCustomDevPath = (OC_CUSTOM_BOOT_DEVICE_PATH *) (
+        (UINT8 *) (LoadOption + 1) + LoadOptionNameSize
+        );
+      CopyMem (
+        DestCustomDevPath,
+        &mOcCustomBootDevPathTemplate,
+        sizeof (mOcCustomBootDevPathTemplate)
+        );
+      CopyMem (
+        DestCustomDevPath->EntryName.PathName,
+        Entry->Name,
+        LoadOptionNameSize
+        );
+      //
+      // FIXME: This may theoretically overflow.
+      //
+      DestCustomDevPath->EntryName.Header.Length[0] += (UINT8) LoadOptionNameSize;
+
+      DestCustomEndNode = (EFI_DEVICE_PATH_PROTOCOL *) (
+        (UINT8 *) DestCustomDevPath + SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH + LoadOptionNameSize
+        );
+      SetDevicePathEndNode (DestCustomEndNode);
+
+      ASSERT (GetDevicePathSize (&DestCustomDevPath->Hdr.Header) == DevicePathSize);
+    }
 
     Status = gRT->SetVariable (
       BootVariableName,

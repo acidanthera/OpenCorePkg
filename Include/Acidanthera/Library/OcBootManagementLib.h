@@ -194,6 +194,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsGeneric;
   //
+  // Set when this entry refers to a custom boot entry.
+  //
+  BOOLEAN                   IsCustom;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                   SetDefault;
