@@ -405,3 +405,17 @@ HasValidGuidStringPrefix (
 
   return TRUE;
 }
+
+INTN
+MixedStrCmp (
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR8   *SecondString
+  )
+{
+  while (*FirstString != '\0' && *FirstString == *SecondString) {
+    ++FirstString;
+    ++SecondString;
+  }
+
+  return *FirstString - *SecondString;
+}

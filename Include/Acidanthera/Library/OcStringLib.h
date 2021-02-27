@@ -557,4 +557,27 @@ HasValidGuidStringPrefix (
   IN CONST CHAR16  *String
   );
 
+/**
+  Compares two Null-terminated Unocide and ASCII strings, and returns the
+  difference between the first mismatched characters.
+
+  This function compares the Null-terminated Unicode string FirstString to the
+  Null-terminated ASCII string SecondString. If FirstString is identical to
+  SecondString, then 0 is returned. Otherwise, the value returned is the first
+  mismatched character in SecondString subtracted from the first mismatched
+  character in FirstString.
+
+  @param  FirstString   A pointer to a Null-terminated Unicode string.
+  @param  SecondString  A pointer to a Null-terminated ASCII string.
+
+  @retval ==0      FirstString is identical to SecondString.
+  @retval !=0      FirstString is not identical to SecondString.
+
+**/
+INTN
+MixedStrCmp (
+  IN CONST CHAR16  *FirstString,
+  IN CONST CHAR8   *SecondString
+  );
+
 #endif // OC_STRING_LIB_H
