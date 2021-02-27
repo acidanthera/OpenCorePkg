@@ -1141,7 +1141,7 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
   constructions.
 
   For this reason, the application of modifications to ACPI tables is extremely
-  risky. The best approach is to make as few as possible changes to ACPI tables
+  risky. The best approach is to make as few changes as possible to ACPI tables
   and to avoid replacing any tables, particularly DSDT tables. When this cannot be
   avoided, ensure that any custom DSDT tables are based on the most recent DSDT
   tables or attempt to remove reads and writes for the affected areas.
@@ -2556,7 +2556,7 @@ blocking.
   timeout (\texttt{9.999999} seconds) that stops the trim operation when not finished in
   time.
 
-  On several controllers, such as Samsung, where the deallocation process is relatively,
+  On several controllers, such as Samsung, where the deallocation process is relatively slow,
   this timeout can be reached very quickly. Essentially, it means that the level of
   fragmentation is high, thus macOS will attempt to trim the same lower blocks that
   have previously been deallocated, but never have enough time to deallocate higher
@@ -6352,7 +6352,8 @@ functioning. Feature highlights:
 
   \emph{Note}: Some Macs, such as the \texttt{MacPro5,1}, may have incompatible
   console output when using modern GPUs, and thus only \texttt{BuiltinGraphics}
-  may work for them in such cases. NVIDIA GPUs need additional firmware upgrades
+  may work for them in such cases. NVIDIA GPUs may require additional
+  \href{https://github.com/acidanthera/bugtracker/issues/1280}{firmware upgrades}.
 
 \item
   \texttt{ConsoleMode}\\
