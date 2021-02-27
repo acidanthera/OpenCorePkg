@@ -13,11 +13,6 @@
 
 #define PROGRAM_VERSION "2.1.7"
 
-#ifdef __GNUC__
-uint32_t arc4random(void) __attribute__((weak));
-uint32_t arc4random_uniform(uint32_t upper_bound) __attribute__((weak));
-#endif
-
 #define ARRAY_SIZE(arr) (sizeof(arr) / sizeof((arr)[0]))
 
 #define SZUUID 16

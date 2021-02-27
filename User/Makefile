@@ -217,7 +217,7 @@ endif
 # Miscellaneous implementations that do not depend on UDK.
 #
 VPATH   += $(OC_USER)/User/Library:$
-OBJS    += UserFile.o
+OBJS    += UserFile.o UserPseudoRandom.o
 
 #
 # Directory where objects will be produced.
