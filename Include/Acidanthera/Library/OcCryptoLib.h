@@ -75,6 +75,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define CHACHA_IV_SIZE  12
 
 //
+// Maximum OpenCore password length.
+//
+#define OC_PASSWORD_MAX_LEN  32
+
+//
 // Possible RSA algorithm types supported by OcCryptoLib
 // for RSA digital signature verification
 // PcdOcCryptoAllowedSigHashTypes MUST be kept in sync with changes!
@@ -514,6 +519,26 @@ VOID *
 SecureZeroMem (
   OUT VOID   *Buffer,
   IN  UINTN  Length
+  );
+
+/**
+  Hash Password and Salt into a PasswordHash.  The used hash function is
+  SHA-512, thus the caller must ensure RefHash is at least 64 bytes in size.
+
+  @param[in] Password      The entered password to hash.
+  @param[in] PasswordSize  The size, in bytes, of Password.
+  @param[in] Salt          The cryptographic salt appended to Password on hash.
+  @param[in] SaltSize      The size, in bytes, of Salt.
+  @param[in] Hash          The SHA-512 hash of Password and Salt.
+
+**/
+VOID
+OcHashPasswordSha512 (
+  IN  CONST UINT8  *Password,
+  IN  UINT32       PasswordSize,
+  IN  CONST UINT8  *Salt,
+  IN  UINT32       SaltSize,
+  OUT UINT8        *Hash
   );
 
 /**

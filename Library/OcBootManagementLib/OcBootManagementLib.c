@@ -337,7 +337,7 @@ OcShowSimplePasswordRequest (
 
   BOOLEAN              Result;
 
-  UINT8                Password[32];
+  UINT8                Password[OC_PASSWORD_MAX_LEN];
   UINT32               PwIndex;
 
   UINT8                Index;

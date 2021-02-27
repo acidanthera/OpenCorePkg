@@ -13,6 +13,7 @@ Utilities/disklabel/disklabel
 Utilities/EfiResTool/EfiResTool
 Utilities/macserial/macserial
 Utilities/icnspack/icnspack
+Utilities/ocpasswordgen/ocpasswordgen
 Utilities/ocvalidate/ocvalidate
 Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
