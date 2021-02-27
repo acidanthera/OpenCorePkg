@@ -126,15 +126,6 @@ InternalStripLoadCommands (
   OriginalCommandSize = SizeOfLeftCommands;
 
   for (Index = 0; Index < MachHeader->NumCommands; ++Index) {
-    //
-    // Assertion: LC_UNIXTHREAD and LC_MAIN are technically stripped in KXLD,
-    //            but they are not supposed to be present in the first place.
-    //
-    if ((LoadCommand->CommandType == MACH_LOAD_COMMAND_UNIX_THREAD)
-     || (LoadCommand->CommandType == MACH_LOAD_COMMAND_MAIN)) {
-      DEBUG ((DEBUG_WARN, "OCMCO: UNIX Thread and Main LCs are unsupported\n"));
-    }
-
     SizeOfLeftCommands -= LoadCommand->CommandSize;
 
     for (Index2 = 0; Index2 < ARRAY_SIZE (LoadCommandsToStrip); ++Index2) {
