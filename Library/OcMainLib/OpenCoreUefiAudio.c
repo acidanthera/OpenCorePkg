@@ -17,7 +17,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Guid/AppleVariable.h>
 #include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
+#include <IndustryStandard/Pci30.h>
 #include <Protocol/AudioDecode.h>
+#include <Protocol/PciIo.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -469,6 +471,84 @@ OcAudioExitBootServices (
   OcAudio->StopPlayback (OcAudio, TRUE);
 }
 
+STATIC
+VOID
+ResetAudioTrafficClass (
+  VOID
+  )
+{
+  EFI_STATUS           Status;
+  UINTN                HandleCount;
+  EFI_HANDLE           *HandleBuffer;
+  UINTN                Index;
+  EFI_PCI_IO_PROTOCOL  *PciIo;
+  UINT32               ClassCode;
+  UINT8                TrafficClass;
+
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiPciIoProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: No PCI devices for TCSEL reset - %r\n", Status));
+    return;
+  }
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+      HandleBuffer[Index],
+      &gEfiPciIoProtocolGuid,
+      (VOID **) &PciIo
+      );
+
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    Status = PciIo->Pci.Read (
+      PciIo,
+      EfiPciIoWidthUint32,
+      OFFSET_OF (PCI_DEVICE_INDEPENDENT_REGION, RevisionID),
+      1,
+      &ClassCode
+      );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    ClassCode >>= 16U; ///< Drop revision and minor codes.
+    if (ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_AUDIO)
+      || ClassCode == (PCI_CLASS_MEDIA << 8 | 0x3 /* PCI_CLASS_MEDIA_HDA */)) {
+      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OC: Discovered audio device at %u/%u with TCSEL %X\n",
+        (UINT32) (Index + 1),
+        (UINT32) HandleCount,
+        TrafficClass
+        ));
+
+      //
+      // Update Traffic Class Select Register to TC0.
+      // This is required for AppleHDA to output audio on some machines.
+      // See Intel I/O Controller Hub 9 (ICH9) Family Datasheet for more details.
+      //
+      if ((TrafficClass & 0x7U) != 0) {
+        TrafficClass &= ~0x7U;
+        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+      }
+    }
+  }
+}
+
 VOID
 OcLoadUefiAudioSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
@@ -482,6 +562,10 @@ OcLoadUefiAudioSupport (
   OC_AUDIO_PROTOCOL                *OcAudio;
   UINT8                            VolumeLevel;
   BOOLEAN                          Muted;
+
+  if (Config->Uefi.Audio.ResetTrafficClass) {
+    ResetAudioTrafficClass ();
+  }
 
   if (!Config->Uefi.Audio.AudioSupport) {
     DEBUG ((DEBUG_INFO, "OC: Requested not to use audio\n"));

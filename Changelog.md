@@ -19,6 +19,7 @@ OpenCore Changelog
 - Added `acdtinfo` utility to lookup certain products
 - Fixed `FSBFrequency` calculation with fractional multiplier
 - Fixed showing core count for some AMD CPUs
+- Added `ResetTrafficClass` to reset TCSEL to T0 on legacy HDA
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy

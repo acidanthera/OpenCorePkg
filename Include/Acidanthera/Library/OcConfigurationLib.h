@@ -590,7 +590,8 @@ typedef enum {
   _(BOOLEAN                     , AudioSupport       ,     , FALSE                             , ()) \
   _(UINT8                       , AudioCodec         ,     , 0                                 , ()) \
   _(UINT8                       , AudioOut           ,     , 0                                 , ()) \
-  _(UINT8                       , MinimumVolume      ,     , 0                                 , ())
+  _(UINT8                       , MinimumVolume      ,     , 0                                 , ()) \
+  _(BOOLEAN                     , ResetTrafficClass  ,     , FALSE                             , ())
   OC_DECLARE (OC_UEFI_AUDIO)
 
 ///

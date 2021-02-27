@@ -51,6 +51,7 @@
   gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES
   gEfiSecurityArchProtocolGuid        ## SOMETIMES_CONSUMES
   gEfiSecurity2ArchProtocolGuid       ## SOMETIMES_CONSUMES
+  gEfiPciIoProtocolGuid               ## SOMETIMES_CONSUMES
 
 [LibraryClasses]
   DevicePathLib

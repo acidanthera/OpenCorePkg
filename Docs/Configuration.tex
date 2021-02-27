@@ -6143,6 +6143,19 @@ functioning. Feature highlights:
   NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
 
 \item
+  \texttt{ResetTrafficClass}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Set HDA Traffic Class Select Register to \texttt{TC0}.
+
+  AppleHDA kext will function correctly only if \texttt{TCSEL} register is configured
+  to use \texttt{TC0} traffic class. Refer to Intel I/O Controller Hub 9 (ICH9) Family
+  Datasheet (or any other ICH datasheet) for more details about this register.
+
+  \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used 
+  it is preferred to use AppleALC \texttt{alctsel} property instead.
+
+\item
   \texttt{SetupDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
