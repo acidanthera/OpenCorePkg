@@ -401,6 +401,7 @@ OpenCore Changelog
 - Added `AppleXcpmForceBoost` kernel quirk to maximise select Xeon performance
 - Bundled NvmExpressDxe and XhciDxe drivers for platforms that need them
 - Added `IncreasePciBarSize` kernel quirk for select platforms with PCI space issues
+- Fixed `opencore-version` reporting the incorrect version in rare cases
 
 #### v0.5.3
 - Update builtin firmware versions

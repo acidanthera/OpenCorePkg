@@ -89,7 +89,7 @@ OcReportVersion (
     gRT->SetVariable (
       OC_VERSION_VARIABLE_NAME,
       &gOcVendorVariableGuid,
-      Config->Nvram.WriteFlash ? OPEN_CORE_NVRAM_NV_ATTR : OPEN_CORE_NVRAM_ATTR,
+      OPEN_CORE_NVRAM_ATTR,
       AsciiStrLen (Version),
       (VOID *) Version
       );
