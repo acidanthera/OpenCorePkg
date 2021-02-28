@@ -23,6 +23,7 @@ OpenCore Changelog
 - Fixed default boot entry selection without timeout for builtin picker
 - Added ocpasswordgen utility to generate OpenCore password data
 - Added `ActivateHpetSupport` quirk to activate HPET support
+- Fixed `opencore-version` reporting the incorrect version in rare cases
 
 #### v0.6.6
 - Added keyboard and pointer entry scroll support in OpenCanopy
@@ -401,7 +402,6 @@ OpenCore Changelog
 - Added `AppleXcpmForceBoost` kernel quirk to maximise select Xeon performance
 - Bundled NvmExpressDxe and XhciDxe drivers for platforms that need them
 - Added `IncreasePciBarSize` kernel quirk for select platforms with PCI space issues
-- Fixed `opencore-version` reporting the incorrect version in rare cases
 
 #### v0.5.3
 - Update builtin firmware versions
