@@ -366,10 +366,11 @@ PatchProcessorInformation (
   // 2666362112 Hz -> 2666 MHz C2Q  Q9450  (2.66)
   // ???        Hz -> ???  MHz Xeon X5675  (3.06)
   // 1992617296 Hz -> 1993 MHz i7   2630QM (2.0)
+  // 3010680273 Hz -> 3011 MHz P4   530    (3.0)
   //
   if (MhzRemainder >= 50 && MhzRemainder < 90) {
     MhzSpeed = (MhzSpeed) / 10 * 10;
-  } else if (MhzRemainder >= 10 && MhzRemainder < 90) {
+  } else if (MhzRemainder >= 12 && MhzRemainder < 90) {
     MhzSpeed = (MhzSpeed + 5) / 10 * 10;
   } else {
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;
