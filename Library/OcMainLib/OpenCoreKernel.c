@@ -633,7 +633,7 @@ OcKernelInjectKext (
   }
 
   DEBUG ((
-    EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+    !IsForced && EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
     "OC: %a%a injection %a (%a) - %r\n",
     PRINT_KERNEL_CACHE_TYPE (CacheType),
     IsForced ? " force" : "",
