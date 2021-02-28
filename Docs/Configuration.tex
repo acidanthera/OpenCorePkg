@@ -6715,6 +6715,15 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
+  \texttt{ActivateHpetSupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Activates HPET support.
+
+  Older boards like ICH6 may not always have HPET setting in the firmware preferences,
+  this option tries to force enable it.
+
+\item
   \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

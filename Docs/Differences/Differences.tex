@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Sun Feb 28 12:38:24 2021
+%DIF ADD ../Configuration.tex        Sun Feb 28 13:12:25 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7119,7 +7119,18 @@ functioning. Feature highlights:
 \begin{enumerate}
 
 \item
-  \texttt{DisableSecurityPolicy}\\
+  \DIFaddbegin \texttt{\DIFadd{ActivateHpetSupport}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Activates HPET support.
+}
+
+  \DIFadd{Older boards like ICH6 may not always have HPET setting in the firmware preferences,
+  this option tries to force enable it.
+}
+
+\item
+  \DIFaddend \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disable platform security policy.

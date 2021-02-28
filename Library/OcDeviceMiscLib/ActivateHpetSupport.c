@@ -25,7 +25,7 @@
 #include <Library/OcDeviceMiscLib.h>
 
 VOID
-ResetAudioTrafficClass (
+ActivateHpetSupport (
   VOID
   )
 {
@@ -35,7 +35,8 @@ ResetAudioTrafficClass (
   UINTN                Index;
   EFI_PCI_IO_PROTOCOL  *PciIo;
   UINT32               ClassCode;
-  UINT8                TrafficClass;
+  UINT32               Rcba;
+  UINT32               Hptc;
 
   Status = gBS->LocateHandleBuffer (
     ByProtocol,
@@ -46,7 +47,7 @@ ResetAudioTrafficClass (
     );
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCDM: No PCI devices for TCSEL reset - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCDM: No PCI devices for HPET support - %r\n", Status));
     return;
   }
 
@@ -73,29 +74,54 @@ ResetAudioTrafficClass (
     }
 
     ClassCode >>= 16U; ///< Drop revision and minor codes.
-    if (ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_AUDIO)
-      || ClassCode == (PCI_CLASS_MEDIA << 8 | 0x3 /* PCI_CLASS_MEDIA_HDA */)) {
-      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+    if (ClassCode == (PCI_CLASS_BRIDGE << 8 | PCI_CLASS_BRIDGE_ISA)) {
+      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, 0xF0 /* RCBA */, 1, &Rcba);
       if (EFI_ERROR (Status)) {
         continue;
       }
 
       DEBUG ((
         DEBUG_INFO,
-        "OCDM: Discovered audio device at %u/%u with TCSEL %X\n",
+        "OCDM: Discovered RCBA device at %u/%u at 0x%X\n",
         (UINT32) (Index + 1),
         (UINT32) HandleCount,
-        TrafficClass
+        Rcba
         ));
 
       //
-      // Update Traffic Class Select Register to TC0.
-      // This is required for AppleHDA to output audio on some machines.
-      // See Intel I/O Controller Hub 9 (ICH9) Family Datasheet for more details.
+      // Disabled completely. Ignore.
       //
-      if ((TrafficClass & 0x7U) != 0) {
-        TrafficClass &= ~0x7U;
-        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+      if ((Rcba & 0xFFFFC000) == 0) {
+        continue;
+      }
+
+      //
+      // Disabled access. Try to enable.
+      //
+      if ((Rcba & BIT0) == 0) {
+        Rcba |= BIT0;
+        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint32, 0xF0 /* RCBA */, 1, &Rcba);
+      }
+
+      Rcba &= 0xFFFFC000;
+
+      Hptc = MmioRead32 (Rcba + 0x3404);
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OCDM: Discovered HPTC register with 0x%X value\n",
+        Hptc
+        ));
+
+      if ((Hptc & BIT7) == 0) {
+        MmioWrite32 (Rcba + 0x3404, Hptc | BIT7);
+        Hptc = MmioRead32 (Rcba + 0x3404);
+
+        DEBUG ((
+          DEBUG_INFO,
+          "OCDM: Updated HPTC register with HPET has 0x%X value\n",
+          Hptc
+          ));
       }
     }
   }

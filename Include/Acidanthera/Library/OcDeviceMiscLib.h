@@ -43,4 +43,12 @@ ResetAudioTrafficClass (
   VOID
   );
 
+/**
+  Force enables HPET timer.
+**/
+VOID
+ActivateHpetSupport (
+  VOID
+  );
+
 #endif // OC_DEVICE_MISC_LIB_H

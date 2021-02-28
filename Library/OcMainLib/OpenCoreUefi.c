@@ -732,6 +732,10 @@ OcLoadUefiSupport (
   //
   OcLoadBooterUefiSupport (Config, CpuInfo);
 
+  if (Config->Uefi.Quirks.ActivateHpetSupport) {
+    ActivateHpetSupport ();
+  }
+
   if (Config->Uefi.Quirks.IgnoreInvalidFlexRatio) {
     OcCpuCorrectFlexRatio (CpuInfo);
   }

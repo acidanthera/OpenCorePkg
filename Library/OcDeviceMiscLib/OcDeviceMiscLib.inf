@@ -43,6 +43,7 @@
   UefiBootServicesTableLib
 
 [Sources]
+  ActivateHpetSupport.c
   DirectReset.c
   ReleaseUsbOwnership.c
   ResetAudioTrafficClass.c
