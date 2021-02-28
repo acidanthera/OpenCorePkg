@@ -393,14 +393,7 @@ OcShowSimplePasswordRequest (
         OcToggleVoiceOver (Context, OcVoiceOverAudioFileEnterPassword);
       }
 
-      if (Key.ScanCode == SCAN_ESC) {
-        gST->ConOut->ClearScreen (gST->ConOut);
-        SecureZeroMem (Password, PwIndex);
-        //
-        // ESC aborts the input.
-        //
-        return EFI_ABORTED;
-      } else if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
+      if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
         gST->ConOut->ClearScreen (gST->ConOut);
         //
         // RETURN finalizes the input.
