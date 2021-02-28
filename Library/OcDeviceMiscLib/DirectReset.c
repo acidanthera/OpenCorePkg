@@ -11,6 +11,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
+#include <Library/OcDeviceMiscLib.h>
 
 VOID
 DirectResetCold (

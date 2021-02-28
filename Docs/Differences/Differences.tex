@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Feb  6 18:51:55 2021
-%DIF ADD ../Configuration.tex        Sat Feb 27 20:05:47 2021
+%DIF ADD ../Configuration.tex        Sun Feb 28 12:38:24 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3809,7 +3809,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCDC} --- OcDriverConnectionLib
   \item \texttt{OCDH} --- OcDataHubLib
   \item \texttt{OCDI} --- OcAppleDiskImageLib
-  \item \texttt{OCFS} --- OcFileLib
+  \item \DIFaddbegin \texttt{\DIFadd{OCDM}} \DIFadd{--- OcDeviceMiscLib
+  }\item \DIFaddend \texttt{OCFS} --- OcFileLib
   \item \texttt{OCFV} --- OcFirmwareVolumeLib
   \item \texttt{OCHS} --- OcHashServicesLib
   \item \texttt{OCI4} --- OcAppleImg4Lib
@@ -3818,7 +3819,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCJS} --- OcApfsLib
   \item \texttt{OCKM} --- OcAppleKeyMapLib
   \item \texttt{OCL} --- OcDebugLogLib
-  \item \texttt{OCMCO} --- OcMachoLib
+  \item \DIFaddbegin \texttt{\DIFadd{OCM}} \DIFadd{--- OcMiscLib
+  }\item \DIFaddend \texttt{OCMCO} --- OcMachoLib
   \item \texttt{OCME} --- OcHeciLib
   \item \texttt{OCMM} --- OcMemoryLib
   \item \texttt{OCPE} --- OcPeCoffLib, OcPeCoffExtLib

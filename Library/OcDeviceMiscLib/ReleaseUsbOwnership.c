@@ -22,6 +22,7 @@
 #include <Library/DebugLib.h>
 #include <Library/IoLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcDeviceMiscLib.h>
 
 #define XHC_HCCPARAMS_OFFSET      0x10
 #define XHC_NEXT_CAPABILITY_MASK  0xFF00

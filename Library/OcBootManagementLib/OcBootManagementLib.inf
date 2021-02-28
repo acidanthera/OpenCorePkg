@@ -108,6 +108,7 @@
   OcAppleSecureBootLib
   OcConsoleLib
   OcCryptoLib
+  OcDeviceMiscLib
   OcDevicePathLib
   OcGuardLib
   OcFileLib

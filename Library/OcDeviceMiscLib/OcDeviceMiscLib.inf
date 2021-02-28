@@ -18,11 +18,11 @@
 
 [Defines]
   INF_VERSION    = 0x00010005
-  BASE_NAME      = OcMiscLib
-  FILE_GUID      = E9DF6F29-95AC-429A-8E42-FCE1F5B81148
+  BASE_NAME      = OcDeviceMiscLib
+  FILE_GUID      = 4CABEB89-2EBC-434A-84C5-E093FFD34174
   MODULE_TYPE    = BASE
   VERSION_STRING = 1.0
-  LIBRARY_CLASS  = OcMiscLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+  LIBRARY_CLASS  = OcDeviceMiscLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
 
 # VALID_ARCHITECTURES = IA32 X64
 
@@ -33,19 +33,16 @@
 
 [Protocols]
   gEfiPciIoProtocolGuid
-  gEfiShellParametersProtocolGuid
-  gEfiLoadedImageProtocolGuid
-  gEfiSimpleFileSystemProtocolGuid
 
 [LibraryClasses]
   BaseLib
+  DebugLib
   IoLib
-  UefiLib
-  OcFileLib
   OcGuardLib
-  OcStringLib
+  UefiLib
+  UefiBootServicesTableLib
 
 [Sources]
-  DataPatcher.c
-  ImageRunner.c
-  ProtocolSupport.c
+  DirectReset.c
+  ReleaseUsbOwnership.c
+  ResetAudioTrafficClass.c

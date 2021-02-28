@@ -41,6 +41,7 @@
 [LibraryClasses]
   BaseLib
   DebugLib
+  OcDeviceMiscLib
   OcMiscLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib

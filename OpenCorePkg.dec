@@ -811,6 +811,9 @@
   OcDebugLogLib|Include/Acidanthera/Library/OcDebugLogLib.h
 
   ##  @libraryclass
+  OcDeviceMiscLib|Include/Acidanthera/Library/OcDeviceMiscLib.h
+
+  ##  @libraryclass
   OcDevicePathLib|Include/Acidanthera/Library/OcDevicePathLib.h
 
   ##  @libraryclass
