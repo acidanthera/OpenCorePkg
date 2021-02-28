@@ -402,6 +402,9 @@ GuiDrawToBuffer (
   IN     BOOLEAN              RequestDraw
   )
 {
+  UINT32                              PosX;
+  UINT32                              PosY;
+
   UINT32                              PosBaseX;
   UINT32                              PosBaseY;
   UINT32                              PosOffsetX;
@@ -440,8 +443,6 @@ GuiDrawToBuffer (
   UINT32                              OverHeight;
 
   UINT32                              ActualArea;
-
-  UINT32                              PosX;
 
   ASSERT (Image != NULL);
   ASSERT (DrawContext != NULL);
@@ -487,6 +488,9 @@ GuiDrawToBuffer (
     }
   }
 
+  ASSERT (PosBaseX + PosOffsetX == BaseX + OffsetX);
+  ASSERT (PosBaseY + PosOffsetY == BaseY + OffsetY);
+
   if (!Fill) {
     ASSERT (Image->Width  > OffsetX);
     ASSERT (Image->Height > OffsetY);
@@ -496,14 +500,16 @@ GuiDrawToBuffer (
     Width  = MIN (Width,  Image->Width  - OffsetX);
     Height = MIN (Height, Image->Height - OffsetY);
   }
+
+  PosX = PosBaseX + PosOffsetX;
+  PosY = PosBaseY + PosOffsetY;
   //
   // Crop to the screen's dimensions.
   //
-  ASSERT (DrawContext->Screen->Width  >= PosBaseX + PosOffsetX);
-  ASSERT (DrawContext->Screen->Height >= PosBaseY + PosOffsetY);
-  PosX   = PosBaseX + PosOffsetX;
+  ASSERT (DrawContext->Screen->Width  >= PosX);
+  ASSERT (DrawContext->Screen->Height >= PosY);
   Width  = MIN (Width,  DrawContext->Screen->Width  - PosX);
-  Height = MIN (Height, DrawContext->Screen->Height - (PosBaseY + PosOffsetY));
+  Height = MIN (Height, DrawContext->Screen->Height - PosY);
 
   if (Width == 0 || Height == 0) {
     return;
@@ -518,7 +524,7 @@ GuiDrawToBuffer (
     for (
       RowIndex = 0,
         SourceRowOffset = OffsetY * Image->Width,
-        TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
+        TargetRowOffset = PosY * DrawContext->Screen->Width;
       RowIndex < Height;
       ++RowIndex,
         SourceRowOffset += Image->Width,
@@ -528,11 +534,11 @@ GuiDrawToBuffer (
       // Blend the row pixel-by-pixel.
       //
       for (
-        TargetColumnOffset = PosOffsetX, SourceColumnOffset = OffsetX;
-        TargetColumnOffset < PosOffsetX + Width;
+        TargetColumnOffset = PosX, SourceColumnOffset = OffsetX;
+        TargetColumnOffset < PosX + Width;
         ++TargetColumnOffset, ++SourceColumnOffset
         ) {
-        TargetPixel = &mScreenBuffer[TargetRowOffset + PosBaseX + TargetColumnOffset];
+        TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
         SourcePixel = &Image->Buffer[SourceRowOffset + SourceColumnOffset];
         GuiBlendPixel (TargetPixel, SourcePixel, Opacity);
       }
@@ -551,7 +557,7 @@ GuiDrawToBuffer (
       //
       for (
         RowIndex = 0,
-          TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
+          TargetRowOffset = PosY * DrawContext->Screen->Width;
         RowIndex < Height;
         ++RowIndex,
           TargetRowOffset += DrawContext->Screen->Width
@@ -572,7 +578,7 @@ GuiDrawToBuffer (
       //
       for (
         RowIndex = 0,
-          TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
+          TargetRowOffset = PosY * DrawContext->Screen->Width;
         RowIndex < Height;
         ++RowIndex,
           TargetRowOffset += DrawContext->Screen->Width
@@ -581,11 +587,11 @@ GuiDrawToBuffer (
         // Blend the row pixel-by-pixel with Source's (0,0).
         //
         for (
-          TargetColumnOffset = PosOffsetX;
-          TargetColumnOffset < PosOffsetX + Width;
+          TargetColumnOffset = PosY;
+          TargetColumnOffset < PosY + Width;
           ++TargetColumnOffset
           ) {
-          TargetPixel = &mScreenBuffer[TargetRowOffset + PosBaseX + TargetColumnOffset];
+          TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
           GuiBlendPixel (TargetPixel, &Image->Buffer[0], Opacity);
         }
       }
@@ -597,10 +603,10 @@ GuiDrawToBuffer (
     //
     // Update the coordinates of the smallest rectangle covering all changes.
     //
-    ThisReq.MinX = PosBaseX + PosOffsetX;
-    ThisReq.MinY = PosBaseY + PosOffsetY;
-    ThisReq.MaxX = PosBaseX + PosOffsetX + Width  - 1;
-    ThisReq.MaxY = PosBaseY + PosOffsetY + Height - 1;
+    ThisReq.MinX = PosX;
+    ThisReq.MinY = PosY;
+    ThisReq.MaxX = PosX + Width  - 1;
+    ThisReq.MaxY = PosY + Height - 1;
 
     ThisArea = Width * Height;
 
