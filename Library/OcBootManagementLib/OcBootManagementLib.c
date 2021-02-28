@@ -125,11 +125,11 @@ OcShowSimpleBootMenu (
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
 
-  ChosenEntry    = -1;
   Code[1]        = '\0';
 
   TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
   ASSERT (BootContext->DefaultEntry != NULL);
+  ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
 
   PlayedOnce     = FALSE;
   PlayChosen     = FALSE;
@@ -258,9 +258,6 @@ OcShowSimpleBootMenu (
         BootContext->PickerContext->HideAuxiliary = FALSE;
         return EFI_ABORTED;
       } else if (KeyIndex == OC_INPUT_UP) {
-        if (TimeOutSeconds > 0) {
-          ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
-        }
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
         } else if (ChosenEntry == 0) {
@@ -274,9 +271,6 @@ OcShowSimpleBootMenu (
         }
         break;
       } else if (KeyIndex == OC_INPUT_DOWN) {
-        if (TimeOutSeconds > 0) {
-          ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
-        }
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
         } else if (ChosenEntry == (INTN) (MIN (Count, OC_INPUT_MAX) - 1)) {
