@@ -82,6 +82,9 @@ gAppleDiskLabelImagePalette[256] = {
   [0xd6] = 0
 };
 
+#define PIXEL_TO_UINT32(Pixel)  \
+  ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
+
 BOOLEAN
 GuiClipChildBounds (
   IN     INT64   ChildOffset,
@@ -438,6 +441,8 @@ GuiDrawToBuffer (
 
   UINT32                              ActualArea;
 
+  UINT32                              PosX;
+
   ASSERT (Image != NULL);
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
@@ -496,7 +501,8 @@ GuiDrawToBuffer (
   //
   ASSERT (DrawContext->Screen->Width  >= PosBaseX + PosOffsetX);
   ASSERT (DrawContext->Screen->Height >= PosBaseY + PosOffsetY);
-  Width  = MIN (Width,  DrawContext->Screen->Width  - (PosBaseX + PosOffsetX));
+  PosX   = PosBaseX + PosOffsetX;
+  Width  = MIN (Width,  DrawContext->Screen->Width  - PosX);
   Height = MIN (Height, DrawContext->Screen->Height - (PosBaseY + PosOffsetY));
 
   if (Width == 0 || Height == 0) {
@@ -533,27 +539,58 @@ GuiDrawToBuffer (
     }
   } else {
     //
-    // Iterate over each row of the request.
+    // Currently we only use Fill for the background colour, which must not be
+    // opaque.
     //
-    for (
-      RowIndex = 0,
-        TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
-      RowIndex < Height;
-      ++RowIndex,
-        TargetRowOffset += DrawContext->Screen->Width
-      ) {
+    ASSERT (Opacity == 0xFF);
+#if 0
+    if (Opacity == 0xFF) {
+#endif
       //
-      // Blend the row pixel-by-pixel with Source's (0,0).
+      // Iterate over each row of the request.
       //
       for (
-        TargetColumnOffset = PosOffsetX;
-        TargetColumnOffset < PosOffsetX + Width;
-        ++TargetColumnOffset
+        RowIndex = 0,
+          TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
+        RowIndex < Height;
+        ++RowIndex,
+          TargetRowOffset += DrawContext->Screen->Width
         ) {
-        TargetPixel = &mScreenBuffer[TargetRowOffset + PosBaseX + TargetColumnOffset];
-        GuiBlendPixel (TargetPixel, &Image->Buffer[0], Opacity);
+        //
+        // Populate the row pixel-by-pixel with Source's (0,0).
+        //
+        SetMem32 (
+          &mScreenBuffer[TargetRowOffset + PosX],
+          Width * sizeof (UINT32),
+          PIXEL_TO_UINT32 (&Image->Buffer[0])
+          );
+      }
+#if 0
+    } else {
+      //
+      // Iterate over each row of the request.
+      //
+      for (
+        RowIndex = 0,
+          TargetRowOffset = (PosBaseY + PosOffsetY) * DrawContext->Screen->Width;
+        RowIndex < Height;
+        ++RowIndex,
+          TargetRowOffset += DrawContext->Screen->Width
+        ) {
+        //
+        // Blend the row pixel-by-pixel with Source's (0,0).
+        //
+        for (
+          TargetColumnOffset = PosOffsetX;
+          TargetColumnOffset < PosOffsetX + Width;
+          ++TargetColumnOffset
+          ) {
+          TargetPixel = &mScreenBuffer[TargetRowOffset + PosBaseX + TargetColumnOffset];
+          GuiBlendPixel (TargetPixel, &Image->Buffer[0], Opacity);
+        }
       }
     }
+#endif
   }
 
   if (RequestDraw) {
