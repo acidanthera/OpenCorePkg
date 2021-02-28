@@ -321,13 +321,14 @@ GuiBlendPixel (
   //
   ASSERT (BackPixel != NULL);
   ASSERT (FrontPixel != NULL);
+  ASSERT (Opacity > 0);
 
   if (FrontPixel->Reserved == 0) {
     return;
   }
 
-  if (FrontPixel->Reserved == 0xFF) {
-    if (Opacity == 0xFF) {
+  if (Opacity == 0xFF) {
+    if (FrontPixel->Reserved == 0xFF) {
       BackPixel->Blue     = FrontPixel->Blue;
       BackPixel->Green    = FrontPixel->Green;
       BackPixel->Red      = FrontPixel->Red;
@@ -335,16 +336,19 @@ GuiBlendPixel (
       return;
     }
 
-    CombOpacity = Opacity;
-  } else {
-    CombOpacity = RGB_APPLY_OPACITY (FrontPixel->Reserved, Opacity);
-  }
+    CombOpacity = FrontPixel->Reserved;
 
-  if (CombOpacity == 0) {
-    return;
-  } else if (CombOpacity == FrontPixel->Reserved) {
     FinalFrontPixel = FrontPixel;
   } else {
+    if (FrontPixel->Reserved == 0xFF) {
+      CombOpacity = Opacity;
+    } else {
+      CombOpacity = RGB_APPLY_OPACITY (FrontPixel->Reserved, Opacity);
+      if (CombOpacity == 0) {
+        return;
+      }
+    }
+
     OpacFrontPixel.Reserved = CombOpacity;
     OpacFrontPixel.Blue     = RGB_APPLY_OPACITY (FrontPixel->Blue,  Opacity);
     OpacFrontPixel.Green    = RGB_APPLY_OPACITY (FrontPixel->Green, Opacity);
@@ -439,6 +443,10 @@ GuiDrawToBuffer (
   ASSERT (DrawContext->Screen != NULL);
   ASSERT (BaseX + OffsetX >= 0);
   ASSERT (BaseY + OffsetY >= 0);
+
+  if (Opacity == 0) {
+    return;
+  }
   //
   // Only draw the onscreen parts.
   //
