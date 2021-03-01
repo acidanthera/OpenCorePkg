@@ -5100,6 +5100,13 @@ be used. Version with macOS specific enhancements can be downloaded from
   When \texttt{CustomMemory} is \texttt{false}, this value is automatically set
   based on Mac product name.
 
+  When \texttt{Automatic} is \texttt{true}, the original value from the firmware
+  will be set if valid (i.e. \texttt{non-zero}). Otherwise, the value from \texttt{OcMacInfoLib}
+  will be set. Under non-Automatic mode (i.e. when \texttt{Automatic} is \texttt{false}),
+  a user-specified value will be set if available. Otherwise, the original value from 
+  the firmware will be set if valid (i.e. \texttt{non-zero}).
+  If still not, the fallback value (\texttt{zero}) will be set.
+
   \begin{itemize}
   \tightlist
   \item

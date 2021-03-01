@@ -51,6 +51,10 @@ typedef struct OC_SMBIOS_MEMORY_DEVICE_DATA_ {
 
 typedef struct OC_SMBIOS_DATA_ {
   //
+  // Forcibly use MemoryFormFactor on non-Automatic mode when TRUE.
+  //
+  BOOLEAN         ForceMemoryFormFactor;
+  //
   // Type 0
   //
   CONST CHAR8     *BIOSVendor;

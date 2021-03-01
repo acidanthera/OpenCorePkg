@@ -185,6 +185,11 @@ OcPlatformUpdateSmbios (
 
   ZeroMem (&Data, sizeof (Data));
 
+  //
+  // Forcibly use MemoryFormFactor on non-Automatic mode.
+  //
+  Data.ForceMemoryFormFactor = !Config->PlatformInfo.Automatic;
+
   if (MacInfo == NULL) {
     //
     // Manual mode, read data from SMBIOS.
