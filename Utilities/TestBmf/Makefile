@@ -9,7 +9,7 @@ OBJS    = $(PROJECT).o
 #
 # From OpenCanopy.
 #
-OBJS   += BitmapFont.o OpenCanopy.o InputSimTextIn.o InputSimAbsPtr.o OutputStGop.o BootPicker.o GuiApp.o
+OBJS   += BitmapFont.o Images.o Blending.o
 #
 # From OpenCore.
 #
