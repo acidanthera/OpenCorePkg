@@ -493,6 +493,8 @@ InternalGetCursorImage (
 {
   ASSERT (This != NULL);
   ASSERT (Context != NULL);
-
+  //
+  // ATTENTION: All images must have the same dimensions.
+  //
   return &Context->Icons[ICON_CURSOR][ICON_TYPE_BASE];
 }
