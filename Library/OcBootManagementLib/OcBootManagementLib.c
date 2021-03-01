@@ -1,5 +1,5 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.
+  Copyright (C) 2019-2021, vit9696 and contributors. All rights reserved.
 
   All rights reserved.
 
@@ -105,6 +105,26 @@ RunShowMenu (
   return Status;
 }
 
+STATIC
+CHAR16
+GetPickerEntryCursor (
+  IN  OC_BOOT_CONTEXT             *BootContext,
+  IN  UINT32                      TimeOutSeconds,
+  IN  INTN                        ChosenEntry,
+  IN  UINTN                       Index
+  )
+{  
+  if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
+    return L'*';
+  }
+  
+  if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
+    return L'>';
+  }
+
+  return L' ';
+}
+
 EFI_STATUS
 EFIAPI
 OcShowSimpleBootMenu (
@@ -118,6 +138,12 @@ OcShowSimpleBootMenu (
   UINTN                              Length;
   INTN                               KeyIndex;
   INTN                               ChosenEntry;
+  INTN                               OldChosenEntry;
+  INT32                              FirstIndexRow;
+  INT32                              StatusRow;
+  INT32                              StatusColumn;
+  CHAR16                             EntryCursor;
+  CHAR16                             OldEntryCursor;
   CHAR16                             Code[2];
   UINT32                             TimeOutSeconds;
   UINT32                             Count;
@@ -129,7 +155,9 @@ OcShowSimpleBootMenu (
 
   TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
   ASSERT (BootContext->DefaultEntry != NULL);
-  ChosenEntry = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
+  ChosenEntry    = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
+  OldChosenEntry = ChosenEntry;
+  FirstIndexRow  = -1;
 
   PlayedOnce     = FALSE;
   PlayChosen     = FALSE;
@@ -160,42 +188,73 @@ OcShowSimpleBootMenu (
   gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
   while (TRUE) {
-    gST->ConOut->ClearScreen (gST->ConOut);
-    gST->ConOut->OutputString (gST->ConOut, OC_MENU_BOOT_MENU);
+    if (FirstIndexRow != -1) {
+      //
+      // Incrementally update menu
+      //
+      if (OldChosenEntry >= 0 && OldChosenEntry != ChosenEntry) {
+        gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + OldChosenEntry);
+        gST->ConOut->OutputString (gST->ConOut, L" ");
+      }
+      
+      if (OldChosenEntry != ChosenEntry || OldEntryCursor != EntryCursor) {
+        if (ChosenEntry >= 0) {
+          OldEntryCursor = EntryCursor;
 
-    if (BootContext->PickerContext->TitleSuffix != NULL) {
-      Length = AsciiStrLen (BootContext->PickerContext->TitleSuffix);
-      gST->ConOut->OutputString (gST->ConOut, L" (");
-      for (Index = 0; Index < Length; ++Index) {
-        Code[0] = BootContext->PickerContext->TitleSuffix[Index];
+          EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, ChosenEntry);
+
+          gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
+          Code[0] = EntryCursor;
+          gST->ConOut->OutputString (gST->ConOut, Code);
+        }
+
+        OldChosenEntry = ChosenEntry;
+
+        gST->ConOut->SetCursorPosition (gST->ConOut, StatusColumn, StatusRow);
+      }
+    } else {
+      //
+      // Render initial menu
+      //
+      gST->ConOut->ClearScreen (gST->ConOut);
+      gST->ConOut->OutputString (gST->ConOut, OC_MENU_BOOT_MENU);
+
+      if (BootContext->PickerContext->TitleSuffix != NULL) {
+        Length = AsciiStrLen (BootContext->PickerContext->TitleSuffix);
+        gST->ConOut->OutputString (gST->ConOut, L" (");
+        for (Index = 0; Index < Length; ++Index) {
+          Code[0] = BootContext->PickerContext->TitleSuffix[Index];
+          gST->ConOut->OutputString (gST->ConOut, Code);
+        }
+        gST->ConOut->OutputString (gST->ConOut, L")");
+      }
+
+      gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
+
+      FirstIndexRow = gST->ConOut->Mode->CursorRow;
+
+      for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
+        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, Index);
+        Code[0] = EntryCursor;
         gST->ConOut->OutputString (gST->ConOut, Code);
-      }
-      gST->ConOut->OutputString (gST->ConOut, L")");
-    }
+        gST->ConOut->OutputString (gST->ConOut, L" ");
 
-    gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
-
-    for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
-      if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
-        gST->ConOut->OutputString (gST->ConOut, L"* ");
-      } else if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
-        gST->ConOut->OutputString (gST->ConOut, L"> ");
-      } else {
-        gST->ConOut->OutputString (gST->ConOut, L"  ");
+        Code[0] = OC_INPUT_STR[Index];
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        gST->ConOut->OutputString (gST->ConOut, L". ");
+        gST->ConOut->OutputString (gST->ConOut, BootEntries[Index]->Name);
+        if (BootEntries[Index]->IsExternal) {
+          gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
+        }
+        gST->ConOut->OutputString (gST->ConOut, L"\r\n");
       }
 
-      Code[0] = OC_INPUT_STR[Index];
-      gST->ConOut->OutputString (gST->ConOut, Code);
-      gST->ConOut->OutputString (gST->ConOut, L". ");
-      gST->ConOut->OutputString (gST->ConOut, BootEntries[Index]->Name);
-      if (BootEntries[Index]->IsExternal) {
-        gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
-      }
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-    }
+      gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
 
-    gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-    gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
+      StatusRow     = gST->ConOut->Mode->CursorRow;
+      StatusColumn  = gST->ConOut->Mode->CursorColumn;
+    }
 
     if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {
       OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileChooseOS, FALSE);

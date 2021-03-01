@@ -6,6 +6,7 @@ OpenCore Changelog
 - Increased OpenCanopy rendering performance
 - Reduced OpenCanopy mouse pointer input lag
 - Fixed that cursor bounds could be different from OpenCanopy's
+- Improved builtin picker rendering performance
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
