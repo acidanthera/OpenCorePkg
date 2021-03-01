@@ -37,8 +37,7 @@ VOID
   IN     UINT32                  OffsetX,
   IN     UINT32                  OffsetY,
   IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     BOOLEAN                 RequestDraw
+  IN     UINT32                  Height
   );
 
 typedef
@@ -173,8 +172,7 @@ GuiObjDrawDelegate (
   IN     UINT32                  OffsetX,
   IN     UINT32                  OffsetY,
   IN     UINT32                  Width,
-  IN     UINT32                  Height,
-  IN     BOOLEAN                 RequestDraw
+  IN     UINT32                  Height
   );
 
 GUI_OBJ *
@@ -208,8 +206,7 @@ GuiDrawToBuffer (
   IN     UINT32               OffsetX,
   IN     UINT32               OffsetY,
   IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN     UINT32               Height
   );
 
 VOID
@@ -218,8 +215,7 @@ GuiDrawScreen (
   IN     INT64                X,
   IN     INT64                Y,
   IN     UINT32               Width,
-  IN     UINT32               Height,
-  IN     BOOLEAN              RequestDraw
+  IN     UINT32               Height
   );
 
 VOID
@@ -227,8 +223,7 @@ GuiRedrawObject (
   IN OUT GUI_OBJ              *Obj,
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     INT64                BaseX,
-  IN     INT64                BaseY,
-  IN     BOOLEAN              RequestDraw
+  IN     INT64                BaseY
   );
 
 VOID
