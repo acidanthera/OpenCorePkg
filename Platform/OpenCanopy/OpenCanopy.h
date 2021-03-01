@@ -290,6 +290,12 @@ GuiBlendPixel (
   IN     UINT8                                Opacity
   );
 
+VOID
+GuiBlendPixelSolid (
+  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL        *BackPixel,
+  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *FrontPixel
+  );
+
 EFI_STATUS
 GuiCreateHighlightedImage (
   OUT GUI_IMAGE                            *SelectedImage,
