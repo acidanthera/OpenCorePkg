@@ -124,6 +124,7 @@ OcShowSimpleBootMenu (
   BOOLEAN                            SetDefault;
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
+  BOOLEAN                            FirstDraw;
 
   Code[1]        = '\0';
 
@@ -159,8 +160,14 @@ OcShowSimpleBootMenu (
   gST->ConOut->ClearScreen (gST->ConOut);
   gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
+  FirstDraw = TRUE;
   while (TRUE) {
-    gST->ConOut->ClearScreen (gST->ConOut);
+    if (FirstDraw) {
+      gST->ConOut->ClearScreen (gST->ConOut);
+      FirstDraw = FALSE;
+    } else {
+      gST->ConOut->SetCursorPosition (gST->ConOut, 0, 0);
+    }
     gST->ConOut->OutputString (gST->ConOut, OC_MENU_BOOT_MENU);
 
     if (BootContext->PickerContext->TitleSuffix != NULL) {
