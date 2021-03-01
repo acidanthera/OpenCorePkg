@@ -33,6 +33,8 @@
   BitmapFont.c
   BmfFile.h
   BmfLib.h
+  Images.c
+  Blending.c
   OpenCanopy.c
   OpenCanopy.h
   GuiApp.c
