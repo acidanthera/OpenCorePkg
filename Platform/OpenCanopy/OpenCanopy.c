@@ -287,10 +287,6 @@ GuiDrawToBufferFill (
   ASSERT (DrawContext->Screen != NULL);
   ASSERT (Width > 0);
   ASSERT (Height > 0);
-  ASSERT (PosX + Width >= 0);
-  ASSERT (PosY + Height >= 0);
-  ASSERT (PosX + Width <= MAX_UINT32);
-  ASSERT (PosY + Height <= MAX_UINT32);
   //
   // Screen cropping happens in GuiDrawScreen().
   //
