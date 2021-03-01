@@ -231,6 +231,8 @@ GuiObjDrawDelegate (
       continue;
     }
 
+    ASSERT (ChildDrawWidth > 0);
+    ASSERT (ChildDrawHeight > 0);
     ASSERT (Child->Obj.Draw != NULL);
     Child->Obj.Draw (
                  &Child->Obj,
@@ -386,10 +388,90 @@ GuiBlendPixel (
 }
 
 VOID
+GuiDrawToBufferFill (
+  IN     CONST GUI_IMAGE      *Image,
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN     UINT32               PosX,
+  IN     UINT32               PosY,
+  IN     UINT32               Width,
+  IN     UINT32               Height
+  )
+{
+  UINT32 RowIndex;
+  UINT32 TargetRowOffset;
+
+  ASSERT (Image != NULL);
+  ASSERT (DrawContext != NULL);
+  ASSERT (DrawContext->Screen != NULL);
+  ASSERT (Width > 0);
+  ASSERT (Height > 0);
+  ASSERT (PosX + Width >= 0);
+  ASSERT (PosY + Height >= 0);
+  ASSERT (PosX + Width <= MAX_UINT32);
+  ASSERT (PosY + Height <= MAX_UINT32);
+  //
+  // Screen cropping happens in GuiDrawScreen().
+  //
+  ASSERT (DrawContext->Screen->Width  >= PosX);
+  ASSERT (DrawContext->Screen->Height >= PosY);
+  ASSERT (PosX + Width <= DrawContext->Screen->Width);
+  ASSERT (PosY + Height <= DrawContext->Screen->Height);
+
+  ASSERT (Image->Buffer != NULL);
+  //
+  // Iterate over each row of the request.
+  //
+  for (
+    RowIndex = 0,
+      TargetRowOffset = PosY * DrawContext->Screen->Width;
+    RowIndex < Height;
+    ++RowIndex,
+      TargetRowOffset += DrawContext->Screen->Width
+    ) {
+    //
+    // Populate the row pixel-by-pixel with Source's (0,0).
+    //
+    SetMem32 (
+      &mScreenBuffer[TargetRowOffset + PosX],
+      Width * sizeof (UINT32),
+      PIXEL_TO_UINT32 (&Image->Buffer[0])
+      );
+  }
+
+  //
+  // TODO: Support opaque fill?
+  //
+
+#if 0
+  //
+  // Iterate over each row of the request.
+  //
+  for (
+    RowIndex = 0,
+      TargetRowOffset = PosY * DrawContext->Screen->Width;
+    RowIndex < Height;
+    ++RowIndex,
+      TargetRowOffset += DrawContext->Screen->Width
+    ) {
+    //
+    // Blend the row pixel-by-pixel with Source's (0,0).
+    //
+    for (
+      TargetColumnOffset = PosY;
+      TargetColumnOffset < PosY + Width;
+      ++TargetColumnOffset
+      ) {
+      TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
+      GuiBlendPixel (TargetPixel, &Image->Buffer[0], Opacity);
+    }
+  }
+#endif
+}
+
+VOID
 GuiDrawToBuffer (
   IN     CONST GUI_IMAGE      *Image,
   IN     UINT8                Opacity,
-  IN     BOOLEAN              Fill,
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     INT64                BaseX,
   IN     INT64                BaseY,
@@ -415,6 +497,8 @@ GuiDrawToBuffer (
   ASSERT (DrawContext->Screen != NULL);
   ASSERT (BaseX + OffsetX >= 0);
   ASSERT (BaseY + OffsetY >= 0);
+  ASSERT (Width > 0);
+  ASSERT (Height > 0);
   ASSERT (BaseX + OffsetX + Width >= 0);
   ASSERT (BaseY + OffsetY + Height >= 0);
   ASSERT (BaseX + OffsetX + Width <= MAX_UINT32);
@@ -434,102 +518,42 @@ GuiDrawToBuffer (
     return;
   }
 
-  if (!Fill) {
-    ASSERT (Image->Width  > OffsetX);
-    ASSERT (Image->Height > OffsetY);
-    //
-    // Only crop to the image's dimensions when not using fill-drawing.
-    //
-    Width  = MIN (Width,  Image->Width  - OffsetX);
-    Height = MIN (Height, Image->Height - OffsetY);
-  }
-
-  if (Width == 0 || Height == 0) {
+  ASSERT (Image->Width  > OffsetX);
+  ASSERT (Image->Height > OffsetY);
+  //
+  // Only crop to the image's dimensions when not using fill-drawing.
+  //
+  Width  = MIN (Width,  Image->Width  - OffsetX);
+  Height = MIN (Height, Image->Height - OffsetY);
+  if ((Width | Height) == 0) {
     return;
   }
 
   ASSERT (Image->Buffer != NULL);
-
-  if (!Fill) {
+  //
+  // Iterate over each row of the request.
+  //
+  for (
+    RowIndex = 0,
+      SourceRowOffset = OffsetY * Image->Width,
+      TargetRowOffset = PosY * DrawContext->Screen->Width;
+    RowIndex < Height;
+    ++RowIndex,
+      SourceRowOffset += Image->Width,
+      TargetRowOffset += DrawContext->Screen->Width
+    ) {
     //
-    // Iterate over each row of the request.
+    // Blend the row pixel-by-pixel.
     //
     for (
-      RowIndex = 0,
-        SourceRowOffset = OffsetY * Image->Width,
-        TargetRowOffset = PosY * DrawContext->Screen->Width;
-      RowIndex < Height;
-      ++RowIndex,
-        SourceRowOffset += Image->Width,
-        TargetRowOffset += DrawContext->Screen->Width
+      TargetColumnOffset = PosX, SourceColumnOffset = OffsetX;
+      TargetColumnOffset < PosX + Width;
+      ++TargetColumnOffset, ++SourceColumnOffset
       ) {
-      //
-      // Blend the row pixel-by-pixel.
-      //
-      for (
-        TargetColumnOffset = PosX, SourceColumnOffset = OffsetX;
-        TargetColumnOffset < PosX + Width;
-        ++TargetColumnOffset, ++SourceColumnOffset
-        ) {
-        TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
-        SourcePixel = &Image->Buffer[SourceRowOffset + SourceColumnOffset];
-        GuiBlendPixel (TargetPixel, SourcePixel, Opacity);
-      }
+      TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
+      SourcePixel = &Image->Buffer[SourceRowOffset + SourceColumnOffset];
+      GuiBlendPixel (TargetPixel, SourcePixel, Opacity);
     }
-  } else {
-    //
-    // Currently we only use Fill for the background colour, which must not be
-    // opaque.
-    //
-    ASSERT (Opacity == 0xFF);
-#if 0
-    if (Opacity == 0xFF) {
-#endif
-      //
-      // Iterate over each row of the request.
-      //
-      for (
-        RowIndex = 0,
-          TargetRowOffset = PosY * DrawContext->Screen->Width;
-        RowIndex < Height;
-        ++RowIndex,
-          TargetRowOffset += DrawContext->Screen->Width
-        ) {
-        //
-        // Populate the row pixel-by-pixel with Source's (0,0).
-        //
-        SetMem32 (
-          &mScreenBuffer[TargetRowOffset + PosX],
-          Width * sizeof (UINT32),
-          PIXEL_TO_UINT32 (&Image->Buffer[0])
-          );
-      }
-#if 0
-    } else {
-      //
-      // Iterate over each row of the request.
-      //
-      for (
-        RowIndex = 0,
-          TargetRowOffset = PosY * DrawContext->Screen->Width;
-        RowIndex < Height;
-        ++RowIndex,
-          TargetRowOffset += DrawContext->Screen->Width
-        ) {
-        //
-        // Blend the row pixel-by-pixel with Source's (0,0).
-        //
-        for (
-          TargetColumnOffset = PosY;
-          TargetColumnOffset < PosY + Width;
-          ++TargetColumnOffset
-          ) {
-          TargetPixel = &mScreenBuffer[TargetRowOffset + TargetColumnOffset];
-          GuiBlendPixel (TargetPixel, &Image->Buffer[0], Opacity);
-        }
-      }
-    }
-#endif
   }
 }
 
@@ -811,7 +835,6 @@ GuiRedrawPointer (
   GuiDrawToBuffer (
     CursorImage,
     0xFF,
-    FALSE,
     DrawContext,
     mScreenViewCursor.X,
     mScreenViewCursor.Y,

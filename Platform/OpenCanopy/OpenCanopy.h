@@ -199,12 +199,21 @@ VOID
 GuiDrawToBuffer (
   IN     CONST GUI_IMAGE      *Image,
   IN     UINT8                Opacity,
-  IN     BOOLEAN              Fill,
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     INT64                BaseX,
   IN     INT64                BaseY,
   IN     UINT32               OffsetX,
   IN     UINT32               OffsetY,
+  IN     UINT32               Width,
+  IN     UINT32               Height
+  );
+
+VOID
+GuiDrawToBufferFill (
+  IN     CONST GUI_IMAGE      *Image,
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN     UINT32               PosX,
+  IN     UINT32               PosY,
   IN     UINT32               Width,
   IN     UINT32               Height
   );

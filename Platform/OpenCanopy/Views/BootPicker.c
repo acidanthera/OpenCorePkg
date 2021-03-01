@@ -84,7 +84,6 @@ GuiDrawChildImage (
       GuiDrawToBuffer (
         Image,
         Opacity,
-        FALSE,
         DrawContext,
         ParentBaseX + ChildBaseX,
         ParentBaseY + ChildBaseY,
@@ -161,15 +160,16 @@ InternalBootPickerViewDraw (
   ASSERT (DrawContext != NULL);
   ASSERT (Context != NULL);
 
-  GuiDrawToBuffer (
+  ASSERT (BaseX + OffsetX >= 0);
+  ASSERT (BaseY + OffsetY >= 0);
+  ASSERT (BaseX + OffsetX <= MAX_UINT32);
+  ASSERT (BaseY + OffsetY <= MAX_UINT32);
+
+  GuiDrawToBufferFill (
     &mBackgroundImage,
-    0xFF,
-    TRUE,
     DrawContext,
-    BaseX,
-    BaseY,
-    OffsetX,
-    OffsetY,
+    (UINT32) (BaseX + OffsetX),
+    (UINT32) (BaseY + OffsetY),
     Width,
     Height
     );
@@ -694,7 +694,6 @@ InternalBootPickerSelectorDraw (
     GuiDrawToBuffer (
       BackgroundImage,
       mBootPickerOpacity,
-      FALSE,
       DrawContext,
       BaseX,
       BaseY,
