@@ -678,10 +678,6 @@ GuiRedrawPointer (
   STATIC UINT32 CursorOldY = 0;
 
   CONST GUI_IMAGE *CursorImage;
-  UINT32          MinX;
-  UINT32          DeltaX;
-  UINT32          MinY;
-  UINT32          DeltaY;
   UINT32          MaxWidth;
   UINT32          MaxHeight;
 
@@ -694,51 +690,29 @@ GuiRedrawPointer (
                                );
   ASSERT (CursorImage != NULL);
 
-  //
-  // TODO: Do we want to conditionally redraw?
-  //
-
-  //
-  // Always drawing the cursor to the buffer increases consistency and is less
-  // error-prone to situational hiding.
-  //
-  // Restore the rectangle previously covered by the cursor.
-  // Cover the area of the new cursor too and do not request a draw of the new
-  // cursor to not need to merge the requests later.
-  //
-  if (CursorOldX < mScreenViewCursor.X) {
-    MinX   = CursorOldX;
-    DeltaX = mScreenViewCursor.X - CursorOldX;
-  } else {
-    MinX   = mScreenViewCursor.X;
-    DeltaX = CursorOldX - mScreenViewCursor.X;
-  }
-
-  if (CursorOldY < mScreenViewCursor.Y) {
-    MinY   = CursorOldY;
-    DeltaY = mScreenViewCursor.Y - CursorOldY;
-  } else {
-    MinY   = mScreenViewCursor.Y;
-    DeltaY = CursorOldY - mScreenViewCursor.Y;
-  }
-
   ASSERT (mScreenViewCursor.X < DrawContext->Screen->Width);
   ASSERT (mScreenViewCursor.Y < DrawContext->Screen->Height);
-  
-  MaxWidth  = MIN (CursorImage->Width, DrawContext->Screen->Width - mScreenViewCursor.X);
-  MaxHeight = MIN (CursorImage->Height, DrawContext->Screen->Height - mScreenViewCursor.Y);
 
   //
-  // TODO: The cursor may jump long distances with touch control, split draws?
+  // Unconditionally draw the cursor to increase frametime consistency and
+  // prevent situational hiding.
   //
 
+  //
+  // Restore the rectangle previously covered by the cursor.
+  //
   GuiDrawScreen (
     DrawContext,
-    MinX,
-    MinY,
-    CursorImage->Width  + DeltaX,
-    CursorImage->Height + DeltaY
+    CursorOldX,
+    CursorOldY,
+    CursorImage->Width,
+    CursorImage->Height
     );
+  //
+  // Draw the new cursor at the new position.
+  //
+  MaxWidth  = MIN (CursorImage->Width, DrawContext->Screen->Width - mScreenViewCursor.X);
+  MaxHeight = MIN (CursorImage->Height, DrawContext->Screen->Height - mScreenViewCursor.Y);
   GuiDrawToBuffer (
     CursorImage,
     0xFF,
@@ -747,6 +721,15 @@ GuiRedrawPointer (
     mScreenViewCursor.Y,
     0,
     0,
+    MaxWidth,
+    MaxHeight
+    );
+  //
+  // Queue a draw request for the newly drawn cursor.
+  //
+  GuiRequestDraw (
+    mScreenViewCursor.X,
+    mScreenViewCursor.Y,
     MaxWidth,
     MaxHeight
     );
