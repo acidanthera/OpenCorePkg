@@ -9,7 +9,6 @@
 
 #include <Protocol/AppleEvent.h>
 #include <Protocol/AbsolutePointer.h>
-#include <Protocol/SimplePointer.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -23,7 +22,6 @@
 
 struct GUI_POINTER_CONTEXT_ {
   APPLE_EVENT_PROTOCOL          *AppleEvent;
-  EFI_SIMPLE_POINTER_PROTOCOL   *Pointer;
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
   APPLE_EVENT_HANDLE            AppleEventHandle;
   UINT32                        MaxX;
@@ -196,99 +194,6 @@ InternalUpdateStateSimpleAppleEvent (
 
 STATIC
 EFI_STATUS
-InternalUpdateStateSimplePointer (
-  IN OUT GUI_POINTER_CONTEXT  *Context,
-  OUT    GUI_POINTER_STATE    *State
-  )
-{
-  EFI_STATUS               Status;
-  EFI_SIMPLE_POINTER_STATE PointerState;
-  INT64                    InterpolatedX;
-  INT64                    InterpolatedY;
-
-  ASSERT (Context->Pointer != NULL);
-
-  Status = Context->Pointer->GetState (Context->Pointer, &PointerState);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
-
-  InterpolatedX = DivS64x64Remainder (
-    InternalGetInterpolatedValue (PointerState.RelativeMovementX),
-    Context->Pointer->Mode->ResolutionX,
-    NULL
-    );
-  InterpolatedY = DivS64x64Remainder (
-    InternalGetInterpolatedValue (PointerState.RelativeMovementY),
-    Context->Pointer->Mode->ResolutionY,
-    NULL
-    );
-
-  if (InterpolatedX == 0) {
-    if (PointerState.RelativeMovementX > 0) {
-      InterpolatedX = 1;
-    } else if (PointerState.RelativeMovementX < 0) {
-      InterpolatedX = -1;
-    }
-  }
-
-  if (InterpolatedY == 0) {
-    if (PointerState.RelativeMovementY > 0) {
-      InterpolatedY = 1;
-    } else if (PointerState.RelativeMovementY < 0) {
-      InterpolatedY = -1;
-    }
-  }
-
-  Context->X = InternalClipPointerSimple (
-    Context->X,
-    InterpolatedX,
-    Context->MaxX
-    );
-  State->X = Context->X;
-
-  Context->Y = InternalClipPointerSimple (
-    Context->Y,
-    InterpolatedY,
-    Context->MaxY
-    );
-  State->Y = Context->Y;
-
-  State->PrimaryDown   = PointerState.LeftButton;
-  State->SecondaryDown = PointerState.RightButton;
-
-  return EFI_SUCCESS;
-}
-
-STATIC
-EFI_STATUS
-InternalUpdateStateSimple (
-  IN OUT GUI_POINTER_CONTEXT  *Context,
-  OUT    GUI_POINTER_STATE    *State
-  )
-{
-  ASSERT (Context != NULL);
-  ASSERT (State != NULL);
-
-  if (Context->AppleEvent != NULL) {
-    return InternalUpdateStateSimpleAppleEvent (
-      Context,
-      State
-      );
-  }
-
-  if (Context->Pointer != NULL) {
-    return InternalUpdateStateSimplePointer (
-      Context,
-      State
-      );
-  }
-
-  return EFI_UNSUPPORTED;
-}
-
-STATIC
-EFI_STATUS
 InternalUpdateStateAbsolute (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
@@ -339,14 +244,9 @@ GuiPointerReset (
   IN OUT GUI_POINTER_CONTEXT  *Context
   )
 {
-  EFI_SIMPLE_POINTER_STATE   SimpleState;
   EFI_ABSOLUTE_POINTER_STATE AbsoluteState;
 
   ASSERT (Context != NULL);
-
-  if (Context->Pointer != NULL) {
-    Context->Pointer->GetState (Context->Pointer, &SimpleState);
-  }
 
   if (Context->AbsPointer != NULL) {
     Context->AbsPointer->GetState (Context->AbsPointer, &AbsoluteState);
@@ -372,7 +272,7 @@ GuiPointerGetState (
   switch (Context->LockedBy) {
     case PointerUnlocked:
     {
-      Status = InternalUpdateStateSimple (Context, State);
+      Status = InternalUpdateStateSimpleAppleEvent (Context, State);
       if (!EFI_ERROR (Status)
        && (State->PrimaryDown || State->SecondaryDown)) {
         Context->LockedBy = PointerLockedSimple;
@@ -394,7 +294,7 @@ GuiPointerGetState (
 
     case PointerLockedSimple:
     {
-      Status = InternalUpdateStateSimple (Context, State);
+      Status = InternalUpdateStateSimpleAppleEvent (Context, State);
       if (!EFI_ERROR (Status)
        && !State->PrimaryDown && !State->SecondaryDown) {
         Context->LockedBy = PointerUnlocked;
@@ -489,16 +389,8 @@ GuiPointerConstruct (
         Context.AppleEvent->Revision,
         Status
         ));
-      Context.AppleEvent = NULL;
+      return NULL;
     }
-  }
-
-  if (EFI_ERROR (Status)) {
-    Status = OcHandleProtocolFallback (
-      gST->ConsoleInHandle,
-      &gEfiSimplePointerProtocolGuid,
-      (VOID **)&Context.Pointer
-      );
   }
 
   Status2 = OcHandleProtocolFallback (
@@ -520,12 +412,8 @@ GuiPointerDestruct (
   )
 {
   ASSERT (Context != NULL);
+  ASSERT (Context->AppleEvent != NULL);
 
-  if (Context->AppleEvent != NULL) {
-    Context->AppleEvent->UnregisterHandler (
-      Context->AppleEventHandle
-      );
-  }
-
+  Context->AppleEvent->UnregisterHandler (Context->AppleEventHandle);
   ZeroMem (Context, sizeof (*Context));
 }
