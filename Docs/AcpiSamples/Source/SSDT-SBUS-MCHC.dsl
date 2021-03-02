@@ -4,14 +4,14 @@
 DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
 {
     External (_SB_.PCI0, DeviceObj)
-    External (_SB_.PCI0.SBUS, DeviceObj)
+    External (_SB_.PCI0.SAT0, DeviceObj)
 
     Scope (_SB.PCI0)
     {
         Device (MCHC)
         {
             Name (_ADR, Zero)  // _ADR: Address
-            Method (_STA, 0, NotSerialized)  // _STA: Status
+            Method (_STA, 0, NotSerialized)  // _STA: StatusPCI0.SAT0
             {
                 If (_OSI ("Darwin"))
                 {
@@ -25,7 +25,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "MCHCSBUS", 0x00000000)
         }
     }
 
-    Device (_SB.PCI0.SBUS.BUS0)
+    Device (_SB.PCI0.SAT0.BUS0)
     {
         Name (_CID, "smbus")  // _CID: Compatible ID
         Name (_ADR, Zero)  // _ADR: Address
