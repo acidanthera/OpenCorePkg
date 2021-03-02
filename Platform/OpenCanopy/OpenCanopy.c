@@ -47,7 +47,6 @@ STATIC GUI_KEY_CONTEXT               *mKeyContext       = NULL;
 //
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL *mScreenBuffer     = NULL;
 STATIC UINT32                        mScreenBufferDelta = 0;
-STATIC GUI_SCREEN_CURSOR             mScreenViewCursor  = { 0, 0 };
 //
 // Frame timing information (60 FPS)
 //
@@ -685,20 +684,15 @@ GuiRedrawPointer (
   ASSERT (DrawContext != NULL);
 
   ASSERT (DrawContext->GetCursorImage != NULL);
-  CursorImage = DrawContext->GetCursorImage (
-                               &mScreenViewCursor,
-                               DrawContext->GuiContext
-                               );
+  CursorImage = DrawContext->GetCursorImage (DrawContext->GuiContext);
   ASSERT (CursorImage != NULL);
   //
   // Poll the current cursor position late to reduce input lag.
   //
   GuiPointerGetState (mPointerContext, &PointerState);
-  mScreenViewCursor.X = PointerState.X;
-  mScreenViewCursor.Y = PointerState.Y;
 
-  ASSERT (mScreenViewCursor.X < DrawContext->Screen->Width);
-  ASSERT (mScreenViewCursor.Y < DrawContext->Screen->Height);
+  ASSERT (PointerState.X < DrawContext->Screen->Width);
+  ASSERT (PointerState.Y < DrawContext->Screen->Height);
 
   //
   // Unconditionally draw the cursor to increase frametime consistency and
@@ -718,14 +712,14 @@ GuiRedrawPointer (
   //
   // Draw the new cursor at the new position.
   //
-  MaxWidth  = MIN (CursorImage->Width, DrawContext->Screen->Width - mScreenViewCursor.X);
-  MaxHeight = MIN (CursorImage->Height, DrawContext->Screen->Height - mScreenViewCursor.Y);
+  MaxWidth  = MIN (CursorImage->Width, DrawContext->Screen->Width - PointerState.X);
+  MaxHeight = MIN (CursorImage->Height, DrawContext->Screen->Height - PointerState.Y);
   GuiDrawToBuffer (
     CursorImage,
     0xFF,
     DrawContext,
-    mScreenViewCursor.X,
-    mScreenViewCursor.Y,
+    PointerState.X,
+    PointerState.Y,
     0,
     0,
     MaxWidth,
@@ -735,14 +729,14 @@ GuiRedrawPointer (
   // Queue a draw request for the newly drawn cursor.
   //
   GuiRequestDraw (
-    mScreenViewCursor.X,
-    mScreenViewCursor.Y,
+    PointerState.X,
+    PointerState.Y,
     MaxWidth,
     MaxHeight
     );
 
-  CursorOldX = mScreenViewCursor.X;
-  CursorOldY = mScreenViewCursor.Y;
+  CursorOldX = PointerState.X;
+  CursorOldY = PointerState.Y;
 }
 
 /**
@@ -932,9 +926,6 @@ GuiLibConstruct (
 
   mDeltaTscTarget =  DivU64x32 (OcGetTSCFrequency (), 60);
 
-  mScreenViewCursor.X = CursorDefaultX;
-  mScreenViewCursor.Y = CursorDefaultY;
-
   return EFI_SUCCESS;
 }
 
@@ -990,18 +981,17 @@ GuiViewInitialize (
 
 VOID
 GuiViewDeinitialize (
-  IN OUT    GUI_DRAWING_CONTEXT   *DrawContext
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  OUT    BOOT_PICKER_GUI_CONTEXT *GuiContext
   )
 {
-  ZeroMem (DrawContext, sizeof (*DrawContext));
-}
+  GUI_POINTER_STATE PointerState;
 
-CONST GUI_SCREEN_CURSOR *
-GuiViewCurrentCursor (
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
-  )
-{
-  return &mScreenViewCursor;
+  GuiPointerGetState (mPointerContext, &PointerState);
+  GuiContext->CursorDefaultX = PointerState.X;
+  GuiContext->CursorDefaultY = PointerState.Y;
+
+  ZeroMem (DrawContext, sizeof (*DrawContext));
 }
 
 VOID
@@ -1074,13 +1064,11 @@ GuiDrawLoop (
     GuiPointerReset (mPointerContext);
   }
   GuiKeyReset (mKeyContext);
+
   //
-  // Initialise default pointer state.
+  // Pointer state will be implicitly initialised on the first call in the loop.
   //
-  PointerState.X = mScreenViewCursor.X;
-  PointerState.Y = mScreenViewCursor.Y;
-  PointerState.PrimaryDown   = FALSE;
-  PointerState.SecondaryDown = FALSE;
+
   //
   // Main drawing loop, time and derieve sub-frequencies as required.
   //

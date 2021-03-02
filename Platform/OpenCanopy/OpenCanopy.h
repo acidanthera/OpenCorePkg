@@ -107,8 +107,7 @@ typedef struct GUI_SCREEN_CURSOR_ GUI_SCREEN_CURSOR;
 typedef
 CONST GUI_IMAGE *
 (*GUI_CURSOR_GET_IMAGE)(
-  IN OUT GUI_SCREEN_CURSOR       *This,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context
+  IN BOOT_PICKER_GUI_CONTEXT *Context
   );
 
 typedef
@@ -246,12 +245,8 @@ GuiViewInitialize (
 
 VOID
 GuiViewDeinitialize (
-  IN OUT GUI_DRAWING_CONTEXT   *DrawContext
-  );
-
-CONST GUI_SCREEN_CURSOR *
-GuiViewCurrentCursor (
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
+  IN OUT GUI_DRAWING_CONTEXT   *DrawContext,
+  OUT    BOOT_PICKER_GUI_CONTEXT *GuiContext
   );
 
 VOID

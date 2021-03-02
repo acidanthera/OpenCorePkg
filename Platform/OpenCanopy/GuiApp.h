@@ -119,8 +119,7 @@ BootPickerViewDeinitialize (
 
 CONST GUI_IMAGE *
 InternalGetCursorImage (
-  IN OUT GUI_SCREEN_CURSOR        *This,
-  IN     BOOT_PICKER_GUI_CONTEXT  *Context
+  IN BOOT_PICKER_GUI_CONTEXT  *Context
   );
 
 #endif // GUI_APP_H
