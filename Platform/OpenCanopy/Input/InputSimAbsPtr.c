@@ -110,12 +110,7 @@ InternalAppleEventNotification (
 
   Context = NotifyContext;
 
-  //
-  // Should not happen but just in case.
-  //
-  if ((Information->EventType & APPLE_ALL_MOUSE_EVENTS) == 0) {
-    return;
-  }
+  ASSERT ((Information->EventType & APPLE_ALL_MOUSE_EVENTS) != 0);
 
   EventType = Information->EventData.PointerEventType;
 
@@ -133,7 +128,7 @@ InternalAppleEventNotification (
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
     if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
       Context->PrimaryDown = TRUE;
-    } else if ((Information->EventType & APPLE_EVENT_TYPE_RIGHT_BUTTON) != 0) {
+    } else if ((EventType & APPLE_EVENT_TYPE_RIGHT_BUTTON) != 0) {
       Context->SecondaryDown = TRUE;
     }
   } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_UP) != 0) {
