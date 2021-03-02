@@ -30,7 +30,7 @@ then
 fi
 
 # Write MBR
-sudo fdisk -f boot0 -u /dev/rdisk"${N}"
+sudo fdisk -f boot0 -u /dev/rdisk"${N}" -y
 
 diskutil umount disk"${N}"s1
 sudo dd if=/dev/rdisk"${N}"s1 count=1  of=origbs
