@@ -66,11 +66,10 @@ GuiPointerReset (
 
 GUI_POINTER_CONTEXT *
 GuiPointerConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContext,
-  IN UINT32             DefaultX,
-  IN UINT32             DefaultY,
-  IN UINT32             Width,
-  IN UINT32             Height
+  IN UINT32  DefaultX,
+  IN UINT32  DefaultY,
+  IN UINT32  Width,
+  IN UINT32  Height
   );
 
 VOID
