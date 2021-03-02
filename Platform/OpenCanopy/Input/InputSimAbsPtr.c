@@ -39,60 +39,6 @@ enum {
 };
 
 STATIC
-UINT32
-InternalClipPointerSimple (
-  IN UINT32  OldCoord,
-  IN INT64   DeltaCoord,
-  IN UINT32  MaxCoord
-  )
-{
-  BOOLEAN Result;
-  INT64   NewCoord;
-
-  Result = OcOverflowAddS64 (OldCoord, DeltaCoord, &NewCoord);
-  if (!Result) {
-    if (NewCoord <= 0) {
-      return 0;
-    }
-
-    if (NewCoord > MaxCoord) {
-      return MaxCoord;
-    }
-
-    return (UINT32) NewCoord;
-  }
-
-  if (DeltaCoord < 0) {
-    return 0;
-  }
-
-  return MaxCoord;
-}
-
-STATIC
-INT64
-InternalGetInterpolatedValue (
-  IN INT32  Value
-  )
-{
-  INTN    Bit;
-
-  //
-  // For now this produces most natural speed.
-  //
-  STATIC CONST INT8 AccelerationNumbers[] = {2};
-
-  if (Value != 0) {
-    Bit = HighBitSet32 (ABS (Value));
-    return (INT64) Value * AccelerationNumbers[
-      MIN (Bit, (INTN) ARRAY_SIZE (AccelerationNumbers) - 1)
-      ];
-  }
-
-  return 0;
-}
-
-STATIC
 VOID
 EFIAPI 
 InternalAppleEventNotification (
@@ -104,7 +50,7 @@ InternalAppleEventNotification (
   GUI_POINTER_CONTEXT       *Context;
   INT32                     NewX;
   INT32                     NewY;
-  INT64                     Difference;
+  INT64                     NewCoord;
 
   Context = NotifyContext;
 
@@ -125,31 +71,40 @@ InternalAppleEventNotification (
   EventType = Information->EventData.PointerEventType;
 
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_MOVED) != 0) {
+    //
+    // Use a factor of 2 for pointer acceleration.
+    //
+
     NewX = Information->PointerPosition.Horizontal;
-    NewY = Information->PointerPosition.Vertical;
     if (NewX == 0 || (UINT32) NewX == Context->MaxX) {
       Context->CurState.X = (UINT32) NewX;
     } else {
-      Difference = InternalGetInterpolatedValue (NewX - Context->RawX);
-      Context->CurState.X = InternalClipPointerSimple (
-        Context->CurState.X,
-        Difference,
-        Context->MaxX
-        );
-    }
+      NewCoord = (INT64) Context->CurState.X + 2 * ((INT64) NewX - Context->RawX);
+      if (NewCoord < 0) {
+        NewCoord = 0;
+      } else if (NewCoord > Context->MaxX) {
+        NewCoord = Context->MaxX;
+      }
 
-    if (NewY == 0 || (UINT32) NewY == Context->MaxY) {
-      Context->CurState.Y = (UINT32) NewY;
-    } else {
-      Difference = InternalGetInterpolatedValue (NewY - Context->RawY);
-      Context->CurState.Y = InternalClipPointerSimple (
-        Context->CurState.Y,
-        Difference,
-        Context->MaxY
-        );
+      Context->CurState.X = (UINT32) NewCoord;
     }
 
     Context->RawX = NewX;
+
+    NewY = Information->PointerPosition.Vertical;
+    if (NewY == 0 || (UINT32) NewY == Context->MaxY) {
+      Context->CurState.Y = (UINT32) NewY;
+    } else {
+      NewCoord = (INT64) Context->CurState.Y + 2 * ((INT64) NewY - Context->RawY);
+      if (NewCoord < 0) {
+        NewCoord = 0;
+      } else if (NewCoord > Context->MaxY) {
+        NewCoord = Context->MaxY;
+      }
+
+      Context->CurState.Y = (UINT32) NewCoord;
+    }
+
     Context->RawY = NewY;
   }
 
