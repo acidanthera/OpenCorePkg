@@ -26,12 +26,10 @@ struct GUI_POINTER_CONTEXT_ {
   APPLE_EVENT_HANDLE            AppleEventHandle;
   UINT32                        MaxX;
   UINT32                        MaxY;
-  UINT32                        PrevX;
-  UINT32                        PrevY;
-  UINT32                        PrevRealX;
-  UINT32                        PrevRealY;
   UINT32                        X;
   UINT32                        Y;
+  INT32                         RawX;
+  INT32                         RawY;
   UINT8                         LockedBy;
   BOOLEAN                       PrimaryDown;
   BOOLEAN                       SecondaryDown;
@@ -107,6 +105,9 @@ InternalAppleEventNotification (
 {
   APPLE_POINTER_EVENT_TYPE  EventType;
   GUI_POINTER_CONTEXT       *Context;
+  INT32                     NewX;
+  INT32                     NewY;
+  INT64                     Difference;
 
   Context = NotifyContext;
 
@@ -115,8 +116,32 @@ InternalAppleEventNotification (
   EventType = Information->EventData.PointerEventType;
 
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_MOVED) != 0) {
-    Context->X = (UINT32) Information->PointerPosition.Horizontal;
-    Context->Y = (UINT32) Information->PointerPosition.Vertical;
+    NewX = Information->PointerPosition.Horizontal;
+    NewY = Information->PointerPosition.Vertical;
+    if (NewX == 0 || (UINT32) NewX == Context->MaxX) {
+      Context->X = (UINT32) NewX;
+    } else {
+      Difference = InternalGetInterpolatedValue (NewX - Context->RawX);
+      Context->X = InternalClipPointerSimple (
+        Context->X,
+        Difference,
+        Context->MaxX
+        );
+    }
+
+    if (NewY == 0 || (UINT32) NewY == Context->MaxY) {
+      Context->Y = (UINT32) NewY;
+    } else {
+      Difference = InternalGetInterpolatedValue (NewY - Context->RawY);
+      Context->Y = InternalClipPointerSimple (
+        Context->Y,
+        Difference,
+        Context->MaxY
+        );
+    }
+
+    Context->RawX = NewX;
+    Context->RawY = NewY;
   }
 
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
@@ -141,38 +166,14 @@ InternalUpdateStateSimpleAppleEvent (
   OUT    GUI_POINTER_STATE    *State
   )
 {
-  INT64    Difference;
-  INT32    PrevX;
-  INT32    PrevY;
-  EFI_TPL  OldTpl;
+  EFI_TPL OldTpl;
 
   ASSERT (Context->AppleEvent != NULL);
 
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
 
-  PrevX = (INT32) Context->PrevX;
-  PrevY = (INT32) Context->PrevY;  
-
-  Context->PrevX = Context->X;
-  Context->PrevY = Context->Y;
-
-  if (Context->X == 0 || Context->X == Context->MaxX) {
-    State->X = Context->X;
-  } else {
-    Difference = InternalGetInterpolatedValue ((INT32) Context->X - PrevX);
-    State->X   = InternalClipPointerSimple (Context->PrevRealX, Difference, Context->MaxX);
-  }
-
-  if (Context->Y == 0 || Context->Y == Context->MaxY) {
-    State->Y = Context->Y;    
-  } else {
-    Difference = InternalGetInterpolatedValue ((INT32) Context->Y - PrevY);
-    State->Y   = InternalClipPointerSimple (Context->PrevRealY, Difference, Context->MaxY);
-  }
-
-  Context->PrevRealX = State->X;
-  Context->PrevRealY = State->Y;
-
+  State->X             = Context->X;
+  State->Y             = Context->Y;
   State->PrimaryDown   = Context->PrimaryDown;
   State->SecondaryDown = Context->SecondaryDown;
 
@@ -315,14 +316,12 @@ GuiPointerConstruct (
   ASSERT (Width    <= MAX_INT32);
   ASSERT (Height   <= MAX_INT32);
 
-  Context.MaxX          = Width - 1;
-  Context.MaxY          = Height - 1;
-  Context.PrevX         = DefaultX;
-  Context.PrevY         = DefaultY;
-  Context.PrevRealX     = DefaultX;
-  Context.PrevRealY     = DefaultY;
-  Context.X             = DefaultX;
-  Context.Y             = DefaultY;
+  Context.MaxX = Width - 1;
+  Context.MaxY = Height - 1;
+  Context.X    = DefaultX;
+  Context.Y    = DefaultY;
+  Context.RawX = (INT32) DefaultX;
+  Context.RawY = (INT32) DefaultY;
 
   Status = OcHandleProtocolFallback (
     gST->ConsoleInHandle,
