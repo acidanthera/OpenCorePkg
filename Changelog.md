@@ -3,6 +3,9 @@ OpenCore Changelog
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
 - Reduced legacy boot install interaction effort
+- Increased OpenCanopy rendering performance
+- Reduced OpenCanopy mouse pointer input lag
+- Fixed that cursor bounds could be different from OpenCanopy's
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
