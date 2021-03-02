@@ -889,7 +889,6 @@ GuiLibConstruct (
 
   if ((PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
     mPointerContext = GuiPointerConstruct (
-      PickerContext,
       CursorDefaultX,
       CursorDefaultY,
       OutputInfo->HorizontalResolution,
