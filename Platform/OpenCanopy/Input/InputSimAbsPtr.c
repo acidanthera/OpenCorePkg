@@ -115,14 +115,8 @@ InternalAppleEventNotification (
   EventType = Information->EventData.PointerEventType;
 
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_MOVED) != 0) {
-    Context->X = MIN (
-      (UINT32) Information->PointerPosition.Horizontal,
-      Context->MaxX
-      );
-    Context->Y = MIN (
-      (UINT32) Information->PointerPosition.Vertical,
-      Context->MaxY
-      );
+    Context->X = (UINT32) Information->PointerPosition.Horizontal;
+    Context->Y = (UINT32) Information->PointerPosition.Vertical;
   }
 
   if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
