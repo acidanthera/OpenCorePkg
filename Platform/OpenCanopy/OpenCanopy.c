@@ -677,9 +677,10 @@ GuiRedrawPointer (
   STATIC UINT32 CursorOldX = 0;
   STATIC UINT32 CursorOldY = 0;
 
-  CONST GUI_IMAGE *CursorImage;
-  UINT32          MaxWidth;
-  UINT32          MaxHeight;
+  CONST GUI_IMAGE   *CursorImage;
+  UINT32            MaxWidth;
+  UINT32            MaxHeight;
+  GUI_POINTER_STATE PointerState;
 
   ASSERT (DrawContext != NULL);
 
@@ -689,6 +690,12 @@ GuiRedrawPointer (
                                DrawContext->GuiContext
                                );
   ASSERT (CursorImage != NULL);
+  //
+  // Poll the current cursor position late to reduce input lag.
+  //
+  GuiPointerGetState (mPointerContext, &PointerState);
+  mScreenViewCursor.X = PointerState.X;
+  mScreenViewCursor.Y = PointerState.Y;
 
   ASSERT (mScreenViewCursor.X < DrawContext->Screen->Width);
   ASSERT (mScreenViewCursor.Y < DrawContext->Screen->Height);
@@ -1084,8 +1091,6 @@ GuiDrawLoop (
       // Process pointer events.
       //
       GuiPointerGetState (mPointerContext, &PointerState);
-      mScreenViewCursor.X = PointerState.X;
-      mScreenViewCursor.Y = PointerState.Y;
 
       if (PointerState.PrimaryDown && HoldObject == NULL) {
         HoldObject = GuiObjDelegatePtrEvent (
