@@ -487,11 +487,9 @@ InternalContextConstruct (
 
 CONST GUI_IMAGE *
 InternalGetCursorImage (
-  IN OUT GUI_SCREEN_CURSOR       *This,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context
+  IN BOOT_PICKER_GUI_CONTEXT *Context
   )
 {
-  ASSERT (This != NULL);
   ASSERT (Context != NULL);
   //
   // ATTENTION: All images must have the same dimensions.

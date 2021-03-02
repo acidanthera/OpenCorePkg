@@ -1781,10 +1781,9 @@ BootPickerViewDeinitialize (
   IN OUT BOOT_PICKER_GUI_CONTEXT  *GuiContext
   )
 {
-  LIST_ENTRY               *ListEntry;
-  LIST_ENTRY               *NextEntry;
-  GUI_VOLUME_ENTRY         *BootEntry;
-  CONST GUI_SCREEN_CURSOR  *ScreenCursor;
+  LIST_ENTRY       *ListEntry;
+  LIST_ENTRY       *NextEntry;
+  GUI_VOLUME_ENTRY *BootEntry;
 
   ListEntry = mBootPicker.Hdr.Obj.Children.BackLink;
   ASSERT (ListEntry == &mBootPickerSelector.Hdr.Link);
@@ -1804,9 +1803,5 @@ BootPickerViewDeinitialize (
     ListEntry = NextEntry;
   }
 
-  ScreenCursor = GuiViewCurrentCursor (DrawContext);
-  GuiContext->CursorDefaultX = ScreenCursor->X;
-  GuiContext->CursorDefaultY = ScreenCursor->Y;
-
-  GuiViewDeinitialize (DrawContext);
+  GuiViewDeinitialize (DrawContext, GuiContext);
 }
