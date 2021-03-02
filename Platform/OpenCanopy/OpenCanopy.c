@@ -1068,6 +1068,13 @@ GuiDrawLoop (
   }
   GuiKeyReset (mKeyContext);
   //
+  // Initialise default pointer state.
+  //
+  PointerState.X = mScreenViewCursor.X;
+  PointerState.Y = mScreenViewCursor.Y;
+  PointerState.PrimaryDown   = FALSE;
+  PointerState.SecondaryDown = FALSE;
+  //
   // Main drawing loop, time and derieve sub-frequencies as required.
   //
   LastTsc = LoopStartTsc = mStartTsc = AsmReadTsc ();
@@ -1076,23 +1083,21 @@ GuiDrawLoop (
       //
       // Process pointer events.
       //
-      Status = GuiPointerGetState (mPointerContext, &PointerState);
-      if (!EFI_ERROR (Status)) {
-        mScreenViewCursor.X = PointerState.X;
-        mScreenViewCursor.Y = PointerState.Y;
+      GuiPointerGetState (mPointerContext, &PointerState);
+      mScreenViewCursor.X = PointerState.X;
+      mScreenViewCursor.Y = PointerState.Y;
 
-        if (HoldObject == NULL && PointerState.PrimaryDown) {
-          HoldObject = GuiObjDelegatePtrEvent (
-                          DrawContext->Screen,
-                          DrawContext,
-                          DrawContext->GuiContext,
-                          GuiPointerPrimaryDown,
-                          0,
-                          0,
-                          PointerState.X,
-                          PointerState.Y
-                          );
-        }
+      if (PointerState.PrimaryDown && HoldObject == NULL) {
+        HoldObject = GuiObjDelegatePtrEvent (
+                        DrawContext->Screen,
+                        DrawContext,
+                        DrawContext->GuiContext,
+                        GuiPointerPrimaryDown,
+                        0,
+                        0,
+                        PointerState.X,
+                        PointerState.Y
+                        );
       }
 
       if (HoldObject != NULL) {

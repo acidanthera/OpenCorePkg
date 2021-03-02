@@ -53,7 +53,7 @@ GuiOutputDestruct (
   IN GUI_OUTPUT_CONTEXT  *Context
   );
 
-EFI_STATUS
+VOID
 GuiPointerGetState (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
