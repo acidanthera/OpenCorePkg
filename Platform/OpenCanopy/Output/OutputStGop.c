@@ -34,14 +34,10 @@ InternalGuiOutputLocateGop (
     (VOID **) &Gop
     );
   if (EFI_ERROR (Status)) {
-    Status = gBS->LocateProtocol (
-      &gEfiGraphicsOutputProtocolGuid,
-      NULL,
-      (VOID **) &Gop
-      );
-    if (EFI_ERROR (Status)) {
-      return NULL;
-    }
+    //
+    // Do not fall back to other GOP instances to match AppleEvent.
+    //
+    return NULL;
   }
 
   return Gop;
