@@ -135,7 +135,7 @@ InternalAppleEventNotification (
 }
 
 STATIC
-EFI_STATUS
+VOID
 InternalUpdateStateSimpleAppleEvent (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
@@ -177,12 +177,10 @@ InternalUpdateStateSimpleAppleEvent (
   State->SecondaryDown = Context->SecondaryDown;
 
   gBS->RestoreTPL (OldTpl);
-
-  return EFI_SUCCESS;
 }
 
 STATIC
-EFI_STATUS
+VOID
 InternalUpdateStateAbsolute (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
@@ -197,12 +195,12 @@ InternalUpdateStateAbsolute (
   ASSERT (State != NULL);
 
   if (Context->AbsPointer == NULL) {
-    return EFI_UNSUPPORTED;
+    return;
   }
 
   Status = Context->AbsPointer->GetState (Context->AbsPointer, &PointerState);
   if (EFI_ERROR (Status)) {
-    return Status;
+    return;
   }
 
   NewX  = PointerState.CurrentX - Context->AbsPointer->Mode->AbsoluteMinX;
@@ -224,8 +222,6 @@ InternalUpdateStateAbsolute (
   //
   Context->X = (UINT32)NewX;
   Context->Y = (UINT32)NewY;
-
-  return EFI_SUCCESS;
 }
 
 VOID
@@ -244,38 +240,26 @@ GuiPointerReset (
   Context->LockedBy = PointerUnlocked;
 }
 
-EFI_STATUS
+VOID
 GuiPointerGetState (
   IN OUT GUI_POINTER_CONTEXT  *Context,
   OUT    GUI_POINTER_STATE    *State
   )
 {
-  EFI_STATUS Status;
-  EFI_STATUS Status2;
-
   ASSERT (Context != NULL);
   ASSERT (State != NULL);
-
-  Status = EFI_NOT_READY;
 
   switch (Context->LockedBy) {
     case PointerUnlocked:
     {
-      Status = InternalUpdateStateSimpleAppleEvent (Context, State);
-      if (!EFI_ERROR (Status)
-       && (State->PrimaryDown || State->SecondaryDown)) {
+      InternalUpdateStateSimpleAppleEvent (Context, State);
+      if ((State->PrimaryDown | State->SecondaryDown) != 0) {
         Context->LockedBy = PointerLockedSimple;
-        break;
-      }
-
-      Status2 = InternalUpdateStateAbsolute (Context, State);
-      if (!EFI_ERROR (Status2)) {
-        if (State->PrimaryDown || State->SecondaryDown) {
+      } else {
+        InternalUpdateStateAbsolute (Context, State);
+        if ((State->PrimaryDown | State->SecondaryDown) != 0) {
           Context->LockedBy = PointerLockedAbsolute;
         }
-
-        Status = Status2;
-        break;
       }
 
       break;
@@ -283,9 +267,8 @@ GuiPointerGetState (
 
     case PointerLockedSimple:
     {
-      Status = InternalUpdateStateSimpleAppleEvent (Context, State);
-      if (!EFI_ERROR (Status)
-       && !State->PrimaryDown && !State->SecondaryDown) {
+      InternalUpdateStateSimpleAppleEvent (Context, State);
+      if ((State->PrimaryDown | State->SecondaryDown) == 0) {
         Context->LockedBy = PointerUnlocked;
       }
 
@@ -294,9 +277,8 @@ GuiPointerGetState (
 
     case PointerLockedAbsolute:
     {
-      Status = InternalUpdateStateAbsolute (Context, State);
-      if (!EFI_ERROR (Status)
-       && !State->PrimaryDown && !State->SecondaryDown) {
+      InternalUpdateStateAbsolute (Context, State);
+      if ((State->PrimaryDown | State->SecondaryDown) == 0) {
         Context->LockedBy = PointerUnlocked;
       }
 
@@ -309,8 +291,6 @@ GuiPointerGetState (
       break;
     }
   }
-
-  return Status;
 }
 
 GUI_POINTER_CONTEXT *
