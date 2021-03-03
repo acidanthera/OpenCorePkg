@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.6.8
+- Switched to VS2019 toolchain for Windows builds
+
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
 - Added `OEM` values to `PlatformInfo` in `Automatic` mode

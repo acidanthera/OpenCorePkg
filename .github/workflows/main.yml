@@ -130,7 +130,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          choco install microsoft-build-tools visualcpp-build-tools make nasm zip --no-progress
+          choco install make nasm zip --no-progress
           choco install iasl --no-progress --version=2017.11.10
 
       - name: CI Bootstrap
