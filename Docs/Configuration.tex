@@ -115,9 +115,9 @@
 
 \section{Introduction}\label{introduction}
 
-This document provides information on the
+This document provides information on the format of the
 \href{https://github.com/acidanthera/OpenCorePkg}{OpenCore} user
-configuration file format used to set up the correct functioning of the macOS
+configuration file used to set up the correct functioning of the macOS
 operating system. It is to be read as the official clarification of expected
 OpenCore behaviour. All deviations, if found in published OpenCore releases,
 shall be considered to be documentation or implementation issues which should be
@@ -134,11 +134,11 @@ contain errors.
 
 Third-party articles, utilities, books, and similar, may be more useful for a wider audience as
 they could provide guide-like material. However, they are subject to their authors' preferences,
-tastes, misinterpretations of this document, and unavoidable obsolescence.
+misinterpretations of this document, and unavoidable obsolescence.
 In cases of using such sources, such as \href{https://dortania.github.io}{Dortania}'s
 \href{https://dortania.github.io/OpenCore-Install-Guide}{OpenCore Install Guide}
 and \href{https://dortania.github.io/getting-started}{related material},
-please refer back to this document on every decision made and re-evaluate potential consequences.
+please refer back to this document on every decision made and re-evaluate potential implications.
 
 Please note that regardless of the sources used, users are required to fully understand every
 OpenCore configuration option, and the principles behind them, before posting issues to the
@@ -279,7 +279,7 @@ with the full list available in
 \subsection{Configuration Processing}\label{configuration-processing}
 
 The \texttt{OC\ config} file is guaranteed to be processed at least once if found.
-Depending on OpenCore bootstrapping mechanism, the presence of multiple
+Subject to the OpenCore bootstrapping mechanism, the presence of multiple
 \texttt{OC\ config} files may lead to the reading of any of them. It is
 permissible for no \texttt{OC\ Config} file to be present on disk. In such cases,
 if the implementation does not abort the boot process, all values shall follow the
@@ -322,7 +322,7 @@ It is recommended, but not required, to abort loading malformed
 not present. For forward compatibility, it is recommended, but not required,
 for the implementation to warn about the use of \texttt{invalid\ values}.
 
-The recommended practice for interpreting \texttt{invalid\ values}
+The recommended approach to interpreting \texttt{invalid\ values}
 is to conform to the following convention where applicable:
 
 \begin{center}
@@ -800,11 +800,11 @@ such as \href{https://dortania.github.io/builds}{Dortania}, may also be useful.
 
 ACPI (Advanced Configuration and Power Interface) is an open standard to
 discover and configure computer hardware.
-The \href{https://uefi.org/specifications}{ACPI specification} define the
+The \href{https://uefi.org/specifications}{ACPI specification} defines
 standard tables (e.g.~\texttt{DSDT}, \texttt{SSDT}, \texttt{FACS}, \texttt{DMAR})
 and various methods (e.g. \texttt{\_DSM}, \texttt{\_PRW}) for implementation.
-Modern hardware needs little changes to maintain ACPI compatibility, yet
-some of those are provided as a part of OpenCore.
+Modern hardware needs few changes to maintain ACPI compatibility and some
+options for such changes are provided as part of OpenCore.
 
 To compile and disassemble ACPI tables, the \href{https://github.com/acpica/acpica}{iASL compiler}
 developed by \href{https://www.acpica.org}{ACPICA} can be used. A GUI front-end to iASL compiler
@@ -1060,8 +1060,8 @@ In most cases, ACPI patches are not useful and are harmful:
 \item
   Avoid patching \texttt{\_OSI} to support a higher feature set level
   whenever possible. While this enables a number of workarounds on APTIO
-  firmware, it typically results in a need for additional patches. Modern
-  firmware generally does not need this and smaller patches work well on
+  firmware, it typically results in a need for additional patches. These are
+  not usually needed on modern firmware and smaller patches work well on
   firmware that does. However, laptop vendors often rely on this method to
   determine the availability of functions such as modern I2C input support, thermal
   adjustment and custom feature additions.
@@ -1227,9 +1227,9 @@ should be met before starting:
 
 When debugging sleep issues, Power Nap and automatic power off (which appear to sometimes cause
 wake to black screen or boot loop issues on older platforms) may be temporarily disabled.
-The specific issues may vary, but generally ACPI tables should be looked at first.
+The specific issues may vary, but ACPI tables should typically be looked at first.
 
-Here is an example of a defect found in some
+Here is an example of a defect found on some
 \href{http://www.insanelymac.com/forum/topic/329624-need-cmos-reset-after-sleep-only-after-login/#entry2534645}{Z68 motherboards}.
 To turn Power Nap and the others off, run the following commands in Terminal:
 \begin{lstlisting}[label=powernap, style=ocbash]
@@ -1340,7 +1340,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \texttt{Identifier}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}:  \texttt{Any} (Match any booter)\\
-  \textbf{Description}: \texttt{Apple} for macOS booter (generally \texttt{boot.efi});
+  \textbf{Description}: \texttt{Apple} for macOS booter (typically \texttt{boot.efi});
   or a name with a suffix, such as \texttt{bootmgfw.efi}, for a specific booter.
 
 \item
@@ -1700,7 +1700,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
     \item They mark items in the memory attributes table as read-write-execute.
   \end{itemize}
 
-  This quirk tries to update memory map and memory attributes table to correct this.
+  This quirk attempts to update the memory map and memory attributes table to correct this.
 
   \emph{Note}: The need for this quirk is indicated by early boot failures.
   Only firmware released after 2017 is typically affected.
@@ -1870,7 +1870,7 @@ blocking.
   Designed to be filled with \texttt{plist\ dict} values, describing each driver.
   See the \hyperref[kernelpropsforce]{Force Properties} section below.
   This section resolves the problem of injecting drivers that depend on other
-  drivers, which are not cached otherwise. The issue normally affects older
+  drivers, which are not cached otherwise. The issue typically affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
   or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
   The kernel driver load order follows the item order in the array, thus the dependencies
@@ -2074,9 +2074,9 @@ blocking.
   (e.g. virtual machines). In this case, \texttt{MinKernel} and \texttt{MaxKernel} can be set to restrict CPU virtualisation and dummy power
   management patches to the particular macOS kernel version.
 
-  \emph{Note 2}: Normally it is only the value of \texttt{EAX} that needs to be taken care of,
-  since it represents the full CPUID. The remaining bytes are to be left as zeroes.
-  Byte order is Little Endian, so for example, \texttt{C3 06 03 00} stands for CPUID
+  \emph{Note 2}: Only the value of \texttt{EAX}, which represents the full CPUID,
+  typically needs to be accounted for and remaining bytes should be left as zeroes.
+  The byte order is Little Endian. For example, \texttt{C3 06 03 00} stands for CPUID
   \texttt{0x0306C3} (Haswell).
 
   \emph{Note 3}: For XCPM support it is recommended to use the following combinations.
@@ -2384,7 +2384,7 @@ blocking.
   \textbf{Description}: Disables multiple MSR access critical for certain CPUs,
   which have no native XCPM support.
 
-  This is normally used in conjunction with \texttt{Emulate} section on Haswell-E,
+  This is typically used in conjunction with the \texttt{Emulate} section on Haswell-E,
   Broadwell-E, Skylake-SP, and similar CPUs. More details on the XCPM patches are outlined in
   \href{https://github.com/acidanthera/bugtracker/issues/365}{acidanthera/bugtracker\#365}.
 
@@ -2695,7 +2695,7 @@ to install and troubleshoot such macOS installations.
   depends on many factors including not only the board identifier, but also the macOS
   product type (client vs server), macOS point release, and amount of RAM. The detection
   of all these is complicated and impractical, as several point releases had implementation
-  defects resulting in a failure to properly execute the server detection in the first place.
+  flaws resulting in a failure to properly execute the server detection in the first place.
   For this reason, OpenCore on macOS~10.6 falls back on the \texttt{x86\_64}
   architecture whenever it is supported by the board, as it is on macOS~10.7.
 
@@ -2736,7 +2736,7 @@ to install and troubleshoot such macOS installations.
 
   Different variants of macOS support different kernel caching variants designed to improve
   boot performance. This setting prevents the use of faster kernel caching variants
-  if slower variants are available for debugging and stability reasons. I.e., by
+  if slower variants are available for debugging and stability reasons. That is, by
   specifying \texttt{Mkext}, \texttt{Prelinked} will be disabled for e.g. 10.6 but not for 10.7.
 
   The list of available kernel caching types and its current support in OpenCore is listed below.
@@ -3052,16 +3052,16 @@ the default boot entry choice will remain changed until the next manual reconfig
   file). The BOOTx64.efi file is no longer used for bootstrapping OpenCore if a custom option is created.
   The custom path used for bootstrapping can be specified by using the \texttt{LauncherPath} option.
 
-  \emph{Note 1}: Some types of firmware may have defective NVRAM implementation, no boot option
-  support, or other incompatibilities. While unlikely, the use of this option may cause boot
-  failures and should only be used exclusively on the boards known to be compatible. Refer to
+  \emph{Note 1}: Some types of firmware may have NVRAM implementation flaws, no boot option
+  support, or other incompatibilities. While unlikely, the use of this option may result in
+  boot failures and should only be used exclusively on boards known to be compatible. Refer to
   \href{https://github.com/acidanthera/bugtracker/issues/1222}{acidanthera/bugtracker\#1222}
-  for some known issues with Haswell and other boards.
+  for some known issues affecting Haswell and other boards.
 
   \emph{Note 2}: While NVRAM resets executed from OpenCore would not typically erase the boot option
   created in \texttt{Bootstrap}, executing NVRAM resets prior to loading OpenCore will erase the boot
-  option. Therefore, for significant implementation updates (e.g. in OpenCore 0.6.4), an NVRAM reset
-  should be performed with \texttt{Bootstrap} disabled after which it can be reenabled.
+  option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4, 
+  an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
 
 \item
   \texttt{LauncherPath}\\
@@ -3176,8 +3176,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable \texttt{modifier hotkey} handling in the OpenCore picker.
 
-  In addition to \texttt{action hotkeys}, which are partially described in \texttt{PickerMode}
-  section and are normally handled by Apple BDS, modifier keys handled by the operating system
+  In addition to \texttt{action hotkeys}, which are partially described in the \texttt{PickerMode}
+  section and are typically handled by Apple BDS, modifier keys handled by the operating system
   bootloader (\texttt{boot.efi}) also exist. These keys allow changing the behaviour of the
   operating system by providing different boot modes.
 
@@ -4091,17 +4091,17 @@ rm vault.pub
 
 \subsection{Introduction}\label{nvramintro}
 
-Has \texttt{plist\ dict} type and allows to set volatile UEFI variables
-commonly referred as NVRAM variables. Refer to \texttt{man\ nvram} for
-more details. macOS extensively uses NVRAM variables for OS --- Bootloader
---- Firmware intercommunication, and thus supplying several NVRAM is
-required for proper macOS functioning.
+This section allows setting non-volatile UEFI variables commonly described
+as NVRAM variables. Refer to \texttt{man\ nvram} for more details.
+The macOS operating system extensively uses NVRAM variables for OS --- Bootloader
+--- Firmware intercommunication. Hence, the supply of several NVRAM variables
+is required for the proper functioning of macOS.
 
 Each NVRAM variable consists of its name, value, attributes (refer to
 UEFI specification), and its
 \href{https://en.wikipedia.org/wiki/Universally_unique_identifier}{GUID},
-representing which `section' NVRAM variable belongs to. macOS uses
-several GUIDs, including but not limited to:
+representing which `section' the NVRAM variable belongs to. The macOS
+operating system makes use of several GUIDs, including but not limited to:
 
 \begin{itemize}
 \tightlist
@@ -4119,23 +4119,23 @@ several GUIDs, including but not limited to:
   (\texttt{OC\_VENDOR\_VARIABLE\_GUID})
 \end{itemize}
 
-\emph{Note}: Some of the variables may be added by
+\emph{Note}: Some of the variables may be added by the
 \hyperref[platforminfonvram]{PlatformNVRAM} or
-\hyperref[platforminfogeneric]{Generic} subsections of
+\hyperref[platforminfogeneric]{Generic} subsections of the
 \hyperref[platforminfo]{PlatformInfo} section.
-Please ensure that variables of this section never collide with them,
-as behaviour is undefined otherwise.
+Please ensure that variables set in this section do not conflict with items
+in those subsections as the implementation behaviour is undefined otherwise.
 
-For proper macOS functioning it is often required to use \texttt{OC\_FIRMWARE\_RUNTIME}
-protocol implementation currently offered as a part of \texttt{OpenRuntime} driver.
-While it brings any benefits, there are certain limitations which arise depending on the
-use.
+The \texttt{OC\_FIRMWARE\_RUNTIME} protocol implementation, currently offered
+as a part of the \texttt{OpenRuntime} driver, is often required for macOS to
+function properly. While this brings many benefits, there are some
+limitations that should be considered for certain use cases.
 
 \begin{enumerate}
 \item Not all tools may be aware of protected namespaces.\\
-  When \texttt{RequestBootVarRouting} is used \texttt{Boot}-prefixed variable access
-  is restricted and protected in a separate namespace. To access the original variables
-  tools have to be aware of \texttt{OC\_FIRMWARE\_RUNTIME} logic.
+  When \texttt{RequestBootVarRouting} is used, \texttt{Boot}-prefixed variable access
+  is restricted and protected in a separate namespace. To access the original variables,
+  tools must be aware of the \texttt{OC\_FIRMWARE\_RUNTIME} logic.
 \end{enumerate}
 
 \subsection{Properties}\label{nvramprops}
@@ -4149,15 +4149,13 @@ use.
   in \texttt{plist\ multidata} format. GUIDs must be provided in canonic string
   format in upper or lower case (e.g. \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}).
 
-  Created variables get \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and
-  \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS} attributes set.
-  Variables will only be set if not present or deleted. I.e. to overwrite
-  an existing variable value add the variable name to the \texttt{Delete} section.
-  This approach enables to provide default values till the operating system
-  takes the lead.
+  The \texttt{EFI\_VARIABLE\_BOOTSERVICE\_ACCESS} and \texttt{EFI\_VARIABLE\_RUNTIME\_ACCESS}
+  attributes of created variables are set. Variables will only be set if not present or deleted.
+  That is, to overwrite an existing variable value, add the variable name to the \texttt{Delete} section.
+  This approach enables the provision of default values until the operating system takes the lead.
 
-  \emph{Note}: If \texttt{plist\ key} does not conform to GUID format,
-  behaviour is undefined.
+  \emph{Note}: The implementation behaviour is undefined when the \texttt{plist\ key}
+  does not conform to the GUID format.
 
 \item
   \texttt{Delete}\\
@@ -4170,10 +4168,10 @@ use.
   \texttt{LegacyEnable}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables loading of NVRAM variable file named \texttt{nvram.plist}
+  \textbf{Description}: Enables loading a NVRAM variable file named \texttt{nvram.plist}
   from EFI volume root.
 
-  This file must have root \texttt{plist\ dictionary} type and contain two fields:
+  This file must have a root \texttt{plist\ dictionary} type and contain two fields:
   \begin{itemize}
   \tightlist
   \item \texttt{Version} --- \texttt{plist\ integer}, file version, must be set to 1.
@@ -4181,17 +4179,18 @@ use.
   \texttt{config.plist}.
   \end{itemize}
 
-  Variable loading happens prior to \texttt{Delete} (and \texttt{Add}) phases. Unless
+  Variable loading happens prior to the \texttt{Delete} (and \texttt{Add}) phases. Unless
   \texttt{LegacyOverwrite} is enabled, it will not overwrite any existing variable.
   Variables allowed to be set must be specified in \texttt{LegacySchema}.
+
   Third-party scripts may be used to create \texttt{nvram.plist}
   file. An example of such script can be found in \texttt{Utilities}. The use of third-party
   scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
-  \texttt{boot-path} variable with OpenCore EFI partition UUID.
+  \texttt{boot-path} variable with the OpenCore EFI partition UUID.
 
-  \textbf{Warning}: This feature is very dangerous as it passes unprotected data to
-  firmware variable services. Use it only when no hardware NVRAM implementation is provided
-  by the firmware or it is incompatible.
+  \textbf{Warning}: This feature can be dangerous, as it passes unprotected data to
+  firmware variable services. Only use when no hardware NVRAM implementation is
+  provided by the firmware or when the NVRAM implementation is incompatible.
 
 \item
   \texttt{LegacyOverwrite}\\
@@ -4210,9 +4209,9 @@ use.
 
   \texttt{*} value can be used to accept all variables for certain GUID.
 
-  \textbf{WARNING}: Choose variables very carefully, as nvram.plist is not vaulted.
-  For instance, do not put \texttt{boot-args} or \texttt{csr-active-config}, as
-  this can bypass SIP.
+  \textbf{WARNING}: Choose variables carefully, as the nvram.plist file is not vaulted.
+  For instance, do not include \texttt{boot-args} or \texttt{csr-active-config}, as
+  these can be used to bypass SIP.
 
 \item
   \texttt{WriteFlash}\\
@@ -4220,14 +4219,14 @@ use.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enables writing to flash memory for all added variables.
 
-  \emph{Note}: It is recommended to have this value enabled on most types of firmware but it is
-  left configurable for firmware that may have issues with NVRAM variable storage
-  garbage collection or similar.
+  \emph{Note}: This value should be enabled on most types of firmware but is
+  left configurable to account for firmware that may have issues with NVRAM
+  variable storage garbage collection or similar.
 
 \end{enumerate}
 
-To read NVRAM variable value from macOS, \texttt{nvram} could be used
-by concatenating GUID and name variables separated by a \texttt{:} symbol.
+The \texttt{nvram} command can be used to read NVRAM variable values from macOS
+by concatenating the GUID and name variables separated by a \texttt{:} symbol.
 For example, \texttt{nvram 7C436110-AB2A-4BBB-A880-FE41995C9F82:boot-args}.
 
 A continuously updated variable list can be found in a corresponding document:
@@ -4235,9 +4234,9 @@ A continuously updated variable list can be found in a corresponding document:
 
 \subsection{Mandatory Variables}\label{nvramvars}
 
-\textbf{Warning}: These variables may be added by
+\textbf{Warning}: These variables may be added by the
 \hyperref[platforminfonvram]{PlatformNVRAM} or
-\hyperref[platforminfogeneric]{Generic} subsections of
+\hyperref[platforminfogeneric]{Generic} subsections of the
 \hyperref[platforminfo]{PlatformInfo} section.
 Using \texttt{PlatformInfo} is the recommended way of setting these variables.
 
@@ -4493,10 +4492,9 @@ troubleshooting:
   and this is the default value.
   \end{itemize}
 
-  \emph{Note}: To see verbose output from \texttt{boot.efi} on modern macOS versions
-  enable \texttt{AppleDebug} option. This will save the log to general OpenCore log.
-  For versions before 10.15.4 set \texttt{bootercfg} to \texttt{log=1}. This will
-  print verbose output onscreen.
+  \emph{Note}: Enable the \texttt{AppleDebug} option to display verbose output from \texttt{boot.efi}
+  on modern macOS versions. This will save the log to the general OpenCore log file. For versions before
+  10.15.4, set \texttt{bootercfg} to \texttt{log=1}. This will print verbose output onscreen.
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
@@ -4504,8 +4502,9 @@ troubleshooting:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break
   Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
-  memory and is pointed by \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
-  variables. Starting from 10.15.4 it can also be saved to OpenCore log by \texttt{AppleDebug} option.
+  memory and is pointed to by the \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
+  variables. Starting from 10.15.4, it can also be saved to the OpenCore log by setting the
+  \texttt{AppleDebug} option.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:fmm-computer-name}
   \break
@@ -4539,7 +4538,7 @@ troubleshooting:
 
 \section{PlatformInfo}\label{platforminfo}
 
-Platform information is comprised of several identification fields
+Platform information consists of several identification fields
 generated or filled manually to be compatible with macOS services. The
 base part of the configuration may be obtained from
 \href{https://github.com/acidanthera/OpenCorePkg/blob/master/AppleModels}{\texttt{AppleModels}},
@@ -4568,9 +4567,9 @@ manual, where all the values are specified (the default), and semi-automatic,
 where (\texttt{Automatic}) only certain values are specified, and later used
 for system configuration.
 
-To inspect SMBIOS contents \href{http://www.nongnu.org/dmidecode}{dmidecode} utility can
-be used. Version with macOS specific enhancements can be downloaded from
-\href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidecode}.
+The \href{http://www.nongnu.org/dmidecode}{dmidecode} utility can be used to inspect
+SMBIOS contents and a version with macOS specific enhancements can be downloaded
+from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidecode}.
 
 \subsection{Properties}\label{platforminfoprops}
 
@@ -4579,8 +4578,8 @@ be used. Version with macOS specific enhancements can be downloaded from
   \texttt{Automatic}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Generate PlatformInfo based on \texttt{Generic}
-  section instead of using values from \texttt{DataHub}, \texttt{NVRAM},
+  \textbf{Description}: Generate PlatformInfo based on the \texttt{Generic}
+  section instead of using values from the \texttt{DataHub}, \texttt{NVRAM},
   and \texttt{SMBIOS} sections.
 
   Enabling this option is useful when \texttt{Generic} section is flexible
@@ -4592,11 +4591,11 @@ be used. Version with macOS specific enhancements can be downloaded from
   \item When disabled \texttt{Generic} section is unused.
   \end{itemize}
 
-  \textbf{Warning}: It is strongly discouraged to set this option to \texttt{false}
-  when intending to update platform information. The only reason to do so is if
-  making minor corrections to SMBIOS values on legacy Apple hardware. In all other
-  cases setting \texttt{Automatic} to \texttt{false} may lead to hard to debug errors,
-  due to inconsistent or invalid settings.
+  \textbf{Warning}: Setting this option to \texttt{false} is strongly discouraged when
+  intending to update platform information. A \texttt{false} setting is typically only
+  valid for minor corrections to SMBIOS values on legacy Apple hardware. In all other
+  cases, setting \texttt{Automatic} to \texttt{false} may lead to hard-to-debug errors
+  resulting from inconsistent or invalid settings.
 
 \item
   \texttt{CustomMemory}\\
@@ -4612,36 +4611,36 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update Data Hub fields. These fields are read
-  from \texttt{Generic} or \texttt{DataHub} sections depending on
-  \texttt{Automatic} value.
+  from the \texttt{Generic} or \texttt{DataHub} sections depending on
+  the setting of the \texttt{Automatic} property.
 
   \emph{Note}: The implementation of the Data Hub protocol in EFI firmware on
-  essentially all systems, including Apple hardware, means that existing Data Hub
-  entries cannot be overridden, while new entries are added to the end with
-  macOS ignoring them. This can be worked around by reinstalling the Data Hub
-  protocol using the \texttt{ProtocolOverrides} section. Refer to the
-  \texttt{DataHub} protocol override description for details.
+  virtually all systems, including Apple hardware, means that existing Data Hub
+  entries cannot be overridden. New entries are added to the end of the Data Hub
+  instead, with macOS ignoring old entries. This can be worked around by
+  replacing the Data Hub protocol using the \texttt{ProtocolOverrides} section.
+  Refer to the \texttt{DataHub} protocol override description for details.
 \item
   \texttt{UpdateNVRAM}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Update NVRAM fields related to platform information.
 
-  These fields are read from \texttt{Generic} or \texttt{PlatformNVRAM} sections
-  depending on \texttt{Automatic} value. All the other fields are
-  to be specified with \texttt{NVRAM} section.
+  These fields are read from the \texttt{Generic} or \texttt{PlatformNVRAM}
+  sections depending on the setting of the \texttt{Automatic} property.
+  All the other fields are to be specified with the \texttt{NVRAM} section.
 
-  If \texttt{UpdateNVRAM} is set to \texttt{false} the aforementioned
-  variables can be updated with \hyperref[nvram]{\texttt{NVRAM}}
-  section. If \texttt{UpdateNVRAM} is set to \texttt{true} the behaviour is
-  undefined when any of the fields are present in \texttt{NVRAM} section.
+  If \texttt{UpdateNVRAM} is set to \texttt{false}, the aforementioned
+  variables can be updated with the \hyperref[nvram]{\texttt{NVRAM}}
+  section. If \texttt{UpdateNVRAM} is set to \texttt{true}, the behaviour is
+  undefined when any of the fields are present in the \texttt{NVRAM} section.
 \item
   \texttt{UpdateSMBIOS}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Update SMBIOS fields. These fields are read from
+  \textbf{Description}: Update SMBIOS fields. These fields are read from the
   \texttt{Generic} or \texttt{SMBIOS} sections depending on
-  \texttt{Automatic} value.
+  the setting of the \texttt{Automatic} property.
 \item
   \texttt{UpdateSMBIOSMode}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -4671,8 +4670,8 @@ be used. Version with macOS specific enhancements can be downloaded from
     done automatically by \texttt{CustomSMBIOSGuid} quirk.
   \end{itemize}
 
-  \emph{Note}: A side effect of using \texttt{Custom} approach is making
-  SMBIOS updates exclusive to macOS, avoiding a collision with existing
+  \emph{Note}: A side effect of using the \texttt{Custom} approach that it
+  makes SMBIOS updates exclusive to macOS, avoiding a collision with existing
   Windows activation and custom OEM software but potentially obstructing
   the operation of Apple-specific tools.
 \item
@@ -4696,28 +4695,29 @@ be used. Version with macOS specific enhancements can be downloaded from
       (\texttt{\{DD CC BB AA FF EE HH GG II JJ KK LL MM NN OO PP\}}).
   \end{itemize}
 
-  SMBIOS specification did not explicitly specify the encoding format for the
+  The SMBIOS specification did not explicitly specify the encoding format for the
   UUID up to SMBIOS 2.6, where it stated that \texttt{Little Endian} encoding
   shall be used. This led to the confusion in both firmware implementations
   and system software as different vendors used different encodings prior to that.
 
   \begin{itemize}
     \tightlist
-    \item Apple uses \texttt{Big Endian} format everywhere but it ignores SMBIOS UUID within macOS.
-    \item \texttt{dmidecode} uses \texttt{Big Endian} format for SMBIOS 2.5.x or lower
-    and \texttt{Little Endian} for 2.6 and newer. Acidanthera
-    \href{https://github.com/acidanthera/dmidecode}{dmidecode} prints all the three.
-    \item Windows uses \texttt{Little Endian} format everywhere, but it only affects
+    \item Apple uses the \texttt{Big Endian} format everywhere but it ignores SMBIOS UUID within macOS.
+    \item \texttt{dmidecode} uses the \texttt{Big Endian} format for SMBIOS 2.5.x or lower
+    and the \texttt{Little Endian} format for 2.6 and newer. Acidanthera
+    \href{https://github.com/acidanthera/dmidecode}{dmidecode} prints all three.
+    \item Windows uses the \texttt{Little Endian} format everywhere, but this only affects
     the visual representation of the values.
   \end{itemize}
 
   OpenCore always sets a recent SMBIOS version (currently 3.2) when generating
-  the modified DMI tables. If \texttt{UseRawUuidEncoding} is enabled, then \texttt{Big Endian}
-  format is used to store the \texttt{SystemUUID} data. Otherwise, \texttt{Little Endian} is used.
+  the modified DMI tables. If \texttt{UseRawUuidEncoding} is enabled, the \texttt{Big Endian}
+  format is used to store the \texttt{SystemUUID} data. Otherwise, the \texttt{Little Endian}
+  format is used.
 
-  \emph{Note}: Since UUIDs used in DataHub and NVRAM are not standardised
-  and are added by Apple, this preference does not affect them. Unlike
-  SMBIOS they are always stored in the \texttt{Big Endian} format.
+  \emph{Note}: This preference does not affect UUIDs used in DataHub and NVRAM
+  as they are not standardised and are added by Apple. Unlike SMBIOS, they are
+  always stored in the \texttt{Big Endian} format.
 
 \item
   \texttt{Generic}\\
@@ -4765,7 +4765,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Sets SMBIOS vendor fields to \texttt{Acidanthera}.
 
-  It is dangerous to use Apple in SMBIOS vendor fields for reasons given in the
+  It can be dangerous to use ``Apple'' in SMBIOS vendor fields for reasons outlined in the
   \texttt{SystemManufacturer} description. However, certain firmware may not provide
   valid values otherwise, which could obstruct the operation of some software.
 
@@ -4779,11 +4779,11 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   \begin{itemize}
     \item \texttt{FW\_FEATURE\_SUPPORTS\_CSM\_LEGACY\_MODE} (\texttt{0x1})
-    - Without this bit it is not possible to reboot to Windows installed on
-      a drive with EFI partition being not the first partition on the disk.
+    - Without this bit, it is not possible to reboot to Windows installed on
+      a drive with an EFI partition that is not the first partition on the disk.
     \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
-    - Without this bit it is not possible to reboot to Windows installed on
-      a drive with EFI partition being the first partition on the disk.
+    - Without this bit, it is not possible to reboot to Windows installed on
+      a drive with an EFI partition that is the first partition on the disk.
   \end{itemize}
 
 \item
@@ -4791,7 +4791,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Sets \texttt{BIOSVersion} to \texttt{9999.999.999.999.999}, recommended for legacy
-  Macs when using \texttt{Automatic} PlatformInfo to avoid BIOS updates in unofficially supported macOS
+  Macs when using \texttt{Automatic} PlatformInfo, to avoid BIOS updates in unofficially supported macOS
   versions.
 
 \item
@@ -4799,7 +4799,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Indicates whether system memory is upgradable in \texttt{PlatformFeature}.
-  This controls the visibility of the Memory tab in About This Mac.
+  This controls the visibility of the Memory tab in ``About This Mac''.
 
   Valid values:
 
@@ -4973,8 +4973,7 @@ be used. Version with macOS specific enhancements can be downloaded from
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Sets \texttt{InitialTSC} in
-  \texttt{gEfiProcessorSubClassGuid}. Sets initial TSC value, normally
-  0.
+  \texttt{gEfiProcessorSubClassGuid}. Sets initial TSC value, normally 0.
 \item
   \texttt{FSBFrequency}\\
   \textbf{Type}: \texttt{plist\ integer}, 64-bit\\
@@ -4998,7 +4997,7 @@ be used. Version with macOS specific enhancements can be downloaded from
 
   This value contains CPU ART frequency, also known as crystal clock frequency.
   Its existence is exclusive to the Skylake generation and newer. The value is specified
-  in Hz, and is normally 24 MHz for client Intel segment, 25 MHz for server Intel segment,
+  in Hz, and is normally 24 MHz for the client Intel segment, 25 MHz for the server Intel segment,
   and 19.2 MHz for Intel Atom CPUs. macOS till 10.15 inclusive assumes 24 MHz by default.
 
   \emph{Note}: On Intel Skylake X ART frequency may be a little less (approx. 0.25\%) than
@@ -5583,13 +5582,13 @@ Apple ROM Version
   \texttt{ProcessorType}\\
   \textbf{Description}: Combined of Processor Major and Minor types.
 
-  Automatic value generation tries to provide most accurate value for
-  the currently installed CPU. When this fails please make sure to create
-  an \href{https://github.com/acidanthera/bugtracker/issues}{issue} and
+  Automatic value generation attempts to provide the most accurate value for
+  the currently installed CPU. When this fails, please raise an
+  \href{https://github.com/acidanthera/bugtracker/issues}{issue} and
   provide \texttt{sysctl machdep.cpu} and
   \href{https://github.com/acidanthera/dmidecode}{\texttt{dmidecode}} output.
   For a full list of available values and their limitations (the value will
-  only apply if the CPU core count matches) refer to Apple SMBIOS definitions header
+  only apply if the CPU core count matches), refer to the Apple SMBIOS definitions header
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleSmBios.h}{here}.
 \end{enumerate}
 
@@ -5599,14 +5598,14 @@ Apple ROM Version
 
 \href{https://uefi.org/specifications}{UEFI} (Unified Extensible Firmware Interface)
 is a specification that defines a software interface between an operating system and
-platform firmware. This section allows to load additional UEFI modules and/or apply
-tweaks for the onboard firmware. To inspect firmware contents, apply modifications
+platform firmware. This section allows loading additional UEFI modules as well as applying
+tweaks to the onboard firmware. To inspect firmware contents, apply modifications
 and perform upgrades \href{https://github.com/LongSoft/UEFITool/releases}{UEFITool}
 and supplementary utilities can be used.
 
 \subsection{Drivers}\label{uefidrivers}
 
-Depending on the firmware a different set of drivers may be required.
+Depending on the firmware, a different set of drivers may be required.
 Loading an incompatible driver may lead the system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
@@ -5693,9 +5692,8 @@ build -a X64 -b RELEASE -t XCODE5 -p MdeModulePkg/MdeModulePkg.dsc
 \subsection{Tools and Applications}\label{uefitools}
 
 Standalone tools may help to debug firmware and hardware. Some of the known tools are listed below.
-While some tools can be launched from within OpenCore, see more details in
-the \hyperref[misctools]{Tools} subsection of the configuration, most should be run
-separately either directly or from \texttt{Shell}.
+While some tools can be launched from within OpenCore (Refer to the \hyperref[misctools]{Tools} subsection
+for more details), most should be run separately either directly or from \texttt{Shell}.
 
 To boot into OpenShell or any other tool directly save \texttt{OpenShell.efi}
 under the name of \texttt{EFI\textbackslash BOOT\textbackslash BOOTX64.EFI}
@@ -5956,9 +5954,9 @@ functioning. Feature highlights:
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
-  describing memory areas exquisite to particular firmware and hardware functioning,
-  which should not be used by the operating system. An example of such memory region
-  could be second 256 MB corrupted by Intel HD 3000 or an area with faulty RAM.
+  describing memory areas exclusive to specific firmware and hardware functioning,
+  which should not be used by the operating system. Examples of such memory regions
+  could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
   See the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
 
 \end{enumerate}
@@ -5973,10 +5971,10 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Load embedded APFS drivers from APFS containers.
 
-  APFS EFI driver is bundled in all bootable APFS containers. This
-  option performs loading of signed APFS drivers with respect to
-  \texttt{ScanPolicy}. See more details in ``EFI Jumpstart'' section of
-  \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference}.
+  An APFS EFI driver is bundled in all bootable APFS containers. This
+  option performs the loading of signed APFS drivers (consistent with the
+  \texttt{ScanPolicy}). Refer to the ``EFI Jumpstart'' section of the
+  \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference} for more details.
 
 
 \item
@@ -5985,10 +5983,10 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Perform full device connection during APFS loading.
 
-  Instead of partition handle connection normally used for APFS driver loading
-  every handle is connected recursively. This may take more time than usual
-  but can be the only way to access APFS partitions on some types of firmware such as
-  those on older HP laptops.
+  Every handle is connected recursively instead of the partition handle connection
+  typically used for APFS driver loading. This may result in additional time being
+  taken but can sometimes be the only way to access APFS partitions on certain
+  firmware, such as those on older HP laptops.
 
 \item
   \texttt{HideVerbose}\\
@@ -6004,9 +6002,8 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Load APFS drivers for newly connected devices.
 
-  Performs APFS driver loading not only at OpenCore startup but also
-  during the OpenCore picker. This permits APFS USB hot plug. Disable
-  if not required.
+  Permits APFS USB hot plug which enables loading APFS drivers, both at OpenCore
+  startup and during OpenCore picker dusplay. Disable if not required.
 
 \item
   \texttt{MinDate}\\
@@ -6014,10 +6011,11 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Minimal allowed APFS driver date.
 
-  APFS driver date connects APFS driver with the calendar
-  release date. Older versions of APFS drivers may contain unpatched
-  vulnerabilities, which can be used to inflict harm to the computer.
-  This option permits restricting APFS drivers to only recent releases.
+  The APFS driver date connects the APFS driver with the calendar release date.
+  Apple ultimately drops support for older macOS releases and APFS drivers from
+  such releases may contain vulnerabilities that can be used to compromise
+  a computer if such drivers are used after support ends. This option
+  permits restricting APFS drivers to current macOS versions.
 
   \begin{itemize}
     \tightlist
@@ -6036,11 +6034,11 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Minimal allowed APFS driver version.
 
-  APFS driver version connects APFS driver with the macOS
-  release. APFS drivers from older macOS releases will become
-  unsupported and thus may contain unpatched vulnerabilities, which
-  can be used to inflict harm to the computer. This option permits
-  restricting APFS drivers to only modern macOS versions.
+  The APFS driver version connects the APFS driver with the macOS release.
+  Apple ultimately drops support for older macOS releases and APFS drivers from
+  such releases may contain vulnerabilities that can be used to compromise
+  a computer if such drivers are used after support ends. This option
+  permits restricting APFS drivers to current macOS versions.
 
   \begin{itemize}
     \tightlist
@@ -6067,14 +6065,14 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Codec address on the specified audio controller for audio support.
 
-  Normally this contains first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
+  This typically contains the first audio codec address on the builtin analog audio controller (\texttt{HDEF}).
   Audio codec addresses, e.g. \texttt{2}, can be found in the debug log (marked in bold-italic):
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,\textit{\textbf{00000000}}) (4 outputs)}\\
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,\textit{\textbf{00000000}}) (1 outputs)}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,\textit{\textbf{02000000}}) (7 outputs)}
 
-  As an alternative this value can be obtained from \texttt{IOHDACodecDevice} class in I/O Registry
+  As an alternative, this value can be obtained from \texttt{IOHDACodecDevice} class in I/O Registry
   containing it in \texttt{IOHDACodecAddress} field.
 
 \item
@@ -6083,7 +6081,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Device path of the specified audio controller for audio support.
 
-  Normally this contains builtin analog audio controller (\texttt{HDEF}) device path,
+  This typically contains builtin analog audio controller (\texttt{HDEF}) device path,
   e.g. \texttt{PciRoot(0x0)/Pci(0x1b,0x0)}. The list of recognised audio controllers can be
   found in the debug log (marked in bold-italic):
 
@@ -6091,8 +6089,8 @@ functioning. Feature highlights:
   \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
   \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
-  As an alternative \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying empty device
-  path will result in the first available audio controller to be used.
+  As an alternative, \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying an empty device
+  path will result in the first available audio controller being used.
 
 \item
   \texttt{AudioOut}\\
@@ -6100,7 +6098,7 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Index of the output port of the specified codec starting from 0.
 
-  Normally this contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
+  This typically contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
   The number of output nodes (\texttt{N}) in the debug log (marked in bold-italic):
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textit{\textbf{4 outputs}})}\\
@@ -6125,9 +6123,9 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Minimal heard volume level from \texttt{0} to \texttt{100}.
 
-  Screen reader will use this volume level, when the calculated volume level is
-  less than \texttt{MinimumVolume}. Boot chime sound will not play if the calculated
-  volume level is less than \texttt{MinimumVolume}.
+  The screen reader will use this volume level when the calculated volume level is lower
+  than \texttt{MinimumVolume} and the boot chime will not play if the calculated
+  volume level is lower than \texttt{MinimumVolume}.
 
 \item
   \texttt{PlayChime}\\
@@ -6135,9 +6133,9 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Play chime sound at startup.
 
-  Enabling this setting plays boot chime through builtin audio support. Volume level
-  is determined by \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings and
-  \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
+  Enabling this setting plays the boot chime using the builtin audio support. The volume
+  level is determined by the \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings
+  as well as the \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
 
   \begin{itemize}
     \tightlist
@@ -6148,7 +6146,7 @@ functioning. Feature highlights:
   \end{itemize}
 
   \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
-  NVRAM variable to avoid conflicts when the firmware is able to play boot chime.
+  NVRAM variable to avoid conflicts when the firmware is able to play the boot chime.
 
 \item
   \texttt{ResetTrafficClass}\\
@@ -6219,20 +6217,20 @@ functioning. Feature highlights:
   we use a timeout to remove once pressed keys from the buffer once the timeout
   expires and no new submission of this key happened.
 
-  This option allows to set this timeout based on the platform. The recommended
-  value that works on the majority of the platforms is \texttt{5} milliseconds.
+  This option allows setting this timeout based on the platform. The recommended
+  value for the majority of platforms is \texttt{5} milliseconds.
   For reference, holding one key on VMware will repeat it roughly every \texttt{2}
-  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus
+  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus,
   it is possible to set a slightly lower value on faster platforms
-  and slightly higher value on slower platforms for more responsive input.
+  and a slightly higher value on slower platforms for more responsive input.
 
   Pressing keys one after the other results in delays of at least \texttt{6} and
   \texttt{10} milliseconds for the same platforms.
 
-  \emph{Note}: Some platforms may require different values, higher or lower.
-  For example, when detecting key misses in OpenCanopy try increasing this value
+  \emph{Note}: Some platforms may require different values, which may be higher or lower.
+  For example, when detecting key misses in OpenCanopy, try increasing this value
   (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
-  Since every platform is different it may be reasonable to check every value
+  Since every platform is different, it may be prudent to check every value
   from \texttt{1} to \texttt{25}.
 
 \item
@@ -6244,8 +6242,8 @@ functioning. Feature highlights:
 
   This option activates the internal keyboard interceptor driver, based on
   \texttt{AppleGenericInput}, also known as \texttt{AptioInputFix}, to fill
-  \texttt{AppleKeyMapAggregator} database for input functioning. In case
-  a separate driver is used, such as \texttt{OpenUsbKbDxe}, this option
+  the \texttt{AppleKeyMapAggregator} database for input functioning. In cases
+  where a separate driver such as \texttt{OpenUsbKbDxe} is used, this option
   should never be enabled.
 
 \item
@@ -6302,8 +6300,8 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Set architecture timer resolution.
 
-  This option allows to update firmware architecture timer period with the specified value
-  in \texttt{100} nanosecond units. Setting a lower value generally improves performance
+  This option allows updating the firmware architecture timer period with the specified value
+  in \texttt{100} nanosecond units. Setting a lower value typically improves performance
   and responsiveness of the interface and input handling.
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
@@ -6330,7 +6328,7 @@ functioning. Feature highlights:
   a different set of options. It is recommended to use \texttt{Builtin}
   renderer, as it supports HiDPI mode and uses full screen resolution.
 
-  UEFI firmware generally supports \texttt{ConsoleControl} with two
+  UEFI firmware typically supports \texttt{ConsoleControl} with two
   rendering modes: \texttt{Graphics} and \texttt{Text}. Some types of firmware
   do not support \texttt{ConsoleControl} and rendering modes. OpenCore
   and macOS expect text to only be shown in \texttt{Graphics} mode and
@@ -6357,9 +6355,9 @@ functioning. Feature highlights:
     system \texttt{ConsoleControl} assuming it behaves correctly.
   \end{itemize}
 
-  The use of \texttt{BuiltinGraphics} is generally straightforward.
-  For most platforms it is necessary to enable \texttt{ProvideConsoleGop},
-  set \texttt{Resolution} to \texttt{Max}. \texttt{BuiltinText} variant is
+  The use of \texttt{BuiltinGraphics} is straightforward.
+  For most platforms, it is necessary to enable \texttt{ProvideConsoleGop}
+  and set \texttt{Resolution} to \texttt{Max}. The \texttt{BuiltinText} variant is
   an alternative \texttt{BuiltinGraphics} for some very old and defective
   laptop firmware, which can only draw in \texttt{Text} mode.
 
@@ -6546,18 +6544,18 @@ functioning. Feature highlights:
   \textbf{Description}: Replaces Apple audio protocols with builtin
   versions.
 
-  Apple audio protocols allow macOS bootloader and OpenCore to play
+  Apple audio protocols allow OpenCore and the macOS bootloader to play
   sounds and signals for screen reading or audible error reporting.
-  Supported protocols are beep generation and VoiceOver. VoiceOver protocol
+  Supported protocols are beep generation and VoiceOver. The VoiceOver protocol
   is specific to Gibraltar machines (T2) and is not supported before
-  macOS High Sierra (10.13). Instead older macOS versions use AppleHDA protocol,
-  which is currently not implemented.
+  macOS High Sierra (10.13). Older macOS versions use the AppleHDA protocol
+  (which is not currently implemented) instead.
 
-  Only one set of audio protocols can be available at a time, so in order
-  to get audio playback in OpenCore user interface on Mac system implementing some
-  of these protocols this setting should be enabled.
+  Only one set of audio protocols can be available at a time, so this setting should
+  be enabled in order to enable audio playback in the OpenCore user interface on Mac
+  systems implementing some of these protocols.
 
-  \emph{Note}: Backend audio driver needs to be configured in \texttt{UEFI Audio}
+  \emph{Note}: The backend audio driver needs to be configured in \texttt{UEFI Audio}
   section for these protocols to be able to stream audio.
 
 \item
@@ -6644,7 +6642,7 @@ functioning. Feature highlights:
   \textbf{Description}: Replaces the Apple SMC I/O protocol with a builtin
   version.
 
-  This protocol replaces legacy \texttt{VirtualSmc} UEFI driver, and is compatible
+  This protocol replaces the legacy \texttt{VirtualSmc} UEFI driver, and is compatible
   with any SMC kernel extension. However, in case \texttt{FakeSMC} kernel extension
   is used, manual NVRAM key variable addition may be needed.
 
@@ -6662,8 +6660,8 @@ functioning. Feature highlights:
   \textbf{Description}: Replaces the Data Hub protocol with a builtin version.
 
   \emph{Note}: This will discard all previous entries if the protocol was already
-  installed, so all properties required for safe operation of the system must be
-  specified in your configuration.
+  installed, so all properties required for the safe operation of the system must
+  be specified in the configuration file.
 
 \item
   \texttt{DeviceProperties}\\
@@ -6674,17 +6672,17 @@ functioning. Feature highlights:
 
   \emph{Note}: This will discard all previous entries if the protocol was already
   installed, so all properties required for safe operation of the system must be
-  specified in your configuration.
+  specified in the configuration file.
 
 \item
   \texttt{FirmwareVolume}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Wraps Firmware Volume protocols or installs a new version
+  \textbf{Description}: Wraps Firmware Volume protocols, or installs a new version,
   to support custom cursor images for FileVault 2. Set to \texttt{true} to ensure
   FileVault 2 compatibility on anything other than on VMs and legacy Macs.
 
-  \emph{Note}: Several virtual machines including VMware may have corrupted
+  \emph{Note}: Several virtual machines, including VMware, may have corrupted
   cursor images in HiDPI mode and thus, may also require enabling this setting.
 
 \item
@@ -6905,11 +6903,11 @@ functioning. Feature highlights:
 
 \subsection{Legacy Apple OS}\label{legacyapple}
 
-Older operating systems may be more complicated to install, but sometimes can
-be necessary to use for all kinds of reasons. While a compatible board identifier
+Older operating systems may be more complicated to install, but are sometimes
+necessary for various reasons. While a compatible board identifier
 and CPUID are the obvious requirements for proper functioning of an older
 operating system, there are many other less obvious things to consider.
-This section tries to cover a common set of issues relevant to installing
+This section covers a common set of issues relevant to installing
 older macOS operating systems.
 
 While newer operating systems can be downloaded over the internet,
@@ -6923,8 +6921,8 @@ However, as this may not always be accurate, the latest versions are listed belo
 \subsubsection{macOS 10.8 and 10.9}\label{legacy108}
 
 \begin{itemize}
-  \item Disk images on these systems use Apple Partitioning Scheme
-    and require \texttt{OpenPartitionDxe} driver to run DMG recovery
+  \item Disk images on these systems use the Apple Partitioning Scheme
+    and require the \texttt{OpenPartitionDxe} driver to run DMG recovery
     and installation (included in OpenDuet). It is possible to set
     \texttt{DmgLoading} to \texttt{Disabled} to run the recovery
     without DMG loading avoiding the need for \texttt{OpenPartitionDxe}.
@@ -7158,11 +7156,11 @@ requires several steps and careful configuration of certain settings as explaine
   from Windows as this often leads to irrecoverable data loss.
   \end{itemize}
 
-  \textbf{Why do I see \texttt{Basic data partition} in Boot Camp Startup Disk control panel?}
+  \textbf{Why do I see \texttt{Basic data partition} in the Boot Camp Startup Disk control panel?}
 
-  Boot Camp control panel uses GPT partition table to obtain each boot option name.
-  After installing Windows separately the partition will have to be relabelled manually.
-  This can be done with many utilities including open-source
+  The Boot Camp control panel uses the GPT partition table to obtain each boot option name.
+  After installing Windows separately, the partition has to be relabelled manually.
+  This can be done with many utilities including the open-source
   \href{https://sourceforge.net/projects/gptfdisk}{gdisk} utility. Reference example:
 
 \begin{lstlisting}[caption=Relabeling Windows volume, label=relabel, style=ocbash]
@@ -7200,12 +7198,12 @@ The operation has completed successfully.
 \end{lstlisting}
 
 
-  \textbf{How to choose Windows BOOTCAMP with custom NTFS drivers?}
+  \textbf{How do I choose Windows BOOTCAMP with custom NTFS drivers?}
 
   Third-party drivers providing NTFS support, such as
   \href{https://www.tuxera.com/community/open-source-ntfs-3g}{NTFS-3G}, Paragon NTFS,
   Tuxera NTFS or \href{https://www.seagate.com/support/software/paragon}{Seagate Paragon Driver}
-  disrupt certain macOS functionality, including
+  disrupt certain macOS functionality, including the
   \href{https://support.apple.com/HT202796}{Startup Disk} preference
   pane normally used for operating system selection. While the recommended option
   remains not to use such drivers as they commonly corrupt the filesystem, and prefer
@@ -7248,10 +7246,9 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
 
 \begin{enumerate}
 \item
-  \textbf{How to debug boot failure?}
+  \textbf{How do I debug boot failures?}
 
-  Normally it is enough to obtain the actual error message. For this
-  ensure that:
+  Obtaining the actual error message is usually adequate. For this, ensure that:
   \begin{itemize}
   \tightlist
   \item A \texttt{DEBUG} or \texttt{NOOPT} version of OpenCore is used.
@@ -7279,7 +7276,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   early debug messages.
 
 \item
-  \textbf{How to debug macOS boot failure?}
+  \textbf{How do I debug macOS boot failures?}
 
   \begin{itemize}
   \tightlist
@@ -7294,7 +7291,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \end{itemize}
 
 \item
-  \textbf{How to customise boot entries?}
+  \textbf{How do I customise boot entries?}
 
   OpenCore follows standard Apple Bless model and extracts the entry name
   from \texttt{.contentDetails} and \texttt{.disk\_label.contentDetails} files in the
@@ -7302,7 +7299,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   which may then be customised by the user.
 
 \item
-  \textbf{How to choose the default boot entry?}
+  \textbf{How do I choose the default boot entry?}
 
   OpenCore uses the primary UEFI boot option to select the default entry. This choice
   can be altered from UEFI Setup, with the macOS
