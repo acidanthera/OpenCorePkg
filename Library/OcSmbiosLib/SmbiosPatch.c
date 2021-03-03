@@ -133,7 +133,9 @@ SmbiosGetFormFactor (
       // Try to use the original value if valid first.
       //
       return Original.Standard.Type17->FormFactor;
-    } else if (Data->MemoryFormFactor != NULL) {
+    }
+
+    if (Data->MemoryFormFactor != NULL) {
       //
       // If not, use the value from database.
       //
@@ -145,7 +147,9 @@ SmbiosGetFormFactor (
       // Under non-Automatic mode, simply use the value from config.
       //
       return *Data->MemoryFormFactor;
-    } else if (SmbiosHasValidOemFormFactor (Original)) {
+    }
+
+    if (SmbiosHasValidOemFormFactor (Original)) {
       //
       // If the value is not available from config, then try to use the original value.
       //
