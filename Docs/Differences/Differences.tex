@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Mar  2 02:14:46 2021
-%DIF ADD ../Configuration.tex        Tue Mar  2 02:16:34 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
+%DIF ADD ../Configuration.tex        Wed Mar  3 14:39:18 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5158,7 +5158,14 @@ be used. Version with macOS specific enhancements can be downloaded from
   factors are listed below.
 
   When \texttt{CustomMemory} is \texttt{false}, this value is automatically set
-  based on Mac product name.
+  based on Mac product name\DIFaddbegin \DIFadd{.
+}
+
+  \DIFadd{When }\texttt{\DIFadd{Automatic}} \DIFadd{is }\texttt{\DIFadd{true}}\DIFadd{, the original value from the the corresponding Mac model will be set if available.
+  Otherwise, the value from }\texttt{\DIFadd{OcMacInfoLib}} \DIFadd{will be set.
+  When }\texttt{\DIFadd{Automatic}} \DIFadd{is }\texttt{\DIFadd{false}}\DIFadd{, a user-specified value will be set if available.
+  Otherwise, the original value from the firmware will be set.
+  If no value is provided, the fallback value (}\texttt{\DIFadd{zero}}\DIFadd{) will be set}\DIFaddend .
 
   \begin{itemize}
   \tightlist
