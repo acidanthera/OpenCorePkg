@@ -105,6 +105,62 @@ SmbiosGetOriginalStructureCount (
   return SmbiosGetStructureCount (mOriginalTable, mOriginalTableSize, Type);
 }
 
+STATIC
+BOOLEAN
+SmbiosHasValidOemFormFactor (
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Original
+  )
+{
+  return Original.Raw != NULL
+    && SMBIOS_ACCESSIBLE (Original, Standard.Type17->FormFactor)
+    && Original.Standard.Type17->FormFactor != 0;
+}
+
+STATIC
+UINT8
+SmbiosGetFormFactor (
+  IN  OC_SMBIOS_DATA                  *Data,
+  IN  APPLE_SMBIOS_STRUCTURE_POINTER  Original
+  )
+{
+  BOOLEAN  IsAutomatic;
+
+  IsAutomatic = !Data->ForceMemoryFormFactor;
+
+  if (IsAutomatic) {
+    //
+    // Try to use the original value if valid first.
+    //
+    if (SmbiosHasValidOemFormFactor (Original)) {
+      return Original.Standard.Type17->FormFactor;
+    }
+    //
+    // If not, use the value from database.
+    //
+    if (Data->MemoryFormFactor != NULL) {
+      return *Data->MemoryFormFactor;
+    }
+  }
+
+  //
+  // Under non-Automatic mode, simply use the value from config.
+  //
+  if (Data->MemoryFormFactor != NULL) {
+    return *Data->MemoryFormFactor;
+  }
+  //
+  // If the value is not available from config, then try to use the original value.
+  //
+  if (SmbiosHasValidOemFormFactor (Original)) {
+    return Original.Standard.Type17->FormFactor;
+  }
+
+  //
+  // If not valid at all, fall back to zero.
+  //
+  return 0;
+}
+
 /** Type 0
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
@@ -755,10 +811,12 @@ PatchMemoryDevice (
 {
   UINT8    MinLength;
   UINT8    StringIndex;
+  UINT8    FormFactor;
 
   *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type17);
   StringIndex   = 0;
+  FormFactor    = SmbiosGetFormFactor (Data, Original);
 
   if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_MEMORY_DEVICE, MinLength, Index))) {
     return;
@@ -770,7 +828,7 @@ PatchMemoryDevice (
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->TotalWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DataWidth, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Size, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type17->FormFactor, Original, Data->MemoryFormFactor, NULL);
+  SMBIOS_OVERRIDE_V (Table, Standard.Type17->FormFactor, Original, &FormFactor, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->DeviceSet, Original, NULL, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->DeviceLocator, Original, NULL, &StringIndex, NULL);
   SMBIOS_OVERRIDE_S (Table, Standard.Type17->BankLocator, Original, NULL, &StringIndex, NULL);

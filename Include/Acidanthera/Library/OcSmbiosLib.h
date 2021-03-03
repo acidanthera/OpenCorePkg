@@ -97,6 +97,10 @@ typedef struct OC_SMBIOS_DATA_ {
   CONST UINT16                  *MemoryDataWidth;
   OC_SMBIOS_MEMORY_DEVICE_DATA  *MemoryDevices;
   CONST UINT8                   *MemoryFormFactor;
+  //
+  // Forcibly override MemoryFormFactor on non-Automatic mode when TRUE.
+  //
+  BOOLEAN                       ForceMemoryFormFactor;
   CONST UINT16                  *MemoryTotalWidth;
   CONST UINT8                   *MemoryType;
   CONST UINT16                  *MemoryTypeDetail;
