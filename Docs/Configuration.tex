@@ -2813,6 +2813,7 @@ The algorithm to determine boot options behaves as follows:
   % Scan policy restrictions are actually checked here as we want the function to be self-contained
   % for non-scan based startup.
   \item Perform fixups (e.g. NVMe subtype correction) and expansion (e.g. for Boot Camp) of the device path.
+  \item On failure, if it is an OpenCore custom entry device path, pre-construct the corresponding custom entry and succeed.
   \item Obtain the device handle by locating the device path of the resulting device path (ignore it on failure).
   \item Locate the device handle in the list of partition handles (ignore it if missing).
   % To determine device path type we can use LocateDevicePath RemainingDevicePath argument.
@@ -2838,7 +2839,7 @@ The algorithm to determine boot options behaves as follows:
   \item Lookup alternate entries by ``bless'' recovery option list retrieval and predefined paths.
   \item Register the resulting entries as alternate auxiliary options and determine their types if found.
   \end{itemize}
-\item Custom entries and tools are added as primary options without any checks with respect to \texttt{Auxiliary}.
+\item Custom entries and tools, except such pre-constructed previously, are added as primary options without any checks with respect to \texttt{Auxiliary}.
 \item System entries, such as \texttt{Reset NVRAM}, are added as primary auxiliary options.
 \end{enumerate}
 
