@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Wed Mar  3 15:04:41 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar  3 13:01:22 2021
+%DIF ADD ../Configuration.tex        Wed Mar  3 13:04:50 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2661,9 +2661,11 @@ blocking.
   \textbf{Description}: Patch various kexts (AppleUSBXHCI.kext, AppleUSBXHCIPCI.kext,
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
-  \emph{Note}: This option should be avoided whenever possible and may no longer
-  \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} in macOS 11.
-  USB port limit is imposed by the amount of used bits in locationID format and there is no
+  \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
+\DIFdel{in macOS 11.
+  }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
+  is imposed by the amount of used bits in locationID format and there is no
   possible way to workaround this without heavy OS modification. The only
   valid solution is to limit the amount of used ports to 15 (discarding some).
   More details can be found on \href{https://applelife.ru/posts/550233}{AppleLife.ru}.
