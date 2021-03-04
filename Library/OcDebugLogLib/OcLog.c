@@ -208,13 +208,10 @@ OcLogAddEntry  (
     // Write to serial port.
     //
     if ((OcLog->Options & OC_LOG_SERIAL) != 0) {
-      Status = SerialPortWrite ((UINT8 *) Private->TimingTxt, TimingLength);
-      if (Status == EFI_NO_MAPPING) {
-        //
-        // Disable serial port option.
-        //
-        OcLog->Options &= ~OC_LOG_SERIAL;
-      }
+      //
+      // No return value check - SerialPortWrite either stalls or falsely return all bytes written if no serial available.
+      //
+      SerialPortWrite ((UINT8 *) Private->TimingTxt, TimingLength);
       SerialPortWrite ((UINT8 *) Private->LineBuffer, LineLength);
     }
 
