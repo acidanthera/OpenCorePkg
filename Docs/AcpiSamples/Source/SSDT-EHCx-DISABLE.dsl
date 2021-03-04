@@ -11,7 +11,7 @@
  * WARN: for some motherboards you need to use either "EH1D = One" or "EH2D = One" but not both!
  * This is because for some motherboards, device (EHC1 or EHC2) is used by macOS. Check the IOReg.
  */
-DefinitionBlock ("", "SSDT", 2, "ACDT", "EHCx_OFF", 0x00001000)
+DefinitionBlock ("", "SSDT", 2, "ACDT", "NOEHCx", 0x00001000)
 {
     Scope (\)
     {
