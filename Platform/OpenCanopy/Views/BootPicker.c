@@ -1596,13 +1596,11 @@ InternalBootPickerAnimateSinMov (
 {
   STATIC UINT32 PrevSine = 0;
 
-  INT64  OldOffsetX;
   UINT32 InterpolVal;
   UINT32 DeltaSine;
 
   ASSERT (DrawContext != NULL);
 
-  OldOffsetX = mBootPicker.Hdr.Obj.OffsetX;
   InterpolVal = GuiGetInterpolatedValue (&mBpAnimInfoSinMove, CurrentTime);
   DeltaSine = InterpolVal - PrevSine;
   mBootPicker.Hdr.Obj.OffsetX -= DeltaSine;
