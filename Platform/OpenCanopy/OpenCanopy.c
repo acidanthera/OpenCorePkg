@@ -58,6 +58,9 @@ STATIC UINT64                        mStartTsc          = 0;
 STATIC UINT8                         mNumValidDrawReqs  = 0;
 STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 
+STATIC UINT32 mCursorOldX = 0;
+STATIC UINT32 mCursorOldY = 0;
+
 #define PIXEL_TO_UINT32(Pixel)  \
   ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
 
@@ -673,9 +676,6 @@ GuiRedrawPointer (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  STATIC UINT32 CursorOldX = 0;
-  STATIC UINT32 CursorOldY = 0;
-
   CONST GUI_IMAGE   *CursorImage;
   UINT32            MaxWidth;
   UINT32            MaxHeight;
@@ -698,17 +698,10 @@ GuiRedrawPointer (
   // Unconditionally draw the cursor to increase frametime consistency and
   // prevent situational hiding.
   //
+  // The original area of the cursor is restored at the beginning of the main
+  // drawing loop.
+  //
 
-  //
-  // Restore the rectangle previously covered by the cursor.
-  //
-  GuiDrawScreen (
-    DrawContext,
-    CursorOldX,
-    CursorOldY,
-    CursorImage->Width,
-    CursorImage->Height
-    );
   //
   // Draw the new cursor at the new position.
   //
@@ -735,8 +728,8 @@ GuiRedrawPointer (
     MaxHeight
     );
 
-  CursorOldX = PointerState.X;
-  CursorOldY = PointerState.Y;
+  mCursorOldX = PointerState.X;
+  mCursorOldY = PointerState.Y;
 }
 
 /**
@@ -1053,6 +1046,8 @@ GuiDrawLoop (
   UINT64              LastTsc;
   UINT64              NewLastTsc;
 
+  CONST GUI_IMAGE     *CursorImage;
+
   ASSERT (DrawContext != NULL);
 
   mNumValidDrawReqs = 0;
@@ -1076,6 +1071,23 @@ GuiDrawLoop (
   LastTsc = LoopStartTsc = mStartTsc = AsmReadTsc ();
   do {
     if (mPointerContext != NULL) {
+      //
+      // TODO: Put cursor dimensions in some context?
+      //
+      ASSERT (DrawContext->GetCursorImage != NULL);
+      CursorImage = DrawContext->GetCursorImage (DrawContext->GuiContext);
+      ASSERT (CursorImage != NULL);
+      //
+      // Restore the rectangle previously covered by the cursor.
+      // The new cursor is drawn right before flushing the screen.
+      //
+      GuiDrawScreen (
+        DrawContext,
+        mCursorOldX,
+        mCursorOldY,
+        CursorImage->Width,
+        CursorImage->Height
+        );
       //
       // Process pointer events.
       //
