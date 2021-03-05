@@ -30,30 +30,30 @@ APPLE_KEY_MAP_AGGREGATOR_PROTOCOL;
 // KEY_MAP_GET_KEY_STROKES
 /** Returns all pressed keys and key modifiers into the appropiate buffers.
 
-  @param[in]  This              Protocol instance pointer.
-  @param[out] Modifiers         The modifiers manipulating the given keys.
-  @param[out] NumberOfKeyCodes  On input the number of keys allocated.
-                                On output the number of keys returned into
-                                KeyCodes.
-  @param[out] KeyCodes          A Pointer to a caller-allocated the pressed
-                                keys get returned in.
+  @param[in]     This              A pointer to the protocol instance.
+  @param[out]    Modifiers         The modifiers manipulating the given keys.
+  @param[in,out] NumberOfKeyCodes  On input the number of keys allocated.
+                                   On output the number of keys returned into
+                                   KeyCodes.
+  @param[out]    KeyCodes          A Pointer to a caller-allocated buffer in
+                                   which the pressed keys get returned.
 
-  @retval EFI_SUCCESS           The pressed keys have been returned into
-                                KeyCodes.
-  @retval EFI_BUFFER_TOO_SMALL  The memory required to return the value exceeds
-                                the size of the allocated Buffer.
-                                The required number of keys to allocate to
-                                complete the operation has been returned into
-                                NumberOfKeyCodes.
-  @retval other                 An error returned by a sub-operation.
+  @retval EFI_SUCCESS              The pressed keys have been returned into
+                                   KeyCodes.
+  @retval EFI_BUFFER_TOO_SMALL     The memory required to return the value exceeds
+                                   the size of the allocated Buffer.
+                                   The required number of keys to allocate to
+                                   complete the operation has been returned into
+                                   NumberOfKeyCodes.
+  @retval other                    An error returned by a sub-operation.
 **/
 typedef
 EFI_STATUS
 (EFIAPI *KEY_MAP_GET_KEY_STROKES)(
-  IN  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *This,
-  OUT APPLE_MODIFIER_MAP                 *Modifiers,
-  OUT UINTN                              *NumberOfKeyCodes,
-  OUT APPLE_KEY_CODE                     *KeyCodes
+  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *This,
+     OUT APPLE_MODIFIER_MAP                 *Modifiers,
+  IN OUT UINTN                              *NumberOfKeyCodes,
+     OUT APPLE_KEY_CODE                     *KeyCodes OPTIONAL
   );
 
 // KEY_MAP_CONTAINS_KEY_STROKES
