@@ -1489,45 +1489,9 @@ InternalBootPickerAnimateOpacity (
   IN     UINT64                  CurrentTime
   )
 {
-  INT64 BaseX;
-  INT64 BaseY;
-
   ASSERT (DrawContext != NULL);
 
   mBootPickerOpacity = (UINT8)GuiGetInterpolatedValue (&mBpAnimInfoOpacity, CurrentTime);
-  //
-  // The entry list has been scrolled, the entire horizontal space to also cover
-  // the scroll buttons.
-  //
-  DEBUG_CODE_BEGIN ();
-  GuiGetBaseCoords (
-    &mBootPickerContainer.Obj,
-    DrawContext,
-    &BaseX,
-    &BaseY
-    );
-
-  ASSERT (BaseX == mBootPickerContainer.Obj.OffsetX);
-  ASSERT (BaseY == mBootPickerContainer.Obj.OffsetY);
-
-  GuiGetBaseCoords (
-    &mBootPickerLeftScroll.Hdr.Obj,
-    DrawContext,
-    &BaseX,
-    &BaseY
-    );
-  ASSERT (BaseY >= mBootPickerContainer.Obj.OffsetY);
-  ASSERT (BaseY + mBootPickerLeftScroll.Hdr.Obj.Height <= mBootPickerContainer.Obj.OffsetY + mBootPickerContainer.Obj.Height);
-
-  GuiGetBaseCoords (
-    &mBootPickerRightScroll.Hdr.Obj,
-    DrawContext,
-    &BaseX,
-    &BaseY
-    );
-  ASSERT (BaseY >= mBootPickerContainer.Obj.OffsetY);
-  ASSERT (BaseY + mBootPickerRightScroll.Hdr.Obj.Height <= mBootPickerContainer.Obj.OffsetY + mBootPickerContainer.Obj.Height);
-  DEBUG_CODE_END ();
   //
   // The screen is drawn by the offset animation, which is always called after
   // this one. Do not draw here to not cause pointless overhead.
