@@ -736,7 +736,12 @@ OcMiscLateInit (
   DEBUG ((DEBUG_INFO, "OC: Translated HibernateMode %a to %u\n", HibernateMode, HibernateMask));
 
   HibernateStatus = OcActivateHibernateWake (HibernateMask);
-  DEBUG ((DEBUG_INFO, "OC: Hibernation detection status is %r\n", HibernateStatus));
+  DEBUG ((
+    DEBUG_INFO,
+    "OC: Hibernation activation - %r, hibernation wake - %a\n",
+    HibernateStatus,
+    OcIsAppleHibernateWake () ? "yes" : "no"
+    ));
 
   if (Config->Misc.Debug.ApplePanic) {
     SavePanicLog (Storage);

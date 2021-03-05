@@ -9,6 +9,7 @@ OpenCore Changelog
 - Improved builtin picker rendering performance
 - Added Memory Type decoding for SMBIOS in `Automatic` mode
 - Properly support setting custom entries as default boot options
+- Fixed creating log file when root file system is not writable
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

@@ -46,7 +46,7 @@ OcActivateHibernateWake (
   INTN                     NumPatchedNodes;
 
   if (HibernateMask == HIBERNATE_MODE_NONE) {
-    return EFI_NOT_FOUND;
+    return EFI_INVALID_PARAMETER;
   }
 
   HasHibernateInfo = FALSE;

@@ -301,8 +301,21 @@ GetFileModificationTime (
   OUT EFI_TIME           *Time
   );
 
+
 /**
-  Determine writeable filesystem.
+  Check if filesystem is writable.
+
+  @param[in]  Fs   File system to check.
+
+  @retval TRUE on success.
+**/
+BOOLEAN
+IsWritableFileSystem (
+  IN EFI_FILE_PROTOCOL  *Fs
+  );
+
+/**
+  Find writable filesystem.
 
   @param[in,out]  WritableFs   First found writeable file system.
 

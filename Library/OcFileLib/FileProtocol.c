@@ -179,6 +179,35 @@ GetFileModificationTime (
   return EFI_SUCCESS;
 }
 
+BOOLEAN
+IsWritableFileSystem (
+  IN EFI_FILE_PROTOCOL  *Fs
+  )
+{
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *File;
+
+  //
+  // We cannot test if the file system is writeable without attempting to create some file.
+  //
+  Status = SafeFileOpen (
+    Fs,
+    &File,
+    L"octest.fil",
+    EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
+    0
+    );
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+  
+  //
+  // Delete the temporary file and report the found file system.
+  //
+  Fs->Delete (File);
+  return TRUE;
+}
+
 EFI_STATUS
 FindWritableFileSystem (
   IN OUT EFI_FILE_PROTOCOL  **WritableFs
@@ -189,7 +218,6 @@ FindWritableFileSystem (
   UINTN                            Index;
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFs;
   EFI_FILE_PROTOCOL                *Fs;
-  EFI_FILE_PROTOCOL                *File;
 
   //
   // Locate all the simple file system devices in the system.
@@ -232,38 +260,22 @@ FindWritableFileSystem (
         ));
       continue;
     }
-    
-    //
-    // We cannot test if the file system is writeable without attempting to create some file.
-    //
-    Status = SafeFileOpen (
-      Fs,
-      &File,
-      L"octest.fil",
-      EFI_FILE_MODE_CREATE | EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE,
-      0
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_VERBOSE,
-        "OCFS: FindWritableFileSystem Fs->Open[%u] returned %r\n",
-        (UINT32) Index,
-        Status
-        ));
-      continue;
+
+    if (IsWritableFileSystem (Fs)) {
+      FreePool (HandleBuffer);
+      *WritableFs = Fs;
+      return EFI_SUCCESS;
     }
-    
-    //
-    // Delete the temporary file and report the found file system.
-    //
-    Fs->Delete (File);
-    *WritableFs = Fs;
-    break;
+
+    DEBUG ((
+      DEBUG_VERBOSE,
+      "OCFS: FindWritableFileSystem Fs->Open[%u] failed\n",
+      (UINT32) Index
+      ));
   }
-  
-  gBS->FreePool (HandleBuffer);
-  
-  return Status;
+
+  FreePool (HandleBuffer);
+  return EFI_NOT_FOUND;
 }
 
 EFI_STATUS

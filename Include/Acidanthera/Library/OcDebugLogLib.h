@@ -54,12 +54,15 @@
 /**
   Install or update the OcLog protocol with specified options.
 
-  @param[in] Options       Logging options.
-  @param[in] DisplayDelay         Delay in microseconds after each log entry.
-  @param[in] DisplayLevel  Console visible error level.
-  @param[in] HaltLevel     Error level causing CPU halt.
-  @param[in] LogPrefixPath Log path (without timestamp).
-  @param[in] LogFileSystem Log filesystem, optional.
+  @param[in] Options        Logging options.
+  @param[in] DisplayDelay   Delay in microseconds after each log entry.
+  @param[in] DisplayLevel   Console visible error level.
+  @param[in] HaltLevel      Error level causing CPU halt.
+  @param[in] LogPrefixPath  Log path (without timestamp).
+  @param[in] LogFileSystem  Log filesystem, optional.
+
+  Note: If LogFileSystem is specified, and it is not writable, then
+  the first writable file system is chosen.
 
   @retval EFI_SUCCESS  The entry point is executed successfully.
 **/

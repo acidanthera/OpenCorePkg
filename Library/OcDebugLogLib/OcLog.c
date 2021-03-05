@@ -448,6 +448,9 @@ OcConfigureLogProtocol (
         Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
         if (EFI_ERROR (Status)) {
           LogRoot = NULL;
+        } else if (!IsWritableFileSystem (LogRoot)) {
+          LogRoot->Close (LogRoot);
+          LogRoot = NULL;
         }
       }
 
