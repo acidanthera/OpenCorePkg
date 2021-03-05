@@ -1528,14 +1528,22 @@ InternalBootPickerAnimateOpacity (
   ASSERT (BaseY >= mBootPickerContainer.Obj.OffsetY);
   ASSERT (BaseY + mBootPickerRightScroll.Hdr.Obj.Height <= mBootPickerContainer.Obj.OffsetY + mBootPickerContainer.Obj.Height);
   DEBUG_CODE_END ();
-
-  GuiDrawScreen (
+  //
+  // The screen is drawn by the offset animation, which is always called after
+  // this one. Do not draw here to not cause pointless overhead.
+  //
+  // FIXME: Investigate and opt for one of the two.
+  //    1. Merge the offset and opacity animations into one.
+  //    2. Add a layer of literal 'draw requests' to merge and process drawing
+  //       requests after all animations and events have been processed.
+  //
+  /*GuiDrawScreen (
     DrawContext,
     mBootPickerContainer.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY,
     DrawContext->Screen->Width,
     mBootPickerContainer.Obj.Height
-    );
+    );*/
 
   if (mBootPickerOpacity == mBpAnimInfoOpacity.EndValue) {
     return TRUE;
@@ -1749,17 +1757,17 @@ BootPickerViewInitialize (
   //
 
   if (!GuiContext->DoneIntroAnimation) {
-    InitBpAnimSinMov (GuiInterpolTypeSmooth, 0, 25);
-    STATIC GUI_ANIMATION PickerAnim;
-    PickerAnim.Context = NULL;
-    PickerAnim.Animate = InternalBootPickerAnimateSinMov;
-    InsertHeadList (&DrawContext->Animations, &PickerAnim.Link);
-
     InitBpAnimOpacity (GuiInterpolTypeSmooth, 0, 25);
     STATIC GUI_ANIMATION PickerAnim2;
     PickerAnim2.Context = NULL;
     PickerAnim2.Animate = InternalBootPickerAnimateOpacity;
     InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
+
+    InitBpAnimSinMov (GuiInterpolTypeSmooth, 0, 25);
+    STATIC GUI_ANIMATION PickerAnim;
+    PickerAnim.Context = NULL;
+    PickerAnim.Animate = InternalBootPickerAnimateSinMov;
+    InsertHeadList (&DrawContext->Animations, &PickerAnim.Link);
 
     GuiContext->DoneIntroAnimation = TRUE;
   }
