@@ -986,9 +986,11 @@ GuiViewDeinitialize (
 {
   GUI_POINTER_STATE PointerState;
 
-  GuiPointerGetState (mPointerContext, &PointerState);
-  GuiContext->CursorDefaultX = PointerState.X;
-  GuiContext->CursorDefaultY = PointerState.Y;
+  if (mPointerContext != NULL) {
+    GuiPointerGetState (mPointerContext, &PointerState);
+    GuiContext->CursorDefaultX = PointerState.X;
+    GuiContext->CursorDefaultY = PointerState.Y;
+  }
 
   ZeroMem (DrawContext, sizeof (*DrawContext));
 }
