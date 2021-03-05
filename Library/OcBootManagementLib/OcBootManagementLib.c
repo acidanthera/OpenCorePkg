@@ -151,12 +151,14 @@ OcShowSimpleBootMenu (
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
 
-  Code[1]        = '\0';
+  Code[1]        = L'\0';
 
   TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
   ASSERT (BootContext->DefaultEntry != NULL);
   ChosenEntry    = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
   OldChosenEntry = ChosenEntry;
+  EntryCursor    = L'\0';
+  OldEntryCursor = L'\0';
   FirstIndexRow  = -1;
 
   PlayedOnce     = FALSE;
@@ -197,18 +199,21 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L" ");
       }
       
+      if (ChosenEntry >= 0) {
+        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, ChosenEntry);
+      } else {
+        EntryCursor = L'\0';
+      }
+
       if (OldChosenEntry != ChosenEntry || OldEntryCursor != EntryCursor) {
         if (ChosenEntry >= 0) {
-          OldEntryCursor = EntryCursor;
-
-          EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, ChosenEntry);
-
           gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
           Code[0] = EntryCursor;
           gST->ConOut->OutputString (gST->ConOut, Code);
         }
 
         OldChosenEntry = ChosenEntry;
+        OldEntryCursor = EntryCursor;
 
         gST->ConOut->SetCursorPosition (gST->ConOut, StatusColumn, StatusRow);
       }
@@ -235,6 +240,11 @@ OcShowSimpleBootMenu (
 
       for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
         EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, Index);
+
+        if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
+          OldEntryCursor = EntryCursor;
+        }
+
         Code[0] = EntryCursor;
         gST->ConOut->OutputString (gST->ConOut, Code);
         gST->ConOut->OutputString (gST->ConOut, L" ");
