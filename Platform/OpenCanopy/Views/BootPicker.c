@@ -1511,10 +1511,6 @@ InternalBootPickerAnimateOpacity (
 
   if (mBootPickerOpacity == mBpAnimInfoOpacity.EndValue) {
     return TRUE;
-    /*UINT32 OrigVal = mBpAnimInfoOpacity.EndValue;
-    mBpAnimInfoOpacity.EndValue   = mBpAnimInfoOpacity.StartValue;
-    mBpAnimInfoOpacity.StartValue = OrigVal;
-    mBpAnimInfoOpacity.StartTime  = CurrentTime;*/
   }
 
   return FALSE;
@@ -1584,6 +1580,11 @@ InitBpAnimSinMov (
   mBpAnimInfoSinMove.Duration   = Duration;
   mBpAnimInfoSinMove.StartValue = 0;
   mBpAnimInfoSinMove.EndValue   = 35;
+  //
+  // FIXME: This assumes that only relative changes of X are performed on
+  //        mBootPicker between animation initialisation and start.
+  //
+  mBootPicker.Hdr.Obj.OffsetX += 35;
 }
 
 BOOLEAN
@@ -1593,41 +1594,30 @@ InternalBootPickerAnimateSinMov (
   IN     UINT64                  CurrentTime
   )
 {
-  STATIC BOOLEAN First = TRUE;
-  STATIC BOOLEAN Minus = TRUE;
-  STATIC INT64 InitOffsetX = 0;
+  STATIC UINT32 PrevSine = 0;
 
   INT64  OldOffsetX;
   UINT32 InterpolVal;
+  UINT32 DeltaSine;
 
   ASSERT (DrawContext != NULL);
 
   OldOffsetX = mBootPicker.Hdr.Obj.OffsetX;
-  if (First) {
-    First       = FALSE;
-    InitOffsetX = OldOffsetX + 35;
-  }
-
   InterpolVal = GuiGetInterpolatedValue (&mBpAnimInfoSinMove, CurrentTime);
-  if (Minus) {
-    mBootPicker.Hdr.Obj.OffsetX = InitOffsetX - InterpolVal;
-  } else {
-    mBootPicker.Hdr.Obj.OffsetX = InitOffsetX + InterpolVal;
-  }
+  DeltaSine = InterpolVal - PrevSine;
+  mBootPicker.Hdr.Obj.OffsetX -= DeltaSine;
+  PrevSine = InterpolVal;
 
   GuiDrawScreen (
     DrawContext,
-    mBootPickerContainer.Obj.OffsetX + MIN (OldOffsetX, mBootPicker.Hdr.Obj.OffsetX),
+    mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
-    (UINT32)(mBootPicker.Hdr.Obj.Width + ABS (OldOffsetX - mBootPicker.Hdr.Obj.OffsetX)),
+    (UINT32)(mBootPicker.Hdr.Obj.Width + DeltaSine),
     mBootPicker.Hdr.Obj.Height
     );
 
   if (InterpolVal == mBpAnimInfoSinMove.EndValue) {
     return TRUE;
-    /*Minus = !Minus;
-    InitOffsetX = mBootPicker.Hdr.Obj.OffsetX;
-    mBpAnimInfoSinMove.StartTime = CurrentTime;*/
   }
 
   return FALSE;
