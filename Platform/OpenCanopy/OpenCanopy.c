@@ -491,16 +491,6 @@ GuiRequestDraw (
   UINT32           CombWidth;
   UINT32           CombHeight;
   UINT32           CombArea;
-
-  UINT32           OverMinX;
-  UINT32           OverMaxX;
-  UINT32           OverMinY;
-  UINT32           OverMaxY;
-  UINT32           OverArea;
-  UINT32           OverWidth;
-  UINT32           OverHeight;
-
-  UINT32           ActualArea;
   //
   // Update the coordinates of the smallest rectangle covering all changes.
   //
@@ -522,53 +512,39 @@ GuiRequestDraw (
 
     if (mDrawRequests[Index].MinX < ThisReq.MinX) {
       CombMinX = mDrawRequests[Index].MinX;
-      OverMinX = ThisReq.MinX;
     } else {
       CombMinX = ThisReq.MinX;
-      OverMinX = mDrawRequests[Index].MinX;
     }
 
     if (mDrawRequests[Index].MaxX > ThisReq.MaxX) {
       CombMaxX = mDrawRequests[Index].MaxX;
-      OverMaxX = ThisReq.MaxX;
     } else {
       CombMaxX = ThisReq.MaxX;
-      OverMaxX = mDrawRequests[Index].MaxX;
     }
 
     if (mDrawRequests[Index].MinY < ThisReq.MinY) {
       CombMinY = mDrawRequests[Index].MinY;
-      OverMinY = ThisReq.MinY;
     } else {
       CombMinY = ThisReq.MinY;
-      OverMinY = mDrawRequests[Index].MinY;
     }
 
     if (mDrawRequests[Index].MaxY > ThisReq.MaxY) {
       CombMaxY = mDrawRequests[Index].MaxY;
-      OverMaxY = ThisReq.MaxY;
     } else {
       CombMaxY = ThisReq.MaxY;
-      OverMaxY = mDrawRequests[Index].MaxY;
     }
 
     CombWidth  = CombMaxX - CombMinX + 1;
     CombHeight = CombMaxY - CombMinY + 1;
     CombArea   = CombWidth * CombHeight;
-
-    OverArea = 0;
-    if (OverMinX <= OverMaxX && OverMinY <= OverMaxY) {
-      OverWidth  = OverMaxX - OverMinX + 1;
-      OverHeight = OverMaxY - OverMinY + 1;
-      OverArea   = OverWidth * OverHeight;
-    }
-
-    ActualArea = ThisArea + ReqArea - OverArea;
     //
-    // Two requests are merged when their combined actual draw area is at
-    // least 3/4 of the area needed to draw both at once.
+    // Two requests are merged when the overarching rectangle is not bigger than
+    // the two separate rectangles (not accounting for the overlap, as it would
+    // be drawn twice).
     //
-    if (4 * ActualArea >= 3 * CombArea) {
+    // TODO: Profile a good constant factor?
+    //
+    if (ThisArea + ReqArea >= CombArea) {
       mDrawRequests[Index].MinX = CombMinX;
       mDrawRequests[Index].MaxX = CombMaxX;
       mDrawRequests[Index].MinY = CombMinY;
