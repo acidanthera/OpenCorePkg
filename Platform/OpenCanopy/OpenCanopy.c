@@ -630,7 +630,7 @@ GuiRedrawObject (
 }
 
 VOID
-GuiRedrawPointer (
+GuiOverlayPointer (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
@@ -742,11 +742,6 @@ GuiFlushScreen (
 
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
-
-  if (mPointerContext != NULL) {
-    GuiRedrawPointer (DrawContext);
-  }
-
   ASSERT (DrawContext->Screen->OffsetX == 0);
   ASSERT (DrawContext->Screen->OffsetY == 0);
   ASSERT (DrawContext->Screen->Draw != NULL);
@@ -773,6 +768,10 @@ GuiFlushScreen (
   DeltaTsc = EndTsc - mStartTsc;
   if (DeltaTsc < mDeltaTscTarget) {
     EndTsc = InternalCpuDelayTsc (mDeltaTscTarget - DeltaTsc);
+  }
+
+  if (mPointerContext != NULL) {
+    GuiOverlayPointer (DrawContext);
   }
 
   for (Index = 0; Index < mNumValidDrawReqs; ++Index) {
