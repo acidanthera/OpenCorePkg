@@ -141,6 +141,10 @@ InternalUpdateContextAbsolute (
   UINT64                     NewY;
 
   ASSERT (Context != NULL);
+
+  if (Context->AbsPointer == NULL) {
+    return;
+  }
   //
   // Discard absolute pointer updates when simple pointer locked.
   //
@@ -152,10 +156,6 @@ InternalUpdateContextAbsolute (
     ASSERT (Context->LockedBy == PointerUnlocked);
   } else {
     ASSERT (Context->LockedBy == PointerLockedAbsolute);
-  }
-
-  if (Context->AbsPointer == NULL) {
-    return;
   }
 
   Status = Context->AbsPointer->GetState (Context->AbsPointer, &PointerState);
