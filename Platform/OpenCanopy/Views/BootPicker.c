@@ -345,7 +345,7 @@ InternalBootPickerScroll (
   ASSERT (ScrollY + mBootPickerRightScroll.Hdr.Obj.Height <= BaseY + This->Hdr.Obj.Height);
   DEBUG_CODE_END ();
   
-  GuiDrawScreen (
+  GuiRequestDrawCrop (
     DrawContext,
     0,
     BaseY,
@@ -388,7 +388,7 @@ InternalBootPickerChangeEntry (
     // Picker object. For this, the height just reach from the top of the entries
     // to the bottom of the selector.
     //
-    GuiDrawScreen (
+    GuiRequestDrawCrop (
       DrawContext,
       BaseX + NewEntry->Hdr.Obj.OffsetX,
       BaseY + NewEntry->Hdr.Obj.OffsetY,
@@ -396,7 +396,7 @@ InternalBootPickerChangeEntry (
       This->Hdr.Obj.Height
       );
 
-    GuiDrawScreen (
+    GuiRequestDrawCrop (
       DrawContext,
       BaseX + PrevEntry->Hdr.Obj.OffsetX,
       BaseY + PrevEntry->Hdr.Obj.OffsetY,
@@ -1564,7 +1564,7 @@ InternalBootPickerAnimateIntro (
   mBootPicker.Hdr.Obj.OffsetX -= DeltaSine;
   PrevSine = InterpolVal;
 
-  GuiDrawScreen (
+  GuiRequestDrawCrop (
     DrawContext,
     mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,

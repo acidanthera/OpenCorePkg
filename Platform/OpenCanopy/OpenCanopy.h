@@ -218,7 +218,7 @@ GuiDrawToBufferFill (
   );
 
 VOID
-GuiDrawScreen (
+GuiRequestDrawCrop (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     INT64                X,
   IN     INT64                Y,
