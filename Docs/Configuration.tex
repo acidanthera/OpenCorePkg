@@ -1526,6 +1526,19 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Refer to the \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
+  \texttt{ForceBooterSignature}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Set macOS \texttt{boot-signature} to OpenCore launcher.
+
+  Booter signature, essentially a SHA-1 hash of the loaded image, is used by Mac EFI
+  to verify the authenticity of the bootloader when waking from hibernation. This
+  option forces macOS to use OpenCore launcher SHA-1 hash as a booter signature to let
+  OpenCore shim hibernation wake on Mac EFI firmware.
+
+  \emph{Note}: OpenCore launcher path is determined from \texttt{LauncherPath} property.
+
+\item
   \texttt{ForceExitBootServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2997,11 +3010,14 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \begin{itemize}
   \tightlist
-    \item \texttt{None} --- Avoid hibernation (Recommended).
+    \item \texttt{None} --- Ignore hibernation state.
     \item \texttt{Auto} --- Use RTC and NVRAM detection.
     \item \texttt{RTC} --- Use RTC detection.
     \item \texttt{NVRAM} --- Use NVRAM detection.
   \end{itemize}
+
+  \emph{Note}: If the firmware can handle hibernation itself (valid for Mac EFI firmware),
+  then \texttt{None} should be specified to hand-off hibernation state as is to OpenCore.
 
 \item
   \texttt{HideAuxiliary}\\
@@ -3044,6 +3060,13 @@ the default boot entry choice will remain changed until the next manual reconfig
   \tightlist
     \item This variant is useful for some older types of firmware, typically from Insyde,
     that are unable to manage full device paths.
+  \end{itemize}
+  \item \texttt{System} --- create no boot option but assume specified custom option is blessed.
+    \begin{itemize}
+  \tightlist
+    \item This variant is useful when relying on \texttt{ForceBooterSignature} quirk and
+    OpenCore launcher path management happens through \texttt{bless} utilities without
+    involving OpenCore.
   \end{itemize} \medskip
   \end{itemize}
 

@@ -15,6 +15,7 @@
 #ifndef OC_AFTER_BOOT_COMPAT_LIB_H
 #define OC_AFTER_BOOT_COMPAT_LIB_H
 
+#include <Library/OcCryptoLib.h>
 #include <Library/OcCpuLib.h>
 
 /**
@@ -152,6 +153,17 @@ typedef struct OC_ABC_SETTINGS_ {
   /// Works around disabled IGPU in Windows and Linux on Apple laptops.
   ///
   BOOLEAN  SignalAppleOS;
+  ///
+  /// Provide OpenCore boot-signature when loading macOS.
+  /// This resolves the ability to wake from hibernate on Mac EFI, which
+  /// checks that the hibernation signature matches the SHA-1 hash of the
+  /// EFI image it launches prior to exposing the image key.
+  ///
+  BOOLEAN  ForceBooterSignature;
+  ///
+  /// Booter signature for ForceBooterSignature.
+  ///
+  UINT8    BooterSignature[SHA1_DIGEST_SIZE];
   ///
   /// CoreImage may update and restore GetMemoryMap during loading (see InsertImageRecord)
   /// as it needs this for segment splitting. Unfortunately it assumes nobody else

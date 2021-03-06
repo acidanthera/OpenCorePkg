@@ -601,43 +601,25 @@ OcMiscEarlyInit (
 }
 
 /**
-  Registers LauncherOption according to the BootProtect mode.
+  Generates bootstrap path according to the BootProtect mode.
 
   @param[in]  RootPath      Root load path.
-  @param[in]  LoadHandle    OpenCore loading handle.
-  @param[in]  LauncherPath  Launcher path to write.
-  @param[in]  ShortForm     Whether to encode a short option.
+  @param[in]  LauncherPath  Launcher path to write, optional.
+  @param[out] MatchSuffix   Match suffix to optimise lookup.
 
   @returns  BootProtect bitmask.
 **/
+
 STATIC
-UINT32
-RegisterLauncherOption (
-  IN CONST CHAR16  *RootPath,
-  IN EFI_HANDLE    LoadHandle,
-  IN CONST CHAR8   *LauncherPath,
-  IN BOOLEAN       ShortForm
+CHAR16 *
+BuildLauncherPath (
+  IN   CONST CHAR16  *RootPath,
+  IN   CONST CHAR8   *LauncherPath,
+  OUT  CONST CHAR16  **MatchSuffix
   )
 {
   CHAR16        *BootstrapPath;
   UINTN         BootstrapSize;
-  CONST CHAR16  *MatchSuffix;
-
-  if (AsciiStrCmp (LauncherPath, "Default") == 0) {
-    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_APP_PATH);
-    BootstrapPath = AllocatePool (BootstrapSize);
-    if (BootstrapPath == NULL) {
-      return 0;
-    }
-    UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_APP_PATH);
-    MatchSuffix = OPEN_CORE_APP_PATH;
-  } else {
-    BootstrapPath = AsciiStrCopyToUnicode (LauncherPath, 0);
-    if (BootstrapPath == NULL) {
-      return 0;
-    }
-    MatchSuffix = BootstrapPath;
-  }
 
   //
   // MatchSuffix allows us to reduce option duplication when switching between
@@ -645,17 +627,23 @@ RegisterLauncherOption (
   // any option with this path (e.g. OC\OpenCore.efi and OC2\OpenCore.efi).
   // For custom paths no deduplication happens.
   //
-  OcRegisterBootstrapBootOption (
-    L"OpenCore",
-    LoadHandle,
-    BootstrapPath,
-    ShortForm,
-    MatchSuffix,
-    StrLen (MatchSuffix)
-    );
-  FreePool (BootstrapPath);
+  if (AsciiStrCmp (LauncherPath, "Default") == 0) {
+    BootstrapSize = StrSize (RootPath) + StrSize (OPEN_CORE_APP_PATH);
+    BootstrapPath = AllocatePool (BootstrapSize);
+    if (BootstrapPath == NULL) {
+      return NULL;
+    }
+    UnicodeSPrint (BootstrapPath, BootstrapSize, L"%s\\%s", RootPath, OPEN_CORE_APP_PATH);
+    *MatchSuffix = OPEN_CORE_APP_PATH;
+  } else {
+    BootstrapPath = AsciiStrCopyToUnicode (LauncherPath, 0);
+    if (BootstrapPath == NULL) {
+      return NULL;
+    }
+    *MatchSuffix = BootstrapPath;
+  }
 
-  return OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+  return BootstrapPath;
 }
 
 VOID
@@ -664,12 +652,22 @@ OcMiscMiddleInit (
   IN  OC_GLOBAL_CONFIG          *Config,
   IN  CONST CHAR16              *RootPath,
   IN  EFI_DEVICE_PATH_PROTOCOL  *LoadPath,
-  IN  EFI_HANDLE                LoadHandle
+  IN  EFI_HANDLE                StorageHandle,
+  OUT UINT8                     *Signature  OPTIONAL
   )
 {
-  CONST CHAR8  *LauncherOption;
-  CONST CHAR8  *LauncherPath;
-  UINT32       BootProtectFlag;
+  EFI_STATUS                       Status;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
+  CONST CHAR8                      *LauncherOption;
+  CONST CHAR8                      *LauncherPath;
+  CHAR16                           *FullLauncherPath;
+  CONST CHAR16                     *MatchSuffix;
+  VOID                             *LauncherData;
+  UINT32                           LauncherSize;
+  UINT32                           BootProtectFlag;
+  BOOLEAN                          HasFullLauncher;
+  BOOLEAN                          HasShortLauncher;
+  BOOLEAN                          HasSystemLauncher;
 
   if ((Config->Misc.Security.ExposeSensitiveData & OCS_EXPOSE_BOOT_PATH) != 0) {
     OcStoreLoadPath (LoadPath);
@@ -680,21 +678,66 @@ OcMiscMiddleInit (
   LauncherPath = OC_BLOB_GET (&Config->Misc.Boot.LauncherPath);
   DEBUG ((
     DEBUG_INFO,
-    "OC: LoadHandle %p with %a LauncherOption pointing to %a\n",
-    LoadHandle,
+    "OC: StorageHandle %p with %a LauncherOption pointing to %a\n",
+    StorageHandle,
     LauncherOption,
     LauncherPath
     ));
+
   //
   // Full-form paths cause entry duplication on e.g. HP 15-ab237ne, InsydeH2O.
   //
-  if (AsciiStrCmp (LauncherOption, "Full") == 0) {
-    BootProtectFlag = RegisterLauncherOption (RootPath, LoadHandle, LauncherPath, FALSE);
-  } else if (AsciiStrCmp (LauncherOption, "Short") == 0) {
-    BootProtectFlag = RegisterLauncherOption (RootPath, LoadHandle, LauncherPath, TRUE);
-  } else {
-    BootProtectFlag = 0;
+  HasFullLauncher   = AsciiStrCmp (LauncherOption, "Full") == 0;
+  HasShortLauncher  = !HasFullLauncher && AsciiStrCmp (LauncherOption, "Short") == 0;
+  HasSystemLauncher = !HasFullLauncher && !HasShortLauncher && AsciiStrCmp (LauncherOption, "System") == 0;
+  if (!HasFullLauncher && !HasShortLauncher && !HasSystemLauncher) {
+    LauncherPath = "Default";
   }
+
+  FullLauncherPath = BuildLauncherPath (RootPath, LauncherPath, &MatchSuffix);
+  if (FullLauncherPath != NULL) {
+    if (HasFullLauncher || HasShortLauncher) {
+      OcRegisterBootstrapBootOption (
+        L"OpenCore",
+        StorageHandle,
+        FullLauncherPath,
+        HasShortLauncher,
+        MatchSuffix,
+        StrLen (MatchSuffix)
+        );
+      BootProtectFlag = OC_BOOT_PROTECT_VARIABLE_BOOTSTRAP;
+    }
+
+    //
+    // Note: This technically is a TOCTOU, but no Macs support Secure Boot with OC anyway.
+    //
+    if (Signature != NULL) {
+      Status = gBS->HandleProtocol (
+        StorageHandle,
+        &gEfiSimpleFileSystemProtocolGuid,
+        (VOID **) &FileSystem
+        );
+      if (!EFI_ERROR (Status)) {
+        LauncherData = ReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
+        if (LauncherData != NULL) {
+          Sha1 (Signature, LauncherData, LauncherSize);
+          DEBUG ((
+            DEBUG_INFO,
+            "OC: Launcher %s signature is %02X%02X%02X%02X\n",
+            FullLauncherPath,
+            Signature[0],
+            Signature[1],
+            Signature[2],
+            Signature[3]
+            ));
+          FreePool (LauncherData);
+        }
+      }
+    }
+
+    FreePool (FullLauncherPath);
+  }
+
 
   //
   // Inform about boot protection.

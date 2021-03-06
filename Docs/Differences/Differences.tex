@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  3 13:01:22 2021
-%DIF ADD ../Configuration.tex        Wed Mar  3 13:04:50 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
+%DIF ADD ../Configuration.tex        Sun Mar  7 00:32:05 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1590,7 +1590,23 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   Refer to the \texttt{OCABC: MAT support is 1/0} log entry to determine whether MAT is supported.
 
 \item
-  \texttt{ForceExitBootServices}\\
+  \DIFaddbegin \texttt{\DIFadd{ForceBooterSignature}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Set macOS }\texttt{\DIFadd{boot-signature}} \DIFadd{to OpenCore launcher.
+}
+
+  \DIFadd{Booter signature, essentially a SHA-1 hash of the loaded image, is used by Mac EFI
+  to verify the authenticity of the bootloader when waking from hibernation. This
+  option forces macOS to use OpenCore launcher SHA-1 hash as a booter signature to let
+  OpenCore shim hibernation wake on Mac EFI firmware.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: OpenCore launcher path is determined from }\texttt{\DIFadd{LauncherPath}} \DIFadd{property.
+}
+
+\item
+  \DIFaddend \texttt{ForceExitBootServices}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Retry \texttt{ExitBootServices} with new memory map on failure.
@@ -2662,7 +2678,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
+  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
@@ -2880,7 +2896,8 @@ The algorithm to determine boot options behaves as follows:
   % Scan policy restrictions are actually checked here as we want the function to be self-contained
   % for non-scan based startup.
   \item Perform fixups (e.g. NVMe subtype correction) and expansion (e.g. for Boot Camp) of the device path.
-  \item Obtain the device handle by locating the device path of the resulting device path (ignore it on failure).
+  \item \DIFaddbegin \DIFadd{On failure, if it is an OpenCore custom entry device path, pre-construct the corresponding custom entry and succeed.
+  }\item \DIFaddend Obtain the device handle by locating the device path of the resulting device path (ignore it on failure).
   \item Locate the device handle in the list of partition handles (ignore it if missing).
   % To determine device path type we can use LocateDevicePath RemainingDevicePath argument.
   % Just check whether it points to the END device path.
@@ -2905,7 +2922,7 @@ The algorithm to determine boot options behaves as follows:
   \item Lookup alternate entries by ``bless'' recovery option list retrieval and predefined paths.
   \item Register the resulting entries as alternate auxiliary options and determine their types if found.
   \end{itemize}
-\item Custom entries and tools are added as primary options without any checks with respect to \texttt{Auxiliary}.
+\item Custom entries and tools\DIFaddbegin \DIFadd{, except such pre-constructed previously, }\DIFaddend are added as primary options without any checks with respect to \texttt{Auxiliary}.
 \item System entries, such as \texttt{Reset NVRAM}, are added as primary auxiliary options.
 \end{enumerate}
 
@@ -3063,13 +3080,17 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \begin{itemize}
   \tightlist
-    \item \texttt{None} --- Avoid hibernation (Recommended).
+    \item \texttt{None} --- \DIFdelbegin \DIFdel{Avoid hibernation (Recommended)}\DIFdelend \DIFaddbegin \DIFadd{Ignore hibernation state}\DIFaddend .
     \item \texttt{Auto} --- Use RTC and NVRAM detection.
     \item \texttt{RTC} --- Use RTC detection.
     \item \texttt{NVRAM} --- Use NVRAM detection.
   \end{itemize}
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: If the firmware can handle hibernation itself (valid for Mac EFI firmware),
+  then }\texttt{\DIFadd{None}} \DIFadd{should be specified to hand-off hibernation state as is to OpenCore.
+}
+
+\DIFaddend \item
   \texttt{HideAuxiliary}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -3110,7 +3131,14 @@ the default boot entry choice will remain changed until the next manual reconfig
   \tightlist
     \item This variant is useful for some older types of firmware, typically from Insyde,
     that are unable to manage full device paths.
-  \end{itemize} \medskip
+  \end{itemize}
+  \DIFaddbegin \item \texttt{\DIFadd{System}} \DIFadd{--- create no boot option but assume specified custom option is blessed.
+    }\begin{itemize}
+  \tightlist
+    \item \DIFadd{This variant is useful when relying on }\texttt{\DIFadd{ForceBooterSignature}} \DIFadd{quirk and
+    OpenCore launcher path management happens through }\texttt{\DIFadd{bless}} \DIFadd{utilities without
+    involving OpenCore.
+  }\end{itemize} \DIFaddend \medskip
   \end{itemize}
 
   This option allows integration with third-party operating system installation and upgrades

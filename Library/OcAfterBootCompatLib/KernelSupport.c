@@ -352,16 +352,28 @@ AppleMapPrepareForBooting (
     // First, there is a BootArgs entry for XNU.
     //
     OcRemoveArgumentFromCmd (BA.CommandLine, "-s");
+  }
 
-    //
-    // Second, there is a DT entry.
-    //
+  if (BootCompat->Settings.DisableSingleUser
+    || BootCompat->Settings.ForceBooterSignature) {
     DTInit ((VOID *)(UINTN) *BA.DeviceTreeP, BA.DeviceTreeLength);
     Status = DTLookupEntry (NULL, "/chosen", &Chosen);
     if (!EFI_ERROR (Status)) {
-      Status = DTGetProperty (Chosen, "boot-args", (VOID **) &ArgsStr, &ArgsSize);
-      if (!EFI_ERROR (Status) && ArgsSize > 0) {
-        OcRemoveArgumentFromCmd (ArgsStr, "-s");
+      if (BootCompat->Settings.DisableSingleUser) {
+        //
+        // Second, there is a DT entry.
+        //
+        Status = DTGetProperty (Chosen, "boot-args", (VOID **) &ArgsStr, &ArgsSize);
+        if (!EFI_ERROR (Status) && ArgsSize > 0) {
+          OcRemoveArgumentFromCmd (ArgsStr, "-s");
+        }
+      }
+
+      if (BootCompat->Settings.ForceBooterSignature) {
+        Status = DTGetProperty (Chosen, "boot-signature", (VOID **) &ArgsStr, &ArgsSize);
+        if (!EFI_ERROR (Status) && ArgsSize == SHA1_DIGEST_SIZE) {
+          CopyMem (ArgsStr, BootCompat->Settings.BooterSignature, ArgsSize);
+        }
       }
     }
   }
@@ -612,7 +624,9 @@ AppleMapPrepareKernelJump (
   //
   if (!BootCompat->Settings.AvoidRuntimeDefrag
     && !BootCompat->Settings.DiscardHibernateMap
-    && !BootCompat->Settings.AllowRelocationBlock) {
+    && !BootCompat->Settings.AllowRelocationBlock
+    && !BootCompat->Settings.DisableSingleUser
+    && !BootCompat->Settings.ForceBooterSignature) {
     return;
   }
 

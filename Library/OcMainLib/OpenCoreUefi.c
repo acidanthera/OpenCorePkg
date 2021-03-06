@@ -513,7 +513,8 @@ OcInstallPermissiveSecurityPolicy (
 VOID
 OcLoadBooterUefiSupport (
   IN OC_GLOBAL_CONFIG  *Config,
-  IN OC_CPU_INFO       *CpuInfo
+  IN OC_CPU_INFO       *CpuInfo,
+  IN UINT8             *Signature
   )
 {
   OC_ABC_SETTINGS        AbcSettings;
@@ -534,6 +535,8 @@ OcLoadBooterUefiSupport (
   AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;
   AbcSettings.EnableWriteUnprotector = Config->Booter.Quirks.EnableWriteUnprotector;
   AbcSettings.ForceExitBootServices  = Config->Booter.Quirks.ForceExitBootServices;
+  AbcSettings.ForceBooterSignature   = Config->Booter.Quirks.ForceBooterSignature;
+  CopyMem (AbcSettings.BooterSignature, Signature, sizeof (AbcSettings.BooterSignature));
   AbcSettings.ProtectMemoryRegions   = Config->Booter.Quirks.ProtectMemoryRegions;
   AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
   AbcSettings.ProvideMaxSlide        = Config->Booter.Quirks.ProvideMaxSlide;
@@ -713,7 +716,8 @@ VOID
 OcLoadUefiSupport (
   IN OC_STORAGE_CONTEXT  *Storage,
   IN OC_GLOBAL_CONFIG    *Config,
-  IN OC_CPU_INFO         *CpuInfo
+  IN OC_CPU_INFO         *CpuInfo,
+  IN UINT8               *Signature
   )
 {
   EFI_HANDLE            *DriversToConnect;
@@ -730,7 +734,7 @@ OcLoadUefiSupport (
   //
   // Setup Apple bootloader specific UEFI features.
   //
-  OcLoadBooterUefiSupport (Config, CpuInfo);
+  OcLoadBooterUefiSupport (Config, CpuInfo, Signature);
 
   if (Config->Uefi.Quirks.ActivateHpetSupport) {
     ActivateHpetSupport ();

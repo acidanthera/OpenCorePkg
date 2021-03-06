@@ -10,6 +10,8 @@ OpenCore Changelog
 - Added Memory Type decoding for SMBIOS in `Automatic` mode
 - Properly support setting custom entries as default boot options
 - Fixed creating log file when root file system is not writable
+- Fixed `DisableSingleUser` not being enabled in certain cases
+- Added `ForceBooterSignature` quirk for Mac EFI firmware
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

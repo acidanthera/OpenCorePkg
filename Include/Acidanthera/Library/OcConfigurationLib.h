@@ -139,6 +139,7 @@
   _(BOOLEAN                     , DiscardHibernateMap       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableSafeModeSlide       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableWriteUnprotector    ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForceBooterSignature      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceExitBootServices     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectMemoryRegions      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ProtectSecureBoot         ,     , FALSE  , ()) \
