@@ -30,10 +30,10 @@
 #include "Views/BootPicker.h"
 
 typedef struct {
-  UINT32 MinX;
-  UINT32 MinY;
-  UINT32 MaxX;
-  UINT32 MaxY;
+  UINT32 X;
+  UINT32 Y;
+  UINT32 Width;
+  UINT32 Height;
 } GUI_DRAW_REQUEST;
 
 //
@@ -475,29 +475,24 @@ GuiRequestDraw (
   IN UINT32  Height
   )
 {
-  GUI_DRAW_REQUEST ThisReq;
-  UINTN            Index;
+  UINTN  Index;
 
-  UINT32           ThisArea;
+  UINT32 ThisArea;
+  UINT32 ThisMaxX;
+  UINT32 ThisMaxY;
 
-  UINT32           ReqWidth;
-  UINT32           ReqHeight;
-  UINT32           ReqArea;
+  UINT32 ReqMaxX;
+  UINT32 ReqMaxY;
+  UINT32 ReqArea;
 
-  UINT32           CombMinX;
-  UINT32           CombMaxX;
-  UINT32           CombMinY;
-  UINT32           CombMaxY;
-  UINT32           CombWidth;
-  UINT32           CombHeight;
-  UINT32           CombArea;
-  //
-  // Update the coordinates of the smallest rectangle covering all changes.
-  //
-  ThisReq.MinX = PosX;
-  ThisReq.MinY = PosY;
-  ThisReq.MaxX = PosX + Width  - 1;
-  ThisReq.MaxY = PosY + Height - 1;
+  UINT32 CombX;
+  UINT32 CombY;
+  UINT32 CombWidth;
+  UINT32 CombHeight;
+  UINT32 CombArea;
+
+  ThisMaxX = PosX + Width  - 1;
+  ThisMaxY = PosY + Height - 1;
 
   ThisArea = Width * Height;
 
@@ -506,37 +501,35 @@ GuiRequestDraw (
     // Calculate several dimensions to determine whether to merge the two
     // draw requests for improved flushing performance.
     //
-    ReqWidth  = mDrawRequests[Index].MaxX - mDrawRequests[Index].MinX + 1;
-    ReqHeight = mDrawRequests[Index].MaxY - mDrawRequests[Index].MinY + 1;
-    ReqArea   = ReqWidth * ReqHeight;
+    ReqMaxX = mDrawRequests[Index].X + mDrawRequests[Index].Width - 1;
+    ReqMaxY = mDrawRequests[Index].Y + mDrawRequests[Index].Height - 1;
+    ReqArea = mDrawRequests[Index].Width * mDrawRequests[Index].Height;
 
-    if (mDrawRequests[Index].MinX < ThisReq.MinX) {
-      CombMinX = mDrawRequests[Index].MinX;
+    if (mDrawRequests[Index].X < PosX) {
+      CombX = mDrawRequests[Index].X;
     } else {
-      CombMinX = ThisReq.MinX;
+      CombX = PosX;
     }
 
-    if (mDrawRequests[Index].MaxX > ThisReq.MaxX) {
-      CombMaxX = mDrawRequests[Index].MaxX;
+    if (ReqMaxX > ThisMaxX) {
+      CombWidth = ReqMaxX - CombX + 1;
     } else {
-      CombMaxX = ThisReq.MaxX;
+      CombWidth = ThisMaxX - CombX + 1;
     }
 
-    if (mDrawRequests[Index].MinY < ThisReq.MinY) {
-      CombMinY = mDrawRequests[Index].MinY;
+    if (mDrawRequests[Index].Y < PosY) {
+      CombY = mDrawRequests[Index].Y;
     } else {
-      CombMinY = ThisReq.MinY;
+      CombY = PosY;
     }
 
-    if (mDrawRequests[Index].MaxY > ThisReq.MaxY) {
-      CombMaxY = mDrawRequests[Index].MaxY;
+    if (ReqMaxY > ThisMaxY) {
+      CombHeight = ReqMaxY - CombY + 1;
     } else {
-      CombMaxY = ThisReq.MaxY;
+      CombHeight = ThisMaxY - CombY + 1;
     }
 
-    CombWidth  = CombMaxX - CombMinX + 1;
-    CombHeight = CombMaxY - CombMinY + 1;
-    CombArea   = CombWidth * CombHeight;
+    CombArea = CombWidth * CombHeight;
     //
     // Two requests are merged when the overarching rectangle is not bigger than
     // the two separate rectangles (not accounting for the overlap, as it would
@@ -545,10 +538,10 @@ GuiRequestDraw (
     // TODO: Profile a good constant factor?
     //
     if (ThisArea + ReqArea >= CombArea) {
-      mDrawRequests[Index].MinX = CombMinX;
-      mDrawRequests[Index].MaxX = CombMaxX;
-      mDrawRequests[Index].MinY = CombMinY;
-      mDrawRequests[Index].MaxY = CombMaxY;
+      mDrawRequests[Index].X = CombX;
+      mDrawRequests[Index].Y = CombY;
+      mDrawRequests[Index].Width = CombWidth;
+      mDrawRequests[Index].Height = CombHeight;
       return;
     }
   }
@@ -558,7 +551,10 @@ GuiRequestDraw (
     return;
   }
 
-  CopyMem (&mDrawRequests[mNumValidDrawReqs], &ThisReq, sizeof (ThisReq));
+  mDrawRequests[mNumValidDrawReqs].X = PosX;
+  mDrawRequests[mNumValidDrawReqs].Y = PosY;
+  mDrawRequests[mNumValidDrawReqs].Width = Width;
+  mDrawRequests[mNumValidDrawReqs].Height = Height;
   ++mNumValidDrawReqs;
 }
 
@@ -751,7 +747,6 @@ GuiFlushScreen (
 {
   EFI_TPL OldTpl;
 
-  UINTN   NumValidDrawReqs;
   UINTN   Index;
 
   UINT64  EndTsc;
@@ -765,21 +760,6 @@ GuiFlushScreen (
   if (mPointerContext != NULL) {
     GuiRedrawPointer (DrawContext);
   }
-
-  NumValidDrawReqs = mNumValidDrawReqs;
-  ASSERT (NumValidDrawReqs <= ARRAY_SIZE (mDrawRequests));
-
-  mNumValidDrawReqs = 0;
-
-  for (Index = 0; Index < NumValidDrawReqs; ++Index) {
-    ASSERT (mDrawRequests[Index].MaxX >= mDrawRequests[Index].MinX);
-    ASSERT (mDrawRequests[Index].MaxY >= mDrawRequests[Index].MinY);
-    //
-    // Set MaxX/Y to Width and Height as the requests are invalidated anyway.
-    //
-    mDrawRequests[Index].MaxX -= mDrawRequests[Index].MinX - 1;
-    mDrawRequests[Index].MaxY -= mDrawRequests[Index].MinY - 1;
-  }
   //
   // Raise the TPL to not interrupt timing or flushing.
   //
@@ -792,20 +772,17 @@ GuiFlushScreen (
     EndTsc = InternalCpuDelayTsc (mDeltaTscTarget - DeltaTsc);
   }
 
-  for (Index = 0; Index < NumValidDrawReqs; ++Index) {
-    //
-    // Due to above's loop, MaxX/Y correspond to Width and Height here.
-    //
+  for (Index = 0; Index < mNumValidDrawReqs; ++Index) {
     GuiOutputBlt (
       mOutputContext,
       mScreenBuffer,
       EfiBltBufferToVideo,
-      mDrawRequests[Index].MinX,
-      mDrawRequests[Index].MinY,
-      mDrawRequests[Index].MinX,
-      mDrawRequests[Index].MinY,
-      mDrawRequests[Index].MaxX,
-      mDrawRequests[Index].MaxY,
+      mDrawRequests[Index].X,
+      mDrawRequests[Index].Y,
+      mDrawRequests[Index].X,
+      mDrawRequests[Index].Y,
+      mDrawRequests[Index].Width,
+      mDrawRequests[Index].Height,
       mScreenBufferDelta
       );
   }
@@ -814,6 +791,8 @@ GuiFlushScreen (
     EnableInterrupts ();
   }
   gBS->RestoreTPL (OldTpl);
+
+  mNumValidDrawReqs = 0;
   //
   // Explicitly include BLT time in the timing calculation.
   // FIXME: GOP takes inconsistently long depending on dimensions.
