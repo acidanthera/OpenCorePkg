@@ -574,33 +574,28 @@ GuiRequestDrawCrop (
 
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
+
+  EffWidth  = Width;
+  EffHeight = Height;
   //
   // Only draw the onscreen parts.
   //
   if (X >= 0) {
     PosX = (UINT32)X;
   } else {
-    if (X + Width <= 0) {
-      return;
-    }
-
-    Width = (UINT32)(X + Width);
-    PosX  = 0;
+    EffWidth += X;
+    PosX      = 0;
   }
 
   if (Y >= 0) {
     PosY = (UINT32)Y;
   } else {
-    if (Y + Height <= 0) {
-      return;
-    }
-
-    Height = (UINT32)(Y + Height);
-    PosY   = 0;
+    EffHeight += Y;
+    PosY       = 0;
   }
 
-  EffWidth  = MIN (Width,  (INT64) DrawContext->Screen->Width  - PosX);
-  EffHeight = MIN (Height, (INT64) DrawContext->Screen->Height - PosY);
+  EffWidth  = MIN (EffWidth,  (INT64) DrawContext->Screen->Width  - PosX);
+  EffHeight = MIN (EffHeight, (INT64) DrawContext->Screen->Height - PosY);
 
   if (EffWidth <= 0 || EffHeight <= 0) {
     return;
