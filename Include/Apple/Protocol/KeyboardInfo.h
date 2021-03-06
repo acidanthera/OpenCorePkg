@@ -24,7 +24,7 @@ EFI_STATUS
 (EFIAPI *KEYBOARD_INFO_GET_INFO)(
   OUT UINT16  *IdVendor,
   OUT UINT16  *IdProduct,
-  OUT UINT8   *CountryCode
+  OUT UINT16  *CountryCode
   );
 
 // EFI_KEYBOARD_INFO_PROTOCOL
