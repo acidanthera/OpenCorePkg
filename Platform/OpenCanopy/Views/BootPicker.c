@@ -760,24 +760,19 @@ InternalBootPickerLeftScrollDraw (
 
   Clickable  = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
 
-  ASSERT_EQUALS (This->Width,  BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (This->Height, BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-
   ButtonImage = Clickable->CurrentImage;
   ASSERT (ButtonImage != NULL);
 
-  ASSERT_EQUALS (ButtonImage->Width , BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (ButtonImage->Height, BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (ButtonImage->Width, This->Width);
+  ASSERT_EQUALS (ButtonImage->Height, This->Height);
   ASSERT (ButtonImage->Buffer != NULL);
 
-  GuiDrawChildImage (
+  GuiDrawToBuffer (
     ButtonImage,
     mBootPickerOpacity,
     DrawContext,
     BaseX,
     BaseY,
-    0,
-    0,
     OffsetX,
     OffsetY,
     Width,
@@ -815,24 +810,19 @@ InternalBootPickerRightScrollDraw (
 
   Clickable  = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
 
-  ASSERT_EQUALS (This->Width,  BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (This->Height, BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-
   ButtonImage = Clickable->CurrentImage;
   ASSERT (ButtonImage != NULL);
 
-  ASSERT_EQUALS (ButtonImage->Width , BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
-  ASSERT_EQUALS (ButtonImage->Height, BOOT_SCROLL_BUTTON_DIMENSION * DrawContext->Scale);
+  ASSERT_EQUALS (ButtonImage->Width , This->Width);
+  ASSERT_EQUALS (ButtonImage->Height, This->Height);
   ASSERT (ButtonImage->Buffer != NULL);
 
-  GuiDrawChildImage (
+  GuiDrawToBuffer (
     ButtonImage,
     mBootPickerOpacity,
     DrawContext,
     BaseX,
     BaseY,
-    0,
-    0,
     OffsetX,
     OffsetY,
     Width,
