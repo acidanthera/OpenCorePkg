@@ -334,6 +334,52 @@ ScanIntelFSBFrequency (
     ));
 }
 
+UINT64
+InternalConvertAppleFSBToTSCFrequency (
+  IN  UINT64        FSBFrequency
+  )
+{
+  CPUID_VERSION_INFO_EAX              Eax;
+  UINT8                               CpuModel;
+  MSR_IA32_PERF_STATUS_REGISTER       PerfStatus;
+  MSR_NEHALEM_PLATFORM_INFO_REGISTER  PlatformInfo;
+  UINT8                               MaxBusRatio;
+  UINT8                               MaxBusRatioDiv;
+
+  //
+  // Assuming Intel machines used on Apple hardware.
+  //
+  AsmCpuid (
+    CPUID_VERSION_INFO,
+    &Eax.Uint32,
+    NULL,
+    NULL,
+    NULL
+    );
+
+  CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+  //
+  // This part should be synced with ScanIntelFSBFrequency.
+  //
+  if (CpuModel >= CPU_MODEL_NEHALEM) {
+    PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
+    MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+    MaxBusRatioDiv = 0;
+  } else {
+    PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+    MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
+    MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
+  }
+
+  //
+  // When MaxBusRatioDiv is 1, the multiplier is MaxBusRatio + 0.5.
+  //
+  if (MaxBusRatioDiv == 1) {
+    return FSBFrequency * MaxBusRatio + FSBFrequency / 2;
+  }
+  return FSBFrequency * MaxBusRatio;
+}
+
 STATIC
 VOID
 ScanIntelProcessorApple (
@@ -344,12 +390,12 @@ ScanIntelProcessorApple (
 
   AppleMajorType = InternalDetectAppleMajorType (Cpu->BrandString);
   Cpu->AppleProcessorType = InternalDetectAppleProcessorType (
-                              Cpu->Model,
-                              Cpu->Stepping,
-                              AppleMajorType,
-                              Cpu->CoreCount,
-                              (Cpu->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
-                              );
+    Cpu->Model,
+    Cpu->Stepping,
+    AppleMajorType,
+    Cpu->CoreCount,
+    (Cpu->ExtFeatures & CPUID_EXTFEATURE_EM64T) != 0
+    );
 
   DEBUG ((DEBUG_INFO, "OCCPU: Detected Apple Processor Type: %02X -> %04X\n", AppleMajorType, Cpu->AppleProcessorType));
 }
@@ -582,8 +628,7 @@ ScanAmdProcessor (
         //
         if (Cpu->MaxExtId >= 0x8000001E) {
           AsmCpuid (0x8000001E, NULL, &CpuidEbx, NULL, NULL);
-          Cpu->CoreCount =
-            (UINT16) DivU64x32 (
+          Cpu->CoreCount = (UINT16) DivU64x32 (
               Cpu->ThreadCount,
               (BitFieldRead32 (CpuidEbx, 8, 15) + 1)
             );

@@ -226,6 +226,17 @@ InternalCalculateTSCFromPMTimer (
 }
 
 UINT64
+InternalCalculateTSCFromApplePlatformInfo (
+  OUT  UINT64  *FSBFrequency  OPTIONAL
+  )
+{
+   //
+   // TODO
+   //
+   return 0;
+ }
+
+UINT64
 InternalCalculateARTFrequencyIntel (
   OUT UINT64   *CPUFrequency,
   OUT UINT64   *TscAdjustPtr OPTIONAL,
