@@ -107,9 +107,6 @@ GuiClickableIsHit (
   IN INT64            OffsetY
   )
 {
-  UINT32 RowOffset;
-  UINT32 IndexX;
-
   ASSERT (Image != NULL);
   ASSERT (Image->Buffer != NULL);
 
@@ -118,33 +115,7 @@ GuiClickableIsHit (
     return FALSE;
   }
 
-  RowOffset = (UINT32)OffsetY * Image->Width;
-
-  if (Image->Buffer[RowOffset + OffsetX].Reserved != 0) {
-    return TRUE;
-  }
-
-  for (IndexX = 0; IndexX < OffsetX; ++IndexX) {
-    if (Image->Buffer[RowOffset + IndexX].Reserved != 0) {
-      break;
-    }
-  }
-
-  if (IndexX == OffsetX) {
-    return FALSE;
-  }
-
-  for (IndexX = Image->Width - 1; IndexX > OffsetX; --IndexX) {
-    if (Image->Buffer[RowOffset + IndexX].Reserved != 0) {
-      break;
-    }
-  }
-
-  if (IndexX == OffsetX) {
-    return FALSE;
-  }
-
-  return TRUE;
+  return Image->Buffer[(UINT32) OffsetY * Image->Width + (UINT32) OffsetX].Reserved > 0;
 }
 
 VOID
