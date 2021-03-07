@@ -160,16 +160,14 @@ InternalBootPickerViewDraw (
   ASSERT (DrawContext != NULL);
   ASSERT (Context != NULL);
 
-  ASSERT (BaseX + OffsetX >= 0);
-  ASSERT (BaseY + OffsetY >= 0);
-  ASSERT (BaseX + OffsetX <= MAX_UINT32);
-  ASSERT (BaseY + OffsetY <= MAX_UINT32);
+  ASSERT (BaseX == 0);
+  ASSERT (BaseY == 0);
 
   GuiDrawToBufferFill (
     &mBackgroundImage,
     DrawContext,
-    (UINT32) (BaseX + OffsetX),
-    (UINT32) (BaseY + OffsetY),
+    OffsetX,
+    OffsetY,
     Width,
     Height
     );
@@ -179,8 +177,8 @@ InternalBootPickerViewDraw (
       &DrawContext->GuiContext->Background,
       0xFF,
       DrawContext,
-      BaseX,
-      BaseY,
+      0,
+      0,
       mBackgroundImageOffsetX,
       mBackgroundImageOffsetY,
       OffsetX,
@@ -194,8 +192,8 @@ InternalBootPickerViewDraw (
     This,
     DrawContext,
     Context,
-    BaseX,
-    BaseY,
+    0,
+    0,
     OffsetX,
     OffsetY,
     Width,
@@ -217,6 +215,8 @@ InternalBootPickerViewKeyEvent (
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
 
+  ASSERT (BaseX == 0);
+  ASSERT (BaseY == 0);
   //
   // Consider moving between multiple panes with UP/DOWN and store the current
   // view within the object - for now, hardcoding this is enough.
@@ -226,8 +226,8 @@ InternalBootPickerViewKeyEvent (
                         &mBootPicker.Hdr.Obj,
                         DrawContext,
                         Context,
-                        BaseX + mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
-                        BaseY + mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
+                        mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
+                        mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
                         Key,
                         Modifier
                         );
