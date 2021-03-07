@@ -10,6 +10,7 @@
 #include <IndustryStandard/AppleIcon.h>
 
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiRuntimeServicesTableLib.h>
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -32,6 +33,9 @@ extern GUI_OBJ_CHILD     mBootPickerContainer;
 extern GUI_OBJ_CLICKABLE mBootPickerSelector;
 extern GUI_OBJ_CLICKABLE mBootPickerRightScroll;
 extern GUI_OBJ_CLICKABLE mBootPickerLeftScroll;
+extern GUI_OBJ_CHILD     mBootPickerActionButtonsContainer;
+extern GUI_OBJ_CLICKABLE mBootPickerShutDown;
+extern GUI_OBJ_CLICKABLE mBootPickerRestart;
 extern CONST GUI_IMAGE   mBackgroundImage;
 
 STATIC UINT8 mBootPickerOpacity = 0xFF;
@@ -1102,6 +1106,155 @@ InternalBootPickerRightScrollPtrEvent (
   return This;
 }
 
+VOID
+InternalBootPickerSimpleButtonDraw (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height
+  )
+{
+  CONST GUI_OBJ_CLICKABLE       *Clickable;
+  CONST GUI_IMAGE               *ButtonImage;
+
+  ASSERT (This != NULL);
+  ASSERT (DrawContext != NULL);
+  ASSERT (Context != NULL);
+
+  Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
+  ButtonImage = Clickable->CurrentImage;
+  ASSERT (ButtonImage != NULL);
+
+  ASSERT (ButtonImage->Width == This->Width);
+  ASSERT (ButtonImage->Height == This->Height);
+  ASSERT (ButtonImage->Buffer != NULL);
+
+  GuiDrawToBuffer (
+    ButtonImage,
+    mBootPickerOpacity,
+    DrawContext,
+    BaseX,
+    BaseY,
+    OffsetX,
+    OffsetY,
+    Width,
+    Height
+    );
+  //
+  // There should be no children.
+  //
+  ASSERT (IsListEmpty (&This->Children));
+}
+
+GUI_OBJ *
+InternalBootPickerShutDownPtrEvent (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
+  )
+{
+  GUI_OBJ_CLICKABLE *Clickable;
+  CONST GUI_IMAGE   *ButtonImage;
+  BOOLEAN           IsHit;
+
+  Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
+  ButtonImage = &Context->Icons[ICON_SHUT_DOWN][ICON_TYPE_BASE];
+
+  ASSERT (Event == GuiPointerPrimaryDown
+       || Event == GuiPointerPrimaryHold
+       || Event == GuiPointerPrimaryUp);
+
+  IsHit = GuiClickableIsHit (
+    ButtonImage,
+    OffsetX,
+    OffsetY
+    );
+  if (IsHit) {
+    if (Event != GuiPointerPrimaryUp) {
+      ButtonImage = &Context->Icons[ICON_SHUT_DOWN][ICON_TYPE_HELD];
+    } else {
+      gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
+    }
+  }
+
+  if (Clickable->CurrentImage != ButtonImage) {
+    Clickable->CurrentImage = ButtonImage;
+    //
+    // The view is constructed such that the action buttons are always fully
+    // visible.
+    //
+    ASSERT (BaseX >= 0);
+    ASSERT (BaseY >= 0);
+    ASSERT (BaseX + This->Width <= mBootPickerView.Width);
+    ASSERT (BaseY + This->Height <= mBootPickerView.Height);
+    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
+  }
+
+  return This;
+}
+
+GUI_OBJ *
+InternalBootPickerRestartPtrEvent (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     GUI_PTR_EVENT           Event,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INT64                   OffsetX,
+  IN     INT64                   OffsetY
+  )
+{
+  GUI_OBJ_CLICKABLE *Clickable;
+  CONST GUI_IMAGE   *ButtonImage;
+  BOOLEAN           IsHit;
+
+  Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
+  ButtonImage = &Context->Icons[ICON_RESTART][ICON_TYPE_BASE];
+
+  ASSERT (Event == GuiPointerPrimaryDown
+       || Event == GuiPointerPrimaryHold
+       || Event == GuiPointerPrimaryUp);
+
+  IsHit = GuiClickableIsHit (
+    ButtonImage,
+    OffsetX,
+    OffsetY
+    );
+  if (IsHit) {
+    if (Event != GuiPointerPrimaryUp) {
+      ButtonImage = &Context->Icons[ICON_RESTART][ICON_TYPE_HELD];
+    } else {
+      gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);
+    }
+  }
+
+  if (Clickable->CurrentImage != ButtonImage) {
+    Clickable->CurrentImage = ButtonImage;
+    //
+    // The view is constructed such that the action buttons are always fully
+    // visible.
+    //
+    ASSERT (BaseX >= 0);
+    ASSERT (BaseY >= 0);
+    ASSERT (BaseX + This->Width <= mBootPickerView.Width);
+    ASSERT (BaseY + This->Height <= mBootPickerView.Height);
+    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
+  }
+
+  return This;
+}
+
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
   {
     INITIALIZE_LIST_HEAD_VARIABLE (mBootPicker.Hdr.Obj.Children),
@@ -1161,7 +1314,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerLeftScroll = {
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
   {
-    { &mBootPickerContainer.Link, &mBootPickerView.Children },
+    { &mBootPickerContainer.Link, &mBootPickerActionButtonsContainer.Link },
     &mBootPickerView,
     {
       0, 0, 0, 0,
@@ -1174,12 +1327,54 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
   NULL
 };
 
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
+  {
+    { &mBootPickerActionButtonsContainer.Obj.Children, &mBootPickerRestart.Hdr.Link },
+    &mBootPickerActionButtonsContainer.Obj,
+    {
+      0, 0, 0, 0,
+      InternalBootPickerSimpleButtonDraw,
+      InternalBootPickerShutDownPtrEvent,
+      NULL,
+      INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerShutDown.Hdr.Obj.Children)
+    }
+  },
+  NULL
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
+  {
+    { &mBootPickerShutDown.Hdr.Link, &mBootPickerActionButtonsContainer.Obj.Children },
+    &mBootPickerActionButtonsContainer.Obj,
+    {
+      0, 0, 0, 0,
+      InternalBootPickerSimpleButtonDraw,
+      InternalBootPickerRestartPtrEvent,
+      NULL,
+      INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerRestart.Hdr.Obj.Children)
+    }
+  },
+  NULL
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerActionButtonsContainer = {
+  { &mBootPickerRightScroll.Hdr.Link, &mBootPickerView.Children },
+  &mBootPickerView,
+  {
+    0, 0, 0, 0,
+    GuiObjDrawDelegate,
+    GuiObjDelegatePtrEvent,
+    NULL,
+    { &mBootPickerRestart.Hdr.Link, &mBootPickerShutDown.Hdr.Link }
+  }
+};
+
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ mBootPickerView = {
   0, 0, 0, 0,
   InternalBootPickerViewDraw,
   GuiObjDelegatePtrEvent,
   InternalBootPickerViewKeyEvent,
-  { &mBootPickerRightScroll.Hdr.Link, &mBootPickerLeftScroll.Hdr.Link }
+  { &mBootPickerActionButtonsContainer.Link, &mBootPickerLeftScroll.Hdr.Link }
 };
 
 STATIC
@@ -1575,6 +1770,20 @@ InternalBootPickerAnimateIntro (
     mBootPicker.Hdr.Obj.Width + DeltaSine,
     mBootPicker.Hdr.Obj.Height
     );
+  //
+  // The view is constructed such that the action buttons are always fully
+  // visible.
+  //
+  ASSERT (mBootPickerActionButtonsContainer.Obj.OffsetX >= 0);
+  ASSERT (mBootPickerActionButtonsContainer.Obj.OffsetY >= 0);
+  ASSERT (mBootPickerActionButtonsContainer.Obj.OffsetX + mBootPickerActionButtonsContainer.Obj.Width <= DrawContext->Screen->Width);
+  ASSERT (mBootPickerActionButtonsContainer.Obj.OffsetY + mBootPickerActionButtonsContainer.Obj.Height <= DrawContext->Screen->Height);
+  GuiRequestDraw (
+    (UINT32) mBootPickerActionButtonsContainer.Obj.OffsetX,
+    (UINT32) mBootPickerActionButtonsContainer.Obj.OffsetY,
+    mBootPickerActionButtonsContainer.Obj.Width,
+    mBootPickerActionButtonsContainer.Obj.Height
+    );
   
   ASSERT (mBpAnimInfoSinMove.Duration == mBpAnimInfoOpacity.Duration);
   return CurrentTime - mBpAnimInfoSinMove.StartTime >= mBpAnimInfoSinMove.Duration;
@@ -1657,6 +1866,23 @@ BootPickerViewInitialize (
   mBootPicker.Hdr.Obj.OffsetY = 0;
 
   mBootPicker.SelectedEntry = NULL;
+
+  mBootPickerShutDown.CurrentImage = &GuiContext->Icons[ICON_SHUT_DOWN][ICON_TYPE_BASE];
+  mBootPickerShutDown.Hdr.Obj.Width = mBootPickerShutDown.CurrentImage->Width;
+  mBootPickerShutDown.Hdr.Obj.Height = mBootPickerShutDown.CurrentImage->Height;
+  mBootPickerShutDown.Hdr.Obj.OffsetX = 0;
+  mBootPickerShutDown.Hdr.Obj.OffsetY = 0;
+
+  mBootPickerRestart.CurrentImage = &GuiContext->Icons[ICON_RESTART][ICON_TYPE_BASE];
+  mBootPickerRestart.Hdr.Obj.Width = mBootPickerShutDown.CurrentImage->Width;
+  mBootPickerRestart.Hdr.Obj.Height = mBootPickerShutDown.CurrentImage->Height;
+  mBootPickerRestart.Hdr.Obj.OffsetX = mBootPickerShutDown.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
+  mBootPickerRestart.Hdr.Obj.OffsetY = 0;
+
+  mBootPickerActionButtonsContainer.Obj.Width = mBootPickerShutDown.Hdr.Obj.Width + mBootPickerRestart.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
+  mBootPickerActionButtonsContainer.Obj.Height = MAX (mBootPickerShutDown.CurrentImage->Height, mBootPickerRestart.CurrentImage->Height);
+  mBootPickerActionButtonsContainer.Obj.OffsetX = (mBootPickerView.Width - mBootPickerActionButtonsContainer.Obj.Width) / 2;
+  mBootPickerActionButtonsContainer.Obj.OffsetY = mBootPickerView.Height - mBootPickerActionButtonsContainer.Obj.Height - BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
 
   // TODO: animations should be tied to UI objects, not global
   // Each object has its own list of animations.

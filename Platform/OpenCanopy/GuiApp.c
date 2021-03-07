@@ -55,6 +55,8 @@ mIconNames[ICON_NUM_TOTAL] = {
   [ICON_SELECTOR]           = "Selector",
   [ICON_LEFT]               = "Left",
   [ICON_RIGHT]              = "Right",
+  [ICON_SHUT_DOWN]          = "ShutDown",
+  [ICON_RESTART]            = "Restart",
   [ICON_GENERIC_HDD]        = "HardDrive",
   [ICON_APPLE]              = "Apple",
   [ICON_APPLE_RECOVERY]     = "AppleRecv",
@@ -377,6 +379,10 @@ InternalContextConstruct (
     } else if (Index == ICON_LEFT || Index == ICON_RIGHT) {
       ImageWidth  = BOOT_SCROLL_BUTTON_DIMENSION;
       ImageHeight = BOOT_SCROLL_BUTTON_DIMENSION;
+    } else if (Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
+      ImageWidth  = BOOT_ACTION_BUTTON_DIMENSION;
+      ImageHeight = BOOT_ACTION_BUTTON_DIMENSION;
+      AllowLessSize = TRUE;
     } else {
       ImageWidth  = BOOT_ENTRY_ICON_DIMENSION;
       ImageHeight = BOOT_ENTRY_ICON_DIMENSION;
@@ -394,7 +400,7 @@ InternalContextConstruct (
       AllowLessSize
       );
     if (!EFI_ERROR (Status)) {
-      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT) {
+      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT || Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
         Status = GuiCreateHighlightedImage (
           &Context->Icons[Index][ICON_TYPE_HELD],
           &Context->Icons[Index][ICON_TYPE_BASE],
