@@ -1721,17 +1721,17 @@ BootPickerViewLateInitialize (
     while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
       BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
       if (mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX < 0) {
+        //
+        // Move the first fully visible boot entry to the very left to prevent
+        // cut-off entries. This only applies when entries overflow.
+        //
+        ScrollOffset = -(INT64) FirstPosOffset;
         break;
       }
 
       FirstPosOffset = mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX;
       ListEntry = ListEntry->BackLink;
     }
-    //
-    // Move the first fully visible boot entry to the very left to prevent
-    // cut-off entries.
-    //
-    ScrollOffset = -(INT64) FirstPosOffset;
   }
 
   mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
