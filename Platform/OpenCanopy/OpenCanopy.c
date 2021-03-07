@@ -466,7 +466,6 @@ GuiDrawToBuffer (
   }
 }
 
-STATIC
 VOID
 GuiRequestDraw (
   IN UINT32  PosX,
@@ -602,26 +601,6 @@ GuiRequestDrawCrop (
   }
 
   GuiRequestDraw (PosX, PosY, (UINT32) EffWidth, (UINT32) EffHeight);
-}
-
-VOID
-GuiRedrawObject (
-  IN OUT GUI_OBJ              *This,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY
-  )
-{
-  ASSERT (This != NULL);
-  ASSERT (DrawContext != NULL);
-
-  GuiRequestDrawCrop (
-    DrawContext,
-    BaseX,
-    BaseY,
-    This->Width,
-    This->Height
-    );
 }
 
 VOID

@@ -344,11 +344,15 @@ InternalBootPickerScroll (
   ASSERT (ScrollY >= BaseY);
   ASSERT (ScrollY + mBootPickerRightScroll.Hdr.Obj.Height <= BaseY + This->Hdr.Obj.Height);
   DEBUG_CODE_END ();
+  //
+  // The container is constructed such that it is always fully visible.
+  //
+  ASSERT (This->Hdr.Obj.Height <= mBootPickerContainer.Obj.Height);
+  ASSERT (BaseY + This->Hdr.Obj.Height <= DrawContext->Screen->Height);
   
-  GuiRequestDrawCrop (
-    DrawContext,
+  GuiRequestDraw (
     0,
-    BaseY,
+    (UINT32) BaseY,
     DrawContext->Screen->Width,
     This->Hdr.Obj.Height
     );
@@ -885,7 +889,14 @@ InternalBootPickerSelectorPtrEvent (
 
   if (Clickable->CurrentImage != ButtonImage) {
     Clickable->CurrentImage = ButtonImage;
-    GuiRedrawObject (This, DrawContext, BaseX, BaseY);
+    //
+    // The view is constructed such that the selector is always fully visible.
+    //
+    ASSERT (BaseX >= 0);
+    ASSERT (BaseY >= 0);
+    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
+    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
   return This;
@@ -983,7 +994,15 @@ InternalBootPickerLeftScrollPtrEvent (
 
   if (Clickable->CurrentImage != ButtonImage) {
     Clickable->CurrentImage = ButtonImage;
-    GuiRedrawObject (This, DrawContext, BaseX, BaseY);
+    //
+    // The view is constructed such that the scroll buttons are always fully
+    // visible.
+    //
+    ASSERT (BaseX >= 0);
+    ASSERT (BaseY >= 0);
+    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
+    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
   return This;
@@ -1079,7 +1098,15 @@ InternalBootPickerRightScrollPtrEvent (
 
   if (Clickable->CurrentImage != ButtonImage) {
     Clickable->CurrentImage = ButtonImage;
-    GuiRedrawObject (This, DrawContext, BaseX, BaseY);
+    //
+    // The view is constructed such that the scroll buttons are always fully
+    // visible.
+    //
+    ASSERT (BaseX >= 0);
+    ASSERT (BaseY >= 0);
+    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
+    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
   return This;
