@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed creating log file when root file system is not writable
 - Fixed `DisableSingleUser` not being enabled in certain cases
 - Added `ForceBooterSignature` quirk for Mac EFI firmware
+- Fixed OpenCanopy sometimes cutting off shown boot entries
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
