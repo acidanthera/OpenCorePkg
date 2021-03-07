@@ -348,12 +348,12 @@ InternalBootPickerScroll (
   // The container is constructed such that it is always fully visible.
   //
   ASSERT (This->Hdr.Obj.Height <= mBootPickerContainer.Obj.Height);
-  ASSERT (BaseY + This->Hdr.Obj.Height <= DrawContext->Screen->Height);
+  ASSERT (BaseY + This->Hdr.Obj.Height <= mBootPickerView.Height);
   
   GuiRequestDraw (
     0,
     (UINT32) BaseY,
-    DrawContext->Screen->Width,
+    mBootPickerView.Width,
     This->Hdr.Obj.Height
     );
 }
@@ -894,8 +894,8 @@ InternalBootPickerSelectorPtrEvent (
     //
     ASSERT (BaseX >= 0);
     ASSERT (BaseY >= 0);
-    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
-    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    ASSERT (BaseX + This->Width <= mBootPickerView.Width);
+    ASSERT (BaseY + This->Height <= mBootPickerView.Height);
     GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
@@ -1000,8 +1000,8 @@ InternalBootPickerLeftScrollPtrEvent (
     //
     ASSERT (BaseX >= 0);
     ASSERT (BaseY >= 0);
-    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
-    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    ASSERT (BaseX + This->Width <= mBootPickerView.Width);
+    ASSERT (BaseY + This->Height <= mBootPickerView.Height);
     GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
@@ -1104,8 +1104,8 @@ InternalBootPickerRightScrollPtrEvent (
     //
     ASSERT (BaseX >= 0);
     ASSERT (BaseY >= 0);
-    ASSERT (BaseX + This->Width <= DrawContext->Screen->Width);
-    ASSERT (BaseY + This->Height <= DrawContext->Screen->Height);
+    ASSERT (BaseX + This->Width <= mBootPickerView.Width);
+    ASSERT (BaseY + This->Height <= mBootPickerView.Height);
     GuiRequestDraw ((UINT32) BaseX, (UINT32) BaseY, This->Width, This->Height);
   }
 
