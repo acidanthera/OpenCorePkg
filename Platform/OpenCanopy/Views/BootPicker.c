@@ -1528,9 +1528,9 @@ InitBpAnimIntro (
   mBpAnimInfoSinMove.EndValue   = 35;
   //
   // FIXME: This assumes that only relative changes of X are performed on
-  //        mBootPicker between animation initialisation and start.
+  //        mBootPickerContainer between animation initialisation and start.
   //
-  mBootPicker.Hdr.Obj.OffsetX += 35;
+  mBootPickerContainer.Obj.OffsetX += 35;
 }
 
 BOOLEAN
@@ -1551,14 +1551,17 @@ InternalBootPickerAnimateIntro (
 
   InterpolVal = GuiGetInterpolatedValue (&mBpAnimInfoSinMove, CurrentTime);
   DeltaSine = InterpolVal - PrevSine;
-  mBootPicker.Hdr.Obj.OffsetX -= DeltaSine;
+  mBootPickerContainer.Obj.OffsetX -= DeltaSine;
   PrevSine = InterpolVal;
-
+  //
+  // Draw the full dimension of the inner container to implicitly cover the
+  // scroll buttons with the off-screen entries.
+  //
   GuiRequestDrawCrop (
     DrawContext,
     mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
-    (UINT32)(mBootPicker.Hdr.Obj.Width + DeltaSine),
+    mBootPicker.Hdr.Obj.Width + DeltaSine,
     mBootPicker.Hdr.Obj.Height
     );
   
