@@ -979,10 +979,12 @@ GuiDrawLoop (
   BOOLEAN             ObjectHeld;
 
   CONST GUI_IMAGE     *CursorImage;
+  UINT64              FrameTime;
 
   ASSERT (DrawContext != NULL);
 
   mNumValidDrawReqs = 0;
+  FrameTime         = 0;
   HoldObject        = NULL;
   ObjectHeld        = FALSE;
 
@@ -1040,7 +1042,7 @@ GuiDrawLoop (
                           );
           
         }
-        
+
         ObjectHeld = TRUE;
       } else {
         ObjectHeld = FALSE;
@@ -1105,8 +1107,6 @@ GuiDrawLoop (
         }
       }
     }
-
-    STATIC UINT64 FrameTime = 0;
     //
     // Process queued animations.
     //
