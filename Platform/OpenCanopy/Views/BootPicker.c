@@ -1117,7 +1117,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
     INITIALIZE_LIST_HEAD_VARIABLE (mBootPicker.Hdr.Obj.Children),
     &mBootPicker.Hdr.Obj,
     {
-      0, 0, BOOT_SELECTOR_WIDTH, BOOT_SELECTOR_HEIGHT,
+      0, 0, 0, 0,
       InternalBootPickerSelectorDraw,
       InternalBootPickerSelectorPtrEvent,
       NULL,
@@ -1131,7 +1131,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
   { &mBootPickerLeftScroll.Hdr.Link, &mBootPickerRightScroll.Hdr.Link },
   &mBootPickerView,
   {
-    0, 0, 0, BOOT_SELECTOR_HEIGHT,
+    0, 0, 0, 0,
     GuiObjDrawDelegate,
     GuiObjDelegatePtrEvent,
     NULL,
@@ -1144,7 +1144,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VOLUME_PICKER mBootPicker = {
     INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerContainer.Obj.Children),
     &mBootPickerContainer.Obj,
     {
-      0, 0, 0, BOOT_SELECTOR_HEIGHT,
+      0, 0, 0, 0,
       GuiObjDrawDelegate,
       GuiObjDelegatePtrEvent,
       InternalBootPickerKeyEvent,
@@ -1159,7 +1159,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerLeftScroll = {
     { &mBootPickerView.Children, &mBootPickerContainer.Link },
     &mBootPickerView,
     {
-      0, 0, BOOT_SCROLL_BUTTON_DIMENSION, BOOT_SCROLL_BUTTON_DIMENSION,
+      0, 0, 0, 0,
       InternalBootPickerLeftScrollDraw,
       InternalBootPickerLeftScrollPtrEvent,
       NULL,
@@ -1174,7 +1174,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
     { &mBootPickerContainer.Link, &mBootPickerView.Children },
     &mBootPickerView,
     {
-      0, 0, BOOT_SCROLL_BUTTON_DIMENSION, BOOT_SCROLL_BUTTON_DIMENSION,
+      0, 0, 0, 0,
       InternalBootPickerRightScrollDraw,
       InternalBootPickerRightScrollPtrEvent,
       NULL,
