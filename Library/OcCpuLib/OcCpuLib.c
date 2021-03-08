@@ -320,6 +320,13 @@ SetMaxBusRatioAndMaxBusRatioDiv (
     //
     *MaxBusRatioDiv   = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
   }
+
+  //
+  // Fall back to 1 if *MaxBusRatio has zero.
+  //
+  if (*MaxBusRatio == 0) {
+    *MaxBusRatio = 1;
+  }
 }
 
 STATIC
@@ -341,7 +348,7 @@ ScanIntelFSBFrequency (
   // There may be some quirks with virtual CPUs (VMware is fine).
   // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
   //
-  if (CpuInfo->CPUFrequency > 0 && MaxBusRatio > 0) {
+  if (CpuInfo->CPUFrequency > 0) {
     if (MaxBusRatioDiv == 0) {
       CpuInfo->FSBFrequency = DivU64x32 (CpuInfo->CPUFrequency, MaxBusRatio);
     } else {
