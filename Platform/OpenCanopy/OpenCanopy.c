@@ -273,18 +273,18 @@ GuiObjDelegatePtrEvent (
 
 VOID
 GuiDrawToBufferFill (
-  IN     CONST GUI_IMAGE      *Image,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT32               PosX,
-  IN     UINT32               PosY,
-  IN     UINT32               Width,
-  IN     UINT32               Height
+  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Colour,
+  IN OUT GUI_DRAWING_CONTEXT                  *DrawContext,
+  IN     UINT32                               PosX,
+  IN     UINT32                               PosY,
+  IN     UINT32                               Width,
+  IN     UINT32                               Height
   )
 {
   UINT32 RowIndex;
   UINT32 TargetRowOffset;
 
-  ASSERT (Image != NULL);
+  ASSERT (Colour != NULL);
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
   ASSERT (Width > 0);
@@ -296,8 +296,6 @@ GuiDrawToBufferFill (
   ASSERT (DrawContext->Screen->Height >= PosY);
   ASSERT (PosX + Width <= DrawContext->Screen->Width);
   ASSERT (PosY + Height <= DrawContext->Screen->Height);
-
-  ASSERT (Image->Buffer != NULL);
   //
   // Iterate over each row of the request.
   //
@@ -314,7 +312,7 @@ GuiDrawToBufferFill (
     SetMem32 (
       &mScreenBuffer[TargetRowOffset + PosX],
       Width * sizeof (UINT32),
-      PIXEL_TO_UINT32 (&Image->Buffer[0])
+      PIXEL_TO_UINT32 (Colour)
       );
   }
 

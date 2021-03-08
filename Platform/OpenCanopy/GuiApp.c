@@ -31,9 +31,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext;
 //
 // FIXME: Should not be global here.
 //
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBackgroundPixel;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mHighlightPixel = {0xAF, 0xAF, 0xAF, 0x32};
-CONST GUI_IMAGE mBackgroundImage = { 1, 1, &mBackgroundPixel };
 
 STATIC
 CONST CHAR8 *
@@ -322,14 +320,6 @@ InternalContextConstruct (
     Context->BackgroundColor.Raw = APPLE_COLOR_SYRAH_BLACK;
   }
 
-  //
-  // Set background colour with full opacity.
-  //
-  mBackgroundPixel.Red      = Context->BackgroundColor.Pixel.Red;
-  mBackgroundPixel.Green    = Context->BackgroundColor.Pixel.Green;
-  mBackgroundPixel.Blue     = Context->BackgroundColor.Pixel.Blue;
-  mBackgroundPixel.Reserved = 0xFF;
-
   if (AsciiStrCmp (Picker->PickerVariant, "Auto") == 0) {
     if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
       Prefix = "Old";
@@ -366,6 +356,10 @@ InternalContextConstruct (
       + Context->BackgroundColor.Pixel.Green * 587U
       + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
+  //
+  // Set background colour with full opacity.
+  //
+  Context->BackgroundColor.Pixel.Reserved = 0xFF;
 
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {
     AllowLessSize = FALSE;

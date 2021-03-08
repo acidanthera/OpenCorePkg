@@ -164,7 +164,7 @@ InternalBootPickerViewDraw (
   ASSERT (BaseY == 0);
 
   GuiDrawToBufferFill (
-    &mBackgroundImage,
+    &Context->BackgroundColor.Pixel,
     DrawContext,
     OffsetX,
     OffsetY,

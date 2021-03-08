@@ -209,12 +209,12 @@ GuiDrawToBuffer (
 
 VOID
 GuiDrawToBufferFill (
-  IN     CONST GUI_IMAGE      *Image,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT32               PosX,
-  IN     UINT32               PosY,
-  IN     UINT32               Width,
-  IN     UINT32               Height
+  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Colour,
+  IN OUT GUI_DRAWING_CONTEXT                  *DrawContext,
+  IN     UINT32                               PosX,
+  IN     UINT32                               PosY,
+  IN     UINT32                               Width,
+  IN     UINT32                               Height
   );
 
 VOID
