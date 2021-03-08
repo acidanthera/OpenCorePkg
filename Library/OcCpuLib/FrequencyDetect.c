@@ -257,6 +257,10 @@ InternalCalculateTSCFromApplePlatformInfo (
     DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r\n", Status));
     return 0;
   }
+  if (Size > sizeof (UINT64)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size for first data\n"));
+    return 0;
+  }
 
   Status = PlatformInfo->GetFirstData (
     PlatformInfo,
