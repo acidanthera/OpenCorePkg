@@ -288,23 +288,7 @@ SetMaxBusRatioAndMaxBusRatioDiv (
   ASSERT (MaxBusRatioDiv != NULL);
 
   if (CpuInfo != NULL) {
-    //
-    // TODO: this may not be accurate on some older processors.
-    //
-    if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
-      PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
-      *MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
-      *MaxBusRatioDiv = 0;
-    } else {
-      PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-      *MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
-      //
-      // Undocumented values:
-      // Non-integer bus ratio for the max-multi.
-      // Non-integer bus ratio for the current-multi.
-      //
-      *MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
-    }
+    CpuModel = CpuInfo->Model;
   } else {
     //
     // Assuming Intel machines used on Apple hardware.
@@ -317,18 +301,24 @@ SetMaxBusRatioAndMaxBusRatioDiv (
       NULL
       );
     CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+  }
+
+  //
+  // TODO: this may not be accurate on some older processors.
+  //
+  if (CpuModel >= CPU_MODEL_NEHALEM) {
+    PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
+    *MaxBusRatio        = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+    *MaxBusRatioDiv     = 0;
+  } else {
+    PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+    *MaxBusRatio      = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
     //
-    // This part should be synced with the code above.
+    // Undocumented values:
+    // Non-integer bus ratio for the max-multi.
+    // Non-integer bus ratio for the current-multi.
     //
-    if (CpuModel >= CPU_MODEL_NEHALEM) {
-      PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
-      *MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
-      *MaxBusRatioDiv = 0;
-    } else {
-      PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-      *MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
-      *MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
-    }
+    *MaxBusRatioDiv   = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
   }
 }
 
