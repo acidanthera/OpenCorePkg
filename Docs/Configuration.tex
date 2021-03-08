@@ -6231,7 +6231,7 @@ functioning. Feature highlights:
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Remove key unless it was submitted during this timeout in milliseconds.
+  \textbf{Description}: Remove key unless it was submitted during this timeout in 10 ms units.
 
   \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
   of currently pressed keys. However, the majority of the drivers only report key
@@ -6241,20 +6241,20 @@ functioning. Feature highlights:
   expires and no new submission of this key happened.
 
   This option allows setting this timeout based on the platform. The recommended
-  value for the majority of platforms is \texttt{5} milliseconds.
-  For reference, holding one key on VMware will repeat it roughly every \texttt{2}
-  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus,
+  value for the majority of platforms is \texttt{5} (\texttt{50} milliseconds).
+  For reference, holding one key on VMware will repeat it roughly every \texttt{20}
+  milliseconds and the same value for APTIO V is \texttt{30-40} milliseconds. Thus,
   it is possible to set a slightly lower value on faster platforms
   and a slightly higher value on slower platforms for more responsive input.
 
-  Pressing keys one after the other results in delays of at least \texttt{6} and
-  \texttt{10} milliseconds for the same platforms.
+  Pressing keys one after the other results in delays of at least \texttt{60} and
+  \texttt{100} milliseconds for the same platforms.
 
   \emph{Note}: Some platforms may require different values, which may be higher or lower.
   For example, when detecting key misses in OpenCanopy, try increasing this value
   (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
   Since every platform is different, it may be prudent to check every value
-  from \texttt{1} to \texttt{25}.
+  from \texttt{1} to \texttt{25} (\texttt{10} to \texttt{250} milliseconds).
 
 \item
   \texttt{KeySupport}\\

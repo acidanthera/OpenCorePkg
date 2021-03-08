@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Sun Mar  7 00:32:05 2021
+%DIF ADD ../Configuration.tex        Mon Mar  8 22:12:57 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6329,7 +6329,7 @@ functioning. Feature highlights:
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Remove key unless it was submitted during this timeout in milliseconds.
+  \textbf{Description}: Remove key unless it was submitted during this timeout in \DIFdelbegin \DIFdel{milliseconds}\DIFdelend \DIFaddbegin \DIFadd{10 ms units}\DIFaddend .
 
   \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
   of currently pressed keys. However, the majority of the drivers only report key
@@ -6339,20 +6339,20 @@ functioning. Feature highlights:
   expires and no new submission of this key happened.
 
   This option allows \DIFdelbegin \DIFdel{to set }\DIFdelend \DIFaddbegin \DIFadd{setting }\DIFaddend this timeout based on the platform. The recommended
-  value \DIFdelbegin \DIFdel{that works on }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend the majority of \DIFdelbegin \DIFdel{the }\DIFdelend platforms is \texttt{5} milliseconds.
-  For reference, holding one key on VMware will repeat it roughly every \texttt{2}
-  milliseconds and the same value for APTIO V is \texttt{3-4} milliseconds. Thus\DIFaddbegin \DIFadd{,
+  value \DIFdelbegin \DIFdel{that works on }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend the majority of \DIFdelbegin \DIFdel{the }\DIFdelend platforms is \texttt{5} \DIFdelbegin \DIFdel{milliseconds}\DIFdelend \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{50}} \DIFadd{milliseconds)}\DIFaddend .
+  For reference, holding one key on VMware will repeat it roughly every \texttt{\DIFdelbegin \DIFdel{2}\DIFdelend \DIFaddbegin \DIFadd{20}\DIFaddend }
+  milliseconds and the same value for APTIO V is \texttt{\DIFdelbegin \DIFdel{3-4}\DIFdelend \DIFaddbegin \DIFadd{30-40}\DIFaddend } milliseconds. Thus\DIFaddbegin \DIFadd{,
   }\DIFaddend it is possible to set a slightly lower value on faster platforms
   and \DIFaddbegin \DIFadd{a }\DIFaddend slightly higher value on slower platforms for more responsive input.
 
-  Pressing keys one after the other results in delays of at least \texttt{6} and
-  \texttt{10} milliseconds for the same platforms.
+  Pressing keys one after the other results in delays of at least \texttt{\DIFdelbegin \DIFdel{6}\DIFdelend \DIFaddbegin \DIFadd{60}\DIFaddend } and
+  \texttt{\DIFdelbegin \DIFdel{10}\DIFdelend \DIFaddbegin \DIFadd{100}\DIFaddend } milliseconds for the same platforms.
 
   \emph{Note}: Some platforms may require different values, \DIFaddbegin \DIFadd{which may be }\DIFaddend higher or lower.
   For example, when detecting key misses in OpenCanopy\DIFaddbegin \DIFadd{, }\DIFaddend try increasing this value
   (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
   Since every platform is different\DIFaddbegin \DIFadd{, }\DIFaddend it may be \DIFdelbegin \DIFdel{reasonable }\DIFdelend \DIFaddbegin \DIFadd{prudent }\DIFaddend to check every value
-  from \texttt{1} to \texttt{25}.
+  from \texttt{1} to \texttt{25} \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{10}} \DIFadd{to }\texttt{\DIFadd{250}} \DIFadd{milliseconds)}\DIFaddend .
 
 \item
   \texttt{KeySupport}\\
