@@ -284,9 +284,8 @@ SetMaxBusRatioAndMaxBusRatioDiv (
   CPUID_VERSION_INFO_EAX              Eax;
   UINT8                               CpuModel;
 
-  if (MaxBusRatio == NULL || MaxBusRatioDiv == NULL) {
-    return;
-  }
+  ASSERT (MaxBusRatio != NULL);
+  ASSERT (MaxBusRatioDiv != NULL);
 
   if (CpuInfo != NULL) {
     //
