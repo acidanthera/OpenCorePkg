@@ -33,7 +33,10 @@ extern EFI_GUID     gAppleBlessedSystemFolderInfoGuid;
 extern EFI_GUID     gAppleBootPolicyProtocolGuid;
 extern EFI_GUID     gAppleVendorVariableGuid;
 extern EFI_GUID     gAppleImg4VerificationProtocolGuid;
-extern EFI_GUID     gAppleBeepGenProtocolGuid; 
+extern EFI_GUID     gAppleBeepGenProtocolGuid;
+extern EFI_GUID     gApplePlatformInfoDatabaseProtocolGuid;
+extern EFI_GUID     gAppleFsbFrequencyPlatformInfoGuid;
+extern EFI_GUID     gAppleFsbFrequencyPlatformInfoIndexHobGuid;
 
 extern CONST CHAR8  *gEfiCallerBaseName;
 extern EFI_GUID     gEfiGraphicsOutputProtocolGuid;
