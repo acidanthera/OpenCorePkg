@@ -31,9 +31,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED BOOT_PICKER_GUI_CONTEXT mGuiContext;
 //
 // FIXME: Should not be global here.
 //
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBackgroundPixel;
 STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mHighlightPixel = {0xAF, 0xAF, 0xAF, 0x32};
-CONST GUI_IMAGE mBackgroundImage = { 1, 1, &mBackgroundPixel };
 
 STATIC
 CONST CHAR8 *
@@ -57,6 +55,8 @@ mIconNames[ICON_NUM_TOTAL] = {
   [ICON_SELECTOR]           = "Selector",
   [ICON_LEFT]               = "Left",
   [ICON_RIGHT]              = "Right",
+  [ICON_SHUT_DOWN]          = "ShutDown",
+  [ICON_RESTART]            = "Restart",
   [ICON_GENERIC_HDD]        = "HardDrive",
   [ICON_APPLE]              = "Apple",
   [ICON_APPLE_RECOVERY]     = "AppleRecv",
@@ -322,14 +322,6 @@ InternalContextConstruct (
     Context->BackgroundColor.Raw = APPLE_COLOR_SYRAH_BLACK;
   }
 
-  //
-  // Set background colour with full opacity.
-  //
-  mBackgroundPixel.Red      = Context->BackgroundColor.Pixel.Red;
-  mBackgroundPixel.Green    = Context->BackgroundColor.Pixel.Green;
-  mBackgroundPixel.Blue     = Context->BackgroundColor.Pixel.Blue;
-  mBackgroundPixel.Reserved = 0xFF;
-
   if (AsciiStrCmp (Picker->PickerVariant, "Auto") == 0) {
     if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
       Prefix = "Old";
@@ -366,6 +358,10 @@ InternalContextConstruct (
       + Context->BackgroundColor.Pixel.Green * 587U
       + Context->BackgroundColor.Pixel.Blue * 114U) >= 186000;
   }
+  //
+  // Set background colour with full opacity.
+  //
+  Context->BackgroundColor.Pixel.Reserved = 0xFF;
 
   for (Index = 0; Index < ICON_NUM_TOTAL; ++Index) {
     AllowLessSize = FALSE;
@@ -383,6 +379,10 @@ InternalContextConstruct (
     } else if (Index == ICON_LEFT || Index == ICON_RIGHT) {
       ImageWidth  = BOOT_SCROLL_BUTTON_DIMENSION;
       ImageHeight = BOOT_SCROLL_BUTTON_DIMENSION;
+    } else if (Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
+      ImageWidth  = BOOT_ACTION_BUTTON_DIMENSION;
+      ImageHeight = BOOT_ACTION_BUTTON_DIMENSION;
+      AllowLessSize = TRUE;
     } else {
       ImageWidth  = BOOT_ENTRY_ICON_DIMENSION;
       ImageHeight = BOOT_ENTRY_ICON_DIMENSION;
@@ -400,7 +400,7 @@ InternalContextConstruct (
       AllowLessSize
       );
     if (!EFI_ERROR (Status)) {
-      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT) {
+      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT || Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
         Status = GuiCreateHighlightedImage (
           &Context->Icons[Index][ICON_TYPE_HELD],
           &Context->Icons[Index][ICON_TYPE_BASE],

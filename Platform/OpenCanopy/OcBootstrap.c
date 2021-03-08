@@ -31,7 +31,6 @@
 #include "GuiApp.h"
 
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
-extern CONST GUI_IMAGE         mBackgroundImage;
 
 STATIC GUI_DRAWING_CONTEXT              mDrawContext;
 STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
@@ -168,7 +167,7 @@ OcShowMenuByOc (
   // Note, it is important to destruct GUI here, as we must ensure
   // that keyboard/mouse polling does not conflict with FV2 ui.
   //
-  GuiClearScreen (&mDrawContext, mBackgroundImage.Buffer);
+  GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
   OcShowMenuByOcLeave ();
 

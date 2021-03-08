@@ -58,8 +58,8 @@ STATIC UINT64                        mStartTsc          = 0;
 STATIC UINT8                         mNumValidDrawReqs  = 0;
 STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 
-STATIC UINT32 mCursorOldX = 0;
-STATIC UINT32 mCursorOldY = 0;
+STATIC INT64                         mPointerOldBaseX = 0;
+STATIC INT64                         mPointerOldBaseY = 0;
 
 #define PIXEL_TO_UINT32(Pixel)  \
   ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
@@ -273,18 +273,18 @@ GuiObjDelegatePtrEvent (
 
 VOID
 GuiDrawToBufferFill (
-  IN     CONST GUI_IMAGE      *Image,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT32               PosX,
-  IN     UINT32               PosY,
-  IN     UINT32               Width,
-  IN     UINT32               Height
+  IN     CONST EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Colour,
+  IN OUT GUI_DRAWING_CONTEXT                  *DrawContext,
+  IN     UINT32                               PosX,
+  IN     UINT32                               PosY,
+  IN     UINT32                               Width,
+  IN     UINT32                               Height
   )
 {
   UINT32 RowIndex;
   UINT32 TargetRowOffset;
 
-  ASSERT (Image != NULL);
+  ASSERT (Colour != NULL);
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
   ASSERT (Width > 0);
@@ -296,8 +296,6 @@ GuiDrawToBufferFill (
   ASSERT (DrawContext->Screen->Height >= PosY);
   ASSERT (PosX + Width <= DrawContext->Screen->Width);
   ASSERT (PosY + Height <= DrawContext->Screen->Height);
-
-  ASSERT (Image->Buffer != NULL);
   //
   // Iterate over each row of the request.
   //
@@ -314,7 +312,7 @@ GuiDrawToBufferFill (
     SetMem32 (
       &mScreenBuffer[TargetRowOffset + PosX],
       Width * sizeof (UINT32),
-      PIXEL_TO_UINT32 (&Image->Buffer[0])
+      PIXEL_TO_UINT32 (Colour)
       );
   }
 
@@ -613,6 +611,13 @@ GuiOverlayPointer (
   UINT32            MaxHeight;
   GUI_POINTER_STATE PointerState;
 
+  INT64             BaseX;
+  INT64             BaseY;
+  UINT32            ImageOffsetX;
+  UINT32            ImageOffsetY;
+  UINT32            DrawBaseX;
+  UINT32            DrawBaseY;
+
   ASSERT (DrawContext != NULL);
 
   ASSERT (DrawContext->GetCursorImage != NULL);
@@ -637,16 +642,37 @@ GuiOverlayPointer (
   //
   // Draw the new cursor at the new position.
   //
-  MaxWidth  = MIN (CursorImage->Width, DrawContext->Screen->Width - PointerState.X);
-  MaxHeight = MIN (CursorImage->Height, DrawContext->Screen->Height - PointerState.Y);
+
+  BaseX = (INT64) PointerState.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  if (BaseX < 0) {
+    ImageOffsetX = (UINT32) -BaseX;
+    DrawBaseX    = 0;
+  } else {
+    ImageOffsetX = 0;
+    DrawBaseX    = (UINT32) BaseX;
+  }
+
+  MaxWidth = MIN (CursorImage->Width, (UINT32) (DrawContext->Screen->Width - BaseX));
+
+  BaseY = (INT64) PointerState.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  if (BaseY < 0) {
+    ImageOffsetY = (UINT32) -BaseY;
+    DrawBaseY    = 0;
+  } else {
+    ImageOffsetY = 0;
+    DrawBaseY    = (UINT32) BaseY;
+  }
+
+  MaxHeight = MIN (CursorImage->Height, (UINT32) (DrawContext->Screen->Height - BaseY));
+
   GuiDrawToBuffer (
     CursorImage,
     0xFF,
     DrawContext,
-    PointerState.X,
-    PointerState.Y,
-    0,
-    0,
+    BaseX,
+    BaseY,
+    ImageOffsetX,
+    ImageOffsetY,
     MaxWidth,
     MaxHeight
     );
@@ -654,14 +680,14 @@ GuiOverlayPointer (
   // Queue a draw request for the newly drawn cursor.
   //
   GuiRequestDraw (
-    PointerState.X,
-    PointerState.Y,
+    DrawBaseX,
+    DrawBaseY,
     MaxWidth,
     MaxHeight
     );
 
-  mCursorOldX = PointerState.X;
-  mCursorOldY = PointerState.Y;
+  mPointerOldBaseX = DrawBaseX;
+  mPointerOldBaseY = DrawBaseY;
 }
 
 /**
@@ -1018,8 +1044,8 @@ GuiDrawLoop (
       //
       GuiRequestDrawCrop (
         DrawContext,
-        mCursorOldX,
-        mCursorOldY,
+        mPointerOldBaseX,
+        mPointerOldBaseY,
         CursorImage->Width,
         CursorImage->Height
         );
