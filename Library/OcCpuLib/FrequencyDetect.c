@@ -259,7 +259,23 @@ InternalCalculateTSCFromApplePlatformInfo (
     &gAppleFsbFrequencyPlatformInfoGuid,
     &Size
     );
-  if (EFI_ERROR (Status)) {
+  if (!EFI_ERROR (Status)) {
+    if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first data\n", Size));
+      return 0;
+    }
+
+    Status = PlatformInfo->GetFirstData (
+      PlatformInfo,
+      &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+      &FsbFreq,
+      &Size
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to ger first data - %r\n", Status));
+      return 0;
+    }
+  } else {
     DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r, trying HOB\n", Status));
 
     FsbHob = GetFirstGuidHob (NULL);
@@ -271,7 +287,7 @@ InternalCalculateTSCFromApplePlatformInfo (
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size with HOB method - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data size with HOB method - %r\n", Status));
         return 0;
       }
       if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
@@ -287,27 +303,12 @@ InternalCalculateTSCFromApplePlatformInfo (
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data of FSB frequency - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data using HOB method - %r\n", Status));
         return 0;
       }
     }
   }
-  if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-    DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first data\n", Size));
-    return 0;
-  }
-
-  Status = PlatformInfo->GetFirstData (
-    PlatformInfo,
-    &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-    &FsbFreq,
-    &Size
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCCPU: Failed to ger first data - %r\n", Status));
-    return 0;
-  }
-
+  
   //
   // Optionally update FSBFrequency.
   //
