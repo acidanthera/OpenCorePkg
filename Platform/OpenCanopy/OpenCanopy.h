@@ -218,20 +218,20 @@ GuiDrawToBufferFill (
   );
 
 VOID
+GuiRequestDraw (
+  IN UINT32  PosX,
+  IN UINT32  PosY,
+  IN UINT32  Width,
+  IN UINT32  Height
+  );
+
+VOID
 GuiRequestDrawCrop (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
   IN     INT64                X,
   IN     INT64                Y,
   IN     UINT32               Width,
   IN     UINT32               Height
-  );
-
-VOID
-GuiRedrawObject (
-  IN OUT GUI_OBJ              *Obj,
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     INT64                BaseX,
-  IN     INT64                BaseY
   );
 
 VOID

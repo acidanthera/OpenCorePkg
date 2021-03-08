@@ -103,6 +103,11 @@ BootPickerViewInitialize (
   IN  GUI_CURSOR_GET_IMAGE     GetCursorImage
   );
 
+VOID
+BootPickerViewLateInitialize (
+  VOID
+  );
+
 EFI_STATUS
 BootPickerEntriesAdd (
   IN OC_PICKER_CONTEXT              *Context,

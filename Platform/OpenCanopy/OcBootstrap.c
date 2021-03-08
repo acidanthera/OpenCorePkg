@@ -130,6 +130,8 @@ OcShowMenuByOc (
     }
   }
 
+  BootPickerViewLateInitialize ();
+
   GuiRedrawAndFlushScreen (&mDrawContext);
 
   if (BootContext->PickerContext->PickerAudioAssist) {
