@@ -139,6 +139,12 @@ typedef struct {
   UINT64                      TscAdjust;
 
   //
+  // The CPU frequency derived from Apple Platform Info.
+  // 0 if Apple Platform Info is not present.
+  //
+  UINT64                      CPUFrequencyFromApple;
+
+  //
   // The CPU frequency derived from the CPUID VMWare Timing leaf.
   // 0 if VMWare Timing leaf is not present.
   //

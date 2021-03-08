@@ -14,10 +14,13 @@
 
 #include <Uefi.h>
 
+#include <Guid/ApplePlatformInfo.h>
+#include <Guid/AppleHob.h>
 #include <Guid/OcVariable.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
 #include <Protocol/PciIo.h>
+#include <Protocol/ApplePlatformInfoDatabase.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -230,11 +233,51 @@ InternalCalculateTSCFromApplePlatformInfo (
   OUT  UINT64  *FSBFrequency  OPTIONAL
   )
 {
-   //
-   // TODO
-   //
-   return 0;
- }
+  EFI_STATUS                             Status;
+  APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
+  UINT32                                 Size;
+  UINT64                                 FsbFreq;
+
+  Status = gBS->LocateProtocol (
+    &gApplePlatformInfoDatabaseProtocolGuid,
+    NULL,
+    (VOID **) &PlatformInfo
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
+    return 0;
+  }
+
+  Status = PlatformInfo->GetFirstDataSize (
+    PlatformInfo,
+    &gAppleFsbFrequencyPlatformInfoGuid,
+    &Size
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r\n", Status));
+    return 0;
+  }
+
+  Status = PlatformInfo->GetFirstData (
+    PlatformInfo,
+    &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+    &FsbFreq,
+    &Size
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to ger first data - %r\n", Status));
+    return 0;
+  }
+
+  //
+  // Optionally update FSBFrequency.
+  //
+  if (FSBFrequency != NULL) {
+    *FSBFrequency = FsbFreq;
+  }
+
+  return InternalConvertAppleFSBToTSCFrequency (FsbFreq);
+}
 
 UINT64
 InternalCalculateARTFrequencyIntel (
@@ -499,12 +542,15 @@ OcGetTSCFrequency (
   if (CPUFrequency == 0) {
     CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
     if (CPUFrequency == 0) {
-      CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+      CPUFrequency = InternalCalculateTSCFromApplePlatformInfo (NULL);
       if (CPUFrequency == 0) {
-        //
-        // Assume at least some frequency, so that we always work.
-        //
-        CPUFrequency = OC_FALLBACK_CPU_FREQUENCY;
+        CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+        if (CPUFrequency == 0) {
+          //
+          // Assume at least some frequency, so that we always work.
+          //
+          CPUFrequency = OC_FALLBACK_CPU_FREQUENCY;
+        }
       }
     }
   }

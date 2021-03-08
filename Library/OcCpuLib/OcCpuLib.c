@@ -273,32 +273,80 @@ ScanThreadCount (
 
 STATIC
 VOID
-ScanIntelFSBFrequency (
-  IN  OC_CPU_INFO        *CpuInfo
+SetMaxBusRatioAndMaxBusRatioDiv (
+  IN   OC_CPU_INFO        *CpuInfo  OPTIONAL,
+  OUT  UINT8              *MaxBusRatio,
+  OUT  UINT8              *MaxBusRatioDiv
   )
 {
   MSR_IA32_PERF_STATUS_REGISTER       PerfStatus;
   MSR_NEHALEM_PLATFORM_INFO_REGISTER  PlatformInfo;
-  UINT8                               MaxBusRatio;
-  UINT8                               MaxBusRatioDiv;
+  CPUID_VERSION_INFO_EAX              Eax;
+  UINT8                               CpuModel;
 
-  //
-  // TODO: this may not be accurate on some older processors.
-  //
-  if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
-    PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
-    MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
-    MaxBusRatioDiv = 0;
-  } else {
-    PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-    MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
-    //
-    // Undocumented values:
-    // Non-integer bus ratio for the max-multi.
-    // Non-integer bus ratio for the current-multi.
-    //
-    MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
+  if (MaxBusRatio == NULL || MaxBusRatioDiv == NULL) {
+    return;
   }
+
+  if (CpuInfo != NULL) {
+    //
+    // TODO: this may not be accurate on some older processors.
+    //
+    if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
+      PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
+      *MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+      *MaxBusRatioDiv = 0;
+    } else {
+      PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+      *MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
+      //
+      // Undocumented values:
+      // Non-integer bus ratio for the max-multi.
+      // Non-integer bus ratio for the current-multi.
+      //
+      *MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
+    }
+  } else {
+    //
+    // Assuming Intel machines used on Apple hardware.
+    //
+    AsmCpuid (
+      CPUID_VERSION_INFO,
+      &Eax.Uint32,
+      NULL,
+      NULL,
+      NULL
+      );
+    CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+    //
+    // This part should be synced with the code above.
+    //
+    if (CpuModel >= CPU_MODEL_NEHALEM) {
+      PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
+      *MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
+      *MaxBusRatioDiv = 0;
+    } else {
+      PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
+      *MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
+      *MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
+    }
+  }
+}
+
+STATIC
+VOID
+ScanIntelFSBFrequency (
+  IN  OC_CPU_INFO        *CpuInfo
+  )
+{
+  UINT8  MaxBusRatio;
+  UINT8  MaxBusRatioDiv;
+
+  if (CpuInfo == NULL || CpuInfo->FSBFrequency > 0) {
+    return;
+  }
+
+  SetMaxBusRatioAndMaxBusRatioDiv (CpuInfo, &MaxBusRatio, &MaxBusRatioDiv);
 
   //
   // There may be some quirks with virtual CPUs (VMware is fine).
@@ -339,37 +387,10 @@ InternalConvertAppleFSBToTSCFrequency (
   IN  UINT64        FSBFrequency
   )
 {
-  CPUID_VERSION_INFO_EAX              Eax;
-  UINT8                               CpuModel;
-  MSR_IA32_PERF_STATUS_REGISTER       PerfStatus;
-  MSR_NEHALEM_PLATFORM_INFO_REGISTER  PlatformInfo;
-  UINT8                               MaxBusRatio;
-  UINT8                               MaxBusRatioDiv;
+  UINT8  MaxBusRatio;
+  UINT8  MaxBusRatioDiv;
 
-  //
-  // Assuming Intel machines used on Apple hardware.
-  //
-  AsmCpuid (
-    CPUID_VERSION_INFO,
-    &Eax.Uint32,
-    NULL,
-    NULL,
-    NULL
-    );
-
-  CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
-  //
-  // This part should be synced with ScanIntelFSBFrequency.
-  //
-  if (CpuModel >= CPU_MODEL_NEHALEM) {
-    PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
-    MaxBusRatio = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
-    MaxBusRatioDiv = 0;
-  } else {
-    PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-    MaxBusRatio = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
-    MaxBusRatioDiv = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
-  }
+  SetMaxBusRatioAndMaxBusRatioDiv (NULL, &MaxBusRatio, &MaxBusRatioDiv);
 
   //
   // When MaxBusRatioDiv is 1, the multiplier is MaxBusRatio + 0.5.
@@ -463,9 +484,14 @@ ScanIntelProcessor (
       );
 
     //
+    // Determine the TSC frequency from Apple Platform Info.
+    //
+    Cpu->CPUFrequencyFromApple = InternalCalculateTSCFromApplePlatformInfo (NULL);
+
+    //
     // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
     //
-    if (Cpu->CPUFrequencyFromART == 0 || Recalculate) {
+    if ((Cpu->CPUFrequencyFromART == 0 && Cpu->CPUFrequencyFromApple == 0) || Recalculate) {
       DEBUG_CODE_BEGIN ();
       TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
       DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
@@ -474,12 +500,26 @@ ScanIntelProcessor (
     }
 
     //
-    // Calculate CPU frequency based on ART if present, otherwise TSC
+    // Calculate CPU frequency firstly based on ART if present.
     //
-    Cpu->CPUFrequency = Cpu->CPUFrequencyFromART != 0 ? Cpu->CPUFrequencyFromART : Cpu->CPUFrequencyFromTSC;
+    if (Cpu->CPUFrequencyFromART != 0) {
+      Cpu->CPUFrequency = Cpu->CPUFrequencyFromART;
+    } else {
+      //
+      // If ART is not available, then try the value from Apple Platform Info.
+      //
+      if (Cpu->CPUFrequencyFromApple != 0) {
+        Cpu->CPUFrequency = Cpu->CPUFrequencyFromApple;
+      } else {
+        //
+        // If still not available, finally use TSC.
+        //
+        Cpu->CPUFrequency = Cpu->CPUFrequencyFromTSC;
+      }
+    }
 
     //
-    // Verify that our two CPU frequency calculations do not differ substantially.
+    // Verify that ART/TSC CPU frequency calculations do not differ substantially.
     //
     if (Cpu->CPUFrequencyFromART > 0 && Cpu->CPUFrequencyFromTSC > 0
       && ABS((INT64) Cpu->CPUFrequencyFromART - (INT64) Cpu->CPUFrequencyFromTSC) > OC_CPU_FREQUENCY_TOLERANCE) {
@@ -487,6 +527,18 @@ ScanIntelProcessor (
         DEBUG_WARN,
         "OCCPU: ART based CPU frequency differs substantially from TSC: %11LuHz != %11LuHz\n",
         Cpu->CPUFrequencyFromART,
+        Cpu->CPUFrequencyFromTSC
+        ));
+    }
+    //
+    // Verify that Apple/TSC CPU frequency calculations do not differ substantially.
+    //
+    if (Cpu->CPUFrequencyFromApple > 0 && Cpu->CPUFrequencyFromTSC > 0
+      && ABS((INT64) Cpu->CPUFrequencyFromApple - (INT64) Cpu->CPUFrequencyFromTSC) > OC_CPU_FREQUENCY_TOLERANCE) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCCPU: Apple based CPU frequency differs substantially from TSC: %11LuHz != %11LuHz\n",
+        Cpu->CPUFrequencyFromApple,
         Cpu->CPUFrequencyFromTSC
         ));
     }
