@@ -238,6 +238,8 @@ InternalCalculateTSCFromApplePlatformInfo (
   UINT32                                 Size;
   UINT64                                 FsbFreq;
 
+  FsbFreq = 0;
+
   Status = gBS->LocateProtocol (
     &gApplePlatformInfoDatabaseProtocolGuid,
     NULL,
