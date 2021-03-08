@@ -24,6 +24,9 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Pi/PiBootMode.h>
+#include <Pi/PiHob.h>
+#include <Library/HobLib.h>
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
@@ -236,6 +239,7 @@ InternalCalculateTSCFromApplePlatformInfo (
   EFI_STATUS                             Status;
   APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
   UINT32                                 Size;
+  VOID                                   *FsbHob;
   UINT64                                 FsbFreq;
 
   FsbFreq = 0;
@@ -256,11 +260,40 @@ InternalCalculateTSCFromApplePlatformInfo (
     &Size
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r\n", Status));
-    return 0;
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r, trying HOB\n", Status));
+
+    FsbHob = GetFirstGuidHob (NULL);
+    if (FsbHob != NULL) {
+      Status = PlatformInfo->GetDataSize (
+        PlatformInfo,
+        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+        *(UINT8 *)GET_GUID_HOB_DATA (FsbHob),
+        &Size
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size with HOB method - %r\n", Status));
+        return 0;
+      }
+      if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for data\n", Size));
+        return 0;
+      }
+
+      Status = PlatformInfo->GetData (
+        PlatformInfo,
+        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+        *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
+        &FsbFreq,
+        &Size
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data of FSB frequency - %r\n", Status));
+        return 0;
+      }
+    }
   }
-  if (Size > sizeof (UINT64)) {
-    DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size for first data\n"));
+  if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
+    DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first data\n", Size));
     return 0;
   }
 
