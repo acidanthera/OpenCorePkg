@@ -480,19 +480,15 @@ ScanIntelProcessor (
       );
 
     //
-    // Determine the TSC frequency from Apple Platform Info.
-    //
-    Cpu->CPUFrequencyFromApple = InternalCalculateTSCFromApplePlatformInfo (NULL);
-
-    //
     // Calculate the TSC frequency only if ART frequency is not available or we are in debug builds.
     //
-    if ((Cpu->CPUFrequencyFromART == 0 && Cpu->CPUFrequencyFromApple == 0) || Recalculate) {
+    if (Cpu->CPUFrequencyFromART == 0 || Recalculate) {
       DEBUG_CODE_BEGIN ();
       TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
       DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
       DEBUG_CODE_END ();
-      Cpu->CPUFrequencyFromTSC = InternalCalculateTSCFromPMTimer (Recalculate);
+      Cpu->CPUFrequencyFromApple = InternalCalculateTSCFromApplePlatformInfo (NULL);
+      Cpu->CPUFrequencyFromTSC   = InternalCalculateTSCFromPMTimer (Recalculate);
     }
 
     //
