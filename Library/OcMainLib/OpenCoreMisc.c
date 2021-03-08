@@ -816,20 +816,21 @@ OcMiscBoot (
   IN  EFI_HANDLE                LoadHandle
   )
 {
-  EFI_STATUS             Status;
-  OC_PICKER_CONTEXT      *Context;
-  OC_PICKER_CMD          PickerCommand;
-  OC_PICKER_MODE         PickerMode;
-  OC_DMG_LOADING_SUPPORT DmgLoading;
-  UINTN                  ContextSize;
-  UINT32                 Index;
-  UINT32                 EntryIndex;
-  OC_INTERFACE_PROTOCOL  *Interface;
-  UINTN                  BlessOverrideSize;
-  CHAR16                 **BlessOverride;
-  CONST CHAR8            *AsciiPicker;
-  CONST CHAR8            *AsciiPickerVariant;
-  CONST CHAR8            *AsciiDmg;
+  EFI_STATUS                          Status;
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL   *KeyMap;
+  OC_PICKER_CONTEXT                   *Context;
+  OC_PICKER_CMD                       PickerCommand;
+  OC_PICKER_MODE                      PickerMode;
+  OC_DMG_LOADING_SUPPORT              DmgLoading;
+  UINTN                               ContextSize;
+  UINT32                              Index;
+  UINT32                              EntryIndex;
+  OC_INTERFACE_PROTOCOL               *Interface;
+  UINTN                               BlessOverrideSize;
+  CHAR16                              **BlessOverride;
+  CONST CHAR8                         *AsciiPicker;
+  CONST CHAR8                         *AsciiPickerVariant;
+  CONST CHAR8                         *AsciiDmg;
 
   AsciiPicker = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
 
@@ -1025,7 +1026,9 @@ OcMiscBoot (
 
   DEBUG ((DEBUG_INFO, "OC: Ready for takeoff in %u us\n", (UINT32) Context->TakeoffDelay));
 
-  OcLoadPickerHotKeys (Context);
+  KeyMap = OcLoadPickerHotKeys (Context);
+
+  OcInitDownkeys (&Config->Uefi.Input, KeyMap);
 
   Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
   Context->AllowSetDefault = Config->Misc.Security.AllowSetDefault;

@@ -142,6 +142,7 @@ OcLoadUefiInputSupport (
   }
 
   if (Config->Uefi.Input.KeySupport) {
+    DEBUG ((DEBUG_INFO, "OC: Installing KeySupport...\n"));
     KeySupportStr = OC_BLOB_GET (&Config->Uefi.Input.KeySupportMode);
     KeyMode = OcInputKeyModeMax;
     if (AsciiStrCmp (KeySupportStr, "Auto") == 0) {

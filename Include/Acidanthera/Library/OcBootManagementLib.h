@@ -549,7 +549,6 @@ INTN
      OUT BOOLEAN                            *SetDefault  OPTIONAL
   );
 
-
 /**
   Play audio file for context.
 **/
@@ -1025,14 +1024,16 @@ OcIsAppleHibernateWake (
   Check pressed hotkeys and update booter context based on this.
 
   @param[in,out]  Context       Picker context.
+
+  @return                       Located Apple Key Map Aggregator protocol instance.
 **/
-VOID
+APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *
 OcLoadPickerHotKeys (
-  IN OUT OC_PICKER_CONTEXT  *Context
+  IN OUT OC_PICKER_CONTEXT                  *Context
   );
 
 /**
-  Default index mapping macros.
+  Key index mappings.
 **/
 #define OC_INPUT_STR            "123456789ABCDEFGHIJKLMNOPQRSTUVXWZ"
 #define OC_INPUT_MAX            L_STR_LEN (OC_INPUT_STR)
@@ -1049,14 +1050,39 @@ OcLoadPickerHotKeys (
 #define OC_INPUT_MORE           -11       ///< Show more entries (press space)
 #define OC_INPUT_VOICE_OVER     -12       ///< Toggle VoiceOver (press CMD+F5)
 #define OC_INPUT_INTERNAL       -13       ///< Accepted internal hotkey (e.g. Apple)
-#define OC_INPUT_FUNCTIONAL(x) (-20 - (x))  ///< Functional hotkeys
+#define OC_INPUT_MODIFIERS_ONLY -20       ///< No key press, returned early to allow GUI response to modifiers
+#define OC_INPUT_FUNCTIONAL(x) (-20 - (x))  ///< Function hotkeys
+
+#if defined(OC_SHOW_RUNNING_KEYS)
+/**
+  Running display of held keys, in builtin picker only.
+
+  @param[in]      NumKeysUp       Number of keys that went up.
+  @param[in]      NumKeysDown     Number of keys that went down.
+  @param[in]      NumKeysHeld     Number of keys held.
+  @param[in]      Modifiers       Key modifiers.
+  @param[in]      CallerID        Caller ID to display if not using downkeys handler.
+  @param[in]      UsingDownkeys   Set to true if using downkeys handler in the kb loop.
+**/
+VOID
+OcShowRunningKeys (
+  UINTN                     NumKeysUp,
+  UINTN                     NumKeysDown,
+  UINTN                     NumKeysHeld,
+  APPLE_MODIFIER_MAP        Modifiers,
+  CHAR16                    CallerID,
+  BOOLEAN                   UsingDownkeys
+  );
+#endif
 
 /**
   Obtains key index from user input.
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
-  @param[out]     SetDefault   Set boot option as default, optional.
+  @param[out]     SetDefault   Pass back whether to set selected boot option as default.
+                               Optional, when not present key combinations which would attempt to
+                               set default boot will not detect.
 
   @returns key index [0, OC_INPUT_MAX) or OC_INPUT_* value.
   @returns OC_INPUT_TIMEOUT when no key is pressed.
@@ -1071,12 +1097,40 @@ OcGetAppleKeyIndex (
   );
 
 /**
+  Initialise held keys buffer. Call before looped calls to OcWaitForAppleKeyIndex or OcGetAppleKeyIndex.
+
+  @param[in]      Input         Input config section.
+  @param[in]      KeyMap        Apple Key Map Aggregator protocol.
+**/
+VOID
+OcInitDownkeys (
+    // TODO: !
+    //IN OC_UEFI_INPUT                          *Input,
+    //IN APPLE_KEY_MAP_AGGREGATOR_PROTOCOL      *KeyMap
+  );
+
+/**
+  Calculate timeout end time in correct format for OcWaitForAppleKeyIndex.
+
+  @param[in]      Timeout       Required timeout in milliseconds.
+
+  @returns Now plus timeout, expressed in system nanosecond clock.
+**/
+UINT64
+OcWaitForAppleKeyIndexGetEndTime(
+  IN UINTN    Timeout
+  );
+
+/**
   Waits for key index from user input.
 
   @param[in,out]  Context      Picker context.
   @param[in]      KeyMap       Apple Key Map Aggregator protocol.
-  @param[in]      Timeout      Timeout to wait for in milliseconds.
-  @param[out]     SetDefault   Set boot option as default, optional.
+  @param[in]      EndTime      Time at which to end timeout, system nanosecond clock.
+  @param[in,out]  SetDefault   On input, previous OC key modifiers.
+                               On output, new OC key modifiers. Invalid
+                               key w/ new modifiers is returned immediately
+                               when modifiers change, to allow UI update.
 
   @returns key index [0, OC_INPUT_MAX) or OC_INPUT_* value.
 **/
@@ -1084,8 +1138,8 @@ INTN
 OcWaitForAppleKeyIndex (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
-  IN     UINTN                              Timeout,
-     OUT BOOLEAN                            *SetDefault  OPTIONAL
+  IN     UINT64                             EndTime,
+  IN OUT BOOLEAN                            *SetDefault  OPTIONAL
   );
 
 /**

@@ -47,6 +47,8 @@ GuiKeyRead (
 {
 
   ASSERT (Context != NULL);
+  ASSERT (KeyIndex != NULL);
+  ASSERT (Modifier != NULL);
 
   *Modifier = FALSE;
   *KeyIndex = Context->Context->GetKeyIndex (

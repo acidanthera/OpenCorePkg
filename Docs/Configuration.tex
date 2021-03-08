@@ -6216,6 +6216,24 @@ functioning. Feature highlights:
 
 \begin{enumerate}
 
+  \item
+  \texttt{DownkeysHandler}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Configure additional keyboard handling to enable more fluent re-rendering within
+  bootpicker. When applied, affects both \texttt{Builtin} bootpicker and OpenCanopy. For best UI experience
+  this setting should always be enabled when \texttt{KeySupport} is disabled,
+  and should normally be disabled when \texttt{KeySupport} is enabled. On
+  some less common configurations (particularly some PS/2 keyboards) enabling this setting together with
+  \texttt{KeySupport} is required to obtain correct bootpicker key repeat behaviour.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Performs automatic choice based on \texttt{KeySupport} setting.
+  \item \texttt{Enabled} --- Add additional downkey handling.
+  \item \texttt{Disabled} --- Do not add additional downkey handling.
+  \end{itemize}
+
 \item
   \texttt{KeyFiltering}\\
   \textbf{Type}: \texttt{plist\ boolean}\\

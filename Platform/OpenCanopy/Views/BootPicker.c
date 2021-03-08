@@ -447,13 +447,18 @@ InternalBootPickerKeyEvent (
   }
 
   if (Key == OC_INPUT_MORE) {
-    GuiContext->HideAuxiliary = FALSE;
-    GuiContext->Refresh = TRUE;
-    DrawContext->GuiContext->PickerContext->PlayAudioFile (
-      DrawContext->GuiContext->PickerContext,
-      OcVoiceOverAudioFileShowAuxiliary,
-      FALSE
-      );
+    //
+    // Match Builtin picker logic here: only refresh if the keypress makes a change
+    //
+    if (GuiContext->HideAuxiliary == TRUE) {
+      GuiContext->HideAuxiliary = FALSE;
+      GuiContext->Refresh = TRUE;
+      DrawContext->GuiContext->PickerContext->PlayAudioFile (
+        DrawContext->GuiContext->PickerContext,
+        OcVoiceOverAudioFileShowAuxiliary,
+        FALSE
+        );
+    }
   } else if (Key == OC_INPUT_ABORTED) {
     GuiContext->Refresh = TRUE;
     DrawContext->GuiContext->PickerContext->PlayAudioFile (

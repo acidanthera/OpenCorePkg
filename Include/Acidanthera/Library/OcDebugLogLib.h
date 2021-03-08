@@ -52,6 +52,18 @@
 #endif
 
 /**
+  Detail debug support - only compile DETAIL_DEBUG calls if DEBUG_DETAIL is defined at top of consumer source file
+**/
+#if defined(DEBUG_DETAIL)
+  #define DETAIL_DEBUG(Expression) \
+    do {                           \
+      DEBUG (Expression);          \
+    } while (FALSE)
+#else
+  #define DETAIL_DEBUG(Expression)
+#endif
+
+/**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options        Logging options.
