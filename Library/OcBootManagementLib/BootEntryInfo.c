@@ -619,7 +619,7 @@ InternalDescribeBootEntry (
         // Common Big Sur beta bug failing to create .contentDetails files.
         // Workaround it by choosing the default name following Apple BootPicker behaviour.
         //
-        TmpBootName = AllocateCopyPool (sizeof (L"Macintosh HD"), L"Macintosh HD");
+        TmpBootName = AllocateCopyPool (sizeof (L"macOS Installer"), L"macOS Installer");
       } else {
         TmpBootName = NULL;
       }
