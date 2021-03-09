@@ -261,7 +261,7 @@ InternalCalculateTSCFromApplePlatformInfo (
     );
   if (!EFI_ERROR (Status)) {
     if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-      DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first data\n", Size));
+      DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first FSBFrequency data from ApplePlatformInfo\n", Size));
       return 0;
     }
 
@@ -276,22 +276,22 @@ InternalCalculateTSCFromApplePlatformInfo (
       return 0;
     }
   } else {
-    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first data size - %r, trying HOB\n", Status));
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first FSBFrequency data size from ApplePlatformInfo - %r, trying HOB\n", Status));
 
     FsbHob = GetFirstGuidHob (NULL);
     if (FsbHob != NULL) {
       Status = PlatformInfo->GetDataSize (
         PlatformInfo,
         &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-        *(UINT8 *)GET_GUID_HOB_DATA (FsbHob),
+        *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data size with HOB method - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data size with HOB method from ApplePlatformInfo - %r\n", Status));
         return 0;
       }
       if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-        DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for data\n", Size));
+        DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for FSBFrequency data\n", Size));
         return 0;
       }
 
@@ -303,7 +303,7 @@ InternalCalculateTSCFromApplePlatformInfo (
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get data using HOB method - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method from ApplePlatformInfo - %r\n", Status));
         return 0;
       }
     }
