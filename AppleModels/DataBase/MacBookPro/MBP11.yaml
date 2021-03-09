@@ -84,7 +84,8 @@ Specifications:
   SystemReportName:
     - "MacBook Pro (original)"
     - "MacBook Pro (15-inch Glossy)"
-  MarketingName: ""
+  MarketingName:
+   - "MacBook Pro (15-inch)"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "VJ1"

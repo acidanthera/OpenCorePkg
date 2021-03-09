@@ -87,7 +87,7 @@ Specifications:
   SystemReportName:
     - "iMac (27-inch, Late 2009)"
   MarketingName:
-    - "iMac Intel Core i5, Intel Core i7 (widescreen, Late 2009)"
+    - "iMac (27-inch, Quad Core, Late 2009)"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "5PJ"
