@@ -1055,6 +1055,40 @@ OcLoadPickerHotKeys (
 
 #if defined(OC_SHOW_RUNNING_KEYS)
 /**
+  Initialise running display of held keys, for builtin picker only.
+
+  @param[in]      TscFrequency      Send in current understood TSC frequency.
+**/
+VOID
+OcInitRunningKeys (
+  UINT64 TscFrequency
+  );
+
+/**
+  Instrument old path kb loop delay.
+
+  @param[in]      LoopDelayStart    Delay start in TSC asm ticks.
+  @param[in]      LoopDelayEnd      Delay end in TSC asm ticks.
+**/
+VOID
+OcInstrumentLoopDelay (
+  UINT64 LoopDelayStart,
+  UINT64 LoopDelayEnd
+  );
+
+/**
+  Instrument old path kb flush delay.
+
+  @param[in]      FlushDelayStart   Delay start in TSC asm ticks.
+  @param[in]      FlushDelayEnd     Delay end in TSC asm ticks.
+**/
+VOID
+OcInstrumentFlushDelay (
+  UINT64 FlushDelayStart,
+  UINT64 FlushDelayEnd
+  );
+
+/**
   Running display of held keys, in builtin picker only.
 
   @param[in]      NumKeysUp       Number of keys that went up.

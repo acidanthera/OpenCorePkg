@@ -151,6 +151,11 @@ OcInitDownkeys (
   CONST CHAR8                *DownkeysHandlerStr;
 
   //
+  // NB initialise this whether downkeys support is used for kb loop or not
+  //
+  OcInitRunningKeys(GetTscFrequency());
+
+  //
   // Failsafe and Auto = opposite of KeySupport, which is recommended for most people
   //
   mUseDownkeys = !Input->KeySupport;
@@ -560,6 +565,10 @@ OcWaitForAppleKeyIndex (
   UINT64                             CurrTime;
   BOOLEAN                            OldSetDefault;
 
+#if defined(OC_SHOW_RUNNING_KEYS)
+  UINT64                             LoopDelayStart;
+#endif
+
   //
   // These hotkeys are normally parsed by boot.efi, and they work just fine
   // when ShowPicker is disabled. On some BSPs, however, they may fail badly
@@ -611,7 +620,13 @@ OcWaitForAppleKeyIndex (
       break;
     }
 
+#if defined(OC_SHOW_RUNNING_KEYS)
+    LoopDelayStart = AsmReadTsc();
+#endif
     MicroSecondDelay (10);
+#if defined(OC_SHOW_RUNNING_KEYS)
+    OcInstrumentLoopDelay(LoopDelayStart, AsmReadTsc());
+#endif
   }
 
   return ResultingKey;

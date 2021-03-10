@@ -27,4 +27,16 @@ RecalculateTSC (
   VOID
   );
 
+/**
+  Return cached PerformanceCounterFrequency value. For instrumentation purposes only.
+
+  @retval               The timer frequency in use.
+
+**/
+UINT64
+EFIAPI
+GetTscFrequency (
+  VOID
+  );
+
 #endif // OC_TIMER_LIB_H

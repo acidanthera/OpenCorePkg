@@ -41,12 +41,25 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #if defined(OC_SHOW_RUNNING_KEYS)
 STATIC INT32                mRunningColumn;
 
-#define MAX_RUNNING_COLUMN  80
+STATIC UINT64               mTscFrequency;
 
-#define UP_DOWN_HELD_DISPLAY_OFFSET   4
-#define ID_DISPLAY_OFFSET             UP_DOWN_HELD_DISPLAY_OFFSET
-#define X_DISPLAY_OFFSET              5
-#define MODIFIER_DISPLAY_OFFSET       6
+STATIC UINT64               mPreviousTick;
+
+STATIC UINT64               mLoopDelayStart;
+STATIC UINT64               mLoopDelayEnd;
+
+STATIC UINT64               mFlushDelayStart;
+STATIC UINT64               mFlushDelayEnd;
+
+#define OC_RKEYS_MAX_COLUMN           80
+#define OC_RKEYS_DELTA_SAMPLE_COLUMN  40
+
+#define OC_RKEYS_PRINT_ROW            2
+
+#define OC_RKEYS_UP_DOWN_ROW          7
+#define OC_RKEYS_FLUSH_ROW            OC_RKEYS_UP_DOWN_ROW
+#define OC_RKEYS_X_ROW                8
+#define OC_RKEYS_MODIFIERS_ROW        9
 #endif
 
 // KEY_MAP_AGGREGATOR_DATA_SIGNATURE
@@ -480,11 +493,80 @@ OcKeyMapHasKey (
   return OcKeyMapHasKeys (Keys, NumKeys, &KeyCode, 1, FALSE);
 }
 
-#if defined(OC_SHOW_RUNNING_KEYS)
 //
 // Defined here not in HotKeySupport.c to allow successful link to
 // OcKeyMapFlush in apps that only need OcAppleKeyMapLib.
 //
+#if defined(OC_SHOW_RUNNING_KEYS)
+VOID
+OcInitRunningKeys (
+  UINT64 TscFrequency
+)
+{
+  mRunningColumn = 0;
+
+  mTscFrequency = TscFrequency;
+
+  mLoopDelayStart = 0;
+  mLoopDelayEnd = 0;
+
+  mFlushDelayStart = 0;
+  mFlushDelayEnd = 0;
+}
+
+VOID
+OcInstrumentLoopDelay (
+  UINT64 LoopDelayStart,
+  UINT64 LoopDelayEnd
+)
+{
+  mLoopDelayStart     = LoopDelayStart;
+  mLoopDelayEnd       = LoopDelayEnd;
+}
+
+VOID
+OcInstrumentFlushDelay (
+  UINT64 FlushDelayStart,
+  UINT64 FlushDelayEnd
+)
+{
+  mFlushDelayStart    = FlushDelayStart;
+  mFlushDelayEnd      = FlushDelayEnd;
+}
+
+STATIC
+VOID
+ShowDeltas (
+  UINT64                    CurrentTick,
+  INT32                     RestoreRow
+  )
+{
+  CONST CHAR16 *ClearSpace = L"      ";
+
+  gST->ConOut->SetCursorPosition (gST->ConOut, 0, RestoreRow + OC_RKEYS_PRINT_ROW);
+
+  Print (
+    L"mTscFrequency  = %,Lu\n",
+    mTscFrequency);
+
+  Print (
+    L"Called delta   = %,Lu%s\n",
+    CurrentTick - mPreviousTick,
+    ClearSpace);
+
+  Print (L"Loop delta     = %,Lu (@ -%,Lu)%s%s\n",
+    mLoopDelayEnd == 0 ? 0 : mLoopDelayEnd - mLoopDelayStart,
+    mLoopDelayEnd == 0 ? 0 : CurrentTick - mLoopDelayEnd,
+    ClearSpace,
+    ClearSpace);
+
+  Print (L"Flush delta    = %,Lu (@ -%,Lu)%s%s\n",
+    mFlushDelayEnd == 0 ? 0 : mFlushDelayEnd - mFlushDelayStart,
+    mFlushDelayEnd == 0 ? 0 : CurrentTick - mFlushDelayEnd,
+    ClearSpace,
+    ClearSpace);
+}
+
 VOID
 OcShowRunningKeys (
   UINTN                     NumKeysUp,
@@ -495,26 +577,29 @@ OcShowRunningKeys (
   BOOLEAN                   UsingDownkeys
   )
 {
-  INT32                              RestoreRow;
-  INT32                              RestoreColumn;
+  UINT64                            CurrentTick;
+  INT32                             RestoreRow;
+  INT32                             RestoreColumn;
 
-  CHAR16                             Code[3];
+  CHAR16                            Code[3]; // includes flush-ahead space, to make progress visible
 
-  Code[1]        = L' ';
-  Code[2]        = L'\0';
+  Code[1]         = L' ';
+  Code[2]         = L'\0';
 
-  if (mRunningColumn < 0 || mRunningColumn >= MAX_RUNNING_COLUMN) {
-    mRunningColumn = 0;
+  RestoreRow      = gST->ConOut->Mode->CursorRow;
+  RestoreColumn   = gST->ConOut->Mode->CursorColumn;
+
+  CurrentTick     = AsmReadTsc();
+  if (mRunningColumn == OC_RKEYS_DELTA_SAMPLE_COLUMN) {
+    ShowDeltas(CurrentTick, RestoreRow);
   }
-
-  RestoreRow     = gST->ConOut->Mode->CursorRow;
-  RestoreColumn  = gST->ConOut->Mode->CursorColumn;
+  mPreviousTick = CurrentTick;
 
   if (UsingDownkeys) {
     //
     // Show downkeys info when in use
     //
-    gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + UP_DOWN_HELD_DISPLAY_OFFSET);
+    gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + OC_RKEYS_UP_DOWN_ROW);
     if (NumKeysUp > 0) {
       Code[0] = L'U';
     } else if (NumKeysDown > 0) {
@@ -529,7 +614,7 @@ OcShowRunningKeys (
     //
     // Show caller ID for flush or non-flush
     //
-    gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + ID_DISPLAY_OFFSET);
+    gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + OC_RKEYS_FLUSH_ROW);
     Code[0] = CallerID;
     gST->ConOut->OutputString (gST->ConOut, Code);
   }
@@ -537,7 +622,7 @@ OcShowRunningKeys (
   //
   // Key held info
   //
-  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + X_DISPLAY_OFFSET);
+  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + OC_RKEYS_X_ROW);
   if (NumKeysHeld > 0) {
     Code[0] = L'X';
   } else {
@@ -548,7 +633,7 @@ OcShowRunningKeys (
   //
   // Modifiers info
   //
-  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + MODIFIER_DISPLAY_OFFSET);
+  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, RestoreRow + OC_RKEYS_MODIFIERS_ROW);
   if (Modifiers == 0) {
     Code[0] = L' ';
     gST->ConOut->OutputString (gST->ConOut, Code);
@@ -556,7 +641,9 @@ OcShowRunningKeys (
     Print(L"%d", Modifiers);
   }
 
-  mRunningColumn++;
+  if (++mRunningColumn >= OC_RKEYS_MAX_COLUMN) {
+    mRunningColumn = 0;
+  }
 
   gST->ConOut->SetCursorPosition (gST->ConOut, RestoreColumn, RestoreRow);
 }
@@ -576,6 +663,10 @@ OcKeyMapFlush (
   APPLE_MODIFIER_MAP  Modifiers;
   EFI_INPUT_KEY       EfiKey;
   APPLE_KEY_CODE      Keys[OC_KEY_MAP_DEFAULT_SIZE];
+
+#if defined(OC_SHOW_RUNNING_KEYS)
+  UINT64              FlushDelayStart;
+#endif
 
   if (!EnableFlush) {
     return;
@@ -619,7 +710,13 @@ OcKeyMapFlush (
       break;
     }
 
+#if defined(OC_SHOW_RUNNING_KEYS)
+    FlushDelayStart = AsmReadTsc();
+#endif
     MicroSecondDelay (10);
+#if defined(OC_SHOW_RUNNING_KEYS)
+    OcInstrumentFlushDelay(FlushDelayStart, AsmReadTsc());
+#endif
   }
 
   if (FlushConsole) {
