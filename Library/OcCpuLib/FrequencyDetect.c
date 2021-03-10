@@ -212,7 +212,7 @@ InternalCalculateTSCFromPMTimer (
       }
     }
 
-    DEBUG ((DEBUG_VERBOSE, "TscFrequency %lld\n", TSCFrequency));
+    DEBUG ((DEBUG_INFO, "TscFrequency %lld\n", TSCFrequency));
 
     //
     // Set the variable if not present and valid.
@@ -250,7 +250,7 @@ InternalCalculateTSCFromApplePlatformInfo (
     (VOID **) &PlatformInfo
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
     return 0;
   }
 
@@ -261,7 +261,7 @@ InternalCalculateTSCFromApplePlatformInfo (
     );
   if (!EFI_ERROR (Status)) {
     if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-      DEBUG ((DEBUG_VERBOSE, "OCCPU: Got inappropriate size (%u) for first FSBFrequency data from ApplePlatformInfo\n", Size));
+      DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for first FSBFrequency data from ApplePlatformInfo\n", Size));
       return 0;
     }
 
@@ -272,11 +272,11 @@ InternalCalculateTSCFromApplePlatformInfo (
       &Size
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get first FSBFrequency data - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first FSBFrequency data - %r\n", Status));
       return 0;
     }
   } else {
-    DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get first FSBFrequency data size from ApplePlatformInfo - %r, trying HOB\n", Status));
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to get first FSBFrequency data size from ApplePlatformInfo - %r, trying HOB\n", Status));
 
     FsbHob = GetFirstGuidHob (NULL);
     if (FsbHob != NULL) {
@@ -287,11 +287,11 @@ InternalCalculateTSCFromApplePlatformInfo (
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get FSBFrequency data size with HOB method from ApplePlatformInfo - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data size with HOB method from ApplePlatformInfo - %r\n", Status));
         return 0;
       }
       if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Got inappropriate size (%u) for FSBFrequency data\n", Size));
+        DEBUG ((DEBUG_INFO, "OCCPU: Got inappropriate size (%u) for FSBFrequency data\n", Size));
         return 0;
       }
 
@@ -303,7 +303,7 @@ InternalCalculateTSCFromApplePlatformInfo (
         &Size
         );
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get FSBFrequency data using HOB method from ApplePlatformInfo - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method from ApplePlatformInfo - %r\n", Status));
         return 0;
       }
     }
@@ -571,7 +571,19 @@ OcGetTSCFrequency (
   VOID
   )
 {
-  UINT64 CPUFrequency;
+  STATIC  BOOLEAN   mInOcGetTSCFrequency = FALSE;
+
+          UINT64    CPUFrequency;
+
+  //
+  // Prevent recursion from debug messages in TSC setup, where log then attempts to get TSC timer value
+  //
+  if (mInOcGetTSCFrequency) {
+    return 0;
+  }
+
+  mInOcGetTSCFrequency = TRUE;
+
   //
   // For Intel platforms (the vendor check is covered by the callee), prefer
   // the CPU Frequency derieved from the ART, as the PM timer might not be
@@ -594,6 +606,9 @@ OcGetTSCFrequency (
       }
     }
   }
+
+  mInOcGetTSCFrequency = FALSE;
+  
   //
   // For all known models with an invariant TSC, its frequency is equal to the
   // CPU's specified base clock.
