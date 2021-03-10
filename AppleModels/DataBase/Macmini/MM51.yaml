@@ -92,7 +92,7 @@ Specifications:
   SystemReportName:
     - "Mac mini (Mid 2011)"
   MarketingName:
-    - "Mac mini (Mid 2011) with Intel HD Graphics 3000."
+    - "Mac mini (Mid 2011) with Intel graphics"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "DJD0"

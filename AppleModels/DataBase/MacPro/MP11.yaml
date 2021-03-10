@@ -79,7 +79,7 @@ Specifications:
   SystemReportName:
     - "Mac Pro"
   MarketingName:
-    - "Mac Pro"
+    - "Mac Pro (Original)"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "UQ2"

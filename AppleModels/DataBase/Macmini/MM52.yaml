@@ -95,7 +95,7 @@ Specifications:
   SystemReportName:
     - "Mac mini (Mid 2011)"
   MarketingName:
-    - "Mac mini (Mid 2011) with AMD Radeon HD 6630M."
+    - "Mac mini (Mid 2011) with Radeon graphics"
 # Note, first model code is used by macserial
 AppleModelCode:
   - "DJD1"
