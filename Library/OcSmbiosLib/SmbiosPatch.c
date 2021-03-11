@@ -1878,7 +1878,7 @@ OcSmbiosGetSmcVersion (
     }
   }
 
-  Temp = SmcRevision[4];
+  Temp = SmcRevision[3];
 
   if (Temp < 0x10) {
     SmcVersion[Index] = (Temp + 0x30);
