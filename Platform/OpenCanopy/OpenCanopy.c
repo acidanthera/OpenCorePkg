@@ -72,38 +72,22 @@ GuiClipChildBounds (
   IN OUT UINT32  *ReqLength
   )
 {
-  UINT32 PosChildOffset;
-  UINT32 NegChildOffset;
-  UINT32 OffsetDelta;
+  INT64  OffsetDelta;
   UINT32 NewOffset;
   UINT32 NewLength;
 
   ASSERT (ReqOffset != NULL);
   ASSERT (ReqLength != NULL);
 
-  if (ChildOffset >= 0) {
-    PosChildOffset = (UINT32)ChildOffset;
-    NegChildOffset = 0;
-  } else {
-    if (ChildOffset + ChildLength <= 0) {
-      return FALSE;
-    }
-
-    PosChildOffset = 0;
-    NegChildOffset = (UINT32) -ChildOffset;
-    ChildLength    = (UINT32)(ChildOffset + ChildLength);
-  }
-
-  ASSERT (ChildLength > 0);
-
   NewOffset = *ReqOffset;
   NewLength = *ReqLength;
 
-  if (NewOffset >= PosChildOffset) {
+  OffsetDelta = NewOffset - ChildOffset;
+
+  if (OffsetDelta >= 0) {
     //
     // The requested offset starts within or past the child.
     //
-    OffsetDelta = NewOffset - PosChildOffset;
     if (ChildLength <= OffsetDelta) {
       //
       // The requested offset starts past the child.
@@ -113,14 +97,13 @@ GuiClipChildBounds (
     //
     // The requested offset starts within the child.
     //
-    NewOffset -= PosChildOffset;
-    NewOffset += NegChildOffset;
+    NewOffset = (UINT32) OffsetDelta;
+    NewLength = MIN (NewLength, (UINT32) (ChildLength - OffsetDelta));
   } else {
     //
-    // The requested offset ends within or before the child.
+    // The requested offset starts before the child.
     //
-    OffsetDelta = PosChildOffset - NewOffset;
-    if (NewLength <= OffsetDelta) {
+    if (NewLength <= -OffsetDelta) {
       //
       // The requested offset ends before the child.
       //
@@ -129,9 +112,13 @@ GuiClipChildBounds (
     //
     // The requested offset ends within the child.
     //
-    NewOffset  = NegChildOffset;
-    NewLength -= OffsetDelta;
+    NewOffset = 0;
+    NewLength = MIN ((UINT32) (NewLength + OffsetDelta), ChildLength);
   }
+
+  ASSERT (ChildOffset + ChildLength > 0);
+  ASSERT (NewLength > 0);
+  ASSERT (NewOffset + NewLength <= ChildLength);
 
   *ReqOffset = NewOffset;
   *ReqLength = NewLength;
@@ -163,12 +150,13 @@ GuiObjDrawDelegate (
   UINT32        ChildDrawHeight;
 
   ASSERT (This != NULL);
-  ASSERT (This->Width  > OffsetX);
-  ASSERT (This->Height > OffsetY);
+  ASSERT (OffsetX < This->Width);
+  ASSERT (OffsetY < This->Height);
+  ASSERT (Width > 0);
+  ASSERT (Height > 0);
+  ASSERT (Width <= This->Width);
+  ASSERT (Height <= This->Height);
   ASSERT (DrawContext != NULL);
-
-  Width  = MIN (Width, This->Width - OffsetX);
-  Height = MIN (Height, This->Height - OffsetY);
 
   for (
     ChildEntry = GetPreviousNode (&This->Children, &This->Children);
@@ -201,6 +189,8 @@ GuiObjDrawDelegate (
       continue;
     }
 
+    ASSERT (ChildDrawOffsetX + ChildDrawWidth <= Child->Obj.Width);
+    ASSERT (ChildDrawOffsetY + ChildDrawHeight <= Child->Obj.Height);
     ASSERT (ChildDrawWidth > 0);
     ASSERT (ChildDrawHeight > 0);
     ASSERT (Child->Obj.Draw != NULL);
