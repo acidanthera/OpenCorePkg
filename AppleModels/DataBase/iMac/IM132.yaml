@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "292.0.0.0.0"
-BIOSLegacyVersion: "IM131.88Z.F000.B00.2006101655"
-BIOSReleaseDate: "06/10/2020"
+BIOSVersion: "421.0.0.0.0"
+BIOSLegacyVersion: "IM131.88Z.F000.B00.2012171805"
+BIOSReleaseDate: "12/17/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac13,2"
 SystemVersion: "1.0"
@@ -77,13 +77,13 @@ SmcEPCI: 0x79006
 OEMStrings: |-
   Apple ROM Version
     Model:        IM131
-    EFI Version:  292.0.0.0.0
-    Built by:     root@saumon
-    Date:         Wed Jun 10 16:55:24 PDT 2020
-    Revision:     292 (B&I)
+    EFI Version:  421.0.0.0.0
+    Built by:     root@xapp134
+    Date:         Thu Dec 17 18:05:04 PST 2020
+    Revision:     421 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+    Compiler:     Apple clang version 11.0.0 (clang-1100.0.32.4) (-macos10.15-objc-selector-opts)
 Specifications:
   CPUCodename:
     - "Ivy Bridge"

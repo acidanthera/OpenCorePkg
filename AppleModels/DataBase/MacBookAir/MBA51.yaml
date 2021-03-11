@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "264.0.0.0.0"
-BIOSLegacyVersion: "MBA51.88Z.F000.B00.2006101654"
-BIOSReleaseDate: "06/10/2020"
+BIOSVersion: "421.0.0.0.0"
+BIOSLegacyVersion: "MBA51.88Z.F000.B00.2012171806"
+BIOSReleaseDate: "12/17/2020"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir5,1"
 SystemVersion: "1.0"
@@ -70,13 +70,13 @@ SmcEPCI: 0x7B006
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA51
-    EFI Version:  264.0.0.0.0
-    Built by:     root@saumon
-    Date:         Wed Jun 10 16:54:31 PDT 2020
-    Revision:     264 (B&I)
+    EFI Version:  421.0.0.0.0
+    Built by:     root@xapp134
+    Date:         Thu Dec 17 18:06:15 PST 2020
+    Revision:     421 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     Apple clang version 3.0 (tags/Apple/clang-211.10.1) (based on LLVM 3.0svn)
+    Compiler:     Apple clang version 11.0.0 (clang-1100.0.32.4) (-macos10.15-objc-selector-opts)
 Specifications:
   CPUCodename:
     - "Ivy Bridge"
