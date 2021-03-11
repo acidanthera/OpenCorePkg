@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added `ForceBooterSignature` quirk for Mac EFI firmware
 - Fixed OpenCanopy sometimes cutting off shown boot entries
 - Further improved CPU frequency calculation on legacy CPUs
+- Fixed SMBIOS SMC version encoding sequence
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
