@@ -338,7 +338,12 @@ ScanIntelFSBFrequency (
   UINT8  MaxBusRatio;
   UINT8  MaxBusRatioDiv;
 
-  if (CpuInfo == NULL || CpuInfo->FSBFrequency > 0) {
+  ASSERT (CpuInfo != NULL);
+
+  //
+  // Do not reset if CpuInfo->FSBFrequency is already set.
+  //
+  if (CpuInfo->FSBFrequency > 0) {
     return;
   }
 
@@ -346,7 +351,7 @@ ScanIntelFSBFrequency (
 
   //
   // There may be some quirks with virtual CPUs (VMware is fine).
-  // Formerly we checked Cpu->MinBusRatio > 0, but we have no MinBusRatio on Penryn.
+  // Formerly we checked Cpu->MinBusRatio > 0, and MaxBusRatio falls back to 1 if it is 0.
   //
   if (CpuInfo->CPUFrequency > 0) {
     if (MaxBusRatioDiv == 0) {
