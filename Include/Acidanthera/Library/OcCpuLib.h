@@ -212,6 +212,19 @@ OcCpuModelToAppleFamily (
   );
 
 /**
+  Converts calculated CPU frequency in Hz to rounded
+  value in MHz.
+
+  @param[in] Frequency  CPU frequency in Hz.
+
+  @return Rounded CPU frequency in MHz.
+**/
+UINT16
+OcCpuFrequencyToDisplayFrequency (
+  IN UINT64  Frequency
+  );
+
+/**
   Obtain CPU's invariant TSC frequency.
 
   @retval CPU's TSC frequency or OC_FALLBACK_CPU_FREQUENCY.

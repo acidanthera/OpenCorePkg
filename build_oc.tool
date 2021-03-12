@@ -12,6 +12,7 @@ buildutil() {
     "ocpasswordgen"
     "ocvalidate"
     "TestBmf"
+    "TestCpuFrequency"
     "TestDiskImage"
     "TestHelloWorld"
     "TestImg4"
