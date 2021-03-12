@@ -676,9 +676,9 @@ OcCpuFrequencyToDisplayFrequency (
   // Round to two digits when the second digit is above zero or to one otherwise.
   // REF: https://github.com/acidanthera/bugtracker/issues/1521
   //
-  if (MhzRemainder >= 60 && MhzRemainder < 90) {
+  if (MhzRemainder >= 60 && MhzRemainder < 89) {
     MhzSpeed = (MhzSpeed) / 10 * 10;
-  } else if (MhzRemainder >= 12 && MhzRemainder < 90) {
+  } else if (MhzRemainder >= 12 && MhzRemainder < 89) {
     MhzSpeed = (MhzSpeed + 5) / 10 * 10;
   } else {
     MhzSpeed = (MhzSpeed + 50) / 100 * 100;
