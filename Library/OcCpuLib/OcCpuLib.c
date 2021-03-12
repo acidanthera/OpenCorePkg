@@ -487,7 +487,7 @@ ScanIntelProcessor (
       TimerAddr = InternalGetPmTimerAddr (&TimerSourceType);
       DEBUG ((DEBUG_INFO, "OCCPU: Timer address is %Lx from %a\n", (UINT64) TimerAddr, TimerSourceType));
       DEBUG_CODE_END ();
-      Cpu->CPUFrequencyFromApple = InternalCalculateTSCFromApplePlatformInfo (NULL);
+      Cpu->CPUFrequencyFromApple = InternalCalculateTSCFromApplePlatformInfo (NULL, Recalculate);
       if (Cpu->CPUFrequencyFromApple == 0 || Recalculate) {
         Cpu->CPUFrequencyFromTSC   = InternalCalculateTSCFromPMTimer (Recalculate);
       }

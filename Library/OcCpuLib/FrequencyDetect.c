@@ -231,82 +231,190 @@ InternalCalculateTSCFromPMTimer (
   return TSCFrequency;
 }
 
-UINT64
-InternalCalculateTSCFromApplePlatformInfo (
-  OUT  UINT64  *FSBFrequency  OPTIONAL
+STATIC
+EFI_STATUS
+ReadApplePlatformFirstData (
+  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN      EFI_GUID                               *DataGuid,
+  IN OUT  UINT32                                 *Size,
+     OUT  VOID                                   *Data
   )
 {
-  EFI_STATUS                             Status;
-  APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
-  UINT32                                 Size;
-  VOID                                   *FsbHob;
-  UINT64                                 FsbFreq;
+  EFI_STATUS  Status;
+  UINT32      DataSize;
 
-  FsbFreq = 0;
-
-  Status = gBS->LocateProtocol (
-    &gApplePlatformInfoDatabaseProtocolGuid,
-    NULL,
-    (VOID **) &PlatformInfo
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
-    return 0;
-  }
+  ASSERT (Size     != NULL);
+  ASSERT (Data     != NULL);
+  ASSERT (DataGuid != NULL);
 
   Status = PlatformInfo->GetFirstDataSize (
     PlatformInfo,
-    &gAppleFsbFrequencyPlatformInfoGuid,
-    &Size
+    DataGuid,
+    &DataSize
     );
-  if (!EFI_ERROR (Status)) {
-    if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-      DEBUG ((DEBUG_VERBOSE, "OCCPU: Got inappropriate size (%u) for first FSBFrequency data from ApplePlatformInfo\n", Size));
-      return 0;
-    }
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No first platform data size for %g up to %u - %r\n",
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return Status;
+  }
+  if (DataSize > *Size) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: Invalid first platform data size %u for %g up to %u - %r\n",
+      DataSize,
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return EFI_INVALID_PARAMETER;
+  }
 
-    Status = PlatformInfo->GetFirstData (
-      PlatformInfo,
-      &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-      &FsbFreq,
-      &Size
+  Status = PlatformInfo->GetFirstData (
+    PlatformInfo,
+    DataGuid,
+    Data,
+    &DataSize
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No first platform data for %g up to %u - %r\n",
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return Status;
+  }
+
+  *Size = DataSize;
+
+  return Status;
+}
+
+STATIC
+EFI_STATUS
+ReadApplePlatformData (
+  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN      EFI_GUID                               *DataGuid,
+  IN OUT  UINT32                                 *Size,
+     OUT  VOID                                   *Data
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *FsbHob;
+  UINT32      DataSize;
+
+  ASSERT (Size     != NULL);
+  ASSERT (Data     != NULL);
+  ASSERT (DataGuid != NULL);
+
+  FsbHob = GetFirstGuidHob (NULL);
+  if (FsbHob == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = PlatformInfo->GetDataSize (
+    PlatformInfo,
+    DataGuid,
+    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
+    &DataSize
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No platform data size for %g up to %u - %r\n",
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return Status;
+  }
+  if (DataSize > *Size) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: Invalid platform data size %u for %g up to %u - %r\n",
+      DataSize,
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return EFI_INVALID_PARAMETER;
+  }
+
+  Status = PlatformInfo->GetData (
+    PlatformInfo,
+    DataGuid,
+    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
+    Data,
+    &DataSize
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No platform data for %g up to %u - %r\n",
+      DataGuid,
+      *Size,
+      Status
+      ));
+    return Status;
+  }
+
+  *Size = DataSize;
+
+  return Status;
+}
+
+UINT64
+InternalCalculateTSCFromApplePlatformInfo (
+  OUT  UINT64   *FSBFrequency  OPTIONAL,
+  IN   BOOLEAN  Recalculate
+  )
+{
+  //
+  // Cache the result to speed up multiple calls.
+  //
+  STATIC BOOLEAN ObtainedFreqs = FALSE;
+  STATIC UINT64  FsbFreq       = 0;
+  STATIC UINT64  TscFreq       = 0;
+
+  EFI_STATUS                             Status;
+  APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
+  UINT32                                 Size;
+
+  if (Recalculate) {
+    ObtainedFreqs = FALSE;
+    FsbFreq = TscFreq = 0;
+  }
+
+  if (!ObtainedFreqs) {
+    Size = sizeof (FsbFreq);
+
+    Status = gBS->LocateProtocol (
+      &gApplePlatformInfoDatabaseProtocolGuid,
+      NULL,
+      (VOID **) &PlatformInfo
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get first FSBFrequency data - %r\n", Status));
+      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
       return 0;
     }
-  } else {
-    DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get first FSBFrequency data size from ApplePlatformInfo - %r, trying HOB\n", Status));
 
-    FsbHob = GetFirstGuidHob (NULL);
-    if (FsbHob != NULL) {
-      Status = PlatformInfo->GetDataSize (
-        PlatformInfo,
-        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-        *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-        &Size
-        );
+    Status = ReadApplePlatformFirstData (PlatformInfo, &gAppleFsbFrequencyPlatformInfoGuid, &Size, &FsbFreq);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
+      Status = ReadApplePlatformData (PlatformInfo, &gAppleFsbFrequencyPlatformInfoGuid, &Size, &FsbFreq);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get FSBFrequency data size with HOB method from ApplePlatformInfo - %r\n", Status));
-        return 0;
-      }
-      if (Size > sizeof (UINT64) || Size < sizeof (UINT32)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Got inappropriate size (%u) for FSBFrequency data\n", Size));
-        return 0;
-      }
-
-      Status = PlatformInfo->GetData (
-        PlatformInfo,
-        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
-        *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-        &FsbFreq,
-        &Size
-        );
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to get FSBFrequency data using HOB method from ApplePlatformInfo - %r\n", Status));
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method - %r\n", Status));
         return 0;
       }
     }
+
+    TscFreq = InternalConvertAppleFSBToTSCFrequency (FsbFreq);
   }
   
   //
@@ -316,7 +424,7 @@ InternalCalculateTSCFromApplePlatformInfo (
     *FSBFrequency = FsbFreq;
   }
 
-  return InternalConvertAppleFSBToTSCFrequency (FsbFreq);
+  return TscFreq;
 }
 
 UINT64
@@ -582,7 +690,7 @@ OcGetTSCFrequency (
   if (CPUFrequency == 0) {
     CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
     if (CPUFrequency == 0) {
-      CPUFrequency = InternalCalculateTSCFromApplePlatformInfo (NULL);
+      CPUFrequency = InternalCalculateTSCFromApplePlatformInfo (NULL, FALSE);
       if (CPUFrequency == 0) {
         CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
         if (CPUFrequency == 0) {

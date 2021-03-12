@@ -133,12 +133,14 @@ InternalCalculateTSCFromPMTimer (
   Calculate the TSC frequency via Apple Platform Info
 
   @param[out]  FSBFrequency  Updated FSB frequency, optional.
+  @param[in]   Recalculate   Do not re-use previously cached information.
 
   @retval  The calculated TSC frequency.
 **/
 UINT64
 InternalCalculateTSCFromApplePlatformInfo (
-  OUT  UINT64  *FSBFrequency  OPTIONAL
+  OUT  UINT64   *FSBFrequency  OPTIONAL,
+  IN   BOOLEAN  Recalculate
   );
 
 /**
