@@ -14,22 +14,17 @@
 
 #include <Uefi.h>
 
-#include <Guid/ApplePlatformInfo.h>
-#include <Guid/AppleHob.h>
 #include <Guid/OcVariable.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
 #include <Protocol/PciIo.h>
-#include <Protocol/ApplePlatformInfoDatabase.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Pi/PiBootMode.h>
-#include <Pi/PiHob.h>
-#include <Library/HobLib.h>
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -231,144 +226,6 @@ InternalCalculateTSCFromPMTimer (
   return TSCFrequency;
 }
 
-STATIC
-EFI_STATUS
-ReadApplePlatformFirstData (
-  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
-  IN      EFI_GUID                               *DataGuid,
-  IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
-  )
-{
-  EFI_STATUS  Status;
-  UINT32      DataSize;
-
-  ASSERT (Size     != NULL);
-  ASSERT (Data     != NULL);
-  ASSERT (DataGuid != NULL);
-
-  Status = PlatformInfo->GetFirstDataSize (
-    PlatformInfo,
-    DataGuid,
-    &DataSize
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: No first platform data size for %g up to %u - %r\n",
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return Status;
-  }
-  if (DataSize > *Size) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: Invalid first platform data size %u for %g up to %u - %r\n",
-      DataSize,
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Status = PlatformInfo->GetFirstData (
-    PlatformInfo,
-    DataGuid,
-    Data,
-    &DataSize
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: No first platform data for %g up to %u - %r\n",
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return Status;
-  }
-
-  *Size = DataSize;
-
-  return Status;
-}
-
-STATIC
-EFI_STATUS
-ReadApplePlatformData (
-  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
-  IN      EFI_GUID                               *DataGuid,
-  IN OUT  UINT32                                 *Size,
-     OUT  VOID                                   *Data
-  )
-{
-  EFI_STATUS  Status;
-  VOID        *FsbHob;
-  UINT32      DataSize;
-
-  ASSERT (Size     != NULL);
-  ASSERT (Data     != NULL);
-  ASSERT (DataGuid != NULL);
-
-  FsbHob = GetFirstGuidHob (DataGuid);
-  if (FsbHob == NULL) {
-    return EFI_UNSUPPORTED;
-  }
-
-  Status = PlatformInfo->GetDataSize (
-    PlatformInfo,
-    DataGuid,
-    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-    &DataSize
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: No platform data size for %g up to %u - %r\n",
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return Status;
-  }
-  if (DataSize > *Size) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: Invalid platform data size %u for %g up to %u - %r\n",
-      DataSize,
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return EFI_INVALID_PARAMETER;
-  }
-
-  Status = PlatformInfo->GetData (
-    PlatformInfo,
-    DataGuid,
-    *(UINT8 *) GET_GUID_HOB_DATA (FsbHob),
-    Data,
-    &DataSize
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCCPU: No platform data for %g up to %u - %r\n",
-      DataGuid,
-      *Size,
-      Status
-      ));
-    return Status;
-  }
-
-  *Size = DataSize;
-
-  return Status;
-}
-
 UINT64
 InternalCalculateTSCFromApplePlatformInfo (
   OUT  UINT64   *FSBFrequency  OPTIONAL,
@@ -388,7 +245,8 @@ InternalCalculateTSCFromApplePlatformInfo (
 
   if (Recalculate) {
     ObtainedFreqs = FALSE;
-    FsbFreq = TscFreq = 0;
+    FsbFreq       = 0;
+    TscFreq       = 0;
   }
 
   if (!ObtainedFreqs) {
@@ -405,10 +263,21 @@ InternalCalculateTSCFromApplePlatformInfo (
       return 0;
     }
 
-    Status = ReadApplePlatformFirstData (PlatformInfo, &gAppleFsbFrequencyPlatformInfoGuid, &Size, &FsbFreq);
+    Status = OcReadApplePlatformFirstData (
+      PlatformInfo,
+      &gAppleFsbFrequencyPlatformInfoGuid,
+      &Size,
+      &FsbFreq
+      );
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
-      Status = ReadApplePlatformData (PlatformInfo, &gAppleFsbFrequencyPlatformInfoGuid, &Size, &FsbFreq);
+      Status = OcReadApplePlatformData (
+        PlatformInfo,
+        &gAppleFsbFrequencyPlatformInfoGuid,
+        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+        &Size,
+        &FsbFreq
+        );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method - %r\n", Status));
         return 0;

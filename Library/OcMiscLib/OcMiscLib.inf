@@ -39,6 +39,7 @@
 
 [LibraryClasses]
   BaseLib
+  HobLib
   IoLib
   UefiLib
   OcFileLib
@@ -48,4 +49,5 @@
 [Sources]
   DataPatcher.c
   ImageRunner.c
+  PlatformInfo.c
   ProtocolSupport.c

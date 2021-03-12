@@ -17,6 +17,7 @@
 
 #include <Uefi.h>
 #include <Library/OcStringLib.h>
+#include <Protocol/ApplePlatformInfoDatabase.h>
 
 /**
   The size, in Bits, of one Byte.
@@ -120,6 +121,23 @@ OcLoadAndRunImage (
   IN   VOID                      *Buffer      OPTIONAL,
   IN   UINTN                     BufferSize,
   OUT  EFI_HANDLE                *ImageHandle OPTIONAL
+  );
+
+EFI_STATUS
+OcReadApplePlatformFirstData (
+  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN      EFI_GUID                               *DataGuid,
+  IN OUT  UINT32                                 *Size,
+     OUT  VOID                                   *Data
+  );
+
+EFI_STATUS
+OcReadApplePlatformData (
+  IN      APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN      EFI_GUID                               *DataGuid,
+  IN      EFI_GUID                               *HobGuid,
+  IN OUT  UINT32                                 *Size,
+     OUT  VOID                                   *Data
   );
 
 /**
