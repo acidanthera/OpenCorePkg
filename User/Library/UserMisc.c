@@ -653,3 +653,12 @@ MmioWrite8 (
 {
   return 0;
 }
+
+VOID *
+EFIAPI
+GetFirstGuidHob (
+  IN CONST EFI_GUID         *Guid
+  )
+{
+  return NULL;
+}

@@ -176,7 +176,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcMiscLib targets.
 	#
-	OBJS    += Math.o ProtocolSupport.o DataPatcher.o
+	OBJS    += Math.o ProtocolSupport.o DataPatcher.o PlatformInfo.o
 	#
 	# OcAppleKernelLib targets.
 	#

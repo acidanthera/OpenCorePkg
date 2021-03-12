@@ -24,6 +24,7 @@
 #include <Library/IoLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/PciLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -223,6 +224,77 @@ InternalCalculateTSCFromPMTimer (
   }
 
   return TSCFrequency;
+}
+
+UINT64
+InternalCalculateTSCFromApplePlatformInfo (
+  OUT  UINT64   *FSBFrequency  OPTIONAL,
+  IN   BOOLEAN  Recalculate
+  )
+{
+  //
+  // Cache the result to speed up multiple calls.
+  //
+  STATIC BOOLEAN ObtainedFreqs = FALSE;
+  STATIC UINT64  FsbFreq       = 0;
+  STATIC UINT64  TscFreq       = 0;
+
+  EFI_STATUS                             Status;
+  APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
+  UINT32                                 Size;
+
+  if (Recalculate) {
+    ObtainedFreqs = FALSE;
+    FsbFreq       = 0;
+    TscFreq       = 0;
+  }
+
+  if (!ObtainedFreqs) {
+    ObtainedFreqs = TRUE;
+    Size          = sizeof (FsbFreq);
+
+    Status = gBS->LocateProtocol (
+      &gApplePlatformInfoDatabaseProtocolGuid,
+      NULL,
+      (VOID **) &PlatformInfo
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
+      return 0;
+    }
+
+    Status = OcReadApplePlatformFirstData (
+      PlatformInfo,
+      &gAppleFsbFrequencyPlatformInfoGuid,
+      &Size,
+      &FsbFreq
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
+      Status = OcReadApplePlatformData (
+        PlatformInfo,
+        &gAppleFsbFrequencyPlatformInfoGuid,
+        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+        &Size,
+        &FsbFreq
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method - %r\n", Status));
+        return 0;
+      }
+    }
+
+    TscFreq = InternalConvertAppleFSBToTSCFrequency (FsbFreq);
+  }
+  
+  //
+  // Optionally update FSBFrequency.
+  //
+  if (FSBFrequency != NULL) {
+    *FSBFrequency = FsbFreq;
+  }
+
+  return TscFreq;
 }
 
 UINT64
@@ -488,12 +560,15 @@ OcGetTSCFrequency (
   if (CPUFrequency == 0) {
     CPUFrequency = InternalCalculateVMTFrequency (NULL, NULL);
     if (CPUFrequency == 0) {
-      CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+      CPUFrequency = InternalCalculateTSCFromApplePlatformInfo (NULL, FALSE);
       if (CPUFrequency == 0) {
-        //
-        // Assume at least some frequency, so that we always work.
-        //
-        CPUFrequency = OC_FALLBACK_CPU_FREQUENCY;
+        CPUFrequency = InternalCalculateTSCFromPMTimer (FALSE);
+        if (CPUFrequency == 0) {
+          //
+          // Assume at least some frequency, so that we always work.
+          //
+          CPUFrequency = OC_FALLBACK_CPU_FREQUENCY;
+        }
       }
     }
   }

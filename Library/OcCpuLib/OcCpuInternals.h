@@ -130,6 +130,20 @@ InternalCalculateTSCFromPMTimer (
   );
 
 /**
+  Calculate the TSC frequency via Apple Platform Info
+
+  @param[out]  FSBFrequency  Updated FSB frequency, optional.
+  @param[in]   Recalculate   Do not re-use previously cached information.
+
+  @retval  The calculated TSC frequency.
+**/
+UINT64
+InternalCalculateTSCFromApplePlatformInfo (
+  OUT  UINT64   *FSBFrequency  OPTIONAL,
+  IN   BOOLEAN  Recalculate
+  );
+
+/**
   Calculate the ART frequency and derieve the CPU frequency for Intel CPUs
 
   @param[out] CPUFrequency  The derieved CPU frequency.
@@ -157,6 +171,18 @@ UINT64
 InternalCalculateVMTFrequency (
   OUT UINT64   *FSBFrequency     OPTIONAL,
   OUT BOOLEAN  *UnderHypervisor  OPTIONAL
+  );
+
+/**
+  Convert Apple FSB frequency to TSC frequency
+
+  @param[in]  FSBFrequency  Frequency in Apple FSB format.
+
+  @retval  Converted TSC frequency.
+**/
+UINT64
+InternalConvertAppleFSBToTSCFrequency (
+  IN  UINT64        FSBFrequency
   );
 
 /**
