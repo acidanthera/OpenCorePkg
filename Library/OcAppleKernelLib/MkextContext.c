@@ -1461,7 +1461,8 @@ MkextContextApplyQuirk (
 EFI_STATUS
 MkextContextBlock (
   IN OUT MKEXT_CONTEXT          *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   )
 {
   EFI_STATUS            Status;

@@ -1014,7 +1014,8 @@ CachelessContextAddQuirk (
 EFI_STATUS
 CachelessContextBlock (
   IN OUT CACHELESS_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   )
 {
   EFI_STATUS      Status;

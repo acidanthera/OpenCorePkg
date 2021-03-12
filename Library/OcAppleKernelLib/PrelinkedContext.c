@@ -1254,7 +1254,8 @@ PrelinkedContextApplyQuirk (
 EFI_STATUS
 PrelinkedContextBlock (
   IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   )
 {
   EFI_STATUS            Status;
@@ -1269,5 +1270,5 @@ PrelinkedContextBlock (
     return Status;
   }
 
-  return PatcherBlockKext (&Patcher);
+  return Exclude ? PatcherExcludePrelinkedKext (Identifier, &Patcher, Context) : PatcherBlockKext (&Patcher);
 }

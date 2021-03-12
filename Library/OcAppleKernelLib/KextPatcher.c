@@ -365,6 +365,19 @@ PatcherApplyGenericPatch (
 }
 
 EFI_STATUS
+PatcherExcludePrelinkedKext (
+  IN     CONST CHAR8            *Identifier,
+  IN OUT PATCHER_CONTEXT        *Patcher,
+  IN OUT PRELINKED_CONTEXT      *Context
+  )
+{
+  //
+  // TODO
+  //
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )
