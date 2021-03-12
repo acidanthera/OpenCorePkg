@@ -313,7 +313,7 @@ ReadApplePlatformData (
   ASSERT (Data     != NULL);
   ASSERT (DataGuid != NULL);
 
-  FsbHob = GetFirstGuidHob (NULL);
+  FsbHob = GetFirstGuidHob (DataGuid);
   if (FsbHob == NULL) {
     return EFI_UNSUPPORTED;
   }
