@@ -930,6 +930,15 @@ OcCpuScanProcessor (
     DivU64x32 (Cpu->CPUFrequencyFromTSC, 1000000)
     ));
 
+  if (Cpu->CPUFrequencyFromApple > 0) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: CPUFrequencyFromApple %11LuHz %5LuMHz\n",
+      Cpu->CPUFrequencyFromApple,
+      DivU64x32 (Cpu->CPUFrequencyFromApple, 1000000)
+      ));
+  }
+
   DEBUG ((
     DEBUG_INFO,
     "OCCPU: CPUFrequency %11LuHz %5LuMHz\n",
