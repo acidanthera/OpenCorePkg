@@ -392,7 +392,8 @@ InternalCalculateTSCFromApplePlatformInfo (
   }
 
   if (!ObtainedFreqs) {
-    Size = sizeof (FsbFreq);
+    ObtainedFreqs = TRUE;
+    Size          = sizeof (FsbFreq);
 
     Status = gBS->LocateProtocol (
       &gApplePlatformInfoDatabaseProtocolGuid,
