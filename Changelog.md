@@ -15,6 +15,7 @@ OpenCore Changelog
 - Fixed OpenCanopy sometimes cutting off shown boot entries
 - Further improved CPU frequency calculation on legacy CPUs
 - Fixed SMBIOS SMC version encoding sequence
+- Implement TSC frequency reading from Apple Platform Info
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
