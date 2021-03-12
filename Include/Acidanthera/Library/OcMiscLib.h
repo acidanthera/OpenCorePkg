@@ -128,7 +128,7 @@ OcLoadAndRunImage (
 
   @param[in]      PlatformInfo  Apple Platform Info protocol.
   @param[in]      DataGuid      Resource GUID identifier.
-  @param[in,out]  Size          Maximum size allowed.
+  @param[in,out]  Size          Maximum size allowed, updated to actual size on success.
   @param[out]     Data          Data read from Apple Platform Info protocol.
 
   @retval EFI_SUCCESS on success.
@@ -142,12 +142,30 @@ OcReadApplePlatformFirstData (
   );
 
 /**
+  Read first data from Apple Platform Info protocol allocating memory from pool.
+
+  @param[in]      PlatformInfo  Apple Platform Info protocol.
+  @param[in]      DataGuid      Resource GUID identifier.
+  @param[in,out]  Size          Size of the entry.
+  @param[out]     Data          Data read from Apple Platform Info protocol allocated from pool.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcReadApplePlatformFirstDataAlloc (
+  IN   APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN   EFI_GUID                               *DataGuid,
+  OUT  UINT32                                 *Size,
+  OUT  VOID                                   **Data
+  );
+
+/**
   Read data from Apple Platform Info protocol.
 
   @param[in]      PlatformInfo  Apple Platform Info protocol.
   @param[in]      DataGuid      Resource GUID identifier.
   @param[in]      HobGuid       Hob GUID identifier.
-  @param[in,out]  Size          Maximum size allowed.
+  @param[in,out]  Size          Maximum size allowed, updated to actual size on success.
   @param[out]     Data          Data read from Apple Platform Info protocol.
 
   @retval EFI_SUCCESS on success.
