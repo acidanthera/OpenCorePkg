@@ -2062,6 +2062,21 @@ blocking.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
+\item
+  \texttt{Strategy}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Disable} (Forcibly make the kernel driver kmod startup code return failure)\\
+  \textbf{Description}: Determines the behaviour of kernel driver blocking.
+
+  Valid values:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Disable} --- Forcibly make the kernel driver kmod startup code return failure.
+    \item \texttt{Exclude} --- Remove the kernel driver from the kernel cache by dropping plist entry and filling in zeroes.
+    \emph{Note}: It is dangerous to \texttt{Exclude} kexts on which other kexts depend.
+  \end{itemize}
+
 \end{enumerate}
 
 \subsection{Emulate Properties}\label{kernelpropsemu}

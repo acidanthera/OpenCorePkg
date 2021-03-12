@@ -216,12 +216,13 @@
 /// KernelSpace kext blocks.
 ///
 #define OC_KERNEL_BLOCK_ENTRY_FIELDS(_, __) \
-  _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
-  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) )
+  _(BOOLEAN                     , Enabled          ,     , FALSE                       ,        ()                   ) \
+  _(OC_STRING                   , Arch             ,     , OC_STRING_CONSTR ("Any", _, __),     OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __),        OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Identifier       ,     , OC_STRING_CONSTR ("", _, __),        OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MaxKernel        ,     , OC_STRING_CONSTR ("", _, __),        OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , MinKernel        ,     , OC_STRING_CONSTR ("", _, __),        OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Strategy         ,     , OC_STRING_CONSTR ("Disable", _, __), OC_DESTR (OC_STRING) )
   OC_DECLARE (OC_KERNEL_BLOCK_ENTRY)
 
 #define OC_KERNEL_BLOCK_ARRAY_FIELDS(_, __) \
