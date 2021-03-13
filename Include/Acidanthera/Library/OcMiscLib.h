@@ -144,10 +144,10 @@ OcReadApplePlatformFirstData (
 /**
   Read first data from Apple Platform Info protocol allocating memory from pool.
 
-  @param[in]      PlatformInfo  Apple Platform Info protocol.
-  @param[in]      DataGuid      Resource GUID identifier.
-  @param[in,out]  Size          Size of the entry.
-  @param[out]     Data          Data read from Apple Platform Info protocol allocated from pool.
+  @param[in]   PlatformInfo  Apple Platform Info protocol.
+  @param[in]   DataGuid      Resource GUID identifier.
+  @param[out]  Size          Size of the entry.
+  @param[out]  Data          Data read from Apple Platform Info protocol allocated from pool.
 
   @retval EFI_SUCCESS on success.
 **/
