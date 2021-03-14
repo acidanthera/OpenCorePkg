@@ -33,6 +33,9 @@
 
 [LibraryClasses]
   BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
   OcFileLib
   OcMemoryLib
   OcMiscLib
@@ -44,4 +47,6 @@
 
 [Sources]
   AcpiDump.c
+  AcpiParser.c
+  AcpiParser.h
   OcAcpiLib.c
