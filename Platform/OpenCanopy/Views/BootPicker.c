@@ -1897,7 +1897,6 @@ BootPickerViewLateInitialize (
   INT64                  ScrollOffset;
   CONST LIST_ENTRY       *ListEntry;
   CONST GUI_VOLUME_ENTRY *BootEntry;
-  INT64                  FirstPosOffset;
 
   ASSERT (mBootPicker.SelectedEntry != NULL);
 
@@ -1908,30 +1907,37 @@ BootPickerViewLateInitialize (
   // impossible.
   //
   if (ScrollOffset == 0) {
-    ListEntry = mBootPicker.Hdr.Obj.Children.BackLink;
-    ASSERT (ListEntry == &mBootPickerSelector.Hdr.Link);
-
-    FirstPosOffset = 0;
-    //
-    // Last entry is always the selector.
-    //
-    ListEntry = ListEntry->BackLink;
     //
     // Find the first entry that is fully visible.
+    // Last entry is always the selector.
     //
-    while (!IsNull (&mBootPicker.Hdr.Obj.Children, ListEntry)) {
+    ASSERT (mBootPicker.Hdr.Obj.Children.BackLink == &mBootPickerSelector.Hdr.Link);
+    for (
+      ListEntry = GetFirstNode (&mBootPicker.Hdr.Obj.Children);
+      ListEntry != mBootPicker.Hdr.Obj.Children.BackLink;
+      ListEntry = GetNextNode (&mBootPicker.Hdr.Obj.Children, ListEntry)
+      ) {
+      //
+      // Move the first partially visible boot entry to the very left to prevent
+      // cut-off entries. This only applies when entries overflow.
+      //
       BootEntry = BASE_CR (ListEntry, GUI_VOLUME_ENTRY, Hdr.Link);
-      if (mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX < 0) {
+      if (mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX >= 0) {
         //
-        // Move the first fully visible boot entry to the very left to prevent
-        // cut-off entries. This only applies when entries overflow.
+        // Move the cut-off entry on-screen.
         //
-        ScrollOffset = -(INT64) FirstPosOffset;
+        ScrollOffset = -ScrollOffset;
         break;
       }
 
-      FirstPosOffset = mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX;
-      ListEntry = ListEntry->BackLink;
+      ScrollOffset = mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX;
+    }
+
+    if (mBootPicker.Hdr.Obj.Children.BackLink != mBootPicker.Hdr.Obj.Children.ForwardLink) {
+      //
+      // mBootPicker must not be entirely off-screen.
+      //
+      ASSERT (ListEntry != mBootPicker.Hdr.Obj.Children.BackLink);
     }
   }
 
