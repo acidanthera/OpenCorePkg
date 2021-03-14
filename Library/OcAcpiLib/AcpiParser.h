@@ -14,6 +14,10 @@ typedef struct {
   ///
   /// Pointer to the end of ACPI table.
   ///
+  UINT8  *TableStart;
+  ///
+  /// Pointer to the end of ACPI table.
+  ///
   UINT8  *TableEnd;
   ///
   /// Decoded lookup path allocated from pool.

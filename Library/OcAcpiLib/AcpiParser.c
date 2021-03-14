@@ -37,7 +37,7 @@ ParseNameString (
   IN OUT UINT8               *IsRootPath      OPTIONAL
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "NameString\n"));
+  DEBUG ((DEBUG_VERBOSE, "NameString 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -222,6 +222,7 @@ ParseScopeOrDevice (
   EFI_STATUS Status;
   UINT8      Index;
   UINT8      Index2;
+  BOOLEAN    Breakout;
 
   DEBUG ((DEBUG_VERBOSE, "Scope / Device\n"));
 
@@ -240,7 +241,7 @@ ParseScopeOrDevice (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - ScopeStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - ScopeStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -266,24 +267,27 @@ ParseScopeOrDevice (
   }
 
   //
-  // FIXME: Both exit conditions in these loops are not correct, as there can be
-  // root-relative scopes within the current scope.
+  // Both exit conditions in these loops are for cases when there can be
+  // root-relative scopes within the current scope that does not match ours at all.
   //
+  Breakout = FALSE;
+
   for (Index = 0; Index < ScopeNameLength; ++Index) {
     if (Context->CurrentIdentifier == Context->PathEnd) {
-      Context->CurrentOpcode     = ScopeEnd;
-      Context->CurrentIdentifier = CurrentPath;
-      CONTEXT_DECREASE_NESTING (Context);
-      return EFI_NOT_FOUND;
+      Context->CurrentIdentifier = Context->PathStart;
+      break;
     }
 
     for (Index2 = 0; Index2 < IDENT_LEN; ++Index2) {
       if (*(ScopeName + Index2) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index2 - 1))) {
-        Context->CurrentOpcode     = ScopeEnd;
-        Context->CurrentIdentifier = CurrentPath;
-        CONTEXT_DECREASE_NESTING (Context);
-        return EFI_NOT_FOUND;
+        Context->CurrentIdentifier = Context->PathStart;
+        Breakout = TRUE;
+        break;
       }
+    }
+
+    if (Breakout) {
+      break;
     }
 
     Context->CurrentIdentifier += 1;
@@ -297,12 +301,9 @@ ParseScopeOrDevice (
       return EFI_SUCCESS;
     }
     //
-    // FIXME: Same issue with root-relative scopes.
+    // Same issue with root-relative scopes. Retry search.
     //
-    Context->CurrentIdentifier = CurrentPath;
-    Context->CurrentOpcode     = ScopeEnd;
-    CONTEXT_DECREASE_NESTING (Context);
-    return EFI_NOT_FOUND;
+    Context->CurrentIdentifier = Context->PathStart;
   }
 
   while (Context->CurrentOpcode < ScopeEnd) {
@@ -455,7 +456,7 @@ ParseBankField (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - BankStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - BankStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -576,13 +577,14 @@ ParseCreateField (
      OUT UINT8               **Result
   )
 {
-  UINT8 *FieldStart;
-  UINT8 *FieldOpcode;
-  UINT8 *Name;
-  UINT8 NameLength;
-  UINT8 Index;
+  UINT8    *FieldStart;
+  UINT8    *FieldOpcode;
+  UINT8    *Name;
+  UINT8    NameLength;
+  UINT8    Index;
+  BOOLEAN  Matched;
 
-  DEBUG ((DEBUG_VERBOSE, "CreateField\n"));
+  DEBUG ((DEBUG_VERBOSE, "CreateField 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -632,31 +634,13 @@ ParseCreateField (
         return EFI_DEVICE_ERROR;
       }
 
+      Matched = TRUE;
       for (Index = 0; Index < IDENT_LEN; Index++) {
         if (*(Name + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
-          CONTEXT_ADVANCE_OPCODE (Context);
-
-          if (ParseNameString (
-            Context,
-            NULL,
-            NULL,
-            NULL
-            ) != EFI_SUCCESS) {
-            return EFI_DEVICE_ERROR;
-          }
-
-          CONTEXT_DECREASE_NESTING (Context);
-          return EFI_NOT_FOUND;
+          Context->CurrentIdentifier = Context->PathStart;
+          Matched = FALSE;
+          break;
         }
-      }
-
-      Context->CurrentIdentifier += 1;
-
-      //
-      // FIXME: Unsure what we deal with here.
-      //
-      if (Context->CurrentIdentifier == Context->PathEnd) {
-        return EFI_DEVICE_ERROR;
       }
 
       CONTEXT_PEEK_BYTES (Context, 1);
@@ -702,10 +686,17 @@ ParseCreateField (
         return EFI_DEVICE_ERROR;
       }
 
+      if (!Matched) {
+        CONTEXT_DECREASE_NESTING (Context);
+        return EFI_NOT_FOUND;
+      }
+
+      Context->CurrentIdentifier += 1;
+
       for (Index = 0; Index < IDENT_LEN; Index++) {
         if (*(Name + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
           CONTEXT_DECREASE_NESTING (Context);
-          Context->CurrentIdentifier -= 1;
+          Context->CurrentIdentifier--;
           return EFI_NOT_FOUND;
         }
       }
@@ -786,7 +777,7 @@ ParseOpRegion (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "OpRegion\n"));
+  DEBUG ((DEBUG_VERBOSE, "OpRegion 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -803,6 +794,7 @@ ParseOpRegion (
 
   switch (Context->CurrentOpcode[0]) {
     case AML_ZERO_OP:
+    case AML_ONE_OP:
       CONTEXT_CONSUME_BYTES (Context, 1);
       break;
 
@@ -915,6 +907,7 @@ ParseOpRegion (
 
   switch (Context->CurrentOpcode[0]) {
     case AML_ZERO_OP:
+    case AML_ONE_OP:
       CONTEXT_CONSUME_BYTES (Context, 1);
       break;
 
@@ -1179,7 +1172,7 @@ ParseMethod (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - MethodStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - MethodStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1283,7 +1276,7 @@ ParseIfElse (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - IfStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - IfStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1324,7 +1317,7 @@ ParseIfElse (
       return EFI_DEVICE_ERROR;
     }
 
-    if (Context->TableEnd - IfStart < PkgLength) {
+    if ((UINT32) (Context->TableEnd - IfStart) < PkgLength) {
       return EFI_DEVICE_ERROR;
     }
 
@@ -1429,7 +1422,7 @@ ParseField (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - FieldStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - FieldStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1566,7 +1559,7 @@ ParseIndexField (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->TableEnd - FieldStart < PkgLength) {
+  if ((UINT32) (Context->TableEnd - FieldStart) < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1988,7 +1981,7 @@ AcpiFindEntryInMemory (
     // We do not check length here, mainly because TableLength > 0 is for fuzzing.
     //
   } else {
-    TableLength = ((EFI_ACPI_COMMON_HEADER *) Context.CurrentOpcode)->Length;
+    TableLength = ((EFI_ACPI_COMMON_HEADER *) Table)->Length;
   }
 
   if (TableLength <= sizeof (EFI_ACPI_DESCRIPTION_HEADER)) {
@@ -2000,6 +1993,7 @@ AcpiFindEntryInMemory (
 
   Context.CurrentOpcode = Table;
   Context.RequiredEntry = Entry;
+  Context.TableStart    = Table;
   Context.TableEnd      = Table + TableLength;
   Context.CurrentOpcode += sizeof (EFI_ACPI_DESCRIPTION_HEADER);
 

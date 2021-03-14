@@ -130,4 +130,13 @@ then echo FAIL && code=1
 else (echo OK; rm -f Tests/Output/test15_output.txt)
 fi
 
+printf "%s" "Test_16(Tests/Input/nesting.bin, _SB.PCI0.GFX0, 1): "
+./ACPIe -f Tests/Input/nesting.bin _SB.PCI0.GFX0 > Tests/Output/test16_output.txt
+diff -q Tests/Output/test16_output.txt Tests/Correct/test16_output.txt
+if (($? == 1))
+then echo FAIL && code=1
+else (echo OK; rm -f Tests/Output/test16_output.txt)
+fi
+
+
 exit $code
