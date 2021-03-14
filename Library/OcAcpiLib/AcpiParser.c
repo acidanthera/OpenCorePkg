@@ -848,7 +848,7 @@ ParseOpRegion (
           break;
 
         default:
-          if (ParseNameString(
+          if (ParseNameString (
             Context,
             NULL,
             NULL,
@@ -883,7 +883,7 @@ ParseOpRegion (
           break;
 
         default:
-          if (ParseNameString(
+          if (ParseNameString (
             Context,
             NULL,
             NULL,
@@ -900,7 +900,7 @@ ParseOpRegion (
       CONTEXT_PEEK_BYTES (Context, 1);
 
     default:
-      if (ParseNameString(
+      if (ParseNameString (
         Context,
         NULL,
         NULL,
@@ -960,7 +960,7 @@ ParseOpRegion (
           break;
 
         default:
-          if (ParseNameString(
+          if (ParseNameString (
             Context,
             NULL,
             NULL,
@@ -1268,7 +1268,6 @@ ParseIfElse (
   UINT32     *CurrentPath;
   UINT8      *IfEnd;
   EFI_STATUS Status;
-  UINT8      *CurrentOpcode;
 
   DEBUG ((DEBUG_VERBOSE, "IfElse\n"));
   CONTEXT_HAS_WORK (Context);
@@ -1284,69 +1283,44 @@ ParseIfElse (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->CurrentOpcode >= Context->TableEnd) {
-    return EFI_DEVICE_ERROR;
-  }
-
-  if (Context->TableEnd - IfStart <= PkgLength) {
+  if (Context->TableEnd - IfStart < PkgLength) {
     return EFI_DEVICE_ERROR;
   }
 
   IfEnd = IfStart + PkgLength;
 
-  if (Context->CurrentOpcode > IfEnd) {
-    return EFI_DEVICE_ERROR;
+  //
+  // FIXME: This is broken like hell.
+  //
+  Status = EFI_NOT_FOUND;
+  while (Status != EFI_SUCCESS && Context->CurrentOpcode < IfEnd) {
+    Status = ParseTerm (Context, Result);
+    if (Status == EFI_DEVICE_ERROR) {
+      Context->CurrentOpcode += 1;
+    }
   }
 
-  Status = ParseTerm(
-    Context,
-    Result
-    );
-  CurrentOpcode = Context->CurrentOpcode;
-
-  while (Status != EFI_SUCCESS && Context->CurrentOpcode < IfEnd) {
-    if (CurrentOpcode + 1 > IfEnd) {
-      break;
-    }
-    Context->CurrentOpcode = CurrentOpcode + 1;
-    CurrentOpcode += 1;
-    Status = ParseTerm(Context,
-                       Result);
+  if (Context->CurrentOpcode > IfEnd || Status == EFI_DEVICE_ERROR) {
+    return EFI_DEVICE_ERROR;
   }
 
   if (Status == EFI_SUCCESS) {
-    Context->EntriesFound += 1;
-    if (Context->EntriesFound == Context->RequiredEntry) {
-      return EFI_SUCCESS;
-    }
-  }
-
-  if (Context->CurrentOpcode > IfEnd) {
-    return EFI_DEVICE_ERROR;
+    CONTEXT_DECREASE_NESTING (Context);
+    return EFI_SUCCESS;
   }
 
   Context->CurrentIdentifier = CurrentPath;
 
-  if (Context->CurrentOpcode >= Context->TableEnd) {
-    return EFI_DEVICE_ERROR;
-  }
+  CONTEXT_PEEK_BYTES (Context, 1);
 
   if (Context->CurrentOpcode[0] == AML_ELSE_OP) {
-    Context->CurrentOpcode += 1;
+    CONTEXT_ADVANCE_OPCODE (Context);
     IfStart = Context->CurrentOpcode;
-
-    if (Context->CurrentOpcode >= Context->TableEnd) {
-      return EFI_DEVICE_ERROR;
-    }
 
     if (ParsePkgLength (
       Context,
       &PkgLength
       ) != EFI_SUCCESS) {
-      return EFI_DEVICE_ERROR;
-    }
-
-    if (Context->CurrentOpcode > Context->TableEnd) {
       return EFI_DEVICE_ERROR;
     }
 
@@ -1356,44 +1330,42 @@ ParseIfElse (
 
     IfEnd = IfStart + PkgLength;
 
-    if (Context->CurrentOpcode > IfEnd) {
+    //
+    // FIXME: This is broken like hell.
+    //
+    Status = EFI_NOT_FOUND;
+    while (Status != EFI_SUCCESS && Context->CurrentOpcode < IfEnd) {
+      Status = ParseTerm (Context, Result);
+      if (Status == EFI_DEVICE_ERROR) {
+        Context->CurrentOpcode += 1;
+      }
+    }
+
+    if (Context->CurrentOpcode > IfEnd || Status == EFI_DEVICE_ERROR) {
       return EFI_DEVICE_ERROR;
     }
 
-    while (Context->CurrentOpcode < IfEnd) {
-      Status = ParseTerm (
-        Context,
-        Result
-        );
-
-      if (Status != EFI_NOT_FOUND) {
-        return Status;
-      }
-      if (Context->CurrentOpcode > Context->TableEnd) {
-        return EFI_DEVICE_ERROR;
-      }
+    if (Status == EFI_SUCCESS) {
+      CONTEXT_DECREASE_NESTING (Context);
+      return EFI_SUCCESS;
     }
 
     Context->CurrentIdentifier = CurrentPath;
   }
 
-  if (Context->CurrentOpcode > Context->TableEnd) {
-    return EFI_DEVICE_ERROR;
-  }
   CONTEXT_DECREASE_NESTING (Context);
   return EFI_NOT_FOUND;
 }
 
 /**
-   Parses event section to skip it correctly.
+  Parses event section to skip it correctly.
 
-   @param[in, out] Context Structure containing the parser context.
+  @param[in, out] Context Structure containing the parser context.
 
-   @retval EFI_NOT_FOUND        Event was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing event.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_NOT_FOUND        Event was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing event.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
 EFI_STATUS
 ParseEvent (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -1417,19 +1389,18 @@ ParseEvent (
 }
 
 /**
-   Parses field section.
-   In case it's name is suitable returns pointer to it's opcode.
-   Otherwise skips this section.
+  Parses field section.
+  In case it's name is suitable returns pointer to it's opcode.
+  Otherwise skips this section.
 
-   @param[in, out] Context Structure containing the parser context.
-   @param[out]     Result  Pointer to sought opcode if required entry was found.
+  @param[in, out] Context Structure containing the parser context.
+  @param[out]     Result  Pointer to sought opcode if required entry was found.
 
-   @retval EFI_SUCCESS          Required entry was found.
-   @retval EFI_NOT_FOUND        Field was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing field.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_SUCCESS          Required entry was found.
+  @retval EFI_NOT_FOUND        Field was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing field.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
 EFI_STATUS
 ParseField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1455,10 +1426,6 @@ ParseField (
     Context,
     &PkgLength
     ) != EFI_SUCCESS) {
-    return EFI_DEVICE_ERROR;
-  }
-
-  if (Context->CurrentOpcode > Context->TableEnd) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1488,13 +1455,16 @@ ParseField (
   CurrentPath = Context->CurrentIdentifier;
 
   for (Index = 0; Index < FieldNameLength; Index++) {
-    if (Context->CurrentIdentifier >= Context->PathEnd) {
-      return EFI_DEVICE_ERROR;
+    if (Context->CurrentIdentifier == Context->PathEnd) {
+      Context->CurrentOpcode = FieldEnd;
+      Context->CurrentIdentifier = CurrentPath;
+      CONTEXT_DECREASE_NESTING (Context);
+      return EFI_NOT_FOUND;
     }
 
     for (Index2 = 0; Index2 < IDENT_LEN; Index2++) {
       if (*(FieldName + Index2) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index2 - 1))) {
-        Context->CurrentOpcode = FieldStart + PkgLength;
+        Context->CurrentOpcode = FieldEnd;
         Context->CurrentIdentifier = CurrentPath;
         CONTEXT_DECREASE_NESTING (Context);
         return EFI_NOT_FOUND;
@@ -1502,16 +1472,13 @@ ParseField (
     }
 
     Context->CurrentIdentifier += 1;
-    if (FieldName + 4 > FieldEnd) {
-      return EFI_DEVICE_ERROR;
-    }
     FieldName += 4;
   }
 
   if (Context->CurrentIdentifier != Context->PathEnd) {
     Context->CurrentOpcode = FieldEnd;
-    CONTEXT_DECREASE_NESTING (Context);
     Context->CurrentIdentifier = CurrentPath;
+    CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
   }
 
@@ -1519,8 +1486,8 @@ ParseField (
 
   if (Context->EntriesFound != Context->RequiredEntry) {
     Context->CurrentOpcode = FieldEnd;
-    CONTEXT_DECREASE_NESTING (Context);
     Context->CurrentIdentifier = CurrentPath;
+    CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
   }
 
@@ -1529,15 +1496,14 @@ ParseField (
 }
 
 /**
-   Parses mutex to correctly skip it.
+  Parses mutex to correctly skip it.
 
-   @param[in, out] Context Structure containing the parser context.
+  @param[in, out] Context Structure containing the parser context.
 
-   @retval EFI_NOT_FOUND        Mutex was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing mutex.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_NOT_FOUND        Mutex was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing mutex.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
 EFI_STATUS
 ParseMutex (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -1562,19 +1528,18 @@ ParseMutex (
 }
 
 /**
-   Parses index field section.
-   In case it's name is suitable returns pointer to it's opcode.
-   Otherwise skips this section.
+  Parses index field section.
+  In case it's name is suitable returns pointer to it's opcode.
+  Otherwise skips this section.
 
-   @param[in, out] Context Structure containing the parser context.
-   @param[out]     Result  Pointer to sought opcode if required entry was found.
+  @param[in, out] Context Structure containing the parser context.
+  @param[out]     Result  Pointer to sought opcode if required entry was found.
 
-   @retval EFI_SUCCESS          Required entry was found.
-   @retval EFI_NOT_FOUND        Index field was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing index field.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_SUCCESS          Required entry was found.
+  @retval EFI_NOT_FOUND        Index field was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing index field.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
 EFI_STATUS
 ParseIndexField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1598,10 +1563,6 @@ ParseIndexField (
     Context,
     &PkgLength
     ) != EFI_SUCCESS) {
-    return EFI_DEVICE_ERROR;
-  }
-
-  if (Context->CurrentOpcode >= Context->TableEnd) {
     return EFI_DEVICE_ERROR;
   }
 
@@ -1632,11 +1593,7 @@ ParseIndexField (
     return EFI_DEVICE_ERROR;
   }
 
-  if (Context->CurrentIdentifier >= Context->PathEnd) {
-    return EFI_DEVICE_ERROR;
-  }
-
-  for (Index = 0; Index < IDENT_LEN; Index++) {
+  for (Index = 0; Index < IDENT_LEN; ++Index) {
     if (*(FieldName + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
       if (ParseNameString (
         Context,
@@ -1647,20 +1604,22 @@ ParseIndexField (
         return EFI_DEVICE_ERROR;
       }
 
-      if (Context->CurrentOpcode >= FieldEnd) {
-        return EFI_DEVICE_ERROR;
-      }
-
       Context->CurrentOpcode = FieldEnd;
       CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
     }
   }
 
-  if (Context->CurrentIdentifier > Context->PathEnd) {
+  Context->CurrentIdentifier += 1;
+
+  //
+  // FIXME: Not sure what to do.
+  //
+  if (Context->CurrentIdentifier == Context->PathEnd) {
     return EFI_DEVICE_ERROR;
   }
-  Context->CurrentIdentifier += 1;
+
+  CONTEXT_PEEK_BYTES (Context, 1);
 
   if (ParseNameString (
     Context,
@@ -1679,33 +1638,19 @@ ParseIndexField (
     return EFI_DEVICE_ERROR;
   }
 
-  if ((UINT8*)(Context->CurrentIdentifier + IDENT_LEN) >= Context->TableEnd){
-    DEBUG((DEBUG_VERBOSE, "OCA: Bad table length provided!\n"));
-    return EFI_DEVICE_ERROR;
-  }
-
-  if (Context->TableEnd - FieldName <= IDENT_LEN){
-    DEBUG((DEBUG_VERBOSE, "OCA: Bad table access!\n"));
-    return EFI_DEVICE_ERROR;
-  }
-
   for (Index = 0; Index < IDENT_LEN; Index++) {
     if (*(FieldName + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
       Context->CurrentOpcode = FieldEnd;
-      CONTEXT_DECREASE_NESTING (Context);
       Context->CurrentIdentifier -= 1;
+      CONTEXT_DECREASE_NESTING (Context);
       return EFI_NOT_FOUND;
     }
   }
 
-  if (Context->PathEnd - Context->CurrentIdentifier < 1) {
-    return EFI_NOT_FOUND;
-  }
-
   if (Context->CurrentIdentifier + 1 != Context->PathEnd) {
     Context->CurrentOpcode = FieldEnd;
-    CONTEXT_DECREASE_NESTING (Context);
     Context->CurrentIdentifier -= 1;
+    CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
   }
 
@@ -1713,8 +1658,8 @@ ParseIndexField (
 
   if (Context->EntriesFound != Context->RequiredEntry) {
     Context->CurrentOpcode = FieldEnd;
-    CONTEXT_DECREASE_NESTING (Context);
     Context->CurrentIdentifier -= 1;
+    CONTEXT_DECREASE_NESTING (Context);
     return EFI_NOT_FOUND;
   }
 
@@ -2066,20 +2011,6 @@ AcpiFindEntryInMemory (
   if (EFI_ERROR (Status)) {
     ClearContext (&Context);
     return Status;
-  }
-
-  if (Context.CurrentOpcode[0] == AML_IF_OP) {
-    if (TableLength <= sizeof (EFI_ACPI_DESCRIPTION_HEADER) + 4) {
-      DEBUG ((DEBUG_VERBOSE, "OCA: Bad table!\n"));
-      ClearContext (&Context);
-      return EFI_DEVICE_ERROR;
-    }
-
-    //
-    // Skip odd IF opcode at the beginning of the table if present.
-    // This is what acpica does at the very least.
-    //
-    Context.CurrentOpcode += 4;
   }
 
   while (Context.CurrentOpcode < Context.TableEnd) {
