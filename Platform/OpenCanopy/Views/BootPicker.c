@@ -1833,7 +1833,11 @@ BootPickerViewInitialize (
   // padding.
   //
   mBootPicker.Hdr.Obj.Width   = 0U - (UINT32) (BOOT_ENTRY_SPACE * GuiContext->Scale);
-  mBootPicker.Hdr.Obj.OffsetX = mBootPickerContainer.Obj.Width / 2;
+  //
+  // Adding an entry will also shift OffsetX considering the added boot entry
+  // space. This is not needed for the first, so initialise accordingly.
+  //
+  mBootPicker.Hdr.Obj.OffsetX = mBootPickerContainer.Obj.Width / 2 + (UINT32) (BOOT_ENTRY_SPACE * GuiContext->Scale) / 2;
   mBootPicker.Hdr.Obj.OffsetY = 0;
 
   mBootPicker.SelectedEntry = NULL;
