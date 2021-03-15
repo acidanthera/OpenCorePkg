@@ -1177,7 +1177,7 @@ AcpiApplyPatch (
       Status = AcpiFindEntryInMemory (
         (VOID *) Context->Dsdt,
         Patch->Base,
-        Patch->BaseSkip + 1,
+        (UINT8) (Patch->BaseSkip + 1),
         &BaseOffset,
         Context->Dsdt->Length
         );
@@ -1251,7 +1251,7 @@ AcpiApplyPatch (
         Status = AcpiFindEntryInMemory (
           (VOID *) Context->Tables[Index],
           Patch->Base,
-          Patch->BaseSkip + 1,
+          (UINT8) (Patch->BaseSkip + 1),
           &BaseOffset,
           Context->Tables[Index]->Length
           );
