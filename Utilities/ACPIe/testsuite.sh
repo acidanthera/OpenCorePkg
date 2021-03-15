@@ -154,12 +154,29 @@ then echo FAIL && code=1
 else (echo OK; rm -f Tests/Output/test18_output.txt)
 fi
 
-printf "%s" "Test_19(Tests/Input/broken3.bin, \\_SB.PCI0.GFX0, 1): "
-./ACPIe -f Tests/Input/broken3.bin \\_SB.PCI0.GFX0 > Tests/Output/test19_output.txt
+printf "%s" "Test_19(Tests/Input/DSDT-legacy.bin, \\HPET, 1): "
+./ACPIe -f Tests/Input/DSDT-legacy.bin \\HPET > Tests/Output/test19_output.txt
 diff -q Tests/Output/test19_output.txt Tests/Correct/test19_output.txt
 if (($? == 1))
 then echo FAIL && code=1
 else (echo OK; rm -f Tests/Output/test19_output.txt)
 fi
+
+printf "%s" "Test_20(Tests/Input/DSDT-legacy.bin, \\_SB.PCI0.SBRG.HPET, 1): "
+./ACPIe -f Tests/Input/DSDT-legacy.bin \\_SB.PCI0.SBRG.HPET > Tests/Output/test20_output.txt
+diff -q Tests/Output/test20_output.txt Tests/Output/test20_output.txt
+if (($? == 1))
+then echo FAIL && code=1
+else (echo OK; rm -f Tests/Output/test20_output.txt)
+fi
+
+printf "%s" "Test_100(Tests/Input/broken3.bin, \\_SB.PCI0.GFX0, 1): "
+./ACPIe -f Tests/Input/broken3.bin \\_SB.PCI0.GFX0 > Tests/Output/test100_output.txt
+diff -q Tests/Output/test100_output.txt Tests/Correct/test100_output.txt
+if (($? == 1))
+then echo FAIL && code=1
+else (echo OK; rm -f Tests/Output/test100_output.txt)
+fi
+
 
 exit $code

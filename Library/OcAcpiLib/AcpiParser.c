@@ -37,7 +37,7 @@ ParseNameString (
   IN OUT UINT8               *IsRootPath      OPTIONAL
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "NameString 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
+  CONTEXT_ENTER(Context, "NameString");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -98,6 +98,10 @@ ParseNameString (
       Context->CurrentOpcode += IDENT_LEN;
   }
 
+  if (NamePathStart != NULL) {
+    PRINT_ACPI_NAME ("Read name", *NamePathStart, *PathLength);
+  }
+
   CONTEXT_DECREASE_NESTING (Context);
   return EFI_SUCCESS;
 }
@@ -123,7 +127,7 @@ ParsePkgLength (
   UINT32 TotalSize;
   UINT32 Index;
 
-  DEBUG ((DEBUG_VERBOSE, "PkgLength\n"));
+  CONTEXT_ENTER(Context, "PkgLength");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -165,7 +169,7 @@ ParseAlias (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "Alias\n"));
+  CONTEXT_ENTER(Context, "Alias");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -217,6 +221,7 @@ ParseScopeOrDevice (
   UINT32     *CurrentPath;
   UINT8      *ScopeEnd;
   UINT8      *ScopeName;
+  UINT8      *ScopeNameStart;
   UINT8      ScopeNameLength;
   UINT8      IsRootPath;
   EFI_STATUS Status;
@@ -224,12 +229,9 @@ ParseScopeOrDevice (
   UINT8      Index2;
   BOOLEAN    Breakout;
 
-  DEBUG ((DEBUG_VERBOSE, "Scope / Device\n"));
-
+  CONTEXT_ENTER(Context, "Scope / Device");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
-
-  DEBUG ((DEBUG_VERBOSE, "Path: %x\n", *(Context->CurrentIdentifier)));
 
   ScopeStart = Context->CurrentOpcode;
   CurrentPath = Context->CurrentIdentifier;
@@ -257,6 +259,8 @@ ParseScopeOrDevice (
     ) != EFI_SUCCESS) {
     return EFI_DEVICE_ERROR;
   }
+
+  ScopeNameStart = ScopeName;
 
   if (Context->CurrentOpcode > ScopeEnd) {
     return EFI_DEVICE_ERROR;
@@ -306,6 +310,8 @@ ParseScopeOrDevice (
     Context->CurrentIdentifier = Context->PathStart;
   }
 
+  PRINT_ACPI_NAME ("Entered scope", ScopeNameStart, ScopeNameLength);
+
   while (Context->CurrentOpcode < ScopeEnd) {
     Status = ParseTerm (
       Context,
@@ -316,6 +322,8 @@ ParseScopeOrDevice (
       return Status;
     }
   }
+
+  PRINT_ACPI_NAME ("Left scope", ScopeNameStart, ScopeNameLength);
 
   Context->CurrentIdentifier = CurrentPath;
   CONTEXT_DECREASE_NESTING (Context);
@@ -339,7 +347,7 @@ ParseName (
   UINT32 PkgLength;
   UINT8  *CurrentOpcode;
 
-  DEBUG ((DEBUG_VERBOSE, "Name\n"));
+  CONTEXT_ENTER(Context, "Name");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -443,7 +451,7 @@ ParseBankField (
   UINT8  NameLength;
   UINT8  Index;
 
-  DEBUG ((DEBUG_VERBOSE, "BankField\n"));
+  CONTEXT_ENTER(Context, "BankField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -584,7 +592,7 @@ ParseCreateField (
   UINT8    Index;
   BOOLEAN  Matched;
 
-  DEBUG ((DEBUG_VERBOSE, "CreateField 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
+  CONTEXT_ENTER(Context, "CreateField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -637,7 +645,6 @@ ParseCreateField (
       Matched = TRUE;
       for (Index = 0; Index < IDENT_LEN; Index++) {
         if (*(Name + Index) != *((UINT8 *)Context->CurrentIdentifier + (IDENT_LEN - Index - 1))) {
-          Context->CurrentIdentifier = Context->PathStart;
           Matched = FALSE;
           break;
         }
@@ -737,7 +744,7 @@ ParseExternal (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "External\n"));
+  CONTEXT_ENTER(Context, "External");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -778,7 +785,7 @@ ParseOpRegion (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "OpRegion 0x%x\n", (UINT32) (Context->CurrentOpcode - Context->TableStart)));
+  CONTEXT_ENTER(Context, "OpRegion");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1038,7 +1045,7 @@ ParsePowerRes (
   UINT32 PkgLength;
   UINT8  *CurrentOpcode;
 
-  DEBUG ((DEBUG_VERBOSE, "PowerRes\n"));
+  CONTEXT_ENTER(Context, "PowerRes");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1074,7 +1081,7 @@ ParseProcessor (
   UINT8 *CurrentOpcode;
   UINT32 PkgLength;
 
-  DEBUG ((DEBUG_VERBOSE, "Processor\n"));
+  CONTEXT_ENTER(Context, "Processor");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1111,7 +1118,7 @@ ParseThermalZone (
   UINT8 *CurrentOpcode;
   UINT32 PkgLength;
 
-  DEBUG ((DEBUG_VERBOSE, "ThermalZone\n"));
+  CONTEXT_ENTER(Context, "ThermalZone");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1159,7 +1166,7 @@ ParseMethod (
   UINT8  Index;
   UINT8  Index2;
 
-  DEBUG ((DEBUG_VERBOSE, "Method\n"));
+  CONTEXT_ENTER(Context, "Method");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1263,7 +1270,7 @@ ParseIfElse (
   UINT8      *IfEnd;
   EFI_STATUS Status;
 
-  DEBUG ((DEBUG_VERBOSE, "IfElse\n"));
+  CONTEXT_ENTER(Context, "IfElse");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1365,7 +1372,7 @@ ParseEvent (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "Event\n"));
+  CONTEXT_ENTER(Context, "Event");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1410,7 +1417,7 @@ ParseField (
   UINT8  Index;
   UINT8  Index2;
 
-  DEBUG ((DEBUG_VERBOSE, "Field\n"));
+  CONTEXT_ENTER(Context, "Field");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1503,7 +1510,7 @@ ParseMutex (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  DEBUG ((DEBUG_VERBOSE, "Mutex\n"));
+  CONTEXT_ENTER(Context, "Mutex");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1547,7 +1554,7 @@ ParseIndexField (
   UINT8  FieldNameLength;
   UINT8  Index;
 
-  DEBUG ((DEBUG_VERBOSE, "IndexField\n"));
+  CONTEXT_ENTER(Context, "IndexField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1669,7 +1676,7 @@ ParseTerm (
 {
   EFI_STATUS Status;
 
-  DEBUG ((DEBUG_VERBOSE, "Term\n"));
+  CONTEXT_ENTER(Context, "Term");
   CONTEXT_HAS_WORK (Context);
   ASSERT (Result != NULL);
   CONTEXT_INCREASE_NESTING (Context);

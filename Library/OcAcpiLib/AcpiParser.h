@@ -54,6 +54,33 @@ typedef struct {
 #define MAX_NESTING 1024
 
 /**
+  Print new entry name.
+**/
+#define CONTEXT_ENTER(Context, Name) \
+  DEBUG (( \
+    DEBUG_VERBOSE, \
+    "%a 0x%x (looking for %c%c%c%c)\n", \
+    (Name), \
+    (UINT32) ((Context)->CurrentOpcode - (Context)->TableStart), \
+    ((CHAR8 *) (Context)->CurrentIdentifier)[3], \
+    ((CHAR8 *) (Context)->CurrentIdentifier)[2], \
+    ((CHAR8 *) (Context)->CurrentIdentifier)[1], \
+    ((CHAR8 *) (Context)->CurrentIdentifier)[0] \
+    ));
+
+#define PRINT_ACPI_NAME(Str, Name, Length) \
+  DEBUG (( \
+    DEBUG_VERBOSE, \
+    "%a %u (%c%c%c%c)\n", \
+    (Str), \
+    (Length), \
+    (Length) > 0 ? (Name)[((Length) - 1) * 4 + 0] : 'Z', \
+    (Length) > 0 ? (Name)[((Length) - 1) * 4 + 1] : 'Z', \
+    (Length) > 0 ? (Name)[((Length) - 1) * 4 + 2] : 'Z', \
+    (Length) > 0 ? (Name)[((Length) - 1) * 4 + 3] : 'Z' \
+    ));
+
+/**
   Check that context is valid and has work to do.
 **/
 #define CONTEXT_HAS_WORK(Context) do { \
