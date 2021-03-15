@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Mon Mar  8 22:12:57 2021
+%DIF ADD ../Configuration.tex        Mon Mar 15 18:46:07 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1031,7 +1031,32 @@ quality of the suggested solutions will be variable.
 \begin{enumerate}
 
 \item
-  \texttt{Comment}\\
+  \DIFaddbegin \texttt{\DIFadd{Base}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty (Ignored)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Selects ACPI path base for patch lookup (or immediate
+  replacement) by obtaining the offset to the provided path.
+}
+
+  \DIFadd{Only fully-qualified absolute paths are supported (e.g. }\texttt{\DIFadd{\textbackslash \_SB\_.PCI0.GFX0}}\DIFadd{).
+  Currently supported object types are: }\texttt{\DIFadd{Device}}\DIFadd{, }\texttt{\DIFadd{Field}}\DIFadd{, }\texttt{\DIFadd{Method}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Use with care, not all OEM tables can be parsed. Use }\texttt{\DIFadd{ACPIe}}
+  \DIFadd{utility to debug. }\texttt{\DIFadd{ACPIe}} \DIFadd{compiled  with }\texttt{\DIFadd{DEBUG=1 make}} \DIFadd{command
+  produces helpful ACPI lookup tracing.
+}
+
+\item
+  \texttt{\DIFadd{BaseSkip}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(Do not skip any occurrences)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Number of found }\texttt{\DIFadd{Base}} \DIFadd{occurrences to skip before
+  finds and replacements are applied.
+}
+
+\item
+  \DIFaddend \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
@@ -1055,7 +1080,11 @@ quality of the suggested solutions will be variable.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size if set.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Can be empty, when }\texttt{\DIFadd{Base}} \DIFadd{is specified, immediate replacement
+  after }\texttt{\DIFadd{Base}} \DIFadd{lookup happens in this case.
+}
+
+\DIFaddend \item
   \texttt{Limit}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (Search entire ACPI table)\\

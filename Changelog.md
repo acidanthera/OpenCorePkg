@@ -17,6 +17,7 @@ OpenCore Changelog
 - Fixed SMBIOS SMC version encoding sequence
 - Added TSC frequency reading from Apple Platform Info
 - Added TSC frequency reading for Apple devices with nForce chipsets
+- Added `Base` and `BaseSkip` lookup for ACPI patches
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
