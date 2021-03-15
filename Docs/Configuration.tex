@@ -968,6 +968,27 @@ quality of the suggested solutions will be variable.
 \begin{enumerate}
 
 \item
+  \texttt{Base}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty (Ignored)\\
+  \textbf{Description}: Selects ACPI path base for patch lookup (or immediate
+  replacement) by obtaining the offset to the provided path.
+
+  Only fully-qualified absolute paths are supported (e.g. \texttt{\textbackslash \_SB\_.PCI0.GFX0}).
+  Currently supported object types are: \texttt{Device}, \texttt{Field}, \texttt{Method}.
+
+  \emph{Note}: Use with care, not all OEM tables can be parsed. Use \texttt{ACPIe}
+  utility to debug. \texttt{ACPIe} compiled  with \texttt{DEBUG=1 make} command
+  produces helpful ACPI lookup tracing.
+
+\item
+  \texttt{BaseSkip}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0} (Do not skip any occurrences)\\
+  \textbf{Description}: Number of found \texttt{Base} occurrences to skip before
+  finds and replacements are applied.
+
+\item
   \texttt{Comment}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
@@ -991,6 +1012,9 @@ quality of the suggested solutions will be variable.
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Data to find. Must be equal to \texttt{Replace} in size if set.
+
+  \emph{Note}: Can be empty, when \texttt{Base} is specified, immediate replacement
+  after \texttt{Base} lookup happens in this case.
 
 \item
   \texttt{Limit}\\

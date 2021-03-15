@@ -159,7 +159,7 @@ typedef struct {
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached (must abort).
  **/
 EFI_STATUS
-ParseTerm (
+InternalAcpiParseTerm (
   IN OUT ACPI_PARSER_CONTEXT *Context,
      OUT UINT8               **Result
   );

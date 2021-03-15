@@ -1,5 +1,6 @@
 /** @file
   Copyright (c) 2020-2021, Ubsefor & koralexa. All rights reserved.
+  Copyright (c) 2021, vit9696. All rights reserved.
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
@@ -29,6 +30,7 @@
   @retval EFI_DEVICE_ERROR     Error occured during parsing.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseNameString (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -37,7 +39,7 @@ ParseNameString (
   IN OUT UINT8               *IsRootPath      OPTIONAL
   )
 {
-  CONTEXT_ENTER(Context, "NameString");
+  CONTEXT_ENTER (Context, "NameString");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -116,6 +118,7 @@ ParseNameString (
   @retval EFI_DEVICE_ERROR     Error occured during parsing length.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParsePkgLength (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -127,7 +130,7 @@ ParsePkgLength (
   UINT32 TotalSize;
   UINT32 Index;
 
-  CONTEXT_ENTER(Context, "PkgLength");
+  CONTEXT_ENTER (Context, "PkgLength");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -164,12 +167,13 @@ ParsePkgLength (
   @retval EFI_DEVICE_ERROR     Error occured during parsing alias.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseAlias (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  CONTEXT_ENTER(Context, "Alias");
+  CONTEXT_ENTER (Context, "Alias");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -210,6 +214,7 @@ ParseAlias (
   @retval EFI_DEVICE_ERROR     Error occured during parsing scope / device.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseScopeOrDevice (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -229,7 +234,7 @@ ParseScopeOrDevice (
   UINT8      Index2;
   BOOLEAN    Breakout;
 
-  CONTEXT_ENTER(Context, "Scope / Device");
+  CONTEXT_ENTER (Context, "Scope / Device");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -313,7 +318,7 @@ ParseScopeOrDevice (
   PRINT_ACPI_NAME ("Entered scope", ScopeNameStart, ScopeNameLength);
 
   while (Context->CurrentOpcode < ScopeEnd) {
-    Status = ParseTerm (
+    Status = InternalAcpiParseTerm (
       Context,
       Result
       );
@@ -339,6 +344,7 @@ ParseScopeOrDevice (
   @retval EFI_DEVICE_ERROR     Error occured during parsing name.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseName (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -347,7 +353,7 @@ ParseName (
   UINT32 PkgLength;
   UINT8  *CurrentOpcode;
 
-  CONTEXT_ENTER(Context, "Name");
+  CONTEXT_ENTER (Context, "Name");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -438,6 +444,7 @@ ParseName (
   @retval EFI_DEVICE_ERROR     Error occured during parsing bank field.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseBankField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -451,7 +458,7 @@ ParseBankField (
   UINT8  NameLength;
   UINT8  Index;
 
-  CONTEXT_ENTER(Context, "BankField");
+  CONTEXT_ENTER (Context, "BankField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -579,6 +586,7 @@ ParseBankField (
   @retval EFI_DEVICE_ERROR     Error occured during parsing field.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseCreateField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -592,7 +600,7 @@ ParseCreateField (
   UINT8    Index;
   BOOLEAN  Matched;
 
-  CONTEXT_ENTER(Context, "CreateField");
+  CONTEXT_ENTER (Context, "CreateField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -739,12 +747,13 @@ ParseCreateField (
   @retval EFI_DEVICE_ERROR     Error occured during parsing external.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseExternal (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  CONTEXT_ENTER(Context, "External");
+  CONTEXT_ENTER (Context, "External");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -780,12 +789,13 @@ ParseExternal (
   @retval EFI_DEVICE_ERROR     Error occured during parsing OpRegion.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseOpRegion (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  CONTEXT_ENTER(Context, "OpRegion");
+  CONTEXT_ENTER (Context, "OpRegion");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1037,6 +1047,7 @@ ParseOpRegion (
   @retval EFI_DEVICE_ERROR     Error occured during parsing PowerRes.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParsePowerRes (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -1045,7 +1056,7 @@ ParsePowerRes (
   UINT32 PkgLength;
   UINT8  *CurrentOpcode;
 
-  CONTEXT_ENTER(Context, "PowerRes");
+  CONTEXT_ENTER (Context, "PowerRes");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1073,6 +1084,7 @@ ParsePowerRes (
   @retval EFI_DEVICE_ERROR     Error occured during parsing processor.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseProcessor (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -1081,7 +1093,7 @@ ParseProcessor (
   UINT8 *CurrentOpcode;
   UINT32 PkgLength;
 
-  CONTEXT_ENTER(Context, "Processor");
+  CONTEXT_ENTER (Context, "Processor");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1101,15 +1113,15 @@ ParseProcessor (
 }
 
 /**
-   Parses thermal zone to skip it correctly.
+  Parses thermal zone to skip it correctly.
 
-   @param[in, out] Context Structure containing the parser context.
+  @param[in, out] Context Structure containing the parser context.
 
-   @retval EFI_NOT_FOUND        Processor was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing processor.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_NOT_FOUND        Processor was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing processor.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
+STATIC
 EFI_STATUS
 ParseThermalZone (
   IN OUT ACPI_PARSER_CONTEXT *Context
@@ -1118,7 +1130,7 @@ ParseThermalZone (
   UINT8 *CurrentOpcode;
   UINT32 PkgLength;
 
-  CONTEXT_ENTER(Context, "ThermalZone");
+  CONTEXT_ENTER (Context, "ThermalZone");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1138,19 +1150,19 @@ ParseThermalZone (
 }
 
 /**
-   Parses method section.
-   In case it's name is suitable returns pointer to it's opcode.
-   Otherwise skips this section.
+  Parses method section.
+  In case it's name is suitable returns pointer to it's opcode.
+  Otherwise skips this section.
 
-   @param[in, out] Context Structure containing the parser context.
-   @param[out]     Result  Pointer to sought opcode if required entry was found.
+  @param[in, out] Context Structure containing the parser context.
+  @param[out]     Result  Pointer to sought opcode if required entry was found.
 
-   @retval EFI_SUCCESS          Required entry was found.
-   @retval EFI_NOT_FOUND        Method was parsed and skipped successfuly.
-   @retval EFI_DEVICE_ERROR     Error occured during parsing method.
-   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
-
- **/
+  @retval EFI_SUCCESS          Required entry was found.
+  @retval EFI_NOT_FOUND        Method was parsed and skipped successfuly.
+  @retval EFI_DEVICE_ERROR     Error occured during parsing method.
+  @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
+**/
+STATIC
 EFI_STATUS
 ParseMethod (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1166,7 +1178,7 @@ ParseMethod (
   UINT8  Index;
   UINT8  Index2;
 
-  CONTEXT_ENTER(Context, "Method");
+  CONTEXT_ENTER (Context, "Method");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1258,6 +1270,7 @@ ParseMethod (
   @retval EFI_DEVICE_ERROR     Error occured during parsing if-else section.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseIfElse (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1270,7 +1283,7 @@ ParseIfElse (
   UINT8      *IfEnd;
   EFI_STATUS Status;
 
-  CONTEXT_ENTER(Context, "IfElse");
+  CONTEXT_ENTER (Context, "IfElse");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1295,7 +1308,7 @@ ParseIfElse (
   //
   Status = EFI_NOT_FOUND;
   while (Status != EFI_SUCCESS && Context->CurrentOpcode < IfEnd) {
-    Status = ParseTerm (Context, Result);
+    Status = InternalAcpiParseTerm (Context, Result);
     if (Status == EFI_DEVICE_ERROR) {
       Context->CurrentOpcode += 1;
     }
@@ -1336,7 +1349,7 @@ ParseIfElse (
     //
     Status = EFI_NOT_FOUND;
     while (Status != EFI_SUCCESS && Context->CurrentOpcode < IfEnd) {
-      Status = ParseTerm (Context, Result);
+      Status = InternalAcpiParseTerm (Context, Result);
       if (Status == EFI_DEVICE_ERROR) {
         Context->CurrentOpcode += 1;
       }
@@ -1367,12 +1380,13 @@ ParseIfElse (
   @retval EFI_DEVICE_ERROR     Error occured during parsing event.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseEvent (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  CONTEXT_ENTER(Context, "Event");
+  CONTEXT_ENTER (Context, "Event");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1402,6 +1416,7 @@ ParseEvent (
   @retval EFI_DEVICE_ERROR     Error occured during parsing field.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1417,7 +1432,7 @@ ParseField (
   UINT8  Index;
   UINT8  Index2;
 
-  CONTEXT_ENTER(Context, "Field");
+  CONTEXT_ENTER (Context, "Field");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1505,12 +1520,13 @@ ParseField (
   @retval EFI_DEVICE_ERROR     Error occured during parsing mutex.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseMutex (
   IN OUT ACPI_PARSER_CONTEXT *Context
   )
 {
-  CONTEXT_ENTER(Context, "Mutex");
+  CONTEXT_ENTER (Context, "Mutex");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1541,6 +1557,7 @@ ParseMutex (
   @retval EFI_DEVICE_ERROR     Error occured during parsing index field.
   @retval EFI_OUT_OF_RESOURCES Nesting limit has been reached.
 **/
+STATIC
 EFI_STATUS
 ParseIndexField (
   IN OUT ACPI_PARSER_CONTEXT *Context,
@@ -1554,7 +1571,7 @@ ParseIndexField (
   UINT8  FieldNameLength;
   UINT8  Index;
 
-  CONTEXT_ENTER(Context, "IndexField");
+  CONTEXT_ENTER (Context, "IndexField");
   CONTEXT_HAS_WORK (Context);
   CONTEXT_INCREASE_NESTING (Context);
 
@@ -1669,14 +1686,14 @@ ParseIndexField (
 }
 
 EFI_STATUS
-ParseTerm (
+InternalAcpiParseTerm (
   IN OUT ACPI_PARSER_CONTEXT *Context,
      OUT UINT8               **Result
   )
 {
   EFI_STATUS Status;
 
-  CONTEXT_ENTER(Context, "Term");
+  CONTEXT_ENTER (Context, "Term");
   CONTEXT_HAS_WORK (Context);
   ASSERT (Result != NULL);
   CONTEXT_INCREASE_NESTING (Context);
@@ -2016,7 +2033,7 @@ AcpiFindEntryInMemory (
   }
 
   while (Context.CurrentOpcode < Context.TableEnd) {
-    Status = ParseTerm (&Context, &Result);
+    Status = InternalAcpiParseTerm (&Context, &Result);
 
     if (!EFI_ERROR (Status)) {
       *Offset = (UINT32) (Result - Table);

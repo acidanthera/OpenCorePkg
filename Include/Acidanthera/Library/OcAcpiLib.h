@@ -124,6 +124,14 @@ typedef struct {
   //
   CONST UINT8  *ReplaceMask;
   //
+  // Fully qualified name with ACPI path (e.g. \_SB_.PCI0.GFX0).
+  //
+  CONST CHAR8  *Base;
+  //
+  // Number of Base entries to skip before using.
+  //
+  UINT32       BaseSkip;
+  //
   // Patch size.
   //
   UINT32       Size;
