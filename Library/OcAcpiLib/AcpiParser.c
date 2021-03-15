@@ -821,6 +821,7 @@ ParseOpRegion (
 
       switch (Context->CurrentOpcode[0]) {
         case AML_ZERO_OP:
+        case AML_ONE_OP:
           CONTEXT_CONSUME_BYTES (Context, 1);
           break;
 
@@ -856,6 +857,7 @@ ParseOpRegion (
 
       switch (Context->CurrentOpcode[0]) {
         case AML_ZERO_OP:
+        case AML_ONE_OP:
           CONTEXT_CONSUME_BYTES (Context, 1);
           break;
 
@@ -887,11 +889,9 @@ ParseOpRegion (
           break;
       }
 
-      //
-      // FIXME: This looks worrying, is it meant to be fall-through???
-      //
       CONTEXT_PEEK_BYTES (Context, 1);
 
+      /* Fallthrough */
     default:
       if (ParseNameString (
         Context,
@@ -934,6 +934,7 @@ ParseOpRegion (
 
       switch (Context->CurrentOpcode[0]) {
         case AML_ZERO_OP:
+        case AML_ONE_OP:
           CONTEXT_CONSUME_BYTES (Context, 1);
           break;
 
@@ -969,6 +970,7 @@ ParseOpRegion (
 
       switch (Context->CurrentOpcode[0]) {
         case AML_ZERO_OP:
+        case AML_ONE_OP:
           CONTEXT_CONSUME_BYTES (Context, 1);
           break;
 
@@ -1000,10 +1002,8 @@ ParseOpRegion (
           break;
       }
 
-      //
-      // FIXME: This looks worrying, is it meant to be fall-through???
-      //
       CONTEXT_PEEK_BYTES (Context, 1);
+      /* Fallthrough */
 
     default:
       if (ParseNameString (
