@@ -92,7 +92,7 @@ typedef struct {
   Check the specified amount of bytes exists.
 **/
 #define CONTEXT_PEEK_BYTES(Context, Bytes) do { \
-    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (Bytes)) { \
+    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (UINT32) (Bytes)) { \
       return EFI_DEVICE_ERROR; \
     } \
   } while (0)
@@ -101,7 +101,7 @@ typedef struct {
   Consume the specified amount of bytes.
 **/
 #define CONTEXT_CONSUME_BYTES(Context, Bytes) do { \
-    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (Bytes)) { \
+    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) < (UINT32) (Bytes)) { \
       return EFI_DEVICE_ERROR; \
     } \
     (Context)->CurrentOpcode += (Bytes); \
@@ -113,7 +113,7 @@ typedef struct {
   i.e. one byte after the current one.
 **/
 #define CONTEXT_ADVANCE_OPCODE(Context) do { \
-    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) <= 1) { \
+    if ((UINT32) ((Context)->TableEnd - (Context)->CurrentOpcode) <= 1U) { \
       return EFI_DEVICE_ERROR; \
     } \
     ++(Context)->CurrentOpcode; \
