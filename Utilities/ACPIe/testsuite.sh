@@ -138,5 +138,20 @@ then echo FAIL && code=1
 else (echo OK; rm -f Tests/Output/test16_output.txt)
 fi
 
+printf "%s" "Test_17(Tests/Input/DSDT-legacy.bin, _SB.PCI0.GFX0, 1): "
+./ACPIe -f Tests/Input/DSDT-legacy.bin \\_SB.PCI0.SBRG > Tests/Output/test17_output.txt
+diff -q Tests/Output/test17_output.txt Tests/Correct/test17_output.txt
+if (($? == 1))
+then echo FAIL && code=1
+else (echo OK; rm -f Tests/Output/test17_output.txt)
+fi
+
+printf "%s" "Test_17(Tests/Input/DSDT-legacy.bin, \\_SB.PCI0.P0P9, 1): "
+./ACPIe -f Tests/Input/DSDT-legacy.bin \\_SB.PCI0.P0P9 > Tests/Output/test18_output.txt
+diff -q Tests/Output/test18_output.txt Tests/Correct/test18_output.txt
+if (($? == 1))
+then echo FAIL && code=1
+else (echo OK; rm -f Tests/Output/test18_output.txt)
+fi
 
 exit $code

@@ -647,6 +647,7 @@ ParseCreateField (
 
       switch (Context->CurrentOpcode[0]) {
         case AML_ZERO_OP:
+        case AML_ONE_OP:
           CONTEXT_CONSUME_BYTES (Context, 1);
           break;
 
