@@ -118,6 +118,8 @@ mAcpiDeleteSchema = OC_SCHEMA_DICT (NULL, mAcpiDeleteSchemaEntry);
 STATIC
 OC_SCHEMA
 mAcpiPatchSchemaEntry[] = {
+  OC_SCHEMA_STRING_IN    ("Base",           OC_ACPI_PATCH_ENTRY, Base),
+  OC_SCHEMA_INTEGER_IN   ("BaseSkip",       OC_ACPI_PATCH_ENTRY, BaseSkip),
   OC_SCHEMA_STRING_IN    ("Comment",        OC_ACPI_PATCH_ENTRY, Comment),
   OC_SCHEMA_INTEGER_IN   ("Count",          OC_ACPI_PATCH_ENTRY, Count),
   OC_SCHEMA_BOOLEAN_IN   ("Enabled",        OC_ACPI_PATCH_ENTRY, Enabled),

@@ -185,6 +185,10 @@
 		<key>Patch</key>
 		<array>
 			<dict>
+				<key>Base</key>
+				<string>\_SB_.PCI0.GFX0</string>
+				<key>BaseSkip</key>
+				<integer>0</integer>
 				<key>Comment</key>
 				<string>Replace one byte sequence with another</string>
 				<key>Count</key>
