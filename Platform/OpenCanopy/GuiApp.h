@@ -62,6 +62,10 @@ typedef enum {
   ICON_RIGHT,
   ICON_SHUT_DOWN,
   ICON_RESTART,
+  ICON_PASSWORD,
+  ICON_DOT,
+  ICON_ENTER,
+  ICON_LOCK,
   ICON_NUM_SYS,
   ICON_GENERIC_HDD       = ICON_NUM_SYS,
   ICON_NUM_MANDATORY,
@@ -102,6 +106,18 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   INT32                                AudioPlaybackTimeout;
   OC_PICKER_CONTEXT                    *PickerContext;
 } BOOT_PICKER_GUI_CONTEXT;
+
+EFI_STATUS
+PasswordViewInitialize (
+  OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext
+  );
+
+VOID
+PasswordViewDeinitialize (
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN OUT BOOT_PICKER_GUI_CONTEXT  *GuiContext
+  );
 
 EFI_STATUS
 BootPickerViewInitialize (

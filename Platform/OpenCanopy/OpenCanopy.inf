@@ -44,7 +44,9 @@
   Input/InputSimTextIn.c
   OcBootstrap.c
   Output/OutputStGop.c
+  Views/Common.c
   Views/BootPicker.c
+  Views/Password.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec

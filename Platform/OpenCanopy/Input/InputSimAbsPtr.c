@@ -294,13 +294,10 @@ GuiPointerReset (
   IN OUT GUI_POINTER_CONTEXT  *Context
   )
 {
-  EFI_ABSOLUTE_POINTER_STATE AbsoluteState;
-
   ASSERT (Context != NULL);
 
-  if (Context->AbsPointer != NULL) {
-    Context->AbsPointer->GetState (Context->AbsPointer, &AbsoluteState);
-  }
+  Context->EventQueueHead = 0;
+  Context->EventQueueTail = 0;
 
   Context->LockedBy = PointerUnlocked;
 }
@@ -330,6 +327,35 @@ GuiPointerGetPosition (
   if (sizeof (UINTN) < sizeof (UINT64)) {
     gBS->RestoreTPL (OldTpl);
   }
+}
+
+VOID
+GuiPointerSetPosition (
+  IN OUT GUI_POINTER_CONTEXT     *Context,
+  IN     CONST GUI_PTR_POSITION  *Position
+  )
+{
+  EFI_TPL   OldTpl;
+  DIMENSION ApplePosition;
+
+  ASSERT (Context != NULL);
+  ASSERT (Position != NULL);
+
+  OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+
+  ApplePosition.Horizontal = (INT32) Position->Pos.X;
+  ApplePosition.Vertical   = (INT32) Position->Pos.Y;
+  Context->AppleEvent->SetCursorPosition (
+    &ApplePosition
+    );
+
+  //
+  // Return the current pointer position.
+  //
+  Context->CurPos.Uint64 = Position->Uint64;
+  Context->RawPos.Uint64 = Position->Uint64;
+
+  gBS->RestoreTPL (OldTpl);
 }
 
 GUI_POINTER_CONTEXT *

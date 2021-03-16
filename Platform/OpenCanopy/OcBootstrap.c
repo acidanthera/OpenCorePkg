@@ -184,6 +184,69 @@ OcShowMenuByOc (
 }
 
 EFI_STATUS
+EFIAPI
+OcShowPasswordByOc (
+  IN OC_PICKER_CONTEXT   *Context,
+  IN OC_PRIVILEGE_LEVEL  Level
+  )
+{
+  OC_PRIVILEGE_CONTEXT *Privilege;
+  EFI_STATUS    Status;
+
+  Privilege = Context->PrivilegeContext;
+
+  if (Privilege == NULL || Privilege->CurrentLevel >= Level) {
+    return EFI_SUCCESS;
+  }
+
+  mGuiContext.BootEntry = NULL;
+  mGuiContext.ReadyToBoot = FALSE;
+  mGuiContext.HideAuxiliary = TRUE;
+  mGuiContext.Refresh = FALSE;
+  mGuiContext.PickerContext = Context;
+  mGuiContext.AudioPlaybackTimeout = -1;
+
+  Status = OcShowMenuByOcEnter (&mGuiContext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Do not play intro animation for blind.
+  //
+  if (Context->PickerAudioAssist) {
+    mGuiContext.DoneIntroAnimation = TRUE;
+  }
+
+  Status = PasswordViewInitialize (
+    &mDrawContext,
+    &mGuiContext
+    );
+  if (EFI_ERROR (Status)) {
+    OcShowMenuByOcLeave ();
+    return Status;
+  }
+
+  GuiRedrawAndFlushScreen (&mDrawContext);
+
+  GuiDrawLoop (&mDrawContext, Context->TimeoutSeconds);
+  //
+  // Clear the screen only if we will not show BootPicker afterwards.
+  //
+  if (Context->PickerCommand != OcPickerShowPicker) {
+    GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
+  }
+  //
+  // Note, it is important to destruct GUI here, as we must ensure
+  // that keyboard/mouse polling does not conflict with FV2 ui.
+  //
+  PasswordViewDeinitialize (&mDrawContext, &mGuiContext);
+  OcShowMenuByOcLeave ();
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,
   IN  OC_STORAGE_CONTEXT       *Storage,
@@ -206,7 +269,8 @@ GuiOcInterfacePopulate (
     return Status;
   }
 
-  Context->ShowMenu = OcShowMenuByOc;
+  Context->ShowMenu         = OcShowMenuByOc;
+  Context->RequestPrivilege = OcShowPasswordByOc;
 
   return EFI_SUCCESS;
 }

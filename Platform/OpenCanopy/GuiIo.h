@@ -59,6 +59,12 @@ GuiPointerGetPosition (
   );
 
 VOID
+GuiPointerSetPosition (
+  IN OUT GUI_POINTER_CONTEXT     *Context,
+  IN     CONST GUI_PTR_POSITION  *Position
+  );
+
+VOID
 GuiPointerReset (
   IN OUT GUI_POINTER_CONTEXT  *Context
   );

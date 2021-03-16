@@ -128,7 +128,8 @@ CONST GUI_IMAGE *
 typedef
 BOOLEAN
 (*GUI_EXIT_LOOP)(
-  IN BOOT_PICKER_GUI_CONTEXT *Context
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *Context
   );
 
 struct GUI_SCREEN_CURSOR_ {
@@ -136,17 +137,29 @@ struct GUI_SCREEN_CURSOR_ {
   UINT32 Y;
 };
 
+typedef struct {
+  GUI_OBJ_DRAW         Draw;
+  GUI_OBJ_PTR_EVENT    PtrEvent;
+  UINT32               NumChildren;
+  GUI_OBJ_CHILD        **Children;
+  GUI_OBJ_KEY_EVENT    KeyEvent;
+  GUI_CURSOR_GET_IMAGE GetCursorImage;
+  GUI_EXIT_LOOP        ExitLoop;
+} GUI_VIEW_CONTEXT;
+
 struct GUI_DRAWING_CONTEXT_ {
   //
   // Scene objects
   //
-  GUI_OBJ                  *Screen;
+  GUI_OBJ                  Screen;
   GUI_OBJ_KEY_EVENT        KeyEvent;
   GUI_CURSOR_GET_IMAGE     GetCursorImage;
   GUI_EXIT_LOOP            ExitLoop;
   LIST_ENTRY               Animations;
   BOOT_PICKER_GUI_CONTEXT  *GuiContext;
   UINT8                    Scale;
+  UINT8                    CursorOpacity;
+  UINT64                   FrameTime;
 };
 
 EFI_STATUS
@@ -250,12 +263,9 @@ GuiRequestDrawCrop (
 
 VOID
 GuiViewInitialize (
-  OUT    GUI_DRAWING_CONTEXT     *DrawContext,
-  IN OUT GUI_OBJ                 *Screen,
-  IN     GUI_OBJ_KEY_EVENT       KeyEvent,
-  IN     GUI_CURSOR_GET_IMAGE    CursorDraw,
-  IN     GUI_EXIT_LOOP           ExitLoop,
-  IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
+  OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN  CONST GUI_VIEW_CONTEXT   *ViewContext
   );
 
 VOID
