@@ -1298,24 +1298,9 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
   NULL
 };
 
-GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
-  {
-    { &mBootPickerActionButtonsContainer.Obj.Children, &mBootPickerRestart.Hdr.Link },
-    &mBootPickerActionButtonsContainer.Obj,
-    {
-      0, 0, 0, 0,
-      InternalBootPickerSimpleButtonDraw,
-      InternalBootPickerShutDownPtrEvent,
-      NULL,
-      INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerShutDown.Hdr.Obj.Children)
-    }
-  },
-  NULL
-};
-
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
   {
-    { &mBootPickerShutDown.Hdr.Link, &mBootPickerActionButtonsContainer.Obj.Children },
+    { &mBootPickerActionButtonsContainer.Obj.Children, &mBootPickerShutDown.Hdr.Link },
     &mBootPickerActionButtonsContainer.Obj,
     {
       0, 0, 0, 0,
@@ -1323,6 +1308,21 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
       InternalBootPickerRestartPtrEvent,
       NULL,
       INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerRestart.Hdr.Obj.Children)
+    }
+  },
+  NULL
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
+  {
+    { &mBootPickerRestart.Hdr.Link, &mBootPickerActionButtonsContainer.Obj.Children },
+    &mBootPickerActionButtonsContainer.Obj,
+    {
+      0, 0, 0, 0,
+      InternalBootPickerSimpleButtonDraw,
+      InternalBootPickerShutDownPtrEvent,
+      NULL,
+      INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerShutDown.Hdr.Obj.Children)
     }
   },
   NULL
@@ -1336,7 +1336,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerActionButtonsContainer = 
     GuiObjDrawDelegate,
     GuiObjDelegatePtrEvent,
     NULL,
-    { &mBootPickerRestart.Hdr.Link, &mBootPickerShutDown.Hdr.Link }
+    { &mBootPickerShutDown.Hdr.Link, &mBootPickerRestart.Hdr.Link }
   }
 };
 
@@ -1842,20 +1842,20 @@ BootPickerViewInitialize (
 
   mBootPicker.SelectedEntry = NULL;
 
+  mBootPickerRestart.CurrentImage = &GuiContext->Icons[ICON_RESTART][ICON_TYPE_BASE];
+  mBootPickerRestart.Hdr.Obj.Width = mBootPickerRestart.CurrentImage->Width;
+  mBootPickerRestart.Hdr.Obj.Height = mBootPickerRestart.CurrentImage->Height;
+  mBootPickerRestart.Hdr.Obj.OffsetX = 0;
+  mBootPickerRestart.Hdr.Obj.OffsetY = 0;
+
   mBootPickerShutDown.CurrentImage = &GuiContext->Icons[ICON_SHUT_DOWN][ICON_TYPE_BASE];
   mBootPickerShutDown.Hdr.Obj.Width = mBootPickerShutDown.CurrentImage->Width;
   mBootPickerShutDown.Hdr.Obj.Height = mBootPickerShutDown.CurrentImage->Height;
-  mBootPickerShutDown.Hdr.Obj.OffsetX = 0;
+  mBootPickerShutDown.Hdr.Obj.OffsetX = mBootPickerRestart.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
   mBootPickerShutDown.Hdr.Obj.OffsetY = 0;
 
-  mBootPickerRestart.CurrentImage = &GuiContext->Icons[ICON_RESTART][ICON_TYPE_BASE];
-  mBootPickerRestart.Hdr.Obj.Width = mBootPickerShutDown.CurrentImage->Width;
-  mBootPickerRestart.Hdr.Obj.Height = mBootPickerShutDown.CurrentImage->Height;
-  mBootPickerRestart.Hdr.Obj.OffsetX = mBootPickerShutDown.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
-  mBootPickerRestart.Hdr.Obj.OffsetY = 0;
-
-  mBootPickerActionButtonsContainer.Obj.Width = mBootPickerShutDown.Hdr.Obj.Width + mBootPickerRestart.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
-  mBootPickerActionButtonsContainer.Obj.Height = MAX (mBootPickerShutDown.CurrentImage->Height, mBootPickerRestart.CurrentImage->Height);
+  mBootPickerActionButtonsContainer.Obj.Width =  mBootPickerRestart.Hdr.Obj.Width + mBootPickerShutDown.Hdr.Obj.Width + BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
+  mBootPickerActionButtonsContainer.Obj.Height = MAX (mBootPickerRestart.CurrentImage->Height, mBootPickerShutDown.CurrentImage->Height);
   mBootPickerActionButtonsContainer.Obj.OffsetX = (mBootPickerView.Width - mBootPickerActionButtonsContainer.Obj.Width) / 2;
   mBootPickerActionButtonsContainer.Obj.OffsetY = mBootPickerView.Height - mBootPickerActionButtonsContainer.Obj.Height - BOOT_ACTION_BUTTON_SPACE * GuiContext->Scale;
 
