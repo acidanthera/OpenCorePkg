@@ -150,7 +150,7 @@ AcpiReadSignature (
 
   Result = Common->Signature;
 
-  Walker = (CHAR8 *) &Common->Signature;
+  Walker = (CHAR8 *) &Result;
   for (Index = 0; Index < sizeof (Common->Signature); Index++) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
