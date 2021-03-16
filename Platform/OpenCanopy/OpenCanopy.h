@@ -79,6 +79,8 @@ typedef struct {
   GUI_ANIMATE Animate;
 } GUI_ANIMATION;
 
+typedef struct GUI_OBJ_CHILD_ GUI_OBJ_CHILD;
+
 struct GUI_OBJ_ {
   INT64             OffsetX;
   INT64             OffsetY;
@@ -87,14 +89,14 @@ struct GUI_OBJ_ {
   GUI_OBJ_DRAW      Draw;
   GUI_OBJ_PTR_EVENT PtrEvent;
   GUI_OBJ_KEY_EVENT KeyEvent;
-  LIST_ENTRY        Children;
+  UINT32            NumChildren;
+  GUI_OBJ_CHILD     **Children;
 };
 
-typedef struct {
-  LIST_ENTRY Link;
+struct GUI_OBJ_CHILD_ {
   GUI_OBJ    *Parent;
   GUI_OBJ    Obj;
-} GUI_OBJ_CHILD;
+};
 
 typedef struct {
   UINT32                        Width;

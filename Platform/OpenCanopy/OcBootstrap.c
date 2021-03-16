@@ -109,7 +109,8 @@ OcShowMenuByOc (
   Status = BootPickerViewInitialize (
     &mDrawContext,
     &mGuiContext,
-    InternalGetCursorImage
+    InternalGetCursorImage,
+    (UINT8) BootContext->BootEntryCount
     );
   if (EFI_ERROR (Status)) {
     OcShowMenuByOcLeave ();
@@ -117,10 +118,11 @@ OcShowMenuByOc (
   }
 
   for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
-    Status = BootPickerEntriesAdd (
+    Status = BootPickerEntriesSet (
       BootContext->PickerContext,
       &mGuiContext,
       BootEntries[Index],
+      (UINT8) Index + 1,
       Index == BootContext->DefaultEntry->EntryIndex - 1
       );
     if (EFI_ERROR (Status)) {

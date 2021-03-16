@@ -21,11 +21,12 @@ typedef struct {
   GUI_IMAGE       Label;
   OC_BOOT_ENTRY   *Context;
   BOOLEAN         CustomIcon;
+  UINT8           Index;
 } GUI_VOLUME_ENTRY;
 
 typedef struct {
-  GUI_OBJ_CHILD    Hdr;
-  GUI_VOLUME_ENTRY *SelectedEntry;
+  GUI_OBJ_CHILD Hdr;
+  UINT32        SelectedIndex;
 } GUI_VOLUME_PICKER;
 
 #endif // BOOT_PICKER_H

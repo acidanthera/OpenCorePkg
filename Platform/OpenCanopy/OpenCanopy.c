@@ -141,7 +141,7 @@ GuiObjDrawDelegate (
 {
   BOOLEAN       Result;
 
-  LIST_ENTRY    *ChildEntry;
+  UINTN         Index;
   GUI_OBJ_CHILD *Child;
 
   UINT32        ChildDrawOffsetX;
@@ -158,12 +158,8 @@ GuiObjDrawDelegate (
   ASSERT (Height <= This->Height);
   ASSERT (DrawContext != NULL);
 
-  for (
-    ChildEntry = GetPreviousNode (&This->Children, &This->Children);
-    !IsNull (&This->Children, ChildEntry);
-    ChildEntry = GetPreviousNode (&This->Children, ChildEntry)
-    ) {
-    Child = BASE_CR (ChildEntry, GUI_OBJ_CHILD, Link);
+  for (Index = 0; Index < This->NumChildren; ++Index) {
+    Child = This->Children[Index];
 
     ChildDrawOffsetX = OffsetX;
     ChildDrawWidth   = Width;
@@ -220,8 +216,8 @@ GuiObjDelegatePtrEvent (
   IN     INT64                   OffsetY
   )
 {
+  UINTN         Index;
   GUI_OBJ       *Obj;
-  LIST_ENTRY    *ChildEntry;
   GUI_OBJ_CHILD *Child;
 
   ASSERT (This != NULL);
@@ -229,12 +225,8 @@ GuiObjDelegatePtrEvent (
   ASSERT (This->Height > OffsetY);
   ASSERT (DrawContext != NULL);
 
-  for (
-    ChildEntry = GetFirstNode (&This->Children);
-    !IsNull (&This->Children, ChildEntry);
-    ChildEntry = GetNextNode (&This->Children, ChildEntry)
-    ) {
-    Child = BASE_CR (ChildEntry, GUI_OBJ_CHILD, Link);
+  for (Index = 0; Index < This->NumChildren; ++Index) {
+    Child = This->Children[Index];
     if (OffsetX  < Child->Obj.OffsetX
      || OffsetX >= Child->Obj.OffsetX + Child->Obj.Width
      || OffsetY  < Child->Obj.OffsetY
@@ -937,6 +929,7 @@ GuiGetBaseCoords (
   GUI_OBJ_CHILD *ChildObj;
   INT64         X;
   INT64         Y;
+  UINT32        Index;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -955,7 +948,15 @@ GuiGetBaseCoords (
     ChildObj = BASE_CR (Obj, GUI_OBJ_CHILD, Obj);
     Obj      = ChildObj->Parent;
     ASSERT (Obj != NULL);
-    ASSERT (IsNodeInList (&Obj->Children, &ChildObj->Link));
+
+    DEBUG_CODE_BEGIN ();
+    for (Index = 0; Index < Obj->NumChildren; ++Index) {
+      if (Obj->Children[Index] == ChildObj) {
+        break;
+      }
+    }
+    ASSERT (Index != Obj->NumChildren);
+    DEBUG_CODE_END ();
   }
 
   *BaseX = X;
