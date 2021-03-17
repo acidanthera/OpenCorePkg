@@ -367,13 +367,56 @@ PatcherApplyGenericPatch (
 EFI_STATUS
 PatcherExcludePrelinkedKext (
   IN     CONST CHAR8            *Identifier,
-  IN OUT PATCHER_CONTEXT        *Patcher,
-  IN OUT PRELINKED_CONTEXT      *Context
+  IN OUT PATCHER_CONTEXT        *PatcherContext,
+  IN OUT PRELINKED_CONTEXT      *PrelinkedContext
   )
 {
+  MACH_SEGMENT_COMMAND_ANY  *Segment;
+  VOID                      *KextData;
+  UINT64                    AddressMax;
+  UINT64                    VirtualAddress;
+  UINT64                    Size;
+  UINT64                    MaxSize;
+
+  ASSERT (Identifier       != NULL);
+  ASSERT (PatcherContext   != NULL);
+  ASSERT (PrelinkedContext != NULL);
+
   //
-  // TODO
+  // First, zero kext memory through PatcherContext->MachContext.
   //
+  Segment    = NULL;
+  AddressMax = 0;
+  MaxSize    = 0;
+  while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
+    VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+    Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
+
+    AddressMax = MAX (VirtualAddress + Size, AddressMax);
+    MaxSize    = AddressMax - PatcherContext->VirtualBase;
+  }
+
+  KextData = MachoGetFilePointerByAddress (
+    &PatcherContext->MachContext,
+    PatcherContext->VirtualBase,
+    NULL
+    );
+  if (KextData == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
+    Identifier,
+    PatcherContext->VirtualBase,
+    MaxSize
+    ));
+  ZeroMem (KextData, AddressMax + MaxSize);
+
+  //
+  // TODO: Erase PrelinkedContext->KextList.
+  //
+
   return EFI_SUCCESS;
 }
 

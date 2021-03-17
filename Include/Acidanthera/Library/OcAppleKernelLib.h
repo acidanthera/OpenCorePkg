@@ -1078,17 +1078,17 @@ PatcherApplyGenericPatch (
 /**
   Exclude kext from prelinked.
 
-  @param[in]      Identifier  Kext identifier to be excluded.
-  @param[in,out]  Patcher     Patcher context.
-  @param[in,out]  Context     Prelinked context.
+  @param[in]      Identifier        Kext identifier to be excluded.
+  @param[in,out]  PatcherContext    Patcher context.
+  @param[in,out]  PrelinkedContext  Prelinked context.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PatcherExcludePrelinkedKext (
   IN     CONST CHAR8            *Identifier,
-  IN OUT PATCHER_CONTEXT        *Patcher,
-  IN OUT PRELINKED_CONTEXT      *Context
+  IN OUT PATCHER_CONTEXT        *PatcherContext,
+  IN OUT PRELINKED_CONTEXT      *PrelinkedContext
   );
 
 /**
