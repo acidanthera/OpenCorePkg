@@ -129,6 +129,12 @@ STATIC BOOLEAN mScreenResolutionSet;
 // mScreenResolution
 STATIC DIMENSION mResolution;
 
+STATIC UINT64 mMaxPointerResolutionX = 1;
+STATIC UINT64 mMaxPointerResolutionY = 1;
+
+STATIC INT64 mPointerRawX;
+STATIC INT64 mPointerRawY;
+
 // InternalRegisterSimplePointerInterface
 STATIC
 VOID
@@ -171,6 +177,26 @@ InternalRegisterSimplePointerInterface (
     }
 
     mPointerProtocols = Instance;
+
+    if (SimplePointer->Mode->ResolutionX > mMaxPointerResolutionX) {
+      mPointerRawX = MultS64x64 (mPointerRawX, (INT64) mMaxPointerResolutionX);
+      mPointerRawX = DivS64x64Remainder (
+        mPointerRawX,
+        (INT64) SimplePointer->Mode->ResolutionX,
+        NULL
+        );
+      mMaxPointerResolutionX = SimplePointer->Mode->ResolutionX;
+    }
+
+    if (SimplePointer->Mode->ResolutionY > mMaxPointerResolutionY) {
+      mPointerRawY = MultS64x64 (mPointerRawY, (INT64) mMaxPointerResolutionY);
+      mPointerRawY = DivS64x64Remainder (
+        mPointerRawY,
+        (INT64) SimplePointer->Mode->ResolutionY,
+        NULL
+        );
+      mMaxPointerResolutionY = SimplePointer->Mode->ResolutionY;
+    }
   }
 }
 
@@ -637,13 +663,15 @@ InternalSimplePointerPollNotifyFunction (
   EFI_SIMPLE_POINTER_STATE    State;
   INT64                       UiScaleX;
   INT64                       UiScaleY;
-  INT64                       MovementY;
-  INT64                       MovementX;
+  INT64                       ScaledY;
+  INT64                       ScaledX;
   DIMENSION                   NewPosition;
   APPLE_EVENT_INFORMATION     *Information;
   APPLE_EVENT_DATA            EventData;
   UINT64                      StartTime;
   UINT64                      EndTime;
+  INT64                       MaxRawPointerX;
+  INT64                       MaxRawPointerY;
 
   StartTime = GetPerformanceCounter ();
 
@@ -668,66 +696,71 @@ InternalSimplePointerPollNotifyFunction (
       Status        = SimplePointer->GetState (SimplePointer, &State);
 
       if (!EFI_ERROR (Status)) {
+        //
+        // CHANGE: Apple scaled the deltas and due to rounding errors, this is
+        //         unacceptable. Changed to scale all pointer deltas to the
+        //         maximum pointer resolution and scaling down to display
+        //         coordinates always based on the accurate raw input value.
+        //
+
         UiScaleX = InternalGetUiScaleData ((INT64)State.RelativeMovementX);
+        UiScaleX = MultS64x64 (UiScaleX, (INT64) mMaxPointerResolutionX);
+
         UiScaleY = InternalGetUiScaleData ((INT64)State.RelativeMovementY);
+        UiScaleY = MultS64x64 (UiScaleY, (INT64) mMaxPointerResolutionY);
 
-        //
-        // Apple did not check for zero resolution here
-        //
-
-        if (SimplePointer->Mode->ResolutionX > 0
-          && SimplePointer->Mode->ResolutionY > 0) {
-          MovementX = DivS64x64Remainder (
-                        UiScaleX,
-                        (INT64)SimplePointer->Mode->ResolutionX,
-                        NULL
-                        );
-
-          MovementY = DivS64x64Remainder (
-                        UiScaleY,
-                        (INT64)SimplePointer->Mode->ResolutionY,
-                        NULL
-                        );
-        } else {
-          MovementX = 0;
-          MovementY = 0;
+        if (SimplePointer->Mode->ResolutionX > 0) {
+          UiScaleX = DivS64x64Remainder (
+            UiScaleX,
+            (INT64) SimplePointer->Mode->ResolutionX,
+            NULL
+            );
         }
 
-        if (MovementX == 0) {
-          if (State.RelativeMovementX > 0) {
-            MovementX = 1;
-          } else if (State.RelativeMovementX < 0) {
-            MovementX = -1;
-          }
+        if (SimplePointer->Mode->ResolutionY > 0) {
+          UiScaleY = DivS64x64Remainder (
+            UiScaleY,
+            (INT64) SimplePointer->Mode->ResolutionY,
+            NULL
+            );
         }
 
-        if (MovementY == 0) {
-          if (State.RelativeMovementY > 0) {
-            MovementY = 1;
-          } else if (State.RelativeMovementY < 0) {
-            MovementY = -1;
-          }
+        mPointerRawX += UiScaleX;
+        MaxRawPointerX = MultS64x64 (
+          mResolution.Horizontal,
+          (INT64) mMaxPointerResolutionX
+          );
+        if (mPointerRawX > MaxRawPointerX) {
+          mPointerRawX = MaxRawPointerX;
+        } else if (mPointerRawX < 0) {
+          mPointerRawX = 0;
         }
 
-        NewPosition.Horizontal = (INT32)(
-                                  mCursorPosition.Horizontal + MovementX
-                                  );
-
-        NewPosition.Vertical   = (INT32)(
-                                  mCursorPosition.Vertical + MovementY
-                                  );
-
-        if (NewPosition.Horizontal > mResolution.Horizontal) {
-          NewPosition.Horizontal = mResolution.Horizontal;
-        } else if (NewPosition.Horizontal < 0) {
-          NewPosition.Horizontal = 0;
+        mPointerRawY += UiScaleY;
+        MaxRawPointerY = MultS64x64 (
+          mResolution.Vertical,
+          (INT64) mMaxPointerResolutionY
+          );
+        if (mPointerRawY > MaxRawPointerY) {
+          mPointerRawY = MaxRawPointerY;
+        } else if (mPointerRawY < 0) {
+          mPointerRawY = 0;
         }
 
-        if (NewPosition.Vertical > mResolution.Vertical) {
-          NewPosition.Vertical = mResolution.Vertical;
-        } else if (NewPosition.Vertical < 0) {
-          NewPosition.Vertical = 0;
-        }
+        ScaledX = DivS64x64Remainder (
+          mPointerRawX,
+          (INT64) mMaxPointerResolutionX,
+          NULL
+          );
+
+        ScaledY = DivS64x64Remainder (
+          mPointerRawY,
+          (INT64) mMaxPointerResolutionY,
+          NULL
+          );
+
+        NewPosition.Horizontal = (INT32) ScaledX;
+        NewPosition.Vertical   = (INT32) ScaledY;
 
         if ((mCursorPosition.Horizontal != NewPosition.Horizontal)
          || (mCursorPosition.Vertical != NewPosition.Vertical)) {
@@ -900,6 +933,14 @@ EventSetCursorPositionImpl (
      && (Position->Vertical < mResolution.Vertical)) {
       mCursorPosition.Horizontal = Position->Horizontal;
       mCursorPosition.Vertical   = Position->Vertical;
+      mPointerRawX = MultS64x64 (
+        mCursorPosition.Horizontal,
+        (INT64) mMaxPointerResolutionX
+        );
+      mPointerRawY = MultS64x64 (
+        mCursorPosition.Vertical,
+        (INT64) mMaxPointerResolutionY
+        );
       Status = EFI_SUCCESS;
     }
   } else if (EFI_ERROR (Status)) {
