@@ -76,35 +76,27 @@ InternalAppleEventNotification (
     //
 
     NewX = Information->PointerPosition.Horizontal;
-    if (NewX == 0 || (UINT32) NewX == Context->MaxX) {
-      Context->CurState.X = (UINT32) NewX;
-    } else {
-      NewCoord = (INT64) Context->CurState.X + 2 * ((INT64) NewX - Context->RawX);
-      if (NewCoord < 0) {
-        NewCoord = 0;
-      } else if (NewCoord > Context->MaxX) {
-        NewCoord = Context->MaxX;
-      }
 
-      Context->CurState.X = (UINT32) NewCoord;
+    NewCoord = (INT64) Context->CurState.X + ((INT64) NewX - Context->RawX);
+    if (NewCoord < 0) {
+      NewCoord = 0;
+    } else if (NewCoord > Context->MaxX) {
+      NewCoord = Context->MaxX;
     }
 
+    Context->CurState.X = (UINT32) NewCoord;
     Context->RawX = NewX;
 
     NewY = Information->PointerPosition.Vertical;
-    if (NewY == 0 || (UINT32) NewY == Context->MaxY) {
-      Context->CurState.Y = (UINT32) NewY;
-    } else {
-      NewCoord = (INT64) Context->CurState.Y + 2 * ((INT64) NewY - Context->RawY);
-      if (NewCoord < 0) {
-        NewCoord = 0;
-      } else if (NewCoord > Context->MaxY) {
-        NewCoord = Context->MaxY;
-      }
 
-      Context->CurState.Y = (UINT32) NewCoord;
+    NewCoord = (INT64) Context->CurState.Y + ((INT64) NewY - Context->RawY);
+    if (NewCoord < 0) {
+      NewCoord = 0;
+    } else if (NewCoord > Context->MaxY) {
+      NewCoord = Context->MaxY;
     }
 
+    Context->CurState.Y = (UINT32) NewCoord;
     Context->RawY = NewY;
   }
 
