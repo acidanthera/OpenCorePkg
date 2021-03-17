@@ -411,7 +411,7 @@ PatcherExcludePrelinkedKext (
     PatcherContext->VirtualBase,
     MaxSize
     ));
-  ZeroMem (KextData, AddressMax + MaxSize);
+  ZeroMem (KextData, (UINTN) (AddressMax + MaxSize));
 
   //
   // TODO: Erase PrelinkedContext->KextList.
