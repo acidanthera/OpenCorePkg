@@ -113,7 +113,7 @@ BootPickerViewInitialize (
 
 VOID
 BootPickerViewLateInitialize (
-  VOID
+  IN UINT8  DefaultIndex
   );
 
 EFI_STATUS
@@ -121,8 +121,7 @@ BootPickerEntriesSet (
   IN OC_PICKER_CONTEXT              *Context,
   IN BOOT_PICKER_GUI_CONTEXT        *GuiContext,
   IN OC_BOOT_ENTRY                  *Entry,
-  IN UINT8                          EntryIndex,
-  IN BOOLEAN                        Default
+  IN UINT8                          EntryIndex
   );
 
 VOID

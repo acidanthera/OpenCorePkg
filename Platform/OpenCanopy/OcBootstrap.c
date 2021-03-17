@@ -122,8 +122,7 @@ OcShowMenuByOc (
       BootContext->PickerContext,
       &mGuiContext,
       BootEntries[Index],
-      (UINT8) Index + 1,
-      Index == BootContext->DefaultEntry->EntryIndex - 1
+      (UINT8) Index
       );
     if (EFI_ERROR (Status)) {
       OcShowMenuByOcLeave ();
@@ -131,7 +130,7 @@ OcShowMenuByOc (
     }
   }
 
-  BootPickerViewLateInitialize ();
+  BootPickerViewLateInitialize ((UINT8) BootContext->DefaultEntry->EntryIndex - 1);
 
   GuiRedrawAndFlushScreen (&mDrawContext);
 

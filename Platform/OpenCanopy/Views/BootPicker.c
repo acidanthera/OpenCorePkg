@@ -53,7 +53,6 @@ InternalGetVolumeEntry (
   IN UINT32  Index
   )
 {
-  ASSERT (Index > 0);
   ASSERT (Index < mBootPicker.Hdr.Obj.NumChildren);
   return (GUI_VOLUME_ENTRY *) (
     mBootPicker.Hdr.Obj.Children[Index]
@@ -231,7 +230,6 @@ InternalBootPickerSelectEntry (
   CONST GUI_VOLUME_ENTRY *NewEntry;
 
   ASSERT (This != NULL);
-  ASSERT (NewIndex > 0);
   ASSERT (NewIndex < mBootPicker.Hdr.Obj.NumChildren);
 
   This->SelectedIndex = NewIndex;
@@ -240,7 +238,7 @@ InternalBootPickerSelectEntry (
   ASSERT (mBootPickerSelector.Hdr.Obj.Width <= NewEntry->Hdr.Obj.Width);
   ASSERT_EQUALS (This->Hdr.Obj.Height, mBootPickerSelector.Hdr.Obj.OffsetY + mBootPickerSelector.Hdr.Obj.Height);
 
-  mBootPickerSelector.Hdr.Obj.OffsetX  = NewEntry->Hdr.Obj.OffsetX;
+  mBootPickerSelector.Hdr.Obj.OffsetX  = mBootPicker.Hdr.Obj.OffsetX + NewEntry->Hdr.Obj.OffsetX;
   mBootPickerSelector.Hdr.Obj.OffsetX += (NewEntry->Hdr.Obj.Width - mBootPickerSelector.Hdr.Obj.Width) / 2;
 
   if (DrawContext != NULL) {
@@ -345,7 +343,6 @@ InternalBootPickerChangeEntry (
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (NewIndex > 0);
   ASSERT (NewIndex < This->Hdr.Obj.NumChildren);
   //
   // The caller must guarantee the entry is actually new for performance
@@ -429,7 +426,7 @@ InternalBootPickerKeyEvent (
         );
     }
   } else if (Key == OC_INPUT_LEFT) {
-    if (mBootPicker.SelectedIndex - 1 > 0) {
+    if (mBootPicker.SelectedIndex > 0) {
       //
       // Redraw the two now (un-)selected entries.
       //
@@ -442,7 +439,7 @@ InternalBootPickerKeyEvent (
         );
     }
   } else if (Key == OC_INPUT_CONTINUE) {
-    if (mBootPicker.Hdr.Obj.NumChildren > 1) {
+    if (mBootPicker.Hdr.Obj.NumChildren > 0) {
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
       SelectedEntry->Context->SetDefault = Modifier;
       GuiContext->ReadyToBoot = TRUE;
@@ -939,7 +936,7 @@ InternalBootPickerLeftScrollPtrEvent (
         // The internal design ensures a selected entry cannot be off-screen,
         // scrolling offsets it by at most one spot.
         //
-        if (mBootPicker.SelectedIndex > 1) {
+        if (mBootPicker.SelectedIndex > 0) {
           InternalBootPickerSelectEntry (
             &mBootPicker,
             DrawContext,
@@ -1240,12 +1237,15 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
       0,
       NULL
     },
-    &mBootPicker.Hdr.Obj
+    &mBootPickerContainer.Obj
   },
   NULL
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerContainerChilds[] = { &mBootPicker.Hdr };
+STATIC GUI_OBJ_CHILD *mBootPickerContainerChilds[] = {
+  &mBootPickerSelector.Hdr,
+  &mBootPicker.Hdr
+  };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
   {
@@ -1393,8 +1393,7 @@ BootPickerEntriesSet (
   IN OC_PICKER_CONTEXT              *Context,
   IN BOOT_PICKER_GUI_CONTEXT        *GuiContext,
   IN OC_BOOT_ENTRY                  *Entry,
-  IN UINT8                          EntryIndex,
-  IN BOOLEAN                        Default
+  IN UINT8                          EntryIndex
   )
 {
   EFI_STATUS                  Status;
@@ -1411,7 +1410,6 @@ BootPickerEntriesSet (
 
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
-  ASSERT (EntryIndex > 0);
   ASSERT (EntryIndex < mBootPicker.Hdr.Obj.NumChildren);
 
   DEBUG ((DEBUG_INFO, "OCUI: Console attributes: %d\n", Context->ConsoleAttributes));
@@ -1601,10 +1599,8 @@ BootPickerEntriesSet (
   VolumeEntry->Hdr.Obj.PtrEvent = InternalBootPickerEntryPtrEvent;
   VolumeEntry->Hdr.Obj.NumChildren = 0;
   VolumeEntry->Hdr.Obj.Children    = NULL;
-  //
-  // The first entry is always the selector.
-  //
-  if (EntryIndex > 1) {
+
+  if (EntryIndex > 0) {
     PrevEntry = InternalGetVolumeEntry (EntryIndex - 1);
     VolumeEntry->Hdr.Obj.OffsetX = PrevEntry->Hdr.Obj.OffsetX + (BOOT_ENTRY_DIMENSION + BOOT_ENTRY_SPACE) * GuiContext->Scale;
   }
@@ -1613,11 +1609,6 @@ BootPickerEntriesSet (
   VolumeEntry->Index = EntryIndex;
   mBootPicker.Hdr.Obj.Width   += (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * GuiContext->Scale;
   mBootPicker.Hdr.Obj.OffsetX -= (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * GuiContext->Scale / 2;
-
-  if (Default) {
-    InternalBootPickerSelectEntry (&mBootPicker, NULL, VolumeEntry->Index);
-    GuiContext->BootEntry = Entry;
-  }
 
   return EFI_SUCCESS;
 }
@@ -1858,14 +1849,13 @@ BootPickerViewInitialize (
   mBootPicker.Hdr.Obj.OffsetX = mBootPickerContainer.Obj.Width / 2 + (UINT32) (BOOT_ENTRY_SPACE * GuiContext->Scale) / 2;
   mBootPicker.Hdr.Obj.OffsetY = 0;
 
-  mBootPicker.SelectedIndex = 1;
+  mBootPicker.SelectedIndex = 0;
 
-  mBootPicker.Hdr.Obj.Children = AllocateZeroPool ((NumBootEntries + 1) * sizeof (*mBootPicker.Hdr.Obj.Children));
+  mBootPicker.Hdr.Obj.Children = AllocateZeroPool (NumBootEntries * sizeof (*mBootPicker.Hdr.Obj.Children));
   if (mBootPicker.Hdr.Obj.Children == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  mBootPicker.Hdr.Obj.Children[0] = &mBootPickerSelector.Hdr;
-  mBootPicker.Hdr.Obj.NumChildren = NumBootEntries + 1;
+  mBootPicker.Hdr.Obj.NumChildren = NumBootEntries;
 
   mBootPickerRestart.CurrentImage = &GuiContext->Icons[ICON_RESTART][ICON_TYPE_BASE];
   mBootPickerRestart.Hdr.Obj.Width = mBootPickerRestart.CurrentImage->Width;
@@ -1916,7 +1906,7 @@ BootPickerViewInitialize (
 
 VOID
 BootPickerViewLateInitialize (
-  VOID
+  IN UINT8  DefaultIndex
   )
 {
   UINT32                 Index;
@@ -1932,9 +1922,8 @@ BootPickerViewLateInitialize (
   if (ScrollOffset == 0) {
     //
     // Find the first entry that is fully visible.
-    // First entry is always the selector.
     //
-    for (Index = 1; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
+    for (Index = 0; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
       //
       // Move the first partially visible boot entry to the very left to prevent
       // cut-off entries. This only applies when entries overflow.
@@ -1953,6 +1942,7 @@ BootPickerViewLateInitialize (
   }
 
   mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
+  InternalBootPickerSelectEntry (&mBootPicker, NULL, DefaultIndex);
 }
 
 VOID
@@ -1963,11 +1953,7 @@ BootPickerViewDeinitialize (
 {
   UINT32 Index;
 
-  ASSERT (mBootPicker.Hdr.Obj.Children[0] == &mBootPickerSelector.Hdr);
-  //
-  // Last entry is always the selector, which is special and cannot be freed.
-  //
-  for (Index = 1; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
+  for (Index = 0; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
     InternalBootPickerEntryDestruct (InternalGetVolumeEntry (Index));
   }
 
