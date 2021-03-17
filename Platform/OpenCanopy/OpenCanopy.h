@@ -94,8 +94,8 @@ struct GUI_OBJ_ {
 };
 
 struct GUI_OBJ_CHILD_ {
-  GUI_OBJ    *Parent;
   GUI_OBJ    Obj;
+  GUI_OBJ    *Parent;
 };
 
 typedef struct {

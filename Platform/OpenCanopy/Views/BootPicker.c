@@ -1232,7 +1232,6 @@ InternalBootPickerRestartPtrEvent (
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
   {
-    &mBootPicker.Hdr.Obj,
     {
       0, 0, 0, 0,
       InternalBootPickerSelectorDraw,
@@ -1240,7 +1239,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
       NULL,
       0,
       NULL
-    }
+    },
+    &mBootPicker.Hdr.Obj
   },
   NULL
 };
@@ -1248,7 +1248,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
 STATIC GUI_OBJ_CHILD *mBootPickerContainerChilds[] = { &mBootPicker.Hdr };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
-  &mBootPickerView,
   {
     0, 0, 0, 0,
     GuiObjDrawDelegate,
@@ -1256,12 +1255,12 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
     NULL,
     ARRAY_SIZE (mBootPickerContainerChilds),
     mBootPickerContainerChilds
-  }
+  },
+  &mBootPickerView
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VOLUME_PICKER mBootPicker = {
   {
-    &mBootPickerContainer.Obj,
     {
       0, 0, 0, 0,
       GuiObjDrawDelegate,
@@ -1269,14 +1268,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VOLUME_PICKER mBootPicker = {
       InternalBootPickerKeyEvent,
       0,
       NULL
-    }
+    },
+    &mBootPickerContainer.Obj
   },
   1
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerLeftScroll = {
   {
-    &mBootPickerView,
     {
       0, 0, 0, 0,
       InternalBootPickerLeftScrollDraw,
@@ -1284,14 +1283,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerLeftScroll = {
       NULL,
       0,
       NULL
-    }
+    },
+    &mBootPickerView
   },
   NULL
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
   {
-    &mBootPickerView,
     {
       0, 0, 0, 0,
       InternalBootPickerRightScrollDraw,
@@ -1299,14 +1298,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
       NULL,
       0,
       NULL
-    }
+    },
+    &mBootPickerView
   },
   NULL
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
   {
-    &mBootPickerActionButtonsContainer.Obj,
     {
       0, 0, 0, 0,
       InternalBootPickerSimpleButtonDraw,
@@ -1314,14 +1313,14 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
       NULL,
       0,
       NULL
-    }
+    },
+    &mBootPickerActionButtonsContainer.Obj
   },
   NULL
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
   {
-    &mBootPickerActionButtonsContainer.Obj,
     {
       0, 0, 0, 0,
       InternalBootPickerSimpleButtonDraw,
@@ -1329,7 +1328,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
       NULL,
       0,
       NULL
-    }
+    },
+    &mBootPickerActionButtonsContainer.Obj
   },
   NULL
 };
@@ -1340,7 +1340,6 @@ STATIC GUI_OBJ_CHILD *mBootPickerActionButtonsContainerChilds[] = {
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerActionButtonsContainer = {
-  &mBootPickerView,
   {
     0, 0, 0, 0,
     GuiObjDrawDelegate,
@@ -1348,7 +1347,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerActionButtonsContainer = 
     NULL,
     ARRAY_SIZE (mBootPickerActionButtonsContainerChilds),
     mBootPickerActionButtonsContainerChilds
-  }
+  },
+  &mBootPickerView
 };
 
 STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
