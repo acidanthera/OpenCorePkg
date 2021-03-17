@@ -3,6 +3,7 @@
 buildutil() {
   UTILS=(
     "AppleEfiSignTool"
+    "ACPIe"
     "EfiResTool"
     "LogoutHook"
     "acdtinfo"
@@ -12,6 +13,7 @@ buildutil() {
     "ocpasswordgen"
     "ocvalidate"
     "TestBmf"
+    "TestCpuFrequency"
     "TestDiskImage"
     "TestHelloWorld"
     "TestImg4"
@@ -218,6 +220,7 @@ package() {
   done
 
   utils=(
+    "ACPIe"
     "acdtinfo"
     "macserial"
     "ocpasswordgen"

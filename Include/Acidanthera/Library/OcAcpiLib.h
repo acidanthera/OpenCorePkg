@@ -124,6 +124,14 @@ typedef struct {
   //
   CONST UINT8  *ReplaceMask;
   //
+  // Fully qualified name with ACPI path (e.g. \_SB_.PCI0.GFX0).
+  //
+  CONST CHAR8  *Base;
+  //
+  // Number of Base entries to skip before using.
+  //
+  UINT32       BaseSkip;
+  //
   // Patch size.
   //
   UINT32       Size;
@@ -302,6 +310,30 @@ AcpiHandleHardwareSignature (
 EFI_STATUS
 AcpiDumpTables (
   IN EFI_FILE_PROTOCOL  *Root
+  );
+
+/**
+  Finds offset of required entry in ACPI table in case it exists.
+
+  @param[in]  Table       Pointer to start of ACPI table.
+  @param[in]  PathString  Path to entry which must be found.
+  @param[in]  Entry       Number of entry which must be found.
+  @param[out] Offset      Offset of the entry if it was found.
+  @param[out] TableLength Length of ACPI table.
+
+  @retval EFI_SUCCESS           Required entry was found.
+  @retval EFI_NOT_FOUND         Required entry was not found.
+  @retval EFI_DEVICE_ERROR      Error occured during parsing ACPI table.
+  @retval EFI_OUT_OF_RESOURCES  Nesting limit has been reached.
+  @retval EFI_INVALID_PARAMETER Got wrong path to the entry.
+**/
+EFI_STATUS
+AcpiFindEntryInMemory (
+  IN     UINT8       *Table,
+  IN     CONST CHAR8 *PathString,
+  IN     UINT8       Entry,
+     OUT UINT32      *Offset,
+  IN     UINT32      TableLength OPTIONAL
   );
 
 #endif // OC_ACPI_LIB_H

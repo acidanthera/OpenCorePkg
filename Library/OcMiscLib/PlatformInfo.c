@@ -20,6 +20,7 @@
 #include <Pi/PiHob.h>
 #include <Library/HobLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
 
 EFI_STATUS
 OcReadApplePlatformFirstData (
@@ -77,6 +78,70 @@ OcReadApplePlatformFirstData (
       *Size,
       Status
       ));
+    return Status;
+  }
+
+  *Size = DataSize;
+
+  return Status;
+}
+
+EFI_STATUS
+OcReadApplePlatformFirstDataAlloc (
+  IN   APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo,
+  IN   EFI_GUID                               *DataGuid,
+  OUT  UINT32                                 *Size,
+  OUT  VOID                                   **Data
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      DataSize;
+
+  ASSERT (Size     != NULL);
+  ASSERT (Data     != NULL);
+  ASSERT (DataGuid != NULL);
+
+  Status = PlatformInfo->GetFirstDataSize (
+    PlatformInfo,
+    DataGuid,
+    &DataSize
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No first platform data size for %g - %r\n",
+      DataGuid,
+      Status
+      ));
+    return Status;
+  }
+
+  *Data = AllocatePool (DataSize);
+  if (*Data == NULL) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: Cannot alloc %u for first platform data %g\n",
+      DataSize,
+      DataGuid
+      ));
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = PlatformInfo->GetFirstData (
+    PlatformInfo,
+    DataGuid,
+    *Data,
+    &DataSize
+    );
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCCPU: No first platform data for %g with %u - %r\n",
+      DataGuid,
+      DataSize,
+      Status
+      ));
+    FreePool (*Data);
     return Status;
   }
 

@@ -20,6 +20,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // gAppleFsbFrequencyPlatformInfoGuid
 extern EFI_GUID gAppleFsbFrequencyPlatformInfoGuid;
 
+// APPLE_FSB_FREQUENCY_LIST_PLATFORM_INFO_GUID
+#define APPLE_FSB_FREQUENCY_LIST_PLATFORM_INFO_GUID \
+  { 0xF55EE371, 0xD19E, 0x4AAA,                    \
+    { 0xA9, 0x7B, 0xC1, 0xB1, 0x28, 0x4C, 0xB3, 0x7C } }
+
+// gAppleFsbFrequencyListPlatformInfoGuid
+extern EFI_GUID gAppleFsbFrequencyListPlatformInfoGuid;
+
 // APPLE_PLATFORM_INFO_KEYBOARD_GUID
 #define APPLE_PLATFORM_INFO_KEYBOARD_GUID  \
   { 0x51871CB9, 0xE25D, 0x44B4,            \

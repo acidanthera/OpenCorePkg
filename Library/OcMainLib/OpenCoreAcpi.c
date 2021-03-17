@@ -156,9 +156,10 @@ OcAcpiPatchTables (
     // - Mask and ReplaceMask mismatch in size when are available.
     //
     if (UserPatch->Replace.Size == 0
-      || UserPatch->Find.Size != UserPatch->Replace.Size
+      || (UserPatch->Find.Size > 0 && UserPatch->Find.Size != UserPatch->Replace.Size)
+      || (UserPatch->Find.Size == 0 && OC_BLOB_GET (&UserPatch->Base)[0] == '\0')
       || (UserPatch->Mask.Size > 0 && UserPatch->Find.Size != UserPatch->Mask.Size)
-      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Find.Size != UserPatch->ReplaceMask.Size)) {
+      || (UserPatch->ReplaceMask.Size > 0 && UserPatch->Replace.Size != UserPatch->ReplaceMask.Size)) {
       DEBUG ((DEBUG_ERROR, "OC: ACPI patch %u is borked\n", Index));
       continue;
     }
@@ -176,6 +177,8 @@ OcAcpiPatchTables (
       Patch.ReplaceMask = OC_BLOB_GET (&UserPatch->ReplaceMask);
     }
 
+    Patch.Base        = OC_BLOB_GET (&UserPatch->Base);
+    Patch.BaseSkip    = UserPatch->BaseSkip;
     Patch.Size        = UserPatch->Replace.Size;
     Patch.Count       = UserPatch->Count;
     Patch.Skip        = UserPatch->Skip;

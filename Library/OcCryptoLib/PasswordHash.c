@@ -31,7 +31,6 @@ OcHashPasswordSha512 (
   SHA512_CONTEXT ShaContext;
 
   ASSERT (Password != NULL);
-  ASSERT (PasswordSize > 0);
   ASSERT (Hash != NULL);
 
   Sha512Init   (&ShaContext);
@@ -83,7 +82,6 @@ OcVerifyPasswordSha512 (
   UINT8   VerifyHash[SHA512_DIGEST_SIZE];
 
   ASSERT (Password != NULL);
-  ASSERT (PasswordSize > 0);
   ASSERT (RefHash != NULL);
 
   OcHashPasswordSha512 (Password, PasswordSize, Salt, SaltSize, VerifyHash);

@@ -465,11 +465,11 @@ GuiRequestDraw (
   UINTN  Index;
 
   UINT32 ThisArea;
-  UINT32 ThisMaxX;
-  UINT32 ThisMaxY;
+  UINT32 ThisMaxXPlus1;
+  UINT32 ThisMaxYPlus1;
 
-  UINT32 ReqMaxX;
-  UINT32 ReqMaxY;
+  UINT32 ReqMaxXPlus1;
+  UINT32 ReqMaxYPlus1;
   UINT32 ReqArea;
 
   UINT32 CombX;
@@ -478,8 +478,8 @@ GuiRequestDraw (
   UINT32 CombHeight;
   UINT32 CombArea;
 
-  ThisMaxX = PosX + Width  - 1;
-  ThisMaxY = PosY + Height - 1;
+  ThisMaxXPlus1 = PosX + Width;
+  ThisMaxYPlus1 = PosY + Height;
 
   ThisArea = Width * Height;
 
@@ -488,8 +488,8 @@ GuiRequestDraw (
     // Calculate several dimensions to determine whether to merge the two
     // draw requests for improved flushing performance.
     //
-    ReqMaxX = mDrawRequests[Index].X + mDrawRequests[Index].Width - 1;
-    ReqMaxY = mDrawRequests[Index].Y + mDrawRequests[Index].Height - 1;
+    ReqMaxXPlus1 = mDrawRequests[Index].X + mDrawRequests[Index].Width;
+    ReqMaxYPlus1 = mDrawRequests[Index].Y + mDrawRequests[Index].Height;
     ReqArea = mDrawRequests[Index].Width * mDrawRequests[Index].Height;
 
     if (mDrawRequests[Index].X < PosX) {
@@ -498,11 +498,12 @@ GuiRequestDraw (
       CombX = PosX;
     }
 
-    if (ReqMaxX > ThisMaxX) {
-      CombWidth = ReqMaxX - CombX + 1;
+    if (ReqMaxXPlus1 > ThisMaxXPlus1) {
+      CombWidth = ReqMaxXPlus1;
     } else {
-      CombWidth = ThisMaxX - CombX + 1;
+      CombWidth = ThisMaxXPlus1;
     }
+    CombWidth -= CombX;
 
     if (mDrawRequests[Index].Y < PosY) {
       CombY = mDrawRequests[Index].Y;
@@ -510,11 +511,12 @@ GuiRequestDraw (
       CombY = PosY;
     }
 
-    if (ReqMaxY > ThisMaxY) {
-      CombHeight = ReqMaxY - CombY + 1;
+    if (ReqMaxYPlus1 > ThisMaxYPlus1) {
+      CombHeight = ReqMaxYPlus1;
     } else {
-      CombHeight = ThisMaxY - CombY + 1;
+      CombHeight = ThisMaxYPlus1;
     }
+    CombHeight -= CombY;
 
     CombArea = CombWidth * CombHeight;
     //

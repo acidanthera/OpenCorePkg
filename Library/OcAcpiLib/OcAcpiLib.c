@@ -150,7 +150,7 @@ AcpiReadSignature (
 
   Result = Common->Signature;
 
-  Walker = (CHAR8 *) &Common->Signature;
+  Walker = (CHAR8 *) &Result;
   for (Index = 0; Index < sizeof (Common->Signature); Index++) {
     if (!IsAsciiPrint (Walker[Index])) {
       Walker[Index] = '?';
@@ -1152,12 +1152,13 @@ AcpiApplyPatch (
   )
 {
   EFI_STATUS              Status;
+  EFI_ACPI_COMMON_HEADER  *NewTable;
   UINT32                  Index;
+  UINT32                  BaseOffset;
   UINT64                  CurrOemTableId;
   UINT32                  ReplaceCount;
   UINT32                  ReplaceLimit;
   UINT32                  TablePrintSignature;
-  EFI_ACPI_COMMON_HEADER  *NewTable;
 
   DEBUG ((DEBUG_INFO, "OCA: Applying %u byte ACPI patch skip %u, count %u\n", Patch->Size, Patch->Skip, Patch->Count));
 
@@ -1165,43 +1166,67 @@ AcpiApplyPatch (
     && (Patch->TableSignature == 0 || Patch->TableSignature == EFI_ACPI_6_2_DIFFERENTIATED_SYSTEM_DESCRIPTION_TABLE_SIGNATURE)
     && (Patch->TableLength == 0 || Context->Dsdt->Length == Patch->TableLength)
     && (Patch->OemTableId == 0 || Context->Dsdt->OemTableId == Patch->OemTableId)) {
-    ReplaceLimit = Patch->Limit;
-    if (ReplaceLimit == 0) {
-      ReplaceLimit = Context->Dsdt->Length;
+    ReplaceLimit = Context->Dsdt->Length;
+    if (Patch->Limit > 0) {
+      ReplaceLimit = MIN (ReplaceLimit, Patch->Limit);
     }
 
-    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
-      Status = AcpiAllocateCopyDsdt (Context, NULL);
-      if (EFI_ERROR (Status)) {
-        return Status;
+    BaseOffset = 0;
+
+    if (Patch->Base != NULL && Patch->Base[0] != '\0') {
+      Status = AcpiFindEntryInMemory (
+        (VOID *) Context->Dsdt,
+        Patch->Base,
+        (UINT8) (Patch->BaseSkip + 1),
+        &BaseOffset,
+        Context->Dsdt->Length
+        );
+      if (!EFI_ERROR (Status)) {
+        ReplaceLimit = MIN (ReplaceLimit, Context->Dsdt->Length - BaseOffset);
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCA: Patching DSDT of %u bytes failed to find base %a\n",
+          Context->Dsdt->Length,
+          Patch->Base
+          ));
+      }      
+    } else {
+      Status = EFI_SUCCESS;
+    }
+
+    if (!EFI_ERROR (Status)) {
+      if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
+        Status = AcpiAllocateCopyDsdt (Context, NULL);
+        if (EFI_ERROR (Status)) {
+          return Status;
+        }
       }
-    }
 
-    ReplaceCount = ApplyPatch (
-      Patch->Find,
-      Patch->Mask,
-      Patch->Size,
-      Patch->Replace,
-      Patch->ReplaceMask,
-      (UINT8 *) Context->Dsdt,
-      ReplaceLimit,
-      Patch->Count,
-      Patch->Skip
-      );
+      ReplaceCount = ApplyPatch (
+        Patch->Find,
+        Patch->Mask,
+        Patch->Size,
+        Patch->Replace,
+        Patch->ReplaceMask,
+        (UINT8 *) Context->Dsdt + BaseOffset,
+        ReplaceLimit,
+        Patch->Count,
+        Patch->Skip
+        );
 
-    DEBUG ((
-      ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
-      "OCA: Patching DSDT of %u bytes with %016Lx ID replaced %u of %u\n",
-      ReplaceLimit,
-      Patch->OemTableId,
-      ReplaceCount,
-      Patch->Count
-      ));
+      DEBUG ((
+        ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,
+        "OCA: Patching DSDT of %u bytes with %016Lx ID replaced %u of %u\n",
+        ReplaceLimit,
+        Patch->OemTableId,
+        ReplaceCount,
+        Patch->Count
+        ));
 
-    if (ReplaceCount > 0) {
-      AcpiRefreshTableChecksum (Context->Dsdt);
-
-
+      if (ReplaceCount > 0) {
+        AcpiRefreshTableChecksum (Context->Dsdt);
+      }
     }
   }
 
@@ -1219,9 +1244,37 @@ AcpiApplyPatch (
         continue;
       }
 
-      ReplaceLimit = Patch->Limit;
-      if (ReplaceLimit == 0) {
-        ReplaceLimit = Context->Tables[Index]->Length;
+      ReplaceLimit = Context->Tables[Index]->Length;
+      if (Patch->Limit > 0) {
+        ReplaceLimit = MIN (ReplaceLimit, Patch->Limit);
+      }
+
+      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
+
+      BaseOffset = 0;
+      if (Patch->Base != NULL && Patch->Base[0] != '\0') {
+        Status = AcpiFindEntryInMemory (
+          (VOID *) Context->Tables[Index],
+          Patch->Base,
+          (UINT8) (Patch->BaseSkip + 1),
+          &BaseOffset,
+          Context->Tables[Index]->Length
+          );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCA: Patching %.4a (%08x) (OEM %016Lx) of %u bytes with %016Lx ID failed to find base %a\n",
+            (CHAR8 *) &TablePrintSignature,
+            Context->Tables[Index]->Signature,
+            AcpiReadOemTableId (Context->Tables[Index]),
+            Context->Tables[Index]->Length,
+            CurrOemTableId,
+            Patch->Base
+            ));
+          continue;
+        }
+
+        ReplaceLimit = MIN (ReplaceLimit, Context->Tables[Index]->Length - BaseOffset);
       }
 
       if (!AcpiIsTableWritable (Context->Tables[Index])) {
@@ -1238,13 +1291,11 @@ AcpiApplyPatch (
         Patch->Size,
         Patch->Replace,
         Patch->ReplaceMask,
-        (UINT8 *) Context->Tables[Index],
+        (UINT8 *) Context->Tables[Index] + BaseOffset,
         ReplaceLimit,
         Patch->Count,
         Patch->Skip
         );
-
-      TablePrintSignature = AcpiReadSignature (Context->Tables[Index]);
 
       DEBUG ((
         ReplaceCount > 0 ? DEBUG_INFO : DEBUG_BULK_INFO,

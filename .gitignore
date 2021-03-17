@@ -8,6 +8,7 @@ xcuserdata
 project.xcworkspace
 *.dSYM
 Utilities/AppleEfiSignTool/AppleEfiSignTool
+Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
 Utilities/disklabel/disklabel
 Utilities/EfiResTool/EfiResTool
@@ -18,6 +19,7 @@ Utilities/ocvalidate/ocvalidate
 Utilities/LogoutHook/nvramdump
 Utilities/RsaTool/RsaTool
 Utilities/TestBmf/Bmf
+Utilities/TestCpuFrequency/CpuFrequency
 Utilities/TestDiskImage/DiskImage
 Utilities/TestHelloWorld/HelloWorld
 Utilities/TestImg4/Img4
