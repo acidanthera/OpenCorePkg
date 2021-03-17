@@ -216,7 +216,7 @@
 			</dict>
 			<dict>
 				<key>Base</key>
-				<string>\_SB_.PCI0.SBRG.HPET</string>
+				<string>\_SB.PCI0.LPCB.HPET</string>
 				<key>BaseSkip</key>
 				<integer>0</integer>
 				<key>Comment</key>

@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Mon Mar 15 18:46:07 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar 17 04:20:17 2021
+%DIF ADD ../Configuration.tex        Wed Mar 17 04:24:07 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1038,7 +1038,7 @@ quality of the suggested solutions will be variable.
   replacement) by obtaining the offset to the provided path.
 }
 
-  \DIFadd{Only fully-qualified absolute paths are supported (e.g. }\texttt{\DIFadd{\textbackslash \_SB\_.PCI0.GFX0}}\DIFadd{).
+  \DIFadd{Only fully-qualified absolute paths are supported (e.g. }\texttt{\DIFadd{\textbackslash \_SB.PCI0.LPCB.HPET}}\DIFadd{).
   Currently supported object types are: }\texttt{\DIFadd{Device}}\DIFadd{, }\texttt{\DIFadd{Field}}\DIFadd{, }\texttt{\DIFadd{Method}}\DIFadd{.
 }
 
@@ -2707,7 +2707,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
