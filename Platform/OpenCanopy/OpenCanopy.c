@@ -723,14 +723,10 @@ GuiFlushScreen (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  EFI_TPL OldTpl;
-
   UINTN   Index;
 
   UINT64  EndTsc;
   UINT64  DeltaTsc;
-
-  BOOLEAN Interrupts;
 
   ASSERT (DrawContext != NULL);
   ASSERT (DrawContext->Screen != NULL);
@@ -753,9 +749,6 @@ GuiFlushScreen (
   //
   // Raise the TPL to not interrupt timing or flushing.
   //
-  OldTpl     = gBS->RaiseTPL (TPL_NOTIFY);
-  Interrupts = SaveAndDisableInterrupts ();
-
   EndTsc   = AsmReadTsc ();
   DeltaTsc = EndTsc - mStartTsc;
   if (DeltaTsc < mDeltaTscTarget) {
@@ -780,11 +773,6 @@ GuiFlushScreen (
       mScreenBufferDelta
       );
   }
-
-  if (Interrupts) {
-    EnableInterrupts ();
-  }
-  gBS->RestoreTPL (OldTpl);
 
   mNumValidDrawReqs = 0;
   //
