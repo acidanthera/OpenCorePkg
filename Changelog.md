@@ -19,6 +19,8 @@ OpenCore Changelog
 - Added TSC frequency reading for Apple devices with nForce chipsets
 - Added `Base` and `BaseSkip` lookup for ACPI patches
 - Fixed ACPI table magic corruption during patching
+- Fixed unnatural OpenCanopy and FileVault 2 cursor movement
+- Fixed OpenCanopy interrupt handling causing missed events and lag
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
