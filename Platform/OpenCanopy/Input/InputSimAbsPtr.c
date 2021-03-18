@@ -77,7 +77,7 @@ InternalAppleEventNotification (
 
     NewX = Information->PointerPosition.Horizontal;
 
-    NewCoord = (INT64) Context->CurState.X + ((INT64) NewX - Context->RawX);
+    NewCoord = (INT64) Context->CurState.X + 2 * ((INT64) NewX - Context->RawX);
     if (NewCoord < 0) {
       NewCoord = 0;
     } else if (NewCoord > Context->MaxX) {
@@ -89,7 +89,7 @@ InternalAppleEventNotification (
 
     NewY = Information->PointerPosition.Vertical;
 
-    NewCoord = (INT64) Context->CurState.Y + ((INT64) NewY - Context->RawY);
+    NewCoord = (INT64) Context->CurState.Y + 2 * ((INT64) NewY - Context->RawY);
     if (NewCoord < 0) {
       NewCoord = 0;
     } else if (NewCoord > Context->MaxY) {
