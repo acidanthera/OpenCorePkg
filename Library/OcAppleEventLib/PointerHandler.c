@@ -55,14 +55,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 // POINTER_BUTTON_INFORMATION
 typedef struct {
-  APPLE_EVENT_TYPE  EventType;          ///<
-  UINTN             NumberOfStrokes;    ///<
-  UINTN             Polls;              ///<
-  UINTN             PreviousEventType;  ///<
-  BOOLEAN           PreviousButton;     ///<
-  BOOLEAN           CurrentButton;      ///<
-  DIMENSION         PreviousPosition;   ///<
-  DIMENSION         Position;           ///<
+  APPLE_EVENT_TYPE  EventType;
+  UINTN             ButtonTicksHold;
+  UINTN             ButtonTicksSinceClick;
+  UINTN             PreviousClickEventType;
+  BOOLEAN           PreviousButton;
+  BOOLEAN           CurrentButton;
+  DIMENSION         MouseDownPosition;
+  DIMENSION         ClickPosition;
 } POINTER_BUTTON_INFORMATION;
 
 // SIMPLE_POINTER_INSTANCE
@@ -572,8 +572,8 @@ InternalHandleButtonInteraction (
   if (!EFI_ERROR (PointerStatus)) {
     if (!Pointer->PreviousButton) {
       if (Pointer->CurrentButton) {
-        Pointer->NumberOfStrokes  = 0;
-        Pointer->PreviousPosition = mCursorPosition;
+        Pointer->ButtonTicksHold   = 0;
+        Pointer->MouseDownPosition = mCursorPosition;
 
         Information = InternalCreatePointerEventQueueInformation (
                         (Pointer->EventType | APPLE_EVENT_TYPE_MOUSE_DOWN),
@@ -594,18 +594,18 @@ InternalHandleButtonInteraction (
         EventAddEventToQueue (Information);
       }
 
-      if (Pointer->NumberOfStrokes <= MAXIMUM_CLICK_DURATION) {
-        HorizontalMovement = ABS(Pointer->PreviousPosition.Horizontal - mCursorPosition.Horizontal);
-        VerticalMovement   = ABS(Pointer->PreviousPosition.Vertical - mCursorPosition.Vertical);
+      if (Pointer->ButtonTicksHold <= MAXIMUM_CLICK_DURATION) {
+        HorizontalMovement = ABS(Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
+        VerticalMovement   = ABS(Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
 
         if ((HorizontalMovement <= MINIMAL_MOVEMENT)
          && (VerticalMovement <= MINIMAL_MOVEMENT)) {
           EventType = APPLE_EVENT_TYPE_MOUSE_CLICK;
 
-          if ((Pointer->PreviousEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
-           && (Pointer->Polls <= MAXIMUM_DOUBLE_CLICK_SPEED)) {
-            HorizontalMovement = ABS(Pointer->Position.Horizontal - mCursorPosition.Horizontal);
-            VerticalMovement   = ABS(Pointer->Position.Vertical - mCursorPosition.Vertical);
+          if ((Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
+           && (Pointer->ButtonTicksSinceClick <= MAXIMUM_DOUBLE_CLICK_SPEED)) {
+            HorizontalMovement = ABS(Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
+            VerticalMovement   = ABS(Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
 
             if ((HorizontalMovement <= MINIMAL_MOVEMENT)
              && (VerticalMovement <= MINIMAL_MOVEMENT)) {
@@ -622,15 +622,15 @@ InternalHandleButtonInteraction (
             EventAddEventToQueue (Information);
           }
 
-          if (Pointer->PreviousEventType == APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) {
-            EventType = ((Pointer->Polls <= MAXIMUM_DOUBLE_CLICK_SPEED)
+          if (Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) {
+            EventType = ((Pointer->ButtonTicksSinceClick <= MAXIMUM_DOUBLE_CLICK_SPEED)
                             ? APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK
                             : APPLE_EVENT_TYPE_MOUSE_CLICK);
           }
 
-          Pointer->PreviousEventType = EventType;
-          Pointer->Position          = mCursorPosition;
-          Pointer->Polls             = 0;
+          Pointer->PreviousClickEventType = EventType;
+          Pointer->ClickPosition          = mCursorPosition;
+          Pointer->ButtonTicksSinceClick  = 0;
         }
       }
     }
@@ -639,10 +639,10 @@ InternalHandleButtonInteraction (
   }
 
   if (Pointer->PreviousButton && Pointer->CurrentButton) {
-    ++Pointer->NumberOfStrokes;
+    ++Pointer->ButtonTicksHold;
   }
 
-  ++Pointer->Polls;
+  ++Pointer->ButtonTicksSinceClick;
 }
 
 // InternalSimplePointerPollNotifyFunction
