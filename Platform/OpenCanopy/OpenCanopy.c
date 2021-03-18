@@ -224,9 +224,11 @@ GuiObjDelegatePtrEvent (
   ASSERT (This->Width  > OffsetX);
   ASSERT (This->Height > OffsetY);
   ASSERT (DrawContext != NULL);
-
-  for (Index = 0; Index < This->NumChildren; ++Index) {
-    Child = This->Children[Index];
+  //
+  // Pointer event propagation is backwards due to forwards draw order.
+  //
+  for (Index = This->NumChildren; Index > 0; --Index) {
+    Child = This->Children[Index - 1];
     if (OffsetX  < Child->Obj.OffsetX
      || OffsetX >= Child->Obj.OffsetX + Child->Obj.Width
      || OffsetY  < Child->Obj.OffsetY
