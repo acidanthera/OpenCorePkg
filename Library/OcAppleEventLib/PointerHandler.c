@@ -775,7 +775,7 @@ InternalSimplePointerPollNotifyFunction (
 
         mLeftButtonInfo.PreviousButton  = mLeftButtonInfo.CurrentButton;
         mLeftButtonInfo.CurrentButton   = State.LeftButton;
-        mRightButtonInfo.PreviousButton = mLeftButtonInfo.CurrentButton;
+        mRightButtonInfo.PreviousButton = mRightButtonInfo.CurrentButton;
         mRightButtonInfo.CurrentButton  = State.RightButton;
         CommonStatus                    = Status;
       }
