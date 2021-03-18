@@ -1906,12 +1906,15 @@ BootPickerViewInitialize (
 
 VOID
 BootPickerViewLateInitialize (
-  IN UINT8  DefaultIndex
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN UINT8                    DefaultIndex
   )
 {
   UINT32                 Index;
   INT64                  ScrollOffset;
   CONST GUI_VOLUME_ENTRY *BootEntry;
+
+  ASSERT (DefaultIndex < mBootPicker.Hdr.Obj.NumChildren);
 
   ScrollOffset = InternelBootPickerScrollSelected ();
   //
@@ -1943,6 +1946,7 @@ BootPickerViewLateInitialize (
 
   mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
   InternalBootPickerSelectEntry (&mBootPicker, NULL, DefaultIndex);
+  GuiContext->BootEntry = InternalGetVolumeEntry (DefaultIndex)->Context;
 }
 
 VOID

@@ -130,7 +130,10 @@ OcShowMenuByOc (
     }
   }
 
-  BootPickerViewLateInitialize ((UINT8) BootContext->DefaultEntry->EntryIndex - 1);
+  BootPickerViewLateInitialize (
+    &mGuiContext,
+    (UINT8) BootContext->DefaultEntry->EntryIndex - 1
+    );
 
   GuiRedrawAndFlushScreen (&mDrawContext);
 
