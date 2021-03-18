@@ -42,13 +42,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (2)
 #define MAX_POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (80)
 
-// MAXIMUM_DOUBLE_CLICK_SPEED
-/// (EFI_TIMER_PERIOD_MILLISECONDS (748) / POINTER_POLL_FREQUENCY)
-#define MAXIMUM_DOUBLE_CLICK_SPEED  374
-
-// MAXIMUM_CLICK_DURATION
-/// (EFI_TIMER_PERIOD_MILLISECONDS (148) / POINTER_POLL_FREQUENCY)
-#define MAXIMUM_CLICK_DURATION  74
+STATIC UINT16 mMaximumDoubleClickSpeed = 374;
+STATIC UINT16 mMaximumClickDuration    = 74;
 
 // MINIMAL_MOVEMENT
 #define MINIMAL_MOVEMENT  5
@@ -594,7 +589,7 @@ InternalHandleButtonInteraction (
         EventAddEventToQueue (Information);
       }
 
-      if (Pointer->ButtonTicksHold <= MAXIMUM_CLICK_DURATION) {
+      if (Pointer->ButtonTicksHold <= mMaximumClickDuration) {
         HorizontalMovement = ABS(Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
         VerticalMovement   = ABS(Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
 
@@ -603,7 +598,7 @@ InternalHandleButtonInteraction (
           EventType = APPLE_EVENT_TYPE_MOUSE_CLICK;
 
           if ((Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
-           && (Pointer->ButtonTicksSinceClick <= MAXIMUM_DOUBLE_CLICK_SPEED)) {
+           && (Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed)) {
             HorizontalMovement = ABS(Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
             VerticalMovement   = ABS(Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
 
@@ -623,7 +618,7 @@ InternalHandleButtonInteraction (
           }
 
           if (Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) {
-            EventType = ((Pointer->ButtonTicksSinceClick <= MAXIMUM_DOUBLE_CLICK_SPEED)
+            EventType = ((Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed)
                             ? APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK
                             : APPLE_EVENT_TYPE_MOUSE_CLICK);
           }
@@ -672,6 +667,8 @@ InternalSimplePointerPollNotifyFunction (
   UINT64                      EndTime;
   INT64                       MaxRawPointerX;
   INT64                       MaxRawPointerY;
+  UINT64                      ClickTemp;
+  UINT64                      DoubleClickTemp;
 
   StartTime = GetPerformanceCounter ();
 
@@ -822,10 +819,28 @@ InternalSimplePointerPollNotifyFunction (
     EndTime = GetTimeInNanoSecond (EndTime - StartTime);
     // Maximum time allowed in this function is half the interval plus some margin (0.55 * 100ns)
     if (EndTime > mSimplePointerPollTime * 55ULL) {
+      ClickTemp = MultU64x32 (mSimplePointerPollTime, mMaximumClickDuration);
+      DoubleClickTemp = MultU64x32 (
+        mSimplePointerPollTime,
+        mMaximumDoubleClickSpeed
+        );
+
       mSimplePointerPollTime = DivU64x32 (EndTime, 50);
       if (mSimplePointerPollTime > MAX_POINTER_POLL_FREQUENCY) {
         mSimplePointerPollTime = MAX_POINTER_POLL_FREQUENCY;
       }
+
+      mMaximumClickDuration = (UINT16) DivU64x64Remainder (
+        ClickTemp,
+        mSimplePointerPollTime,
+        NULL
+        );
+      mMaximumDoubleClickSpeed = (UINT16) DivU64x64Remainder (
+        DoubleClickTemp,
+        mSimplePointerPollTime,
+        NULL
+        );
+
       gBS->SetTimer (mSimplePointerPollEvent, TimerPeriodic, mSimplePointerPollTime);
     }
   }
