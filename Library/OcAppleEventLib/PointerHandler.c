@@ -38,12 +38,16 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 
-// POINTER_POLL_FREQUENCY
-#define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (2)
+//
+// CHANGE: Apple polls with a frequency of 2 ms, however this is infeasible on
+//         most machines. Poll with 10 ms, which matches the keyboard behaviour,
+//         and also is the minimum for QEMU.
+//
+#define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (10)
 #define MAX_POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (80)
 
-STATIC UINT16 mMaximumDoubleClickSpeed = 374;
-STATIC UINT16 mMaximumClickDuration    = 74;
+STATIC UINT16 mMaximumDoubleClickSpeed = 38; // 374 for 2 ms
+STATIC UINT16 mMaximumClickDuration    = 8;  // 74 for 2 ms
 
 // MINIMAL_MOVEMENT
 #define MINIMAL_MOVEMENT  5
