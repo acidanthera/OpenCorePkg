@@ -209,11 +209,9 @@ GuiObjDelegatePtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   UINTN         Index;
@@ -221,18 +219,20 @@ GuiObjDelegatePtrEvent (
   GUI_OBJ_CHILD *Child;
 
   ASSERT (This != NULL);
-  ASSERT (This->Width  > OffsetX);
-  ASSERT (This->Height > OffsetY);
+  ASSERT (Event->Pos.Pos.X >= BaseX);
+  ASSERT (Event->Pos.Pos.Y >= BaseY);
+  ASSERT (This->Width  > Event->Pos.Pos.X - BaseX);
+  ASSERT (This->Height > Event->Pos.Pos.Y - BaseY);
   ASSERT (DrawContext != NULL);
   //
   // Pointer event propagation is backwards due to forwards draw order.
   //
   for (Index = This->NumChildren; Index > 0; --Index) {
     Child = This->Children[Index - 1];
-    if (OffsetX  < Child->Obj.OffsetX
-     || OffsetX >= Child->Obj.OffsetX + Child->Obj.Width
-     || OffsetY  < Child->Obj.OffsetY
-     || OffsetY >= Child->Obj.OffsetY + Child->Obj.Height) {
+    if (Event->Pos.Pos.X - BaseX  < Child->Obj.OffsetX
+     || Event->Pos.Pos.X - BaseX >= Child->Obj.OffsetX + Child->Obj.Width
+     || Event->Pos.Pos.Y - BaseY  < Child->Obj.OffsetY
+     || Event->Pos.Pos.Y - BaseY >= Child->Obj.OffsetY + Child->Obj.Height) {
       continue;
     }
 
@@ -241,11 +241,9 @@ GuiObjDelegatePtrEvent (
                        &Child->Obj,
                        DrawContext,
                        Context,
-                       Event,
-                       BaseX   + Child->Obj.OffsetX,
-                       BaseY   + Child->Obj.OffsetY,
-                       OffsetX - Child->Obj.OffsetX,
-                       OffsetY - Child->Obj.OffsetY
+                       BaseX + Child->Obj.OffsetX,
+                       BaseY + Child->Obj.OffsetY,
+                       Event
                        );
     if (Obj != NULL) {
       return Obj;
@@ -592,17 +590,17 @@ GuiOverlayPointer (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  CONST GUI_IMAGE   *CursorImage;
-  UINT32            MaxWidth;
-  UINT32            MaxHeight;
-  GUI_POINTER_STATE PointerState;
+  CONST GUI_IMAGE  *CursorImage;
+  UINT32           MaxWidth;
+  UINT32           MaxHeight;
+  GUI_PTR_POSITION PointerPos;
 
-  INT64             BaseX;
-  INT64             BaseY;
-  UINT32            ImageOffsetX;
-  UINT32            ImageOffsetY;
-  UINT32            DrawBaseX;
-  UINT32            DrawBaseY;
+  INT64            BaseX;
+  INT64            BaseY;
+  UINT32           ImageOffsetX;
+  UINT32           ImageOffsetY;
+  UINT32           DrawBaseX;
+  UINT32           DrawBaseY;
 
   ASSERT (DrawContext != NULL);
 
@@ -612,10 +610,10 @@ GuiOverlayPointer (
   //
   // Poll the current cursor position late to reduce input lag.
   //
-  GuiPointerGetState (mPointerContext, &PointerState);
+  GuiPointerGetPosition (mPointerContext, &PointerPos);
 
-  ASSERT (PointerState.X < DrawContext->Screen->Width);
-  ASSERT (PointerState.Y < DrawContext->Screen->Height);
+  ASSERT (PointerPos.Pos.X < DrawContext->Screen->Width);
+  ASSERT (PointerPos.Pos.Y < DrawContext->Screen->Height);
 
   //
   // Unconditionally draw the cursor to increase frametime consistency and
@@ -629,7 +627,7 @@ GuiOverlayPointer (
   // Draw the new cursor at the new position.
   //
 
-  BaseX = (INT64) PointerState.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  BaseX = (INT64) PointerPos.Pos.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
   if (BaseX < 0) {
     ImageOffsetX = (UINT32) -BaseX;
     DrawBaseX    = 0;
@@ -640,7 +638,7 @@ GuiOverlayPointer (
 
   MaxWidth = MIN (CursorImage->Width, (UINT32) (DrawContext->Screen->Width - BaseX));
 
-  BaseY = (INT64) PointerState.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  BaseY = (INT64) PointerPos.Pos.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
   if (BaseY < 0) {
     ImageOffsetY = (UINT32) -BaseY;
     DrawBaseY    = 0;
@@ -792,9 +790,9 @@ GuiRedrawAndFlushScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContext,
-  IN UINT32             CursorDefaultX,
-  IN UINT32             CursorDefaultY
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN UINT32                   CursorDefaultX,
+  IN UINT32                   CursorDefaultY
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
@@ -811,19 +809,20 @@ GuiLibConstruct (
   CursorDefaultX = MIN (CursorDefaultX, OutputInfo->HorizontalResolution - 1);
   CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
 
-  if ((PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
+  if ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
     mPointerContext = GuiPointerConstruct (
       CursorDefaultX,
       CursorDefaultY,
       OutputInfo->HorizontalResolution,
-      OutputInfo->VerticalResolution
+      OutputInfo->VerticalResolution,
+      GuiContext->Scale
       );
     if (mPointerContext == NULL) {
       DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
     }
   }
 
-  mKeyContext = GuiKeyConstruct (PickerContext);
+  mKeyContext = GuiKeyConstruct (GuiContext->PickerContext);
   if (mKeyContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
@@ -911,12 +910,12 @@ GuiViewDeinitialize (
   OUT    BOOT_PICKER_GUI_CONTEXT *GuiContext
   )
 {
-  GUI_POINTER_STATE PointerState;
+  GUI_PTR_POSITION PointerPos;
 
   if (mPointerContext != NULL) {
-    GuiPointerGetState (mPointerContext, &PointerState);
-    GuiContext->CursorDefaultX = PointerState.X;
-    GuiContext->CursorDefaultY = PointerState.Y;
+    GuiPointerGetPosition (mPointerContext, &PointerPos);
+    GuiContext->CursorDefaultX = PointerPos.Pos.X;
+    GuiContext->CursorDefaultY = PointerPos.Pos.Y;
   }
 
   ZeroMem (DrawContext, sizeof (*DrawContext));
@@ -974,31 +973,35 @@ GuiDrawLoop (
   IN     UINT32               TimeOutSeconds
   )
 {
-  EFI_STATUS          Status;
-  BOOLEAN             Result;
+  EFI_STATUS           Status;
+  BOOLEAN              Result;
 
-  INTN                InputKey;
-  BOOLEAN             Modifier;
-  GUI_POINTER_STATE   PointerState;
-  GUI_OBJ             *HoldObject;
-  INT64               HoldObjBaseX;
-  INT64               HoldObjBaseY;
-  CONST LIST_ENTRY    *AnimEntry;
-  CONST GUI_ANIMATION *Animation;
-  UINT64              LoopStartTsc;
-  UINT64              LastTsc;
-  UINT64              NewLastTsc;
-  BOOLEAN             ObjectHeld;
+  INTN                 InputKey;
+  BOOLEAN              Modifier;
+  GUI_PTR_EVENT        PointerEvent;
+  GUI_OBJ              *TempObject;
+  GUI_OBJ              *HoldObject;
+  INT64                HoldObjBaseX;
+  INT64                HoldObjBaseY;
+  CONST LIST_ENTRY     *AnimEntry;
+  CONST GUI_ANIMATION  *Animation;
+  UINT64               LoopStartTsc;
+  UINT64               LastTsc;
+  UINT64               NewLastTsc;
+  BOOLEAN              ObjectHeld;
 
-  CONST GUI_IMAGE     *CursorImage;
-  UINT64              FrameTime;
+  CONST GUI_IMAGE      *CursorImage;
+  UINT64               FrameTime;
 
   ASSERT (DrawContext != NULL);
 
   mNumValidDrawReqs = 0;
   FrameTime         = 0;
   HoldObject        = NULL;
-  ObjectHeld        = FALSE;
+
+  DEBUG_CODE_BEGIN ();
+  ObjectHeld = FALSE;
+  DEBUG_CODE_END ();
 
   //
   // Clear previous inputs.
@@ -1038,29 +1041,65 @@ GuiDrawLoop (
       //
       // Process pointer events.
       //
-      GuiPointerGetState (mPointerContext, &PointerState);
+      Result = GuiPointerGetEvent (mPointerContext, &PointerEvent);
+      if (Result) {
+        if (PointerEvent.Type == GuiPointerPrimaryUp) {
+          //
+          // 'Button down' must have caught and set an interaction object.
+          // It may be NULL for objects that solely delegate pointer events.
+          //
+          ASSERT (ObjectHeld);
 
-      if (PointerState.PrimaryDown) {
-        if (!ObjectHeld && HoldObject == NULL) {
-          HoldObject = GuiObjDelegatePtrEvent (
-                          DrawContext->Screen,
-                          DrawContext,
-                          DrawContext->GuiContext,
-                          GuiPointerPrimaryDown,
-                          0,
-                          0,
-                          PointerState.X,
-                          PointerState.Y
-                          );
-          
+          if (HoldObject != NULL) {
+            GuiGetBaseCoords (
+              HoldObject,
+              DrawContext,
+              &HoldObjBaseX,
+              &HoldObjBaseY
+              );
+            HoldObject->PtrEvent (
+              HoldObject,
+              DrawContext,
+              DrawContext->GuiContext,
+              HoldObjBaseX,
+              HoldObjBaseY,
+              &PointerEvent
+              );
+            HoldObject = NULL;
+          }
+
+          DEBUG_CODE_BEGIN ();
+          ObjectHeld = FALSE;
+          DEBUG_CODE_END ();
+        } else {
+          //
+          // HoldObject == NULL cannot be tested here as double-click may arrive
+          // before button up.
+          //
+          ASSERT (PointerEvent.Type != GuiPointerPrimaryUp);
+          TempObject = GuiObjDelegatePtrEvent (
+            DrawContext->Screen,
+            DrawContext,
+            DrawContext->GuiContext,
+            0,
+            0,
+            &PointerEvent
+            );
+          if (PointerEvent.Type == GuiPointerPrimaryDown) {
+            DEBUG_CODE_BEGIN ();
+            ObjectHeld = TRUE;
+            DEBUG_CODE_END ();
+
+            HoldObject = TempObject;
+          }
         }
-
-        ObjectHeld = TRUE;
-      } else {
-        ObjectHeld = FALSE;
-      }
-
-      if (HoldObject != NULL) {
+      } else if (HoldObject != NULL) {
+        //
+        // If there are no events to process, update the cursor position with
+        // the interaction object for visual effects.
+        //
+        PointerEvent.Type = GuiPointerPrimaryDown;
+        GuiPointerGetPosition (mPointerContext, &PointerEvent.Pos);
         GuiGetBaseCoords (
           HoldObject,
           DrawContext,
@@ -1068,18 +1107,13 @@ GuiDrawLoop (
           &HoldObjBaseY
           );
         HoldObject->PtrEvent (
-                      HoldObject,
-                      DrawContext,
-                      DrawContext->GuiContext,
-                      !PointerState.PrimaryDown ? GuiPointerPrimaryUp : GuiPointerPrimaryHold,
-                      HoldObjBaseX,
-                      HoldObjBaseY,
-                      (INT64)PointerState.X - HoldObjBaseX,
-                      (INT64)PointerState.Y - HoldObjBaseY
-                      );
-        if (!PointerState.PrimaryDown) {
-          HoldObject = NULL;
-        }
+          HoldObject,
+          DrawContext,
+          DrawContext->GuiContext,
+          HoldObjBaseX,
+          HoldObjBaseY,
+          &PointerEvent
+          );
       }
     }
 

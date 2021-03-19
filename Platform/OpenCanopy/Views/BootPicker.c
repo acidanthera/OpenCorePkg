@@ -473,24 +473,22 @@ InternalBootPickerEntryPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
-  STATIC BOOLEAN SameIter = FALSE;
-
   GUI_VOLUME_ENTRY        *Entry;
   BOOLEAN                 IsHit;
+  UINT32                  OffsetX;
+  UINT32                  OffsetY;
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
-  if (Event == GuiPointerPrimaryHold) {
-    return This;
-  }
+  OffsetX = (UINT32) (Event->Pos.Pos.X - BaseX);
+  OffsetY = (UINT32) (Event->Pos.Pos.Y - BaseY);
+
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
 
   if (OffsetX < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale
    || OffsetY < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale) {
@@ -508,7 +506,7 @@ InternalBootPickerEntryPtrEvent (
     return This;
   }
 
-  if (Event == GuiPointerPrimaryDown) {
+  if (Event->Type == GuiPointerPrimaryDown) {
     if (mBootPicker.SelectedIndex != Entry->Index) {
       ASSERT (Entry->Hdr.Parent == &mBootPicker.Hdr.Obj);
       InternalBootPickerChangeEntry (
@@ -518,21 +516,16 @@ InternalBootPickerEntryPtrEvent (
         BaseY - This->OffsetY,
         Entry->Index
         );
-      SameIter = TRUE;
     }
-  } else {
+  } else if (Event->Type == GuiPointerPrimaryDoubleClick) {
     //
     // This must be ensured because the UI directs Move/Up events to the object
     // Down had been sent to.
     //
     ASSERT (mBootPicker.SelectedIndex == Entry->Index);
 
-    if (SameIter) {
-      SameIter = FALSE;
-    } else {
-      Context->ReadyToBoot = TRUE;
-      ASSERT (Context->BootEntry == Entry->Context);
-    }
+    Context->ReadyToBoot = TRUE;
+    ASSERT (Context->BootEntry == Entry->Context);
   }
   //
   // There should be no children.
@@ -724,17 +717,17 @@ InternalBootPickerSelectorPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   GUI_OBJ_CLICKABLE             *Clickable;
   CONST GUI_IMAGE               *ButtonImage;
 
   BOOLEAN                       IsHit;
+  UINT32                        OffsetX;
+  UINT32                        OffsetY;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -744,12 +737,15 @@ InternalBootPickerSelectorPtrEvent (
   //
   ASSERT (This->NumChildren == 0);
 
+  OffsetX = (UINT32) (Event->Pos.Pos.X - BaseX);
+  OffsetY = (UINT32) (Event->Pos.Pos.Y - BaseY);
+
   Clickable     = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   ButtonImage   = &Context->Icons[ICON_SELECTOR][ICON_TYPE_BASE];
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
   if (OffsetX >= (BOOT_SELECTOR_BACKGROUND_DIMENSION * DrawContext->Scale - ButtonImage->Width) / 2
    && OffsetY >= (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) * DrawContext->Scale) {
     IsHit = GuiClickableIsHit (
@@ -758,7 +754,7 @@ InternalBootPickerSelectorPtrEvent (
               OffsetY - (BOOT_SELECTOR_BACKGROUND_DIMENSION + BOOT_SELECTOR_BUTTON_SPACE) * DrawContext->Scale
               );
     if (IsHit) {
-      if (Event == GuiPointerPrimaryUp) {
+      if (Event->Type == GuiPointerPrimaryUp) {
         ASSERT (Context->BootEntry == InternalGetVolumeEntry (mBootPicker.SelectedIndex)->Context);
         Context->ReadyToBoot = TRUE;
       } else  {
@@ -787,11 +783,9 @@ InternalBootPickerLeftScrollPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   GUI_OBJ_CLICKABLE *Clickable;
@@ -812,19 +806,19 @@ InternalBootPickerLeftScrollPtrEvent (
   Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   ButtonImage = &Context->Icons[ICON_LEFT][ICON_TYPE_BASE];
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
   ASSERT (ButtonImage->Width == This->Width);
   ASSERT (ButtonImage->Height == This->Height);
 
   IsHit = GuiClickableIsHit (
     ButtonImage,
-    OffsetX,
-    OffsetY
+    Event->Pos.Pos.X - BaseX,
+    Event->Pos.Pos.Y - BaseY
     );
   if (IsHit) {
-    if (Event != GuiPointerPrimaryUp) {
+    if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_LEFT][ICON_TYPE_HELD];
     } else if (mBootPicker.Hdr.Obj.OffsetX < 0) {
       //
@@ -891,11 +885,9 @@ InternalBootPickerRightScrollPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   GUI_OBJ_CLICKABLE *Clickable;
@@ -916,17 +908,17 @@ InternalBootPickerRightScrollPtrEvent (
   Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   ButtonImage = &Context->Icons[ICON_RIGHT][ICON_TYPE_BASE];
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
 
   IsHit = GuiClickableIsHit (
     ButtonImage,
-    OffsetX,
-    OffsetY
+    Event->Pos.Pos.X - BaseX,
+    Event->Pos.Pos.Y - BaseY
     );
   if (IsHit) {
-    if (Event != GuiPointerPrimaryUp) {
+    if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_RIGHT][ICON_TYPE_HELD];
     } else if (mBootPicker.Hdr.Obj.OffsetX + mBootPicker.Hdr.Obj.Width > mBootPickerContainer.Obj.Width) {
       //
@@ -1038,11 +1030,9 @@ InternalBootPickerShutDownPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   GUI_OBJ_CLICKABLE *Clickable;
@@ -1052,17 +1042,17 @@ InternalBootPickerShutDownPtrEvent (
   Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   ButtonImage = &Context->Icons[ICON_SHUT_DOWN][ICON_TYPE_BASE];
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
 
   IsHit = GuiClickableIsHit (
     ButtonImage,
-    OffsetX,
-    OffsetY
+    Event->Pos.Pos.X - BaseX,
+    Event->Pos.Pos.Y - BaseY
     );
   if (IsHit) {
-    if (Event != GuiPointerPrimaryUp) {
+    if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_SHUT_DOWN][ICON_TYPE_HELD];
     } else {
       gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
@@ -1090,11 +1080,9 @@ InternalBootPickerRestartPtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
   GUI_OBJ_CLICKABLE *Clickable;
@@ -1104,17 +1092,17 @@ InternalBootPickerRestartPtrEvent (
   Clickable   = BASE_CR (This, GUI_OBJ_CLICKABLE, Hdr.Obj);
   ButtonImage = &Context->Icons[ICON_RESTART][ICON_TYPE_BASE];
 
-  ASSERT (Event == GuiPointerPrimaryDown
-       || Event == GuiPointerPrimaryHold
-       || Event == GuiPointerPrimaryUp);
+  ASSERT (Event->Type == GuiPointerPrimaryDown
+       || Event->Type == GuiPointerPrimaryUp
+       || Event->Type == GuiPointerPrimaryDoubleClick);
 
   IsHit = GuiClickableIsHit (
     ButtonImage,
-    OffsetX,
-    OffsetY
+    Event->Pos.Pos.X - BaseX,
+    Event->Pos.Pos.Y - BaseY
     );
   if (IsHit) {
-    if (Event != GuiPointerPrimaryUp) {
+    if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_RESTART][ICON_TYPE_HELD];
     } else {
       gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);

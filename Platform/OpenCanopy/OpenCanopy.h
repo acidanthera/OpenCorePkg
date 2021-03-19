@@ -20,11 +20,23 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT BOOT_PICKER_GUI_CONTEXT;
 
 enum {
   GuiPointerPrimaryDown,
-  GuiPointerPrimaryHold,
-  GuiPointerPrimaryUp
+  GuiPointerPrimaryUp,
+  GuiPointerPrimaryDoubleClick
 };
 
-typedef UINT8 GUI_PTR_EVENT;
+typedef union {
+  struct {
+    UINT32 X;
+    UINT32 Y;
+  }      Pos;
+  UINT64 Uint64;
+} GUI_PTR_POSITION;
+
+
+typedef struct {
+  UINT8            Type;
+  GUI_PTR_POSITION Pos;
+} GUI_PTR_EVENT;
 
 typedef
 VOID
@@ -46,11 +58,9 @@ GUI_OBJ *
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   );
 
 typedef
@@ -181,11 +191,9 @@ GuiObjDelegatePtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   );
 
 BOOLEAN
@@ -271,9 +279,9 @@ GuiClearScreen (
 
 EFI_STATUS
 GuiLibConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContext,
-  IN UINT32             CursorDefaultX,
-  IN UINT32             CursorDefaultY
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN UINT32                   CursorDefaultX,
+  IN UINT32                   CursorDefaultY
   );
 
 VOID

@@ -38,13 +38,13 @@ STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
 STATIC
 EFI_STATUS
 OcShowMenuByOcEnter (
-  IN     OC_BOOT_CONTEXT          *BootContext
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext
   )
 {
   EFI_STATUS  Status;
 
   Status = GuiLibConstruct (
-    BootContext->PickerContext,
+    GuiContext,
     mGuiContext.CursorDefaultX,
     mGuiContext.CursorDefaultY
     );
@@ -94,7 +94,7 @@ OcShowMenuByOc (
   mGuiContext.PickerContext = BootContext->PickerContext;
   mGuiContext.AudioPlaybackTimeout = -1;
 
-  Status = OcShowMenuByOcEnter (BootContext);
+  Status = OcShowMenuByOcEnter (&mGuiContext);
   if (EFI_ERROR (Status)) {
     return Status;
   }

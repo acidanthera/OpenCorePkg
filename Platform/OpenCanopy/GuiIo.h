@@ -16,13 +16,6 @@ typedef struct GUI_OUTPUT_CONTEXT_  GUI_OUTPUT_CONTEXT;
 typedef struct GUI_POINTER_CONTEXT_ GUI_POINTER_CONTEXT;
 typedef struct GUI_KEY_CONTEXT_     GUI_KEY_CONTEXT;
 
-typedef struct {
-  UINT32  X;
-  UINT32  Y;
-  BOOLEAN PrimaryDown;
-  BOOLEAN SecondaryDown;
-} GUI_POINTER_STATE;
-
 GUI_OUTPUT_CONTEXT *
 GuiOutputConstruct (
   VOID
@@ -53,10 +46,16 @@ GuiOutputDestruct (
   IN GUI_OUTPUT_CONTEXT  *Context
   );
 
-VOID
-GuiPointerGetState (
+BOOLEAN
+GuiPointerGetEvent (
   IN OUT GUI_POINTER_CONTEXT  *Context,
-  OUT    GUI_POINTER_STATE    *State
+  OUT    GUI_PTR_EVENT        *Event
+  );
+
+VOID
+GuiPointerGetPosition (
+  IN OUT GUI_POINTER_CONTEXT  *Context,
+  OUT    GUI_PTR_POSITION     *Position
   );
 
 VOID
@@ -69,7 +68,8 @@ GuiPointerConstruct (
   IN UINT32  DefaultX,
   IN UINT32  DefaultY,
   IN UINT32  Width,
-  IN UINT32  Height
+  IN UINT32  Height,
+  IN UINT8   UiScale
   );
 
 VOID
