@@ -134,6 +134,7 @@
   UefiLib|MdePkg/Library/UefiLib/UefiLib.inf
   UefiRuntimeServicesTableLib|MdePkg/Library/UefiRuntimeServicesTableLib/UefiRuntimeServicesTableLib.inf
   UefiUsbLib|MdePkg/Library/UefiUsbLib/UefiUsbLib.inf
+  ResetSystemLib|OpenCorePkg/Library/OcResetSystemLib/OcResetSystemLib.inf
 
   !include NetworkPkg/NetworkLibs.dsc.inc
 
