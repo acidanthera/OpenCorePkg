@@ -87,13 +87,11 @@ EFIAPI
 GuiKeyReset (
   IN OUT GUI_KEY_CONTEXT  *Context
   );
-
-EFI_STATUS
-EFIAPI
-GuiKeyRead (
+  
+BOOLEAN
+GuiKeyGetEvent (
   IN OUT GUI_KEY_CONTEXT  *Context,
-  OUT    INTN             *KeyIndex,
-  OUT    BOOLEAN          *Modifier
+  OUT    GUI_KEY_EVENT    *Event
   );
 
 VOID

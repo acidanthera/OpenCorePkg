@@ -307,8 +307,7 @@ InternalBootPickerKeyEvent (
   IN     BOOT_PICKER_GUI_CONTEXT *GuiContext,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     CONST GUI_KEY_EVENT     *KeyEvent
   )
 {
   GUI_VOLUME_PICKER       *Picker;
@@ -320,7 +319,7 @@ InternalBootPickerKeyEvent (
 
   Picker = BASE_CR (This, GUI_VOLUME_PICKER, Hdr.Obj);
 
-  if (Key == OC_INPUT_RIGHT) {
+  if (KeyEvent->Key.ScanCode == SCAN_RIGHT) {
     //
     // Edge-case: The last child is the selector button.
     //
@@ -336,7 +335,7 @@ InternalBootPickerKeyEvent (
         mBootPicker.SelectedIndex + 1
         );
     }
-  } else if (Key == OC_INPUT_LEFT) {
+  } else if (KeyEvent->Key.ScanCode == SCAN_LEFT) {
     if (mBootPicker.SelectedIndex > 0) {
       //
       // Redraw the two now (un-)selected entries.
@@ -349,10 +348,10 @@ InternalBootPickerKeyEvent (
         mBootPicker.SelectedIndex - 1
         );
     }
-  } else if (Key == OC_INPUT_CONTINUE) {
+  } else if (KeyEvent->Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
     if (mBootPicker.Hdr.Obj.NumChildren > 0) {
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-      SelectedEntry->Context->SetDefault = Modifier;
+      SelectedEntry->Context->SetDefault = (KeyEvent->Modifiers & USB_HID_KB_KP_MODIFIERS_CONTROL) != 0;
       GuiContext->ReadyToBoot = TRUE;
       ASSERT (GuiContext->BootEntry == SelectedEntry->Context);
     }
@@ -363,7 +362,7 @@ InternalBootPickerKeyEvent (
     return;
   }
 
-  if (Key == OC_INPUT_MORE) {
+  if (KeyEvent->Key.UnicodeChar == L' ') {
     GuiContext->HideAuxiliary = FALSE;
     GuiContext->Refresh = TRUE;
     DrawContext->GuiContext->PickerContext->PlayAudioFile (
@@ -371,14 +370,14 @@ InternalBootPickerKeyEvent (
       OcVoiceOverAudioFileShowAuxiliary,
       FALSE
       );
-  } else if (Key == OC_INPUT_ABORTED) {
+  } else if (KeyEvent->Key.ScanCode == SCAN_ESC || KeyEvent->Key.UnicodeChar == '0') {
     GuiContext->Refresh = TRUE;
     DrawContext->GuiContext->PickerContext->PlayAudioFile (
       DrawContext->GuiContext->PickerContext,
       OcVoiceOverAudioFileReloading,
       FALSE
       );
-  } else if (Key == OC_INPUT_VOICE_OVER) {
+  } else if (KeyEvent->Key.ScanCode == SCAN_F5 && (KeyEvent->Modifiers & USB_HID_KB_KP_MODIFIERS_GUI) != 0) {
     DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
       DrawContext->GuiContext->PickerContext,
       0
@@ -1191,8 +1190,7 @@ InternalBootPickerViewKeyEvent (
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     CONST GUI_KEY_EVENT     *KeyEvent
   )
 {
   ASSERT (This != NULL);
@@ -1210,8 +1208,7 @@ InternalBootPickerViewKeyEvent (
     Context,
     mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
-    Key,
-    Modifier
+    KeyEvent
     );
 }
 

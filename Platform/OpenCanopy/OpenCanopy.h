@@ -38,6 +38,11 @@ typedef struct {
   GUI_PTR_POSITION Pos;
 } GUI_PTR_EVENT;
 
+typedef struct {
+  EFI_INPUT_KEY           Key;
+  USB_HID_KB_MODIFIER_MAP Modifiers;
+} GUI_KEY_EVENT;
+
 typedef
 VOID
 (*GUI_OBJ_DRAW)(
@@ -71,8 +76,7 @@ VOID
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     CONST GUI_KEY_EVENT     *KeyEvent
   );
 
 typedef

@@ -977,11 +977,9 @@ GuiDrawLoop (
   IN     UINT32               TimeOutSeconds
   )
 {
-  EFI_STATUS           Status;
-  BOOLEAN              Result;
+  BOOLEAN             Result;
 
-  INTN                 InputKey;
-  BOOLEAN              Modifier;
+  GUI_KEY_EVENT        KeyEvent;
   GUI_PTR_EVENT        PointerEvent;
   GUI_OBJ              *TempObject;
   GUI_OBJ              *HoldObject;
@@ -1101,17 +1099,15 @@ GuiDrawLoop (
       //
       // Process key events. Only allow one key at a time for now.
       //
-      Status = GuiKeyRead (mKeyContext, &InputKey, &Modifier);
-      if (!EFI_ERROR (Status)) {
-        ASSERT (DrawContext->KeyEvent != NULL);
+      Result = GuiKeyGetEvent (mKeyContext, &KeyEvent);
+      if (Result) {
         DrawContext->KeyEvent (
           DrawContext->Screen,
           DrawContext,
           DrawContext->GuiContext,
           0,
           0,
-          InputKey,
-          Modifier
+          &KeyEvent
           );
         //
         // If detected key press then disable menu timeout
