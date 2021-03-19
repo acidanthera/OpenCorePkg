@@ -19,6 +19,19 @@ DEFAULT  REL
 SECTION  .text
 
 ;------------------------------------------------------------------------------
+; UINT8
+; EFIAPI
+; OcAtomicPreIncUint8 (
+;   IN OUT volatile UINT8  *Value
+;   );
+;------------------------------------------------------------------------------
+global ASM_PFX(OcAtomicPreIncUint8)
+ASM_PFX(OcAtomicPreIncUint8):
+  mov       eax, 1
+  lock xadd byte [rcx], al
+  ret
+
+;------------------------------------------------------------------------------
 ; UINT32
 ; EFIAPI
 ; AsmIncrementUint32 (

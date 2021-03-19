@@ -234,4 +234,17 @@ OcGetTSCFrequency (
   VOID
   );
 
+/**
+  Atomically pre-increment 8-bit integer.
+
+  @param[in]  Value  Pointer to 8-bit integer to increment.
+
+  @retval value before incrementing.
+**/
+UINT8
+EFIAPI
+OcAtomicPreIncUint8 (
+  IN OUT volatile UINT8  *Value
+  );
+
 #endif // OC_CPU_LIB_H_
