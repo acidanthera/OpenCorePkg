@@ -239,7 +239,6 @@ GuiPointerConstruct (
 
   EFI_STATUS Status;
   EFI_STATUS Status2;
-  EFI_TPL    OldTpl;
   DIMENSION  Dimension;
 
   ASSERT (DefaultX < Width);
@@ -261,7 +260,12 @@ GuiPointerConstruct (
     );
   if (!EFI_ERROR (Status)) {
     if (Context.AppleEvent->Revision >= APPLE_EVENT_PROTOCOL_REVISION) {
-      OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
+      Dimension.Horizontal = (INT32) DefaultX;
+      Dimension.Vertical   = (INT32) DefaultY;
+      Context.AppleEvent->SetCursorPosition (
+        &Dimension
+        );
+
       //
       // Do not register 'Click' as its behaviour does not follow OS behaviour.
       //
@@ -271,14 +275,6 @@ GuiPointerConstruct (
         &Context.AppleEventHandle,
         &Context
         );
-
-      Dimension.Horizontal = (INT32) DefaultX;
-      Dimension.Vertical   = (INT32) DefaultY;
-      Context.AppleEvent->SetCursorPosition (
-        &Dimension
-        );
-
-      gBS->RestoreTPL (OldTpl);
     } else {
       Status = EFI_UNSUPPORTED;
     }
