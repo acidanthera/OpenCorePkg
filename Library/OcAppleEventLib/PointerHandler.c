@@ -596,9 +596,11 @@ InternalHandleButtonInteraction (
       if (Pointer->ButtonTicksHold <= mMaximumClickDuration) {
         HorizontalMovement = ABS(Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
         VerticalMovement   = ABS(Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
-
-        if ((HorizontalMovement <= MINIMAL_MOVEMENT)
-         && (VerticalMovement <= MINIMAL_MOVEMENT)) {
+        //
+        // CHANGE: Apple did not scale by UIScale.
+        //
+        if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+         && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
           EventType = APPLE_EVENT_TYPE_MOUSE_CLICK;
 
           if ((Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
@@ -606,8 +608,8 @@ InternalHandleButtonInteraction (
             HorizontalMovement = ABS(Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
             VerticalMovement   = ABS(Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
 
-            if ((HorizontalMovement <= MINIMAL_MOVEMENT)
-             && (VerticalMovement <= MINIMAL_MOVEMENT)) {
+            if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+             && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
               EventType = APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK;
             }
           }
