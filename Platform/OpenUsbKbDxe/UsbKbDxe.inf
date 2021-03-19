@@ -65,6 +65,7 @@
   PcdLib
   UefiUsbLib
   OcGuardLib
+  ResetSystemLib
 
 [Guids]
   gAppleKeyboardPlatformInfoGuid                ## SOMETIMES_CONSUMES

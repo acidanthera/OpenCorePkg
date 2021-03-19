@@ -13,6 +13,8 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Guid/UsbKeyBoardLayout.h>
 
+#include <Library/ResetSystemLib.h>
+
 USB_KEYBOARD_LAYOUT_PACK_BIN  mUsbKeyboardLayoutBin = {
   sizeof (USB_KEYBOARD_LAYOUT_PACK_BIN),   // Binary size
 
@@ -1312,7 +1314,10 @@ USBParseKey (
     //
     if (KeyDescriptor->Modifier == EFI_DELETE_MODIFIER) {
       if ((UsbKeyboardDevice->CtrlOn) && (UsbKeyboardDevice->AltOn)) {
-        gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);
+        //
+        // CHANGE: Use library call to be able to centrally alter the behaviour.
+        //
+        ResetWarm ();
       }
     }
 
