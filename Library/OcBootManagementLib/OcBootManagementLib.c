@@ -47,6 +47,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <Library/UefiLib.h>
+#include <Library/ResetSystemLib.h>
 
 STATIC
 EFI_STATUS
@@ -544,7 +545,7 @@ OcShowSimplePasswordRequest (
   DEBUG ((DEBUG_WARN, "OCB: User failed to verify password for 3 times running\n"));
 
   gBS->Stall (5000000);
-  gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);
+  ResetWarm ();
   return EFI_ACCESS_DENIED;
 }
 

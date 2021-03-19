@@ -50,6 +50,7 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
@@ -118,3 +119,4 @@
   OcXmlLib
   TimerLib
   FileHandleLib
+  ResetSystemLib
