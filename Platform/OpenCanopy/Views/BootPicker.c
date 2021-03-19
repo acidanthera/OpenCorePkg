@@ -20,6 +20,7 @@
 #include <Library/OcPngLib.h>
 #include <Library/OcStorageLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/ResetSystemLib.h>
 
 #include "../OpenCanopy.h"
 #include "../BmfLib.h"
@@ -1055,7 +1056,7 @@ InternalBootPickerShutDownPtrEvent (
     if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_SHUT_DOWN][ICON_TYPE_HELD];
     } else {
-      gRT->ResetSystem (EfiResetShutdown, EFI_SUCCESS, 0, NULL);
+      ResetShutdown ();
     }
   }
 
@@ -1105,7 +1106,7 @@ InternalBootPickerRestartPtrEvent (
     if (Event->Type == GuiPointerPrimaryDown) {
       ButtonImage = &Context->Icons[ICON_RESTART][ICON_TYPE_HELD];
     } else {
-      gRT->ResetSystem (EfiResetWarm, EFI_SUCCESS, 0, NULL);
+      ResetWarm ();
     }
   }
 

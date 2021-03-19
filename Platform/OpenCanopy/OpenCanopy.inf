@@ -78,6 +78,7 @@
   OcMiscLib
   OcPngLib
   OcStorageLib
+  ResetSystemLib
   TimerLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
