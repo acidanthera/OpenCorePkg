@@ -877,6 +877,7 @@ VOID
 GuiViewInitialize (
   OUT    GUI_DRAWING_CONTEXT     *DrawContext,
   IN OUT GUI_OBJ                 *Screen,
+  IN     GUI_OBJ_KEY_EVENT       KeyEvent,
   IN     GUI_CURSOR_GET_IMAGE    GetCursorImage,
   IN     GUI_EXIT_LOOP           ExitLoop,
   IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
@@ -886,6 +887,7 @@ GuiViewInitialize (
 
   ASSERT (DrawContext != NULL);
   ASSERT (Screen != NULL);
+  ASSERT (KeyEvent != NULL);
   ASSERT (GetCursorImage != NULL);
   ASSERT (ExitLoop != NULL);
 
@@ -896,6 +898,7 @@ GuiViewInitialize (
   Screen->Height = OutputInfo->VerticalResolution;
 
   DrawContext->Screen         = Screen;
+  DrawContext->KeyEvent       = KeyEvent;
   DrawContext->GetCursorImage = GetCursorImage;
   DrawContext->ExitLoop       = ExitLoop;
   DrawContext->GuiContext     = GuiContext;
@@ -1086,16 +1089,16 @@ GuiDrawLoop (
       //
       Status = GuiKeyRead (mKeyContext, &InputKey, &Modifier);
       if (!EFI_ERROR (Status)) {
-        ASSERT (DrawContext->Screen->KeyEvent != NULL);
-        DrawContext->Screen->KeyEvent (
-                               DrawContext->Screen,
-                               DrawContext,
-                               DrawContext->GuiContext,
-                               0,
-                               0,
-                               InputKey,
-                               Modifier
-                               );
+        ASSERT (DrawContext->KeyEvent != NULL);
+        DrawContext->KeyEvent (
+          DrawContext->Screen,
+          DrawContext,
+          DrawContext->GuiContext,
+          0,
+          0,
+          InputKey,
+          Modifier
+          );
         //
         // If detected key press then disable menu timeout
         //

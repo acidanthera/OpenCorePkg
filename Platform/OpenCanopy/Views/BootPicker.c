@@ -131,96 +131,6 @@ GuiClickableIsHit (
 }
 
 VOID
-InternalBootPickerViewDraw (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     UINT32                  OffsetX,
-  IN     UINT32                  OffsetY,
-  IN     UINT32                  Width,
-  IN     UINT32                  Height
-  )
-{
-  ASSERT (This != NULL);
-  ASSERT (DrawContext != NULL);
-  ASSERT (Context != NULL);
-
-  ASSERT (BaseX == 0);
-  ASSERT (BaseY == 0);
-
-  GuiDrawToBufferFill (
-    &Context->BackgroundColor.Pixel,
-    DrawContext,
-    OffsetX,
-    OffsetY,
-    Width,
-    Height
-    );
-
-  if (DrawContext->GuiContext->Background.Buffer != NULL) {
-    GuiDrawChildImage (
-      &DrawContext->GuiContext->Background,
-      0xFF,
-      DrawContext,
-      0,
-      0,
-      mBackgroundImageOffsetX,
-      mBackgroundImageOffsetY,
-      OffsetX,
-      OffsetY,
-      Width,
-      Height
-      );
-  }
-
-  GuiObjDrawDelegate (
-    This,
-    DrawContext,
-    Context,
-    0,
-    0,
-    OffsetX,
-    OffsetY,
-    Width,
-    Height
-    );
-}
-
-VOID
-InternalBootPickerViewKeyEvent (
-  IN OUT GUI_OBJ                 *This,
-  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
-  IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     INT64                   BaseX,
-  IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
-  )
-{
-  ASSERT (This != NULL);
-  ASSERT (DrawContext != NULL);
-
-  ASSERT (BaseX == 0);
-  ASSERT (BaseY == 0);
-  //
-  // Consider moving between multiple panes with UP/DOWN and store the current
-  // view within the object - for now, hardcoding this is enough.
-  //
-  ASSERT (mBootPicker.Hdr.Obj.KeyEvent != NULL);
-  mBootPicker.Hdr.Obj.KeyEvent (
-                        &mBootPicker.Hdr.Obj,
-                        DrawContext,
-                        Context,
-                        mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
-                        mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
-                        Key,
-                        Modifier
-                        );
-}
-
-VOID
 InternalBootPickerSelectEntry (
   IN OUT GUI_VOLUME_PICKER   *This,
   IN OUT GUI_DRAWING_CONTEXT *DrawContext,
@@ -1227,13 +1137,101 @@ InternalBootPickerRestartPtrEvent (
   return This;
 }
 
+VOID
+InternalBootPickerViewDraw (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height
+  )
+{
+  ASSERT (This != NULL);
+  ASSERT (DrawContext != NULL);
+  ASSERT (Context != NULL);
+
+  ASSERT (BaseX == 0);
+  ASSERT (BaseY == 0);
+
+  GuiDrawToBufferFill (
+    &Context->BackgroundColor.Pixel,
+    DrawContext,
+    OffsetX,
+    OffsetY,
+    Width,
+    Height
+    );
+
+  if (DrawContext->GuiContext->Background.Buffer != NULL) {
+    GuiDrawChildImage (
+      &DrawContext->GuiContext->Background,
+      0xFF,
+      DrawContext,
+      0,
+      0,
+      mBackgroundImageOffsetX,
+      mBackgroundImageOffsetY,
+      OffsetX,
+      OffsetY,
+      Width,
+      Height
+      );
+  }
+
+  GuiObjDrawDelegate (
+    This,
+    DrawContext,
+    Context,
+    0,
+    0,
+    OffsetX,
+    OffsetY,
+    Width,
+    Height
+    );
+}
+
+VOID
+InternalBootPickerViewKeyEvent (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     INTN                    Key,
+  IN     BOOLEAN                 Modifier
+  )
+{
+  ASSERT (This != NULL);
+  ASSERT (DrawContext != NULL);
+
+  ASSERT (BaseX == 0);
+  ASSERT (BaseY == 0);
+  //
+  // Consider moving between multiple panes with UP/DOWN and store the current
+  // view within the object - for now, hardcoding this is enough.
+  //
+  InternalBootPickerKeyEvent (
+    &mBootPicker.Hdr.Obj,
+    DrawContext,
+    Context,
+    mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
+    mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
+    Key,
+    Modifier
+    );
+}
+
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelector = {
   {
     {
       0, 0, 0, 0,
       InternalBootPickerSelectorDraw,
       InternalBootPickerSelectorPtrEvent,
-      NULL,
       0,
       NULL
     },
@@ -1252,7 +1250,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
     0, 0, 0, 0,
     GuiObjDrawDelegate,
     GuiObjDelegatePtrEvent,
-    NULL,
     ARRAY_SIZE (mBootPickerContainerChilds),
     mBootPickerContainerChilds
   },
@@ -1265,7 +1262,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VOLUME_PICKER mBootPicker = {
       0, 0, 0, 0,
       GuiObjDrawDelegate,
       GuiObjDelegatePtrEvent,
-      InternalBootPickerKeyEvent,
       0,
       NULL
     },
@@ -1280,7 +1276,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerLeftScroll = {
       0, 0, 0, 0,
       InternalBootPickerLeftScrollDraw,
       InternalBootPickerLeftScrollPtrEvent,
-      NULL,
       0,
       NULL
     },
@@ -1295,7 +1290,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
       0, 0, 0, 0,
       InternalBootPickerRightScrollDraw,
       InternalBootPickerRightScrollPtrEvent,
-      NULL,
       0,
       NULL
     },
@@ -1310,7 +1304,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRestart = {
       0, 0, 0, 0,
       InternalBootPickerSimpleButtonDraw,
       InternalBootPickerRestartPtrEvent,
-      NULL,
       0,
       NULL
     },
@@ -1325,7 +1318,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerShutDown = {
       0, 0, 0, 0,
       InternalBootPickerSimpleButtonDraw,
       InternalBootPickerShutDownPtrEvent,
-      NULL,
       0,
       NULL
     },
@@ -1344,7 +1336,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerActionButtonsContainer = 
     0, 0, 0, 0,
     GuiObjDrawDelegate,
     GuiObjDelegatePtrEvent,
-    NULL,
     ARRAY_SIZE (mBootPickerActionButtonsContainerChilds),
     mBootPickerActionButtonsContainerChilds
   },
@@ -1362,7 +1353,6 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ mBootPickerView = {
   0, 0, 0, 0,
   InternalBootPickerViewDraw,
   GuiObjDelegatePtrEvent,
-  InternalBootPickerViewKeyEvent,
   ARRAY_SIZE (mBootPickerViewChilds),
   mBootPickerViewChilds
 };
@@ -1786,6 +1776,7 @@ BootPickerViewInitialize (
   GuiViewInitialize (
     DrawContext,
     &mBootPickerView,
+    InternalBootPickerViewKeyEvent,
     GetCursorImage,
     InternalBootPickerExitLoop,
     GuiContext

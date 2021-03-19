@@ -88,7 +88,6 @@ struct GUI_OBJ_ {
   UINT32            Height;
   GUI_OBJ_DRAW      Draw;
   GUI_OBJ_PTR_EVENT PtrEvent;
-  GUI_OBJ_KEY_EVENT KeyEvent;
   UINT32            NumChildren;
   GUI_OBJ_CHILD     **Children;
 };
@@ -128,6 +127,7 @@ struct GUI_DRAWING_CONTEXT_ {
   // Scene objects
   //
   GUI_OBJ                  *Screen;
+  GUI_OBJ_KEY_EVENT        KeyEvent;
   GUI_CURSOR_GET_IMAGE     GetCursorImage;
   GUI_EXIT_LOOP            ExitLoop;
   LIST_ENTRY               Animations;
@@ -240,6 +240,7 @@ VOID
 GuiViewInitialize (
   OUT    GUI_DRAWING_CONTEXT     *DrawContext,
   IN OUT GUI_OBJ                 *Screen,
+  IN     GUI_OBJ_KEY_EVENT       KeyEvent,
   IN     GUI_CURSOR_GET_IMAGE    CursorDraw,
   IN     GUI_EXIT_LOOP           ExitLoop,
   IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
