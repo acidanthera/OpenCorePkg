@@ -1048,7 +1048,9 @@ GuiDrawLoop (
           // 'Button down' must have caught and set an interaction object.
           // It may be NULL for objects that solely delegate pointer events.
           //
+          DEBUG_CODE_BEGIN ();
           ASSERT (ObjectHeld);
+          DEBUG_CODE_END ();
 
           if (HoldObject != NULL) {
             GuiGetBaseCoords (
