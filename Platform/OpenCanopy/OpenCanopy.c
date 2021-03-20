@@ -988,7 +988,6 @@ GuiDrawLoop (
   UINT64               LoopStartTsc;
   UINT64               LastTsc;
   UINT64               NewLastTsc;
-  BOOLEAN              ObjectHeld;
 
   CONST GUI_IMAGE      *CursorImage;
   UINT64               FrameTime;
@@ -998,11 +997,6 @@ GuiDrawLoop (
   mNumValidDrawReqs = 0;
   FrameTime         = 0;
   HoldObject        = NULL;
-
-  DEBUG_CODE_BEGIN ();
-  ObjectHeld = FALSE;
-  DEBUG_CODE_END ();
-
   //
   // Clear previous inputs.
   //
@@ -1045,13 +1039,9 @@ GuiDrawLoop (
       if (Result) {
         if (PointerEvent.Type == GuiPointerPrimaryUp) {
           //
-          // 'Button down' must have caught and set an interaction object.
-          // It may be NULL for objects that solely delegate pointer events.
+          // 'Button down' must have caught and set an interaction object, but
+          // it may be NULL for objects that solely delegate pointer events.
           //
-          DEBUG_CODE_BEGIN ();
-          ASSERT (ObjectHeld);
-          DEBUG_CODE_END ();
-
           if (HoldObject != NULL) {
             GuiGetBaseCoords (
               HoldObject,
@@ -1069,10 +1059,6 @@ GuiDrawLoop (
               );
             HoldObject = NULL;
           }
-
-          DEBUG_CODE_BEGIN ();
-          ObjectHeld = FALSE;
-          DEBUG_CODE_END ();
         } else {
           //
           // HoldObject == NULL cannot be tested here as double-click may arrive
@@ -1088,10 +1074,6 @@ GuiDrawLoop (
             &PointerEvent
             );
           if (PointerEvent.Type == GuiPointerPrimaryDown) {
-            DEBUG_CODE_BEGIN ();
-            ObjectHeld = TRUE;
-            DEBUG_CODE_END ();
-
             HoldObject = TempObject;
           }
         }
