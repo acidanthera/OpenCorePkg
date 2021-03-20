@@ -13,10 +13,12 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/AppleEventLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/UefiLib.h>
 
 #include "../OpenCanopy.h"
 #include "../GuiIo.h"
@@ -28,6 +30,7 @@ struct GUI_POINTER_CONTEXT_ {
   APPLE_EVENT_PROTOCOL          *AppleEvent;
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
   APPLE_EVENT_HANDLE            AppleEventHandle;
+  EFI_EVENT                     AbsPollEvent;
   UINT32                        MaxX;
   UINT32                        MaxY;
   GUI_PTR_POSITION              RawPos;
@@ -59,7 +62,6 @@ InternalQueuePointerEvent (
 {
   UINT32 Tail;
   //
-  // Tail can be accessed concurrently, so increment atomically.
   // Due to the modulus, wraparounds do not matter. The size of the queue must
   // be a power of two for this to hold.
   //
@@ -68,10 +70,11 @@ InternalQueuePointerEvent (
     "The pointer event queue must have a power of two length."
     );
     
-  Tail = OcAtomicPreIncUint8 (&Context->EventQueueTail) % ARRAY_SIZE (Context->EventQueue);
+  Tail = Context->EventQueueTail % ARRAY_SIZE (Context->EventQueue);
   Context->EventQueue[Tail].Type      = Type;
   Context->EventQueue[Tail].Pos.Pos.X = X;
   Context->EventQueue[Tail].Pos.Pos.Y = Y;
+  ++Context->EventQueueTail;
 }
 
 BOOLEAN
@@ -80,9 +83,6 @@ GuiPointerGetEvent (
   OUT    GUI_PTR_EVENT        *Event
   )
 {
-  //
-  // EventQueueHead cannot be accessed concurrently.
-  //
   if (Context->EventQueueHead == Context->EventQueueTail) {
     return FALSE;
   }
@@ -198,21 +198,23 @@ InternalAppleEventNotification (
 
 STATIC
 VOID
+EFIAPI
 InternalUpdateContextAbsolute (
-  IN OUT GUI_POINTER_CONTEXT  *Context
+  IN     EFI_EVENT  Event,
+  IN OUT VOID       *NotifyContext
   )
 {
+  GUI_POINTER_CONTEXT        *Context;
   EFI_STATUS                 Status;
   EFI_ABSOLUTE_POINTER_STATE PointerState;
   UINT64                     NewX;
   UINT64                     NewY;
   GUI_PTR_POSITION           NewPos;
 
-  ASSERT (Context != NULL);
+  ASSERT (NotifyContext != NULL);
 
-  if (Context->AbsPointer == NULL) {
-    return;
-  }
+  Context = NotifyContext;
+  ASSERT (Context->AbsPointer != NULL);
   //
   // Discard absolute pointer updates when simple pointer locked.
   //
@@ -238,9 +240,7 @@ InternalUpdateContextAbsolute (
     NewY,
     (UINT32) (Context->AbsPointer->Mode->AbsoluteMaxY - Context->AbsPointer->Mode->AbsoluteMinY)
     );
-  //
-  // This is not perfectly concurrent, but good enough.
-  //
+
   Context->CurPos.Uint64 = NewPos.Uint64;
   Context->RawPos.Uint64 = NewPos.Uint64;
   //
@@ -320,16 +320,12 @@ GuiPointerGetPosition (
   ASSERT (Context != NULL);
   ASSERT (Position != NULL);
   //
-  // Prevent simple pointer updates during state retrieval.
+  // Prevent pointer updates during state retrieval.
   // On 64+-bit systems, the operation is atomic.
   //
   if (sizeof (UINTN) < sizeof (UINT64)) {
     OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
   }
-  //
-  // The simple pointer updates are done in InternalAppleEventNotification().
-  //
-  InternalUpdateContextAbsolute (Context);
   //
   // Return the current pointer position.
   //
@@ -411,6 +407,17 @@ GuiPointerConstruct (
     &gEfiAbsolutePointerProtocolGuid,
     (VOID **)&Context.AbsPointer
     );
+  if (!EFI_ERROR (Status2)) {
+    Context.AbsPollEvent = EventLibCreateNotifyTimerEvent (
+      InternalUpdateContextAbsolute,
+      &Context,
+      EFI_TIMER_PERIOD_MILLISECONDS (10),
+      TRUE
+      );
+    if (Context.AbsPollEvent == NULL) {
+      Status2 = EFI_UNSUPPORTED;
+    }
+  }
 
   if (EFI_ERROR (Status) && EFI_ERROR (Status2)) {
     return NULL;
@@ -428,5 +435,10 @@ GuiPointerDestruct (
   ASSERT (Context->AppleEvent != NULL);
 
   Context->AppleEvent->UnregisterHandler (Context->AppleEventHandle);
+
+  if (Context->AbsPollEvent != NULL) {
+    EventLibCancelEvent (Context->AbsPollEvent);
+  }
+
   ZeroMem (Context, sizeof (*Context));
 }

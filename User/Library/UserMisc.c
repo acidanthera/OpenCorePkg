@@ -161,17 +161,6 @@ AsmCpuidEx (
   #endif
 }
 
-UINT8
-EFIAPI
-OcAtomicPreIncUint8 (
-  IN OUT volatile UINT8  *Value
-  )
-{
-  ASSERT (FALSE);
-
-  return 0;
-}
-
 UINT32
 EFIAPI
 AsmIncrementUint32 (
