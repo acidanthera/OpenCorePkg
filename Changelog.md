@@ -4,6 +4,7 @@ OpenCore Changelog
 - Switched to VS2019 toolchain for Windows builds
 - Reduced legacy boot install interaction effort
 - Increased OpenCanopy rendering performance
+- Added OpenCanopy Shut Down and Restart buttons
 - Reduced OpenCanopy mouse pointer input lag
 - Fixed that cursor bounds could be different from OpenCanopy's
 - Improved builtin picker rendering performance
