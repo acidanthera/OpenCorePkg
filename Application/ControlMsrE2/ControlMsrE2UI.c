@@ -221,8 +221,9 @@ ModifySearchString (
     Print (L"\nCurrent search string: %s\n", *SearchString);
     Print (L"Do you want to change it ? ");
     Result = ReadYN ();
+    Print (L"\n");
     if (Result) {
-      Print (L"\nEnter search string: ");
+      Print (L"Enter search string: ");
 
       CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
 
@@ -231,9 +232,9 @@ ModifySearchString (
           Print (L"\nNo Input. Search string not changed.\n");
           FreePool (Buffer);
         } else {
+          Print (L"\n");
           FreePool (*SearchString);
           *SearchString = Buffer;
-          Print (L"\n");
         }
       } else {
         Print (L"Could not allocate memory. Search string can not be changed.\n");

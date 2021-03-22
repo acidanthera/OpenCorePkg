@@ -179,10 +179,6 @@ SearchForString (
   EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders;
   UINT32                        ListHeaderCount;
 
-  if (mArgumentFlags == ARG_INTERACTIVE) {
-    ModifySearchString (&SearchString);
-  }
-
   HiiHandles = HiiGetHiiHandles (NULL);
   if (HiiHandles == NULL) {
     Print (L"Could not retrieve HiiHandles.\n");
@@ -224,19 +220,21 @@ UefiMain (
   if (!EFI_ERROR (Status)) {
     Status = VerifyMSRE2 ();
     if (!EFI_ERROR (Status)) {
-      if (mArgumentFlags == ARG_VERIFY) {
-        return Status;
-      }
+      if (mArgumentFlags != ARG_VERIFY) {
+        Print (L"\nBIOS Options:\n");
 
-      Print (L"\nBIOS Options:\n");
+        SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
+        if (SearchString != NULL) {
+          if (mArgumentFlags == ARG_INTERACTIVE) {
+            ModifySearchString (&SearchString);
+          }
 
-      SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
-      if (SearchString != NULL) {
-        Status = SearchForString (SearchString);
-        FreePool (SearchString);
-      } else {
-        Print (L"Could not allocate memory for SearchString\n");
-        Status = EFI_OUT_OF_RESOURCES;
+          Status = SearchForString (SearchString);
+          FreePool (SearchString);
+        } else {
+          Print (L"Could not allocate memory for SearchString\n");
+          Status = EFI_OUT_OF_RESOURCES;
+        }
       }
     } else {
       Print (L"Unable to verify MSR 0xE2 - %r\n", Status);

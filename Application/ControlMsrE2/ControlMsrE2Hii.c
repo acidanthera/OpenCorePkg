@@ -250,7 +250,6 @@ HandleIfrOption (
       Print (L"\n");
     }
   }
-  FreePool (IfrVarStore);
   FreePool (HiiString);
 }
 

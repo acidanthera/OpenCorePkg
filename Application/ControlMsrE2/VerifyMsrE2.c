@@ -95,7 +95,5 @@ VerifyMSRE2 (
     Print (L"This firmware has LOCKED MSR 0xE2 register!\n");
   }
 
-  gBS->Stall (SECONDS_TO_MICROSECONDS (3));
-
   return EFI_SUCCESS;
 }
