@@ -179,6 +179,8 @@ SearchForString (
   EFI_HII_PACKAGE_LIST_HEADER   **ListHeaders;
   UINT32                        ListHeaderCount;
 
+  Print (L"\nBIOS Options:\n");
+
   HiiHandles = HiiGetHiiHandles (NULL);
   if (HiiHandles == NULL) {
     Print (L"Could not retrieve HiiHandles.\n");
@@ -221,8 +223,6 @@ UefiMain (
     Status = VerifyMSRE2 ();
     if (!EFI_ERROR (Status)) {
       if (mArgumentFlags != ARG_VERIFY) {
-        Print (L"\nBIOS Options:\n");
-
         SearchString = AllocateCopyPool (L_STR_SIZE(L"cfg"), L"cfg");
         if (SearchString != NULL) {
           if (mArgumentFlags == ARG_INTERACTIVE) {

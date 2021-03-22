@@ -223,7 +223,7 @@ ModifySearchString (
     Result = ReadYN ();
     Print (L"\n");
     if (Result) {
-      Print (L"Enter search string: ");
+      Print (L"Enter search string:\n");
 
       CHAR16 *Buffer = AllocatePool (BUFFER_LENGTH * sizeof (CHAR16));
 
