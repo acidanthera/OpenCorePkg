@@ -83,15 +83,11 @@ GuiPointerGetEvent (
   OUT    GUI_PTR_EVENT        *Event
   )
 {
+  UINT32 Head;
+
   if (Context->EventQueueHead == Context->EventQueueTail) {
     return FALSE;
   }
-
-  CopyMem (
-    Event,
-    &Context->EventQueue[Context->EventQueueHead % ARRAY_SIZE (Context->EventQueue)],
-    sizeof (*Event)
-    );
   //
   // Due to the modulus, wraparounds do not matter. The size of the queue must
   // be a power of two for this to hold.
@@ -100,6 +96,11 @@ GuiPointerGetEvent (
     IS_POWER_2 (ARRAY_SIZE (Context->EventQueue)),
     "The pointer event queue must have a power of two length."
     );
+
+  Head = Context->EventQueueHead % ARRAY_SIZE (Context->EventQueue);
+  Event->Type      = Context->EventQueue[Head].Type;
+  Event->Pos.Pos.X = Context->EventQueue[Head].Pos.Pos.X;
+  Event->Pos.Pos.Y = Context->EventQueue[Head].Pos.Pos.Y;
   ++Context->EventQueueHead;
 
   return TRUE;
@@ -162,8 +163,8 @@ InternalAppleEventNotification (
     Context->RawPos.Uint64 = NewRaw.Uint64;
   }
 
-  if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
-    if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+  if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+    if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOWN) != 0) {
       ASSERT (Context->LockedBy == PointerUnlocked);
       InternalQueuePointerEvent (
         Context,
@@ -172,9 +173,7 @@ InternalAppleEventNotification (
         Context->CurPos.Pos.Y
         );
       Context->LockedBy = PointerLockedSimple;
-    }
-  } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_UP) != 0) {
-    if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+    } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_UP) != 0) {
       ASSERT (Context->LockedBy == PointerLockedSimple);
       InternalQueuePointerEvent (
         Context,
@@ -183,9 +182,7 @@ InternalAppleEventNotification (
         Context->CurPos.Pos.Y
         );
       Context->LockedBy = PointerUnlocked;
-    }
-  } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) != 0) {
-    if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
+    } else if ((EventType & APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) != 0) {
       InternalQueuePointerEvent (
         Context,
         GuiPointerPrimaryDoubleClick,
@@ -246,6 +243,8 @@ InternalUpdateContextAbsolute (
   //
   // Cancel double click when the finger is moved too far away.
   //
+  ASSERT (Context->UiScale > 0);
+  
   if (Context->AbsDoubleClick) {
     if (ABS ((INT64) NewPos.Pos.X - Context->AbsLastDownPos.Pos.X) > ABS_DOUBLE_CLICK_RADIUS * Context->UiScale
      || ABS ((INT64) NewPos.Pos.Y - Context->AbsLastDownPos.Pos.Y) > ABS_DOUBLE_CLICK_RADIUS * Context->UiScale) {
@@ -265,8 +264,7 @@ InternalUpdateContextAbsolute (
         );
       Context->LockedBy = PointerLockedAbsolute;
 
-      Context->AbsLastDownPos.Pos.X = NewPos.Pos.X;
-      Context->AbsLastDownPos.Pos.Y = NewPos.Pos.Y;
+      Context->AbsLastDownPos.Uint64 = NewPos.Uint64;
       Context->AbsDoubleClick = TRUE;
     } else {
       ASSERT (Context->LockedBy == PointerLockedAbsolute);
@@ -277,8 +275,6 @@ InternalUpdateContextAbsolute (
         NewPos.Pos.Y
         );
       Context->LockedBy = PointerUnlocked;
-
-      ASSERT (Context->UiScale > 0);
 
       if (Context->AbsDoubleClick) {
         InternalQueuePointerEvent (

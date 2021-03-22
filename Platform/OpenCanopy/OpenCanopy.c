@@ -993,7 +993,6 @@ GuiDrawLoop (
   UINT64               LastTsc;
   UINT64               NewLastTsc;
 
-  CONST GUI_IMAGE      *CursorImage;
   UINT64               FrameTime;
 
   ASSERT (DrawContext != NULL);
