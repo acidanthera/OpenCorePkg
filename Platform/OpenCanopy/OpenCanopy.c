@@ -58,8 +58,10 @@ STATIC UINT64                        mStartTsc          = 0;
 STATIC UINT8                         mNumValidDrawReqs  = 0;
 STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
 
-STATIC INT64                         mPointerOldBaseX = 0;
-STATIC INT64                         mPointerOldBaseY = 0;
+STATIC UINT32                        mPointerOldDrawBaseX  = 0;
+STATIC UINT32                        mPointerOldDrawBaseY  = 0;
+STATIC UINT32                        mPointerOldDrawWidth  = 0;
+STATIC UINT32                        mPointerOldDrawHeight = 0;
 
 #define PIXEL_TO_UINT32(Pixel)  \
   ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
@@ -670,8 +672,10 @@ GuiOverlayPointer (
     MaxHeight
     );
 
-  mPointerOldBaseX = DrawBaseX;
-  mPointerOldBaseY = DrawBaseY;
+  mPointerOldDrawBaseX  = DrawBaseX;
+  mPointerOldDrawBaseY  = DrawBaseY;
+  mPointerOldDrawWidth  = MaxWidth;
+  mPointerOldDrawHeight = MaxHeight;
 }
 
 /**
@@ -1016,21 +1020,14 @@ GuiDrawLoop (
   do {
     if (mPointerContext != NULL) {
       //
-      // TODO: Put cursor dimensions in some context?
-      //
-      ASSERT (DrawContext->GetCursorImage != NULL);
-      CursorImage = DrawContext->GetCursorImage (DrawContext->GuiContext);
-      ASSERT (CursorImage != NULL);
-      //
       // Restore the rectangle previously covered by the cursor.
       // The new cursor is drawn right before flushing the screen.
       //
-      GuiRequestDrawCrop (
-        DrawContext,
-        mPointerOldBaseX,
-        mPointerOldBaseY,
-        CursorImage->Width,
-        CursorImage->Height
+      GuiRequestDraw (
+        mPointerOldDrawBaseX,
+        mPointerOldDrawBaseY,
+        mPointerOldDrawWidth,
+        mPointerOldDrawHeight
         );
       //
       // Process pointer events.
