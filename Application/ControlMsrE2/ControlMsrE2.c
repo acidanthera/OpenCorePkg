@@ -241,7 +241,10 @@ UefiMain (
     }
   }
 
-  Print (L"Press any key. \n");
+  Print (L"Press any key.\n");
   ReadAnyKey ();
+
+  gST->ConOut->EnableCursor (gST->ConOut, TRUE);
+
   return Status;
 }
