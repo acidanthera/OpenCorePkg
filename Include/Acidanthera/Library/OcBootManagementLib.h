@@ -1157,10 +1157,24 @@ OcGetPickerKeyInfo (
   Call before looped calls to OcWaitForPickerKeyInfo or OcGetPickerKeyInfo.
 
   @param[in,out]  Context       Picker context.
+
+  @retval EFI_SUCCESS           The keyboard handling within the context has been initialised.
+  @retval EFI_NOT_FOUND         Could not find a required protocol.
+  @retval other                 An error returned by a sub-operation.
 **/
-VOID
+EFI_STATUS
 OcInitHotKeys (
   IN OUT OC_PICKER_CONTEXT  *Context
+  );
+
+/**
+  Free picker keyboard handling resources.
+
+  @param[in]      Context       Picker context.
+**/
+VOID
+OcFreeHotKeys (
+  IN     OC_PICKER_CONTEXT  *Context
   );
 
 /**

@@ -19,14 +19,22 @@
 
 VOID
 OcFreeKeyRepeatContext (
-  OC_KEY_REPEAT_CONTEXT                     *Context
+  OC_KEY_REPEAT_CONTEXT                     **Context
   )
 {
-  DEBUG ((DEBUG_INFO, "OCKM: Freeing key repeat context %p %p %p\n", Context, Context->KeysHeld, Context->KeyHeldTimes));
+  ASSERT (Context != NULL);
 
-  FreePool (Context->KeyHeldTimes);
-  FreePool (Context->KeysHeld);
-  FreePool (Context);
+  if (*Context == NULL) {
+    return;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCKM: Freeing key repeat context %p %p %p\n", *Context, (*Context)->KeysHeld, (*Context)->KeyHeldTimes));
+
+  FreePool ((*Context)->KeyHeldTimes);
+  FreePool ((*Context)->KeysHeld);
+  FreePool (*Context);
+
+  *Context = NULL;
 }
 
 EFI_STATUS
@@ -59,6 +67,7 @@ OcInitKeyRepeatContext (
     if ((*Context)->KeysHeld == NULL) {
       DEBUG ((DEBUG_ERROR, "OCKM: Cannot allocate keys held\n"));
       FreePool (*Context);
+      *Context = NULL;
       return EFI_OUT_OF_RESOURCES;
     }
 
@@ -68,6 +77,7 @@ OcInitKeyRepeatContext (
       DEBUG ((DEBUG_ERROR, "OCKM: Cannot allocate key held times\n"));
       FreePool ((*Context)->KeysHeld);
       FreePool (*Context);
+      *Context = NULL;
       return EFI_OUT_OF_RESOURCES;
     }
   }
@@ -99,7 +109,7 @@ OcInitKeyRepeatContext (
 
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_ERROR, "OCKM: InitKeyRepeatContext initial GetUpDownKeys call - %r\n", Status));
-      OcFreeKeyRepeatContext (*Context);
+      OcFreeKeyRepeatContext (Context);
       return Status;
     }
   }

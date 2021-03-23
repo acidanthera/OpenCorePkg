@@ -193,8 +193,6 @@ RunShowMenu (
     BootContext->PickerContext->ApplePickerUnsupported = TRUE;
   }
 
-  OcInitHotKeys (BootContext->PickerContext);
-      
   BootEntries = OcEnumerateEntries (BootContext);
   if (BootEntries == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -221,11 +219,20 @@ RunShowMenu (
     &EntryReason
     );
 
+  Status = OcInitHotKeys (BootContext->PickerContext);
+  if (EFI_ERROR(Status)) {
+    FreePool (BootEntries);
+    return Status;
+  }
+      
   Status = BootContext->PickerContext->ShowMenu (
     BootContext,
     BootEntries,
     ChosenBootEntry
     );
+
+  OcFreeHotKeys (BootContext->PickerContext);
+
   FreePool (BootEntries);
 
   return Status;

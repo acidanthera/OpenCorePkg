@@ -174,28 +174,38 @@ OcUnregisterTypingHandler (
 {
   EFI_STATUS    Status;
 
-  ASSERT (*Context != NULL);
+  ASSERT (Context != NULL);
 
-  Status = mProtocol->UnregisterHandler(
-    (*Context)->Handle
-  );
+  if (*Context == NULL) {
+    return EFI_SUCCESS;
+  }
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCTY: Failed to unregister handler - %r\n", Status));
+  DEBUG ((OC_TRACE_TYPING, "OCTY: unreg c=%p h=%p k=%p\n", *Context, (*Context)->Handle, (*Context)->KeyTimes));
+
+  if ((*Context)->Handle == NULL) {
+    Status = EFI_NOT_STARTED;
   } else {
-    DEBUG ((OC_TRACE_TYPING, "OCTY: unreg c=%p h=%p k=%p\n", *Context, (*Context)->Handle, (*Context)->KeyTimes));
-    // show this here, before freeing the pools; any stray events in log after this point would be a problem
-    DEBUG ((DEBUG_INFO, "OCTY: Unregistered handler\n"));
+    Status = mProtocol->UnregisterHandler ((*Context)->Handle);
+    (*Context)->Handle = NULL;
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_ERROR, "OCTY: Failed to unregister handler - %r\n", Status));
+    } else {
+      // show this here, before freeing the pools; any stray events in log after this point would be a problem
+      DEBUG ((DEBUG_INFO, "OCTY: Unregistered handler\n"));
+    }
   }
 
 #if defined(OC_TRACE_KEY_TIMES)
   DEBUG_CODE_BEGIN();
-  FreePool ((*Context)->KeyTimes);
+  if ((*Context)->KeyTimes != NULL) {
+    FreePool ((*Context)->KeyTimes);
+    (*Context)->KeyTimes = NULL;
+  }
   DEBUG_CODE_END();
 #endif
 
   FreePool (*Context);
-
   *Context = NULL;
 
   return Status;

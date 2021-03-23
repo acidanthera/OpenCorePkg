@@ -1638,18 +1638,6 @@ OcFreeBootContext (
     FreeFileSystemEntry (Context, FileSystem);
   }
 
-  if (Context->PickerContext != NULL) {
-    if (Context->PickerContext->TypingContext != NULL) {
-      OcUnregisterTypingHandler(&Context->PickerContext->TypingContext);
-      Context->PickerContext->TypingContext = NULL;
-    }
-
-    if (Context->PickerContext->DoNotRepeatContext != NULL) {
-      OcFreeKeyRepeatContext(Context->PickerContext->DoNotRepeatContext);
-      Context->PickerContext->DoNotRepeatContext = NULL;
-    }
-  }
-
   FreePool (Context);
 }
 

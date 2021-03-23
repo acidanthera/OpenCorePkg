@@ -51,7 +51,7 @@ typedef struct {
 **/
 VOID
 OcFreeKeyRepeatContext (
-  OC_KEY_REPEAT_CONTEXT                     *Context
+  OC_KEY_REPEAT_CONTEXT               **Context
   );
 
 /** Initialise key repeat context.

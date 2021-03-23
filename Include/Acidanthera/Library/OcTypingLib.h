@@ -65,7 +65,8 @@ OcRegisterTypingHandler (
 
   @param[in]      Context             Typing handler context.
 
-  @retval EFI_SUCCESS                 Unregistered successfully.
+  @retval EFI_SUCCESS                 Unregistered successfully, or context was already null.
+  @retval EFI_NOT_STARTED             Null Apple Event handle present in context.
   @retval other                       An error returned by a sub-operation.
 **/
 EFI_STATUS
