@@ -404,22 +404,10 @@ OcGetPickerKeyInfo (
   }
 
   //
-  // Handle typing
+  // Handle typing chars.
   //
-  if (FilterForTyping) {
-    if (UnicodeChar >= 32 && UnicodeChar < 128) {
-      PickerKeyInfo->TypingChar = (CHAR8)UnicodeChar;
-    }
-
-    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyEscape)) {
-      PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_CLEAR_ALL;
-      return;
-    }
-
-    if (OcKeyMapHasKey (Keys, NumKeys, AppleHidUsbKbUsageKeyBackSpace)) {
-      PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_BACKSPACE;
-      return;
-    }
+  if (FilterForTyping && UnicodeChar >= 32 && UnicodeChar < 128) {
+    PickerKeyInfo->TypingChar = (CHAR8)UnicodeChar;
   }
 
   //
@@ -468,6 +456,23 @@ OcGetPickerKeyInfo (
 
       if (Keys[0] == AppleHidUsbKbUsageKeyRightArrow) {
         PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_RIGHT;
+        return;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyEscape) {
+        PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_CLEAR_ALL;
+        return;
+      }
+
+      if (Keys[0] ==AppleHidUsbKbUsageKeyBackSpace) {
+        PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_BACKSPACE;
+        return;
+      }
+
+      if (Keys[0] == AppleHidUsbKbUsageKeyEnter
+        || Keys[0] == AppleHidUsbKbUsageKeyReturn
+        || Keys[0] == AppleHidUsbKbUsageKeyPadEnter) {
+        PickerKeyInfo->OcKeyCode = OC_INPUT_TYPING_CONFIRM;
         return;
       }
     } else {
