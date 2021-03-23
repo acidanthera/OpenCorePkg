@@ -117,7 +117,7 @@ jobs:
           path: Binaries/*.zip
 
   build-windows:
-    name: Build Windows VS2017
+    name: Build Windows VS2019
     runs-on: windows-latest
     env:
       HAS_OPENSSL_BUILD: 0
