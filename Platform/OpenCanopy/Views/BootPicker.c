@@ -307,8 +307,8 @@ InternalBootPickerKeyEvent (
   IN     BOOT_PICKER_GUI_CONTEXT *GuiContext,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     OC_KEY_CODE             Key,
+  IN     OC_MODIFIER_MAP         Modifiers
   )
 {
   GUI_VOLUME_PICKER       *Picker;
@@ -352,7 +352,7 @@ InternalBootPickerKeyEvent (
   } else if (Key == OC_INPUT_CONTINUE) {
     if (mBootPicker.Hdr.Obj.NumChildren > 0) {
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-      SelectedEntry->Context->SetDefault = Modifier;
+      SelectedEntry->Context->SetDefault = ((Modifiers & OC_MODIFIERS_SET_DEFAULT) != 0);
       GuiContext->ReadyToBoot = TRUE;
       ASSERT (GuiContext->BootEntry == SelectedEntry->Context);
     }
@@ -364,13 +364,18 @@ InternalBootPickerKeyEvent (
   }
 
   if (Key == OC_INPUT_MORE) {
-    GuiContext->HideAuxiliary = FALSE;
-    GuiContext->Refresh = TRUE;
-    DrawContext->GuiContext->PickerContext->PlayAudioFile (
-      DrawContext->GuiContext->PickerContext,
-      OcVoiceOverAudioFileShowAuxiliary,
-      FALSE
-      );
+    //
+    // Match Builtin picker logic here: only refresh if the keypress makes a change
+    //
+    if (GuiContext->HideAuxiliary) {
+      GuiContext->HideAuxiliary = FALSE;
+      GuiContext->Refresh = TRUE;
+      DrawContext->GuiContext->PickerContext->PlayAudioFile (
+        DrawContext->GuiContext->PickerContext,
+        OcVoiceOverAudioFileShowAuxiliary,
+        FALSE
+        );
+    }
   } else if (Key == OC_INPUT_ABORTED) {
     GuiContext->Refresh = TRUE;
     DrawContext->GuiContext->PickerContext->PlayAudioFile (
@@ -1191,8 +1196,8 @@ InternalBootPickerViewKeyEvent (
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     OC_KEY_CODE             Key,
+  IN     OC_MODIFIER_MAP         Modifiers
   )
 {
   ASSERT (This != NULL);
@@ -1211,7 +1216,7 @@ InternalBootPickerViewKeyEvent (
     mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX,
     mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY,
     Key,
-    Modifier
+    Modifiers
     );
 }
 

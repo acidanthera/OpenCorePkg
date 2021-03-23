@@ -32,6 +32,7 @@
 
 [Sources]
   OcAppleKeyMapLib.c
+  UpDownDetection.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec

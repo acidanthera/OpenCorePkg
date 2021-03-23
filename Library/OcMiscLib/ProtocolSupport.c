@@ -166,3 +166,34 @@ OcCountProtocolInstances (
 
   return HandleCount;
 }
+
+VOID *
+OcGetProtocol (
+  IN  EFI_GUID      *Protocol,
+  IN  UINTN         ErrorLevel,
+  IN  CONST CHAR8   *CallerName     OPTIONAL,
+  IN  CONST CHAR8   *ProtocolName   OPTIONAL
+  )
+{
+  EFI_STATUS        Status;
+  VOID              *Instance;
+
+  Status = gBS->LocateProtocol (
+    Protocol,
+    NULL,
+    (VOID **) &Instance
+    );
+
+  if (EFI_ERROR (Status)) {
+    Instance = NULL;
+    if (ErrorLevel != 0) {
+      if (ProtocolName != NULL) {
+        DEBUG ((ErrorLevel, "OCM: %a cannot get protocol %s - %r\n", CallerName, ProtocolName, Status));
+      } else {
+        DEBUG ((ErrorLevel, "OCM: %a cannot get protocol %g - %r\n", CallerName, Protocol, Status));
+      }
+    }
+  }
+
+  return Instance;
+}

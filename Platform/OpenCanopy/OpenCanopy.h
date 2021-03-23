@@ -71,8 +71,8 @@ VOID
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INTN                    Key,
-  IN     BOOLEAN                 Modifier
+  IN     OC_KEY_CODE             Key,
+  IN     OC_MODIFIER_MAP         Modifiers
   );
 
 typedef

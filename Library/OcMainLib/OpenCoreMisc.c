@@ -961,7 +961,7 @@ OcMiscBoot (
   Context->ShowMenu              = OcShowSimpleBootMenu;
   Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
   Context->GetEntryIcon          = OcGetBootEntryIcon;
-  Context->GetKeyIndex           = OcGetAppleKeyIndex;
+  Context->GetKeyInfo            = OcGetPickerKeyInfo;
   Context->PlayAudioFile         = OcPlayAudioFile;
   Context->PlayAudioBeep         = OcPlayAudioBeep;
   Context->PlayAudioEntry        = OcPlayAudioEntry;

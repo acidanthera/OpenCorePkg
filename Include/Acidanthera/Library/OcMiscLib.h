@@ -108,6 +108,30 @@ OcCountProtocolInstances (
   );
 
 /**
+  Obtain protocol.
+  If not obtained returns NULL, and optionally adds log message
+  "[CallerName] cannot get protocol [ProtocolName] - %r".
+
+  @param[in]  Protocol      Protocol to search for.
+  @param[in]  ErrorLevel    The error level of the debug log message to print if protocol not found.
+                            Send zero to generate no log message (caller becomes reponsible).
+  @param[in]  CallerName    The caller name for the error message; should always be provided
+                            if ErrorLevel is non-zero; will work, but with less useful log output,
+                            if ommitted in that case.
+  @param[in]  ProtocolName  The protocol name for the error message; optional, protocol GUID will
+                            be used as protocol name in error message when required, otherwise.
+
+  @return     Protocol instance, or NULL if not found.
+**/
+VOID *
+OcGetProtocol (
+  IN  EFI_GUID      *Protocol,
+  IN  UINTN         ErrorLevel,
+  IN  CONST CHAR8   *CallerName     OPTIONAL,
+  IN  CONST CHAR8   *ProtocolName   OPTIONAL
+  );
+
+/**
   Run and execute image file from buffer.
 
   @param[in]  DevicePath   Image device path, optional.

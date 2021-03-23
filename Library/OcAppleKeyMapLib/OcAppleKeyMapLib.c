@@ -15,6 +15,7 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
+
 #include <AppleMacEfi.h>
 #include <IndustryStandard/AppleHid.h>
 #include <Protocol/AppleKeyMapAggregator.h>
@@ -25,9 +26,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcTimerLib.h>
 #include <Library/TimerLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-
 
 // KEY_MAP_AGGREGATOR_DATA_SIGNATURE
 #define KEY_MAP_AGGREGATOR_DATA_SIGNATURE  \
@@ -271,6 +272,10 @@ OcKeyMapFlush (
 
   ASSERT (KeyMap != NULL);
 
+  //
+  // Key flush support for use on systems with EFI driver level key repeat; on newer
+  // and Apple hardware, will hang until all keys (including control keys) come up.
+  //
   while (TRUE) {
     NumKeys = ARRAY_SIZE (Keys);
     Status = KeyMap->GetKeyStrokes (
@@ -293,7 +298,7 @@ OcKeyMapFlush (
       break;
     }
 
-    MicroSecondDelay (10);
+    MicroSecondDelay (OC_MINIMAL_CPU_DELAY);
   }
 
   if (FlushConsole) {

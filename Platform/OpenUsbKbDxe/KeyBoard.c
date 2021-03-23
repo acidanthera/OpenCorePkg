@@ -1065,7 +1065,7 @@ KeyboardHandler (
 
   //
   // If there is new key pressed, update the RepeatKey value, and set the
-  // timer to repeate delay timer
+  // timer to repeat delay timer
   //
   if (NewRepeatKey != 0) {
     //

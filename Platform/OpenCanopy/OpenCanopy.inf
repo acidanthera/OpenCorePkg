@@ -61,6 +61,7 @@
   gEfiAbsolutePointerProtocolGuid
   gEfiUserInterfaceThemeProtocolGuid
   gAppleEventProtocolGuid
+  gAppleKeyMapAggregatorProtocolGuid
   gOcInterfaceProtocolGuid
   gEfiLoadedImageProtocolGuid
 
@@ -71,7 +72,6 @@
   FrameBufferBltLib
   MemoryAllocationLib
   MtrrLib
-  OcAppleKeyMapLib
   OcCompressionLib
   OcConsoleLib
   OcGuardLib

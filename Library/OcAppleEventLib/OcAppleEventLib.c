@@ -566,7 +566,7 @@ OcAppleEventInstallProtocol (
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCAE: Uninstall failed: %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed: %r\n", Status));
       return NULL;
     }
   } else {
@@ -577,6 +577,7 @@ OcAppleEventInstallProtocol (
       );
 
     if (!EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAE: Using OEM\n"));
       return Protocol;
     }
   }
@@ -599,9 +600,11 @@ OcAppleEventInstallProtocol (
   }
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCAE: Install failed\n"));
     AppleEventUnload ();
     return NULL;
   }
 
+  DEBUG ((DEBUG_INFO, "OCAE: Installed\n"));
   return &mAppleEventProtocol;
 }

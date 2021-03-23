@@ -1,15 +1,7 @@
 /** @file
-  Copyright (C) 2019-2021, vit9696 and contributors. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2019, vit9696. All rights reserved.<BR>
+  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include "BootManagementInternal.h"
@@ -49,6 +41,137 @@
 #include <Library/UefiLib.h>
 #include <Library/ResetSystemLib.h>
 
+STATIC INT32                mStatusRow;
+STATIC INT32                mStatusColumn;
+
+STATIC INT32                mRunningColumn;
+
+STATIC UINT64               mPreviousTick;
+
+STATIC UINT64               mLoopDelayStart;
+STATIC UINT64               mLoopDelayEnd;
+
+#define OC_KB_DBG_MAX_COLUMN           80
+#define OC_KB_DBG_DELTA_SAMPLE_COLUMN  0 //40
+
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+#define OC_TYPING_ROW                  2
+#else
+#define OC_TYPING_ROW                  0
+#endif
+
+#define OC_KB_DBG_PRINT_ROW            (OC_TYPING_ROW + 2)
+
+#define OC_KB_DBG_DOWN_ROW             (OC_KB_DBG_PRINT_ROW + 4)
+#define OC_KB_DBG_X_ROW                (OC_KB_DBG_PRINT_ROW + 5)
+#define OC_KB_DBG_MODIFIERS_ROW        (OC_KB_DBG_PRINT_ROW + 6)
+
+STATIC
+VOID
+InitKbDebugDisplay (
+  VOID
+  )
+{
+  mRunningColumn = 0;
+
+  mLoopDelayStart = 0;
+  mLoopDelayEnd = 0;
+}
+
+STATIC
+VOID
+EFIAPI
+InstrumentLoopDelay (
+  UINT64 LoopDelayStart,
+  UINT64 LoopDelayEnd
+  )
+{
+  mLoopDelayStart     = LoopDelayStart;
+  mLoopDelayEnd       = LoopDelayEnd;
+}
+
+STATIC
+VOID
+EFIAPI
+ShowKbDebugDisplay (
+  UINTN                     NumKeysDown,
+  UINTN                     NumKeysHeld,
+  APPLE_MODIFIER_MAP        Modifiers
+  )
+{
+  CONST CHAR16    *ClearSpace = L"      ";
+
+  UINT64          CurrentTick;
+
+  CHAR16          Code[3]; // includes flush-ahead space, to make progress visible
+
+  Code[1]         = L' ';
+  Code[2]         = L'\0';
+
+  CurrentTick     = AsmReadTsc();
+
+  if (mRunningColumn == OC_KB_DBG_DELTA_SAMPLE_COLUMN) {
+    gST->ConOut->SetCursorPosition (gST->ConOut, 0, mStatusRow + OC_KB_DBG_PRINT_ROW + 1);
+
+    Print (
+      L"Called delta   = %,Lu%s\n",
+      CurrentTick - mPreviousTick,
+      ClearSpace);
+
+    Print (L"Loop delta     = %,Lu (@ -%,Lu)%s%s\n",
+      mLoopDelayEnd == 0 ? 0 : mLoopDelayEnd - mLoopDelayStart,
+      mLoopDelayEnd == 0 ? 0 : CurrentTick - mLoopDelayEnd,
+      ClearSpace,
+      ClearSpace);
+  }
+
+  mPreviousTick = CurrentTick;
+
+  //
+  // Show Apple Event keys
+  //
+  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, mStatusRow + OC_KB_DBG_DOWN_ROW);
+  if (NumKeysDown > 0) {
+    Code[0] = L'D';
+  } else {
+    Code[0] = L' ';
+  }
+  gST->ConOut->OutputString (gST->ConOut, Code);
+
+  //
+  // Show AKMA key held info
+  //
+  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, mStatusRow + OC_KB_DBG_X_ROW);
+  if (NumKeysHeld > 0) {
+    Code[0] = L'X';
+  } else {
+    Code[0] = L'.';
+  }
+  gST->ConOut->OutputString (gST->ConOut, Code);
+
+  //
+  // Modifiers info
+  //
+  gST->ConOut->SetCursorPosition (gST->ConOut, mRunningColumn, mStatusRow + OC_KB_DBG_MODIFIERS_ROW);
+  if (Modifiers == 0) {
+    Code[0] = L' ';
+    gST->ConOut->OutputString (gST->ConOut, Code);
+  } else {
+    Print (L"%X", Modifiers);
+  }
+
+  if (++mRunningColumn >= OC_KB_DBG_MAX_COLUMN) {
+    mRunningColumn = 0;
+  }
+
+  gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+}
+
+STATIC OC_KB_DEBUG_CALLBACKS mSimplePickerKbDebug = {
+  InstrumentLoopDelay,
+  ShowKbDebugDisplay
+};
+
 STATIC
 EFI_STATUS
 RunShowMenu (
@@ -70,6 +193,8 @@ RunShowMenu (
     BootContext->PickerContext->ApplePickerUnsupported = TRUE;
   }
 
+  OcInitHotKeys (BootContext->PickerContext);
+      
   BootEntries = OcEnumerateEntries (BootContext);
   if (BootEntries == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -107,20 +232,33 @@ RunShowMenu (
 }
 
 STATIC
+VOID
+DisplaySystemMs (
+  VOID
+  )
+{
+  UINT64      CurrentMillis;
+
+  CurrentMillis = DivU64x64Remainder (GetTimeInNanoSecond (GetPerformanceCounter ()), 1000000ULL, NULL);
+  Print (L"%,Lu]", CurrentMillis);
+}
+
+STATIC
 CHAR16
 GetPickerEntryCursor (
   IN  OC_BOOT_CONTEXT             *BootContext,
   IN  UINT32                      TimeOutSeconds,
   IN  INTN                        ChosenEntry,
-  IN  UINTN                       Index
+  IN  UINTN                       Index,
+  IN  OC_MODIFIER_MAP             OcModifiers
   )
-{  
+{
   if (TimeOutSeconds > 0 && BootContext->DefaultEntry->EntryIndex - 1 == Index) {
     return L'*';
   }
   
   if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
-    return L'>';
+    return ((OcModifiers & OC_MODIFIERS_SET_DEFAULT) != 0) ? L'+' : L'>';
   }
 
   return L' ';
@@ -137,33 +275,55 @@ OcShowSimpleBootMenu (
   APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   UINTN                              Index;
   UINTN                              Length;
-  INTN                               KeyIndex;
+  OC_PICKER_KEY_INFO                 PickerKeyInfo;
   INTN                               ChosenEntry;
   INTN                               OldChosenEntry;
   INT32                              FirstIndexRow;
-  INT32                              StatusRow;
-  INT32                              StatusColumn;
+  INT32                              MillisColumn;
   CHAR16                             EntryCursor;
   CHAR16                             OldEntryCursor;
   CHAR16                             Code[2];
   UINT32                             TimeOutSeconds;
   UINT32                             Count;
-  BOOLEAN                            SetDefault;
+  UINT64                             KeyEndTime;
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
+  BOOLEAN                            IsTyping;
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  INT32                              TypingColumn;
+  INT32                              TypingStartColumn;
+#endif
 
   Code[1]        = L'\0';
 
   TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
+  KeyEndTime     = 0;
+
   ASSERT (BootContext->DefaultEntry != NULL);
   ChosenEntry    = (INTN) (BootContext->DefaultEntry->EntryIndex - 1);
   OldChosenEntry = ChosenEntry;
+
   EntryCursor    = L'\0';
   OldEntryCursor = L'\0';
+
   FirstIndexRow  = -1;
+  IsTyping       = FALSE;
+
+  //
+  // Used to detect changes.
+  //
+  PickerKeyInfo.OcModifiers = OC_MODIFIERS_NONE;
 
   PlayedOnce     = FALSE;
   PlayChosen     = FALSE;
+
+  DEBUG_CODE_BEGIN();
+  if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+    DEBUG ((DEBUG_INFO, "OCB: Init builtin picker debug\n"));
+    InitKbDebugDisplay();
+    BootContext->PickerContext->KbDebug = &mSimplePickerKbDebug;
+  }
+  DEBUG_CODE_END();
 
   KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
   if (KeyMap == NULL) {
@@ -201,7 +361,7 @@ OcShowSimpleBootMenu (
       }
       
       if (ChosenEntry >= 0) {
-        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, ChosenEntry);
+        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, ChosenEntry, PickerKeyInfo.OcModifiers);
       } else {
         EntryCursor = L'\0';
       }
@@ -216,8 +376,19 @@ OcShowSimpleBootMenu (
         OldChosenEntry = ChosenEntry;
         OldEntryCursor = EntryCursor;
 
-        gST->ConOut->SetCursorPosition (gST->ConOut, StatusColumn, StatusRow);
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
+
+      DEBUG_CODE_BEGIN();
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+        //
+        // Varying part of milliseconds display
+        //
+        gST->ConOut->SetCursorPosition (gST->ConOut, MillisColumn, 0);
+        DisplaySystemMs ();
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+      }
+      DEBUG_CODE_END();
     } else {
       //
       // Render initial menu
@@ -235,12 +406,23 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L")");
       }
 
+      DEBUG_CODE_BEGIN();
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+        //
+        // Fixed part of milliseconds display
+        //
+        gST->ConOut->OutputString (gST->ConOut, L" [System uptime: ");
+        MillisColumn = gST->ConOut->Mode->CursorColumn;
+        DisplaySystemMs ();
+      }
+      DEBUG_CODE_END();
+
       gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
 
       FirstIndexRow = gST->ConOut->Mode->CursorRow;
 
       for (Index = 0; Index < MIN (Count, OC_INPUT_MAX); ++Index) {
-        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, Index);
+        EntryCursor = GetPickerEntryCursor(BootContext, TimeOutSeconds, ChosenEntry, Index, PickerKeyInfo.OcModifiers);
 
         if (ChosenEntry >= 0 && (UINTN) ChosenEntry == Index) {
           OldEntryCursor = EntryCursor;
@@ -263,8 +445,29 @@ OcShowSimpleBootMenu (
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
       gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
 
-      StatusRow     = gST->ConOut->Mode->CursorRow;
-      StatusColumn  = gST->ConOut->Mode->CursorColumn;
+      mStatusRow     = gST->ConOut->Mode->CursorRow;
+      mStatusColumn  = gST->ConOut->Mode->CursorColumn;
+
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+      gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
+      Print (L"Typing: ");
+      TypingColumn = gST->ConOut->Mode->CursorColumn;
+      TypingStartColumn = TypingColumn;
+#endif
+
+      DEBUG_CODE_BEGIN();
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+        //
+        // Parts of main debug display which do not need to reprint every frame
+        // TODO: Could do more here
+        //
+        gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
+        Print (
+          L"mTscFrequency  = %,Lu\n",
+          GetTscFrequency ());
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+      }
+      DEBUG_CODE_END();
     }
 
     if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {
@@ -285,49 +488,124 @@ OcShowSimpleBootMenu (
     }
 
     while (TRUE) {
-      //
-      // Pronounce entry name only after N ms of idleness.
-      //
-      KeyIndex = OcWaitForAppleKeyIndex (
+      if (PlayChosen) {
+        //
+        // Pronounce entry name only after N ms of idleness.
+        //
+        KeyEndTime = OcWaitForPickerKeyInfoGetEndTime(OC_VOICE_OVER_IDLE_TIMEOUT_MS);
+      } else if (TimeOutSeconds != 0) {
+        if (KeyEndTime == 0) {
+          KeyEndTime = OcWaitForPickerKeyInfoGetEndTime(TimeOutSeconds * 1000);
+        }
+      } else {
+        KeyEndTime = 0;
+      }
+
+      OcWaitForPickerKeyInfo (
         BootContext->PickerContext,
         KeyMap,
-        PlayChosen ? OC_VOICE_OVER_IDLE_TIMEOUT_MS : TimeOutSeconds * 1000,
-        &SetDefault
+        KeyEndTime,
+        IsTyping,
+        &PickerKeyInfo
         );
 
-      if (PlayChosen && KeyIndex == OC_INPUT_TIMEOUT) {
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+      if (PickerKeyInfo.OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
+        //
+        // Only allow TAB to go forwards and SHIFT+TAB to go backwards, just to test that it is working.
+        //
+        if (!IsTyping && ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) == 0)) {
+          IsTyping = TRUE;
+        } else if (IsTyping && ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) != 0)) {
+          IsTyping = FALSE;
+        }
+
+        //
+        // Show/hide typing cursor.
+        //
+        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
+        Code[0] = IsTyping ? L'_' : ' ';
+        gST->ConOut->OutputString (gST->ConOut, Code);
+
+        //
+        // Show/hide picker cursor.
+        //
+        if (ChosenEntry >= 0) {
+          gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
+          Code[0] = IsTyping ? L' ' : OldEntryCursor;
+          gST->ConOut->OutputString (gST->ConOut, Code);
+
+          //
+          // Timeout gets cancelled and thefore cursor gets redrawn unless we do this.
+          //
+          OldEntryCursor = GetPickerEntryCursor(BootContext, 0, ChosenEntry, ChosenEntry, PickerKeyInfo.OcModifiers);
+        }
+
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+      }
+
+      if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_BACKSPACE && TypingColumn > TypingStartColumn) {
+        //
+        // Backspace and move cursor.
+        //
+        TypingColumn--;
+        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
+        Code[0] = L'_';
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        Code[0] = L' ';
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+      } else if (PickerKeyInfo.TypingChar != '\0') {
+        //
+        // Type and move cursor.
+        //
+        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
+        Code[0] = (CHAR16) PickerKeyInfo.TypingChar;
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        Code[0] = L'_';
+        gST->ConOut->OutputString (gST->ConOut, Code);
+        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+        TypingColumn++;
+      }
+#endif
+
+      if (PickerKeyInfo.OcKeyCode == OC_INPUT_EXTRA) {
+        break;
+      }
+
+      if (PlayChosen && PickerKeyInfo.OcKeyCode == OC_INPUT_TIMEOUT) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
         OcPlayAudioEntry (BootContext->PickerContext, BootEntries[ChosenEntry]);
         PlayChosen = FALSE;
         continue;
-      } else if (KeyIndex == OC_INPUT_TIMEOUT) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_TIMEOUT) {
         *ChosenBootEntry = BootEntries[BootContext->DefaultEntry->EntryIndex - 1];
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_TIMEOUT);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileTimeout, FALSE);
         return EFI_SUCCESS;
-      } else if (KeyIndex == OC_INPUT_CONTINUE) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_CONTINUE) {
         if (ChosenEntry >= 0) {
           *ChosenBootEntry = BootEntries[(UINTN) ChosenEntry];
         } else {
           *ChosenBootEntry = BootContext->DefaultEntry;
         }
-        (*ChosenBootEntry)->SetDefault = SetDefault;
+        (*ChosenBootEntry)->SetDefault = ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_SET_DEFAULT) != 0);
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_OK);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         return EFI_SUCCESS;
-      } else if (KeyIndex == OC_INPUT_ABORTED) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_ABORTED) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_RELOADING);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileReloading, FALSE);
         return EFI_ABORTED;
-      } else if (KeyIndex == OC_INPUT_MORE && BootContext->PickerContext->HideAuxiliary) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_MORE && BootContext->PickerContext->HideAuxiliary) {
         gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHOW_AUXILIARY);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShowAuxiliary, FALSE);
         BootContext->PickerContext->HideAuxiliary = FALSE;
         return EFI_ABORTED;
-      } else if (KeyIndex == OC_INPUT_UP) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_UP) {
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
         } else if (ChosenEntry == 0) {
@@ -340,7 +618,7 @@ OcShowSimpleBootMenu (
           PlayChosen = TRUE;
         }
         break;
-      } else if (KeyIndex == OC_INPUT_DOWN) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_DOWN) {
         if (ChosenEntry < 0) {
           ChosenEntry = 0;
         } else if (ChosenEntry == (INTN) (MIN (Count, OC_INPUT_MAX) - 1)) {
@@ -353,27 +631,27 @@ OcShowSimpleBootMenu (
           PlayChosen = TRUE;
         }
         break;
-      } else if (KeyIndex == OC_INPUT_TOP || KeyIndex == OC_INPUT_LEFT) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_TOP || PickerKeyInfo.OcKeyCode == OC_INPUT_LEFT) {
         ChosenEntry = 0;
         TimeOutSeconds = 0;
         if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
-      } else if (KeyIndex == OC_INPUT_BOTTOM || KeyIndex == OC_INPUT_RIGHT) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_BOTTOM || PickerKeyInfo.OcKeyCode == OC_INPUT_RIGHT) {
         ChosenEntry = (INTN) (MIN (Count, OC_INPUT_MAX) - 1);
         TimeOutSeconds = 0;
         if (BootContext->PickerContext->PickerAudioAssist) {
           PlayChosen = TRUE;
         }
         break;
-      } else if (KeyIndex == OC_INPUT_VOICE_OVER) {
+      } else if (PickerKeyInfo.OcKeyCode == OC_INPUT_VOICE_OVER) {
         OcToggleVoiceOver (BootContext->PickerContext, 0);
         break;
-      } else if (KeyIndex != OC_INPUT_INVALID && KeyIndex >= 0 && (UINTN)KeyIndex < Count) {
-        *ChosenBootEntry = BootEntries[KeyIndex];
-        (*ChosenBootEntry)->SetDefault = SetDefault;
-        Code[0] = OC_INPUT_STR[KeyIndex];
+      } else if (PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION && PickerKeyInfo.OcKeyCode >= 0 && (UINTN)PickerKeyInfo.OcKeyCode < Count) {
+        *ChosenBootEntry = BootEntries[PickerKeyInfo.OcKeyCode];
+        (*ChosenBootEntry)->SetDefault = ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_SET_DEFAULT) != 0);
+        Code[0] = OC_INPUT_STR[PickerKeyInfo.OcKeyCode];
         gST->ConOut->OutputString (gST->ConOut, Code);
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
         return EFI_SUCCESS;

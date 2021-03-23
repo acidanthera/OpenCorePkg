@@ -40,5 +40,6 @@
   UefiCpuPkg/UefiCpuPkg.dec
 
 [LibraryClasses]
+  BaseLib
   OcCpuLib
   PciLib

@@ -91,9 +91,9 @@ GuiKeyReset (
 EFI_STATUS
 EFIAPI
 GuiKeyRead (
-  IN OUT GUI_KEY_CONTEXT  *Context,
-  OUT    INTN             *KeyIndex,
-  OUT    BOOLEAN          *Modifier
+  IN OUT GUI_KEY_CONTEXT      *Context,
+     OUT OC_PICKER_KEY_INFO   *PickerKeyInfo,
+  IN     BOOLEAN              FilterForTyping
   );
 
 VOID

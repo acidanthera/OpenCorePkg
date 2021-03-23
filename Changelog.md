@@ -24,6 +24,7 @@ OpenCore Changelog
 - Fixed OpenCanopy interrupt handling causing missed events and lag
 - Improved OpenCanopy double-click detection 
 - Reduced OpenCanopy touch input lag and improved usability
+- Improved keyboard handling on OpenCanopy and Builtin pickers
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

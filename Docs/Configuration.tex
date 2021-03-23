@@ -3199,6 +3199,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enables pointer control
   in the OpenCore picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
+  \item \texttt{0x0020} --- \texttt{OC\_ATTR\_DEBUG\_DISPLAY}, enable display of additional
+  timing and debug information, in Builtin picker in \texttt{DEBUG} and \texttt{NOOPT}
+  builds only.
   \end{itemize}
 
 \item
@@ -3230,9 +3233,10 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   On certain firmware, using modifier keys may be problematic due to driver incompatibilities.
   To workaround this problem, this option allows registering certain hotkeys in a more permissive
-  manner from within the OpenCore picker. Such extensions include support for tapping on keys in
-  addition to holding and pressing \texttt{Shift} along with other keys instead of only
-  pressing the \texttt{Shift} key, which is not detectable on many PS/2 keyboards.
+  manner from within the OpenCore picker. Such extensions include support for tapping on key
+  combinations before selecting the boot item, and for reliable detection of the \texttt{Shift} key
+  when selecting the boot item, in order to work around the fact that hotkeys which are continuously
+  held during boot cannot be reliably detected on many PS/2 keyboards.
 
   This list of known \texttt{modifier hotkeys} includes:
   \begin{itemize}
@@ -3242,7 +3246,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{CMD+S} --- single user mode.
   \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
   \item \texttt{CMD+V} --- verbose mode.
-  \item \texttt{Shift} --- safe mode.
+  \item \texttt{Shift+Enter}, \texttt{Shift+Index} --- safe mode, may be used in
+  combination with \texttt{CTRL+Enter}, \texttt{CTRL+Index}.
   \end{itemize}
 
 \item
@@ -3620,8 +3625,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CTRL+Enter} and \texttt{CTRL+Index} handling
-  to set the default boot option in the OpenCore picker.
-
+  to set the default boot option in the OpenCore picker; may be used in combination
+  with \texttt{Shift+Enter} or \texttt{Shift+Index} when \texttt{PollAppleHotKeys} is
+  enabled.
 \item
   \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
