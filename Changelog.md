@@ -24,9 +24,10 @@ OpenCore Changelog
 - Fixed OpenCanopy interrupt handling causing missed events and lag
 - Improved OpenCanopy double-click detection 
 - Reduced OpenCanopy touch input lag and improved usability
-- Apple Event keyboard handling for improved keypress response in OpenCanopy and Builtin pickers
-- Apple Key Map edge detection for improved non-repeating key response in pickers
-- Improved Shift+Enter and Shift+Index handling with PollAppleHotKeys
+- Added Apple Event keyboard handling for improved keypress response in OpenCanopy and Builtin pickers
+- Added Apple Key Map edge detection for improved non-repeating key response in pickers
+- Fixed extremely fast repeat then stall issue with keyboard handling on some PS/2 systems
+- Improved Shift+Enter and Shift+Index behaviour with PollAppleHotKeys
 - Added CTRL-held indicator to Builtin picker
 
 #### v0.6.7
