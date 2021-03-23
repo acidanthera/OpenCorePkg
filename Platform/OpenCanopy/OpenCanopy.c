@@ -1117,7 +1117,8 @@ GuiDrawLoop (
         //
         // If detected key press then disable menu timeout
         //
-        if (TimeOutSeconds > 0) {
+        if (PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION
+          && TimeOutSeconds > 0) {
           //
           // Voice only unrelated key press.
           //
