@@ -214,4 +214,10 @@ InternetGetOcCustomDevPath (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 
+EFI_STATUS
+InternalRunRequestPrivilege (
+  IN OC_PICKER_CONTEXT   *PickerContext,
+  IN OC_PRIVILEGE_LEVEL  Level
+  );
+
 #endif // BOOT_MANAGEMENET_INTERNAL_H

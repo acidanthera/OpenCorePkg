@@ -239,6 +239,29 @@ RunShowMenu (
   return Status;
 }
 
+EFI_STATUS
+InternalRunRequestPrivilege (
+  IN OC_PICKER_CONTEXT   *PickerContext,
+  IN OC_PRIVILEGE_LEVEL  Level
+  )
+{
+  EFI_STATUS Status;
+
+  Status = OcInitHotKeys (PickerContext);
+  if (EFI_ERROR(Status)) {
+    return Status;
+  }
+
+  Status = PickerContext->RequestPrivilege (
+    PickerContext,
+    OcPrivilegeAuthorized
+    );
+
+  OcFreeHotKeys (PickerContext);
+
+  return Status;
+}
+
 STATIC
 VOID
 DisplaySystemMs (
@@ -882,10 +905,7 @@ OcRunBootPicker (
   // This one is handled as is for Apple BootPicker for now.
   //
   if (Context->PickerCommand != OcPickerDefault) {
-    Status = Context->RequestPrivilege (
-      Context,
-      OcPrivilegeAuthorized
-      );
+    Status = InternalRunRequestPrivilege (Context, OcPrivilegeAuthorized);
     if (EFI_ERROR (Status)) {
       if (Status != EFI_ABORTED) {
         ASSERT (FALSE);

@@ -23,6 +23,8 @@
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 
+#include "BootManagementInternal.h"
+
 VOID
 OcParseBootArgs (
   OUT OC_BOOT_ARGUMENTS *Arguments,
@@ -173,10 +175,7 @@ OcAppendArgumentToCmd (
   UINTN      Len = AsciiStrLen (CommandLine);
 
   if (Context != NULL) {
-    Status = Context->RequestPrivilege (
-      Context,
-      OcPrivilegeAuthorized
-      );
+    Status = InternalRunRequestPrivilege (Context, OcPrivilegeAuthorized);
     if (EFI_ERROR (Status)) {
       if (Status != EFI_ABORTED) {
         ASSERT (FALSE);
