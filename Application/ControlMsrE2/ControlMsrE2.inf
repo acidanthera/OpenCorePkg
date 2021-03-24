@@ -1,7 +1,7 @@
 ## @file
-#  Verify MSR 0xE2 status on all the processors.
+#  Control MSR 0xE2 BIOS Option.
 #
-#  Copyright (c) 2018, vit9696. All rights reserved.<BR>
+#  Copyright (c) 2020, Brumbaer. All rights reserved.<BR>
 #
 #  This program and the accompanying materials
 #  are licensed and made available under the terms and conditions of the BSD License
@@ -14,8 +14,9 @@
 
 [Defines]
   INF_VERSION                    = 0x00010005
-  BASE_NAME                      = VerifyMsrE2
-  FILE_GUID                      = 9031CCA3-EF7A-4D36-ADCA-F75802085D32
+  BASE_NAME                      = ControlMsrE2
+  FILE_GUID                      = A779AF43-2D2E-4C9F-998E-CA1AE5DD248B
+
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
   ENTRY_POINT                    = UefiMain
@@ -32,7 +33,10 @@
 #
 
 [Sources]
+  ControlMsrE2.c
   VerifyMsrE2.c
+  ControlMsrE2UI.c
+  ControlMsrE2Hii.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -40,12 +44,25 @@
   OpenCorePkg/OpenCorePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
-[Protocols]
-  gEfiMpServiceProtocolGuid                 ## CONSUMES
-
 [LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  OcMemoryLib
+  OcMiscLib
   OcConsoleControlEntryModeGenericLib
   UefiApplicationEntryPoint
   UefiLib
+  HiiLib
+  UefiHiiServicesLib
   PcdLib
   IoLib
+
+[Guids]
+gEfiHiiPlatformSetupFormsetGuid
+
+[Protocols]
+gEfiMpServiceProtocolGuid                 ## CONSUMES
+gEfiHiiDatabaseProtocolGuid
+
