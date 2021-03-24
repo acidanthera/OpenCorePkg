@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar 17 04:20:17 2021
-%DIF ADD ../Configuration.tex        Wed Mar 17 04:24:07 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
+%DIF ADD ../Configuration.tex        Wed Mar 24 10:55:06 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1302,8 +1302,10 @@ should be met before starting:
   firmware settings if present. Consider
 \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
   if no option is available (for advanced users only). See
-\hyperref[kernelpropsquirks]{VerifyMsrE2}
-  notes for more details.
+\DIFdelbegin %DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
+%DIFDELCMD <   %%%
+\DIFdelend \DIFaddbegin \hyperref[kernelpropsquirks]{ControlMsrE2}
+  \DIFaddend notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
   if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
@@ -2443,8 +2445,8 @@ blocking.
   kernel panic, when it is locked from writing.
 
   Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register and the bundled
-  \texttt{VerifyMsrE2} tool can be used to check its state. Note that some types of firmware only
-  have this register locked on some cores.
+  \texttt{\DIFdelbegin \DIFdel{VerifyMsrE2}\DIFdelend \DIFaddbegin \DIFadd{ControlMsrE2}\DIFaddend } tool can be used to check its state \DIFaddbegin \DIFadd{and enable it on selected platforms with
+  that option hidden}\DIFaddend . Note that some types of firmware only have this register locked on some cores.
 
   As modern firmware provide a \texttt{CFG Lock} setting that allows configuring the
   \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
@@ -2707,7 +2709,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
+  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
@@ -3275,7 +3277,10 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enables pointer control
   in the OpenCore picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
-  \end{itemize}
+  \DIFaddbegin \item \texttt{\DIFadd{0x0020}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_DEBUG\_DISPLAY}}\DIFadd{, enable display of additional
+  timing and debug information, in Builtin picker in }\texttt{\DIFadd{DEBUG}} \DIFadd{and }\texttt{\DIFadd{NOOPT}}
+  \DIFadd{builds only.
+  }\DIFaddend \end{itemize}
 
 \item
   \texttt{PickerAudioAssist}\\
@@ -3306,9 +3311,13 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   On certain firmware, using modifier keys may be problematic due to driver incompatibilities.
   To workaround this problem, this option allows registering certain hotkeys in a more permissive
-  manner from within the OpenCore picker. Such extensions include support for tapping on keys in
-  addition to holding and pressing \texttt{Shift} along with other keys instead of only
-  pressing the \texttt{Shift} key, which is not detectable on many PS/2 keyboards.
+  manner from within the OpenCore picker. Such extensions include support for tapping on \DIFdelbegin \DIFdel{keys in
+  addition to holding and pressing }\texttt{\DIFdel{Shift}} %DIFAUXCMD
+\DIFdel{along with other keys instead of only
+  pressing }\DIFdelend \DIFaddbegin \DIFadd{key
+  combinations before selecting the boot item, and for reliable detection of }\DIFaddend the \texttt{Shift} key
+  \DIFdelbegin \DIFdel{, which is not detectable }\DIFdelend \DIFaddbegin \DIFadd{when selecting the boot item, in order to work around the fact that hotkeys which are continuously
+  held during boot cannot be reliably detected }\DIFaddend on many PS/2 keyboards.
 
   This list of known \texttt{modifier hotkeys} includes:
   \begin{itemize}
@@ -3318,7 +3327,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{CMD+S} --- single user mode.
   \item \texttt{CMD+S+MINUS} --- disable KASLR slide, requires disabled SIP.
   \item \texttt{CMD+V} --- verbose mode.
-  \item \texttt{Shift} --- safe mode.
+  \item \texttt{Shift\DIFaddbegin \DIFadd{+Enter}\DIFaddend }\DIFaddbegin \DIFadd{, }\texttt{\DIFadd{Shift+Index}} \DIFaddend --- safe mode\DIFaddbegin \DIFadd{, may be used in
+  combination with }\texttt{\DIFadd{CTRL+Enter}}\DIFadd{, }\texttt{\DIFadd{CTRL+Index}}\DIFaddend .
   \end{itemize}
 
 \item
@@ -3696,9 +3706,14 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CTRL+Enter} and \texttt{CTRL+Index} handling
-  to set the default boot option in the OpenCore picker.
+  to set the default boot option in the OpenCore picker\DIFdelbegin \DIFdel{.
+}%DIFDELCMD < 
 
-\item
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{; may be used in combination
+  with }\texttt{\DIFadd{Shift+Enter}} \DIFadd{or }\texttt{\DIFadd{Shift+Index}} \DIFadd{when }\texttt{\DIFadd{PollAppleHotKeys}} \DIFadd{is
+  enabled.
+}\DIFaddend \item
   \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
   \textbf{Failsafe}: \texttt{0}\\
@@ -5888,7 +5903,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\DIFdelbegin \texttt{\DIFdel{VerifyMsrE2}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{ControlMsrE2}}\DIFaddend }\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
 \end{tabular}
 
