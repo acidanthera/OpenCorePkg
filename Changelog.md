@@ -29,6 +29,7 @@ OpenCore Changelog
 - Fixed extremely fast repeat then stall issue with keyboard handling on some PS/2 systems
 - Improved Shift+Enter and Shift+Index behaviour with PollAppleHotKeys
 - Added CTRL-held indicator to Builtin picker
+- Replaced VerifyMsrE2 with ControkMsrE2 also allowing unlock on some firmwares
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
