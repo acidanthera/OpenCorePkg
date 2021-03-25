@@ -325,13 +325,13 @@ OcShowSimpleBootMenu (
   PlayedOnce     = FALSE;
   PlayChosen     = FALSE;
 
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
     DEBUG ((DEBUG_INFO, "OCB: Init builtin picker debug\n"));
     InitKbDebugDisplay();
     BootContext->PickerContext->KbDebug = &mSimplePickerKbDebug;
   }
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 
   KeyMap = OcAppleKeyMapInstallProtocols (FALSE);
   if (KeyMap == NULL) {
@@ -387,7 +387,7 @@ OcShowSimpleBootMenu (
         gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
 
-      DEBUG_CODE_BEGIN();
+      DEBUG_CODE_BEGIN ();
       if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
         //
         // Varying part of milliseconds display
@@ -396,7 +396,7 @@ OcShowSimpleBootMenu (
         DisplaySystemMs ();
         gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
-      DEBUG_CODE_END();
+      DEBUG_CODE_END ();
     } else {
       //
       // Render initial menu
@@ -414,7 +414,7 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L")");
       }
 
-      DEBUG_CODE_BEGIN();
+      DEBUG_CODE_BEGIN ();
       if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
         //
         // Fixed part of milliseconds display
@@ -423,7 +423,7 @@ OcShowSimpleBootMenu (
         MillisColumn = gST->ConOut->Mode->CursorColumn;
         DisplaySystemMs ();
       }
-      DEBUG_CODE_END();
+      DEBUG_CODE_END ();
 
       gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
 
@@ -463,7 +463,7 @@ OcShowSimpleBootMenu (
       TypingStartColumn = TypingColumn;
 #endif
 
-      DEBUG_CODE_BEGIN();
+      DEBUG_CODE_BEGIN ();
       if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
         //
         // Parts of main debug display which do not need to reprint every frame
@@ -475,7 +475,7 @@ OcShowSimpleBootMenu (
           GetTscFrequency ());
         gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
-      DEBUG_CODE_END();
+      DEBUG_CODE_END ();
     }
 
     if (!PlayedOnce && BootContext->PickerContext->PickerAudioAssist) {

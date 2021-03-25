@@ -71,9 +71,9 @@ HandleKeyEvent (
 
   Context->Head = NewHead;
 
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   ASSERT (AppleKeyCode != 0);
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
   
   DEBUG ((OC_TRACE_TYPING, "OCTY: Writing to %d\n", Context->Head));
 
@@ -81,9 +81,9 @@ HandleKeyEvent (
   Context->Buffer[Context->Head].UnicodeChar  = UnicodeChar;
 
 #if defined(OC_TRACE_KEY_TIMES)
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   Context->KeyTimes[Context->Head] = GetPerformanceCounter ();
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 #endif
 }
 
@@ -122,7 +122,7 @@ OcRegisterTypingHandler (
   (*Context)->KeyTimes = NULL;
 
 #if defined(OC_TRACE_KEY_TIMES)
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   DEBUG ((OC_TRACE_TYPING, "OCTY: About to allocate %d x %d for key times buffer\n", OC_TYPING_BUFFER_SIZE, sizeof((*Context)->KeyTimes[0])));
 
   (*Context)->KeyTimes = AllocatePool (OC_TYPING_BUFFER_SIZE * sizeof((*Context)->KeyTimes[0]));
@@ -134,7 +134,7 @@ OcRegisterTypingHandler (
     Status = EFI_OUT_OF_RESOURCES;
     return Status;
   }
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 #endif
 
   DEBUG ((OC_TRACE_TYPING, "OCTY: RegisterHandler (F, [%p], %p, %p)\n", &HandleKeyEvent, &(*Context)->Handle, *Context));
@@ -148,9 +148,9 @@ OcRegisterTypingHandler (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCTY: Failed to register handler - %r\n", Status));
 #if defined(OC_TRACE_KEY_TIMES)
-    DEBUG_CODE_BEGIN();
+    DEBUG_CODE_BEGIN ();
     FreePool ((*Context)->KeyTimes);
-    DEBUG_CODE_END();
+    DEBUG_CODE_END ();
 #endif
     FreePool (*Context);
     *Context = NULL;
@@ -198,12 +198,12 @@ OcUnregisterTypingHandler (
   }
 
 #if defined(OC_TRACE_KEY_TIMES)
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   if ((*Context)->KeyTimes != NULL) {
     FreePool ((*Context)->KeyTimes);
     (*Context)->KeyTimes = NULL;
   }
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 #endif
 
   FreePool (*Context);
@@ -265,10 +265,10 @@ OcGetNextKeystroke (
   Context->Tail = NewTail;
 
 #if defined(OC_TRACE_KEY_TIMES)
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   CurrentMillis = DivU64x64Remainder (GetTimeInNanoSecond (Context->KeyTimes[Context->Tail]), 1000000ULL, NULL);
   DEBUG ((DEBUG_INFO, "OCTY: OcGetNextKeystroke @%d %d[%x] %,Lu\n", Context->Tail, *Modifiers, *AppleKeyCode, CurrentMillis));
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 #else
   DEBUG ((OC_TRACE_TYPING, "OCTY: OcGetNextKeystroke @%d %d[%x] %,Lu\n", Context->Tail, *Modifiers, *AppleKeyCode, CurrentMillis));
 #endif

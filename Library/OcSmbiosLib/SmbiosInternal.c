@@ -347,9 +347,9 @@ SmbiosFinaliseStruct (
   IN OUT OC_SMBIOS_TABLE  *Table
   )
 {
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   SmbiosDebugAnyStructure (Table->CurrentPtr);
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 
   if (Table->CurrentPtr.Standard.Hdr->Length > Table->MaxStructureSize) {
     Table->MaxStructureSize = Table->CurrentPtr.Standard.Hdr->Length;

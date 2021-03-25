@@ -280,11 +280,11 @@ OcGetPickerKeyInfo (
   }
 
 
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
   if (Context->KbDebug != NULL) {
     Context->KbDebug->Show (NumKeys, AkmaNumKeys, Modifiers);
   }
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 
   //
   // Set OcModifiers early, so they are correct even if - say - a hotkey or non-repeating key returns first.
@@ -650,16 +650,16 @@ OcWaitForPickerKeyInfo (
       }
     }
 
-    DEBUG_CODE_BEGIN();
+    DEBUG_CODE_BEGIN ();
     LoopDelayStart = AsmReadTsc();
-    DEBUG_CODE_END();
+    DEBUG_CODE_END ();
 
     MicroSecondDelay (OC_MINIMAL_CPU_DELAY);
 
-    DEBUG_CODE_BEGIN();
+    DEBUG_CODE_BEGIN ();
     if (Context->KbDebug != NULL) {
       Context->KbDebug->InstrumentLoopDelay (LoopDelayStart, AsmReadTsc());
     }
-    DEBUG_CODE_END();
+    DEBUG_CODE_END ();
   }
 }

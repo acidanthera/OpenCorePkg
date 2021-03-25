@@ -23,7 +23,7 @@ DebugPrintDevicePath (
   IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
 
   CHAR16 *TextDevicePath;
 
@@ -33,7 +33,7 @@ DebugPrintDevicePath (
     FreePool (TextDevicePath);
   }
 
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 }
 
 VOID
@@ -44,7 +44,7 @@ DebugPrintHexDump (
   IN UINTN                     Size
   )
 {
-  DEBUG_CODE_BEGIN();
+  DEBUG_CODE_BEGIN ();
 
   UINTN  Index;
   UINTN  Index2;
@@ -93,5 +93,5 @@ DebugPrintHexDump (
 
   FreePool (HexLine);
 
-  DEBUG_CODE_END();
+  DEBUG_CODE_END ();
 }
