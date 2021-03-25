@@ -202,6 +202,7 @@ InternalBootPickerScroll (
   INT64 ScrollY;
 
   mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
+  mBootPickerSelector.Hdr.Obj.OffsetX += ScrollOffset;
   //
   // The entry list has been scrolled, the entire horizontal space to also cover
   // the scroll buttons.
