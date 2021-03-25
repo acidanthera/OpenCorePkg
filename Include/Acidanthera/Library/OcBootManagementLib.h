@@ -41,6 +41,7 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_MENU_RESET_NVRAM_ENTRY    L"Reset NVRAM"
 #define OC_MENU_UEFI_SHELL_ENTRY     L"UEFI Shell"
 #define OC_MENU_PASSWORD_REQUEST     L"Password: "
+#define OC_MENU_PASSWORD_PROCESSING  L"Verifying password..."
 #define OC_MENU_PASSWORD_RETRY_LIMIT L"Password retry limit exceeded."
 #define OC_MENU_CHOOSE_OS            L"Choose the Operating System: "
 #define OC_MENU_SHOW_AUXILIARY       L"Show Auxiliary"
