@@ -44,9 +44,9 @@ GuiKeyRead (
   ASSERT (Context != NULL);
   ASSERT (PickerKeyInfo != NULL);
 
-  Context->Context->GetKeyInfo (
+  Context->Context->HotKeyContext->GetKeyInfo (
     Context->Context,
-    FilterForTyping,
+    OC_PICKER_KEYS_FOR_PICKER,
     PickerKeyInfo
     );
 

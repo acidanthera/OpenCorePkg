@@ -11,6 +11,7 @@
 #include <Protocol/AppleKeyMapAggregator.h>
 
 #include <Library/BaseLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcAppleKeyMapLib.h>
@@ -110,87 +111,22 @@ OcLoadPickerHotKeys (
   }
 }
 
-//
-// Initialise picker keyboard handling.
-//
-EFI_STATUS
-OcInitHotKeys (
-  IN OUT OC_PICKER_CONTEXT  *Context
-  )
-{
-  EFI_STATUS                         Status;
-
-  DEBUG ((DEBUG_INFO, "OCHK: InitHotKeys\n"));
-
-  //
-  // No kb debug unless initialiased on settings flag by a given picker itself.
-  //
-  Context->KbDebug = NULL;
-
-  Context->KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
-  if (Context->KeyMap == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  //
-  // Non-repeating keys e.g. ESC and SPACE.
-  //
-  Status = OcInitKeyRepeatContext (
-    &Context->DoNotRepeatContext,
-    Context->KeyMap,
-    OC_HELD_KEYS_DEFAULT_SIZE,
-    0,
-    0,
-    TRUE
-  );
-  
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCHK: Init non-repeating context - %r\n", Status));
-    return Status;
-  }
-
-  //
-  // Typing handler, for most keys.
-  //
-  Status = OcRegisterTypingHandler(&Context->TypingContext);
-
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCHK: Register typing handler - %r\n", Status));
-    OcFreeKeyRepeatContext (&Context->DoNotRepeatContext);
-    return Status;
-  }
-
-  //
-  // NB Raw AKMA is also still used for HotKeys, since we really do need
-  // three different types of keys response for fluent UI behaviour.
-  //
-
-  return EFI_SUCCESS;
-}
-
-//
-// Free picker keyboard handling resources.
-//
-VOID
-OcFreeHotKeys (
-  IN     OC_PICKER_CONTEXT  *Context
-  )
-{
-  if (Context == NULL) {
-    return;
-  }
-
-  DEBUG ((DEBUG_INFO, "OCHK: FreeHotKeys\n"));
-
-  OcUnregisterTypingHandler (&Context->TypingContext);
-  OcFreeKeyRepeatContext (&Context->DoNotRepeatContext);
-}
-
+STATIC
 VOID
 EFIAPI
-OcGetPickerKeyInfo (
+PickerFlushTypingBuffer (
+  IN OUT OC_PICKER_CONTEXT                  *Context
+  )
+{
+  OcFlushTypingBuffer(Context->HotKeyContext->TypingContext);
+}
+
+STATIC
+VOID
+EFIAPI
+GetPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     BOOLEAN                            FilterForTyping,
+  IN     OC_PICKER_KEY_MAP                  KeyFilter,
      OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   )
 {
@@ -222,21 +158,21 @@ OcGetPickerKeyInfo (
   UINT32                             CsrActiveConfig;
   UINTN                              CsrActiveConfigSize;
 
-  ASSERT (Context->KeyMap             != NULL);
-  ASSERT (Context->TypingContext      != NULL);
-  ASSERT (Context->DoNotRepeatContext != NULL);
-  ASSERT (PickerKeyInfo               != NULL);
+  ASSERT (Context->HotKeyContext->KeyMap             != NULL);
+  ASSERT (Context->HotKeyContext->TypingContext      != NULL);
+  ASSERT (Context->HotKeyContext->DoNotRepeatContext != NULL);
+  ASSERT (PickerKeyInfo                              != NULL);
 
   PickerKeyInfo->OcKeyCode        = OC_INPUT_NO_ACTION;
   PickerKeyInfo->OcModifiers      = OC_MODIFIERS_NONE;
-  PickerKeyInfo->TypingChar       = '\0';
+  PickerKeyInfo->UnicodeChar      = CHAR_NULL;
 
   //
   // AKMA hotkeys
   //
   AkmaNumKeys         = ARRAY_SIZE (AkmaKeys);
-  Status = Context->KeyMap->GetKeyStrokes (
-    Context->KeyMap,
+  Status = Context->HotKeyContext->KeyMap->GetKeyStrokes (
+    Context->HotKeyContext->KeyMap,
     &AkmaModifiers,
     &AkmaNumKeys,
     AkmaKeys
@@ -251,7 +187,7 @@ OcGetPickerKeyInfo (
   // Apple Event typing
   //
   Keys                = &Key;
-  OcGetNextKeystroke(Context->TypingContext, &Modifiers, Keys, &UnicodeChar);
+  OcGetNextKeystroke(Context->HotKeyContext->TypingContext, &Modifiers, Keys, &UnicodeChar);
   if (*Keys == 0) {
     NumKeys = 0;
   }
@@ -265,7 +201,7 @@ OcGetPickerKeyInfo (
   NumKeysUp           = 0;
   NumKeysDoNotRepeat  = ARRAY_SIZE (KeysDoNotRepeat);
   Status = OcGetUpDownKeys (
-    Context->DoNotRepeatContext,
+    Context->HotKeyContext->DoNotRepeatContext,
     &ModifiersDoNotRepeat,
     &NumKeysUp, NULL,
     &NumKeysDoNotRepeat, KeysDoNotRepeat,
@@ -288,31 +224,28 @@ OcGetPickerKeyInfo (
   // Set OcModifiers early, so they are correct even if - say - a hotkey or non-repeating key returns first.
   //
   ValidBootModifiers = APPLE_MODIFIERS_CONTROL;
-  if (!FilterForTyping && Context->PollAppleHotKeys) {
-    ValidBootModifiers |= APPLE_MODIFIERS_SHIFT;
-  }
 
   //
-  // Default update is desired for Ctrl+Index and Ctrl+Enter.
-  // Strictly apply only on CTRL or CTRL+SHIFT, but no other modifiers.
-  // (CTRL is set default, SHIFT+CTRL is set default and set verbose mode.)
+  // NB As historically SHIFT handling here is considered a 'hotkey':
+  // it's original reason for being here is to fix difficulties in
+  // detecting this and other hotkey modifiers during no-picker boot.
   //
-  if ((Modifiers & ~ValidBootModifiers) == 0
-    && (Modifiers & APPLE_MODIFIERS_CONTROL) != 0) {
-    PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
+  if ((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0 && Context->PollAppleHotKeys) {
+    ValidBootModifiers |= APPLE_MODIFIERS_SHIFT;
   }
 
   //
   // Loosely apply regardless of other modifiers.
   //
-  if ((Modifiers & APPLE_MODIFIERS_SHIFT) != 0) {
+  if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
+    && (Modifiers & APPLE_MODIFIERS_SHIFT) != 0) {
     PickerKeyInfo->OcModifiers |= OC_MODIFIERS_REVERSE_SWITCH_CONTEXT;
   }
 
   //
   // Handle key combinations.
   //
-  if (!FilterForTyping && Context->PollAppleHotKeys) {
+  if ((KeyFilter & OC_PICKER_KEYS_HOTKEYS) != 0 && Context->PollAppleHotKeys) {
     HasCommand = (AkmaModifiers & APPLE_MODIFIERS_COMMAND) != 0;
     HasKeyC    = OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyC);
     HasKeyK    = OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyK);
@@ -404,20 +337,21 @@ OcGetPickerKeyInfo (
   //
   // Handle typing chars.
   //
-  if (FilterForTyping && UnicodeChar >= 32 && UnicodeChar < 128) {
-    PickerKeyInfo->TypingChar = (CHAR8)UnicodeChar;
+  if ((KeyFilter & OC_PICKER_KEYS_TYPING) != 0) {
+    PickerKeyInfo->UnicodeChar = UnicodeChar;
   }
 
   //
   // Handle VoiceOver - non-repeating.
   //
-  if ((Modifiers & APPLE_MODIFIERS_COMMAND) != 0
+  if ((KeyFilter & OC_PICKER_KEYS_VOICE_OVER) != 0
+    && (Modifiers & APPLE_MODIFIERS_COMMAND) != 0
     && OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyF5)) {
     PickerKeyInfo->OcKeyCode = OC_INPUT_VOICE_OVER;
     return;
   }
 
-  if (!FilterForTyping) {
+  if ((KeyFilter & OC_PICKER_KEYS_TYPING) == 0) {
     //
     // Handle reload menu - non-repeating.
     //
@@ -438,12 +372,13 @@ OcGetPickerKeyInfo (
   }
 
   if (NumKeys == 1) {
-    if (Keys[0] == AppleHidUsbKbUsageKeyTab) {
+    if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
+      && Keys[0] == AppleHidUsbKbUsageKeyTab) {
       PickerKeyInfo->OcKeyCode = OC_INPUT_SWITCH_CONTEXT;
       return;
     }
 
-    if (FilterForTyping) {
+    if ((KeyFilter & OC_PICKER_KEYS_TYPING) != 0) {
       //
       // Typing index key strokes.
       //
@@ -483,6 +418,15 @@ OcGetPickerKeyInfo (
       //
       if ((Modifiers & ~ValidBootModifiers) == 0)
       {
+        //
+        // Default update is desired for Ctrl+Index and Ctrl+Enter.
+        // Strictly apply only on CTRL or CTRL+SHIFT, but no other modifiers.
+        // (CTRL is set default, SHIFT+CTRL is set default and set verbose mode.)
+        //
+        if ((Modifiers & APPLE_MODIFIERS_CONTROL) != 0) {
+          PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
+        }
+
         TriggerBoot = FALSE;
 
         if (Keys[0] == AppleHidUsbKbUsageKeyEnter
@@ -582,8 +526,10 @@ OcGetPickerKeyInfo (
   PickerKeyInfo->OcKeyCode    = OC_INPUT_NO_ACTION;
 }
 
+STATIC
 UINT64
-OcWaitForPickerKeyInfoGetEndTime(
+EFIAPI
+WaitForPickerKeyInfoGetEndTime (
   IN UINTN    Timeout
   )
 {
@@ -594,11 +540,13 @@ OcWaitForPickerKeyInfoGetEndTime(
   return GetTimeInNanoSecond (GetPerformanceCounter ()) + Timeout * 1000000u;
 }
 
+STATIC
 BOOLEAN
-OcWaitForPickerKeyInfo (
+EFIAPI
+WaitForPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     UINT64                             EndTime,
-  IN     BOOLEAN                            FilterForTyping,
+  IN     OC_PICKER_KEY_MAP                  KeyFilter,
   IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   )
 {
@@ -617,14 +565,14 @@ OcWaitForPickerKeyInfo (
   //
 
   while (TRUE) {
-    OcGetPickerKeyInfo (Context, FilterForTyping, PickerKeyInfo);
+    GetPickerKeyInfo (Context, KeyFilter, PickerKeyInfo);
 
     //
     // All non-null actions (even internal) are now returned to picker for possible UI response.
     //
     if (PickerKeyInfo->OcKeyCode != OC_INPUT_NO_ACTION ||
       PickerKeyInfo->OcModifiers != OldOcModifiers     ||
-      PickerKeyInfo->TypingChar  != '\0') {
+      PickerKeyInfo->UnicodeChar != CHAR_NULL) {
       break;
     }
 
@@ -650,4 +598,98 @@ OcWaitForPickerKeyInfo (
   }
 
   return PickerKeyInfo->OcModifiers != OldOcModifiers;
+}
+
+//
+// Initialise picker keyboard handling.
+//
+EFI_STATUS
+OcInitHotKeys (
+  IN OUT OC_PICKER_CONTEXT  *Context
+  )
+{
+  EFI_STATUS                         Status;
+
+  DEBUG ((DEBUG_INFO, "OCHK: InitHotKeys\n"));
+
+  //
+  // No kb debug unless initialiased on settings flag by a given picker itself.
+  //
+  Context->KbDebug = NULL;
+
+  Context->HotKeyContext = AllocatePool (sizeof(*(Context->HotKeyContext)));
+  if (Context->HotKeyContext == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  //
+  // Fn. ptrs.
+  //
+  Context->HotKeyContext->GetKeyInfo          = GetPickerKeyInfo;
+  Context->HotKeyContext->GetKeyWaitEndTime   = WaitForPickerKeyInfoGetEndTime;
+  Context->HotKeyContext->WaitForKeyInfo      = WaitForPickerKeyInfo;
+  Context->HotKeyContext->FlushTypingBuffer   = PickerFlushTypingBuffer;
+
+  Context->HotKeyContext->KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
+  if (Context->HotKeyContext->KeyMap == NULL) {
+    FreePool (Context->HotKeyContext);
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Non-repeating keys, e.g. ESC and SPACE.
+  //
+  Status = OcInitKeyRepeatContext (
+    &Context->HotKeyContext->DoNotRepeatContext,
+    Context->HotKeyContext->KeyMap,
+    OC_HELD_KEYS_DEFAULT_SIZE,
+    0,
+    0,
+    TRUE
+  );
+  
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCHK: Init non-repeating context - %r\n", Status));
+    FreePool (Context->HotKeyContext);
+    return Status;
+  }
+
+  //
+  // Typing handler, for most keys.
+  //
+  Status = OcRegisterTypingHandler(&Context->HotKeyContext->TypingContext);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCHK: Register typing handler - %r\n", Status));
+    OcFreeKeyRepeatContext (&Context->HotKeyContext->DoNotRepeatContext);
+    FreePool (Context->HotKeyContext);
+    return Status;
+  }
+
+  //
+  // NB Raw AKMA is also still used for HotKeys, since we really do need
+  // three different types of keys response for fluent UI behaviour.
+  //
+
+  return EFI_SUCCESS;
+}
+
+//
+// Free picker keyboard handling resources.
+//
+VOID
+OcFreeHotKeys (
+  IN     OC_PICKER_CONTEXT  *Context
+  )
+{
+  if (Context == NULL) {
+    return;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCHK: FreeHotKeys\n"));
+
+  OcUnregisterTypingHandler (&Context->HotKeyContext->TypingContext);
+  OcFreeKeyRepeatContext (&Context->HotKeyContext->DoNotRepeatContext);
+
+  FreePool (Context->HotKeyContext);
 }

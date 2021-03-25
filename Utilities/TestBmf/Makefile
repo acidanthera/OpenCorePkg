@@ -13,7 +13,7 @@ OBJS   += BitmapFont.o Images.o Blending.o
 #
 # From OpenCore.
 #
-OBJS   += OcPng.o lodepng.o OcCompressionLib.o OcTimerLib.o OcAppleKeyMapLib.o UpDownDetection.o HotKeySupport.o OcTypingLib.o ConsoleUtils.o BootArguments.o BootEntryInfo.o OcAppleBootPolicyLib.o OcDevicePathLib.o DebugPrint.o GetFileInfo.o GetVolumeLabel.o ReadFile.o OpenFile.o FileProtocol.o OcStorageLib.o BootAudio.o
+OBJS   += OcPng.o lodepng.o OcCompressionLib.o OcTimerLib.o OcAppleKeyMapLib.o UpDownDetection.o OcTypingLib.o ConsoleUtils.o BootEntryInfo.o OcAppleBootPolicyLib.o OcDevicePathLib.o DebugPrint.o GetFileInfo.o GetVolumeLabel.o ReadFile.o OpenFile.o FileProtocol.o OcStorageLib.o BootAudio.o
 
 VPATH   = ../../Platform/OpenCanopy:$\
           ../../Platform/OpenCanopy/Input:$\

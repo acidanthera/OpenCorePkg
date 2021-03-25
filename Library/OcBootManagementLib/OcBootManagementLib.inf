@@ -39,6 +39,7 @@
   BootEntryInfo.c
   BootEntryManagement.c
   BootManagementInternal.h
+  BuiltinPicker.c
   DefaultEntryChoice.c
   DmgBootSupport.c
   HotKeySupport.c

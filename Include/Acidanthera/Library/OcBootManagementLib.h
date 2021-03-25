@@ -30,6 +30,11 @@
 typedef struct OC_PICKER_CONTEXT_ OC_PICKER_CONTEXT;
 
 /**
+  Picker keyboard handling context.
+**/
+typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
+
+/**
   Default strings for use in the interfaces.
 **/
 #define OC_MENU_BOOT_MENU            L"OpenCore Boot Menu"
@@ -502,14 +507,19 @@ typedef INTN                    OC_KEY_CODE;
 typedef UINT16                  OC_MODIFIER_MAP;
 
 /**
+  OC picker modifiers.
+**/
+typedef UINTN                   OC_PICKER_KEY_MAP;
+
+/**
   Full picker key info.
   Note: Typing is 'orthogonal' to actions, and the presence or absence of a next
-  typing key should be detected by TypingChar != '\0'.
+  typing key should be detected by UnicodeChar != CHAR_NULL.
 **/
 typedef struct {
   OC_KEY_CODE         OcKeyCode;
   OC_MODIFIER_MAP     OcModifiers;
-  CHAR8               TypingChar;
+  CHAR16              UnicodeChar;
 } OC_PICKER_KEY_INFO;
 
 /**
@@ -559,14 +569,44 @@ EFI_STATUS
   );
 
 /**
-  Get pressed key info.
+  Get picker pressed key info.
 **/
 typedef
 VOID
 (EFIAPI *OC_GET_KEY_INFO) (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     BOOLEAN                            FilterForTyping,
+  IN     OC_PICKER_KEY_MAP                  KeyFilter,
      OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
+  );
+
+/**
+  Request end time in units appropriate for OC_WAIT_FOR_KEY_INFO.
+**/
+typedef
+UINT64
+(EFIAPI *OC_GET_KEY_WAIT_END_TIME) (
+  IN UINTN    Timeout
+  );
+
+/**
+  Wait for picker pressed key info. Use zero EndTime for no timeout.
+**/
+typedef
+BOOLEAN
+(EFIAPI *OC_WAIT_FOR_KEY_INFO) (
+  IN OUT OC_PICKER_CONTEXT                  *Context,
+  IN     UINT64                             EndTime,
+  IN     OC_PICKER_KEY_MAP                  KeyFilter,
+  IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
+  );
+
+/**
+  Flush picker typing buffer.
+**/
+typedef
+VOID
+(EFIAPI *OC_FLUSH_TYPING_BUFFER) (
+  IN OUT OC_PICKER_CONTEXT                  *Context
   );
 
 /**
@@ -722,21 +762,9 @@ struct OC_PICKER_CONTEXT_ {
   //
   OC_REQ_PRIVILEGE           RequestPrivilege;
   //
-  // Get pressed key info.
+  // Picker typing context.
   //
-  OC_GET_KEY_INFO            GetKeyInfo;
-  //
-  // Apple Key Map protocol.
-  //
-  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
-  //
-  // Non-repeating key context.
-  //
-  OC_KEY_REPEAT_CONTEXT      *DoNotRepeatContext;
-  //
-  // Typing context.
-  //
-  OC_TYPING_CONTEXT          *TypingContext;
+  OC_HOTKEY_CONTEXT          *HotKeyContext;
   //
   // Keyboard debug methods.
   //
@@ -856,6 +884,40 @@ struct OC_PICKER_CONTEXT_ {
   // Custom picker entries.  Absolute entries come first.
   //
   OC_PICKER_ENTRY            CustomEntries[];
+};
+
+/**
+  Boot picker keyboard handling context.
+**/
+struct OC_HOTKEY_CONTEXT_ {
+  //
+  // Get pressed key info.
+  //
+  OC_GET_KEY_INFO            GetKeyInfo;
+  //
+  // Request end time in units appropriate for WaitForKeyInfo.
+  //
+  OC_GET_KEY_WAIT_END_TIME   GetKeyWaitEndTime;
+  //
+  // Wait for pressed key info.
+  //
+  OC_WAIT_FOR_KEY_INFO       WaitForKeyInfo;
+  //
+  // Flush typing buffer.
+  //
+  OC_FLUSH_TYPING_BUFFER     FlushTypingBuffer;
+  //
+  // Apple Key Map protocol.
+  //
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
+  //
+  // Non-repeating key context.
+  //
+  OC_KEY_REPEAT_CONTEXT      *DoNotRepeatContext;
+  //
+  // Typing context.
+  //
+  OC_TYPING_CONTEXT          *TypingContext;
 };
 
 /**
@@ -1133,25 +1195,16 @@ OcLoadPickerHotKeys (
 #define OC_MODIFIERS_SET_DEFAULT              BIT0
 #define OC_MODIFIERS_REVERSE_SWITCH_CONTEXT   BIT1
 
-/**
-  Obtains key info from user input.
+#define OC_PICKER_KEYS_TYPING                 BIT0
+#define OC_PICKER_KEYS_HOTKEYS                BIT1
+#define OC_PICKER_KEYS_VOICE_OVER             BIT2
+#define OC_PICKER_KEYS_TAB_CONTROL            BIT3
 
-  @param[in,out]  Context           Picker context. Some values may be modified by detected hotkeys.
-  @param[in]      FilterForTyping   Filter out OC actions which are irrelevant/harmful when
-                                    typing; includes hotkeys, SPACE, and ESC/0 handling.
-  @param[out]     PickerKeyInfo     Pass back current picker key info state, detected in
-                                    various appropriate ways: held, repeating, non-repeating.
-                                    TypingChar is only populated when FilterForTyping is
-                                    true; ESC, DEL etc. while typing are handled as
-                                    OC_INPUT_TYPING_... actions.
-**/
-VOID
-EFIAPI
-OcGetPickerKeyInfo (
-  IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     BOOLEAN                            FilterForTyping,
-     OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
-  );
+#define OC_PICKER_KEYS_FOR_TYPING   \
+  (OC_PICKER_KEYS_TYPING | OC_PICKER_KEYS_VOICE_OVER | OC_PICKER_KEYS_TAB_CONTROL)
+
+#define OC_PICKER_KEYS_FOR_PICKER   \
+  (OC_PICKER_KEYS_HOTKEYS | OC_PICKER_KEYS_VOICE_OVER | OC_PICKER_KEYS_TAB_CONTROL)
 
 /**
   Initialise picker keyboard handling.
@@ -1177,39 +1230,6 @@ OcInitHotKeys (
 VOID
 OcFreeHotKeys (
   IN     OC_PICKER_CONTEXT  *Context
-  );
-
-/**
-  Calculate timeout end time in correct format for OcWaitForPickerKeyInfo.
-
-  @param[in]      Timeout       Required timeout in milliseconds.
-
-  @returns Now plus timeout, expressed in system nanosecond clock.
-**/
-UINT64
-OcWaitForPickerKeyInfoGetEndTime(
-  IN UINTN    Timeout
-  );
-
-/**
-  Waits for key index from user input.
-
-  @param[in,out]  Context           Picker context. Some values may be modified by detected hotkeys.
-  @param[in]      EndTime           Time at which to end timeout, system nanosecond clock.
-  @param[in]      FilterForTyping   Filter out OC actions which are irrelevant/harmful when
-                                    typing; includes hotkeys, SPACE, and ESC/0 handling.
-  @param[in,out]  PickerKeyInfo     On input, old modifiers are noticed and used to return
-                                    immediately on modifier changes.
-                                    On output, the new picker key info.
-
-  @retval                           True if modifiers have changed.  
-**/
-BOOLEAN
-OcWaitForPickerKeyInfo (
-  IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     UINT64                             EndTime,
-  IN     BOOLEAN                            FilterForTyping,
-  IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   );
 
 /**
