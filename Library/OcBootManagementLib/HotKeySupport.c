@@ -575,11 +575,6 @@ OcGetPickerKeyInfo (
     }
   }
 
-  if (PickerKeyInfo->TypingChar != '\0') {
-    PickerKeyInfo->OcKeyCode = OC_INPUT_EXTRA;
-    return;
-  }
-
   //
   // Return NO_ACTION here, since all non-null actions now feedback
   // immediately to either picker, to allow UI response.
@@ -599,7 +594,7 @@ OcWaitForPickerKeyInfoGetEndTime(
   return GetTimeInNanoSecond (GetPerformanceCounter ()) + Timeout * 1000000u;
 }
 
-VOID
+BOOLEAN
 OcWaitForPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     UINT64                             EndTime,
@@ -625,17 +620,11 @@ OcWaitForPickerKeyInfo (
     OcGetPickerKeyInfo (Context, FilterForTyping, PickerKeyInfo);
 
     //
-    // All non-null actions (even internal) are now returned to picker for possible UI response
+    // All non-null actions (even internal) are now returned to picker for possible UI response.
     //
-    if (PickerKeyInfo->OcKeyCode != OC_INPUT_NO_ACTION) {
-      break;
-    }
-
-    //
-    // Return modifiers if they change, so we can optionally update UI
-    //
-    if (PickerKeyInfo->OcModifiers != OldOcModifiers) {
-      PickerKeyInfo->OcKeyCode = OC_INPUT_EXTRA;
+    if (PickerKeyInfo->OcKeyCode != OC_INPUT_NO_ACTION ||
+      PickerKeyInfo->OcModifiers != OldOcModifiers     ||
+      PickerKeyInfo->TypingChar  != '\0') {
       break;
     }
 
@@ -659,4 +648,6 @@ OcWaitForPickerKeyInfo (
     }
     DEBUG_CODE_END ();
   }
+
+  return PickerKeyInfo->OcModifiers != OldOcModifiers;
 }

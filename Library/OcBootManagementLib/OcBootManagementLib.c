@@ -297,6 +297,7 @@ OcShowSimpleBootMenu (
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
   BOOLEAN                            IsTyping;
+  BOOLEAN                            ModifiersChanged;
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
   INT32                              TypingColumn;
   INT32                              TypingStartColumn;
@@ -509,7 +510,7 @@ OcShowSimpleBootMenu (
         KeyEndTime = 0;
       }
 
-      OcWaitForPickerKeyInfo (
+      ModifiersChanged = OcWaitForPickerKeyInfo (
         BootContext->PickerContext,
         KeyEndTime,
         IsTyping,
@@ -575,10 +576,6 @@ OcShowSimpleBootMenu (
         TypingColumn++;
       }
 #endif
-
-      if (PickerKeyInfo.OcKeyCode == OC_INPUT_EXTRA) {
-        break;
-      }
 
       if (PlayChosen && PickerKeyInfo.OcKeyCode == OC_INPUT_TIMEOUT) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
@@ -664,9 +661,13 @@ OcShowSimpleBootMenu (
         return EFI_SUCCESS;
       }
 
-      if (TimeOutSeconds > 0) {
+      if (PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION && TimeOutSeconds > 0) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileAbortTimeout, FALSE);
         TimeOutSeconds = 0;
+        break;
+      }
+
+      if (ModifiersChanged || PickerKeyInfo.TypingChar != '\0') {
         break;
       }
     }

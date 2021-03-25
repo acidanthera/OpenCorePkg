@@ -502,7 +502,9 @@ typedef INTN                    OC_KEY_CODE;
 typedef UINT16                  OC_MODIFIER_MAP;
 
 /**
-  Full picker key info - OC and non-OC.
+  Full picker key info.
+  Note: Typing is 'orthogonal' to actions, and the presence or absence of a next
+  typing key should be detected by TypingChar != '\0'.
 **/
 typedef struct {
   OC_KEY_CODE         OcKeyCode;
@@ -1122,7 +1124,6 @@ OcLoadPickerHotKeys (
 #define OC_INPUT_TYPING_RIGHT         -17       ///< Move right while typing (UI does not have to support)
 #define OC_INPUT_TYPING_CONFIRM       -18       ///< Confirm input while typing (press enter)
 #define OC_INPUT_SWITCH_CONTEXT       -19       ///< Switch context (tab and shift+tab)
-#define OC_INPUT_EXTRA                -50       ///< No OC_INPUT value as above, but returned early to allow GUI to respond to modifiers or other keys
 #define OC_INPUT_FUNCTIONAL(x)        (-50 - (x))  ///< Function hotkeys
 
 /**
@@ -1200,8 +1201,10 @@ OcWaitForPickerKeyInfoGetEndTime(
   @param[in,out]  PickerKeyInfo     On input, old modifiers are noticed and used to return
                                     immediately on modifier changes.
                                     On output, the new picker key info.
+
+  @retval                           True if modifiers have changed.  
 **/
-VOID
+BOOLEAN
 OcWaitForPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
   IN     UINT64                             EndTime,
