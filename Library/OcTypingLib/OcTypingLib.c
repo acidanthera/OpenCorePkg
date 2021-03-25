@@ -9,10 +9,11 @@
 #include <Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+#include <Library/OcAppleEventLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcTypingLib.h>
-#include <Library/OcAppleEventLib.h>
 
 STATIC APPLE_EVENT_PROTOCOL     *mProtocol;
 
@@ -207,6 +208,11 @@ OcUnregisterTypingHandler (
 
   FreePool (*Context);
   *Context = NULL;
+
+  //
+  // Prevent chars which have queued up in ConIn (which is not used by us) affecting subsequent applications.
+  //
+  OcConsoleFlush ();
 
   return Status;
 }

@@ -47,6 +47,7 @@
   OcStringLib
 
 [Sources]
+  ConsoleUtils.c
   DataPatcher.c
   ImageRunner.c
   PlatformInfo.c

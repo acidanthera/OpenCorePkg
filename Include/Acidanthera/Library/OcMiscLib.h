@@ -204,6 +204,14 @@ OcReadApplePlatformData (
   );
 
 /**
+  Performs ConIn keyboard input flush.
+**/
+VOID
+OcConsoleFlush (
+  VOID
+  );
+
+/**
   Internal worker macro that calls DebugPrint().
 
   This macro calls DebugPrint(), passing in the filename, line number, an

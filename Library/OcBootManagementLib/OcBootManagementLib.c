@@ -27,6 +27,7 @@
 #include <Library/DevicePathLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcTimerLib.h>
+#include <Library/OcTypingLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcBootManagementLib.h>
@@ -691,7 +692,10 @@ OcShowSimplePasswordRequest (
 
   UINT8                Index;
   EFI_STATUS           Status;
-  EFI_INPUT_KEY        Key;
+  OC_TYPING_CONTEXT    *TypingContext;
+  APPLE_MODIFIER_MAP   Modifiers;
+  APPLE_KEY_CODE       AppleKeyCode;
+  CHAR16               UnicodeChar;
 
   Privilege = Context->PrivilegeContext;
 
@@ -699,25 +703,30 @@ OcShowSimplePasswordRequest (
     return EFI_SUCCESS;
   }
 
+  Status = OcRegisterTypingHandler(&TypingContext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
   gST->ConOut->ClearScreen (gST->ConOut);
   gST->ConOut->TestString (gST->ConOut, OC_CONSOLE_MARK_CONTROLLED);
 
-  for (Index = 0; Index < 3; ++Index) {
+  for (Index = 0; Index < OC_PASSWORD_MAX_RETRIES; ++Index) {
     PwIndex = 0;
     //
     // Skip previously pressed characters.
     //
-    do {
-      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
-    } while (!EFI_ERROR (Status));
+    OcFlushTypingBuffer(TypingContext);
 
     gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_REQUEST);
     OcPlayAudioFile (Context, OcVoiceOverAudioFileEnterPassword, TRUE);
 
     while (TRUE) {
-      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &Key);
+      OcGetNextKeystroke(TypingContext, &Modifiers, &AppleKeyCode, &UnicodeChar);
+
+      /*
       if (Status == EFI_NOT_READY) {
         continue;
       } else if (EFI_ERROR (Status)) {
@@ -734,21 +743,19 @@ OcShowSimplePasswordRequest (
           );
         return EFI_ABORTED;
       }
+      */
 
-      //
-      // TODO: We should really switch to Apple input here.
-      //
-      if (Key.ScanCode == SCAN_F5) {
+      if (AppleKeyCode == AppleHidUsbKbUsageKeyF5) {
         OcToggleVoiceOver (Context, OcVoiceOverAudioFileEnterPassword);
       }
 
-      if (Key.UnicodeChar == CHAR_CARRIAGE_RETURN) {
+      if (UnicodeChar == CHAR_CARRIAGE_RETURN) {
         gST->ConOut->ClearScreen (gST->ConOut);
         //
         // RETURN finalizes the input.
         //
         break;
-      } else if (Key.UnicodeChar == CHAR_BACKSPACE) {
+      } else if (UnicodeChar == CHAR_BACKSPACE) {
         //
         // Delete the last entered character, if such exists.
         //
@@ -773,8 +780,8 @@ OcShowSimplePasswordRequest (
 
         OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
         continue;
-      } else if (Key.UnicodeChar == CHAR_NULL
-       || (UINT8)Key.UnicodeChar != Key.UnicodeChar) {
+      } else if (UnicodeChar == CHAR_NULL
+       || (UINT8)UnicodeChar != UnicodeChar) {
         //
         // Only ASCII characters are supported.
         //
@@ -798,7 +805,7 @@ OcShowSimplePasswordRequest (
       }
 
       gST->ConOut->OutputString (gST->ConOut, L"*");
-      Password[PwIndex] = (UINT8)Key.UnicodeChar;
+      Password[PwIndex] = (UINT8)UnicodeChar;
       OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
       ++PwIndex;
     }
@@ -817,21 +824,28 @@ OcShowSimplePasswordRequest (
       gST->ConOut->ClearScreen (gST->ConOut);
       Privilege->CurrentLevel = Level;
       OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordAccepted, TRUE);
-      return EFI_SUCCESS;
+      Status = EFI_SUCCESS;
+      break;
     } else {
       OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordIncorrect, TRUE);
+      Status = EFI_ACCESS_DENIED;
     }
   }
 
-  gST->ConOut->ClearScreen (gST->ConOut);
-  gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_RETRY_LIMIT);
-  gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-  OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordRetryLimit, TRUE);
-  DEBUG ((DEBUG_WARN, "OCB: User failed to verify password for 3 times running\n"));
+  OcUnregisterTypingHandler(&TypingContext);
 
-  gBS->Stall (5000000);
-  ResetWarm ();
-  return EFI_ACCESS_DENIED;
+  if (EFI_ERROR (Status)) {
+    gST->ConOut->ClearScreen (gST->ConOut);
+    gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_RETRY_LIMIT);
+    gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+    OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordRetryLimit, TRUE);
+    DEBUG ((DEBUG_WARN, "OCB: User failed to verify password %d times running\n", OC_PASSWORD_MAX_RETRIES));
+
+    gBS->Stall (SECONDS_TO_MICROSECONDS (5));
+    ResetWarm ();
+  }
+
+  return Status;
 }
 
 EFI_STATUS

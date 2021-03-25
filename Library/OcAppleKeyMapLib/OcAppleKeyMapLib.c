@@ -267,7 +267,6 @@ OcKeyMapFlush (
   EFI_STATUS          Status;
   UINTN               NumKeys;
   APPLE_MODIFIER_MAP  Modifiers;
-  EFI_INPUT_KEY       EfiKey;
   APPLE_KEY_CODE      Keys[OC_KEY_MAP_DEFAULT_SIZE];
 
   ASSERT (KeyMap != NULL);
@@ -302,15 +301,7 @@ OcKeyMapFlush (
   }
 
   if (FlushConsole) {
-    do {
-      Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &EfiKey);
-    } while (!EFI_ERROR (Status));
-
-    //
-    // This one is required on APTIO IV after holding OPT key.
-    // Interestingly it does not help adding this after OPT key handling.
-    //
-    gST->ConIn->Reset (gST->ConIn, FALSE);
+    OcConsoleFlush ();
   }
 }
 
