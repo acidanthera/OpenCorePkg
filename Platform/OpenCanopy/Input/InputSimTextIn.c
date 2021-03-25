@@ -18,7 +18,6 @@
 #include "../GuiIo.h"
 
 struct GUI_KEY_CONTEXT_ {
-  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   OC_PICKER_CONTEXT                  *Context;
 };
 
@@ -28,11 +27,7 @@ GuiKeyConstruct (
   )
 {
   STATIC GUI_KEY_CONTEXT  mContext;
-  mContext.KeyMap  = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_WARN, "GuiKeyConstruct", "AppleKeyMapAggregator");
   mContext.Context = PickerContext;
-  if (mContext.KeyMap == NULL) {
-    return NULL;
-  }
 
   return &mContext;
 }
@@ -51,7 +46,6 @@ GuiKeyRead (
 
   Context->Context->GetKeyInfo (
     Context->Context,
-    Context->KeyMap,
     FilterForTyping,
     PickerKeyInfo
     );

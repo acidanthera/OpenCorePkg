@@ -511,7 +511,6 @@ OcShowSimpleBootMenu (
 
       OcWaitForPickerKeyInfo (
         BootContext->PickerContext,
-        KeyMap,
         KeyEndTime,
         IsTyping,
         &PickerKeyInfo

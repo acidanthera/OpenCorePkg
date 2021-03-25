@@ -118,7 +118,6 @@ OcInitHotKeys (
   IN OUT OC_PICKER_CONTEXT  *Context
   )
 {
-  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   EFI_STATUS                         Status;
 
   DEBUG ((DEBUG_INFO, "OCHK: InitHotKeys\n"));
@@ -128,8 +127,8 @@ OcInitHotKeys (
   //
   Context->KbDebug = NULL;
 
-  KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
-  if (KeyMap == NULL) {
+  Context->KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
+  if (Context->KeyMap == NULL) {
     return EFI_NOT_FOUND;
   }
 
@@ -138,7 +137,7 @@ OcInitHotKeys (
   //
   Status = OcInitKeyRepeatContext (
     &Context->DoNotRepeatContext,
-    KeyMap,
+    Context->KeyMap,
     OC_HELD_KEYS_DEFAULT_SIZE,
     0,
     0,
@@ -191,7 +190,6 @@ VOID
 EFIAPI
 OcGetPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     BOOLEAN                            FilterForTyping,
      OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   )
@@ -224,7 +222,7 @@ OcGetPickerKeyInfo (
   UINT32                             CsrActiveConfig;
   UINTN                              CsrActiveConfigSize;
 
-  ASSERT (KeyMap                      != NULL);
+  ASSERT (Context->KeyMap             != NULL);
   ASSERT (Context->TypingContext      != NULL);
   ASSERT (Context->DoNotRepeatContext != NULL);
   ASSERT (PickerKeyInfo               != NULL);
@@ -237,8 +235,8 @@ OcGetPickerKeyInfo (
   // AKMA hotkeys
   //
   AkmaNumKeys         = ARRAY_SIZE (AkmaKeys);
-  Status = KeyMap->GetKeyStrokes (
-    KeyMap,
+  Status = Context->KeyMap->GetKeyStrokes (
+    Context->KeyMap,
     &AkmaModifiers,
     &AkmaNumKeys,
     AkmaKeys
@@ -604,7 +602,6 @@ OcWaitForPickerKeyInfoGetEndTime(
 VOID
 OcWaitForPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     UINT64                             EndTime,
   IN     BOOLEAN                            FilterForTyping,
   IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
@@ -625,7 +622,7 @@ OcWaitForPickerKeyInfo (
   //
 
   while (TRUE) {
-    OcGetPickerKeyInfo (Context, KeyMap, FilterForTyping, PickerKeyInfo);
+    OcGetPickerKeyInfo (Context, FilterForTyping, PickerKeyInfo);
 
     //
     // All non-null actions (even internal) are now returned to picker for possible UI response

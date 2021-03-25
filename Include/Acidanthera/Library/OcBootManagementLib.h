@@ -563,7 +563,6 @@ typedef
 VOID
 (EFIAPI *OC_GET_KEY_INFO) (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     BOOLEAN                            FilterForTyping,
      OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   );
@@ -724,6 +723,10 @@ struct OC_PICKER_CONTEXT_ {
   // Get pressed key info.
   //
   OC_GET_KEY_INFO            GetKeyInfo;
+  //
+  // Apple Key Map protocol.
+  //
+  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
   //
   // Non-repeating key context.
   //
@@ -1132,8 +1135,7 @@ OcLoadPickerHotKeys (
 /**
   Obtains key info from user input.
 
-  @param[in,out]  Context           Picker context.
-  @param[in]      KeyMap            Apple Key Map Aggregator protocol.
+  @param[in,out]  Context           Picker context. Some values may be modified by detected hotkeys.
   @param[in]      FilterForTyping   Filter out OC actions which are irrelevant/harmful when
                                     typing; includes hotkeys, SPACE, and ESC/0 handling.
   @param[out]     PickerKeyInfo     Pass back current picker key info state, detected in
@@ -1146,7 +1148,6 @@ VOID
 EFIAPI
 OcGetPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     BOOLEAN                            FilterForTyping,
      OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
   );
@@ -1192,8 +1193,7 @@ OcWaitForPickerKeyInfoGetEndTime(
 /**
   Waits for key index from user input.
 
-  @param[in,out]  Context           Picker context.
-  @param[in]      KeyMap            Apple Key Map Aggregator protocol.
+  @param[in,out]  Context           Picker context. Some values may be modified by detected hotkeys.
   @param[in]      EndTime           Time at which to end timeout, system nanosecond clock.
   @param[in]      FilterForTyping   Filter out OC actions which are irrelevant/harmful when
                                     typing; includes hotkeys, SPACE, and ESC/0 handling.
@@ -1204,7 +1204,6 @@ OcWaitForPickerKeyInfoGetEndTime(
 VOID
 OcWaitForPickerKeyInfo (
   IN OUT OC_PICKER_CONTEXT                  *Context,
-  IN     APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap,
   IN     UINT64                             EndTime,
   IN     BOOLEAN                            FilterForTyping,
   IN OUT OC_PICKER_KEY_INFO                 *PickerKeyInfo
