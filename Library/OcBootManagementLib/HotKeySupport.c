@@ -411,7 +411,7 @@ OcGetPickerKeyInfo (
   //
   // Handle VoiceOver - non-repeating.
   //
-  if ((Modifiers & (APPLE_MODIFIER_LEFT_COMMAND | APPLE_MODIFIER_RIGHT_COMMAND)) != 0
+  if ((Modifiers & APPLE_MODIFIERS_COMMAND) != 0
     && OcKeyMapHasKey (KeysDoNotRepeat, NumKeysDoNotRepeat, AppleHidUsbKbUsageKeyF5)) {
     PickerKeyInfo->OcKeyCode = OC_INPUT_VOICE_OVER;
     return;

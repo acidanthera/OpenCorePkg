@@ -745,7 +745,8 @@ OcShowSimplePasswordRequest (
       }
       */
 
-      if (AppleKeyCode == AppleHidUsbKbUsageKeyF5) {
+      if ((Modifiers & APPLE_MODIFIERS_COMMAND) != 0
+        && AppleKeyCode == AppleHidUsbKbUsageKeyF5) {
         OcToggleVoiceOver (Context, OcVoiceOverAudioFileEnterPassword);
       }
 
