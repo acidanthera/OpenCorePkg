@@ -619,8 +619,6 @@ OcShowSimplePasswordRequest (
   IN OC_PRIVILEGE_LEVEL  Level
   )
 {
-  OC_PRIVILEGE_CONTEXT *Privilege;
-
   BOOLEAN              Result;
 
   UINT8                Password[OC_PASSWORD_MAX_LEN];
@@ -629,12 +627,6 @@ OcShowSimplePasswordRequest (
   UINT8                Index;
   OC_PICKER_KEY_INFO   PickerKeyInfo;
   UINT8                SpaceIndex;
-
-  Privilege = Context->PrivilegeContext;
-
-  if (Privilege == NULL || Privilege->CurrentLevel >= Level) {
-    return EFI_SUCCESS;
-  }
 
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
   gST->ConOut->EnableCursor (gST->ConOut, FALSE);
@@ -762,9 +754,9 @@ OcShowSimplePasswordRequest (
     Result = OcVerifyPasswordSha512 (
                Password,
                PwIndex,
-               Privilege->Salt,
-               Privilege->SaltSize,
-               Privilege->Hash
+               Context->PrivilegeContext->Salt,
+               Context->PrivilegeContext->SaltSize,
+               Context->PrivilegeContext->Hash
                );
 
     SecureZeroMem (Password, PwIndex);
@@ -786,7 +778,6 @@ OcShowSimplePasswordRequest (
       );
 
     if (Result) {
-      Privilege->CurrentLevel = Level;
       OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordAccepted, TRUE);
       return EFI_SUCCESS;
       break;

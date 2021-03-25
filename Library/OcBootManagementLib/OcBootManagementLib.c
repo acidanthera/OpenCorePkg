@@ -116,6 +116,11 @@ InternalRunRequestPrivilege (
   EFI_STATUS Status;
   BOOLEAN    HotKeysAlreadyLive;
 
+  if (PickerContext->PrivilegeContext == NULL
+   || PickerContext->PrivilegeContext->CurrentLevel >= Level) {
+     return EFI_SUCCESS;
+  }
+
   HotKeysAlreadyLive = (PickerContext->HotKeyContext != NULL);
 
   if (!HotKeysAlreadyLive) {
@@ -129,6 +134,9 @@ InternalRunRequestPrivilege (
     PickerContext,
     OcPrivilegeAuthorized
     );
+  if (!EFI_ERROR (Status)) {
+    PickerContext->PrivilegeContext->CurrentLevel = Level;
+  }
 
   if (!HotKeysAlreadyLive) {
     OcFreeHotKeys (PickerContext);
