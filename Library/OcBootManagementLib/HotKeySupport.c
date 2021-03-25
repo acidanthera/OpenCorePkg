@@ -235,6 +235,18 @@ GetPickerKeyInfo (
   }
 
   //
+  // Default update is desired for Ctrl+Index and Ctrl+Enter.
+  // Strictly apply only on CTRL or CTRL+SHIFT (when SHIFT allowed),
+  // but no other modifiers.
+  // Needs to be set/unset even if filtered for typing (otherwise can
+  // get locked on if user tabs to typing context).
+  //
+  if ((Modifiers & ~ValidBootModifiers) == 0
+    && (Modifiers & APPLE_MODIFIERS_CONTROL) != 0) {
+    PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
+  }
+
+  //
   // Loosely apply regardless of other modifiers.
   //
   if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
@@ -418,15 +430,6 @@ GetPickerKeyInfo (
       //
       if ((Modifiers & ~ValidBootModifiers) == 0)
       {
-        //
-        // Default update is desired for Ctrl+Index and Ctrl+Enter.
-        // Strictly apply only on CTRL or CTRL+SHIFT, but no other modifiers.
-        // (CTRL is set default, SHIFT+CTRL is set default and set verbose mode.)
-        //
-        if ((Modifiers & APPLE_MODIFIERS_CONTROL) != 0) {
-          PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
-        }
-
         TriggerBoot = FALSE;
 
         if (Keys[0] == AppleHidUsbKbUsageKeyEnter
