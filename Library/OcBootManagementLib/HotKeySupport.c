@@ -612,6 +612,8 @@ OcInitHotKeys (
 
   DEBUG ((DEBUG_INFO, "OCHK: InitHotKeys\n"));
 
+  ASSERT_EQUALS (Context->HotKeyContext, NULL);
+
   //
   // No kb debug unless initialiased on settings flag by a given picker itself.
   //
@@ -633,6 +635,7 @@ OcInitHotKeys (
   Context->HotKeyContext->KeyMap = OcGetProtocol (&gAppleKeyMapAggregatorProtocolGuid, DEBUG_ERROR, "OcInitHotKeys", "AppleKeyMapAggregator");
   if (Context->HotKeyContext->KeyMap == NULL) {
     FreePool (Context->HotKeyContext);
+    Context->HotKeyContext = NULL;
     return EFI_NOT_FOUND;
   }
 
@@ -651,6 +654,7 @@ OcInitHotKeys (
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCHK: Init non-repeating context - %r\n", Status));
     FreePool (Context->HotKeyContext);
+    Context->HotKeyContext = NULL;
     return Status;
   }
 
@@ -663,6 +667,7 @@ OcInitHotKeys (
     DEBUG ((DEBUG_ERROR, "OCHK: Register typing handler - %r\n", Status));
     OcFreeKeyRepeatContext (&Context->HotKeyContext->DoNotRepeatContext);
     FreePool (Context->HotKeyContext);
+    Context->HotKeyContext = NULL;
     return Status;
   }
 
@@ -688,8 +693,11 @@ OcFreeHotKeys (
 
   DEBUG ((DEBUG_INFO, "OCHK: FreeHotKeys\n"));
 
+  ASSERT (Context->HotKeyContext != NULL);
+
   OcUnregisterTypingHandler (&Context->HotKeyContext->TypingContext);
   OcFreeKeyRepeatContext (&Context->HotKeyContext->DoNotRepeatContext);
 
   FreePool (Context->HotKeyContext);
+  Context->HotKeyContext = NULL;
 }
