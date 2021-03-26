@@ -649,27 +649,9 @@ OcShowSimplePasswordRequest (
         &PickerKeyInfo
         );
 
-      /*
-      if (Status == EFI_NOT_READY) {
-        continue;
-      } else if (EFI_ERROR (Status)) {
-        gST->ConOut->ClearScreen (gST->ConOut);
-        SecureZeroMem (Password, PwIndex);
-        SecureZeroMem (&Key.UnicodeChar, sizeof (Key.UnicodeChar));
-
-        DEBUG ((DEBUG_ERROR, "Input device error\r\n"));
-        OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_HWERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SILENCE_ERROR_MS
-          );
-        return EFI_ABORTED;
-      }
-      */
-
       if (PickerKeyInfo.OcKeyCode == OC_INPUT_VOICE_OVER) {
         OcToggleVoiceOver (Context, OcVoiceOverAudioFileEnterPassword);
+        continue;
       }
 
       if (PickerKeyInfo.UnicodeChar == CHAR_CARRIAGE_RETURN) {
@@ -677,59 +659,53 @@ OcShowSimplePasswordRequest (
         // RETURN finalizes the input.
         //
         break;
-      } else if (PickerKeyInfo.UnicodeChar == CHAR_BACKSPACE) {
+      }
+      
+      if (PickerKeyInfo.UnicodeChar == CHAR_BACKSPACE) {
         //
         // Delete the last entered character, if such exists.
         //
-        if (PwIndex != 0) {
+        if (PwIndex > 0) {
           --PwIndex;
           Password[PwIndex] = 0;
           //
           // Overwrite current character with a space.
           //
           gST->ConOut->SetCursorPosition (
-                         gST->ConOut,
-                         gST->ConOut->Mode->CursorColumn - 1,
-                         gST->ConOut->Mode->CursorRow
-                         );
+            gST->ConOut,
+            gST->ConOut->Mode->CursorColumn - 1,
+            gST->ConOut->Mode->CursorRow
+            );
           gST->ConOut->OutputString (gST->ConOut, L" ");
           gST->ConOut->SetCursorPosition (
-                         gST->ConOut,
-                         gST->ConOut->Mode->CursorColumn - 1,
-                         gST->ConOut->Mode->CursorRow
-                         );
+            gST->ConOut,
+            gST->ConOut->Mode->CursorColumn - 1,
+            gST->ConOut->Mode->CursorRow
+            );
         }
 
         OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
         continue;
-      } else if (PickerKeyInfo.UnicodeChar == CHAR_NULL
-       || (UINT8)PickerKeyInfo.UnicodeChar != PickerKeyInfo.UnicodeChar) {
-        //
-        // Only ASCII characters are supported.
-        //
-        OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_ERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SILENCE_ERROR_MS
-          );
+      }
+      
+      if (PickerKeyInfo.UnicodeChar != CHAR_NULL
+       && PickerKeyInfo.UnicodeChar == (CHAR8) PickerKeyInfo.UnicodeChar
+       && PwIndex < ARRAY_SIZE (Password)) {
+        gST->ConOut->OutputString (gST->ConOut, L"*");
+        Password[PwIndex] = (UINT8) PickerKeyInfo.UnicodeChar;
+        OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
+        ++PwIndex;
         continue;
       }
-
-      if (PwIndex == ARRAY_SIZE (Password)) {
-        OcPlayAudioBeep (
-          Context,
-          OC_VOICE_OVER_SIGNALS_ERROR,
-          OC_VOICE_OVER_SIGNAL_ERROR_MS,
-          OC_VOICE_OVER_SILENCE_ERROR_MS
-          );
-        continue;
-      }
-
-      gST->ConOut->OutputString (gST->ConOut, L"*");
-      Password[PwIndex] = (UINT8)PickerKeyInfo.UnicodeChar;
-      OcPlayAudioFile (Context, AppleVoiceOverAudioFileBeep, TRUE);
-      ++PwIndex;
+      //
+      // Only ASCII characters are supported.
+      //
+      OcPlayAudioBeep (
+        Context,
+        OC_VOICE_OVER_SIGNALS_ERROR,
+        OC_VOICE_OVER_SIGNAL_ERROR_MS,
+        OC_VOICE_OVER_SILENCE_ERROR_MS
+        );
     }
     //
     // Output password processing status.
@@ -752,12 +728,12 @@ OcShowSimplePasswordRequest (
     }
 
     Result = OcVerifyPasswordSha512 (
-               Password,
-               PwIndex,
-               Context->PrivilegeContext->Salt,
-               Context->PrivilegeContext->SaltSize,
-               Context->PrivilegeContext->Hash
-               );
+      Password,
+      PwIndex,
+      Context->PrivilegeContext->Salt,
+      Context->PrivilegeContext->SaltSize,
+      Context->PrivilegeContext->Hash
+      );
 
     SecureZeroMem (Password, PwIndex);
     //
@@ -780,10 +756,9 @@ OcShowSimplePasswordRequest (
     if (Result) {
       OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordAccepted, TRUE);
       return EFI_SUCCESS;
-      break;
-    } else {
-      OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordIncorrect, TRUE);
     }
+
+    OcPlayAudioFile (Context, OcVoiceOverAudioFilePasswordIncorrect, TRUE);
   }
 
   gST->ConOut->OutputString (gST->ConOut, OC_MENU_PASSWORD_RETRY_LIMIT L"\r\n");
