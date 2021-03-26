@@ -557,29 +557,8 @@ BmfGetTextInfo (
       return NULL;
     }
 
-    /*if (Width > MaxWidth) {
-      break;
-    }*/
-
     TextInfo->Chars[Index] = Char;
     InfoPairs[Index - 1]   = Pair;
-  }
-
-  if (Index != StringLen) {
-    CONST BMF_KERNING_PAIR *PeriodPair;
-
-    Char = BmfGetChar (Context, '.');
-    if (Char == NULL) {
-      FreePool (TextInfo);
-      return NULL;
-    }
-
-    CurWidth = 2 * (INT32)Char->xadvance + (INT32)Char->xoffset + (INT32)Char->width;
-
-    PeriodPair = BmfGetKerningPair (Context, '.', '.');
-    if (PeriodPair != NULL) {
-      CurWidth += 2 * (INT32)PeriodPair->amount;
-    }
   }
 
   Width += ((INT32)TextInfo->Chars[Index - 1]->xoffset + (INT32)TextInfo->Chars[Index - 1]->width - (INT32)TextInfo->Chars[Index - 1]->xadvance);
