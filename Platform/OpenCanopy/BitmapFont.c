@@ -650,13 +650,8 @@ GuiGetLabel (
   InfoPairs   = (CONST BMF_KERNING_PAIR **)&TextInfo->Chars[StringLen];
   TargetCharX = 0;
 
-  if (TextInfo->Chars[0]->xoffset >= 0) {
-    InitialCharX       = 0;
-    InitialWidthOffset = 0;
-  } else {
-    InitialCharX       = -TextInfo->Chars[0]->xoffset;
-    InitialWidthOffset = TextInfo->Chars[0]->xoffset;
-  }
+  InitialCharX       = -TextInfo->Chars[0]->xoffset;
+  InitialWidthOffset = TextInfo->Chars[0]->xoffset;
 
   for (Index = 0; Index < StringLen; ++Index) {
     ASSERT (TextInfo->Chars[Index]->yoffset + TextInfo->OffsetY >= 0);
