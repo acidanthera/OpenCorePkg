@@ -37,6 +37,7 @@ OpenCore Changelog
 - Added OpenCanopy 'set default' indicator
 - Fixed OpenCanopy not aborting timeout on pointer click
 - Fixed OpenCanopy intro animation not scaling with UIScale
+- Add OpenCanopy boot entry label scrolling (fixes missing long labels)
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

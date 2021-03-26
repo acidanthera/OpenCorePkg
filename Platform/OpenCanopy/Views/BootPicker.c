@@ -29,6 +29,9 @@
 
 #include "Common.h"
 
+#define BOOT_LABEL_WRAPAROUND_PADDING   30U
+#define BOOT_LABEL_SCROLLING_HOLD_TIME  180U
+
 extern GUI_KEY_CONTEXT   *mKeyContext;
 
 extern GUI_VOLUME_PICKER mBootPicker;
@@ -44,6 +47,8 @@ extern CONST GUI_IMAGE   mBackgroundImage;
 
 extern INT64 mBackgroundImageOffsetX;
 extern INT64 mBackgroundImageOffsetY;
+
+STATIC UINT32 mBootPickerLabelScrollHoldTime = 0;
 
 STATIC GUI_OBJ *mBootPickerFocusList[] = {
   &mBootPicker.Hdr.Obj,
@@ -63,6 +68,63 @@ InternalGetVolumeEntry (
     );
 }
 
+STATIC
+VOID
+InternalRedrawVolumeLabel (
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     CONST GUI_VOLUME_ENTRY  *Entry
+  )
+{
+  GuiRequestDrawCrop (
+    DrawContext,
+    mBootPickerContainer.Obj.OffsetX + mBootPicker.Hdr.Obj.OffsetX + Entry->Hdr.Obj.OffsetX,
+    (mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY + Entry->Hdr.Obj.OffsetY + Entry->Hdr.Obj.Height - Entry->Label.Height),
+    Entry->Hdr.Obj.Width,
+    Entry->Label.Height
+    );
+}
+
+BOOLEAN
+InternalBootPickerAnimateLabel (
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     UINT64                  CurrentTime
+  )
+{
+  GUI_VOLUME_ENTRY *Entry;
+
+  ASSERT (DrawContext != NULL);
+
+  if (mBootPickerLabelScrollHoldTime < BOOT_LABEL_SCROLLING_HOLD_TIME) {
+    ++mBootPickerLabelScrollHoldTime;
+    return FALSE;
+  }
+
+  Entry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
+  if (Entry->Label.Width <= Entry->Hdr.Obj.Width) {
+    return FALSE;
+  }
+
+  Entry->LabelOffset -= DrawContext->Scale;
+  //
+  // If the second drawn label reaches the front, switch back to the first.
+  //
+  if (Entry->LabelOffset == -(INT16) (Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING)) {
+    Entry->LabelOffset = 0;
+    mBootPickerLabelScrollHoldTime = 0;
+  }
+
+  InternalRedrawVolumeLabel (DrawContext, Entry);
+
+  return FALSE;
+}
+
+STATIC GUI_ANIMATION mBootPickerLabelAnimation = {
+  INITIALIZE_LIST_HEAD_VARIABLE (mBootPickerLabelAnimation.Link),
+  NULL,
+  InternalBootPickerAnimateLabel
+};
+
 VOID
 InternalBootPickerSelectEntry (
   IN OUT GUI_VOLUME_PICKER   *This,
@@ -70,13 +132,41 @@ InternalBootPickerSelectEntry (
   IN     UINT32              NewIndex
   )
 {
+  GUI_VOLUME_ENTRY       *OldEntry;
   CONST GUI_VOLUME_ENTRY *NewEntry;
 
   ASSERT (This != NULL);
   ASSERT (NewIndex < mBootPicker.Hdr.Obj.NumChildren);
 
+  OldEntry = InternalGetVolumeEntry (This->SelectedIndex);
   This->SelectedIndex = NewIndex;
-  NewEntry = (CONST GUI_VOLUME_ENTRY *) mBootPicker.Hdr.Obj.Children[NewIndex];
+  NewEntry = InternalGetVolumeEntry (NewIndex);
+  //
+  // Reset the boot entry label scrolling timer.
+  //
+  mBootPickerLabelScrollHoldTime = 0;
+
+  if (OldEntry->Label.Width > OldEntry->Hdr.Obj.Width) {
+    //
+    // Reset the label of the old entry back to its default position.
+    //
+    if (OldEntry->LabelOffset != 0) {
+      OldEntry->LabelOffset = 0;
+      InternalRedrawVolumeLabel (DrawContext, OldEntry);
+    }
+    //
+    // Remove the animation if the next entry does not need scrolling.
+    //
+    if (NewEntry->Label.Width <= NewEntry->Hdr.Obj.Width) {
+      RemoveEntryList (&mBootPickerLabelAnimation.Link);
+      InitializeListHead (&mBootPickerLabelAnimation.Link);
+    }
+  } else if (NewEntry->Label.Width >= NewEntry->Hdr.Obj.Width) {
+    //
+    // Add the animation if the next entry needs scrolling.
+    //
+    InsertHeadList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link);
+  }
 
   ASSERT (NewEntry->Hdr.Obj.Width <= mBootPickerSelectorContainer.Obj.Width);
   ASSERT_EQUALS (This->Hdr.Obj.Height, mBootPickerSelectorContainer.Obj.OffsetY + mBootPickerSelectorContainer.Obj.Height);
@@ -427,13 +517,31 @@ InternalBootPickerEntryDraw (
     DrawContext,
     BaseX,
     BaseY,
-    (This->Width - Label->Width) / 2,
+    Entry->LabelOffset,
     This->Height - Label->Height,
     OffsetX,
     OffsetY,
     Width,
     Height
     );
+  //
+  // If the label needs scrolling, draw a second one to get a wraparound effect.
+  //
+  if (Entry->Label.Width > This->Width) {
+    GuiDrawChildImage (
+      Label,
+      Opacity,
+      DrawContext,
+      BaseX,
+      BaseY,
+      (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING,
+      This->Height - Label->Height,
+      OffsetX,
+      OffsetY,
+      Width,
+      Height
+      );
+  }
   //
   // There should be no children.
   //

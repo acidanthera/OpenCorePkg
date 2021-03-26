@@ -17,6 +17,7 @@ typedef struct {
   OC_BOOT_ENTRY   *Context;
   BOOLEAN         CustomIcon;
   UINT8           Index;
+  INT16           LabelOffset;
 } GUI_VOLUME_ENTRY;
 
 typedef struct {
