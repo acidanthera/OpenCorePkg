@@ -69,7 +69,7 @@ int main (int argc, char** argv)
 
   FontImage   = UserReadFile (argv[1], &FontImageSize);
   FontMetrics = UserReadFile (argv[2], &FontMetricsSize);
-  Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize);
+  Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize, 1);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));
     return -1;

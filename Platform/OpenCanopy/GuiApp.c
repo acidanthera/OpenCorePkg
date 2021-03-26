@@ -487,7 +487,8 @@ InternalContextConstruct (
       FontImage,
       FontImageSize,
       FontData,
-      FontDataSize
+      FontDataSize,
+      Context->Scale 
       );
     if (Context->FontContext.BmfContext.Height != BOOT_ENTRY_LABEL_HEIGHT * Context->Scale) {
         DEBUG((
