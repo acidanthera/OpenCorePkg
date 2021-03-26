@@ -1422,6 +1422,15 @@ InternalBootPickerAnimateIntro (
     );
   mBootPickerContainer.Obj.Opacity = Opacity;
   //
+  // Animate the scroll buttons based on their active state.
+  //
+  if (mBootPicker.Hdr.Obj.OffsetX < 0) {
+    mBootPickerLeftScroll.Hdr.Obj.Opacity = Opacity;
+  }
+  if (mBootPicker.Hdr.Obj.OffsetX + mBootPicker.Hdr.Obj.Width > mBootPickerContainer.Obj.Width) {
+    mBootPickerRightScroll.Hdr.Obj.Opacity = Opacity;
+  }
+  //
   // If PasswordView already faded-in the action buttons, skip them.
   //
   if (mCommonActionButtonsContainer.Obj.Opacity != 0xFF) {
@@ -1651,12 +1660,19 @@ BootPickerViewInitialize (
     InitBpAnimIntro (DrawContext);
     InsertHeadList (&DrawContext->Animations, &mBootPickerIntroAnimation.Link);
     //
-    // Fade-in picker and action buttons.
+    // Fade-in picker, scroll buttons, and action buttons.
     //
-    mBootPickerContainer.Obj.Opacity = 0;
+    mBootPickerContainer.Obj.Opacity       = 0;
+    mBootPickerLeftScroll.Hdr.Obj.Opacity  = 0;
+    mBootPickerRightScroll.Hdr.Obj.Opacity = 0;
 
     GuiContext->DoneIntroAnimation = TRUE;
   } else {
+    //
+    // The late code assumes the scroll buttons are visible by default.
+    //
+    mBootPickerLeftScroll.Hdr.Obj.Opacity  = 0xFF;
+    mBootPickerRightScroll.Hdr.Obj.Opacity = 0xFF;
     //
     // Unhide action buttons immediately if they are not animated.
     //
@@ -1722,7 +1738,13 @@ BootPickerViewLateInitialize (
   }
 
   mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
-  InternalUpdateScrollButtons ();
+  //
+  // If the scroll buttons are hidden, the intro animation will update them
+  // implicitly.
+  //
+  if (mBootPickerLeftScroll.Hdr.Obj.Opacity == 0xFF) {
+    InternalUpdateScrollButtons ();
+  }
   InternalBootPickerSelectEntry (&mBootPicker, NULL, DefaultIndex);
   GuiContext->BootEntry = InternalGetVolumeEntry (DefaultIndex)->Context;
 }
