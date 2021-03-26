@@ -640,11 +640,21 @@ InternalBootPickerLeftScrollPtrEvent (
         &BootPickerY
         );
       //
+      // Scroll the boot entry view by one spot.
+      //
+      InternalBootPickerScroll (
+        &mBootPicker,
+        DrawContext,
+        BootPickerX,
+        BootPickerY,
+        (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale
+        );
+      //
       // If the selected entry is pushed off-screen by scrolling, select the
       // appropriate neighbour entry.
       //
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-      if (mBootPicker.Hdr.Obj.OffsetX + (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale + SelectedEntry->Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.Width > mBootPickerContainer.Obj.Width) {
+      if (mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.Width > mBootPickerContainer.Obj.Width) {
         //
         // The internal design ensures a selected entry cannot be off-screen,
         // scrolling offsets it by at most one spot.
@@ -657,19 +667,9 @@ InternalBootPickerLeftScrollPtrEvent (
             );
 
           SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-          ASSERT (!(mBootPicker.Hdr.Obj.OffsetX + (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale + SelectedEntry->Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.Width > mBootPickerContainer.Obj.Width));
+          ASSERT (!(mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.Width > mBootPickerContainer.Obj.Width));
         }
       }
-      //
-      // Scroll the boot entry view by one spot.
-      //
-      InternalBootPickerScroll (
-        &mBootPicker,
-        DrawContext,
-        BootPickerX,
-        BootPickerY,
-        (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale
-        );
       //
       // Falthrough to 'hit' case.
       //
@@ -730,11 +730,21 @@ InternalBootPickerRightScrollPtrEvent (
         &BootPickerY
         );
       //
+      // Scroll the boot entry view by one spot.
+      //
+      InternalBootPickerScroll (
+        &mBootPicker,
+        DrawContext,
+        BootPickerX,
+        BootPickerY,
+        -(INT64) (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale
+        );
+      //
       // If the selected entry is pushed off-screen by scrolling, select the
       // appropriate neighbour entry.
       //
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-      if (mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX < (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale) {
+      if (mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX < 0) {
         //
         // The internal design ensures a selected entry cannot be off-screen,
         // scrolling offsets it by at most one spot.
@@ -748,18 +758,8 @@ InternalBootPickerRightScrollPtrEvent (
         }
 
         SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-        ASSERT (!(mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX < (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale));
+        ASSERT (!(mBootPicker.Hdr.Obj.OffsetX + SelectedEntry->Hdr.Obj.OffsetX < 0));
       }
-      //
-      // Scroll the boot entry view by one spot.
-      //
-      InternalBootPickerScroll (
-        &mBootPicker,
-        DrawContext,
-        BootPickerX,
-        BootPickerY,
-        -(INT64) (BOOT_ENTRY_WIDTH + BOOT_ENTRY_SPACE) * Context->Scale
-        );
       //
       // Falthrough to 'hit' case.
       //
