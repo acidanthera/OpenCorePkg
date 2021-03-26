@@ -24,11 +24,11 @@ OpenCore Changelog
 - Fixed OpenCanopy interrupt handling causing missed events and lag
 - Improved OpenCanopy double-click detection 
 - Reduced OpenCanopy touch input lag and improved usability
-- Added Apple Event keyboard handling for improved keypress response in OpenCanopy and Builtin pickers
-- Added Apple Key Map edge detection for improved non-repeating key response in pickers
-- Fixed extremely fast repeat then stall issue with keyboard handling on some PS/2 systems
-- Improved Shift+Enter and Shift+Index behaviour with PollAppleHotKeys
-- Added CTRL-held indicator to Builtin picker
+- Improved keypress responsiveness in OpenCanopy and builtin pickers
+- Improved non-repeating key detection in OpenCanopy and builtin pickers
+- Fixed fast repeat then stall issue with key handling on some PS/2 systems
+- Added accurate Shift+Enter/Shift+Index detection when using PollAppleHotKeys
+- Added CTRL-held indicator to builtin picker
 - Replaced VerifyMsrE2 with ControlMsrE2 also allowing unlock on some firmwares
 - Fixed OpenCanopy flicker when refreshing the entry view
 - Added OpenCanopy TAB navigation support
@@ -38,6 +38,7 @@ OpenCore Changelog
 - Fixed OpenCanopy not aborting timeout on pointer click
 - Fixed OpenCanopy intro animation not scaling with UIScale
 - Add OpenCanopy boot entry label scrolling (fixes missing long labels)
+- Added tabbable Shutdown and Restart buttons to builtin picker
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

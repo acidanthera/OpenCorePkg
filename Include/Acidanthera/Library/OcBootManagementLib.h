@@ -49,6 +49,8 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_MENU_TIMEOUT              L"Timeout"
 #define OC_MENU_OK                   L"OK"
 #define OC_MENU_EXTERNAL             L" (external)"
+#define OC_MENU_SHUTDOWN             L"Shutting Down"
+#define OC_MENU_RESTART              L"Restarting"
 
 /**
   Paths allowed to be accessible by the interfaces.

@@ -54,16 +54,24 @@ STATIC UINT64               mPreviousTick;
 STATIC UINT64               mLoopDelayStart;
 STATIC UINT64               mLoopDelayEnd;
 
+typedef enum {
+  TAB_PICKER,
+  TAB_RESTART,
+  TAB_SHUTDOWN,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  TAB_TYPING_DEMO,
+#endif
+  TAB_MAX
+} TAB_CONTEXT;
+
 #define OC_KB_DBG_MAX_COLUMN           80
 #define OC_KB_DBG_DELTA_SAMPLE_COLUMN  0 //40
 
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
-#define OC_TYPING_ROW                  2
+#define OC_KB_DBG_PRINT_ROW            4
 #else
-#define OC_TYPING_ROW                  0
+#define OC_KB_DBG_PRINT_ROW            2
 #endif
-
-#define OC_KB_DBG_PRINT_ROW            (OC_TYPING_ROW + 2)
 
 #define OC_KB_DBG_DOWN_ROW             (OC_KB_DBG_PRINT_ROW + 4)
 #define OC_KB_DBG_X_ROW                (OC_KB_DBG_PRINT_ROW + 5)
@@ -208,6 +216,60 @@ GetPickerEntryCursor (
   return L' ';
 }
 
+VOID
+UpdateTabContext (
+  IN  BOOLEAN                       IsEntering,
+  IN  TAB_CONTEXT                   TabContext,
+  IN  INTN                          ChosenEntry,
+  IN  CHAR16                        OldEntryCursor,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  IN  INT32                         TypingRow,
+  IN  INT32                         TypingColumn,
+#endif
+  IN  INT32                         FirstIndexRow,
+  IN  INT32                         ShutdownRestartRow,
+  IN  INT32                         ShutdownColumn,
+  IN  INT32                         RestartColumn
+  )
+{
+  CHAR16      Code[2];
+
+  Code[1]      = L'\0';
+
+  if (TabContext == TAB_PICKER) {
+    if (ChosenEntry >= 0) {
+      gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
+      Code[0] = IsEntering ? OldEntryCursor : L' ';
+      gST->ConOut->OutputString (gST->ConOut, Code);
+    }
+  } else if (TabContext == TAB_SHUTDOWN || TabContext == TAB_RESTART) {
+    if (TabContext == TAB_SHUTDOWN) {
+      gST->ConOut->SetCursorPosition (gST->ConOut, ShutdownColumn, ShutdownRestartRow);
+    } else {
+      gST->ConOut->SetCursorPosition (gST->ConOut, RestartColumn, ShutdownRestartRow);
+    }
+
+    Code[0] = IsEntering ? L'[' : '|';
+    gST->ConOut->OutputString (gST->ConOut, Code);
+
+    if (TabContext == TAB_SHUTDOWN) {
+      gST->ConOut->OutputString (gST->ConOut, L"Shutdown");
+    } else {
+      gST->ConOut->OutputString (gST->ConOut, L"Restart");
+    }
+
+    Code[0] = IsEntering ? L']' : '|';
+    gST->ConOut->OutputString (gST->ConOut, Code);
+  }
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  else if (TabContext == TAB_TYPING_DEMO) {
+    gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, TypingRow);
+    Code[0] = IsEntering ? L'_' : ' ';
+    gST->ConOut->OutputString (gST->ConOut, Code);
+  }
+#endif
+}
+
 EFI_STATUS
 EFIAPI
 OcShowSimpleBootMenu (
@@ -232,12 +294,16 @@ OcShowSimpleBootMenu (
   UINT64                             KeyEndTime;
   BOOLEAN                            PlayedOnce;
   BOOLEAN                            PlayChosen;
-  BOOLEAN                            IsTyping;
   BOOLEAN                            ModifiersChanged;
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
+  INT32                              TypingRow;
   INT32                              TypingColumn;
   INT32                              TypingStartColumn;
 #endif
+  INT32                              ShutdownRestartRow;
+  INT32                              ShutdownColumn;
+  INT32                              RestartColumn;
+  TAB_CONTEXT                        TabContext;
 
   Code[1]        = L'\0';
 
@@ -252,7 +318,8 @@ OcShowSimpleBootMenu (
   OldEntryCursor = L'\0';
 
   FirstIndexRow  = -1;
-  IsTyping       = FALSE;
+
+  TabContext     = TAB_PICKER;
 
   //
   // Used to detect changes.
@@ -388,6 +455,16 @@ OcShowSimpleBootMenu (
       }
 
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+
+      ShutdownRestartRow = gST->ConOut->Mode->CursorRow;
+      gST->ConOut->OutputString (gST->ConOut, L" ");
+      RestartColumn = gST->ConOut->Mode->CursorColumn;
+      gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
+      gST->ConOut->OutputString (gST->ConOut, L"  ");
+      ShutdownColumn = gST->ConOut->Mode->CursorColumn;
+      gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
+
+      gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
       gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
 
       mStatusRow     = gST->ConOut->Mode->CursorRow;
@@ -395,8 +472,9 @@ OcShowSimpleBootMenu (
 
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
       gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
-      Print (L"Typing: ");
-      TypingColumn = gST->ConOut->Mode->CursorColumn;
+      gST->ConOut->OutputString (gST->ConOut, L"Typing: ");
+      TypingRow         = gST->ConOut->Mode->CursorRow;
+      TypingColumn      = gST->ConOut->Mode->CursorColumn;
       TypingStartColumn = TypingColumn;
 #endif
 
@@ -449,67 +527,106 @@ OcShowSimpleBootMenu (
       ModifiersChanged = BootContext->PickerContext->HotKeyContext->WaitForKeyInfo (
         BootContext->PickerContext,
         KeyEndTime,
-        IsTyping ? OC_PICKER_KEYS_FOR_TYPING : OC_PICKER_KEYS_FOR_PICKER,
+        (TabContext != TAB_PICKER)
+          ? OC_PICKER_KEYS_FOR_TYPING
+          : OC_PICKER_KEYS_FOR_PICKER,
         &PickerKeyInfo
         );
 
-#if defined(BUILTIN_DEMONSTRATE_TYPING)
       if (PickerKeyInfo.OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
-        //
-        // Only allow TAB to go forwards and SHIFT+TAB to go backwards, just to test that it is working.
-        //
-        if (!IsTyping && ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) == 0)) {
-          IsTyping = TRUE;
-        } else if (IsTyping && ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) != 0)) {
-          IsTyping = FALSE;
-        }
+        UpdateTabContext (
+          FALSE,
+          TabContext,
+          ChosenEntry,
+          OldEntryCursor,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+          TypingRow,
+          TypingColumn,
+#endif
+          FirstIndexRow,
+          ShutdownRestartRow,
+          ShutdownColumn,
+          RestartColumn
+          );
 
         //
-        // Show/hide typing cursor.
+        // On leaving picker the first time, any timeout gets cancelled (correctly), therefore text
+        // cursor changes, therefore text cursor gets redrawn - unless we do this.
         //
-        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
-        Code[0] = IsTyping ? L'_' : ' ';
-        gST->ConOut->OutputString (gST->ConOut, Code);
-
-        //
-        // Show/hide picker cursor.
-        //
-        if (ChosenEntry >= 0) {
-          gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
-          Code[0] = IsTyping ? L' ' : OldEntryCursor;
-          gST->ConOut->OutputString (gST->ConOut, Code);
-
-          //
-          // Timeout gets cancelled and thefore cursor gets redrawn unless we do this.
-          //
+        if (TabContext == TAB_PICKER && TimeOutSeconds > 0) {
           OldEntryCursor = GetPickerEntryCursor(BootContext, 0, ChosenEntry, ChosenEntry, PickerKeyInfo.OcModifiers);
         }
+
+        if ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) != 0) {
+          if (TabContext == 0) {
+            TabContext = TAB_MAX;
+          }
+          TabContext--;
+        } else {
+          TabContext++;
+          if (TabContext == TAB_MAX) {
+            TabContext = 0;
+          }
+        }
+
+        UpdateTabContext (
+          TRUE,
+          TabContext,
+          ChosenEntry,
+          OldEntryCursor,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+          TypingRow,
+          TypingColumn,
+#endif
+          FirstIndexRow,
+          ShutdownRestartRow,
+          ShutdownColumn,
+          RestartColumn
+          );
 
         gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
 
-      if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_BACKSPACE && TypingColumn > TypingStartColumn) {
-        //
-        // Backspace and move cursor.
-        //
-        TypingColumn--;
-        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
-        Code[0] = L'_';
-        gST->ConOut->OutputString (gST->ConOut, Code);
-        Code[0] = L' ';
-        gST->ConOut->OutputString (gST->ConOut, Code);
-        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
-      } else if (PickerKeyInfo.UnicodeChar >= 32 && PickerKeyInfo.UnicodeChar < 128) {
-        //
-        // Type and move cursor.
-        //
-        gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, mStatusRow + OC_TYPING_ROW);
-        Code[0] = (CHAR16) PickerKeyInfo.UnicodeChar;
-        gST->ConOut->OutputString (gST->ConOut, Code);
-        Code[0] = L'_';
-        gST->ConOut->OutputString (gST->ConOut, Code);
-        gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
-        TypingColumn++;
+      if (TabContext == TAB_RESTART) {
+        if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+          gST->ConOut->OutputString (gST->ConOut, OC_MENU_RESTART);
+          gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+          ResetWarm();
+          return EFI_SUCCESS;
+        }
+      } else if (TabContext == TAB_SHUTDOWN) {
+        if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+          gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHUTDOWN);
+          gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+          ResetShutdown();
+          return EFI_SUCCESS;
+        }
+      }
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+      else if (TabContext == TAB_TYPING_DEMO) {
+        if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_BACKSPACE && TypingColumn > TypingStartColumn) {
+          //
+          // Backspace and move cursor.
+          //
+          TypingColumn--;
+          gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, TypingRow);
+          Code[0] = L'_';
+          gST->ConOut->OutputString (gST->ConOut, Code);
+          Code[0] = L' ';
+          gST->ConOut->OutputString (gST->ConOut, Code);
+          gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+        } else if (PickerKeyInfo.UnicodeChar >= 32 && PickerKeyInfo.UnicodeChar < 128) {
+          //
+          // Type and move cursor.
+          //
+          gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, TypingRow);
+          Code[0] = PickerKeyInfo.UnicodeChar;
+          gST->ConOut->OutputString (gST->ConOut, Code);
+          Code[0] = L'_';
+          gST->ConOut->OutputString (gST->ConOut, Code);
+          gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
+          TypingColumn++;
+        }
       }
 #endif
 
@@ -597,7 +714,7 @@ OcShowSimpleBootMenu (
         return EFI_SUCCESS;
       }
 
-      if (PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION && TimeOutSeconds > 0) {
+      if ((ModifiersChanged || PickerKeyInfo.OcKeyCode != OC_INPUT_NO_ACTION) && TimeOutSeconds > 0) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileAbortTimeout, FALSE);
         TimeOutSeconds = 0;
         break;
