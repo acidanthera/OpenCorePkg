@@ -381,13 +381,7 @@ InternalBootPickerKeyEvent (
   BaseY = mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY;
 
   if (KeyEvent->OcKeyCode == OC_INPUT_RIGHT) {
-    //
-    // Edge-case: The last child is the selector button.
-    //
     if (mBootPicker.SelectedIndex + 1 < mBootPicker.Hdr.Obj.NumChildren) {
-      //
-      // Redraw the two now (un-)selected entries.
-      //
       InternalBootPickerChangeEntry (
         Picker,
         DrawContext,
@@ -398,9 +392,6 @@ InternalBootPickerKeyEvent (
     }
   } else if (KeyEvent->OcKeyCode == OC_INPUT_LEFT) {
     if (mBootPicker.SelectedIndex > 0) {
-      //
-      // Redraw the two now (un-)selected entries.
-      //
       InternalBootPickerChangeEntry (
         Picker,
         DrawContext,
