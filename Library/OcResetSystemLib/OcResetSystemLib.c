@@ -57,7 +57,10 @@ ResetShutdown (
     0,
     NULL
     );
-  CpuDeadLoop ();
+  //
+  // Perform cold reset when shutdown fails (e.g. DUET).
+  //
+  ResetCold ();
 }
 
 VOID
@@ -76,7 +79,6 @@ InternalResetPlatformSpecific (
     );
   ResetCold ();
 }
-
 
 VOID
 EFIAPI
