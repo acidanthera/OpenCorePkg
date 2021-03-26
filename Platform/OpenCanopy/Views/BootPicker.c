@@ -427,11 +427,6 @@ InternalBootPickerKeyEvent (
       OcVoiceOverAudioFileReloading,
       FALSE
       );
-  } else if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
-    DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
-      DrawContext->GuiContext->PickerContext,
-      0
-      );
   }
 }
 
@@ -872,6 +867,14 @@ InternalBootPickerViewKeyEvent (
 {
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
+
+  if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
+    DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
+      DrawContext->GuiContext->PickerContext,
+      0
+      );
+    return;
+  }
 
   InternalFocusKeyHandler (
     DrawContext,

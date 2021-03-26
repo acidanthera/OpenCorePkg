@@ -276,14 +276,6 @@ InternalPasswordBoxKeyEvent (
   IN     CONST GUI_KEY_EVENT     *KeyEvent
   )
 {
-  if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
-    DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
-      DrawContext->GuiContext->PickerContext,
-      OcVoiceOverAudioFileEnterPassword
-      );
-    return;
-  }
-
   if (KeyEvent->UnicodeChar == CHAR_CARRIAGE_RETURN) {
     //
     // RETURN finalizes the input.
@@ -370,6 +362,14 @@ InternalPasswordViewKeyEvent (
   // Disable input when maximum password retries have been reached.
   //
   if (mPasswordNumTries >= OC_PASSWORD_MAX_RETRIES) {
+    return;
+  }
+
+  if (KeyEvent->OcKeyCode == OC_INPUT_VOICE_OVER) {
+    DrawContext->GuiContext->PickerContext->ToggleVoiceOver (
+      DrawContext->GuiContext->PickerContext,
+      OcVoiceOverAudioFileEnterPassword
+      );
     return;
   }
 
