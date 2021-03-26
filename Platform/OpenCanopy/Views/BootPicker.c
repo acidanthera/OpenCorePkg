@@ -291,10 +291,8 @@ InternalBootPickerChangeEntry (
   IN     UINT32               NewIndex
   )
 {
-  CONST GUI_VOLUME_ENTRY *NewEntry;
-  CONST GUI_VOLUME_ENTRY *PrevEntry;
-  INT64                  ScrollOffset;
-  INT64                  OldSelectorOffsetX;
+  INT64 ScrollOffset;
+  INT64 OldSelectorOffsetX;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
@@ -306,11 +304,6 @@ InternalBootPickerChangeEntry (
   ASSERT (This->SelectedIndex != NewIndex);
 
   OldSelectorOffsetX = mBootPickerSelectorContainer.Obj.OffsetX;
-  //
-  // Redraw the two now (un-)selected entries.
-  //
-  NewEntry  = InternalGetVolumeEntry (NewIndex);
-  PrevEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
   InternalBootPickerSelectEntry (This, DrawContext, NewIndex);
 
   ScrollOffset = InternelBootPickerScrollSelected ();
