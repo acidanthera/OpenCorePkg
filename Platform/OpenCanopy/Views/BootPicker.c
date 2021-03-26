@@ -109,7 +109,7 @@ InternalBootPickerAnimateLabel (
   //
   // If the second drawn label reaches the front, switch back to the first.
   //
-  if (Entry->LabelOffset == -(INT16) (Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING)) {
+  if (Entry->LabelOffset <= -(INT16) (Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale)) {
     Entry->LabelOffset = 0;
     mBootPickerLabelScrollHoldTime = 0;
   }
@@ -518,7 +518,7 @@ InternalBootPickerEntryDraw (
       DrawContext,
       BaseX,
       BaseY,
-      (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING,
+      (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale,
       This->Height - Label->Height,
       OffsetX,
       OffsetY,
