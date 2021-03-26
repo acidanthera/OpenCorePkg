@@ -59,6 +59,12 @@ GuiPointerGetPosition (
   );
 
 VOID
+GuiPointerSetPosition (
+  IN OUT GUI_POINTER_CONTEXT     *Context,
+  IN     CONST GUI_PTR_POSITION  *Position
+  );
+
+VOID
 GuiPointerReset (
   IN OUT GUI_POINTER_CONTEXT  *Context
   );
@@ -88,12 +94,10 @@ GuiKeyReset (
   IN OUT GUI_KEY_CONTEXT  *Context
   );
 
-EFI_STATUS
-EFIAPI
-GuiKeyRead (
-  IN OUT GUI_KEY_CONTEXT      *Context,
-     OUT OC_PICKER_KEY_INFO   *PickerKeyInfo,
-  IN     BOOLEAN              FilterForTyping
+BOOLEAN
+GuiKeyGetEvent (
+  IN OUT GUI_KEY_CONTEXT  *Context,
+  OUT    GUI_KEY_EVENT    *Event
   );
 
 VOID

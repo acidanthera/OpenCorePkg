@@ -30,6 +30,13 @@ OpenCore Changelog
 - Improved Shift+Enter and Shift+Index behaviour with PollAppleHotKeys
 - Added CTRL-held indicator to Builtin picker
 - Replaced VerifyMsrE2 with ControlMsrE2 also allowing unlock on some firmwares
+- Fixed OpenCanopy flicker when refreshing the entry view
+- Added OpenCanopy TAB navigation support
+- Added OpenCanopy graphical password interface
+- Added OpenCanopy pulsing animation to signal timeout
+- Added OpenCanopy 'set default' indicator
+- Fixed OpenCanopy not aborting timeout on pointer click
+- Fixed OpenCanopy intro animation not scaling with UIScale
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

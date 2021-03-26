@@ -12,12 +12,10 @@
 #include <Library/DebugLib.h>
 
 #include "OpenCanopy.h"
+#include "Blending.h"
 
 #define PIXEL_TO_UINT32(Pixel)  \
   ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
-
-#define RGB_APPLY_OPACITY(Rgba, Opacity)  \
-  (((Rgba) * (Opacity)) / 0xFF)
 
 #define RGB_ALPHA_BLEND(Back, Front, InvFrontOpacity)  \
   ((Front) + RGB_APPLY_OPACITY (InvFrontOpacity, Back))

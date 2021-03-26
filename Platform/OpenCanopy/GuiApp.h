@@ -38,8 +38,19 @@
 #define BOOT_SCROLL_BUTTON_DIMENSION  40U
 #define BOOT_SCROLL_BUTTON_SPACE      40U
 
-#define BOOT_ACTION_BUTTON_DIMENSION  144U
-#define BOOT_ACTION_BUTTON_SPACE      36U
+#define BOOT_ACTION_BUTTON_DIMENSION        128U
+#define BOOT_ACTION_BUTTON_FOCUS_DIMENSION  144U
+#define BOOT_ACTION_BUTTON_SPACE            36U
+
+#define PASSWORD_LOCK_DIMENSION 144U
+
+#define PASSWORD_ENTER_WIDTH  75U
+#define PASSWORD_ENTER_HEIGHT 30U
+
+#define PASSWORD_BOX_WIDTH   288U
+#define PASSWORD_BOX_HEIGHT  30U
+
+#define PASSWORD_DOT_DIMENSION  10U
 
 typedef enum {
   LABEL_GENERIC_HDD,
@@ -58,10 +69,16 @@ typedef enum {
   ICON_CURSOR,
   ICON_SELECTED,
   ICON_SELECTOR,
+  ICON_SET_DEFAULT,
   ICON_LEFT,
   ICON_RIGHT,
   ICON_SHUT_DOWN,
   ICON_RESTART,
+  ICON_BUTTON_FOCUS,
+  ICON_PASSWORD,
+  ICON_DOT,
+  ICON_ENTER,
+  ICON_LOCK,
   ICON_NUM_SYS,
   ICON_GENERIC_HDD       = ICON_NUM_SYS,
   ICON_NUM_MANDATORY,
@@ -97,11 +114,22 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   BOOLEAN                              DoneIntroAnimation;
   BOOLEAN                              ReadyToBoot;
   UINT8                                Scale;
-  UINT32                               CursorDefaultX;
-  UINT32                               CursorDefaultY;
+  GUI_PTR_POSITION                     CursorDefaultPos;
   INT32                                AudioPlaybackTimeout;
   OC_PICKER_CONTEXT                    *PickerContext;
 } BOOT_PICKER_GUI_CONTEXT;
+
+EFI_STATUS
+PasswordViewInitialize (
+  OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext
+  );
+
+VOID
+PasswordViewDeinitialize (
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN OUT BOOT_PICKER_GUI_CONTEXT  *GuiContext
+  );
 
 EFI_STATUS
 BootPickerViewInitialize (

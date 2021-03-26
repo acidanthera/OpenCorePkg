@@ -17,10 +17,6 @@
 
 #include "../GuiIo.h"
 
-struct GUI_KEY_CONTEXT_ {
-  OC_PICKER_CONTEXT                  *Context;
-};
-
 GUI_KEY_CONTEXT *
 GuiKeyConstruct (
   IN OC_PICKER_CONTEXT  *PickerContext
@@ -32,25 +28,33 @@ GuiKeyConstruct (
   return &mContext;
 }
 
-EFI_STATUS
-EFIAPI
-GuiKeyRead (
-  IN OUT GUI_KEY_CONTEXT      *Context,
-     OUT OC_PICKER_KEY_INFO   *PickerKeyInfo,
-  IN     BOOLEAN              FilterForTyping
+BOOLEAN
+GuiKeyGetEvent (
+  IN OUT GUI_KEY_CONTEXT  *Context,
+  OUT    GUI_KEY_EVENT    *Event
   )
 {
-
   ASSERT (Context != NULL);
-  ASSERT (PickerKeyInfo != NULL);
+  ASSERT (Event != NULL);
 
   Context->Context->HotKeyContext->GetKeyInfo (
     Context->Context,
-    OC_PICKER_KEYS_FOR_PICKER,
-    PickerKeyInfo
+    Context->KeyFilter,
+    Event
     );
+  
+  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_PICKER
+   && Context->OcModifiers != Event->OcModifiers) {
+    Context->OcModifiers = Event->OcModifiers;
+    return TRUE;
+  }
 
-  return EFI_SUCCESS;
+  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_TYPING
+   && Event->UnicodeChar != L'\0') {
+    return TRUE;
+  }
+
+  return Event->OcKeyCode != OC_INPUT_NO_ACTION;
 }
 
 VOID
@@ -63,6 +67,7 @@ GuiKeyReset (
   //
   // Flush console here?
   //
+  Context->Context->HotKeyContext->FlushTypingBuffer (Context->Context);
 }
 
 VOID

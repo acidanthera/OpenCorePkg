@@ -53,10 +53,16 @@ mIconNames[ICON_NUM_TOTAL] = {
   [ICON_CURSOR]             = "Cursor",
   [ICON_SELECTED]           = "Selected",
   [ICON_SELECTOR]           = "Selector",
+  [ICON_SET_DEFAULT]        = "SetDefault",
   [ICON_LEFT]               = "Left",
   [ICON_RIGHT]              = "Right",
   [ICON_SHUT_DOWN]          = "ShutDown",
   [ICON_RESTART]            = "Restart",
+  [ICON_BUTTON_FOCUS]       = "BtnFocus",
+  [ICON_PASSWORD]           = "Password",
+  [ICON_DOT]                = "Dot",
+  [ICON_ENTER]              = "Enter",
+  [ICON_LOCK]               = "Lock",
   [ICON_GENERIC_HDD]        = "HardDrive",
   [ICON_APPLE]              = "Apple",
   [ICON_APPLE_RECOVERY]     = "AppleRecv",
@@ -372,7 +378,7 @@ InternalContextConstruct (
     } else if (Index == ICON_SELECTED) {
       ImageWidth  = BOOT_SELECTOR_BACKGROUND_DIMENSION;
       ImageHeight = BOOT_SELECTOR_BACKGROUND_DIMENSION;
-    } else if (Index == ICON_SELECTOR) {
+    } else if (Index == ICON_SELECTOR || Index == ICON_SET_DEFAULT) {
       ImageWidth  = BOOT_SELECTOR_BUTTON_WIDTH;
       ImageHeight = BOOT_SELECTOR_BUTTON_HEIGHT;
       AllowLessSize = TRUE;
@@ -382,6 +388,26 @@ InternalContextConstruct (
     } else if (Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
       ImageWidth  = BOOT_ACTION_BUTTON_DIMENSION;
       ImageHeight = BOOT_ACTION_BUTTON_DIMENSION;
+      AllowLessSize = TRUE;
+    } else if (Index == ICON_BUTTON_FOCUS) {
+      ImageWidth  = BOOT_ACTION_BUTTON_FOCUS_DIMENSION;
+      ImageHeight = BOOT_ACTION_BUTTON_FOCUS_DIMENSION;
+      AllowLessSize = TRUE;
+    } else if (Index == ICON_PASSWORD) {
+      ImageWidth  = PASSWORD_BOX_WIDTH;
+      ImageHeight = PASSWORD_BOX_HEIGHT;
+      AllowLessSize = TRUE;
+    } else if (Index == ICON_LOCK) {
+      ImageWidth  = PASSWORD_LOCK_DIMENSION;
+      ImageHeight = PASSWORD_LOCK_DIMENSION;
+      AllowLessSize = TRUE;
+    } else if (Index == ICON_ENTER) {
+      ImageWidth  = PASSWORD_ENTER_WIDTH;
+      ImageHeight = PASSWORD_ENTER_HEIGHT;
+      AllowLessSize = TRUE;
+    } else if (Index == ICON_DOT) {
+      ImageWidth  = PASSWORD_DOT_DIMENSION;
+      ImageHeight = PASSWORD_DOT_DIMENSION;
       AllowLessSize = TRUE;
     } else {
       ImageWidth  = BOOT_ENTRY_ICON_DIMENSION;
@@ -400,7 +426,7 @@ InternalContextConstruct (
       AllowLessSize
       );
     if (!EFI_ERROR (Status)) {
-      if (Index == ICON_SELECTOR || Index == ICON_LEFT || Index == ICON_RIGHT || Index == ICON_SHUT_DOWN || Index == ICON_RESTART) {
+      if (Index == ICON_SELECTOR || Index == ICON_SET_DEFAULT || Index == ICON_LEFT || Index == ICON_RIGHT || Index == ICON_SHUT_DOWN || Index == ICON_RESTART || Index == ICON_ENTER) {
         Status = GuiCreateHighlightedImage (
           &Context->Icons[Index][ICON_TYPE_HELD],
           &Context->Icons[Index][ICON_TYPE_BASE],
