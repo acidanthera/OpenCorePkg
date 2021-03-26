@@ -28,9 +28,13 @@
 #include "BootPicker.h"
 
 #include "Common.h"
+#include "../Blending.h"
 
 #define BOOT_LABEL_WRAPAROUND_PADDING   30U
 #define BOOT_LABEL_SCROLLING_HOLD_TIME  180U
+
+#define BOOT_LABEL_SHADOW_WIDTH   8U
+#define BOOT_LABEL_SHADOW_HEIGHT  BOOT_ENTRY_LABEL_HEIGHT
 
 extern GUI_KEY_CONTEXT   *mKeyContext;
 
@@ -105,13 +109,21 @@ InternalBootPickerAnimateLabel (
     return FALSE;
   }
 
+  Entry->ShowLeftShadow = TRUE;
   Entry->LabelOffset -= DrawContext->Scale;
-  //
-  // If the second drawn label reaches the front, switch back to the first.
-  //
-  if (Entry->LabelOffset <= -(INT16) (Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale)) {
-    Entry->LabelOffset = 0;
-    mBootPickerLabelScrollHoldTime = 0;
+
+  if (Entry->LabelOffset <= -(INT16) Entry->Label.Width) {
+    //
+    // Hide the left shadow once the first label is hidden.
+    //
+    Entry->ShowLeftShadow = FALSE;
+    //
+    // If the second drawn label reaches the front, switch back to the first.
+    //
+    if (Entry->LabelOffset <= -(INT16) (Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale)) {
+      Entry->LabelOffset = 0;
+      mBootPickerLabelScrollHoldTime = 0;
+    }
   }
 
   InternalRedrawVolumeLabel (DrawContext, Entry);
@@ -124,6 +136,22 @@ STATIC GUI_ANIMATION mBootPickerLabelAnimation = {
   NULL,
   InternalBootPickerAnimateLabel
 };
+
+VOID
+InternalAnimateSelectedLabel (
+  IN OUT GUI_DRAWING_CONTEXT *DrawContext
+  )
+{
+  CONST GUI_VOLUME_ENTRY *Entry;
+
+  Entry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
+  if (Entry->Label.Width >= Entry->Hdr.Obj.Width) {
+    //
+    // Add the animation if the next entry needs scrolling.
+    //
+    InsertHeadList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link);
+  }
+}
 
 VOID
 InternalBootPickerSelectEntry (
@@ -141,39 +169,39 @@ InternalBootPickerSelectEntry (
   OldEntry = InternalGetVolumeEntry (This->SelectedIndex);
   This->SelectedIndex = NewIndex;
   NewEntry = InternalGetVolumeEntry (NewIndex);
-  //
-  // Reset the boot entry label scrolling timer.
-  //
-  mBootPickerLabelScrollHoldTime = 0;
-
-  if (OldEntry->Label.Width > OldEntry->Hdr.Obj.Width) {
-    //
-    // Reset the label of the old entry back to its default position.
-    //
-    if (OldEntry->LabelOffset != 0) {
-      OldEntry->LabelOffset = 0;
-      InternalRedrawVolumeLabel (DrawContext, OldEntry);
-    }
-    //
-    // Remove the animation if the next entry does not need scrolling.
-    //
-    if (NewEntry->Label.Width <= NewEntry->Hdr.Obj.Width) {
-      RemoveEntryList (&mBootPickerLabelAnimation.Link);
-      InitializeListHead (&mBootPickerLabelAnimation.Link);
-    }
-  } else if (NewEntry->Label.Width >= NewEntry->Hdr.Obj.Width) {
-    //
-    // Add the animation if the next entry needs scrolling.
-    //
-    InsertHeadList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link);
-  }
 
   ASSERT (NewEntry->Hdr.Obj.Width <= mBootPickerSelectorContainer.Obj.Width);
   ASSERT_EQUALS (This->Hdr.Obj.Height, mBootPickerSelectorContainer.Obj.OffsetY + mBootPickerSelectorContainer.Obj.Height);
 
   mBootPickerSelectorContainer.Obj.OffsetX = mBootPicker.Hdr.Obj.OffsetX + NewEntry->Hdr.Obj.OffsetX - (mBootPickerSelectorContainer.Obj.Width - NewEntry->Hdr.Obj.Width) / 2;
+  //
+  // Reset the boot entry label scrolling timer.
+  //
+  mBootPickerLabelScrollHoldTime = 0;
 
   if (DrawContext != NULL) {
+    if (OldEntry->Label.Width > OldEntry->Hdr.Obj.Width) {
+      //
+      // Reset the label of the old entry back to its default position.
+      //
+      if (OldEntry->LabelOffset != 0) {
+        OldEntry->ShowLeftShadow = FALSE;
+        OldEntry->LabelOffset = 0;
+        InternalRedrawVolumeLabel (DrawContext, OldEntry);
+      }
+      //
+      // Remove the animation if the next entry does not need scrolling.
+      //
+      if (NewEntry->Label.Width <= NewEntry->Hdr.Obj.Width) {
+        RemoveEntryList (&mBootPickerLabelAnimation.Link);
+        InitializeListHead (&mBootPickerLabelAnimation.Link);
+      }
+    } else {
+      //
+      // Add the animation if the next entry needs scrolling.
+      //
+      InternalAnimateSelectedLabel (DrawContext);
+    }
     //
     // Set voice timeout to N frames from now.
     //
@@ -430,6 +458,94 @@ InternalBootPickerKeyEvent (
   }
 }
 
+STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBootPickerLabelLeftShadowBuffer[2 * BOOT_LABEL_SHADOW_WIDTH * 2 * BOOT_LABEL_SHADOW_HEIGHT];
+STATIC GUI_IMAGE mBootPickerLabelLeftShadowImage;
+
+STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBootPickerLabelRightShadowBuffer[2 * BOOT_LABEL_SHADOW_WIDTH * 2 * BOOT_LABEL_SHADOW_HEIGHT];
+STATIC GUI_IMAGE mBootPickerLabelRightShadowImage;
+
+VOID
+InternalInitialiseLabelShadows (
+  IN CONST GUI_DRAWING_CONTEXT  *DrawContext,
+  IN BOOT_PICKER_GUI_CONTEXT    *GuiContext
+  )
+{
+  UINT32 RowOffset;
+  UINT32 ColumnOffset;
+  UINT32 MaxOffset;
+  UINT8  Opacity;
+
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL LeftPixel;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL RightPixel;
+
+  ASSERT (DrawContext->Scale <= 2);
+
+  mBootPickerLabelLeftShadowImage.Width  = BOOT_LABEL_SHADOW_WIDTH * DrawContext->Scale;
+  mBootPickerLabelLeftShadowImage.Height = BOOT_LABEL_SHADOW_HEIGHT * DrawContext->Scale;
+  mBootPickerLabelLeftShadowImage.Buffer = mBootPickerLabelLeftShadowBuffer;
+
+  mBootPickerLabelRightShadowImage.Width  = BOOT_LABEL_SHADOW_WIDTH * DrawContext->Scale;
+  mBootPickerLabelRightShadowImage.Height = BOOT_LABEL_SHADOW_HEIGHT * DrawContext->Scale;
+  mBootPickerLabelRightShadowImage.Buffer = mBootPickerLabelRightShadowBuffer;
+
+  MaxOffset = mBootPickerLabelLeftShadowImage.Width * mBootPickerLabelLeftShadowImage.Height;
+
+  for (
+    ColumnOffset = 0;
+    ColumnOffset < mBootPickerLabelLeftShadowImage.Width;
+    ++ColumnOffset
+    ) {
+    Opacity = (UINT8) (((ColumnOffset + 1) * 0xFF) / (mBootPickerLabelLeftShadowImage.Width + 1));
+
+    LeftPixel.Blue = RGB_APPLY_OPACITY (
+      GuiContext->BackgroundColor.Pixel.Blue,
+      0xFF - Opacity
+      );
+    LeftPixel.Green = RGB_APPLY_OPACITY (
+      GuiContext->BackgroundColor.Pixel.Green,
+      0xFF - Opacity
+      );
+    LeftPixel.Red = RGB_APPLY_OPACITY (
+      GuiContext->BackgroundColor.Pixel.Red,
+      0xFF - Opacity
+      );
+    LeftPixel.Reserved = 0xFF - Opacity;
+
+    RightPixel.Blue =
+      RGB_APPLY_OPACITY (
+        GuiContext->BackgroundColor.Pixel.Blue,
+        Opacity
+        );
+    RightPixel.Green =
+      RGB_APPLY_OPACITY (
+        GuiContext->BackgroundColor.Pixel.Green,
+        Opacity
+        );
+    RightPixel.Red =
+      RGB_APPLY_OPACITY (
+        GuiContext->BackgroundColor.Pixel.Red,
+        Opacity
+        );
+    RightPixel.Reserved = Opacity;
+
+    for (
+      RowOffset = 0;
+      RowOffset < MaxOffset;
+      RowOffset += mBootPickerLabelLeftShadowImage.Width
+      ) {
+      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Blue     = LeftPixel.Blue;
+      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Green    = LeftPixel.Green;
+      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Red      = LeftPixel.Red;
+      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Reserved = LeftPixel.Reserved;
+
+      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Blue     = RightPixel.Blue;
+      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Green    = RightPixel.Green;
+      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Red      = RightPixel.Red;
+      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Reserved = Opacity;
+    }
+  }
+}
+
 STATIC
 VOID
 InternalBootPickerEntryDraw (
@@ -515,6 +631,36 @@ InternalBootPickerEntryDraw (
       BaseY,
       (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale,
       This->Height - Label->Height,
+      OffsetX,
+      OffsetY,
+      Width,
+      Height
+      );
+
+    if (Entry->ShowLeftShadow) {
+      GuiDrawChildImage (
+        &mBootPickerLabelLeftShadowImage,
+        Opacity,
+        DrawContext,
+        BaseX,
+        BaseY,
+        0,
+        This->Height - mBootPickerLabelLeftShadowImage.Height,
+        OffsetX,
+        OffsetY,
+        Width,
+        Height
+        );
+    }
+
+    GuiDrawChildImage (
+      &mBootPickerLabelRightShadowImage,
+      Opacity,
+      DrawContext,
+      BaseX,
+      BaseY,
+      This->Width - mBootPickerLabelRightShadowImage.Width,
+      This->Height - mBootPickerLabelRightShadowImage.Height,
       OffsetX,
       OffsetY,
       Width,
@@ -1682,6 +1828,8 @@ BootPickerViewInitialize (
     InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
   }
 
+  InternalInitialiseLabelShadows (DrawContext, GuiContext);
+
   /*
   InitBpAnimImageList(GuiInterpolTypeLinear, 25, 25);
   STATIC GUI_ANIMATION PoofAnim;
@@ -1695,8 +1843,9 @@ BootPickerViewInitialize (
 
 VOID
 BootPickerViewLateInitialize (
-  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
-  IN UINT8                    DefaultIndex
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN     UINT8                    DefaultIndex
   )
 {
   UINT32                 Index;
@@ -1742,6 +1891,7 @@ BootPickerViewLateInitialize (
     InternalUpdateScrollButtons ();
   }
   InternalBootPickerSelectEntry (&mBootPicker, NULL, DefaultIndex);
+  InternalAnimateSelectedLabel (DrawContext);
   GuiContext->BootEntry = InternalGetVolumeEntry (DefaultIndex)->Context;
 }
 

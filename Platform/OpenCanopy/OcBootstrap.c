@@ -132,6 +132,7 @@ OcShowMenuByOc (
   }
 
   BootPickerViewLateInitialize (
+    &mDrawContext,
     &mGuiContext,
     (UINT8) BootContext->DefaultEntry->EntryIndex - 1
     );

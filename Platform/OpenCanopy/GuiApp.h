@@ -141,8 +141,9 @@ BootPickerViewInitialize (
 
 VOID
 BootPickerViewLateInitialize (
-  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
-  IN UINT8                    DefaultIndex
+  IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN     UINT8                    DefaultIndex
   );
 
 EFI_STATUS
