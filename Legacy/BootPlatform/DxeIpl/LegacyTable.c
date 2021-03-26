@@ -386,10 +386,9 @@ PrepareFadtTable (
   AcpiDescription->PM2_CNT_LEN = Fadt->Pm2CntLen;
 
   //
-  // Fill these fields by known values; 1 and 2 never used.
-  // Change by Slice.
+  // Fill these fields by known values; SLP3_TYPa and SLP4_TYPa are never used.
   //
-  AcpiDescription->SLP_TYPa = 5;
+  AcpiDescription->SLP_TYPa = 7;
   AcpiDescription->SLP3_TYPa = 5;
   AcpiDescription->SLP4_TYPa = 7;
 

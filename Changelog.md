@@ -39,6 +39,7 @@ OpenCore Changelog
 - Fixed OpenCanopy intro animation not scaling with UIScale
 - Add OpenCanopy boot entry label scrolling (fixes missing long labels)
 - Added tabbable Shutdown and Restart buttons to builtin picker
+- Fixed in-firmware shutdown for some systems running OpenDuet
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
