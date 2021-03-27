@@ -102,14 +102,16 @@ GuiClickableIsHit (
   return Image->Buffer[(UINT32) OffsetY * Image->Width + (UINT32) OffsetX].Reserved > 0;
 }
 
-VOID
+GUI_OBJ *
 InternalFocusKeyHandler (
   IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT  *Context,
   IN     CONST GUI_KEY_EVENT      *KeyEvent
   )
 {
-  UINT8 CommonFocusState;
+  UINT8   CommonFocusState;
+  GUI_OBJ *FocusChangedObj;
+
   if (KeyEvent->OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
     mCommonFocusList[mCommonFocusState]->Focus (
       mCommonFocusList[mCommonFocusState],
@@ -136,6 +138,8 @@ InternalFocusKeyHandler (
       DrawContext,
       TRUE
       );
+
+    FocusChangedObj = mCommonFocusList[CommonFocusState];
   } else {
     mCommonFocusList[mCommonFocusState]->KeyEvent (
       mCommonFocusList[mCommonFocusState],
@@ -143,7 +147,11 @@ InternalFocusKeyHandler (
       Context,
       KeyEvent
       );
+    
+    FocusChangedObj = NULL;
   }
+
+  return FocusChangedObj;
 }
 
 VOID

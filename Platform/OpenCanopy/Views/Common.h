@@ -31,7 +31,7 @@ GuiClickableIsHit (
   IN INT64            OffsetY
   );
 
-VOID
+GUI_OBJ *
 InternalFocusKeyHandler (
   IN OUT GUI_DRAWING_CONTEXT      *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT  *Context,

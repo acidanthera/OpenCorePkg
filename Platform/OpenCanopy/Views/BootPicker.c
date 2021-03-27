@@ -138,18 +138,43 @@ STATIC GUI_ANIMATION mBootPickerLabelAnimation = {
 };
 
 VOID
-InternalAnimateSelectedLabel (
-  IN OUT GUI_DRAWING_CONTEXT *DrawContext
+InternalStartAnimateLabel (
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     CONST GUI_VOLUME_ENTRY  *Entry
   )
 {
-  CONST GUI_VOLUME_ENTRY *Entry;
+  ASSERT (!IsNodeInList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link));
+  //
+  // Reset the boot entry label scrolling timer.
+  //
+  mBootPickerLabelScrollHoldTime = 0;
 
-  Entry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
-  if (Entry->Label.Width >= Entry->Hdr.Obj.Width) {
+  if (Entry->Label.Width > Entry->Hdr.Obj.Width) {
     //
     // Add the animation if the next entry needs scrolling.
     //
     InsertHeadList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link);
+  }
+}
+
+VOID
+InternalStopAnimateLabel (
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
+  IN OUT GUI_VOLUME_ENTRY     *Entry
+  )
+{
+  if (Entry->Label.Width > Entry->Hdr.Obj.Width) {
+    //
+    // Reset the label of the old entry back to its default position.
+    //
+    if (Entry->LabelOffset != 0) {
+      Entry->ShowLeftShadow = FALSE;
+      Entry->LabelOffset    = 0;
+      InternalRedrawVolumeLabel (DrawContext, Entry);
+    }
+
+    RemoveEntryList (&mBootPickerLabelAnimation.Link);
+    InitializeListHead (&mBootPickerLabelAnimation.Link);
   }
 }
 
@@ -174,34 +199,14 @@ InternalBootPickerSelectEntry (
   ASSERT_EQUALS (This->Hdr.Obj.Height, mBootPickerSelectorContainer.Obj.OffsetY + mBootPickerSelectorContainer.Obj.Height);
 
   mBootPickerSelectorContainer.Obj.OffsetX = mBootPicker.Hdr.Obj.OffsetX + NewEntry->Hdr.Obj.OffsetX - (mBootPickerSelectorContainer.Obj.Width - NewEntry->Hdr.Obj.Width) / 2;
-  //
-  // Reset the boot entry label scrolling timer.
-  //
-  mBootPickerLabelScrollHoldTime = 0;
 
   if (DrawContext != NULL) {
     if (OldEntry->Label.Width > OldEntry->Hdr.Obj.Width) {
-      //
-      // Reset the label of the old entry back to its default position.
-      //
-      if (OldEntry->LabelOffset != 0) {
-        OldEntry->ShowLeftShadow = FALSE;
-        OldEntry->LabelOffset = 0;
-        InternalRedrawVolumeLabel (DrawContext, OldEntry);
-      }
-      //
-      // Remove the animation if the next entry does not need scrolling.
-      //
-      if (NewEntry->Label.Width <= NewEntry->Hdr.Obj.Width) {
-        RemoveEntryList (&mBootPickerLabelAnimation.Link);
-        InitializeListHead (&mBootPickerLabelAnimation.Link);
-      }
-    } else {
-      //
-      // Add the animation if the next entry needs scrolling.
-      //
-      InternalAnimateSelectedLabel (DrawContext);
+      ASSERT (IsNodeInList (&DrawContext->Animations, &mBootPickerLabelAnimation.Link));
     }
+
+    InternalStopAnimateLabel (DrawContext, OldEntry);
+    InternalStartAnimateLabel (DrawContext, NewEntry);
     //
     // Set voice timeout to N frames from now.
     //
@@ -1011,6 +1016,9 @@ InternalBootPickerViewKeyEvent (
   IN     CONST GUI_KEY_EVENT     *KeyEvent
   )
 {
+  GUI_OBJ          *FocusChangedObj;
+  GUI_VOLUME_ENTRY *Entry;
+
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
 
@@ -1022,11 +1030,20 @@ InternalBootPickerViewKeyEvent (
     return;
   }
 
-  InternalFocusKeyHandler (
+  Entry = InternalGetVolumeEntry(mBootPicker.SelectedIndex);
+
+  FocusChangedObj = InternalFocusKeyHandler (
     DrawContext,
     Context,
     KeyEvent
     );
+  if (FocusChangedObj == &mBootPicker.Hdr.Obj) {
+    InternalStartAnimateLabel (DrawContext, Entry);
+  } else if (FocusChangedObj != NULL) {
+    if (!IsListEmpty (&mBootPickerLabelAnimation.Link)) {
+      InternalStopAnimateLabel (DrawContext, Entry);
+    }
+  }
 }
 
 VOID
@@ -1891,8 +1908,9 @@ BootPickerViewLateInitialize (
     InternalUpdateScrollButtons ();
   }
   InternalBootPickerSelectEntry (&mBootPicker, NULL, DefaultIndex);
-  InternalAnimateSelectedLabel (DrawContext);
-  GuiContext->BootEntry = InternalGetVolumeEntry (DefaultIndex)->Context;
+  BootEntry = InternalGetVolumeEntry (DefaultIndex);
+  InternalStartAnimateLabel (DrawContext, BootEntry);
+  GuiContext->BootEntry = BootEntry->Context;
 }
 
 VOID
