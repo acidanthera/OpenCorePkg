@@ -26,6 +26,7 @@ OpenCore Changelog
 - Reduced OpenCanopy touch input lag and improved usability
 - Improved keypress responsiveness in OpenCanopy and builtin pickers
 - Improved non-repeating key detection in OpenCanopy and builtin pickers
+- Fixed Escape preventing OpenCanopy fade up until released, on some systems
 - Fixed fast repeat then stall issue with key handling on some PS/2 systems
 - Added accurate Shift+Enter/Shift+Index detection when using PollAppleHotKeys
 - Added CTRL-held indicator to builtin picker
