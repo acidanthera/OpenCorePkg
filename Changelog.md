@@ -29,7 +29,7 @@ OpenCore Changelog
 - Fixed Escape preventing OpenCanopy fade up until released, on some systems
 - Fixed fast repeat then stall issue with key handling on some PS/2 systems
 - Added accurate Shift+Enter/Shift+Index detection when using PollAppleHotKeys
-- Added CTRL-held indicator to builtin picker
+- Added 'set default' indicator to builtin picker
 - Replaced VerifyMsrE2 with ControlMsrE2 also allowing unlock on some firmwares
 - Fixed OpenCanopy flicker when refreshing the entry view
 - Added OpenCanopy TAB navigation support
