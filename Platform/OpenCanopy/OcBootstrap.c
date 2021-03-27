@@ -30,6 +30,8 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
+#define DEFAULT_CURSOR_OFFSET_Y  112U
+
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
 
 STATIC GUI_DRAWING_CONTEXT              mDrawContext;
@@ -45,8 +47,8 @@ OcShowMenuByOcEnter (
 
   Status = GuiLibConstruct (
     GuiContext,
-    mGuiContext.CursorDefaultPos.Pos.X,
-    mGuiContext.CursorDefaultPos.Pos.Y
+    mGuiContext.CursorOffsetX,
+    mGuiContext.CursorOffsetY
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -87,6 +89,13 @@ OcShowMenuByOc (
   UINTN         Index;
 
   *ChosenBootEntry = NULL;
+  //
+  // The cursor position is updated on GUI exit, so don't overwrite it.
+  //
+  if (mGuiContext.PickerContext == NULL) {
+    mGuiContext.CursorOffsetX = 0;
+    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
+  }
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
@@ -198,6 +207,13 @@ OcShowPasswordByOc (
   )
 {
   EFI_STATUS    Status;
+  //
+  // The cursor position is updated on GUI exit, so don't overwrite it.
+  //
+  if (mGuiContext.PickerContext == NULL) {
+    mGuiContext.CursorOffsetX = 0;
+    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
+  }
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = TRUE;

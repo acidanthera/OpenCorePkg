@@ -803,11 +803,13 @@ GuiRedrawAndFlushScreen (
 EFI_STATUS
 GuiLibConstruct (
   IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
-  IN UINT32                   CursorDefaultX,
-  IN UINT32                   CursorDefaultY
+  IN INT32                    CursorOffsetX,
+  IN INT32                    CursorOffsetY
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
+  INT64                                      CursorX;
+  INT64                                      CursorY;
 
   mOutputContext = GuiOutputConstruct ();
   if (mOutputContext == NULL) {
@@ -818,13 +820,23 @@ GuiLibConstruct (
   OutputInfo = GuiOutputGetInfo (mOutputContext);
   ASSERT (OutputInfo != NULL);
 
-  CursorDefaultX = MIN (CursorDefaultX, OutputInfo->HorizontalResolution - 1);
-  CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
-
   if ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
+    CursorX = (INT64) CursorOffsetX + OutputInfo->HorizontalResolution / 2;
+    if (CursorX < 0) {
+      CursorX = 0;
+    } else if (CursorX > OutputInfo->HorizontalResolution - 1) {
+      CursorX = OutputInfo->HorizontalResolution - 1;
+    }
+    CursorY = (INT64) CursorOffsetY + OutputInfo->VerticalResolution / 2;
+    if (CursorY < 0) {
+      CursorY = 0;
+    } else if (CursorY > OutputInfo->VerticalResolution - 1) {
+      CursorY = OutputInfo->VerticalResolution - 1;
+    }
+
     mPointerContext = GuiPointerConstruct (
-      CursorDefaultX,
-      CursorDefaultY,
+      (UINT32) CursorX,
+      (UINT32) CursorY,
       OutputInfo->HorizontalResolution,
       OutputInfo->VerticalResolution,
       GuiContext->Scale
@@ -924,8 +936,14 @@ GuiViewDeinitialize (
   OUT    BOOT_PICKER_GUI_CONTEXT *GuiContext
   )
 {
+  GUI_PTR_POSITION                           CursorPosition;
+  CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
+
   if (mPointerContext != NULL) {
-    GuiPointerGetPosition (mPointerContext, &GuiContext->CursorDefaultPos);
+    OutputInfo = GuiOutputGetInfo (mOutputContext);
+    GuiPointerGetPosition (mPointerContext, &CursorPosition);
+    GuiContext->CursorOffsetX = (INT32) ((INT64) CursorPosition.Pos.X - OutputInfo->HorizontalResolution / 2);
+    GuiContext->CursorOffsetY = (INT32) ((INT64) CursorPosition.Pos.Y - OutputInfo->VerticalResolution / 2);
   }
 
   ZeroMem (DrawContext, sizeof (*DrawContext));

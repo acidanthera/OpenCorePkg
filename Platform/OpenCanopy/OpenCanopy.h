@@ -309,8 +309,8 @@ GuiClearScreen (
 EFI_STATUS
 GuiLibConstruct (
   IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
-  IN UINT32                   CursorDefaultX,
-  IN UINT32                   CursorDefaultY
+  IN INT32                    CursorOffsetX,
+  IN INT32                    CursorOffsetY
   );
 
 VOID

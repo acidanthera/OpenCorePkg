@@ -114,7 +114,8 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   BOOLEAN                              DoneIntroAnimation;
   BOOLEAN                              ReadyToBoot;
   UINT8                                Scale;
-  GUI_PTR_POSITION                     CursorDefaultPos;
+  INT32                                CursorOffsetX;
+  INT32                                CursorOffsetY;
   INT32                                AudioPlaybackTimeout;
   OC_PICKER_CONTEXT                    *PickerContext;
 } BOOT_PICKER_GUI_CONTEXT;
