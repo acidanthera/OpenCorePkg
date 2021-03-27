@@ -50,20 +50,15 @@ typedef UINT16  STRING_REF;
   { 0xFA6AE23D, 0x09BE, 0x40A0,       \
     { 0xAF, 0xDE, 0x06, 0x37, 0x85, 0x94, 0x26, 0xC8 } }
 
-  // APPLE_DEVICE_PATHS_SUPPORTED_DATA_RECORD_GUID
+// APPLE_DEVICE_PATHS_SUPPORTED_DATA_RECORD_GUID
 #define APPLE_DEVICE_PATHS_SUPPORTED_DATA_RECORD_GUID  \
   { 0x5BB91CF7, 0xD816, 0x404B,                        \
     { 0x86, 0x72, 0x68, 0xF2, 0x7F, 0x78, 0x31, 0xDC } }
 
-  // APPLE_MACHINE_PERSONALITY_DATA_RECORD_GUID
+// APPLE_MACHINE_PERSONALITY_DATA_RECORD_GUID
 #define APPLE_MACHINE_PERSONALITY_DATA_RECORD_GUID  \
   { 0x2B6C7ADE, 0xC5DA, 0x474B,                     \
     { 0xBA, 0x42, 0x06, 0xBD, 0xDD, 0x4E, 0x34, 0x97 } }
-
-  // APPLE_FSB_FREQUENCY_DATA_RECORD_GUID
-#define APPLE_FSB_FREQUENCY_DATA_RECORD_GUID  \
-  { 0xD1A04D55, 0x75B9, 0x41A3,               \
-    { 0x90, 0x36, 0x8F, 0x4A, 0x26, 0x1C, 0xBB, 0xA2 } }
 
 // APPLE_BOARD_ID_DATA_RECORD_GUID
 #define APPLE_BOARD_ID_DATA_RECORD_GUID  \
@@ -134,9 +129,6 @@ extern EFI_GUID gAppleDevicePathsSupportedDataRecordGuid;
 
 // gAppleMachinePersonalityDataRecordGuid
 extern EFI_GUID gAppleMachinePersonalityDataRecordGuid;
-
-// gAppleFsbFrequencyDataRecordGuid
-extern EFI_GUID gAppleFsbFrequencyDataRecordGuid;
 
 // gAppleBoardIdDataRecordGuid
 extern EFI_GUID gAppleBoardIdDataRecordGuid;
