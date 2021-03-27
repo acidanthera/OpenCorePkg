@@ -124,13 +124,7 @@ InternalPasswordAnimateIncorrect (
     
     if (Iteration == 5) {
       Iteration = 0;
-      mPasswordBoxContainer.Obj.Opacity = 0xFF;
-      GuiRequestDraw (
-        (UINT32) mPasswordBoxContainer.Obj.OffsetX,
-        (UINT32) mPasswordBoxContainer.Obj.OffsetY,
-        mPasswordBoxContainer.Obj.Width + DeltaAdd,
-        mPasswordBoxContainer.Obj.Height
-        );
+      mPasswordEnter.Hdr.Obj.Opacity = 0xFF;
       return TRUE;
     }
 
@@ -263,9 +257,15 @@ InternalRequestPasswordConfirmation (
   )
 {
   DrawContext->CursorOpacity = 0;
-  mPasswordBoxContainer.Obj.Opacity = 0x100 / 2;
+  mPasswordEnter.Hdr.Obj.Opacity = 0x100 / 2;
   mPasswordBox.RequestConfirm = TRUE;
   InternalRedrawPaswordBox ();
+    GuiRequestDraw (
+    (UINT32) (mPasswordBoxContainer.Obj.OffsetX + mPasswordEnter.Hdr.Obj.OffsetX),
+    (UINT32) (mPasswordBoxContainer.Obj.OffsetY + mPasswordEnter.Hdr.Obj.OffsetY),
+    mPasswordEnter.Hdr.Obj.Width,
+    mPasswordEnter.Hdr.Obj.Height
+    );
 }
 
 VOID
