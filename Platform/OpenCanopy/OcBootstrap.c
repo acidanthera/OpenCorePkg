@@ -197,15 +197,7 @@ OcShowPasswordByOc (
   IN OC_PRIVILEGE_LEVEL  Level
   )
 {
-  OC_PRIVILEGE_CONTEXT *Privilege;
   EFI_STATUS    Status;
-
-  Privilege = Context->PrivilegeContext;
-
-  if (Privilege == NULL || Privilege->CurrentLevel >= Level) {
-    return EFI_SUCCESS;
-  }
-
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = TRUE;
