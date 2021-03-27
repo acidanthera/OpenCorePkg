@@ -1806,12 +1806,13 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets device properties from a map (\texttt{plist\ dict})
   of device paths to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ multidata} format. Device paths must be provided in canonic string
-  format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
-  be set if not present and not deleted.
+  in \texttt{plist\ multidata} format.
 
-  \emph{Note}: Currently properties may only be (formerly) added by the original driver,
-  so unless a separate driver was installed, there is no reason to delete the variables.
+  \emph{Note 1}: Device paths must be provided in canonic string format
+  (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}).
+
+  \emph{Note 2}: Existing properties will not be changed unless deleted
+  in the \texttt{DeviceProperties\ Delete} section.
 
 \item
   \texttt{Delete}\\
@@ -1819,6 +1820,10 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \textbf{Description}: Removes device properties from a map (\texttt{plist\ dict})
   of device paths to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
+
+  \emph{Note}: Currently, existing properties may only exist on firmware
+  with DeviceProperties drivers (e.g. Apple). Hence, there is typically
+  no reason to delete variables unless a new driver has been installed.
 
 \end{enumerate}
 
@@ -3107,7 +3112,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \emph{Note 2}: While NVRAM resets executed from OpenCore would not typically erase the boot option
   created in \texttt{Bootstrap}, executing NVRAM resets prior to loading OpenCore will erase the boot
-  option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4, 
+  option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4,
   an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
 
 \item
@@ -6211,7 +6216,7 @@ functioning. Feature highlights:
   to use \texttt{TC0} traffic class. Refer to Intel I/O Controller Hub 9 (ICH9) Family
   Datasheet (or any other ICH datasheet) for more details about this register.
 
-  \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used 
+  \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used
   it is preferred to use AppleALC \texttt{alctsel} property instead.
 
 \item
