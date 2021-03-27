@@ -41,6 +41,7 @@ OpenCore Changelog
 - Add OpenCanopy boot entry label scrolling (fixes missing long labels)
 - Added tabbable Shutdown and Restart buttons to builtin picker
 - Fixed in-firmware shutdown for some systems running OpenDuet
+- Added Zero as alias hotkey for Escape, to force show picker if hidden
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
