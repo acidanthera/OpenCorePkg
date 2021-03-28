@@ -3350,7 +3350,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   In addition, \texttt{Zero} is provided to support systems on which \texttt{Escape} is already assigned to
   some other pre-boot firmware feature. In systems which do not require \texttt{KeySupport}, pressing and
   holding one of these keys from after power on until the picker appears should always be successful. The
-  same should  apply when using \texttt{KeySupport} mode if it is correctly configured for the system, i.e.
+  same should apply when using \texttt{KeySupport} mode if it is correctly configured for the system, i.e.
   with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
   enter the picker, multiple repeated keypresses may be tried instead.
  
@@ -3643,9 +3643,15 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CTRL+Enter} and \texttt{CTRL+Index} handling
-  to set the default boot option in the OpenCore picker; may be used in combination
+  to set the default boot option in the OpenCore picker.
+  
+  \emph{Note 1}: May be used in combination
   with \texttt{Shift+Enter} or \texttt{Shift+Index} when \texttt{PollAppleHotKeys} is
   enabled.
+
+  \emph{Note 2}: In order to support systems with unresponsive modifiers during preboot
+  (which includes \texttt{V1} and \texttt{V2} \texttt{KeySupport} mode on some firmware)
+  OpenCore also allows holding the \texttt{=/+} key in order to trigger `set default' mode.
 \item
   \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
@@ -6309,11 +6315,11 @@ functioning. Feature highlights:
   \emph{Note}: If you wish to fine tune this value, a good heuristic is to use
   the `set default' indicator within either OpenCanopy or the builtin picker. When
   \texttt{KeyForgetThreshold} is configured correctly, this indicator should
-  flicker once, when first pressing and holding the \texttt{CTRL} key, and then
+  flicker once, when first pressing and holding the \texttt{CTRL} or \texttt{=/+} key, and then
   after a further very brief interval should go on and stay on. (The initial flicker
   is an unavoidable artefact of using \texttt{KeySupport} to emulate raw keyboard
   data.) If \texttt{KeyForgetThreshold} is configured too low for the system, then
-  the `set default' indicator will continue to flicker while CTRL is held. Configure
+  the `set default' indicator will continue to flicker while \texttt{CTRL} or \texttt{=/+} is held. Configure
   the lowest value which causes this indicator to go on and stay on after the first
   initial flicker.
 

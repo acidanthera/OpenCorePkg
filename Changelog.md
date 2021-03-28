@@ -42,6 +42,7 @@ OpenCore Changelog
 - Added tabbable Shutdown and Restart buttons to builtin picker
 - Fixed in-firmware shutdown for some systems running OpenDuet
 - Added Zero as alias hotkey for Escape, to force show picker if hidden
+- Added =/+ key as alias for CTRL to set default OS
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

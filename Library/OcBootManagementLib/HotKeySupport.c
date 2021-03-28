@@ -249,6 +249,14 @@ GetPickerKeyInfo (
   }
 
   //
+  // Alternative 'set default' key, if modifiers not working;
+  // useful both for 'set default' and for tuning KeyForgetThreshold.
+  //
+  if (OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyEquals)) {
+    PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
+  }
+
+  //
   // Loosely apply regardless of other modifiers.
   //
   if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
