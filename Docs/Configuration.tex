@@ -3343,11 +3343,17 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{Note 1}: The \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are required for key
   handling. However, not all of the key handling functions can be implemented on several types of firmware.
 
-  \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using the \texttt{Escape} key to display
-  the OpenCore picker when \texttt{ShowPicker} is disabled. This key exists for the \texttt{Apple} picker
-  mode as well as for firmware that fail to report held \texttt{OPT} keys on PS/2 keyboards, requiring
-  multiple presses of the \texttt{Escape} key to access the OpenCore picker.
-
+  \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using both the \texttt{Escape}
+  and \texttt{Zero} keys to enter the OpenCore picker when \texttt{ShowPicker} is disabled.
+  \texttt{Escape} exists to support co-existence with the Apple picker (including OpenCore \texttt{Apple}
+  picker mode) and to support firmware that fails to report held \texttt{OPT} key, as on some PS/2 keyboards.
+  In addition, \texttt{Zero} is provided to support systems on which \texttt{Escape} is already assigned to
+  some other pre-boot firmware feature. In systems which do not require \texttt{KeySupport}, pressing and
+  holding one of these keys from after power on until the picker appears should always be successful. The
+  same should  apply when using \texttt{KeySupport} mode if it is correctly configured for the system, i.e.
+  with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
+  enter the picker, multiple repeated keypresses may be tried instead.
+ 
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple picker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
