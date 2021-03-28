@@ -132,7 +132,7 @@ IterateListHeaders (
       do {
         Print (L"\nEnter choice (1..%x) ? ", OptionsCount);
         Key = ReadAnyKey ();
-      } while ((Key < '1') && (Key > '0' + OptionsCount) && (Key != CHAR_ESC));
+      } while ((Key != CHAR_ESC) && ((Key < '1') || (Key > '0' + OptionsCount)));
 
       Print (L"\n");
     }
@@ -187,7 +187,9 @@ SearchForString (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount);
+  for (ListHeaderCount = 0; HiiHandles[ListHeaderCount] != NULL; ++ListHeaderCount) {
+    ;
+  }
 
   //
   // Keep list alive 'til program finishes.
