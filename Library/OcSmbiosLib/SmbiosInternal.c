@@ -141,27 +141,14 @@ SmbiosAssignStructHandle (
   //
   // Support select tables to have more than 1 entry.
   //
-  if (Type == SMBIOS_TYPE_CACHE_INFORMATION) {
-    switch (Index) {
-      case 1:
-        Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosL1CacheHandle;
-        return EFI_SUCCESS;
-      case 2:
-        Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosL2CacheHandle;
-        return EFI_SUCCESS;
-      case 3:
-        Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosL3CacheHandle;
-        return EFI_SUCCESS;
-      default:
-        ASSERT (FALSE);
-        return EFI_INVALID_PARAMETER;
-    }
-  } else if (Type == SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION
-          || Type == SMBIOS_TYPE_SYSTEM_SLOTS
-          || Type == SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY
-          || Type == SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS
-          || Type == SMBIOS_TYPE_MEMORY_DEVICE
-          || Type == SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS) {
+  if (Type == SMBIOS_TYPE_PROCESSOR_INFORMATION
+    || Type == SMBIOS_TYPE_CACHE_INFORMATION
+    || Type == SMBIOS_TYPE_PORT_CONNECTOR_INFORMATION
+    || Type == SMBIOS_TYPE_SYSTEM_SLOTS
+    || Type == SMBIOS_TYPE_PHYSICAL_MEMORY_ARRAY
+    || Type == SMBIOS_TYPE_MEMORY_ARRAY_MAPPED_ADDRESS
+    || Type == SMBIOS_TYPE_MEMORY_DEVICE
+    || Type == SMBIOS_TYPE_MEMORY_DEVICE_MAPPED_ADDRESS) {
     Table->CurrentPtr.Standard.Hdr->Handle = Table->Handle++;
     return EFI_SUCCESS;
   } else if (Index != 1) {
@@ -181,9 +168,6 @@ SmbiosAssignStructHandle (
       break;
     case SMBIOS_TYPE_SYSTEM_ENCLOSURE:
       Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosSystemEnclosureHandle;
-      break;
-    case SMBIOS_TYPE_PROCESSOR_INFORMATION:
-      Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosProcessorInformationHandle;
       break;
     case SMBIOS_TYPE_MEMORY_CONTROLLER_INFORMATION:
       Table->CurrentPtr.Standard.Hdr->Handle = OcSmbiosMemoryControllerInformationHandle;
