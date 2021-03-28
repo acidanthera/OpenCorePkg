@@ -26,6 +26,7 @@
   Include/Generic
   Include/Intel
   Include/Microsoft
+  Include/Nvidia
   Include/VMware
 
 [Includes.AArch64]
@@ -35,6 +36,7 @@
   # Include/Generic/AArch64
   # Include/Intel/AArch64
   # Include/Microsoft/AArch64
+  # Include/Nvidia/AArch64
   # Include/VMware/AArch64
 
 [Includes.Arm]
@@ -44,6 +46,7 @@
   # Include/Generic/Arm
   # Include/Intel/Arm
   # Include/Microsoft/Arm
+  # Include/Nvidia/Arm
   # Include/VMware/Arm
 
 [Includes.Ebc]
@@ -53,6 +56,7 @@
   # Include/Generic/Ebc
   # Include/Intel/Ebc
   # Include/Microsoft/Ebc
+  # Include/Nvidia/Ebc
   # Include/VMware/Ebc
 
 [Includes.Ia32]
@@ -62,6 +66,7 @@
   # Include/Generic/Ia32
   # Include/Intel/Ia32
   # Include/Microsoft/Ia32
+  # Include/Nvidia/Ia32
   # Include/VMware/Ia32
 
 [Includes.X64]
@@ -71,6 +76,7 @@
   # Include/Generic/X64
   # Include/Intel/X64
   # Include/Microsoft/X64
+  # Include/Nvidia/X64
   # Include/VMware/X64
 
 [Guids]
