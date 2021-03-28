@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Mar 28 14:21:34 2021
-%DIF ADD ../Configuration.tex        Sun Mar 28 14:21:34 2021
+%DIF DEL PreviousConfiguration.tex   Sun Mar 28 23:20:53 2021
+%DIF ADD ../Configuration.tex        Sun Mar 28 23:20:53 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -591,9 +591,9 @@ Available entries include:
 \item
   \texttt{Resources} \\
   Directory used for storing media resources such as audio files
-  for screen reader support. See the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+  for screen reader support. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
   section for more details. This directory also contains image files
-  for graphical user interface. See the \hyperref[ueficanopy]{OpenCanopy} section for more details.
+  for graphical user interface. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[ueficanopy]{OpenCanopy} section for more details.
 \item
   \texttt{Tools} \\
   Directory used for storing supplemental tools.
@@ -701,7 +701,8 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to the UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -716,6 +717,7 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -I/UefiPackages/OpenCorePkg/Include/Generic
 -I/UefiPackages/OpenCorePkg/Include/Intel
 -I/UefiPackages/OpenCorePkg/Include/Microsoft
+%DIF > -I/UefiPackages/OpenCorePkg/Include/Nvidia
 -I/UefiPackages/OpenCorePkg/Include/VMware
 -I/UefiPackages/OvmfPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
@@ -735,6 +737,7 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DOC_TARGET_NOOPT=1
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
@@ -916,8 +919,8 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Load selected tables from the \texttt{OC/ACPI}
   directory.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each add entry.
-  See the \hyperref[acpipropsadd]{Add Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each add entry.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsadd]{Add Properties} section below.
 
 \item
   \texttt{Delete}\\
@@ -925,8 +928,8 @@ quality of the suggested solutions will be variable.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Remove selected tables from the ACPI stack.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each delete entry.
-  See the \hyperref[acpipropsdelete]{Delete Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each delete entry.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsdelete]{Delete Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -935,8 +938,8 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Perform binary patches in ACPI tables before
   table addition or removal.
 
-  Designed to be filled with \texttt{plist\ dictionary} values describing each
-  patch entry. See the \hyperref[acpipropspatch]{Patch Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values describing each patch entry.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1343,10 +1346,10 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  \textbf{Description}: \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
-  See the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -1354,8 +1357,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Perform binary patches in booter.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See the \hyperref[booterpropspatch]{Patch Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each
+  patch. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1865,7 +1868,7 @@ The first stage applies very early but exclusively to the devices present in ACP
 The second stage applies to all devices much later after the PCI configuration
 and may repeat the first stage if the device was not present in ACPI.
 
-For all kernel drivers that may inspect the \texttt{IODeviceTree} plane without probing,
+For all kernel \DIFdelbegin \DIFdel{drivers }\DIFdelend \DIFaddbegin \DIFadd{extensions }\DIFaddend that may inspect the \texttt{IODeviceTree} plane without probing,
 such as \texttt{Lilu} and its plugins (e.g. \texttt{WhateverGreen}), it is especially
 important to ensure device presence in the ACPI tables. A failure to do so may result
 \textbf{in erratic behaviour} caused by ignoring the injected device properties
@@ -1954,28 +1957,35 @@ blocking.
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Load selected kernel drivers from \texttt{OC/Kexts} directory.
+  \textbf{Description}: Load selected kernel \DIFdelbegin \DIFdel{drivers from }\DIFdelend \DIFaddbegin \DIFadd{extensions (kexts) from the }\DIFaddend \texttt{OC/Kexts} directory.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See the \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
-  order follows the item order in the array, thus the dependencies should be written
-  prior to their consumers.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each \DIFdelbegin \DIFdel{driver. See }\DIFdelend \DIFaddbegin \DIFadd{kext. Refer to
+  }\DIFaddend the \hyperref[kernelpropsadd]{Add Properties} section below.
+\DIFdelbegin \DIFdel{Kernel driver load order follows the item order in the array, thus the dependencies should be written
+  prior to their consumers}\DIFdelend \DIFaddbegin 
 
-  To track the dependency order, inspect the \texttt{OSBundleLibraries} key
-  in the \texttt{Info.plist} of the kext. Any kext mentioned in the
-  \texttt{OSBundleLibraries} of the other kext must precede this kext.
+  \emph{\DIFadd{Note 1}}\DIFadd{: The load order is based on the order in which the kexts appear in
+  the array. Hence, dependencies must appear before kexts that depend on them}\DIFaddend .
 
-  \emph{Note}: Kexts may have inner kexts (\texttt{Plug-Ins}) in their bundle. Each
-  inner kext must be added separately.
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend To track the dependency order, inspect the \texttt{OSBundleLibraries}
+  key in the \texttt{Info.plist} \DIFaddbegin \DIFadd{file }\DIFaddend of the kext \DIFaddbegin \DIFadd{being added}\DIFaddend . Any kext \DIFdelbegin \DIFdel{mentioned }\DIFdelend \DIFaddbegin \DIFadd{included
+  }\DIFaddend in the \texttt{OSBundleLibraries} \DIFdelbegin \DIFdel{of the other kext must precede
+  this kext }\DIFdelend \DIFaddbegin \DIFadd{key is a dependency that must precede
+  the kext being added}\DIFaddend .
+
+  \emph{Note \DIFaddbegin \DIFadd{3}\DIFaddend }: Kexts may have inner kexts (\texttt{\DIFdelbegin \DIFdel{Plug-Ins}\DIFdelend \DIFaddbegin \DIFadd{Plugins}\DIFaddend }) \DIFdelbegin \DIFdel{in their bundle . Each
+  inner kext }\DIFdelend \DIFaddbegin \DIFadd{included
+  in the bundle and each such plugin }\DIFaddend must be added separately.
 
 \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Remove selected kernel drivers from prelinked kernel.
+  \textbf{Description}: Remove selected kernel \DIFdelbegin \DIFdel{drivers from }\DIFdelend \DIFaddbegin \DIFadd{extensions (kexts) from the }\DIFaddend prelinked kernel.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  blocked driver. See the \hyperref[kernelpropsblock]{Block Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each blocked \DIFdelbegin \DIFdel{driver.
+  See }\DIFdelend \DIFaddbegin \DIFadd{kext.
+  Refer to }\DIFaddend the \hyperref[kernelpropsblock]{Block Properties} section below.
 
 \item
   \texttt{Emulate}\\
@@ -1987,21 +1997,30 @@ blocking.
   \texttt{Force}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Load kernel drivers from system volume if they are not cached.
+  \textbf{Description}: Load kernel \DIFdelbegin \DIFdel{drivers from }\DIFdelend \DIFaddbegin \DIFadd{extensions (kexts) from the }\DIFaddend system volume if they are not cached.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See the \hyperref[kernelpropsforce]{Force Properties} section below.
-  This section resolves the problem of injecting drivers that depend on other
-  drivers, which are not cached otherwise. The issue \DIFdelbegin \DIFdel{normally }\DIFdelend \DIFaddbegin \DIFadd{typically }\DIFaddend affects older
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each \DIFdelbegin \DIFdel{driver.
+  See }\DIFdelend \DIFaddbegin \DIFadd{kext.
+  Refer to }\DIFaddend the \hyperref[kernelpropsforce]{Force Properties} section below.
+  This section resolves the problem of injecting \DIFdelbegin \DIFdel{drivers }\DIFdelend \DIFaddbegin \DIFadd{kexts }\DIFaddend that depend on other
+  \DIFdelbegin \DIFdel{drivers}\DIFdelend \DIFaddbegin \DIFadd{kexts}\DIFaddend , which are not \DIFdelbegin \DIFdel{cached otherwise }\DIFdelend \DIFaddbegin \DIFadd{otherwise cached}\DIFaddend . The issue \DIFdelbegin \DIFdel{normally }\DIFdelend \DIFaddbegin \DIFadd{typically }\DIFaddend affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
   or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
-  The kernel driver load order follows the item order in the array, thus the dependencies
-  should be written prior to their consumers. \texttt{Force} happens before
-  \texttt{Add}.
+\DIFdelbegin \DIFdel{The kernel driver load order follows the item order in the array, thus the dependencies should be written prior to their consumers.
+}\DIFdelend \DIFaddbegin 
 
-  \emph{Note}: The signature of the ``forced'' kernel drivers is not checked anyhow,
-  making the use of this feature extremely dangerous and undesired for secure boot.
-  This feature may not work on encrypted partitions in newer operating systems.
+  \emph{\DIFadd{Note 1}}\DIFadd{: The load order is based on the order in which the kexts appear in
+  the array. Hence, dependencies must appear before kexts that depend on them.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend \texttt{Force} happens before \texttt{Add}.
+
+  \emph{Note \DIFaddbegin \DIFadd{3}\DIFaddend }: The signature of the ``forced'' \DIFdelbegin \DIFdel{kernel drivers }\DIFdelend \DIFaddbegin \DIFadd{kext }\DIFaddend is not checked \DIFdelbegin \DIFdel{anyhow,
+  making the use of }\DIFdelend \DIFaddbegin \DIFadd{in any way.
+  This makes using }\DIFaddend this feature extremely dangerous and \DIFdelbegin \DIFdel{undesired }\DIFdelend \DIFaddbegin \DIFadd{undesirable }\DIFaddend for secure boot.
+\DIFaddbegin 
+
+  \emph{\DIFadd{Note 4}}\DIFadd{: }\DIFaddend This feature may not work on encrypted partitions in newer operating systems.
 
 \item
   \texttt{Patch}\\
@@ -2010,8 +2029,8 @@ blocking.
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
   driver addition and removal.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See the \hyperref[kernelpropspatch]{Patch Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each patch.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[kernelpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -2055,8 +2074,7 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be added unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This kernel driver will not be added unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to add this kernel extension}\DIFaddend .
 
 \item
   \texttt{ExecutablePath}\\
@@ -2069,7 +2087,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+  \textbf{Description}: Adds kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or older.
 
   \hypertarget{kernmatch}Kernel version can be obtained with \texttt{uname -r} command,
   and should look like 3 numbers separated by dots, for example \texttt{18.7.0} is the
@@ -2112,7 +2130,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+  \textbf{Description}: Adds kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2145,8 +2163,7 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be blocked unless set to
-  \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This kernel driver will not be blocked unless set }\DIFdelend \DIFaddbegin \DIFadd{Set }\DIFaddend to \texttt{true} \DIFaddbegin \DIFadd{to block this kernel extension}\DIFaddend .
 
 \item
   \texttt{Identifier}\\
@@ -2159,7 +2176,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Blocks kernel driver on specified macOS version or older.
+  \textbf{Description}: Blocks kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or older.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2167,7 +2184,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
+  \textbf{Description}: Blocks kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2294,8 +2311,9 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be added when not present
-  unless set to \texttt{true}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{This kernel driver will not be added }\DIFdelend \DIFaddbegin \DIFadd{Set to }\texttt{\DIFadd{true}} \DIFadd{to load this kernel extension from the
+  system volume }\DIFaddend when not present \DIFdelbegin \DIFdel{unless set to }\texttt{\DIFdel{true}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{in the kernel cache}\DIFaddend .
 
 \item
   \texttt{ExecutablePath}\\
@@ -2316,7 +2334,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+  \textbf{Description}: Adds kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or older.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2324,7 +2342,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+  \textbf{Description}: Adds kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -3038,7 +3056,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add custom scanning paths through the bless model.
 
-  Designed to be filled with \texttt{plist\ string} entries containing
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders such as
   \texttt{\textbackslash EFI\textbackslash debian\textbackslash grubx64.efi}
   for the Debian bootloader. This allows non-standard boot paths to be automatically
@@ -3058,8 +3076,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add boot entries to OpenCore picker.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See the \hyperref[miscentryprops]{Entry Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each load entry.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below.
 
 \item
   \texttt{Security}\\
@@ -3072,8 +3090,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See the \hyperref[miscentryprops]{Entry Properties} section below.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each load entry.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
   \textbf{MUST NOT} appear in production configurations, paticularly in vaulted
@@ -4142,10 +4160,10 @@ rm vault.pub
 
   \begin{enumerate}
     \tightlist
-    \item As with T2 Macs, unsigned kernel drivers and several signed kernel
-      drivers, including NVIDIA Web Drivers, cannot be installed.
-    \item The list of cached drivers may be different, resulting in a need
-      to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
+    \item As with T2 Macs, \DIFdelbegin \DIFdel{unsigned kernel drivers and }\DIFdelend \DIFaddbegin \DIFadd{all unsigned kernel extensions as well as }\DIFaddend several
+      signed kernel \DIFdelbegin \DIFdel{drivers}\DIFdelend \DIFaddbegin \DIFadd{extensions}\DIFaddend , including NVIDIA Web Drivers, cannot be installed.
+    \item The list of cached \DIFdelbegin \DIFdel{drivers }\DIFdelend \DIFaddbegin \DIFadd{kernel extensions }\DIFaddend may be different, resulting in a need
+      to change the list of \texttt{Added} or \texttt{Forced} kernel \DIFdelbegin \DIFdel{drivers}\DIFdelend \DIFaddbegin \DIFadd{extensions}\DIFaddend .
       For example, \texttt{IO80211Family} cannot be injected in this case.
     \item System volume alterations on operating systems with sealing, such as
       macOS~11, may result in the operating system being unbootable. Do not
@@ -5249,8 +5267,8 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Specifies the custom memory devices to be added.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  memory device. See the \hyperref[platforminfomemorydevice]{Memory Devices Properties}
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each
+  memory device. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[platforminfomemorydevice]{Memory Devices Properties}
   section below. This should include all memory slots, even if unpopulated.
 
 \item
@@ -6115,8 +6133,7 @@ functioning. Feature highlights:
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
   directory.
 
-  Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers.
+  \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with string filenames meant to be loaded as UEFI drivers.
 
 \item
   \texttt{Input}\\
@@ -6151,12 +6168,12 @@ functioning. Feature highlights:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  \textbf{Description}: \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values,
   describing memory areas \DIFdelbegin \DIFdel{exquisite to particular }\DIFdelend \DIFaddbegin \DIFadd{exclusive to specific }\DIFaddend firmware and hardware functioning,
   which should not be used by the operating system. \DIFdelbegin \DIFdel{An example }\DIFdelend \DIFaddbegin \DIFadd{Examples }\DIFaddend of such memory \DIFdelbegin \DIFdel{region
   could be }\DIFdelend \DIFaddbegin \DIFadd{regions
   could be the }\DIFaddend second 256 MB corrupted by \DIFaddbegin \DIFadd{the }\DIFaddend Intel HD 3000 or an area with faulty RAM.
-  See the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
 
 \end{enumerate}
 
@@ -6493,8 +6510,23 @@ functioning. Feature highlights:
   \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
   the particular specified protocol. This may change in the future versions.
 
+  \item
+  \DIFaddbegin \texttt{\DIFadd{KeySkipFirstDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Suppress initial delay before key repeat in
+  OpenCore implementation of Apple Event protocol.
+}
+
+  \DIFadd{When combining OpenCore }\texttt{\DIFadd{KeySupport}} \DIFadd{with the Apple Event protocol, key repeat behaviour
+  may show one additional slow key repeat before normal key repeat starts. Enabling this option
+  works around this problem by suppressing the initial repeat delay in the OpenCore Apple Event
+  implementation. This option is recommended to be set when using }\texttt{\DIFadd{KeySupport}} \DIFadd{mode, in most
+  cases, and is not recommended to be set on any systems which are not using }\texttt{\DIFadd{KeySupport}} \DIFadd{mode.
+}
+
 \item
-  \texttt{KeySwap}\\
+  \DIFaddend \texttt{KeySwap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Swap \texttt{Command} and \texttt{Option} keys during submission.
@@ -6874,7 +6906,7 @@ functioning. Feature highlights:
   version.
 
   This protocol replaces \DIFaddbegin \DIFadd{the }\DIFaddend legacy \texttt{VirtualSmc} UEFI driver, and is compatible
-  with any SMC kernel extension. However, in case \texttt{FakeSMC} kernel extension
+  with any SMC kernel extension. However, in case \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{FakeSMC} kernel extension
   is used, manual NVRAM key variable addition may be needed.
 
 \item
@@ -7042,13 +7074,13 @@ functioning. Feature highlights:
 
   This is an experimental quirk, which should only be used for the aforementioned problem.
   In all other cases, the quirk may render the operating system unstable and is not recommended.
-  The recommended solution in the other cases is to install a kernel driver such as
+  The recommended solution in the other cases is to install a kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend such as
   \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
   \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
   or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
   variant of VoodooTSCSync for newer laptops).
 
-  \emph{Note}: This quirk cannot replace the kernel driver because it cannot operate in
+  \emph{Note}: This quirk cannot replace the kernel \DIFdelbegin \DIFdel{driver }\DIFdelend \DIFaddbegin \DIFadd{extension }\DIFaddend because it cannot operate in
   ACPI S3 (sleep wake) mode and because the UEFI firmware only provides very limited
   multicore support which prevents precise updates of the MSR registers.
 
