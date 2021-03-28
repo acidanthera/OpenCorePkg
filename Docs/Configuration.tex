@@ -6280,30 +6280,42 @@ functioning. Feature highlights:
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Remove key unless it was submitted during this timeout in 10 ms units.
+  \textbf{Description}: Treat duplicate key presses as held keys if they arrive
+  during this timeout, in 10 ms units. Only applies to systems using \texttt{KeySupport}.
 
   \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
-  of currently pressed keys. However, the majority of the drivers only report key
-  presses as interrupts and pressing and holding the key on the keyboard results in
-  subsequent submissions of this key with some defined time interval. As a result
-  we use a timeout to remove once pressed keys from the buffer once the timeout
-  expires and no new submission of this key happened.
+  of currently pressed keys. However, the majority of the drivers which require
+  \texttt{KeySupport} report key presses as interrupts, with automatically generated
+  key repeat behaviour with some defined initial and subsequent delay. As a result,
+  to emulate the raw key behaviour required by several Apple boot systems, we use a
+  timeout to merge multiple repeated keys which are submitted within a small timeout
+  window.
 
   This option allows setting this timeout based on the platform. The recommended
-  value for the majority of platforms is \texttt{5} (\texttt{50} milliseconds).
-  For reference, holding one key on VMware will repeat it roughly every \texttt{20}
-  milliseconds and the same value for APTIO V is \texttt{30-40} milliseconds. Thus,
-  it is possible to set a slightly lower value on faster platforms
-  and a slightly higher value on slower platforms for more responsive input.
+  value for the majority of platforms is from \texttt{5} (\texttt{50} milliseconds)
+  to \texttt{7} (\texttt{70} milliseconds), although values up to \texttt{9}
+  (\texttt{90} milliseconds) have been observed to be required on some PS/2 systems.
+  For reference, holding a key on VMware will repeat roughly every \texttt{20}
+  milliseconds and the equivalent value for APTIO V is \texttt{30-40} milliseconds.
+  \texttt{KeyForgetThreshold} should be configured to be longer than this. Thus,
+  it is possible to configure a lower \texttt{KeyForgetThreshold} value on platforms
+  with a faster native driver key repeat rate, for more responsive input, and it is
+  required to set a higher value on slower platforms.
 
   Pressing keys one after the other results in delays of at least \texttt{60} and
-  \texttt{100} milliseconds for the same platforms.
+  \texttt{100} milliseconds for the same platforms. Ideally, \texttt{KeyForgetThreshold}
+  should remain lower than this value, to avoid merging real key presses.
 
-  \emph{Note}: Some platforms may require different values, which may be higher or lower.
-  For example, when detecting key misses in OpenCanopy, try increasing this value
-  (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
-  Since every platform is different, it may be prudent to check every value
-  from \texttt{1} to \texttt{25} (\texttt{10} to \texttt{250} milliseconds).
+  \emph{Note}: If you wish to fine tune this value, a good heuristic is to use
+  the `set default' indicator within either OpenCanopy or the builtin picker. When
+  \texttt{KeyForgetThreshold} is configured correctly, this indicator should
+  flicker once, when first pressing and holding the \texttt{CTRL} key, and then
+  after a further very brief interval should go on and stay on. (The initial flicker
+  is an unavoidable artefact of using \texttt{KeySupport} to emulate raw keyboard
+  data.) If \texttt{KeyForgetThreshold} is configured too low for the system, then
+  the `set default' indicator will continue to flicker while CTRL is held. Configure
+  the lowest value which causes this indicator to go on and stay on after the first
+  initial flicker.
 
 \item
   \texttt{KeySupport}\\
