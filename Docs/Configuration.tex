@@ -531,9 +531,9 @@ Available entries include:
 \item
   \texttt{Resources} \\
   Directory used for storing media resources such as audio files
-  for screen reader support. See the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+  for screen reader support. Refer to the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
   section for more details. This directory also contains image files
-  for graphical user interface. See the \hyperref[ueficanopy]{OpenCanopy} section for more details.
+  for graphical user interface. Refer to the \hyperref[ueficanopy]{OpenCanopy} section for more details.
 \item
   \texttt{Tools} \\
   Directory used for storing supplemental tools.
@@ -854,8 +854,8 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Load selected tables from the \texttt{OC/ACPI}
   directory.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each add entry.
-  See the \hyperref[acpipropsadd]{Add Properties} section below.
+  To be filled with \texttt{plist\ dict} values, describing each add entry.
+  Refer to the \hyperref[acpipropsadd]{Add Properties} section below.
 
 \item
   \texttt{Delete}\\
@@ -863,8 +863,8 @@ quality of the suggested solutions will be variable.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Remove selected tables from the ACPI stack.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each delete entry.
-  See the \hyperref[acpipropsdelete]{Delete Properties} section below.
+  To be filled with \texttt{plist\ dict} values, describing each delete entry.
+  Refer to the \hyperref[acpipropsdelete]{Delete Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -873,8 +873,8 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Perform binary patches in ACPI tables before
   table addition or removal.
 
-  Designed to be filled with \texttt{plist\ dictionary} values describing each
-  patch entry. See the \hyperref[acpipropspatch]{Patch Properties} section below.
+  To be filled with \texttt{plist\ dictionary} values describing each patch entry.
+  Refer to the \hyperref[acpipropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1270,10 +1270,10 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
-  See the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
+  Refer to the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
 
 \item
   \texttt{Patch}\\
@@ -1281,8 +1281,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Perform binary patches in booter.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See the \hyperref[booterpropspatch]{Patch Properties} section below.
+  To be filled with \texttt{plist\ dictionary} values, describing each
+  patch. Refer to the \hyperref[booterpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1789,7 +1789,7 @@ The first stage applies very early but exclusively to the devices present in ACP
 The second stage applies to all devices much later after the PCI configuration
 and may repeat the first stage if the device was not present in ACPI.
 
-For all kernel drivers that may inspect the \texttt{IODeviceTree} plane without probing,
+For all kernel extensions that may inspect the \texttt{IODeviceTree} plane without probing,
 such as \texttt{Lilu} and its plugins (e.g. \texttt{WhateverGreen}), it is especially
 important to ensure device presence in the ACPI tables. A failure to do so may result
 \textbf{in erratic behaviour} caused by ignoring the injected device properties
@@ -1872,28 +1872,30 @@ blocking.
   \texttt{Add}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Load selected kernel drivers from \texttt{OC/Kexts} directory.
+  \textbf{Description}: Load selected kernel extensions (kexts) from the \texttt{OC/Kexts} directory.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See the \hyperref[kernelpropsadd]{Add Properties} section below. Kernel driver load
-  order follows the item order in the array, thus the dependencies should be written
-  prior to their consumers.
+  To be filled with \texttt{plist\ dict} values, describing each kext. Refer to
+  the \hyperref[kernelpropsadd]{Add Properties} section below.
 
-  To track the dependency order, inspect the \texttt{OSBundleLibraries} key
-  in the \texttt{Info.plist} of the kext. Any kext mentioned in the
-  \texttt{OSBundleLibraries} of the other kext must precede this kext.
+  \emph{Note 1}: The load order is based on the order in which the kexts appear in
+  the array. Hence, dependencies must appear before kexts that depend on them.
 
-  \emph{Note}: Kexts may have inner kexts (\texttt{Plug-Ins}) in their bundle. Each
-  inner kext must be added separately.
+  \emph{Note 2}: To track the dependency order, inspect the \texttt{OSBundleLibraries}
+  key in the \texttt{Info.plist} file of the kext being added. Any kext included
+  in the \texttt{OSBundleLibraries} key is a dependency that must precede
+  the kext being added.
+
+  \emph{Note 3}: Kexts may have inner kexts (\texttt{Plugins}) included
+  in the bundle and each such plugin must be added separately.
 
 \item
   \texttt{Block}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Remove selected kernel drivers from prelinked kernel.
+  \textbf{Description}: Remove selected kernel extensions (kexts) from the prelinked kernel.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  blocked driver. See the \hyperref[kernelpropsblock]{Block Properties} section below.
+  To be filled with \texttt{plist\ dictionary} values, describing each blocked kext.
+  Refer to the \hyperref[kernelpropsblock]{Block Properties} section below.
 
 \item
   \texttt{Emulate}\\
@@ -1905,21 +1907,24 @@ blocking.
   \texttt{Force}\\
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Load kernel drivers from system volume if they are not cached.
+  \textbf{Description}: Load kernel extensions (kexts) from the system volume if they are not cached.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each driver.
-  See the \hyperref[kernelpropsforce]{Force Properties} section below.
-  This section resolves the problem of injecting drivers that depend on other
-  drivers, which are not cached otherwise. The issue typically affects older
+  To be filled with \texttt{plist\ dict} values, describing each kext.
+  Refer to the \hyperref[kernelpropsforce]{Force Properties} section below.
+  This section resolves the problem of injecting kexts that depend on other
+  kexts, which are not otherwise cached. The issue typically affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
   or \texttt{IONetworkingFamily} may not be present in the kernel cache by default.
-  The kernel driver load order follows the item order in the array, thus the dependencies
-  should be written prior to their consumers. \texttt{Force} happens before
-  \texttt{Add}.
 
-  \emph{Note}: The signature of the ``forced'' kernel drivers is not checked anyhow,
-  making the use of this feature extremely dangerous and undesired for secure boot.
-  This feature may not work on encrypted partitions in newer operating systems.
+  \emph{Note 1}: The load order is based on the order in which the kexts appear in
+  the array. Hence, dependencies must appear before kexts that depend on them.
+
+  \emph{Note 2}: \texttt{Force} happens before \texttt{Add}.
+
+  \emph{Note 3}: The signature of the ``forced'' kext is not checked in any way.
+  This makes using this feature extremely dangerous and undesirable for secure boot.
+
+  \emph{Note 4}: This feature may not work on encrypted partitions in newer operating systems.
 
 \item
   \texttt{Patch}\\
@@ -1928,8 +1933,8 @@ blocking.
   \textbf{Description}: Perform binary patches in kernel and drivers prior to
   driver addition and removal.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  patch. See the \hyperref[kernelpropspatch]{Patch Properties} section below.
+  To be filled with \texttt{plist\ dictionary} values, describing each patch.
+  Refer to the \hyperref[kernelpropspatch]{Patch Properties} section below.
 
 \item
   \texttt{Quirks}\\
@@ -1973,8 +1978,7 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be added unless set to
-  \texttt{true}.
+  \textbf{Description}: Set to \texttt{true} to add this kernel extension.
 
 \item
   \texttt{ExecutablePath}\\
@@ -1987,7 +1991,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+  \textbf{Description}: Adds kernel extension on specified macOS version or older.
 
   \hypertarget{kernmatch}Kernel version can be obtained with \texttt{uname -r} command,
   and should look like 3 numbers separated by dots, for example \texttt{18.7.0} is the
@@ -2030,7 +2034,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+  \textbf{Description}: Adds kernel extension on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2063,8 +2067,7 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be blocked unless set to
-  \texttt{true}.
+  \textbf{Description}: Set to \texttt{true} to block this kernel extension.
 
 \item
   \texttt{Identifier}\\
@@ -2077,7 +2080,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Blocks kernel driver on specified macOS version or older.
+  \textbf{Description}: Blocks kernel extension on specified macOS version or older.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2085,7 +2088,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Blocks kernel driver on specified macOS version or newer.
+  \textbf{Description}: Blocks kernel extension on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2212,8 +2215,8 @@ blocking.
   \texttt{Enabled}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: This kernel driver will not be added when not present
-  unless set to \texttt{true}.
+  \textbf{Description}: Set to \texttt{true} to load this kernel extension from the
+  system volume when not present in the kernel cache.
 
 \item
   \texttt{ExecutablePath}\\
@@ -2234,7 +2237,7 @@ blocking.
   \texttt{MaxKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or older.
+  \textbf{Description}: Adds kernel extension on specified macOS version or older.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2242,7 +2245,7 @@ blocking.
   \texttt{MinKernel}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Adds kernel driver on specified macOS version or newer.
+  \textbf{Description}: Adds kernel extension on specified macOS version or newer.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
@@ -2947,7 +2950,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add custom scanning paths through the bless model.
 
-  Designed to be filled with \texttt{plist\ string} entries containing
+  To be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders such as
   \texttt{\textbackslash EFI\textbackslash debian\textbackslash grubx64.efi}
   for the Debian bootloader. This allows non-standard boot paths to be automatically
@@ -2967,8 +2970,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add boot entries to OpenCore picker.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See the \hyperref[miscentryprops]{Entry Properties} section below.
+  To be filled with \texttt{plist\ dict} values, describing each load entry.
+  Refer to the \hyperref[miscentryprops]{Entry Properties} section below.
 
 \item
   \texttt{Security}\\
@@ -2981,8 +2984,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ array}\\
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
-  Designed to be filled with \texttt{plist\ dict} values, describing each load entry.
-  See the \hyperref[miscentryprops]{Entry Properties} section below.
+  To be filled with \texttt{plist\ dict} values, describing each load entry.
+  Refer to the \hyperref[miscentryprops]{Entry Properties} section below.
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
   \textbf{MUST NOT} appear in production configurations, paticularly in vaulted
@@ -3354,7 +3357,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   same should apply when using \texttt{KeySupport} mode if it is correctly configured for the system, i.e.
   with a long enough \texttt{KeyForgetThreshold}. If pressing and holding the key is not successful to reliably
   enter the picker, multiple repeated keypresses may be tried instead.
- 
+
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple picker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
   OpenCore. On some Macs however, the \texttt{BootKicker} utility cannot be run from OpenCore.
@@ -3645,7 +3648,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CTRL+Enter} and \texttt{CTRL+Index} handling
   to set the default boot option in the OpenCore picker.
-  
+
   \emph{Note 1}: May be used in combination
   with \texttt{Shift+Enter} or \texttt{Shift+Index} when \texttt{PollAppleHotKeys} is
   enabled.
@@ -4043,10 +4046,10 @@ rm vault.pub
 
   \begin{enumerate}
     \tightlist
-    \item As with T2 Macs, unsigned kernel drivers and several signed kernel
-      drivers, including NVIDIA Web Drivers, cannot be installed.
-    \item The list of cached drivers may be different, resulting in a need
-      to change the list of \texttt{Added} or \texttt{Forced} kernel drivers.
+    \item As with T2 Macs, all unsigned kernel extensions as well as several
+      signed kernel extensions, including NVIDIA Web Drivers, cannot be installed.
+    \item The list of cached kernel extensions may be different, resulting in a need
+      to change the list of \texttt{Added} or \texttt{Forced} kernel extensions.
       For example, \texttt{IO80211Family} cannot be injected in this case.
     \item System volume alterations on operating systems with sealing, such as
       macOS~11, may result in the operating system being unbootable. Do not
@@ -5135,8 +5138,8 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Specifies the custom memory devices to be added.
 
-  Designed to be filled with \texttt{plist\ dictionary} values, describing each
-  memory device. See the \hyperref[platforminfomemorydevice]{Memory Devices Properties}
+  To be filled with \texttt{plist\ dictionary} values, describing each
+  memory device. Refer to the \hyperref[platforminfomemorydevice]{Memory Devices Properties}
   section below. This should include all memory slots, even if unpopulated.
 
 \item
@@ -5996,8 +5999,7 @@ functioning. Feature highlights:
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
   directory.
 
-  Designed to be filled with string filenames meant to be loaded as UEFI
-  drivers.
+  To be filled with string filenames meant to be loaded as UEFI drivers.
 
 \item
   \texttt{Input}\\
@@ -6032,11 +6034,11 @@ functioning. Feature highlights:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Designed to be filled with \texttt{plist\ dict} values,
+  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
-  See the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
 
 \end{enumerate}
 
@@ -6747,7 +6749,7 @@ functioning. Feature highlights:
   version.
 
   This protocol replaces the legacy \texttt{VirtualSmc} UEFI driver, and is compatible
-  with any SMC kernel extension. However, in case \texttt{FakeSMC} kernel extension
+  with any SMC kernel extension. However, in case the \texttt{FakeSMC} kernel extension
   is used, manual NVRAM key variable addition may be needed.
 
 \item
@@ -6915,13 +6917,13 @@ functioning. Feature highlights:
 
   This is an experimental quirk, which should only be used for the aforementioned problem.
   In all other cases, the quirk may render the operating system unstable and is not recommended.
-  The recommended solution in the other cases is to install a kernel driver such as
+  The recommended solution in the other cases is to install a kernel extension such as
   \href{https://github.com/RehabMan/VoodooTSCSync}{VoodooTSCSync},
   \href{https://github.com/interferenc/TSCAdjustReset}{TSCAdjustReset},
   or \href{https://github.com/lvs1974/CpuTscSync}{CpuTscSync} (a more specialised
   variant of VoodooTSCSync for newer laptops).
 
-  \emph{Note}: This quirk cannot replace the kernel driver because it cannot operate in
+  \emph{Note}: This quirk cannot replace the kernel extension because it cannot operate in
   ACPI S3 (sleep wake) mode and because the UEFI firmware only provides very limited
   multicore support which prevents precise updates of the MSR registers.
 
