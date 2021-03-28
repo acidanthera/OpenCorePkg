@@ -6354,6 +6354,19 @@ functioning. Feature highlights:
   \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
   the particular specified protocol. This may change in the future versions.
 
+  \item
+  \texttt{KeySkipFirstDelay}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Suppress initial delay before key repeat in
+  OpenCore implementation of Apple Event protocol.
+
+  When combining OpenCore \texttt{KeySupport} with the Apple Event protocol, key repeat behaviour
+  may show one additional slow key repeat before normal key repeat starts. Enabling this option
+  works around this problem by suppressing the initial repeat delay in the OpenCore Apple Event
+  implementation. This option is recommended to be set when using \texttt{KeySupport} mode, in most
+  cases, and is not recommended to be set on any systems which are not using \texttt{KeySupport} mode.
+
 \item
   \texttt{KeySwap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\

@@ -606,6 +606,7 @@ typedef enum {
   _(UINT32                      , TimerResolution    ,     , 0                                 , ()) \
   _(UINT8                       , KeyForgetThreshold ,     , 0                                 , ()) \
   _(BOOLEAN                     , KeySupport         ,     , FALSE                             , ()) \
+  _(BOOLEAN                     , KeySkipFirstDelay  ,     , FALSE                             , ()) \
   _(BOOLEAN                     , KeyFiltering       ,     , FALSE                             , ()) \
   _(BOOLEAN                     , KeySwap            ,     , FALSE                             , ()) \
   _(BOOLEAN                     , PointerSupport     ,     , FALSE                             , ())

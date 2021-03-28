@@ -1154,6 +1154,8 @@
 			<false/>
 			<key>KeyForgetThreshold</key>
 			<integer>5</integer>
+			<key>KeySkipFirstDelay</key>
+			<true/>
 			<key>KeySupport</key>
 			<true/>
 			<key>KeySupportMode</key>

@@ -548,13 +548,15 @@ AppleEventUnload (
 /**
   Install and initialise Apple Event protocol.
 
-  @param[in] Reinstall  Overwrite installed protocol.
+  @param[in] Reinstall                Overwrite installed protocol.
+  @param[in] KeySkipFirstDelay  Modify keyboard handling to suppress initial delay.
 
   @retval installed or located protocol or NULL.
 **/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN BOOLEAN  KeySkipFirstDelay
   )
 {
   EFI_STATUS           Status;
@@ -581,6 +583,8 @@ OcAppleEventInstallProtocol (
       return Protocol;
     }
   }
+
+  InternalSkipFirstKeyDelay (KeySkipFirstDelay);
 
   //
   // Apple code supports unloading, ours does not.
