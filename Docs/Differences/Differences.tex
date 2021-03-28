@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Sat Mar 27 20:28:32 2021
+%DIF DEL PreviousConfiguration.tex   Sun Mar 28 14:21:34 2021
+%DIF ADD ../Configuration.tex        Sun Mar 28 14:21:34 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1300,8 +1300,8 @@ should be met before starting:
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
   firmware settings if present. \DIFdelbegin \DIFdel{Consider
-}\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFdel{patching it}}
-  %DIFAUXCMD
+}%DIFDELCMD < \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
+%DIFDELCMD <   %%%
 \DIFdel{if no option is available (for advanced users only). See }%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
 %DIFDELCMD <   %%%
 \DIFdelend \DIFaddbegin \DIFadd{See }\hyperref[kernelpropsquirks]{ControlMsrE2}
@@ -1880,12 +1880,18 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Sets device properties from a map (\texttt{plist\ dict})
   of device paths to a map (\texttt{plist\ dict}) of variable names and their values
-  in \texttt{plist\ multidata} format. Device paths must be provided in canonic string
-  format (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}). Properties will only
-  be set if not present and not deleted.
+  in \texttt{plist\ multidata} format.
+\DIFaddbegin 
 
-  \emph{Note}: Currently properties may only be (formerly) added by the original driver,
-  so unless a separate driver was installed, there is no reason to delete the variables.
+  \emph{\DIFadd{Note 1}}\DIFadd{: }\DIFaddend Device paths must be provided in canonic string format
+  (e.g. \texttt{PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)}).
+\DIFdelbegin \DIFdel{Properties will only
+  be set if not present and not deleted.
+}\DIFdelend 
+
+  \emph{Note \DIFaddbegin \DIFadd{2}\DIFaddend }: \DIFdelbegin \DIFdel{Currently properties may only be (formerly) added by the original driver,
+  so unless a separate driver was installed, there is no reason to delete the variables}\DIFdelend \DIFaddbegin \DIFadd{Existing properties will not be changed unless deleted
+  in the }\texttt{\DIFadd{DeviceProperties\ Delete}} \DIFadd{section}\DIFaddend .
 
 \item
   \texttt{Delete}\\
@@ -1894,7 +1900,12 @@ as they were not constructed at the first stage. See \texttt{SSDT-IMEI.dsl} and
   of device paths to an array (\texttt{plist\ array}) of variable names in
   \texttt{plist\ string} format.
 
-\end{enumerate}
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Currently, existing properties may only exist on firmware
+  with DeviceProperties drivers (e.g. Apple). Hence, there is typically
+  no reason to delete variables unless a new driver has been installed.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Common Properties}\label{devpropscommon}
 
@@ -2487,7 +2498,7 @@ blocking.
 }
 
   \DIFadd{As a last resort, consider
-  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFadd{patching the BIOS}}
+  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching the BIOS}
   \DIFadd{(for advanced users only).
 }
 
@@ -2725,7 +2736,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
@@ -3201,7 +3212,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 
   \emph{Note 2}: While NVRAM resets executed from OpenCore would not typically erase the boot option
   created in \texttt{Bootstrap}, executing NVRAM resets prior to loading OpenCore will erase the boot
-  option. Therefore, for significant implementation updates\DIFdelbegin \DIFdel{(e.g. in }\DIFdelend \DIFaddbegin \DIFadd{, such as was the case with }\DIFaddend OpenCore 0.6.4\DIFdelbegin \DIFdel{)}\DIFdelend , 
+  option. Therefore, for significant implementation updates\DIFdelbegin \DIFdel{(e.g. in }\DIFdelend \DIFaddbegin \DIFadd{, such as was the case with }\DIFaddend OpenCore 0.6.4\DIFdelbegin \DIFdel{)}\DIFdelend ,
   an NVRAM reset should be \DIFdelbegin \DIFdel{performed }\DIFdelend \DIFaddbegin \DIFadd{executed }\DIFaddend with \texttt{Bootstrap} disabled\DIFaddbegin \DIFadd{, }\DIFaddend after which it can be \DIFdelbegin \DIFdel{reenabled}\DIFdelend \DIFaddbegin \DIFadd{re-enabled}\DIFaddend .
 
 \item
@@ -3428,10 +3439,19 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{Note 1}: The \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are required for key
   handling. However, not all of the key handling functions can be implemented on several types of firmware.
 
-  \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using the \texttt{Escape} key to display
-  the OpenCore picker when \texttt{ShowPicker} is disabled. This key exists for the \texttt{Apple} picker
-  mode as well as for firmware that fail to report held \texttt{OPT} keys on PS/2 keyboards, requiring
-  multiple presses of the \texttt{Escape} key to access the OpenCore picker.
+  \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using \DIFaddbegin \DIFadd{both }\DIFaddend the \texttt{Escape}
+  \DIFdelbegin \DIFdel{key to display
+  }\DIFdelend \DIFaddbegin \DIFadd{and }\texttt{\DIFadd{Zero}} \DIFadd{keys to enter }\DIFaddend the OpenCore picker when \texttt{ShowPicker} is disabled.
+  \DIFdelbegin \DIFdel{This key exists for the }\DIFdelend \DIFaddbegin \texttt{\DIFadd{Escape}} \DIFadd{exists to support co-existence with the Apple picker (including OpenCore }\DIFaddend \texttt{Apple}
+  picker mode\DIFdelbegin \DIFdel{as well as for firmware that fail }\DIFdelend \DIFaddbegin \DIFadd{) and to support firmware that fails }\DIFaddend to report held \texttt{OPT} \DIFdelbegin \DIFdel{keys on }\DIFdelend \DIFaddbegin \DIFadd{key, as on some }\DIFaddend PS/2 keyboards\DIFdelbegin \DIFdel{, requiring
+  multiple presses of the }\DIFdelend \DIFaddbegin \DIFadd{.
+  In addition, }\texttt{\DIFadd{Zero}} \DIFadd{is provided to support systems on which }\texttt{\DIFadd{Escape}} \DIFadd{is already assigned to
+  some other pre-boot firmware feature. In systems which do not require }\texttt{\DIFadd{KeySupport}}\DIFadd{, pressing and
+  holding one of these keys from after power on until the picker appears should always be successful. The
+  same should apply when using }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Escape}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{key to access the OpenCore picker}\DIFdelend \DIFaddbegin \DIFadd{KeySupport}} \DIFadd{mode if it is correctly configured for the system, i.e.
+  with a long enough }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{. If pressing and holding the key is not successful to reliably
+  enter the picker, multiple repeated keypresses may be tried instead}\DIFaddend .
 
   \emph{Note 3}: On Macs with problematic GOP, it may be difficult to access the Apple picker.
   The \texttt{BootKicker} utility can be blessed to workaround this problem even without loading
@@ -3722,13 +3742,16 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Allow \texttt{CTRL+Enter} and \texttt{CTRL+Index} handling
-  to set the default boot option in the OpenCore picker\DIFdelbegin \DIFdel{.
-}%DIFDELCMD < 
+  to set the default boot option in the OpenCore picker.
 
-%DIFDELCMD < %%%
-\DIFdelend \DIFaddbegin \DIFadd{; may be used in combination
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: May be used in combination
   with }\texttt{\DIFadd{Shift+Enter}} \DIFadd{or }\texttt{\DIFadd{Shift+Index}} \DIFadd{when }\texttt{\DIFadd{PollAppleHotKeys}} \DIFadd{is
   enabled.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: In order to support systems with unresponsive modifiers during preboot
+  (which includes }\texttt{\DIFadd{V1}} \DIFadd{and }\texttt{\DIFadd{V2}} \texttt{\DIFadd{KeySupport}} \DIFadd{mode on some firmware)
+  OpenCore also allows holding the }\texttt{\DIFadd{=/+}} \DIFadd{key in order to trigger `set default' mode.
 }\DIFaddend \item
   \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
@@ -5919,8 +5942,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\DIFdelbegin \texttt{\DIFdel{VerifyMsrE2}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \texttt{\DIFadd{ControlMsrE2}}\DIFaddend }\textbf{*}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\DIFaddend \textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
 across all cores \DIFaddbegin \DIFadd{and change such hidden options on selected platforms}\DIFaddend .
 \end{tabular}
@@ -6341,7 +6364,7 @@ functioning. Feature highlights:
   to use \texttt{TC0} traffic class. Refer to Intel I/O Controller Hub 9 (ICH9) Family
   Datasheet (or any other ICH datasheet) for more details about this register.
 
-  \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used 
+  \emph{Note}: This option is independent from \texttt{AudioSupport}. If AppleALC is used
   it is preferred to use AppleALC \texttt{alctsel} property instead.
 
 \item
@@ -6391,30 +6414,52 @@ functioning. Feature highlights:
   \texttt{KeyForgetThreshold}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Remove key unless it was submitted during this timeout in \DIFdelbegin \DIFdel{milliseconds}\DIFdelend \DIFaddbegin \DIFadd{10 ms units}\DIFaddend .
+  \textbf{Description}: \DIFdelbegin \DIFdel{Remove key unless it was submitted }\DIFdelend \DIFaddbegin \DIFadd{Treat duplicate key presses as held keys if they arrive
+  }\DIFaddend during this timeout\DIFdelbegin \DIFdel{in milliseconds. }\DIFdelend \DIFaddbegin \DIFadd{, in 10 ms units. Only applies to systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{.
+}\DIFaddend 
 
   \texttt{AppleKeyMapAggregator} protocol is supposed to contain a fixed length buffer
-  of currently pressed keys. However, the majority of the drivers only report key
-  presses as interrupts and pressing and holding the key on the keyboard results in
-  subsequent submissions of this key with some defined time interval. As a result
-  we use a timeout to remove once pressed keys from the buffer once the timeout
-  expires and no new submission of this key happened.
+  of currently pressed keys. However, the majority of the drivers \DIFdelbegin \DIFdel{only }\DIFdelend \DIFaddbegin \DIFadd{which require
+  }\texttt{\DIFadd{KeySupport}} \DIFaddend report key presses as interrupts\DIFdelbegin \DIFdel{and pressing and holding the key on the keyboard results in
+  subsequent submissions of this key }\DIFdelend \DIFaddbegin \DIFadd{, with automatically generated
+  key repeat behaviour }\DIFaddend with some defined \DIFdelbegin \DIFdel{time interval}\DIFdelend \DIFaddbegin \DIFadd{initial and subsequent delay}\DIFaddend . As a result\DIFaddbegin \DIFadd{,
+  to emulate the raw key behaviour required by several Apple boot systems, }\DIFaddend we use a
+  timeout to \DIFdelbegin \DIFdel{remove once pressed keys from the buffer once the timeout
+  expires and no new submission of this key happened}\DIFdelend \DIFaddbegin \DIFadd{merge multiple repeated keys which are submitted within a small timeout
+  window}\DIFaddend .
 
   This option allows \DIFdelbegin \DIFdel{to set }\DIFdelend \DIFaddbegin \DIFadd{setting }\DIFaddend this timeout based on the platform. The recommended
-  value \DIFdelbegin \DIFdel{that works on }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend the majority of \DIFdelbegin \DIFdel{the }\DIFdelend platforms is \texttt{5} \DIFdelbegin \DIFdel{milliseconds}\DIFdelend \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{50}} \DIFadd{milliseconds)}\DIFaddend .
-  For reference, holding one key on VMware will repeat it roughly every \texttt{\DIFdelbegin \DIFdel{2}\DIFdelend \DIFaddbegin \DIFadd{20}\DIFaddend }
-  milliseconds and the same value for APTIO V is \texttt{\DIFdelbegin \DIFdel{3-4}\DIFdelend \DIFaddbegin \DIFadd{30-40}\DIFaddend } milliseconds. Thus\DIFaddbegin \DIFadd{,
-  }\DIFaddend it is possible to set a slightly lower value on faster platforms
-  and \DIFaddbegin \DIFadd{a }\DIFaddend slightly higher value on slower platforms for more responsive input.
+  value \DIFdelbegin \DIFdel{that works on }\DIFdelend \DIFaddbegin \DIFadd{for }\DIFaddend the majority of \DIFdelbegin \DIFdel{the platforms is }\DIFdelend \DIFaddbegin \DIFadd{platforms is from }\DIFaddend \texttt{5} \DIFdelbegin \DIFdel{milliseconds}\DIFdelend \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{50}} \DIFadd{milliseconds)
+  to }\texttt{\DIFadd{7}} \DIFadd{(}\texttt{\DIFadd{70}} \DIFadd{milliseconds), although values up to }\texttt{\DIFadd{9}}
+  \DIFadd{(}\texttt{\DIFadd{90}} \DIFadd{milliseconds) have been observed to be required on some PS/2 systems}\DIFaddend .
+  For reference, holding \DIFdelbegin \DIFdel{one }\DIFdelend \DIFaddbegin \DIFadd{a }\DIFaddend key on VMware will repeat \DIFdelbegin \DIFdel{it roughly every }\DIFdelend \DIFaddbegin \DIFadd{roughly every }\DIFaddend \texttt{\DIFdelbegin \DIFdel{2}\DIFdelend \DIFaddbegin \DIFadd{20}\DIFaddend }
+  milliseconds and the \DIFdelbegin \DIFdel{same }\DIFdelend \DIFaddbegin \DIFadd{equivalent }\DIFaddend value for APTIO V is \texttt{\DIFdelbegin \DIFdel{3-4}\DIFdelend \DIFaddbegin \DIFadd{30-40}\DIFaddend } milliseconds.
+  \DIFdelbegin \DIFdel{Thus
+  }\DIFdelend \DIFaddbegin \texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{should be configured to be longer than this. Thus,
+  }\DIFaddend it is possible to \DIFdelbegin \DIFdel{set a slightly lower value on faster platforms
+  and slightly }\DIFdelend \DIFaddbegin \DIFadd{configure a lower }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{value on platforms
+  with a faster native driver key repeat rate, for more responsive input, and it is
+  required to set a }\DIFaddend higher value on slower platforms\DIFdelbegin \DIFdel{for more responsive input}\DIFdelend .
 
   Pressing keys one after the other results in delays of at least \texttt{\DIFdelbegin \DIFdel{6}\DIFdelend \DIFaddbegin \DIFadd{60}\DIFaddend } and
-  \texttt{\DIFdelbegin \DIFdel{10}\DIFdelend \DIFaddbegin \DIFadd{100}\DIFaddend } milliseconds for the same platforms.
+  \texttt{\DIFdelbegin \DIFdel{10}\DIFdelend \DIFaddbegin \DIFadd{100}\DIFaddend } milliseconds for the same platforms. \DIFaddbegin \DIFadd{Ideally, }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{should remain lower than this value, to avoid merging real key presses.
+}\DIFaddend 
 
-  \emph{Note}: Some platforms may require different values, \DIFaddbegin \DIFadd{which may be }\DIFaddend higher or lower.
-  For example, when detecting key misses in OpenCanopy\DIFaddbegin \DIFadd{, }\DIFaddend try increasing this value
-  (e.g. to \texttt{10}), and when detecting key stall, try decreasing this value.
-  Since every platform is different\DIFaddbegin \DIFadd{, }\DIFaddend it may be \DIFdelbegin \DIFdel{reasonable }\DIFdelend \DIFaddbegin \DIFadd{prudent }\DIFaddend to check every value
-  from \texttt{1} to \texttt{25} \DIFaddbegin \DIFadd{(}\texttt{\DIFadd{10}} \DIFadd{to }\texttt{\DIFadd{250}} \DIFadd{milliseconds)}\DIFaddend .
+  \emph{Note}: \DIFdelbegin \DIFdel{Some platforms may require different values, higher or lower. For example, when detecting key misses in OpenCanopy try increasing this value
+  (e.g. to }\texttt{\DIFdel{10}}%DIFAUXCMD
+\DIFdel{), and when detecting keystall, try decreasing this value. Since every platform is different it may be reasonable to check every value from }\texttt{\DIFdel{1}} %DIFAUXCMD
+\DIFdel{to }\texttt{\DIFdel{25}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{If you wish to fine tune this value, a good heuristic is to use
+  the `set default' indicator within either OpenCanopy or the builtin picker. When
+  }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{is configured correctly, this indicator should
+  flicker once, when first pressing and holding the }\texttt{\DIFadd{CTRL}} \DIFadd{or }\texttt{\DIFadd{=/+}} \DIFadd{key, and then
+  after a further very brief interval should go on and stay on. (The initial flicker
+  is an unavoidable artefact of using }\texttt{\DIFadd{KeySupport}} \DIFadd{to emulate raw keyboard
+  data.) If }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{is configured too low for the system, then
+  the `set default' indicator will continue to flicker while }\texttt{\DIFadd{CTRL}} \DIFadd{or }\texttt{\DIFadd{=/+}} \DIFadd{is held. Configure
+  the lowest value which causes this indicator to go on and stay on after the first
+  initial flicker}\DIFaddend .
 
 \item
   \texttt{KeySupport}\\
