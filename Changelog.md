@@ -44,6 +44,7 @@ OpenCore Changelog
 - Added Zero as alias hotkey for Escape, to force show picker if hidden
 - Added =/+ key as alias for CTRL to set default OS
 - Added additional support for configuring correct key repeat behaviour with KeySupport mode
+- Fixed CPU multiplier detection on pre-Nehalem Intel CPUs
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

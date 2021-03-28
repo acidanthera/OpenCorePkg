@@ -304,7 +304,7 @@ SetMaxBusRatioAndMaxBusRatioDiv (
   }
 
   //
-  // TODO: this may not be accurate on some older processors.
+  // Refer to Intel SDM (MSRs in Processors Based on Intel... table).
   //
   if (CpuModel >= CPU_MODEL_NEHALEM) {
     PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
@@ -312,12 +312,7 @@ SetMaxBusRatioAndMaxBusRatioDiv (
     *MaxBusRatioDiv     = 0;
   } else {
     PerfStatus.Uint64 = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-    *MaxBusRatio      = (UINT8) (RShiftU64 (PerfStatus.Uint64, 8) & 0x1FU);
-    //
-    // Undocumented values:
-    // Non-integer bus ratio for the max-multi.
-    // Non-integer bus ratio for the current-multi.
-    //
+    *MaxBusRatio      = (UINT8) (RShiftU64 (PerfStatus.Uint64, 40) & 0x1FU);
     *MaxBusRatioDiv   = (UINT8) (RShiftU64 (PerfStatus.Uint64, 46) & BIT0);
   }
 
