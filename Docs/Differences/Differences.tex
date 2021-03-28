@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Wed Mar 24 10:55:06 2021
+%DIF ADD ../Configuration.tex        Sat Mar 27 20:28:32 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1299,12 +1299,12 @@ should be met before starting:
   It is not necessary unless the system cannot be booted at all or
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
-  firmware settings if present. Consider
-\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
-  if no option is available (for advanced users only). See
-\DIFdelbegin %DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
+  firmware settings if present. \DIFdelbegin \DIFdel{Consider
+}\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFdel{patching it}}
+  %DIFAUXCMD
+\DIFdel{if no option is available (for advanced users only). See }%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \hyperref[kernelpropsquirks]{ControlMsrE2}
+\DIFdelend \DIFaddbegin \DIFadd{See }\hyperref[kernelpropsquirks]{ControlMsrE2}
   \DIFaddend notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
   if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
@@ -2444,13 +2444,18 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register and the bundled
-  \texttt{\DIFdelbegin \DIFdel{VerifyMsrE2}\DIFdelend \DIFaddbegin \DIFadd{ControlMsrE2}\DIFaddend } tool can be used to check its state \DIFaddbegin \DIFadd{and enable it on selected platforms with
-  that option hidden}\DIFaddend . Note that some types of firmware only have this register locked on some cores.
+  Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR
+  register and the bundled \texttt{\DIFdelbegin \DIFdel{VerifyMsrE2}\DIFdelend \DIFaddbegin \DIFadd{ControlMsrE2}\DIFaddend } tool can be used to check its
+  state. Note that some types of firmware only have this register locked on some
+  cores. \DIFdelbegin %DIFDELCMD < 
 
-  As modern firmware provide a \texttt{CFG Lock} setting that allows configuring the
-  \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
-  whenever possible. On APTIO firmware that do not provide a \texttt{CFG Lock}
+%DIFDELCMD <   %%%
+\DIFdelend As modern firmware provide a \texttt{CFG Lock} setting that allows
+  configuring the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this
+  option should be avoided whenever possible.
+\DIFaddbegin 
+
+  \DIFaddend On APTIO firmware that do not provide a \texttt{CFG Lock}
   setting in the GUI, it is possible to access the option directly:
 
   \begin{enumerate}
@@ -2475,7 +2480,18 @@ blocking.
   \textbf{Warning}: Variable offsets are unique not only to each motherboard but even to its firmware
   version. Never ever try to use an offset without checking.
 
-\item
+  \DIFaddbegin \DIFadd{On selected platforms, the }\texttt{\DIFadd{ControlMsrE2}} \DIFadd{tool can also change such
+  hidden options. Pass desired argument: }\texttt{\DIFadd{lock}}\DIFadd{, }\texttt{\DIFadd{unlock}} \DIFadd{for
+  }\texttt{\DIFadd{CFG Lock}}\DIFadd{. Or pass }\texttt{\DIFadd{interactive}} \DIFadd{to find and modify other
+  hidden options.
+}
+
+  \DIFadd{As a last resort, consider
+  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFadd{patching the BIOS}}
+  \DIFadd{(for advanced users only).
+}
+
+\DIFaddend \item
   \texttt{AppleXcpmCfgLock}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -5905,7 +5921,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\DIFdelbegin \texttt{\DIFdel{VerifyMsrE2}}%DIFAUXCMD
 \DIFdelend \DIFaddbegin \texttt{\DIFadd{ControlMsrE2}}\DIFaddend }\textbf{*}
-& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
+& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
+across all cores \DIFaddbegin \DIFadd{and change such hidden options on selected platforms}\DIFaddend .
 \end{tabular}
 
 \subsection{OpenCanopy}\label{ueficanopy}
