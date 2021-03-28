@@ -19,7 +19,7 @@
 #include <Guid/ApplePlatformInfo.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
-#include <IndustryStandard/MpcMemoryController.h>
+#include <IndustryStandard/McpMemoryController.h>
 #include <Protocol/PciIo.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -246,7 +246,7 @@ InternalSelectAppleFsbFrequency (
   //
   // Tested on nForce MCP89 installed in MacBook7,1.
   //
-  Pll = IoRead32 (R_NVIDIA_MPC89_DDR_PLL);
+  Pll = IoRead32 (R_NVIDIA_MCP89_DDR_PLL);
 
   DEBUG ((
     DEBUG_INFO,
@@ -363,22 +363,22 @@ InternalCalculateTSCFromApplePlatformInfo (
 
     //
     // This is not necessarily Apple, but keep it here for the time being.
-    // Should work on more or less any MPC79 device.
+    // Should work on more or less any MCP79 device.
     //
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using Apple Platform Info - %r\n", Status));
       
-      if (MmioRead16 (B_NVIDIA_MPC_MC_BASE) == V_NVIDIA_MPC_MC_VENDOR) {
-        Un44 = MmioRead32 (B_NVIDIA_MPC_MC_BASE + R_NVIDIA_MPC_MC_UN44);
-        Un78 = MmioRead32 (B_NVIDIA_MPC_MC_BASE + R_NVIDIA_MPC_MC_UN78);
+      if (MmioRead16 (B_NVIDIA_MCP_MC_BASE) == V_NVIDIA_MCP_MC_VENDOR) {
+        Un44 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN44);
+        Un78 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN78);
 
-        Dividend = NVIDIA_MPC79_GET_FSB_FREQUENCY_DIVIDEND (Un44, Un78);
-        Divisor  = NVIDIA_MPC79_GET_FSB_FREQUENCY_DIVISOR (Un44, Un78);
+        Dividend = NVIDIA_MCP79_GET_FSB_FREQUENCY_DIVIDEND (Un44, Un78);
+        Divisor  = NVIDIA_MCP79_GET_FSB_FREQUENCY_DIVISOR (Un44, Un78);
 
         DEBUG ((
           DEBUG_INFO,
-          "OCCPU: Found nForce MPC MC 0x%08X (UN44 0x%08X, UN78 0x%08X, DVD 0x%016Lx, DIV 0x%08X)\n",
-          MmioRead32 (B_NVIDIA_MPC_MC_BASE),
+          "OCCPU: Found nForce MCP MC 0x%08X (UN44 0x%08X, UN78 0x%08X, DVD 0x%016Lx, DIV 0x%08X)\n",
+          MmioRead32 (B_NVIDIA_MCP_MC_BASE),
           Un44,
           Un78,
           Dividend,
