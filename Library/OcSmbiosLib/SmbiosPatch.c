@@ -164,7 +164,7 @@ SmbiosGetFormFactor (
 /** Type 0
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 
   @retval TRUE                      Apple SMBIOS detected
   @retval FALSE                     Apple SMBIOS not detected
@@ -222,7 +222,7 @@ PatchBiosInformation (
 /** Type 1
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -258,7 +258,7 @@ PatchSystemInformation (
 /** Type 2
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -308,7 +308,7 @@ PatchBaseboardInformation (
 /** Type 3
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -511,7 +511,7 @@ PatchCacheInformation (
 /** Type 8
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -554,7 +554,7 @@ PatchSystemPorts (
 /** Type 9
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -679,7 +679,7 @@ PatchSystemSlots (
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -722,7 +722,7 @@ PatchMemoryArray (
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -772,7 +772,7 @@ CreateMemoryArray (
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -846,7 +846,7 @@ PatchMemoryDevice (
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -920,7 +920,7 @@ CreateMemoryDevice (
 /** Type 19
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -966,7 +966,7 @@ PatchMemoryMappedAddress (
 /** Type 20
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1015,7 +1015,7 @@ PatchMemoryMappedDevice (
 /** Type 22
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1065,7 +1065,7 @@ PatchPortableBatteryDevice (
 /** Type 32
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1093,8 +1093,8 @@ PatchBootInformation (
 /** Type 128
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1140,7 +1140,7 @@ CreateOrPatchAppleFirmwareVolume (
 /** Type 131
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
 **/
 STATIC
@@ -1169,7 +1169,7 @@ CreateAppleProcessorType (
 /** Type 132
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
 **/
 STATIC
@@ -1205,8 +1205,8 @@ CreateAppleProcessorSpeed (
 /** Type 133
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1246,8 +1246,8 @@ CreateOrPatchApplePlatformFeature (
 /** Type 134
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1287,7 +1287,7 @@ CreateOrPatchAppleSmcInformation (
 /** Type 127
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
