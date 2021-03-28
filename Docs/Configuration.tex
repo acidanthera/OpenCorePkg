@@ -1230,10 +1230,7 @@ should be met before starting:
   It is not necessary unless the system cannot be booted at all or
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
-  firmware settings if present. Consider
-\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
-  if no option is available (for advanced users only). See
-\hyperref[kernelpropsquirks]{ControlMsrE2}
+  firmware settings if present. See \hyperref[kernelpropsquirks]{ControlMsrE2}
   notes for more details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
   if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
@@ -2375,13 +2372,14 @@ blocking.
   MSR modification in AppleIntelCPUPowerManagement.kext, commonly causing early
   kernel panic, when it is locked from writing.
 
-  Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register and the bundled
-  \texttt{ControlMsrE2} tool can be used to check its state and enable it on selected platforms with
-  that option hidden. Note that some types of firmware only have this register locked on some cores.
+  Some types of firmware lock the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR
+  register and the bundled \texttt{ControlMsrE2} tool can be used to check its
+  state. Note that some types of firmware only have this register locked on some
+  cores. As modern firmware provide a \texttt{CFG Lock} setting that allows
+  configuring the \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this
+  option should be avoided whenever possible.
 
-  As modern firmware provide a \texttt{CFG Lock} setting that allows configuring the
-  \texttt{PKG\_CST\_CONFIG\_CONTROL} MSR register lock, this option should be avoided
-  whenever possible. On APTIO firmware that do not provide a \texttt{CFG Lock}
+  On APTIO firmware that do not provide a \texttt{CFG Lock}
   setting in the GUI, it is possible to access the option directly:
 
   \begin{enumerate}
@@ -2405,6 +2403,15 @@ blocking.
 
   \textbf{Warning}: Variable offsets are unique not only to each motherboard but even to its firmware
   version. Never ever try to use an offset without checking.
+
+  On selected platforms, the \texttt{ControlMsrE2} tool can also change such
+  hidden options. Pass desired argument: \texttt{lock}, \texttt{unlock} for
+  \texttt{CFG Lock}. Or pass \texttt{interactive} to find and modify other
+  hidden options.
+
+  As a last resort, consider
+  \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching the BIOS}
+  (for advanced users only).
 
 \item
   \texttt{AppleXcpmCfgLock}\\
@@ -5805,7 +5812,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\textbf{*}
-& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency across all cores.
+& Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
+across all cores and change such hidden options on selected platforms.
 \end{tabular}
 
 \subsection{OpenCanopy}\label{ueficanopy}
