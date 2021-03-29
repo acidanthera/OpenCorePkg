@@ -1875,18 +1875,18 @@ blocking.
   \textbf{Description}: Load selected kernel extensions (kexts) from the \texttt{OC/Kexts} directory.
 
   To be filled with \texttt{plist\ dict} values, describing each kext. Refer to
-  the \hyperref[kernelpropsadd]{Add Properties} section below.
+  the \hyperref[kernelpropsadd]{Add Properties} section below for details.
 
   \emph{Note 1}: The load order is based on the order in which the kexts appear in
   the array. Hence, dependencies must appear before kexts that depend on them.
 
   \emph{Note 2}: To track the dependency order, inspect the \texttt{OSBundleLibraries}
   key in the \texttt{Info.plist} file of the kext being added. Any kext included
-  in the \texttt{OSBundleLibraries} key is a dependency that must precede
-  the kext being added.
+  under the key is a dependency that must appear before the kext being added.
 
-  \emph{Note 3}: Kexts may have inner kexts (\texttt{Plugins}) included
-  in the bundle and each such plugin must be added separately.
+  \emph{Note 3}: Kexts may have inner kexts (\texttt{Plugins}) included in the bundle.
+  Such \texttt{Plugins} must be added separately and follow the same global ordering
+  rules as other kexts.
 
 \item
   \texttt{Block}\\
