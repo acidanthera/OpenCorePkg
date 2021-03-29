@@ -341,7 +341,11 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_ERROR, "OC: Failed to install key map protocols\n"));
   }
 
-  if (OcAppleEventInstallProtocol (Config->Uefi.ProtocolOverrides.AppleEvent, Config->Uefi.Input.KeySkipFirstDelay) == NULL) {
+  if (OcAppleEventInstallProtocol (
+    Config->Uefi.ProtocolOverrides.AppleEvent,
+    Config->Uefi.Input.KeyInitialDelay,
+    Config->Uefi.Input.KeySubsequentDelay
+    ) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install key event protocol\n"));
   }
 

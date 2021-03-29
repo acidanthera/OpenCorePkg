@@ -66,19 +66,29 @@ STATIC KEY_STROKE_INFORMATION mKeyStrokeInfo[10];
 // mCLockChanged
 STATIC BOOLEAN mCLockChanged = FALSE;
 
-// mSkipFirstDelay
-STATIC BOOLEAN mSkipFirstDelay = FALSE;
+// mKeyInitialDelay, mKeySubsequentDelay
+STATIC UINTN mKeyInitialDelay = 50;
+STATIC UINTN mKeySubsequentDelay = 5;
 
 // mAppleKeyMapAggregator
 STATIC APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *mKeyMapAggregator = NULL;
 
-// InternalSkipFirstKeyDelay
+// InternalSetKeyDelays
 VOID
-InternalSkipFirstKeyDelay (
-  IN  BOOLEAN         SkipFirstDelay
+InternalSetKeyDelays (
+  IN  UINT16          KeyInitialDelay,
+  IN  UINT16          KeySubsequentDelay
   )
 {
-  mSkipFirstDelay = SkipFirstDelay;
+  if (KeyInitialDelay != 0) {
+    mKeyInitialDelay = KeyInitialDelay;
+  }
+
+  if (KeySubsequentDelay != 0) {
+    mKeySubsequentDelay = KeySubsequentDelay;
+  }
+  
+  DEBUG ((DEBUG_INFO, "OCAE: Using %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
 }
 
 // InternalGetAppleKeyStrokes
@@ -504,9 +514,9 @@ InternalGetCurrentKeyStroke (
 
     if (KeyInfo != NULL) {
       AcceptStroke = (BOOLEAN)(
-                       (!mSkipFirstDelay && KeyInfo->NumberOfStrokes < (KEY_STROKE_DELAY * 10))
+                       (KeyInfo->NumberOfStrokes < mKeyInitialDelay)
                          ? (KeyInfo->NumberOfStrokes == 0)
-                         : ((KeyInfo->NumberOfStrokes % KEY_STROKE_DELAY) == 0)
+                         : (((KeyInfo->NumberOfStrokes - mKeyInitialDelay) % mKeySubsequentDelay) == 0)
                        );
 
       if (AcceptStroke) {

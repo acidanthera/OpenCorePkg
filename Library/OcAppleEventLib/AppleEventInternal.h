@@ -154,10 +154,11 @@ EventInputKeyFromAppleKeyCode (
   IN  BOOLEAN         Shifted
   );
 
-// InternalSkipFirstKeyDelay
+// InternalSetKeyDelays
 VOID
-InternalSkipFirstKeyDelay (
-  IN  BOOLEAN         SkipFirstDelay
+InternalSetKeyDelays (
+  IN  UINT16          KeyInitialDelay,
+  IN  UINT16          KeySubsequentDelay
   );
 
 #endif // APPLE_EVENT_INTERNAL_H_
