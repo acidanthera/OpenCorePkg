@@ -1,18 +1,18 @@
-From 5f81e6e5dfab91bd185994eb3edbeb227c826f9b Mon Sep 17 00:00:00 2001
+From 172c0cefdb30a474ee62c25c07fa270c971ffdc6 Mon Sep 17 00:00:00 2001
 From: ocbuild <ocbuild@acidanthera.local>
-Date: Tue, 30 Mar 2021 18:27:11 +0100
+Date: Tue, 30 Mar 2021 18:38:46 +0100
 Subject: [PATCH] ShellPkg: Devices shell command support misaligned device
  names found in some Apple firmware
 
 ---
- ShellPkg/Application/Shell/ShellProtocol.c | 24 ++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ ShellPkg/Application/Shell/ShellProtocol.c | 22 ++++++++++++++++++++++
+ 1 file changed, 22 insertions(+)
 
 diff --git a/ShellPkg/Application/Shell/ShellProtocol.c b/ShellPkg/Application/Shell/ShellProtocol.c
-index 4e639fe..b313af6 100644
+index 4e639fe..5ac8f92 100644
 --- a/ShellPkg/Application/Shell/ShellProtocol.c
 +++ b/ShellPkg/Application/Shell/ShellProtocol.c
-@@ -573,6 +573,22 @@ EfiShellGetDevicePathFromFilePath(
+@@ -573,6 +573,20 @@ EfiShellGetDevicePathFromFilePath(
    return (DevicePathForReturn);
  }
  
@@ -22,20 +22,18 @@ index 4e639fe..b313af6 100644
 +  )
 +{
 +  UINTN     Len;
-+  CHAR16    *Dest;
 +
 +  for (Len = 0; !(((UINT8 *) Source)[Len * 2] == '\0' && ((UINT8 *) Source)[Len * 2 + 1] == '\0'); Len++) {
 +  }
 +  Len = (Len + 1) * sizeof (CHAR16);
-+  Dest = AllocateCopyPool (Len, Source);
-+
-+  return Dest;
++  
++  return AllocateCopyPool (Len, Source);
 +}
 +
  /**
    Gets the name of the device specified by the device handle.
  
-@@ -630,6 +646,7 @@ EfiShellGetDeviceName(
+@@ -630,6 +644,7 @@ EfiShellGetDeviceName(
    EFI_HANDLE                        *ParentControllerBuffer;
    UINTN                             ParentDriverCount;
    EFI_HANDLE                        *ParentDriverBuffer;
@@ -43,7 +41,7 @@ index 4e639fe..b313af6 100644
  
    if (BestDeviceName == NULL ||
        DeviceHandle   == NULL
-@@ -748,7 +765,14 @@ EfiShellGetDeviceName(
+@@ -748,7 +763,14 @@ EfiShellGetDeviceName(
      //
      if (DeviceNameToReturn != NULL){
        ASSERT(BestDeviceName != NULL);
