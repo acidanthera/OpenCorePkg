@@ -256,9 +256,7 @@ OcAppleGenericInputKeycodeInit (
   gAikSelf.KeyForgotThreshold = KeyForgotThreshold;
   gAikSelf.KeyFiltering       = KeyFiltering;
   Status = AIKInstall (&gAikSelf);
-  //
-  // Allow to see whether this is installed, even on success
-  //
+
   if (EFI_ERROR (Status)) {
     //
     // No AppleKeyMapAggregator present, install on its availability.
@@ -266,7 +264,7 @@ OcAppleGenericInputKeycodeInit (
     Status = AIKProtocolArriveInstall (&gAikSelf);
     if (EFI_ERROR (Status)) {
       //
-      // TODO: Should there be DEBUG_ERROR here (critical error?)
+      // Note: Even with no kb support (e.g. detachable keyboard) system can still boot via timeout
       //
       DEBUG ((DEBUG_INFO, "AIK: NOT waiting for protocols - %r\n", Status));
     }
