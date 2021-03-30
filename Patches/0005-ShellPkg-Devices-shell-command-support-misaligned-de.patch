@@ -1,0 +1,63 @@
+From 5f81e6e5dfab91bd185994eb3edbeb227c826f9b Mon Sep 17 00:00:00 2001
+From: ocbuild <ocbuild@acidanthera.local>
+Date: Tue, 30 Mar 2021 18:27:11 +0100
+Subject: [PATCH] ShellPkg: Devices shell command support misaligned device
+ names found in some Apple firmware
+
+---
+ ShellPkg/Application/Shell/ShellProtocol.c | 24 ++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
+
+diff --git a/ShellPkg/Application/Shell/ShellProtocol.c b/ShellPkg/Application/Shell/ShellProtocol.c
+index 4e639fe..b313af6 100644
+--- a/ShellPkg/Application/Shell/ShellProtocol.c
++++ b/ShellPkg/Application/Shell/ShellProtocol.c
+@@ -573,6 +573,22 @@ EfiShellGetDevicePathFromFilePath(
+   return (DevicePathForReturn);
+ }
+ 
++STATIC
++CHAR16 *Realign (
++  CHAR16 *Source
++  )
++{
++  UINTN     Len;
++  CHAR16    *Dest;
++
++  for (Len = 0; !(((UINT8 *) Source)[Len * 2] == '\0' && ((UINT8 *) Source)[Len * 2 + 1] == '\0'); Len++) {
++  }
++  Len = (Len + 1) * sizeof (CHAR16);
++  Dest = AllocateCopyPool (Len, Source);
++
++  return Dest;
++}
++
+ /**
+   Gets the name of the device specified by the device handle.
+ 
+@@ -630,6 +646,7 @@ EfiShellGetDeviceName(
+   EFI_HANDLE                        *ParentControllerBuffer;
+   UINTN                             ParentDriverCount;
+   EFI_HANDLE                        *ParentDriverBuffer;
++  BOOLEAN                           NeedsRealign;
+ 
+   if (BestDeviceName == NULL ||
+       DeviceHandle   == NULL
+@@ -748,7 +765,14 @@ EfiShellGetDeviceName(
+     //
+     if (DeviceNameToReturn != NULL){
+       ASSERT(BestDeviceName != NULL);
++      NeedsRealign = ((UINTN) DeviceNameToReturn & BIT0) != 0;
++      if (NeedsRealign) {
++        DeviceNameToReturn = Realign (DeviceNameToReturn);
++      }
+       StrnCatGrow(BestDeviceName, NULL, DeviceNameToReturn, 0);
++      if (NeedsRealign) {
++        FreePool (DeviceNameToReturn);
++      }
+       return (EFI_SUCCESS);
+     }
+   }
+-- 
+2.27.0
+
