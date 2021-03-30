@@ -6374,30 +6374,36 @@ functioning. Feature highlights:
     \item On systems which are not using \texttt{KeySupport}, no tuning
     is needed.
     \item On systems which are using \texttt{KeySupport}, it is important to tune
-    \texttt{KeyForgetThreshold} as documented above, in order to get reliable key-held
+    \texttt{KeyForgetThreshold} as documented, in order to get reliable key-held
     behaviour - including reliable responses to boot hotkeys - within OC.
-    \item After this, no further tuning is \emph{required} for reliable operation.
+    \item After this, no further tuning is required for reliable operation.
     However for fine tuning, proceed as follows:
  \end{itemize}
   
-  Apple Event protocol is used widely for key input in OpenCore, since we have to
-  provide it for Apple's own pre-boot systems to use anyway. However, a minor issue
-  is that when combining OpenCore \texttt{KeySupport} with Apple Event key handling,
+  Apple Event protocol is used for key input in OpenCore, since we have to
+  provide it for Apple's own pre-boot systems to use anyway. However when combining
+  OpenCore \texttt{KeySupport} with Apple Event key handling,
   key repeat behaviour may show one additional slow key repeat before normal key repeat starts.
   This is perfectly usable in practice, but in order to fine tune your key response and avoid
-  this minor issue, configure the value of \texttt{KeyInitialDelay} to be the same as the value of
-  \texttt{KeySubsequentDelay}, i.e. by default configure a value of \texttt{5} for
-  \texttt{KeyInitialDelay}. On many systems this will be sufficient. However on some
-  pathological - especially PS/2 - systems, you may find that using \texttt{5} and \texttt{5}
-  for \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} causes two key responses for
-  every key press. In this case, you will need to tune the shared value upwards until you avoid
-  this new symptom. E.g. values as high as \texttt{9} and \texttt{9} have been observed required
-  on some systems.
+  this issue, configure the value of \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay}
+  to be the same as the value you have already configured for \texttt{KeyForgetThreshold}. (However,
+  to avoid over-fast key repeats, if you have been able to configure \texttt{KeyForgetThreshold}
+  to a value less than \texttt{5}, then you are recommended to configure \texttt{KeyInitialDelay}
+  and \texttt{KeySubsequentDelay} to \texttt{5}.) Configure and test this. You should find the
+  repeat response is now corrected (no double long delay) and that you have no other problems. However,
+  it is theoretically possible (not actually observed) that on some systems this procedure may
+  give you two key responses for each key press. If this happens, then to avoid it you will need
+  to increment the value of both settings by one or two. E.g. if your \texttt{KeyForgetThreshold}
+  was \texttt{7} and you configured \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay}
+  to \texttt{7}, then if you get double key press responses, try configuring values
+  of \texttt{8} and \texttt{8} or \texttt{9} and \texttt{9} instead. Use the lowest values
+  which work.
 
   \emph{Note}: When tuning keyboard behaviour, double key responses can make it impossible to
-  access some boot entries - avoid making your system unbootable. If you do not have easy access to
-  another boot method, you are recommended to set \texttt{Misc/Boot/Timeout} to \texttt{5} before
-  trying this procedure, so that your normal OS will boot after a short time anyway.
+  select some boot entries. Therefore before tuning the above, to avoid making your system
+  unbootable if you do not have easy access to another boot method, you are recommended to set
+  \texttt{Misc/Boot/Timeout} to \texttt{5} so that your normal OS will boot after a short time
+  anyway.
 
 \item
   \texttt{KeySubsequentDelay}\\
@@ -6406,7 +6412,12 @@ functioning. Feature highlights:
   \textbf{Description}: Configure subsequent keyboard repeat delay in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 
-  See documentation of \texttt{KeyInitialDelay}.
+  See documentation of \texttt{KeyInitialDelay} for fine tuning. Even if not fine tuning,
+  this value should ideally not be set to less than the value of \texttt{KeyForgetThreshold} in
+  order to avoid excess key repeats; however, in practice, the difference may not be noticeable,
+  and you probably do not need to change this value except as part of key repeat fine tuning.
+
+  \emph{Note}: No changes to this value are ever required on systems which are not using \texttt{KeySupport}.
 
 \item
   \texttt{KeySwap}\\
