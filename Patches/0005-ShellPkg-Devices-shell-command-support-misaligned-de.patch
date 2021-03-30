@@ -1,39 +1,41 @@
-From 172c0cefdb30a474ee62c25c07fa270c971ffdc6 Mon Sep 17 00:00:00 2001
+From 95ebbfb43b45af46329cc0caea48c29eee34ea15 Mon Sep 17 00:00:00 2001
 From: ocbuild <ocbuild@acidanthera.local>
-Date: Tue, 30 Mar 2021 18:38:46 +0100
+Date: Tue, 30 Mar 2021 23:16:22 +0100
 Subject: [PATCH] ShellPkg: Devices shell command support misaligned device
  names found in some Apple firmware
 
 ---
- ShellPkg/Application/Shell/ShellProtocol.c | 22 ++++++++++++++++++++++
- 1 file changed, 22 insertions(+)
+ ShellPkg/Application/Shell/ShellProtocol.c | 24 ++++++++++++++++++++++
+ 1 file changed, 24 insertions(+)
 
 diff --git a/ShellPkg/Application/Shell/ShellProtocol.c b/ShellPkg/Application/Shell/ShellProtocol.c
-index 4e639fe..5ac8f92 100644
+index 4e639fe..ac004d1 100644
 --- a/ShellPkg/Application/Shell/ShellProtocol.c
 +++ b/ShellPkg/Application/Shell/ShellProtocol.c
-@@ -573,6 +573,20 @@ EfiShellGetDevicePathFromFilePath(
+@@ -573,6 +573,22 @@ EfiShellGetDevicePathFromFilePath(
    return (DevicePathForReturn);
  }
  
 +STATIC
-+CHAR16 *Realign (
++CHAR16 *RealignString16 (
 +  CHAR16 *Source
 +  )
 +{
-+  UINTN     Len;
++  UINTN     Size;
++  CHAR16    NextChar;
 +
-+  for (Len = 0; !(((UINT8 *) Source)[Len * 2] == '\0' && ((UINT8 *) Source)[Len * 2 + 1] == '\0'); Len++) {
-+  }
-+  Len = (Len + 1) * sizeof (CHAR16);
-+  
-+  return AllocateCopyPool (Len, Source);
++  Size = 0;
++  do {
++    NextChar = ReadUnaligned16 ((CHAR16 *) &((UINT8 *) Source)[Size]);
++    Size += 2;
++  } while (NextChar != CHAR_NULL);
++  return AllocateCopyPool (Size, Source);
 +}
 +
  /**
    Gets the name of the device specified by the device handle.
  
-@@ -630,6 +644,7 @@ EfiShellGetDeviceName(
+@@ -630,6 +646,7 @@ EfiShellGetDeviceName(
    EFI_HANDLE                        *ParentControllerBuffer;
    UINTN                             ParentDriverCount;
    EFI_HANDLE                        *ParentDriverBuffer;
@@ -41,13 +43,13 @@ index 4e639fe..5ac8f92 100644
  
    if (BestDeviceName == NULL ||
        DeviceHandle   == NULL
-@@ -748,7 +763,14 @@ EfiShellGetDeviceName(
+@@ -748,7 +765,14 @@ EfiShellGetDeviceName(
      //
      if (DeviceNameToReturn != NULL){
        ASSERT(BestDeviceName != NULL);
 +      NeedsRealign = ((UINTN) DeviceNameToReturn & BIT0) != 0;
 +      if (NeedsRealign) {
-+        DeviceNameToReturn = Realign (DeviceNameToReturn);
++        DeviceNameToReturn = RealignString16 (DeviceNameToReturn);
 +      }
        StrnCatGrow(BestDeviceName, NULL, DeviceNameToReturn, 0);
 +      if (NeedsRealign) {
