@@ -509,7 +509,7 @@ Available entries include:
   is loaded by the firmware by default consistent with the UEFI specification. However,
   it may also be renamed and put in a custom location to allow OpenCore coexist alongside
   operating systems, such as Windows, that use \texttt{BOOTx64.efi} files as their loaders.
-  Refer to the \texttt{LauncherOption} property for more details.
+  Refer to the \texttt{LauncherOption} property for details.
 \item
   \texttt{boot} \\
   Duet bootstrap loader, which initialises the UEFI environment on legacy BIOS firmware
@@ -532,8 +532,8 @@ Available entries include:
   \texttt{Resources} \\
   Directory used for storing media resources such as audio files
   for screen reader support. Refer to the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
-  section for more details. This directory also contains image files
-  for graphical user interface. Refer to the \hyperref[ueficanopy]{OpenCanopy} section for more details.
+  section for details. This directory also contains image files
+  for graphical user interface. Refer to the \hyperref[ueficanopy]{OpenCanopy} section for details.
 \item
   \texttt{Tools} \\
   Directory used for storing supplemental tools.
@@ -855,7 +855,7 @@ quality of the suggested solutions will be variable.
   directory.
 
   To be filled with \texttt{plist\ dict} values, describing each add entry.
-  Refer to the \hyperref[acpipropsadd]{Add Properties} section below.
+  Refer to the \hyperref[acpipropsadd]{Add Properties} section below for details.
 
 \item
   \texttt{Delete}\\
@@ -864,7 +864,7 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Remove selected tables from the ACPI stack.
 
   To be filled with \texttt{plist\ dict} values, describing each delete entry.
-  Refer to the \hyperref[acpipropsdelete]{Delete Properties} section below.
+  Refer to the \hyperref[acpipropsdelete]{Delete Properties} section below for details.
 
 \item
   \texttt{Patch}\\
@@ -874,7 +874,7 @@ quality of the suggested solutions will be variable.
   table addition or removal.
 
   To be filled with \texttt{plist\ dictionary} values describing each patch entry.
-  Refer to the \hyperref[acpipropspatch]{Patch Properties} section below.
+  Refer to the \hyperref[acpipropspatch]{Patch Properties} section below for details.
 
 \item
   \texttt{Quirks}\\
@@ -1231,8 +1231,8 @@ should be met before starting:
   It is not necessary unless the system cannot be booted at all or
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
-  firmware settings if present. See \hyperref[kernelpropsquirks]{ControlMsrE2}
-  notes for more details.
+  firmware settings if present. Refer to the \hyperref[kernelpropsquirks]{ControlMsrE2}
+  notes for details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
   if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
@@ -1273,7 +1273,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
-  Refer to the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
+  Refer to the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below for details.
 
 \item
   \texttt{Patch}\\
@@ -1282,7 +1282,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Perform binary patches in booter.
 
   To be filled with \texttt{plist\ dictionary} values, describing each
-  patch. Refer to the \hyperref[booterpropspatch]{Patch Properties} section below.
+  patch. Refer to the \hyperref[booterpropspatch]{Patch Properties} section below for details.
 
 \item
   \texttt{Quirks}\\
@@ -1895,7 +1895,7 @@ blocking.
   \textbf{Description}: Remove selected kernel extensions (kexts) from the prelinked kernel.
 
   To be filled with \texttt{plist\ dictionary} values, describing each blocked kext.
-  Refer to the \hyperref[kernelpropsblock]{Block Properties} section below.
+  Refer to the \hyperref[kernelpropsblock]{Block Properties} section below for details.
 
 \item
   \texttt{Emulate}\\
@@ -1910,7 +1910,7 @@ blocking.
   \textbf{Description}: Load kernel extensions (kexts) from the system volume if they are not cached.
 
   To be filled with \texttt{plist\ dict} values, describing each kext.
-  Refer to the \hyperref[kernelpropsforce]{Force Properties} section below.
+  Refer to the \hyperref[kernelpropsforce]{Force Properties} section below for details.
   This section resolves the problem of injecting kexts that depend on other
   kexts, which are not otherwise cached. The issue typically affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
@@ -1934,7 +1934,7 @@ blocking.
   driver addition and removal.
 
   To be filled with \texttt{plist\ dictionary} values, describing each patch.
-  Refer to the \hyperref[kernelpropspatch]{Patch Properties} section below.
+  Refer to the \hyperref[kernelpropspatch]{Patch Properties} section below for details.
 
 \item
   \texttt{Quirks}\\
@@ -2426,8 +2426,8 @@ blocking.
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
 
-  \emph{Note}: This option should be avoided whenever possible. See \texttt{AppleCpuPmCfgLock}
-  description for more details.
+  \emph{Note}: This option should be avoided whenever possible.
+  Refer to the \texttt{AppleCpuPmCfgLock} description for details.
 
 \item
   \texttt{AppleXcpmExtraMsrs}\\
@@ -2625,7 +2625,7 @@ blocking.
   by the controller. Conversely, the trim operation can be disabled by
   setting a very low timeout value. e.g. \texttt{999}. Refer to this
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
-  for more details.
+  for details.
 
 \item
   \texttt{ThirdPartyDrives}\\
@@ -2838,7 +2838,7 @@ removable media list set out in the UEFI specification.
 Partitions can only booted by OpenCore when they meet the requirements of a predefined \texttt{Scan policy}.
 This policy sets out which specific file systems a partition must have, and which specific device types
 a partition must be located on, to be made available by OpenCore as a boot option.
-Refer to the \texttt{ScanPolicy} property for more details.
+Refer to the \texttt{ScanPolicy} property for details.
 
 The scan process starts with enumerating all available partitions, filtered based on the \texttt{Scan policy}.
 Each partition may generate multiple primary and alternate options. Primary options represent operating systems
@@ -2850,7 +2850,7 @@ installed on the media, while alternate options represent recovery options for t
 \item Each primary and alternate option can be an auxiliary option or not.
 \begin{itemize}
 \tightlist
-  \item Refer to the \texttt{HideAuxiliary} section for more details.
+  \item Refer to the \texttt{HideAuxiliary} section for details.
 \end{itemize} \medskip
 \end{itemize}
 
@@ -2971,7 +2971,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Description}: Add boot entries to OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
-  Refer to the \hyperref[miscentryprops]{Entry Properties} section below.
+  Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
 
 \item
   \texttt{Security}\\
@@ -2985,7 +2985,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
-  Refer to the \hyperref[miscentryprops]{Entry Properties} section below.
+  Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
   \textbf{MUST NOT} appear in production configurations, paticularly in vaulted
@@ -3234,7 +3234,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   combination.
 
   \emph{Note}: The screen reader requires working audio support. Refer to the
-  \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}} section for more details.
+  \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}} section for details.
 
 \item
   \texttt{PollAppleHotKeys}\\
@@ -3477,7 +3477,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
     \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
   \end{itemize}
 
-  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for more details.
+  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
 
 \item
   \texttt{SysReport}\\
@@ -3634,9 +3634,9 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   showing \texttt{NVRAM Reset} entry in OpenCore picker.
 
   \emph{Note 1}: It is known that some Lenovo laptops have a firmware
-  bug, which makes them unbootable after performing NVRAM reset. See
+  bug, which makes them unbootable after performing NVRAM reset. Refer to
   \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
-  for more details.
+  for details.
 
   \emph{Note 2}: Resetting NVRAM will also erase any boot options not backed up using
   the bless command. For example, Linux installations to custom locations not specified
@@ -4173,7 +4173,7 @@ rm vault.pub
 \subsection{Introduction}\label{nvramintro}
 
 This section allows setting non-volatile UEFI variables commonly described
-as NVRAM variables. Refer to \texttt{man\ nvram} for more details.
+as NVRAM variables. Refer to \texttt{man\ nvram} for details.
 The macOS operating system extensively uses NVRAM variables for OS --- Bootloader
 --- Firmware intercommunication. Hence, the supply of several NVRAM variables
 is required for the proper functioning of macOS.
@@ -5573,8 +5573,8 @@ Apple ROM Version
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
   Type\\
   \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
-  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module),
-  refer to Table 15 -- Baseboard: Board Type for more details.
+  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module).
+  Refer to Table 15 -- Baseboard: Board Type for details.
 \item
   \texttt{BoardLocationInChassis}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -5595,8 +5595,8 @@ Apple ROM Version
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (OEM specified)\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
-  \textbf{Description}: Chassis type, refer to Table 17 --- System
-  Enclosure or Chassis Types for more details.
+  \textbf{Description}: Chassis type. Refer to Table 17 --- System
+  Enclosure or Chassis Types for details.
 \item
   \texttt{ChassisVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -5623,9 +5623,8 @@ Apple ROM Version
   \textbf{Failsafe}: \texttt{0xFFFFFFFF} (OEM specified on Apple hardware, do not provide the table otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
-  \textbf{Description}: Platform features bitmask. Refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Missing on older Macs.
+  \textbf{Description}: Platform features bitmask (Missing on older Macs). Refer to
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h} for details.
 \item
   \texttt{SmcVersion}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
@@ -5641,7 +5640,7 @@ Apple ROM Version
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
+  for details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
   64 bits match \texttt{ExtendedFirmwareFeatures}.
 \item
   \texttt{FirmwareFeaturesMask}\\
@@ -5653,7 +5652,7 @@ Apple ROM Version
   \textbf{Description}: Supported bits of extended firmware features
   bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
+  for details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
   Upper 64 bits match \texttt{ExtendedFirmwareFeaturesMask}.
 \item
   \texttt{ProcessorType}\\
@@ -6038,7 +6037,7 @@ functioning. Feature highlights:
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
-  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+  Refer to the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below for details.
 
 \end{enumerate}
 
@@ -6055,7 +6054,7 @@ functioning. Feature highlights:
   An APFS EFI driver is bundled in all bootable APFS containers. This
   option performs the loading of signed APFS drivers (consistent with the
   \texttt{ScanPolicy}). Refer to the ``EFI Jumpstart'' section of the
-  \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference} for more details.
+  \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference} for details.
 
 
 \item
@@ -6379,7 +6378,7 @@ functioning. Feature highlights:
     \item After this, no further tuning is required for reliable operation.
     However for fine tuning, proceed as follows:
  \end{itemize}
-  
+
   Apple Event protocol is used for key input in OpenCore, since we have to
   provide it for Apple's own pre-boot systems to use anyway. However when combining
   OpenCore \texttt{KeySupport} with Apple Event key handling,
@@ -6561,7 +6560,7 @@ functioning. Feature highlights:
   NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
   in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
   and boot screen logo. Refer to the \hyperref[nvramvarsrec]{Recommended Variables}
-  section for more details.
+  section for details.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
@@ -7005,7 +7004,7 @@ functioning. Feature highlights:
   \emph{Note}: Some types of firmware may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
   and enabled, these areas can be found in the lower memory and can be fixed up by doing the reservation.
-  See \texttt{Sample.plist} for more details.
+  Refer to the \texttt{Sample.plist} file for details.
 
 \item
   \texttt{Comment}\\
@@ -7119,8 +7118,8 @@ However, as this may not always be accurate, the latest versions are listed belo
     (with \texttt{ACDT} suffix) without model restrictions can be found
     \href{https://archive.org/details/10.6.7-10j3250-disk-images}{here}
     (\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{MEGA Mirror}),
-    assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that these are the earliest tested
+    assuming macOS~10.6 is legally owned. Refer to the \texttt{DIGEST.txt} file
+    for details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
 \end{itemize}
 
@@ -7170,8 +7169,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     as is. The original \texttt{9J3050} image can be found
     \href{https://archive.org/details/10.5.7-9-j-3050}{here}
     (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
-    assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that this is the earliest tested
+    assuming macOS~10.5 is legally owned. Refer to the \texttt{DIGEST.txt} file
+    for details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
 \end{itemize}
 
@@ -7190,8 +7189,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     model restrictions can be found
     \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{here}
     (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
-    assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that these are the earliest tested
+    assuming macOS~10.4 is legally owned. Refer to the \texttt{DIGEST.txt} file
+    for details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.
 \end{itemize}
 
@@ -7539,7 +7538,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
   is no definite approach even on similar systems, so trying all their
   combinations may be required for optimal setup. Refer to individual quirk
-  descriptions in this document for more details.
+  descriptions in this document for details.
 
 \end{enumerate}
 
