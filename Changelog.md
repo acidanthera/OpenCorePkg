@@ -46,6 +46,7 @@ OpenCore Changelog
 - Added additional support for configuring correct key repeat behaviour with KeySupport mode
 - Fixed CPU multiplier detection on pre-Nehalem Intel CPUs
 - Fixed incorrect handling of multiple processors and processor cache in SMBIOS
+- Matched default Apple boot picker cursor start position
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

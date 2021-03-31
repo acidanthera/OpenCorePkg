@@ -30,6 +30,11 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
+//
+// Add slight x offset of cursor by its position within its icon file,
+// in order to match look of Apple picker initial position.
+//
+#define DEFAULT_CURSOR_OFFSET_X  BOOT_CURSOR_OFFSET
 #define DEFAULT_CURSOR_OFFSET_Y  112U
 
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
@@ -77,6 +82,21 @@ OcShowMenuByOcLeave (
   OcConsoleControlSetMode (mPreviousMode);
 }
 
+STATIC
+VOID
+OcSetInitialCursorOffset (
+  VOID
+  )
+{
+  //
+  // The cursor position is updated on GUI exit, so don't overwrite it.
+  //
+  if (mGuiContext.PickerContext == NULL) {
+    mGuiContext.CursorOffsetX = DEFAULT_CURSOR_OFFSET_X * mGuiContext.Scale;
+    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
+  }
+}
+
 EFI_STATUS
 EFIAPI
 OcShowMenuByOc (
@@ -89,13 +109,7 @@ OcShowMenuByOc (
   UINTN         Index;
 
   *ChosenBootEntry = NULL;
-  //
-  // The cursor position is updated on GUI exit, so don't overwrite it.
-  //
-  if (mGuiContext.PickerContext == NULL) {
-    mGuiContext.CursorOffsetX = 0;
-    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
-  }
+  OcSetInitialCursorOffset();
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
@@ -207,13 +221,7 @@ OcShowPasswordByOc (
   )
 {
   EFI_STATUS    Status;
-  //
-  // The cursor position is updated on GUI exit, so don't overwrite it.
-  //
-  if (mGuiContext.PickerContext == NULL) {
-    mGuiContext.CursorOffsetX = 0;
-    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
-  }
+  OcSetInitialCursorOffset ();
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = TRUE;
