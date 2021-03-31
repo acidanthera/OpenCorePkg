@@ -1,18 +1,18 @@
-From 95ebbfb43b45af46329cc0caea48c29eee34ea15 Mon Sep 17 00:00:00 2001
+From 6cf9c38ca1065797cd7b608f96a918cf703490bb Mon Sep 17 00:00:00 2001
 From: ocbuild <ocbuild@acidanthera.local>
-Date: Tue, 30 Mar 2021 23:16:22 +0100
+Date: Tue, 30 Mar 2021 23:27:57 +0100
 Subject: [PATCH] ShellPkg: Devices shell command support misaligned device
  names found in some Apple firmware
 
 ---
- ShellPkg/Application/Shell/ShellProtocol.c | 24 ++++++++++++++++++++++
- 1 file changed, 24 insertions(+)
+ ShellPkg/Application/Shell/ShellProtocol.c | 26 ++++++++++++++++++++++
+ 1 file changed, 26 insertions(+)
 
 diff --git a/ShellPkg/Application/Shell/ShellProtocol.c b/ShellPkg/Application/Shell/ShellProtocol.c
-index 4e639fe..ac004d1 100644
+index 4e639fe..9f5dc80 100644
 --- a/ShellPkg/Application/Shell/ShellProtocol.c
 +++ b/ShellPkg/Application/Shell/ShellProtocol.c
-@@ -573,6 +573,22 @@ EfiShellGetDevicePathFromFilePath(
+@@ -573,6 +573,24 @@ EfiShellGetDevicePathFromFilePath(
    return (DevicePathForReturn);
  }
  
@@ -21,21 +21,23 @@ index 4e639fe..ac004d1 100644
 +  CHAR16 *Source
 +  )
 +{
-+  UINTN     Size;
 +  CHAR16    NextChar;
++  UINT8     *Walker;
 +
-+  Size = 0;
++  Walker = (UINT8 *) Source;
++
 +  do {
-+    NextChar = ReadUnaligned16 ((CHAR16 *) &((UINT8 *) Source)[Size]);
-+    Size += 2;
++    NextChar = ReadUnaligned16 ((VOID *) Walker);
++    Walker += sizeof (CHAR16);
 +  } while (NextChar != CHAR_NULL);
-+  return AllocateCopyPool (Size, Source);
++
++  return AllocateCopyPool (Walker - (UINT8 *) Source, Source);
 +}
 +
  /**
    Gets the name of the device specified by the device handle.
  
-@@ -630,6 +646,7 @@ EfiShellGetDeviceName(
+@@ -630,6 +648,7 @@ EfiShellGetDeviceName(
    EFI_HANDLE                        *ParentControllerBuffer;
    UINTN                             ParentDriverCount;
    EFI_HANDLE                        *ParentDriverBuffer;
@@ -43,7 +45,7 @@ index 4e639fe..ac004d1 100644
  
    if (BestDeviceName == NULL ||
        DeviceHandle   == NULL
-@@ -748,7 +765,14 @@ EfiShellGetDeviceName(
+@@ -748,7 +767,14 @@ EfiShellGetDeviceName(
      //
      if (DeviceNameToReturn != NULL){
        ASSERT(BestDeviceName != NULL);
