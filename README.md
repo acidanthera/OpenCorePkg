@@ -58,6 +58,7 @@ details.
 - [Andrey1970AppleLife](https://github.com/Andrey1970AppleLife)
 - [mhaeuser (ex Download-Fritz)](https://github.com/mhaeuser)
 - [Goldfish64](https://github.com/Goldfish64)
+- [MikeBeaton](https://github.com/MikeBeaton)
 - [nms42](https://github.com/nms42)
 - [PMheart](https://github.com/PMheart)
 - [savvamitrofanov](https://github.com/savvamitrofanov)
