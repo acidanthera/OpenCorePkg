@@ -156,9 +156,9 @@ SmbiosGetFormFactor (
   }
 
   //
-  // If not valid at all, fall back to zero.
+  // If not valid at all, fall back on the failsafe.
   //
-  return 0;
+  return MemoryFormFactorUnknown;
 }
 
 /** Type 0
@@ -751,7 +751,7 @@ PatchMemoryArray (
   Table->CurrentPtr.Standard.Type16->MemoryErrorInformationHandle = 0xFFFF;
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->NumberOfMemoryDevices, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->ExtendedMaximumCapacity, Original, NULL, NULL);
- 
+
   //
   // Return assigned handle
   //
@@ -801,7 +801,7 @@ CreateMemoryArray (
     Table->CurrentPtr.Standard.Type16->MaximumCapacity          = SIZE_2TB / SIZE_1KB;
     Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = *Data->MemoryMaxCapacity;
   }
- 
+
   //
   // Return assigned handle
   //
@@ -2020,7 +2020,7 @@ OcSmbiosCreate (
       Data,
       &MemoryArrayHandle
       );
-    
+
       //
       // Generate new memory device tables (type 17) for this memory array.
       //

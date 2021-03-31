@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Fri Apr  2 22:11:27 2021
+%DIF ADD ../Configuration.tex        Sat Apr  3 02:49:53 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5321,7 +5321,7 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   Otherwise, the value from }\texttt{\DIFadd{OcMacInfoLib}} \DIFadd{will be set.
   When }\texttt{\DIFadd{Automatic}} \DIFadd{is }\texttt{\DIFadd{false}}\DIFadd{, a user-specified value will be set if available.
   Otherwise, the original value from the firmware will be set.
-  If no value is provided, the fallback value (}\texttt{\DIFadd{zero}}\DIFadd{) will be set.
+  If no value is provided, the failsafe value will be set.
 }
 
   \DIFaddend \begin{itemize}
@@ -6351,12 +6351,13 @@ functioning. Feature highlights:
 \item
   \texttt{\DIFadd{KeySubsequentDelay}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(no delay)}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{1}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Configure subsequent keyboard repeat delay in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 }
 
   \DIFadd{Configures the gap between key repeats. The Apple OEM default value is }\texttt{\DIFadd{5}} \DIFadd{(50ms).
+  }\texttt{\DIFadd{0}} \DIFadd{is an invalid value for this option.
 }
 
   \DIFadd{When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
@@ -6365,6 +6366,29 @@ functioning. Feature highlights:
   the unlikely event that you still get frequent, or occasional, double key responses after doing
   this, proceed to set this value to one or two greater than }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{- use
   the lowest value which works.)
+}
+
+\item
+  \texttt{\DIFadd{PointerSpeedDiv}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{1}}\DIFadd{)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer speed divisor in OpenCore implementation
+  of Apple Event protocol.
+}
+
+  \DIFadd{Configures the divisor for pointer movements. The Apple OEM default value is }\texttt{\DIFadd{1}}\DIFadd{.
+  }\texttt{\DIFadd{0}} \DIFadd{is an invalid value for this option.
+}
+
+\item
+  \texttt{\DIFadd{PointerSpeedMul}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\DIFadd{)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure pointer speed multiplier in OpenCore implementation
+  of Apple Event protocol.
+}
+
+  \DIFadd{Configures the multiplier for pointer movements. The Apple OEM default value is }\texttt{\DIFadd{1}}\DIFadd{.
 }
 
 \end{enumerate}
