@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Mar 28 23:20:53 2021
-%DIF ADD ../Configuration.tex        Sun Mar 28 23:20:53 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar 31 14:49:52 2021
+%DIF ADD ../Configuration.tex        Wed Mar 31 14:49:52 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -569,7 +569,7 @@ Available entries include:
   is loaded by the firmware by default consistent with the UEFI specification. However,
   it may also be renamed and put in a custom location to allow OpenCore coexist alongside
   operating systems, such as Windows, that use \texttt{BOOTx64.efi} files as their loaders.
-  Refer to the \texttt{LauncherOption} property for more details.
+  Refer to the \texttt{LauncherOption} property for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 \item
   \texttt{boot} \\
   Duet bootstrap loader, which initialises the UEFI environment on legacy BIOS firmware
@@ -592,8 +592,8 @@ Available entries include:
   \texttt{Resources} \\
   Directory used for storing media resources such as audio files
   for screen reader support. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
-  section for more details. This directory also contains image files
-  for graphical user interface. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[ueficanopy]{OpenCanopy} section for more details.
+  section for \DIFdelbegin \DIFdel{more }\DIFdelend details. This directory also contains image files
+  for graphical user interface. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[ueficanopy]{OpenCanopy} section for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 \item
   \texttt{Tools} \\
   Directory used for storing supplemental tools.
@@ -920,7 +920,7 @@ quality of the suggested solutions will be variable.
   directory.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each add entry.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsadd]{Add Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsadd]{Add Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Delete}\\
@@ -929,7 +929,7 @@ quality of the suggested solutions will be variable.
   \textbf{Description}: Remove selected tables from the ACPI stack.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each delete entry.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsdelete]{Delete Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropsdelete]{Delete Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Patch}\\
@@ -939,7 +939,7 @@ quality of the suggested solutions will be variable.
   table addition or removal.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values describing each patch entry.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropspatch]{Patch Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[acpipropspatch]{Patch Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Quirks}\\
@@ -1305,10 +1305,11 @@ should be met before starting:
   firmware settings if present. \DIFdelbegin \DIFdel{Consider
 }%DIFDELCMD < \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
 %DIFDELCMD <   %%%
-\DIFdel{if no option is available (for advanced users only). See }%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
+\DIFdel{if no option is available (for advanced users only). See
+}%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
 %DIFDELCMD <   %%%
-\DIFdelend \DIFaddbegin \DIFadd{See }\hyperref[kernelpropsquirks]{ControlMsrE2}
-  \DIFaddend notes for more details.
+\DIFdel{notes for more }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\hyperref[kernelpropsquirks]{ControlMsrE2}
+  \DIFadd{notes for }\DIFaddend details.
 \item \texttt{CSM} (Compatibility Support Module) disabled in firmware settings
   if present. On NVIDIA 6xx/AMD 2xx or older, GOP ROM may have to be flashed first. Use
   \href{https://www.win-raid.com/t892f16-AMD-and-Nvidia-GOP-update-No-requests-DIY.html}{GopUpdate}
@@ -1349,7 +1350,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Patch}\\
@@ -1358,7 +1359,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Description}: Perform binary patches in booter.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each
-  patch. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropspatch]{Patch Properties} section below.
+  patch. \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[booterpropspatch]{Patch Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Quirks}\\
@@ -1960,22 +1961,25 @@ blocking.
   \textbf{Description}: Load selected kernel \DIFdelbegin \DIFdel{drivers from }\DIFdelend \DIFaddbegin \DIFadd{extensions (kexts) from the }\DIFaddend \texttt{OC/Kexts} directory.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each \DIFdelbegin \DIFdel{driver. See }\DIFdelend \DIFaddbegin \DIFadd{kext. Refer to
-  }\DIFaddend the \hyperref[kernelpropsadd]{Add Properties} section below.
-\DIFdelbegin \DIFdel{Kernel driver load order follows the item order in the array, thus the dependencies should be written
-  prior to their consumers}\DIFdelend \DIFaddbegin 
+  }\DIFaddend the \hyperref[kernelpropsadd]{Add Properties} section below \DIFaddbegin \DIFadd{for details.
+}
 
   \emph{\DIFadd{Note 1}}\DIFadd{: The load order is based on the order in which the kexts appear in
   the array. Hence, dependencies must appear before kexts that depend on them}\DIFaddend .
+\DIFdelbegin \DIFdel{Kernel driver load order follows the item order in the array, thus the dependencies should be written
+  prior to their consumers.
+}\DIFdelend 
 
   \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend To track the dependency order, inspect the \texttt{OSBundleLibraries}
-  key in the \texttt{Info.plist} \DIFaddbegin \DIFadd{file }\DIFaddend of the kext \DIFaddbegin \DIFadd{being added}\DIFaddend . Any kext \DIFdelbegin \DIFdel{mentioned }\DIFdelend \DIFaddbegin \DIFadd{included
-  }\DIFaddend in the \texttt{OSBundleLibraries} \DIFdelbegin \DIFdel{of the other kext must precede
-  this kext }\DIFdelend \DIFaddbegin \DIFadd{key is a dependency that must precede
-  the kext being added}\DIFaddend .
+  key in the \texttt{Info.plist} \DIFaddbegin \DIFadd{file }\DIFaddend of the kext \DIFaddbegin \DIFadd{being added}\DIFaddend . Any kext \DIFdelbegin \DIFdel{mentioned in the }\texttt{\DIFdel{OSBundleLibraries}} %DIFAUXCMD
+\DIFdel{of the other kext must precede this kext}\DIFdelend \DIFaddbegin \DIFadd{included
+  under the key is a dependency that must appear before the kext being added}\DIFaddend .
 
-  \emph{Note \DIFaddbegin \DIFadd{3}\DIFaddend }: Kexts may have inner kexts (\texttt{\DIFdelbegin \DIFdel{Plug-Ins}\DIFdelend \DIFaddbegin \DIFadd{Plugins}\DIFaddend }) \DIFdelbegin \DIFdel{in their bundle . Each
-  inner kext }\DIFdelend \DIFaddbegin \DIFadd{included
-  in the bundle and each such plugin }\DIFaddend must be added separately.
+  \emph{Note \DIFaddbegin \DIFadd{3}\DIFaddend }: Kexts may have inner kexts (\texttt{\DIFdelbegin \DIFdel{Plug-Ins}\DIFdelend \DIFaddbegin \DIFadd{Plugins}\DIFaddend }) \DIFdelbegin \DIFdel{in their bundle.
+  Each
+  inner kext }\DIFdelend \DIFaddbegin \DIFadd{included in the bundle.
+  Such }\texttt{\DIFadd{Plugins}} \DIFaddend must be added separately \DIFaddbegin \DIFadd{and follow the same global ordering
+  rules as other kexts}\DIFaddend .
 
 \item
   \texttt{Block}\\
@@ -1985,7 +1989,7 @@ blocking.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each blocked \DIFdelbegin \DIFdel{driver.
   See }\DIFdelend \DIFaddbegin \DIFadd{kext.
-  Refer to }\DIFaddend the \hyperref[kernelpropsblock]{Block Properties} section below.
+  Refer to }\DIFaddend the \hyperref[kernelpropsblock]{Block Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Emulate}\\
@@ -2001,7 +2005,7 @@ blocking.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each \DIFdelbegin \DIFdel{driver.
   See }\DIFdelend \DIFaddbegin \DIFadd{kext.
-  Refer to }\DIFaddend the \hyperref[kernelpropsforce]{Force Properties} section below.
+  Refer to }\DIFaddend the \hyperref[kernelpropsforce]{Force Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
   This section resolves the problem of injecting \DIFdelbegin \DIFdel{drivers }\DIFdelend \DIFaddbegin \DIFadd{kexts }\DIFaddend that depend on other
   \DIFdelbegin \DIFdel{drivers}\DIFdelend \DIFaddbegin \DIFadd{kexts}\DIFaddend , which are not \DIFdelbegin \DIFdel{cached otherwise }\DIFdelend \DIFaddbegin \DIFadd{otherwise cached}\DIFaddend . The issue \DIFdelbegin \DIFdel{normally }\DIFdelend \DIFaddbegin \DIFadd{typically }\DIFaddend affects older
   operating systems, where various dependency kexts, such as \texttt{IOAudioFamily}
@@ -2030,7 +2034,7 @@ blocking.
   driver addition and removal.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dictionary} values, describing each patch.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[kernelpropspatch]{Patch Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[kernelpropspatch]{Patch Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Quirks}\\
@@ -2529,8 +2533,8 @@ blocking.
   MSR modification in XNU kernel, commonly causing early kernel panic, when it is
   locked from writing (XCPM power management).
 
-  \emph{Note}: This option should be avoided whenever possible. See \texttt{AppleCpuPmCfgLock}
-  description for more details.
+  \emph{Note}: This option should be avoided whenever possible.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \texttt{AppleCpuPmCfgLock} description for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 \item
   \texttt{AppleXcpmExtraMsrs}\\
@@ -2728,7 +2732,7 @@ blocking.
   by the controller. Conversely, the trim operation can be disabled by
   setting a very low timeout value. e.g. \texttt{999}. Refer to this
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
-  for more details.
+  for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 \item
   \texttt{ThirdPartyDrives}\\
@@ -2944,7 +2948,7 @@ removable media list set out in the UEFI specification.
 Partitions can only booted by OpenCore when they meet the requirements of a predefined \texttt{Scan policy}.
 This policy sets out which specific file systems a partition must have, and which specific device types
 a partition must be located on, to be made available by OpenCore as a boot option.
-Refer to the \texttt{ScanPolicy} property for more details.
+Refer to the \texttt{ScanPolicy} property for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 The scan process starts with enumerating all available partitions, filtered based on the \texttt{Scan policy}.
 Each partition may generate multiple primary and alternate options. Primary options represent operating systems
@@ -2956,7 +2960,7 @@ installed on the media, while alternate options represent recovery options for t
 \item Each primary and alternate option can be an auxiliary option or not.
 \begin{itemize}
 \tightlist
-  \item Refer to the \texttt{HideAuxiliary} section for more details.
+  \item Refer to the \texttt{HideAuxiliary} section for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 \end{itemize} \medskip
 \end{itemize}
 
@@ -3077,7 +3081,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Description}: Add boot entries to OpenCore picker.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each load entry.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \item
   \texttt{Security}\\
@@ -3091,7 +3095,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
   \DIFdelbegin \DIFdel{Designed to }\DIFdelend \DIFaddbegin \DIFadd{To }\DIFaddend be filled with \texttt{plist\ dict} values, describing each load entry.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[miscentryprops]{Entry Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
   \emph{Note}: Certain UEFI tools, such as UEFI Shell, can be very dangerous and
   \textbf{MUST NOT} appear in production configurations, paticularly in vaulted
@@ -3341,7 +3345,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   combination.
 
   \emph{Note}: The screen reader requires working audio support. Refer to the
-  \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}} section for more details.
+  \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}} section for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 \item
   \texttt{PollAppleHotKeys}\\
@@ -3590,7 +3594,7 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
     \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
   \end{itemize}
 
-  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for more details.
+  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 \item
   \texttt{SysReport}\\
@@ -3747,9 +3751,10 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   showing \texttt{NVRAM Reset} entry in OpenCore picker.
 
   \emph{Note 1}: It is known that some Lenovo laptops have a firmware
-  bug, which makes them unbootable after performing NVRAM reset. See
-  \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
-  for more details.
+  bug, which makes them unbootable after performing NVRAM reset. \DIFdelbegin \DIFdel{See
+  }\DIFdelend \DIFaddbegin \DIFadd{Refer to
+  }\DIFaddend \href{https://github.com/acidanthera/bugtracker/issues/995}{acidanthera/bugtracker\#995}
+  for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
   \emph{Note 2}: Resetting NVRAM will also erase any boot options not backed up using
   the bless command. For example, Linux installations to custom locations not specified
@@ -4288,8 +4293,9 @@ rm vault.pub
 
 \DIFdelbegin \DIFdel{Has }\texttt{\DIFdel{plist\ dict}} %DIFAUXCMD
 \DIFdel{type and allows to set volatile }\DIFdelend \DIFaddbegin \DIFadd{This section allows setting non-volatile }\DIFaddend UEFI variables commonly \DIFdelbegin \DIFdel{referred }\DIFdelend \DIFaddbegin \DIFadd{described
-}\DIFaddend as NVRAM variables. Refer to \texttt{man\ nvram} for more details.
-\DIFdelbegin \DIFdel{macOS }\DIFdelend \DIFaddbegin \DIFadd{The macOS operating system }\DIFaddend extensively uses NVRAM variables for OS --- Bootloader
+}\DIFaddend as NVRAM variables. Refer to \texttt{man\ nvram} for \DIFdelbegin \DIFdel{more details.
+macOS }\DIFdelend \DIFaddbegin \DIFadd{details.
+The macOS operating system }\DIFaddend extensively uses NVRAM variables for OS --- Bootloader
 --- Firmware intercommunication\DIFdelbegin \DIFdel{, and thus supplying several NVRAM }\DIFdelend \DIFaddbegin \DIFadd{. Hence, the supply of several NVRAM variables
 }\DIFaddend is required for \DIFdelbegin \DIFdel{proper macOS functioning }\DIFdelend \DIFaddbegin \DIFadd{the proper functioning of macOS}\DIFaddend .
 
@@ -5703,8 +5709,9 @@ Apple ROM Version
   \textbf{SMBIOS}: Baseboard (or Module) Information (Type 2) --- Board
   Type\\
   \textbf{Description}: Either \texttt{0xA} (Motherboard (includes
-  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module),
-  refer to Table 15 -- Baseboard: Board Type for more details.
+  processor, memory, and I/O) or \texttt{0xB} (Processor/Memory Module)\DIFdelbegin \DIFdel{,
+  refer }\DIFdelend \DIFaddbegin \DIFadd{.
+  Refer }\DIFaddend to Table 15 -- Baseboard: Board Type for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 \item
   \texttt{BoardLocationInChassis}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -5725,8 +5732,8 @@ Apple ROM Version
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0} (OEM specified)\\
   \textbf{SMBIOS}: System Enclosure or Chassis (Type 3) --- Type\\
-  \textbf{Description}: Chassis type, refer to Table 17 --- System
-  Enclosure or Chassis Types for more details.
+  \textbf{Description}: Chassis type\DIFdelbegin \DIFdel{, refer }\DIFdelend \DIFaddbegin \DIFadd{. Refer }\DIFaddend to Table 17 --- System
+  Enclosure or Chassis Types for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 \item
   \texttt{ChassisVersion}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -5753,10 +5760,11 @@ Apple ROM Version
   \textbf{Failsafe}: \texttt{0xFFFFFFFF} (OEM specified on Apple hardware, do not provide the table otherwise)\\
   \textbf{SMBIOS}: \texttt{APPLE\_SMBIOS\_TABLE\_TYPE133} -
   \texttt{PlatformFeature}\\
-  \textbf{Description}: Platform features bitmask. Refer to
-  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Missing on older Macs.
-\item
+  \textbf{Description}: Platform features bitmask \DIFaddbegin \DIFadd{(Missing on older Macs)}\DIFaddend . Refer to
+  \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h} for \DIFdelbegin \DIFdel{more details.
+Missing on older Macs.
+}\DIFdelend \DIFaddbegin \DIFadd{details.
+}\DIFaddend \item
   \texttt{SmcVersion}\\
   \textbf{Type}: \texttt{plist\ data}, 16 bytes\\
   \textbf{Failsafe}: All zero (OEM specified on Apple hardware, do not provide the table otherwise)\\
@@ -5771,7 +5779,7 @@ Apple ROM Version
   \texttt{FirmwareFeatures} and \texttt{ExtendedFirmwareFeatures}\\
   \textbf{Description}: 64-bit firmware features bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
+  for \DIFdelbegin \DIFdel{more }\DIFdelend details. Lower 32 bits match \texttt{FirmwareFeatures}. Upper
   64 bits match \texttt{ExtendedFirmwareFeatures}.
 \item
   \texttt{FirmwareFeaturesMask}\\
@@ -5783,7 +5791,7 @@ Apple ROM Version
   \textbf{Description}: Supported bits of extended firmware features
   bitmask. Refer to
   \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Apple/IndustryStandard/AppleFeatures.h}{AppleFeatures.h}
-  for more details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
+  for \DIFdelbegin \DIFdel{more }\DIFdelend details. Lower 32 bits match \texttt{FirmwareFeaturesMask}.
   Upper 64 bits match \texttt{ExtendedFirmwareFeaturesMask}.
 \item
   \texttt{ProcessorType}\\
@@ -6173,7 +6181,7 @@ functioning. Feature highlights:
   which should not be used by the operating system. \DIFdelbegin \DIFdel{An example }\DIFdelend \DIFaddbegin \DIFadd{Examples }\DIFaddend of such memory \DIFdelbegin \DIFdel{region
   could be }\DIFdelend \DIFaddbegin \DIFadd{regions
   could be the }\DIFaddend second 256 MB corrupted by \DIFaddbegin \DIFadd{the }\DIFaddend Intel HD 3000 or an area with faulty RAM.
-  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend the \hyperref[uefirsvdprops]{ReservedMemory Properties} section below \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 \end{enumerate}
 
@@ -6191,7 +6199,7 @@ functioning. Feature highlights:
   option performs \DIFaddbegin \DIFadd{the }\DIFaddend loading of signed APFS drivers \DIFdelbegin \DIFdel{with respect to
   }\DIFdelend \DIFaddbegin \DIFadd{(consistent with the
   }\DIFaddend \texttt{ScanPolicy}\DIFdelbegin \DIFdel{. See more details in }\DIFdelend \DIFaddbegin \DIFadd{). Refer to the }\DIFaddend ``EFI Jumpstart'' section of \DIFaddbegin \DIFadd{the
-  }\DIFaddend \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference} \DIFaddbegin \DIFadd{for more details}\DIFaddend .
+  }\DIFaddend \href{https://developer.apple.com/support/apple-file-system/Apple-File-System-Reference.pdf}{Apple File System Reference} \DIFaddbegin \DIFadd{for details}\DIFaddend .
 
 
 \item
@@ -6510,19 +6518,74 @@ functioning. Feature highlights:
   \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
   the particular specified protocol. This may change in the future versions.
 
-  \item
-  \DIFaddbegin \texttt{\DIFadd{KeySkipFirstDelay}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Suppress initial delay before key repeat in
-  OpenCore implementation of Apple Event protocol.
+\item
+  \DIFaddbegin \texttt{\DIFadd{KeyInitialDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(acts as }\texttt{\DIFadd{50}}\DIFadd{, or 500ms)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure initial keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
 }
 
-  \DIFadd{When combining OpenCore }\texttt{\DIFadd{KeySupport}} \DIFadd{with the Apple Event protocol, key repeat behaviour
-  may show one additional slow key repeat before normal key repeat starts. Enabling this option
-  works around this problem by suppressing the initial repeat delay in the OpenCore Apple Event
-  implementation. This option is recommended to be set when using }\texttt{\DIFadd{KeySupport}} \DIFadd{mode, in most
-  cases, and is not recommended to be set on any systems which are not using }\texttt{\DIFadd{KeySupport}} \DIFadd{mode.
+  \DIFadd{In order to fine tune keyboard behaviour three values are relavent:
+  }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{, }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}\DIFadd{.
+}
+
+  \DIFadd{The tuning procedure is as follows:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{On systems which are not using }\texttt{\DIFadd{KeySupport}}\DIFadd{, no tuning
+    is needed.
+    }\item \DIFadd{On systems which are using }\texttt{\DIFadd{KeySupport}}\DIFadd{, it is important to tune
+    }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{as documented, in order to get reliable key-held
+    behaviour - including reliable responses to boot hotkeys - within OC.
+    }\item \DIFadd{After this, no further tuning is required for reliable operation.
+    However for fine tuning, proceed as follows:
+ }\end{itemize}
+
+  \DIFadd{Apple Event protocol is used for key input in OpenCore, since we have to
+  provide it for Apple's own pre-boot systems to use anyway. However when combining
+  OpenCore }\texttt{\DIFadd{KeySupport}} \DIFadd{with Apple Event key handling,
+  key repeat behaviour may show one additional slow key repeat before normal key repeat starts.
+  This is perfectly usable in practice, but in order to fine tune your key response and avoid
+  this issue, configure the value of }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}
+  \DIFadd{to be the same as the value you have already configured for }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{. (However,
+  to avoid over-fast key repeats, if you have been able to configure }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{to a value less than }\texttt{\DIFadd{5}}\DIFadd{, then you are recommended to configure }\texttt{\DIFadd{KeyInitialDelay}}
+  \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to }\texttt{\DIFadd{5}}\DIFadd{.) Configure and test this. You should find the
+  repeat response is now corrected (no double long delay) and that you have no other problems. However,
+  it is theoretically possible (not actually observed) that on some systems this procedure may
+  give you two key responses for each key press. If this happens, then to avoid it you will need
+  to increment the value of both settings by one or two. E.g. if your }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{was }\texttt{\DIFadd{7}} \DIFadd{and you configured }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}
+  \DIFadd{to }\texttt{\DIFadd{7}}\DIFadd{, then if you get double key press responses, try configuring values
+  of }\texttt{\DIFadd{8}} \DIFadd{and }\texttt{\DIFadd{8}} \DIFadd{or }\texttt{\DIFadd{9}} \DIFadd{and }\texttt{\DIFadd{9}} \DIFadd{instead. Use the lowest values
+  which work.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: When tuning keyboard behaviour, double key responses can make it impossible to
+  select some boot entries. Therefore before tuning the above, to avoid making your system
+  unbootable if you do not have easy access to another boot method, you are recommended to set
+  }\texttt{\DIFadd{Misc/Boot/Timeout}} \DIFadd{to }\texttt{\DIFadd{5}} \DIFadd{so that your normal OS will boot after a short time
+  anyway.
+}
+
+\item
+  \texttt{\DIFadd{KeySubsequentDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(acts as }\texttt{\DIFadd{5}}\DIFadd{, or 50ms)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure subsequent keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
+}
+
+  \DIFadd{See documentation of }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{for fine tuning. Even if not fine tuning,
+  this value should ideally not be set to less than the value of }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{in
+  order to avoid excess key repeats; however, in practice, the difference may not be noticeable,
+  and you probably do not need to change this value except as part of key repeat fine tuning.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: No changes to this value are ever required on systems which are not using }\texttt{\DIFadd{KeySupport}}\DIFadd{.
 }
 
 \item
@@ -6668,7 +6731,7 @@ functioning. Feature highlights:
   NVRAM variable may need to be set to \texttt{02} to enable HiDPI scaling
   in \texttt{Builtin} text renderer, FileVault 2 UEFI password interface,
   and boot screen logo. Refer to the \hyperref[nvramvarsrec]{Recommended Variables}
-  section for more details.
+  section for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
   \emph{Note}: This will fail when console handle has no GOP protocol. When
   the firmware does not provide it, it can be added with \texttt{ProvideConsoleGop}
@@ -7113,7 +7176,7 @@ functioning. Feature highlights:
   \emph{Note}: Some types of firmware may not allocate memory areas used by S3 (sleep) and S4 (hibernation)
   code unless CSM is enabled causing wake failures. After comparing the memory maps with CSM disabled
   and enabled, these areas can be found in the lower memory and can be fixed up by doing the reservation.
-  See \texttt{Sample.plist} for more details.
+  \DIFdelbegin \DIFdel{See }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \texttt{Sample.plist} \DIFdelbegin \DIFdel{for more }\DIFdelend \DIFaddbegin \DIFadd{file for }\DIFaddend details.
 
 \item
   \texttt{Comment}\\
@@ -7228,8 +7291,8 @@ However, as this may not always be accurate, the latest versions are listed belo
     (with \texttt{ACDT} suffix) without model restrictions can be found
     \href{https://archive.org/details/10.6.7-10j3250-disk-images}{here}
     (\href{https://mega.nz/folder/z5YUhYTb#gA\_IRY5KMuYpnNCg7kR3ug}{MEGA Mirror}),
-    assuming macOS~10.6 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that these are the earliest tested
+    assuming macOS~10.6 is legally owned. \DIFdelbegin \DIFdel{Read }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \texttt{DIGEST.txt} \DIFdelbegin \DIFdel{for more }\DIFdelend \DIFaddbegin \DIFadd{file
+    for }\DIFaddend details. Note that these are the earliest tested
     versions of macOS~10.6 with OpenCore.
 \end{itemize}
 
@@ -7279,8 +7342,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     as is. The original \texttt{9J3050} image can be found
     \href{https://archive.org/details/10.5.7-9-j-3050}{here}
     (\href{https://mega.nz/folder/inRBTarD#zanf7fUbviwz3WHBU5xpCg}{MEGA Mirror}),
-    assuming macOS~10.5 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that this is the earliest tested
+    assuming macOS~10.5 is legally owned. \DIFdelbegin \DIFdel{Read }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \texttt{DIGEST.txt} \DIFdelbegin \DIFdel{for more }\DIFdelend \DIFaddbegin \DIFadd{file
+    for }\DIFaddend details. Note that this is the earliest tested
     version of macOS~10.5 with OpenCore.
 \end{itemize}
 
@@ -7299,8 +7362,8 @@ hdiutil convert ReadWrite.dmg -format UDZO -o ReadOnly.dmg
     model restrictions can be found
     \href{https://archive.org/details/10.4.10-8-r-4088-acdt}{here}
     (\href{https://mega.nz/folder/D3ASzLzA\#7sjYXE2X09f6aGjol\_C7dg}{MEGA Mirror}),
-    assuming macOS~10.4 is legally owned. Read \texttt{DIGEST.txt}
-    for more details. Note that these are the earliest tested
+    assuming macOS~10.4 is legally owned. \DIFdelbegin \DIFdel{Read }\DIFdelend \DIFaddbegin \DIFadd{Refer to the }\DIFaddend \texttt{DIGEST.txt} \DIFdelbegin \DIFdel{for more }\DIFdelend \DIFaddbegin \DIFadd{file
+    for }\DIFaddend details. Note that these are the earliest tested
     versions of macOS~10.4 with OpenCore.
 \end{itemize}
 
@@ -7648,7 +7711,7 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \texttt{SetupVirtualMap}, and \texttt{SyncRuntimePermissions} there
   is no definite approach even on similar systems, so trying all their
   combinations may be required for optimal setup. Refer to individual quirk
-  descriptions in this document for more details.
+  descriptions in this document for \DIFdelbegin \DIFdel{more }\DIFdelend details.
 
 \end{enumerate}
 
