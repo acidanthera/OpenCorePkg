@@ -174,6 +174,9 @@ OcAudioGetFilePath (
         case OcVoiceOverAudioFileRestart:
           BasePath = "Restart";
           break;
+        case OcVoiceOverAudioFileDiskImage:
+          BasePath = "DiskImage";
+          break;
         default:
           BasePath = NULL;
           break;
