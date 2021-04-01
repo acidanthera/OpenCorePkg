@@ -1163,17 +1163,23 @@ InternalDetectIntelProcessorGeneration (
       case CPU_MODEL_COMETLAKE_S:
       case CPU_MODEL_COMETLAKE_U:
         CpuGeneration = OcCpuGenerationCometLake;
-        break;     
+        break;
+      case CPU_MODEL_ROCKETLAKE_S:
+        CpuGeneration = OcCpuGenerationRocketLake;
+        break;
       case CPU_MODEL_ICELAKE_Y:
       case CPU_MODEL_ICELAKE_U:
       case CPU_MODEL_ICELAKE_SP:
         CpuGeneration = OcCpuGenerationIceLake;
         break;
+      case CPU_MODEL_TIGERLAKE_U:
+        CpuGeneration = OcCpuGenerationTigerLake;
+        break;
       default:
         if (CpuInfo->Model < CPU_MODEL_PENRYN) {
           CpuGeneration = OcCpuGenerationPrePenryn;
         } else if (CpuInfo->Model >= CPU_MODEL_SANDYBRIDGE) {
-          CpuGeneration = OcCpuGenerationPostSandyBridge;         
+          CpuGeneration = OcCpuGenerationPostSandyBridge;
         }
     }
   } else {

@@ -48,7 +48,8 @@ OpenCore Changelog
 - Fixed incorrect handling of multiple processors and processor cache in SMBIOS
 - Matched default Apple boot picker cursor start position
 - Updated OpenShell `devices` command to support misaligned device names returned by some Apple firmware
-- Add '(dmg)' suffix to DMG boot options in OpenCanopy
+- Added `(dmg)` suffix to DMG boot options in OpenCanopy
+- Added identifiers for Rocket Lake and Tiger Lake CPUs
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

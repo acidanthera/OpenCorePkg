@@ -47,8 +47,10 @@ typedef enum {
   OcCpuGenerationKabyLake,
   OcCpuGenerationCoffeeLake,
   OcCpuGenerationCometLake,
+  OcCpuGenerationRocketLake,
   OcCpuGenerationCannonLake,
   OcCpuGenerationIceLake,
+  OcCpuGenerationTigerLake,
   OcCpuGenerationMaxGeneration
 } OC_CPU_GENERATION;
 
