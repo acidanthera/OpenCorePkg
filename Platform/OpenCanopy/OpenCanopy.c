@@ -1206,15 +1206,61 @@ GuiDrawLoop (
         1000000
         ));
       if (DrawContext->GuiContext->AudioPlaybackTimeout <= 0) {
-        DrawContext->GuiContext->PickerContext->PlayAudioFile (
-          DrawContext->GuiContext->PickerContext,
-          OcVoiceOverAudioFileSelected,
-          FALSE
-          );
-        DrawContext->GuiContext->PickerContext->PlayAudioEntry (
-          DrawContext->GuiContext->PickerContext,
-          DrawContext->GuiContext->BootEntry
-          );
+        switch (DrawContext->GuiContext->VoAction) {
+          case CanopyVoSelectedEntry:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
+            DrawContext->GuiContext->PickerContext->PlayAudioEntry (
+              DrawContext->GuiContext->PickerContext,
+              DrawContext->GuiContext->BootEntry
+              );
+            break;
+          }
+
+          case CanopyVoFocusPassword:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileEnterPassword,
+              TRUE
+              );
+            break;
+          }
+
+          case CanopyVoFocusShutDown:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileShutDown,
+              TRUE
+              );
+            break;
+          }
+
+          case CanopyVoFocusRestart:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileRestart,
+              TRUE
+              );
+            break;
+          }
+
+          default:
+          {
+            ASSERT (FALSE);
+            break;
+          }
+        }
+        //
+        // Avoid playing twice if we reach precisely 0.
+        //
+        DrawContext->GuiContext->AudioPlaybackTimeout = -1;
       }
     }
 

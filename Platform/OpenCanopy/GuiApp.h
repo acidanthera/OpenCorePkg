@@ -100,6 +100,13 @@ typedef enum {
   ICON_TYPE_COUNT    = 2,
 } ICON_TYPE;
 
+enum {
+  CanopyVoSelectedEntry,
+  CanopyVoFocusPassword,
+  CanopyVoFocusShutDown,
+  CanopyVoFocusRestart
+};
+
 typedef struct _BOOT_PICKER_GUI_CONTEXT {
   GUI_IMAGE                            Background;
   GUI_IMAGE                            Icons[ICON_NUM_TOTAL][ICON_TYPE_COUNT];
@@ -114,6 +121,7 @@ typedef struct _BOOT_PICKER_GUI_CONTEXT {
   BOOLEAN                              DoneIntroAnimation;
   BOOLEAN                              ReadyToBoot;
   UINT8                                Scale;
+  UINT8                                VoAction;
   INT32                                CursorOffsetX;
   INT32                                CursorOffsetY;
   INT32                                AudioPlaybackTimeout;

@@ -211,6 +211,7 @@ InternalBootPickerSelectEntry (
     // Set voice timeout to N frames from now.
     //
     DrawContext->GuiContext->AudioPlaybackTimeout = OC_VOICE_OVER_IDLE_TIMEOUT_MS;
+    DrawContext->GuiContext->VoAction = CanopyVoSelectedEntry;
     DrawContext->GuiContext->BootEntry = NewEntry->Context;
   }
 }
@@ -1057,6 +1058,9 @@ InternalBootPickerFocus (
     mBootPickerSelectorContainer.Obj.Opacity = 0;
   } else {
     mBootPickerSelectorContainer.Obj.Opacity = 0xFF;
+
+    DrawContext->GuiContext->AudioPlaybackTimeout = 0;
+    DrawContext->GuiContext->VoAction = CanopyVoSelectedEntry;
   }
 
   GuiRequestDraw (

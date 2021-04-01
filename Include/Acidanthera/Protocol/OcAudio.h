@@ -102,8 +102,10 @@ typedef enum {
   OcVoiceOverAudioFileUEFI_Shell            = 0x1047,
   OcVoiceOverAudioFileWelcome               = 0x1048,
   OcVoiceOverAudioFileWindows               = 0x1049,
+  OcVoiceOverAudioFileShutDown              = 0x104A,
+  OcVoiceOverAudioFileRestart               = 0x104B,
 
-  OcVoiceOverAudioFileMax                   = 0x104A,
+  OcVoiceOverAudioFileMax                   = 0x104C,
 } OC_VOICE_OVER_AUDIO_FILE;
 
 STATIC_ASSERT (OcVoiceOverAudioFileIndexMax - OcVoiceOverAudioFileIndexBase == 9 + 26, "Invalid index count");
