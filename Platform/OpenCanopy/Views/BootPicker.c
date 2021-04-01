@@ -1257,6 +1257,8 @@ BootPickerEntriesSet (
   BOOLEAN                     UseDiskLabel;
   BOOLEAN                     UseGenericLabel;
   BOOLEAN                     Result;
+  CHAR16                      *EntryName;
+  UINTN                       EntryNameLength;
 
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
@@ -1336,13 +1338,33 @@ BootPickerEntriesSet (
   }
 
   if (EFI_ERROR (Status)) {
+    EntryName       = Entry->Name;
+    EntryNameLength = StrLen (Entry->Name);
+    if (Entry->IsFolder) {
+      EntryName = AllocatePool (EntryNameLength * sizeof (CHAR16) + L_STR_SIZE (L" (dmg)"));
+      if (EntryName != NULL) {
+        CopyMem (EntryName, Entry->Name, EntryNameLength * sizeof (CHAR16));
+        CopyMem (&EntryName[EntryNameLength], L" (dmg)", L_STR_SIZE (L" (dmg)"));
+        EntryNameLength += L_STR_LEN (L" (dmg)");
+      } else {
+        EntryName = Entry->Name;
+      }
+    }
+
+    ASSERT (StrLen (EntryName) == EntryNameLength);
+
     Result = GuiGetLabel (
       &VolumeEntry->Label,
       &GuiContext->FontContext,
-      Entry->Name,
-      StrLen (Entry->Name),
+      EntryName,
+      EntryNameLength,
       GuiContext->LightBackground
       );
+    
+    if (EntryName != Entry->Name) {
+      FreePool (EntryName);
+    }
+
     if (!Result) {
       DEBUG ((DEBUG_WARN, "OCUI: label failed\n"));
       return EFI_UNSUPPORTED;
