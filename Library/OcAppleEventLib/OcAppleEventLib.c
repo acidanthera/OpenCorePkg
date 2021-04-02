@@ -509,33 +509,14 @@ InternalUnregisterHandlers (
   }
 }
 
-UINT32
-EFIAPI
-OcEventExSetPointerScale (
-  IN OUT OC_APPLE_EVENT_EX_PROTOCOL  *This,
-  IN     UINT32                      Scale
-  )
-{
-  UINT32 OldScale;
-
-  OldScale = mPointerScale;
-  mPointerScale = Scale;
-
-  return OldScale;
-}
-
 // mAppleEventProtocol
-STATIC OC_APPLE_EVENT_EX_PROTOCOL mAppleEventProtocol = {
-  OC_APPLE_EVENT_EX_PROTOCOL_REVISION,
-  OcEventExSetPointerScale,
-  {
-    APPLE_EVENT_PROTOCOL_REVISION,
-    EventRegisterHandler,
-    EventUnregisterHandler,
-    EventSetCursorPosition,
-    EventSetEventName,
-    EventIsCapsLockOn
-  }
+STATIC APPLE_EVENT_PROTOCOL mAppleEventProtocol = {
+  APPLE_EVENT_PROTOCOL_REVISION,
+  EventRegisterHandler,
+  EventUnregisterHandler,
+  EventSetCursorPosition,
+  EventSetEventName,
+  EventIsCapsLockOn
 };
 
 // AppleEventUnload
@@ -558,9 +539,7 @@ AppleEventUnload (
   Status = gBS->UninstallMultipleProtocolInterfaces (
     gImageHandle,
     &gAppleEventProtocolGuid,
-    (VOID *)&mAppleEventProtocol.AppleEvent,
-    &gOcAppleEventExProtocolGuid,
-    &mAppleEventProtocol
+    (VOID *) &mAppleEventProtocol
     );
 
   return Status;
@@ -582,8 +561,10 @@ APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
   IN BOOLEAN  Reinstall,
   IN BOOLEAN  CustomDelays,
-  IN UINT16   KeyInitialDelay      OPTIONAL,
-  IN UINT16   KeySubsequentDelay   OPTIONAL
+  IN UINT16   KeyInitialDelay,
+  IN UINT16   KeySubsequentDelay,
+  IN UINT16   PointerSpeedDiv,
+  IN UINT16   PointerSpeedMul
   )
 {
   EFI_STATUS           Status;
@@ -614,11 +595,11 @@ OcAppleEventInstallProtocol (
     InternalSetKeyDelays (KeyInitialDelay, KeySubsequentDelay);
   }
 
+  InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
+
   Status = gBS->InstallMultipleProtocolInterfaces (
     &gImageHandle,
     &gAppleEventProtocolGuid,
-    &mAppleEventProtocol.AppleEvent,
-    &gOcAppleEventExProtocolGuid,
     &mAppleEventProtocol,
     NULL
     );
@@ -636,5 +617,5 @@ OcAppleEventInstallProtocol (
   }
 
   DEBUG ((DEBUG_INFO, "OCAE: Installed\n"));
-  return &mAppleEventProtocol.AppleEvent;
+  return &mAppleEventProtocol;
 }

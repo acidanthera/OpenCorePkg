@@ -590,6 +590,8 @@ typedef enum {
   _(OC_STRING                   , CustomDelays       ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING) ) \
   _(UINT16                      , KeyInitialDelay    ,     , 0                                 , ()) \
   _(UINT16                      , KeySubsequentDelay ,     , 1                                 , ()) \
+  _(UINT16                      , PointerSpeedDiv    ,     , 1                                 , ()) \
+  _(UINT16                      , PointerSpeedMul    ,     , 0                                 , ())
   OC_DECLARE (OC_UEFI_APPLEINPUT)
 
 ///

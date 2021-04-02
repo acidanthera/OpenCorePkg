@@ -21,7 +21,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <IndustryStandard/AppleHid.h>
 
-#include <Protocol/OcAppleEventEx.h>
+#include <Protocol/AppleEvent.h>
 
 // EventCreateKeyStrokePollEvent
 EFI_STATUS
@@ -161,6 +161,13 @@ InternalSetKeyDelays (
   IN  UINT16          KeySubsequentDelay
   );
 
-extern UINT32 mPointerScale;
+VOID
+InternalSetPointerSpeed (
+  IN UINT16 PointerSpeedDiv,
+  IN UINT16 PointerSpeedMul
+  );
+
+extern UINT32 mPointerSpeedMul;
+extern UINT32 mPointerSpeedDiv;
 
 #endif // APPLE_EVENT_INTERNAL_H_

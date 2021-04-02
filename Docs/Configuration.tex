@@ -6209,6 +6209,25 @@ functioning. Feature highlights:
   this, proceed to set this value to one or two greater than \texttt{KeyForgetThreshold} - use
   the lowest value which works.)
 
+\item
+  \texttt{PointerSpeedDiv}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{1})\\
+  \textbf{Description}: Configure pointer speed divisor in OpenCore implementation
+  of Apple Event protocol.
+
+  Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
+  \texttt{0} is an invalid value for this option.
+
+\item
+  \texttt{PointerSpeedMul}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0})\\
+  \textbf{Description}: Configure pointer speed multiplier in OpenCore implementation
+  of Apple Event protocol.
+
+  Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
+
 \end{enumerate}
 
 \subsection{Audio Properties}\label{uefiaudioprops}

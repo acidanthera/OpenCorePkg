@@ -379,7 +379,9 @@ OcReinstallProtocols (
       OverrideAppleEvent,
       UseCustomDelays,
       Config->Uefi.AppleInput.KeyInitialDelay,
-      Config->Uefi.AppleInput.KeySubsequentDelay
+      Config->Uefi.AppleInput.KeySubsequentDelay,
+      Config->Uefi.AppleInput.PointerSpeedDiv,
+      Config->Uefi.AppleInput.PointerSpeedMul
       ) == NULL) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to install apple event protocol\n"));
     }

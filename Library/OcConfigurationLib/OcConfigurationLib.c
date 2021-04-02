@@ -716,6 +716,8 @@ mUefiAppleInputSchema[] = {
   OC_SCHEMA_STRING_IN   ("CustomDelays",            OC_GLOBAL_CONFIG,  Uefi.AppleInput.CustomDelays),
   OC_SCHEMA_INTEGER_IN  ("KeyInitialDelay",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeyInitialDelay),
   OC_SCHEMA_INTEGER_IN  ("KeySubsequentDelay",      OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeySubsequentDelay),
+  OC_SCHEMA_INTEGER_IN  ("PointerSpeedDiv",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedDiv),
+  OC_SCHEMA_INTEGER_IN  ("PointerSpeedMul",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedMul),
 };
 
 STATIC
