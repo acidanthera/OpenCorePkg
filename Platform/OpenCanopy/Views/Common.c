@@ -414,6 +414,14 @@ InternalCommonShutDownKeyEvent (
 {
   if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE
    || KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+    if (Context->PickerContext->PickerAudioAssist) {
+      Context->PickerContext->PlayAudioFile (
+        Context->PickerContext,
+        AppleVoiceOverAudioFileBeep,
+        TRUE
+        );
+    }
+
     ResetShutdown ();
   }
 }
@@ -471,6 +479,14 @@ InternalCommonRestartKeyEvent (
 {
   if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE
    || KeyEvent->OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
+    if (Context->PickerContext->PickerAudioAssist) {
+      Context->PickerContext->PlayAudioFile (
+        Context->PickerContext,
+        AppleVoiceOverAudioFileBeep,
+        TRUE
+        );
+    }
+    
     ResetWarm ();
   }
 }

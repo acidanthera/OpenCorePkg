@@ -1235,6 +1235,11 @@ GuiDrawLoop (
           {
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
               DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
               OcVoiceOverAudioFileShutDown,
               TRUE
               );
@@ -1243,6 +1248,11 @@ GuiDrawLoop (
 
           case CanopyVoFocusRestart:
           {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
             DrawContext->GuiContext->PickerContext->PlayAudioFile (
               DrawContext->GuiContext->PickerContext,
               OcVoiceOverAudioFileRestart,
