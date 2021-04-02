@@ -22,7 +22,6 @@
 
 #include "../OpenCanopy.h"
 #include "../GuiIo.h"
-#include "ProcessorBind.h"
 
 #define ABS_DOUBLE_CLICK_RADIUS  25U
 #define IS_POWER_2(x)  (((x) & ((x) - 1)) == 0 && (x) != 0)
@@ -143,6 +142,9 @@ InternalAppleEventNotification (
     if (Context->OcAppleEventEx != NULL) {
       Context->CurPos.Pos.X = (UINT32) Information->PointerPosition.Horizontal;
       Context->CurPos.Pos.Y = (UINT32) Information->PointerPosition.Vertical;
+      //
+      // Context->RawPos is unused for OcAppleEventEx.
+      //
     } else {
       NewCoord = (INT64) Context->CurPos.Pos.X + POINTER_SCALE * ((INT64) Information->PointerPosition.Horizontal - Context->RawPos.Pos.X);
       if (NewCoord < 0) {
@@ -161,6 +163,9 @@ InternalAppleEventNotification (
       } else {
         Context->CurPos.Pos.Y = (UINT32) NewCoord;
       }
+
+      Context->RawPos.Pos.X = (UINT32) Information->PointerPosition.Horizontal;
+      Context->RawPos.Pos.Y = (UINT32) Information->PointerPosition.Vertical;
     }
   }
 
