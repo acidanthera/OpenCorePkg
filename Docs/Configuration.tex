@@ -6195,11 +6195,12 @@ functioning. Feature highlights:
 \item
   \texttt{KeySubsequentDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (no delay)\\
+  \textbf{Failsafe}: \texttt{1}\\
   \textbf{Description}: Configure subsequent keyboard repeat delay in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 
   Configures the gap between key repeats. The Apple OEM default value is \texttt{5} (50ms).
+  \texttt{0} is an invalid value for this option.
 
   When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
   before normal speed key repeat starts. If so, set \texttt{KeyInitialDelay} to \texttt{0}
