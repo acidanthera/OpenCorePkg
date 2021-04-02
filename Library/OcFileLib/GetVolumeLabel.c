@@ -77,9 +77,9 @@ GetVolumeLabel (
       // terminating \0 (though they do append it). These drivers must
       // not be used, but we try not to die when debugging is off.
       //
-      if (VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0'
-        || VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16)) {
-        DEBUG ((DEBUG_ERROR, "OCFS: Found unterminated or too long volume label!"));
+      if (VolumeLabelSize > OC_MAX_VOLUME_LABEL_SIZE * sizeof (CHAR16) 
+       || VolumeInfo->VolumeLabel[VolumeLabelSize / sizeof (CHAR16) - 1] != '\0') {
+        DEBUG ((DEBUG_INFO, "OCFS: Found unterminated or too long volume label!"));
         FreePool (VolumeInfo);
         return AllocateCopyPool (sizeof (L"INVALID"), L"INVALID");
       } else {

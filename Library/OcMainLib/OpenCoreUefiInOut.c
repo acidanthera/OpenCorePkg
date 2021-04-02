@@ -134,7 +134,7 @@ OcLoadUefiInputSupport (
     if (PointerMode != OcInputPointerModeMax) {
       Status = OcAppleGenericInputPointerInit (PointerMode);
       if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_ERROR, "OC: Failed to initialize pointer\n"));
+        DEBUG ((DEBUG_INFO, "OC: Failed to initialize pointer\n"));
       } else {
         ExitBs = TRUE;
       }
