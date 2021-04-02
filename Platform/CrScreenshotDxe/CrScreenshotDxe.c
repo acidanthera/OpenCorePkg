@@ -39,6 +39,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/SimpleFileSystem.h>
 
+//
+// Keyboard protocol arrival event.
+//
+STATIC EFI_EVENT mProtocolNotification;
+
 STATIC
 EFI_STATUS
 EFIAPI
@@ -361,11 +366,10 @@ AppleEventKeyHandler (
   }
 }
 
+STATIC
 EFI_STATUS
-EFIAPI
-CrScreenshotDxeEntry (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+InstallKeyHandler (
+  VOID
   )
 {
   EFI_STATUS                         Status;
@@ -509,6 +513,61 @@ CrScreenshotDxeEntry (
     }
 
     gBS->FreePool (HandleBuffer);
+  }
+
+  return EFI_SUCCESS;
+}
+
+VOID
+EFIAPI
+InstallKeyHandlerWrapper (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  InstallKeyHandler ();
+  gBS->CloseEvent (mProtocolNotification);
+}
+
+EFI_STATUS
+EFIAPI
+CrScreenshotDxeEntry (
+  IN EFI_HANDLE         ImageHandle,
+  IN EFI_SYSTEM_TABLE   *SystemTable
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *Registration;
+
+  Status = InstallKeyHandler ();
+  if (EFI_ERROR (Status)) {
+    Status = gBS->CreateEvent (
+      EVT_NOTIFY_SIGNAL,
+      TPL_CALLBACK,
+      InstallKeyHandlerWrapper,
+      NULL,
+      &mProtocolNotification
+      );
+
+    if (!EFI_ERROR (Status)) {
+      gBS->RegisterProtocolNotify (
+        &gEfiSimpleTextInputExProtocolGuid,
+        mProtocolNotification,
+        &Registration
+        );
+
+      gBS->RegisterProtocolNotify (
+        &gAppleEventProtocolGuid,
+        mProtocolNotification,
+        &Registration
+        );
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "CRSCR: Cannot create event for keyboard protocol arrivals %r\n",
+        Status
+        ));
+    }
   }
 
   return EFI_SUCCESS;
