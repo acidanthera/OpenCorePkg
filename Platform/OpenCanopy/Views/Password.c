@@ -556,7 +556,10 @@ InternalPasswordExitLoop (
 
   if (mPasswordBox.RequestConfirm) {
     mPasswordBox.RequestConfirm = FALSE;
-    InternalQueueIncorrectPassword (DrawContext);
+
+    if (!Context->PickerContext->PickerAudioAssist) {
+      InternalQueueIncorrectPassword (DrawContext);
+    }
 
     Confirmed = InternalConfirmPassword (DrawContext, Context);
     SecureZeroMem (&mPasswordBox.PasswordInfo, sizeof (mPasswordBox.PasswordInfo));
