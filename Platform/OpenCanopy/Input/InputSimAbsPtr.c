@@ -26,7 +26,7 @@
 #define ABS_DOUBLE_CLICK_RADIUS  25U
 #define IS_POWER_2(x)  (((x) & ((x) - 1)) == 0 && (x) != 0)
 
-#define POINTER_SCALE  2U
+#define POINTER_SCALE  1U
 
 struct GUI_POINTER_CONTEXT_ {
   OC_APPLE_EVENT_EX_PROTOCOL    *OcAppleEventEx;
