@@ -50,8 +50,8 @@ OpenCore Changelog
 - Updated OpenShell `devices` command to support misaligned device names returned by some Apple firmware
 - Added `(dmg)` suffix to DMG boot options in OpenCanopy
 - Added identifiers for Rocket Lake and Tiger Lake CPUs
-- Added VoiceOver 'disk image' indication
-- Fixed VoiceOver indications played twice in rare cases
+- Added PickerAudioAssist 'disk image' indication
+- Fixed PickerAudioAssist indications played twice in rare cases
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
