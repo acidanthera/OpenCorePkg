@@ -7,7 +7,7 @@
 
 #include <Uefi.h>
 
-#include <Protocol/AppleEvent.h>
+#include <Protocol/OcAppleEventEx.h>
 #include <Protocol/AbsolutePointer.h>
 
 #include <Library/BaseLib.h>
@@ -22,11 +22,15 @@
 
 #include "../OpenCanopy.h"
 #include "../GuiIo.h"
+#include "ProcessorBind.h"
 
 #define ABS_DOUBLE_CLICK_RADIUS  25U
 #define IS_POWER_2(x)  (((x) & ((x) - 1)) == 0 && (x) != 0)
 
+#define POINTER_SCALE  2U
+
 struct GUI_POINTER_CONTEXT_ {
+  OC_APPLE_EVENT_EX_PROTOCOL    *OcAppleEventEx;
   APPLE_EVENT_PROTOCOL          *AppleEvent;
   EFI_ABSOLUTE_POINTER_PROTOCOL *AbsPointer;
   APPLE_EVENT_HANDLE            AppleEventHandle;
@@ -36,6 +40,7 @@ struct GUI_POINTER_CONTEXT_ {
   GUI_PTR_POSITION              RawPos;
   GUI_PTR_POSITION              CurPos;
   GUI_PTR_POSITION              AbsLastDownPos;
+  UINT32                        OldEventExScale;
   BOOLEAN                       AbsPrimaryDown;
   BOOLEAN                       AbsDoubleClick;
   UINT8                         UiScale;
@@ -116,8 +121,6 @@ InternalAppleEventNotification (
 {
   APPLE_POINTER_EVENT_TYPE  EventType;
   GUI_POINTER_CONTEXT       *Context;
-  GUI_PTR_POSITION          NewPos;
-  GUI_PTR_POSITION          NewRaw;
   INT64                     NewCoord;
 
   Context = NotifyContext;
@@ -137,30 +140,28 @@ InternalAppleEventNotification (
     // Use a factor of 2 for pointer acceleration.
     //
 
-    NewRaw.Pos.X = (UINT32) Information->PointerPosition.Horizontal;
-
-    NewCoord = (INT64) Context->CurPos.Pos.X + 2 * ((INT64) NewRaw.Pos.X - Context->RawPos.Pos.X);
-    if (NewCoord < 0) {
-      NewPos.Pos.X = 0;
-    } else if (NewCoord > Context->MaxX) {
-      NewPos.Pos.X = Context->MaxX;
+    if (Context->OcAppleEventEx != NULL) {
+      Context->CurPos.Pos.X = (UINT32) Information->PointerPosition.Horizontal;
+      Context->CurPos.Pos.Y = (UINT32) Information->PointerPosition.Vertical;
     } else {
-      NewPos.Pos.X = (UINT32) NewCoord;
+      NewCoord = (INT64) Context->CurPos.Pos.X + POINTER_SCALE * ((INT64) Information->PointerPosition.Horizontal - Context->RawPos.Pos.X);
+      if (NewCoord < 0) {
+        Context->CurPos.Pos.X = 0;
+      } else if (NewCoord > Context->MaxX) {
+        Context->CurPos.Pos.X = Context->MaxX;
+      } else {
+        Context->CurPos.Pos.X = (UINT32) NewCoord;
+      }
+
+      NewCoord = (INT64) Context->CurPos.Pos.Y + POINTER_SCALE * ((INT64) Information->PointerPosition.Vertical - Context->RawPos.Pos.Y);
+      if (NewCoord < 0) {
+        Context->CurPos.Pos.Y = 0;
+      } else if (NewCoord > Context->MaxY) {
+        Context->CurPos.Pos.Y = Context->MaxY;
+      } else {
+        Context->CurPos.Pos.Y = (UINT32) NewCoord;
+      }
     }
-
-    NewRaw.Pos.Y = (UINT32) Information->PointerPosition.Vertical;
-
-    NewCoord = (INT64) Context->CurPos.Pos.Y + 2 * ((INT64) NewRaw.Pos.Y - Context->RawPos.Pos.Y);
-    if (NewCoord < 0) {
-      NewPos.Pos.Y = 0;
-    } else if (NewCoord > Context->MaxY) {
-      NewPos.Pos.Y = Context->MaxY;
-    } else {
-      NewPos.Pos.Y = (UINT32) NewCoord;
-    }
-
-    Context->CurPos.Uint64 = NewPos.Uint64;
-    Context->RawPos.Uint64 = NewRaw.Uint64;
   }
 
   if ((EventType & APPLE_EVENT_TYPE_LEFT_BUTTON) != 0) {
@@ -387,12 +388,37 @@ GuiPointerConstruct (
   Context.RawPos.Pos.Y = DefaultY;
   Context.UiScale      = UiScale;
 
-  Status = OcHandleProtocolFallback (
-    gST->ConsoleInHandle,
-    &gAppleEventProtocolGuid,
-    (VOID **)&Context.AppleEvent
+  Context.OcAppleEventEx = OcGetProtocol (
+    &gOcAppleEventExProtocolGuid,
+    DEBUG_INFO,
+    "GuiPointerConstruct",
+    "OcAppleEventEx"
     );
-  if (!EFI_ERROR (Status)) {
+  if (Context.OcAppleEventEx != NULL) {
+    Context.AppleEvent = &Context.OcAppleEventEx->AppleEvent;
+    if (Context.OcAppleEventEx->Revision != OC_APPLE_EVENT_EX_PROTOCOL_REVISION) {
+      DEBUG ((
+        DEBUG_WARN,
+        "OCUI: OcAppleEventEx %u is unsupported\n",
+        Context.OcAppleEventEx->Revision
+        ));
+    }
+                              DEBUG ((
+                                  DEBUG_WARN,
+                                  "OCUI: Found OcAppleEventEx %u\n",
+                                  Context.OcAppleEventEx->Revision
+                                  ));
+  } else {
+    Context.AppleEvent = OcGetProtocol (
+      &gAppleEventProtocolGuid,
+      DEBUG_WARN,
+      "GuiPointerConstruct",
+      "AppleEvent"
+      );
+  }
+
+  Status = EFI_UNSUPPORTED;
+  if (Context.AppleEvent != NULL) {
     if (Context.AppleEvent->Revision >= APPLE_EVENT_PROTOCOL_REVISION) {
       Dimension.Horizontal = (INT32) DefaultX;
       Dimension.Vertical   = (INT32) DefaultY;
@@ -409,8 +435,13 @@ GuiPointerConstruct (
         &Context.AppleEventHandle,
         &Context
         );
-    } else {
-      Status = EFI_UNSUPPORTED;
+
+      if (Context.OcAppleEventEx != NULL) {
+        Context.OldEventExScale = Context.OcAppleEventEx->SetPointerScale (
+          Context.OcAppleEventEx,
+          POINTER_SCALE
+          );
+      }
     }
 
     if (EFI_ERROR (Status)) {
@@ -457,6 +488,13 @@ GuiPointerDestruct (
   ASSERT (Context->AppleEvent != NULL);
 
   Context->AppleEvent->UnregisterHandler (Context->AppleEventHandle);
+
+  if (Context->OcAppleEventEx != NULL) {
+    Context->OcAppleEventEx->SetPointerScale (
+      Context->OcAppleEventEx,
+      Context->OldEventExScale
+      );
+  }
 
   if (Context->AbsPollEvent != NULL) {
     EventLibCancelEvent (Context->AbsPollEvent);

@@ -52,6 +52,7 @@ OpenCore Changelog
 - Added identifiers for Rocket Lake and Tiger Lake CPUs
 - Added PickerAudioAssist 'disk image' indication
 - Fixed PickerAudioAssist indications played twice in rare cases
+- Improved OpenCanopy pointer acceleration
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
