@@ -1310,9 +1310,9 @@
 			<key>AppleEvent</key>
 			<string>Builtin</string>
 			<key>CustomDelays</key>
-			<true/>
+			<string>Auto</string>
 			<key>KeyInitialDelay</key>
-			<integer>50</integer>
+			<integer>0</integer>
 			<key>KeySubsequentDelay</key>
 			<integer>5</integer>
 		</dict>

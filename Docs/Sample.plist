@@ -1111,13 +1111,13 @@
 		<key>AppleInput</key>
 		<dict>
 			<key>AppleEvent</key>
-			<string>Auto</string>
+			<string>Builtin</string>
 			<key>CustomDelays</key>
-			<false/>
+			<string>Auto</string>
 			<key>KeyInitialDelay</key>
 			<integer>0</integer>
 			<key>KeySubsequentDelay</key>
-			<integer>0</integer>
+			<integer>5</integer>
 		</dict>
 		<key>Audio</key>
 		<dict>

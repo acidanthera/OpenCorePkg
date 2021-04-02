@@ -6164,12 +6164,16 @@ functioning. Feature highlights:
 
 \item
   \texttt{CustomDelays}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Enable custom key repeat delays.
 
-  If \texttt{true} the values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
-  If \texttt{false} Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+  \begin{itemize}
+  \tightlist
+  \item If \texttt{Auto} is treated as \texttt{Enabled} when \texttt{KeySupport} is \texttt{true} and \texttt{Disabled} otherwise.
+  \item If \texttt{Enabled} the values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
+  \item If \texttt{Disabled} Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+  \end{itemize}
 
 \item
   \texttt{KeyInitialDelay}\\

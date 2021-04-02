@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Wed Mar 31 15:08:27 2021
+%DIF ADD ../Configuration.tex        Fri Apr  2 22:11:27 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6286,8 +6286,90 @@ functioning. Feature highlights:
 
 \end{enumerate}
 
+\DIFaddbegin \subsection{\DIFadd{AppleInput Properties}}\label{uefiappleinputprops}
 
-\subsection{Audio Properties}\label{uefiaudioprops}
+\begin{enumerate}
+
+  \item
+  \texttt{\DIFadd{AppleEvent}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Determine whether OC builtin or OEM Apple Event protocol is used.
+}
+
+  \DIFadd{This option determines whether Apple's OEM Apple Event protocol is used (where available), or
+  whether OpenCore's reversed engineered and updated re-implementation is used. In general
+  OpenCore's re-implementation should be preferred, since it contains updates such as noticeably
+  improved fine mouse cursor movement and configurable key repeat delays.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{Auto}} \DIFadd{--- Performs automatic choice of implementation. Because of optimisations used to achieve
+  fast boot times, this actually means that the OpenCore re-implementation will be found and used
+  except in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
+  Apple's boot picker (where present).
+  }\item \texttt{\DIFadd{Builtin}} \DIFadd{--- Use OpenCore's updated re-implementation of the Apple Event protocol. Recommended.
+  }\item \texttt{\DIFadd{OEM}} \DIFadd{--- Assume Apple's protocol will be available at driver connection. This results in Apple's
+  implementation being reliably used on Apple systems. It results in no keyboard or mouse support otherwise.
+  }\end{itemize}
+
+\item
+  \texttt{\DIFadd{CustomDelays}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable custom key repeat delays.
+}
+
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{If }\texttt{\DIFadd{Auto}} \DIFadd{is treated as }\texttt{\DIFadd{Enabled}} \DIFadd{when }\texttt{\DIFadd{KeySupport}} \DIFadd{is }\texttt{\DIFadd{true}} \DIFadd{and }\texttt{\DIFadd{Disabled}} \DIFadd{otherwise.
+  }\item \DIFadd{If }\texttt{\DIFadd{Enabled}} \DIFadd{the values }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{are used.
+  }\item \DIFadd{If }\texttt{\DIFadd{Disabled}} \DIFadd{Apple default values of 500ms (}\texttt{\DIFadd{50}}\DIFadd{) and 50ms (}\texttt{\DIFadd{5}}\DIFadd{) are used.
+  }\end{itemize}
+
+\item
+  \texttt{\DIFadd{KeyInitialDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(no initial delay, immediate repeat)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure initial keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
+}
+
+  \DIFadd{When not using }\texttt{\DIFadd{KeySupport}}\DIFadd{, this option will configure the initial delay before
+  key repeat as expected. The Apple OEM default value is }\texttt{\DIFadd{50}} \DIFadd{(500ms).
+}
+
+  \DIFadd{When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
+  before normal speed key repeat starts. If so, your initial key repeat delay is being
+  driven by your BIOS firmware and cannot be overriden by OC. To avoid this minor undesired
+  effect, set }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}}\DIFadd{. If doing this, to avoid multiple
+  reponses to single key presses, you should set }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to at least
+  the value of your }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{setting.
+}
+
+\item
+  \texttt{\DIFadd{KeySubsequentDelay}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(no delay)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure subsequent keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
+}
+
+  \DIFadd{Configures the gap between key repeats. The Apple OEM default value is }\texttt{\DIFadd{5}} \DIFadd{(50ms).
+}
+
+  \DIFadd{When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
+  before normal speed key repeat starts. If so, set }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}}
+  \DIFadd{and set this option to at least the value of your }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{setting. (In
+  the unlikely event that you still get frequent, or occasional, double key responses after doing
+  this, proceed to set this value to one or two greater than }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{- use
+  the lowest value which works.)
+}
+
+\end{enumerate}
+
+\DIFaddend \subsection{Audio Properties}\label{uefiaudioprops}
 
 \begin{enumerate}
 
@@ -6521,77 +6603,7 @@ functioning. Feature highlights:
   the particular specified protocol. This may change in the future versions.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{KeyInitialDelay}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(acts as }\texttt{\DIFadd{50}}\DIFadd{, or 500ms)}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure initial keyboard repeat delay in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
-}
-
-  \DIFadd{In order to fine tune keyboard behaviour three values are relavent:
-  }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{, }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}\DIFadd{.
-}
-
-  \DIFadd{The tuning procedure is as follows:
-}
-
-  \begin{itemize}
-    \tightlist
-    \item \DIFadd{On systems which are not using }\texttt{\DIFadd{KeySupport}}\DIFadd{, no tuning
-    is needed.
-    }\item \DIFadd{On systems which are using }\texttt{\DIFadd{KeySupport}}\DIFadd{, it is important to tune
-    }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{as documented, in order to get reliable key-held
-    behaviour - including reliable responses to boot hotkeys - within OC.
-    }\item \DIFadd{After this, no further tuning is required for reliable operation.
-    However for fine tuning, proceed as follows:
- }\end{itemize}
-
-  \DIFadd{Apple Event protocol is used for key input in OpenCore, since we have to
-  provide it for Apple's own pre-boot systems to use anyway. However when combining
-  OpenCore }\texttt{\DIFadd{KeySupport}} \DIFadd{with Apple Event key handling,
-  key repeat behaviour may show one additional slow key repeat before normal key repeat starts.
-  This is perfectly usable in practice, but in order to fine tune your key response and avoid
-  this issue, configure the value of }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}
-  \DIFadd{to be the same as the value you have already configured for }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{. (However,
-  to avoid over-fast key repeats, if you have been able to configure }\texttt{\DIFadd{KeyForgetThreshold}}
-  \DIFadd{to a value less than }\texttt{\DIFadd{5}}\DIFadd{, then you are recommended to configure }\texttt{\DIFadd{KeyInitialDelay}}
-  \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to }\texttt{\DIFadd{5}}\DIFadd{.) Configure and test this. You should find the
-  repeat response is now corrected (no double long delay) and that you have no other problems. However,
-  it is theoretically possible (not actually observed) that on some systems this procedure may
-  give you two key responses for each key press. If this happens, then to avoid it you will need
-  to increment the value of both settings by one or two. E.g. if your }\texttt{\DIFadd{KeyForgetThreshold}}
-  \DIFadd{was }\texttt{\DIFadd{7}} \DIFadd{and you configured }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}}
-  \DIFadd{to }\texttt{\DIFadd{7}}\DIFadd{, then if you get double key press responses, try configuring values
-  of }\texttt{\DIFadd{8}} \DIFadd{and }\texttt{\DIFadd{8}} \DIFadd{or }\texttt{\DIFadd{9}} \DIFadd{and }\texttt{\DIFadd{9}} \DIFadd{instead. Use the lowest values
-  which work.
-}
-
-  \emph{\DIFadd{Note}}\DIFadd{: When tuning keyboard behaviour, double key responses can make it impossible to
-  select some boot entries. Therefore before tuning the above, to avoid making your system
-  unbootable if you do not have easy access to another boot method, you are recommended to set
-  }\texttt{\DIFadd{Misc/Boot/Timeout}} \DIFadd{to }\texttt{\DIFadd{5}} \DIFadd{so that your normal OS will boot after a short time
-  anyway.
-}
-
-\item
-  \texttt{\DIFadd{KeySubsequentDelay}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}} \DIFadd{(acts as }\texttt{\DIFadd{5}}\DIFadd{, or 50ms)}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure subsequent keyboard repeat delay in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
-}
-
-  \DIFadd{See documentation of }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{for fine tuning. Even if not fine tuning,
-  this value should ideally not be set to less than the value of }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{in
-  order to avoid excess key repeats; however, in practice, the difference may not be noticeable,
-  and you probably do not need to change this value except as part of key repeat fine tuning.
-}
-
-  \emph{\DIFadd{Note}}\DIFadd{: No changes to this value are ever required on systems which are not using }\texttt{\DIFadd{KeySupport}}\DIFadd{.
-}
-
-\item
-  \DIFaddend \texttt{KeySwap}\\
+  \texttt{KeySwap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Swap \texttt{Command} and \texttt{Option} keys during submission.

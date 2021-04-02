@@ -16,6 +16,7 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 
+#include <Library/BaseLib.h>
 #include <Library/OcConsoleLib.h>
 
 /**
@@ -151,6 +152,7 @@ CheckUEFIAppleInput (
   UINT32          ErrorCount;
   OC_UEFI_CONFIG  *UserUefi;
   CONST CHAR8     *AppleEvent;
+  CONST CHAR8     *CustomDelays;
 
   ErrorCount      = 0;
   UserUefi        = &Config->Uefi;
@@ -162,6 +164,14 @@ CheckUEFIAppleInput (
     && AsciiStrCmp (AppleEvent, "Builtin") != 0
     && AsciiStrCmp (AppleEvent, "OEM") != 0) {
     DEBUG ((DEBUG_WARN, "UEFI->AppleInput->AppleEvent is illegal (Can only be Auto, Builtin, OEM)!\n"));
+    ++ErrorCount;
+  }
+
+  CustomDelays = OC_BLOB_GET (&UserUefi->AppleInput.CustomDelays);
+  if (AsciiStrCmp (CustomDelays, "Auto") != 0
+    && AsciiStrCmp (CustomDelays, "Enabled") != 0
+    && AsciiStrCmp (CustomDelays, "Disabled") != 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->AppleInput->CustomDelays is illegal (Can only be Auto, Enabled, Disabled)!\n"));
     ++ErrorCount;
   }
 
