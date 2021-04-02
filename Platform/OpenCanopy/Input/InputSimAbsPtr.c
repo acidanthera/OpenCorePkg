@@ -146,7 +146,7 @@ InternalAppleEventNotification (
       // Context->RawPos is unused for OcAppleEventEx.
       //
     } else {
-      NewCoord = (INT64) Context->CurPos.Pos.X + POINTER_SCALE * ((INT64) Information->PointerPosition.Horizontal - Context->RawPos.Pos.X);
+      NewCoord = (INT64) Context->CurPos.Pos.X + POINTER_SCALE * Context->UiScale * ((INT64) Information->PointerPosition.Horizontal - Context->RawPos.Pos.X);
       if (NewCoord < 0) {
         Context->CurPos.Pos.X = 0;
       } else if (NewCoord > Context->MaxX) {
@@ -155,7 +155,7 @@ InternalAppleEventNotification (
         Context->CurPos.Pos.X = (UINT32) NewCoord;
       }
 
-      NewCoord = (INT64) Context->CurPos.Pos.Y + POINTER_SCALE * ((INT64) Information->PointerPosition.Vertical - Context->RawPos.Pos.Y);
+      NewCoord = (INT64) Context->CurPos.Pos.Y + POINTER_SCALE * Context->UiScale * ((INT64) Information->PointerPosition.Vertical - Context->RawPos.Pos.Y);
       if (NewCoord < 0) {
         Context->CurPos.Pos.Y = 0;
       } else if (NewCoord > Context->MaxY) {
@@ -439,7 +439,7 @@ GuiPointerConstruct (
       if (Context.OcAppleEventEx != NULL) {
         Context.OldEventExScale = Context.OcAppleEventEx->SetPointerScale (
           Context.OcAppleEventEx,
-          POINTER_SCALE
+          POINTER_SCALE * Context.UiScale
           );
       }
     }
