@@ -403,11 +403,6 @@ GuiPointerConstruct (
         Context.OcAppleEventEx->Revision
         ));
     }
-                              DEBUG ((
-                                  DEBUG_WARN,
-                                  "OCUI: Found OcAppleEventEx %u\n",
-                                  Context.OcAppleEventEx->Revision
-                                  ));
   } else {
     Context.AppleEvent = OcGetProtocol (
       &gAppleEventProtocolGuid,
