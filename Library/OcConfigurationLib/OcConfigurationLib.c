@@ -73,6 +73,7 @@ OC_STRUCTORS       (OC_PLATFORM_CONFIG, ())
 
 OC_ARRAY_STRUCTORS (OC_UEFI_DRIVER_ARRAY)
 OC_STRUCTORS       (OC_UEFI_APFS, ())
+OC_STRUCTORS       (OC_UEFI_APPLEINPUT, ())
 OC_STRUCTORS       (OC_UEFI_AUDIO, ())
 OC_STRUCTORS       (OC_UEFI_INPUT, ())
 OC_STRUCTORS       (OC_UEFI_OUTPUT, ())
@@ -681,7 +682,6 @@ mUefiProtocolOverridesSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleAudio",              OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleAudio),
   OC_SCHEMA_BOOLEAN_IN ("AppleBootPolicy",         OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleBootPolicy),
   OC_SCHEMA_BOOLEAN_IN ("AppleDebugLog",           OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleDebugLog),
-  OC_SCHEMA_BOOLEAN_IN ("AppleEvent",              OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleEvent),
   OC_SCHEMA_BOOLEAN_IN ("AppleFramebufferInfo",    OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleFramebufferInfo),
   OC_SCHEMA_BOOLEAN_IN ("AppleImageConversion",    OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleImageConversion),
   OC_SCHEMA_BOOLEAN_IN ("AppleImg4Verification",   OC_GLOBAL_CONFIG, Uefi.ProtocolOverrides.AppleImg4Verification),
@@ -711,6 +711,15 @@ mUefiApfsSchema[] = {
 
 STATIC
 OC_SCHEMA
+mUefiAppleInputSchema[] = {
+  OC_SCHEMA_STRING_IN   ("AppleEvent",              OC_GLOBAL_CONFIG,  Uefi.AppleInput.AppleEvent),
+  OC_SCHEMA_BOOLEAN_IN  ("CustomDelays",            OC_GLOBAL_CONFIG,  Uefi.AppleInput.CustomDelays),
+  OC_SCHEMA_INTEGER_IN  ("KeyInitialDelay",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeyInitialDelay),
+  OC_SCHEMA_INTEGER_IN  ("KeySubsequentDelay",      OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeySubsequentDelay),
+};
+
+STATIC
+OC_SCHEMA
 mUefiAudioSchema[] = {
   OC_SCHEMA_INTEGER_IN ("AudioCodec",         OC_GLOBAL_CONFIG, Uefi.Audio.AudioCodec),
   OC_SCHEMA_STRING_IN  ("AudioDevice",        OC_GLOBAL_CONFIG, Uefi.Audio.AudioDevice),
@@ -728,8 +737,6 @@ OC_SCHEMA
 mUefiInputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("KeyFiltering",       OC_GLOBAL_CONFIG, Uefi.Input.KeyFiltering),
   OC_SCHEMA_INTEGER_IN ("KeyForgetThreshold", OC_GLOBAL_CONFIG, Uefi.Input.KeyForgetThreshold),
-  OC_SCHEMA_INTEGER_IN ("KeyInitialDelay",    OC_GLOBAL_CONFIG, Uefi.Input.KeyInitialDelay),
-  OC_SCHEMA_INTEGER_IN ("KeySubsequentDelay", OC_GLOBAL_CONFIG, Uefi.Input.KeySubsequentDelay),
   OC_SCHEMA_BOOLEAN_IN ("KeySupport",         OC_GLOBAL_CONFIG, Uefi.Input.KeySupport),
   OC_SCHEMA_STRING_IN  ("KeySupportMode",     OC_GLOBAL_CONFIG, Uefi.Input.KeySupportMode),
   OC_SCHEMA_BOOLEAN_IN ("KeySwap",            OC_GLOBAL_CONFIG, Uefi.Input.KeySwap),
@@ -774,6 +781,7 @@ STATIC
 OC_SCHEMA
 mUefiConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("APFS",              mUefiApfsSchema),
+  OC_SCHEMA_DICT       ("AppleInput",        mUefiAppleInputSchema),
   OC_SCHEMA_DICT       ("Audio",             mUefiAudioSchema),
   OC_SCHEMA_BOOLEAN_IN ("ConnectDrivers",    OC_GLOBAL_CONFIG, Uefi.ConnectDrivers),
   OC_SCHEMA_ARRAY_IN   ("Drivers",           OC_GLOBAL_CONFIG, Uefi.Drivers, &mUefiDriversSchema),

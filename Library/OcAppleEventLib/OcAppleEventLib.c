@@ -570,16 +570,18 @@ AppleEventUnload (
   Install and initialise Apple Event protocol.
 
   @param[in] Reinstall          Overwrite installed protocol.
+  @param[in] CustomDelays       If true, use key delays specified.
+                                If false, use Apple OEM default key delay values.
   @param[in] KeyInitialDelay    Key repeat initial delay in 10ms units.
-                                If less than or equal to 0 then use 50.
   @param[in] KeySubsequentDelay Key repeat subsequent delay in 10ms units.
-                                If less than or equal to 0 then use 5.
+                                If zero, warn and use 1.
 
   @retval installed or located protocol or NULL.
 **/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
   IN BOOLEAN  Reinstall,
+  IN BOOLEAN  CustomDelays,
   IN UINT16   KeyInitialDelay      OPTIONAL,
   IN UINT16   KeySubsequentDelay   OPTIONAL
   )
@@ -608,7 +610,9 @@ OcAppleEventInstallProtocol (
     }
   }
 
-  InternalSetKeyDelays (KeyInitialDelay, KeySubsequentDelay);
+  if (CustomDelays) {
+    InternalSetKeyDelays (KeyInitialDelay, KeySubsequentDelay);
+  }
 
   Status = gBS->InstallMultipleProtocolInterfaces (
     &gImageHandle,

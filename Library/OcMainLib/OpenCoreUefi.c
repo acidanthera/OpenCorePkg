@@ -297,6 +297,10 @@ OcReinstallProtocols (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
+  CONST CHAR8   *AppleEventMode;
+  BOOLEAN       InstallAppleEvent;
+  BOOLEAN       OverrideAppleEvent;
+
   if (OcAudioInstallProtocols (Config->Uefi.ProtocolOverrides.AppleAudio) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
@@ -341,12 +345,31 @@ OcReinstallProtocols (
     DEBUG ((DEBUG_ERROR, "OC: Failed to install key map protocols\n"));
   }
 
-  if (OcAppleEventInstallProtocol (
-    Config->Uefi.ProtocolOverrides.AppleEvent,
-    Config->Uefi.Input.KeyInitialDelay,
-    Config->Uefi.Input.KeySubsequentDelay
-    ) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install key event protocol\n"));
+  InstallAppleEvent   = TRUE;
+  OverrideAppleEvent  = FALSE;
+
+  AppleEventMode = OC_BLOB_GET (&Config->Uefi.AppleInput.AppleEvent);
+
+  if (AsciiStrCmp (AppleEventMode, "Auto") == 0) {
+  } else if (AsciiStrCmp (AppleEventMode, "OEM") == 0) {
+    InstallAppleEvent = FALSE;
+  } else if (AsciiStrCmp (AppleEventMode, "Builtin") == 0) {
+    OverrideAppleEvent = TRUE;
+  } else {
+    DEBUG ((DEBUG_WARN, "OC: Invalid AppleInput AppleEvent setting %a, using Auto\n", AppleEventMode));
+  }
+
+  if (InstallAppleEvent) {
+    if (OcAppleEventInstallProtocol (
+      OverrideAppleEvent,
+      Config->Uefi.AppleInput.CustomDelays,
+      Config->Uefi.AppleInput.KeyInitialDelay,
+      Config->Uefi.AppleInput.KeySubsequentDelay
+      ) == NULL) {
+      DEBUG ((DEBUG_ERROR, "OC: Failed to install apple event protocol\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: Allowing OEM apple event protocol to connect\n"));
   }
 
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {

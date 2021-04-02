@@ -144,6 +144,32 @@ CheckUEFIAPFS (
 
 STATIC
 UINT32
+CheckUEFIAppleInput (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32          ErrorCount;
+  OC_UEFI_CONFIG  *UserUefi;
+  CONST CHAR8     *AppleEvent;
+
+  ErrorCount      = 0;
+  UserUefi        = &Config->Uefi;
+
+  ErrorCount      = 0;
+
+  AppleEvent = OC_BLOB_GET (&UserUefi->AppleInput.AppleEvent);
+  if (AsciiStrCmp (AppleEvent, "Auto") != 0
+    && AsciiStrCmp (AppleEvent, "Builtin") != 0
+    && AsciiStrCmp (AppleEvent, "OEM") != 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->AppleInput->AppleEvent is illegal (Can only be Auto, Builtin, OEM)!\n"));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
+}
+
+STATIC
+UINT32
 CheckUEFIAudio (
   IN  OC_GLOBAL_CONFIG  *Config
   )
@@ -532,6 +558,7 @@ CheckUEFI (
   UINTN                Index;
   STATIC CONFIG_CHECK  UEFICheckers[] = {
     &CheckUEFIAPFS,
+    &CheckUEFIAppleInput,
     &CheckUEFIAudio,
     &CheckUEFIDrivers,
     &CheckUEFIInput,

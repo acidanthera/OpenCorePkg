@@ -66,7 +66,9 @@ STATIC KEY_STROKE_INFORMATION mKeyStrokeInfo[10];
 // mCLockChanged
 STATIC BOOLEAN mCLockChanged = FALSE;
 
-// mKeyInitialDelay, mKeySubsequentDelay
+// mKeyInitialDelay
+// mKeySubsequentDelay
+// Apple implementation default values
 STATIC UINTN mKeyInitialDelay = 50;
 STATIC UINTN mKeySubsequentDelay = 5;
 
@@ -80,13 +82,19 @@ InternalSetKeyDelays (
   IN  UINT16          KeySubsequentDelay
   )
 {
-  if (KeyInitialDelay != 0) {
-    mKeyInitialDelay = KeyInitialDelay;
-  }
+  //
+  // Zero is meaningful
+  //
+  mKeyInitialDelay    = KeyInitialDelay;
 
-  if (KeySubsequentDelay != 0) {
-    mKeySubsequentDelay = KeySubsequentDelay;
+  //
+  // Zero is meaningless (also div by zero expception): warn and use 1
+  //
+  if (KeySubsequentDelay == 0) {
+    KeySubsequentDelay = 1;
+    DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
   }
+  mKeySubsequentDelay = KeySubsequentDelay;
   
   DEBUG ((DEBUG_INFO, "OCAE: Using %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
 }

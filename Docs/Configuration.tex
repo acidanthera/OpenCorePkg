@@ -6136,6 +6136,75 @@ functioning. Feature highlights:
 
 \end{enumerate}
 
+\subsection{AppleInput Properties}\label{uefiappleinputprops}
+
+\begin{enumerate}
+
+  \item
+  \texttt{AppleEvent}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Determine whether OC builtin or OEM Apple Event protocol is used.
+
+  This option determines whether Apple's OEM Apple Event protocol is used (where available), or
+  whether OpenCore's reversed engineered and updated re-implementation is used. In general
+  OpenCore's re-implementation should be preferred, since it contains updates such as noticeably
+  improved fine mouse cursor movement and configurable key repeat delays.
+
+  \begin{itemize}
+  \tightlist
+  \item \texttt{Auto} --- Performs automatic choice of implementation. Because of optimisations used to achieve
+  fast boot times, this actually means that the OpenCore re-implementation will be found and used
+  except in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
+  Apple's boot picker (where present).
+  \item \texttt{Builtin} --- Use OpenCore's updated re-implementation of the Apple Event protocol. Recommended.
+  \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. This results in Apple's
+  implementation being reliably used on Apple systems. It results in no keyboard or mouse support otherwise.
+  \end{itemize}
+
+\item
+  \texttt{CustomDelays}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable custom key repeat delays.
+
+  If \texttt{true} the values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
+  If \texttt{false} Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+
+\item
+  \texttt{KeyInitialDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0} (no initial delay, immediate repeat)\\
+  \textbf{Description}: Configure initial keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
+
+  When not using \texttt{KeySupport}, this option will configure the initial delay before
+  key repeat as expected. The Apple OEM default value is \texttt{50} (500ms).
+
+  When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
+  before normal speed key repeat starts. If so, your initial key repeat delay is being
+  driven by your BIOS firmware and cannot be overriden by OC. To avoid this minor undesired
+  effect, set \texttt{KeyInitialDelay} to \texttt{0}. If doing this, to avoid multiple
+  reponses to single key presses, you should set \texttt{KeySubsequentDelay} to at least
+  the value of your \texttt{KeyForgetThreshold} setting.
+
+\item
+  \texttt{KeySubsequentDelay}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0} (no delay)\\
+  \textbf{Description}: Configure subsequent keyboard repeat delay in OpenCore implementation
+  of Apple Event protocol, in units of 10ms.
+
+  Configures the gap between key repeats. The Apple OEM default value is \texttt{5} (50ms).
+
+  When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
+  before normal speed key repeat starts. If so, set \texttt{KeyInitialDelay} to \texttt{0}
+  and set this option to at least the value of your \texttt{KeyForgetThreshold} setting. (In
+  the unlikely event that you still get frequent, or occasional, double key responses after doing
+  this, proceed to set this value to one or two greater than \texttt{KeyForgetThreshold} - use
+  the lowest value which works.)
+
+\end{enumerate}
 
 \subsection{Audio Properties}\label{uefiaudioprops}
 
@@ -6357,68 +6426,6 @@ functioning. Feature highlights:
 
   \emph{Note}: Currently \texttt{V1}, \texttt{V2}, and \texttt{AMI} unlike \texttt{Auto} only do filtering of
   the particular specified protocol. This may change in the future versions.
-
-\item
-  \texttt{KeyInitialDelay}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (acts as \texttt{50}, or 500ms)\\
-  \textbf{Description}: Configure initial keyboard repeat delay in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
-
-  In order to fine tune keyboard behaviour three values are relavent:
-  \texttt{KeyForgetThreshold}, \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay}.
-
-  The tuning procedure is as follows:
-
-  \begin{itemize}
-    \tightlist
-    \item On systems which are not using \texttt{KeySupport}, no tuning
-    is needed.
-    \item On systems which are using \texttt{KeySupport}, it is important to tune
-    \texttt{KeyForgetThreshold} as documented, in order to get reliable key-held
-    behaviour - including reliable responses to boot hotkeys - within OC.
-    \item After this, no further tuning is required for reliable operation.
-    However for fine tuning, proceed as follows:
- \end{itemize}
-
-  Apple Event protocol is used for key input in OpenCore, since we have to
-  provide it for Apple's own pre-boot systems to use anyway. However when combining
-  OpenCore \texttt{KeySupport} with Apple Event key handling,
-  key repeat behaviour may show one additional slow key repeat before normal key repeat starts.
-  This is perfectly usable in practice, but in order to fine tune your key response and avoid
-  this issue, configure the value of \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay}
-  to be the same as the value you have already configured for \texttt{KeyForgetThreshold}. (However,
-  to avoid over-fast key repeats, if you have been able to configure \texttt{KeyForgetThreshold}
-  to a value less than \texttt{5}, then you are recommended to configure \texttt{KeyInitialDelay}
-  and \texttt{KeySubsequentDelay} to \texttt{5}.) Configure and test this. You should find the
-  repeat response is now corrected (no double long delay) and that you have no other problems. However,
-  it is theoretically possible (not actually observed) that on some systems this procedure may
-  give you two key responses for each key press. If this happens, then to avoid it you will need
-  to increment the value of both settings by one or two. E.g. if your \texttt{KeyForgetThreshold}
-  was \texttt{7} and you configured \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay}
-  to \texttt{7}, then if you get double key press responses, try configuring values
-  of \texttt{8} and \texttt{8} or \texttt{9} and \texttt{9} instead. Use the lowest values
-  which work.
-
-  \emph{Note}: When tuning keyboard behaviour, double key responses can make it impossible to
-  select some boot entries. Therefore before tuning the above, to avoid making your system
-  unbootable if you do not have easy access to another boot method, you are recommended to set
-  \texttt{Misc/Boot/Timeout} to \texttt{5} so that your normal OS will boot after a short time
-  anyway.
-
-\item
-  \texttt{KeySubsequentDelay}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (acts as \texttt{5}, or 50ms)\\
-  \textbf{Description}: Configure subsequent keyboard repeat delay in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
-
-  See documentation of \texttt{KeyInitialDelay} for fine tuning. Even if not fine tuning,
-  this value should ideally not be set to less than the value of \texttt{KeyForgetThreshold} in
-  order to avoid excess key repeats; however, in practice, the difference may not be noticeable,
-  and you probably do not need to change this value except as part of key repeat fine tuning.
-
-  \emph{Note}: No changes to this value are ever required on systems which are not using \texttt{KeySupport}.
 
 \item
   \texttt{KeySwap}\\

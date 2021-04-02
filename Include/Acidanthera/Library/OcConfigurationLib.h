@@ -583,6 +583,16 @@ typedef enum {
   OC_DECLARE (OC_UEFI_APFS)
 
 ///
+/// AppleInput is a set of options to configure OpenCore's reverse engingeered then customised implementation of the AppleEvent protocol.
+///
+#define OC_UEFI_APPLEINPUT_FIELDS(_, __) \
+  _(OC_STRING                   , AppleEvent         ,     , OC_STRING_CONSTR ("", _, __)  , OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , CustomDelays       ,     , FALSE                         , ()) \
+  _(UINT16                      , KeyInitialDelay    ,     , 0                             , ()) \
+  _(UINT16                      , KeySubsequentDelay ,     , 0                             , ())
+  OC_DECLARE (OC_UEFI_APPLEINPUT)
+
+///
 /// Audio is a set of options for sound configuration.
 ///
 #define OC_UEFI_AUDIO_FIELDS(_, __) \
@@ -604,8 +614,6 @@ typedef enum {
   _(OC_STRING                   , KeySupportMode     ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , PointerSupportMode ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
   _(UINT32                      , TimerResolution    ,     , 0                                 , ()) \
-  _(UINT16                      , KeyInitialDelay    ,     , 0                                 , ()) \
-  _(UINT16                      , KeySubsequentDelay ,     , 0                                 , ()) \
   _(UINT8                       , KeyForgetThreshold ,     , 0                                 , ()) \
   _(BOOLEAN                     , KeySupport         ,     , FALSE                             , ()) \
   _(BOOLEAN                     , KeyFiltering       ,     , FALSE                             , ()) \
@@ -639,7 +647,6 @@ typedef enum {
   _(BOOLEAN                     , AppleAudio                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleBootPolicy             ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleDebugLog               ,     , FALSE  , ()) \
-  _(BOOLEAN                     , AppleEvent                  ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleFramebufferInfo        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImageConversion        ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleImg4Verification       ,     , FALSE  , ()) \
@@ -691,6 +698,7 @@ typedef enum {
 #define OC_UEFI_CONFIG_FIELDS(_, __) \
   _(BOOLEAN                     , ConnectDrivers    ,     , FALSE                                          , ()) \
   _(OC_UEFI_APFS                , Apfs              ,     , OC_CONSTR2 (OC_UEFI_APFS, _, __)               , OC_DESTR (OC_UEFI_APFS)) \
+  _(OC_UEFI_APPLEINPUT          , AppleInput        ,     , OC_CONSTR2 (OC_UEFI_APPLEINPUT, _, __)         , OC_DESTR (OC_UEFI_APPLEINPUT)) \
   _(OC_UEFI_AUDIO               , Audio             ,     , OC_CONSTR2 (OC_UEFI_AUDIO, _, __)              , OC_DESTR (OC_UEFI_AUDIO)) \
   _(OC_UEFI_DRIVER_ARRAY        , Drivers           ,     , OC_CONSTR2 (OC_UEFI_DRIVER_ARRAY, _, __)       , OC_DESTR (OC_UEFI_DRIVER_ARRAY)) \
   _(OC_UEFI_INPUT               , Input             ,     , OC_CONSTR2 (OC_UEFI_INPUT, _, __)              , OC_DESTR (OC_UEFI_INPUT)) \
