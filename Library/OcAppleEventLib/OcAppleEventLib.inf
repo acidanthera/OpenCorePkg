@@ -44,6 +44,7 @@
 
 [Protocols]
   gAppleEventProtocolGuid             ## SOMETIMES_PRODUCES
+  gOcAppleEventExProtocolGuid         ## SOMETIMES_PRODUCES
   gAppleKeyMapDatabaseProtocolGuid    ## SOMETIMES_CONSUMES
   gAppleKeyMapAggregatorProtocolGuid  ## SOMETIMES_CONSUMES
   gEfiConsoleControlProtocolGuid      ## SOMETIMES_CONSUMES

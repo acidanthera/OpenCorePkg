@@ -46,6 +46,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (10)
 #define MAX_POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (80)
 
+GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerScale = 1;
+
 STATIC UINT16 mMaximumDoubleClickSpeed = 75; // 374 for 2 ms
 STATIC UINT16 mMaximumClickDuration    = 15;  // 74 for 2 ms
 
@@ -708,9 +710,11 @@ InternalSimplePointerPollNotifyFunction (
 
         UiScaleX = InternalGetUiScaleData ((INT64)State.RelativeMovementX);
         UiScaleX = MultS64x64 (UiScaleX, (INT64) mMaxPointerResolutionX);
+        UiScaleX = MultS64x64 (UiScaleX, mPointerScale);
 
         UiScaleY = InternalGetUiScaleData ((INT64)State.RelativeMovementY);
         UiScaleY = MultS64x64 (UiScaleY, (INT64) mMaxPointerResolutionY);
+        UiScaleY = MultS64x64 (UiScaleY, mPointerScale);
 
         if (SimplePointer->Mode->ResolutionX > 0) {
           UiScaleX = DivS64x64Remainder (

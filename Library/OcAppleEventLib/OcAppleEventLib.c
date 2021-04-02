@@ -509,14 +509,33 @@ InternalUnregisterHandlers (
   }
 }
 
+UINT32
+EFIAPI
+OcEventExSetPointerScale (
+  IN OUT OC_APPLE_EVENT_EX_PROTOCOL  *This,
+  IN     UINT32                      Scale
+  )
+{
+  UINT32 OldScale;
+
+  OldScale = mPointerScale;
+  mPointerScale = Scale;
+
+  return OldScale;
+}
+
 // mAppleEventProtocol
-STATIC APPLE_EVENT_PROTOCOL mAppleEventProtocol = {
-  APPLE_EVENT_PROTOCOL_REVISION,
-  EventRegisterHandler,
-  EventUnregisterHandler,
-  EventSetCursorPosition,
-  EventSetEventName,
-  EventIsCapsLockOn
+STATIC OC_APPLE_EVENT_EX_PROTOCOL mAppleEventProtocol = {
+  OC_APPLE_EVENT_EX_PROTOCOL_REVISION,
+  OcEventExSetPointerScale,
+  {
+    APPLE_EVENT_PROTOCOL_REVISION,
+    EventRegisterHandler,
+    EventUnregisterHandler,
+    EventSetCursorPosition,
+    EventSetEventName,
+    EventIsCapsLockOn
+  }
 };
 
 // AppleEventUnload
@@ -536,11 +555,13 @@ AppleEventUnload (
   InternalUnregisterHandlers ();
   InternalCancelPollEvents ();
 
-  Status = gBS->UninstallProtocolInterface (
-                  gImageHandle,
-                  &gAppleEventProtocolGuid,
-                  (VOID *)&mAppleEventProtocol
-                  );
+  Status = gBS->UninstallMultipleProtocolInterfaces (
+    gImageHandle,
+    &gAppleEventProtocolGuid,
+    (VOID *)&mAppleEventProtocol.AppleEvent,
+    &gOcAppleEventExProtocolGuid,
+    &mAppleEventProtocol
+    );
 
   return Status;
 }
@@ -565,7 +586,6 @@ OcAppleEventInstallProtocol (
 {
   EFI_STATUS           Status;
   APPLE_EVENT_PROTOCOL *Protocol;
-  EFI_HANDLE           NewHandle;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
@@ -590,16 +610,14 @@ OcAppleEventInstallProtocol (
 
   InternalSetKeyDelays (KeyInitialDelay, KeySubsequentDelay);
 
-  //
-  // Apple code supports unloading, ours does not.
-  //
-  NewHandle = NULL;
-  Status      = gBS->InstallProtocolInterface (
-                       &NewHandle,
-                       &gAppleEventProtocolGuid,
-                       EFI_NATIVE_INTERFACE,
-                       (VOID *)&mAppleEventProtocol
-                       );
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &gImageHandle,
+    &gAppleEventProtocolGuid,
+    &mAppleEventProtocol.AppleEvent,
+    &gOcAppleEventExProtocolGuid,
+    &mAppleEventProtocol,
+    NULL
+    );
 
   if (!EFI_ERROR (Status)) {
     InternalCreateQueueEvent ();
@@ -614,5 +632,5 @@ OcAppleEventInstallProtocol (
   }
 
   DEBUG ((DEBUG_INFO, "OCAE: Installed\n"));
-  return &mAppleEventProtocol;
+  return &mAppleEventProtocol.AppleEvent;
 }
