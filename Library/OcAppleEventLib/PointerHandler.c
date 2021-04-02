@@ -727,10 +727,12 @@ InternalSimplePointerPollNotifyFunction (
             NULL
             );
         }
-
+        //
+        // CHANGE: Fix maximum coordinates.
+        //
         mPointerRawX += UiScaleX;
         MaxRawPointerX = MultS64x64 (
-          mResolution.Horizontal,
+          mResolution.Horizontal - 1,
           (INT64) mMaxPointerResolutionX
           );
         if (mPointerRawX > MaxRawPointerX) {
@@ -741,7 +743,7 @@ InternalSimplePointerPollNotifyFunction (
 
         mPointerRawY += UiScaleY;
         MaxRawPointerY = MultS64x64 (
-          mResolution.Vertical,
+          mResolution.Vertical - 1,
           (INT64) mMaxPointerResolutionY
           );
         if (mPointerRawY > MaxRawPointerY) {
