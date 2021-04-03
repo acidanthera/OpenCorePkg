@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
-%DIF ADD ../Configuration.tex        Sat Apr  3 02:49:53 2021
+%DIF DEL PreviousConfiguration.tex   Sat Apr  3 05:21:28 2021
+%DIF ADD ../Configuration.tex        Sat Apr  3 05:31:00 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -907,7 +907,7 @@ can also be found in \href{https://dortania.github.io}{Dortania}'s
 For more exotic cases, there are several alternatives such as
 \href{https://github.com/daliansky}{daliansky}'s
 \href{https://github.com/daliansky/OC-little}{ACPI sample collection}
-\DIFaddbegin \DIFadd{(}\href{https://github.com/5T33Z0/OC-Little-Translated}{\DIFadd{English Translation by 5T33Z0 et al}}\DIFadd{,
+\DIFaddbegin \DIFadd{(}\href{https://github.com/5T33Z0/OC-Little-Translated}{English Translation by 5T33Z0 et al}\DIFadd{,
 may be outdated and contain typos)}\DIFaddend . Note however that the quality of the suggested solutions
 will be variable.
 
@@ -1305,8 +1305,8 @@ should be met before starting:
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
   firmware settings if present. \DIFdelbegin \DIFdel{Consider
-}\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFdel{patching it}}
-  %DIFAUXCMD
+}%DIFDELCMD < \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
+%DIFDELCMD <   %%%
 \DIFdel{if no option is available (for advanced users only). See
 }%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
 %DIFDELCMD <   %%%
@@ -2234,7 +2234,10 @@ blocking.
     \item Broadwell-E (\texttt{0x0406F1}) to Broadwell (\texttt{0x0306D4}):\\
     \texttt{Cpuid1Data}: \texttt{D4 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-  \end{itemize}
+    \DIFaddbegin \item \DIFadd{Rocket Lake (}\texttt{\DIFadd{0x0A0670}}\DIFadd{) to Comet Lake (}\texttt{\DIFadd{0x0906EB}}\DIFadd{):}\\
+    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
+    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
+  \DIFaddend \end{itemize}
 
   \emph{Note 4}: Be aware that the following configurations are unsupported by XCPM (at least out of the box):
 
@@ -2522,7 +2525,7 @@ blocking.
 }
 
   \DIFadd{As a last resort, consider
-  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFadd{patching the BIOS}}
+  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching the BIOS}
   \DIFadd{(for advanced users only).
 }
 
@@ -2760,7 +2763,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
+  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
@@ -5970,8 +5973,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\DIFdelbegin \texttt{\DIFdel{VerifyMsrE2}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \texttt{\DIFadd{ControlMsrE2}}\DIFaddend }\textbf{*}
+\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}%%%
+\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\DIFaddend \textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
 across all cores \DIFaddbegin \DIFadd{and change such hidden options on selected platforms}\DIFaddend .
 \end{tabular}
