@@ -182,8 +182,7 @@ CheckUEFIAppleInput (
       DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is below KeyForgetThreshold (likely to lead to uncontrolled key repeat, use 0 instead)!\n"));
       ++ErrorCount;
     }
-    if (UserUefi->AppleInput.KeySubsequentDelay != 0
-      && UserUefi->AppleInput.KeySubsequentDelay < UserUefi->Input.KeyForgetThreshold) {
+    if (UserUefi->AppleInput.KeySubsequentDelay < UserUefi->Input.KeyForgetThreshold) {
       DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is below KeyForgetThreshold (likely to lead to uncontrolled key repeat, use KeyForgetThreshold value or above instead)!\n"));
       ++ErrorCount;
     }
