@@ -219,6 +219,7 @@ GetPickerEntryCursor (
 VOID
 UpdateTabContext (
   IN  BOOLEAN                       IsEntering,
+  IN  OC_BOOT_CONTEXT               *BootContext,
   IN  TAB_CONTEXT                   TabContext,
   IN  INTN                          ChosenEntry,
   IN  CHAR16                        OldEntryCursor,
@@ -253,8 +254,16 @@ UpdateTabContext (
     gST->ConOut->OutputString (gST->ConOut, Code);
 
     if (TabContext == TAB_SHUTDOWN) {
+      if (IsEntering) {
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShutDown, FALSE);
+      }
       gST->ConOut->OutputString (gST->ConOut, L"Shutdown");
     } else {
+      if (IsEntering) {
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
+        OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileRestart, FALSE);
+      }
       gST->ConOut->OutputString (gST->ConOut, L"Restart");
     }
 
@@ -536,6 +545,7 @@ OcShowSimpleBootMenu (
       if (PickerKeyInfo.OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
         UpdateTabContext (
           FALSE,
+          BootContext,
           TabContext,
           ChosenEntry,
           OldEntryCursor,
@@ -571,6 +581,7 @@ OcShowSimpleBootMenu (
 
         UpdateTabContext (
           TRUE,
+          BootContext,
           TabContext,
           ChosenEntry,
           OldEntryCursor,
@@ -591,6 +602,7 @@ OcShowSimpleBootMenu (
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_RESTART);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+          OcPlayAudioFile (BootContext->PickerContext, AppleVoiceOverAudioFileBeep, FALSE);
           ResetWarm();
           return EFI_SUCCESS;
         }
@@ -598,6 +610,7 @@ OcShowSimpleBootMenu (
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHUTDOWN);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+          OcPlayAudioFile (BootContext->PickerContext, AppleVoiceOverAudioFileBeep, FALSE);
           ResetShutdown();
           return EFI_SUCCESS;
         }
