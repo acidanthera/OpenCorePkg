@@ -179,11 +179,11 @@ CheckUEFIAppleInput (
     && AsciiStrCmp (CustomDelays, "Disabled") != 0) {
     if (UserUefi->AppleInput.KeyInitialDelay != 0
       && UserUefi->AppleInput.KeyInitialDelay < UserUefi->Input.KeyForgetThreshold) {
-      DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is below KeyForgetThreshold (likely to lead to uncontrolled key repeat, use 0 instead)!\n"));
+      DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is less than the KeyForgetThreshold value (likely to result in uncontrolled key repeats); use zero (0) instead!\n"));
       ++ErrorCount;
     }
     if (UserUefi->AppleInput.KeySubsequentDelay < UserUefi->Input.KeyForgetThreshold) {
-      DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is below KeyForgetThreshold (likely to lead to uncontrolled key repeat, use KeyForgetThreshold value or above instead)!\n"));
+      DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is less than the KeyForgetThreshold value (likely to result in uncontrolled key repeats); use the KeyForgetThreshold value, or greater, instead!\n"));
       ++ErrorCount;
     }
   }
@@ -593,7 +593,7 @@ CheckUEFI (
   DEBUG ((DEBUG_VERBOSE, "config loaded into %a!\n", __func__));
 
   ErrorCount = 0;
-  
+
   for (Index = 0; Index < ARRAY_SIZE (UEFICheckers); ++Index) {
     ErrorCount += UEFICheckers[Index] (Config);
   }
