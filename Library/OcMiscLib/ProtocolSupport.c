@@ -27,6 +27,8 @@ GetArguments (
   OUT CHAR16  ***Argv
   )
 {
+  STATIC CHAR16 *StArgv[2] = { L"Self", NULL };
+
   EFI_STATUS                     Status;
   EFI_SHELL_PARAMETERS_PROTOCOL  *ShellParameters;
   EFI_LOADED_IMAGE_PROTOCOL      *LoadedImage;
@@ -47,11 +49,17 @@ GetArguments (
     &gEfiLoadedImageProtocolGuid,
     (VOID **) &LoadedImage
     );
-  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
-    return EFI_NOT_FOUND;
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCM: LoadedImage cannot be located - %r\n", Status));
   }
 
-  STATIC CHAR16 *StArgv[2] = { L"Self", NULL };
+  if (EFI_ERROR (Status) || LoadedImage->LoadOptions == NULL) {
+    *Argc = 1;
+    *Argv = StArgv;
+    return EFI_SUCCESS;
+  }
+
   StArgv[1] = LoadedImage->LoadOptions;
   *Argc = ARRAY_SIZE (StArgv);
   *Argv = StArgv;

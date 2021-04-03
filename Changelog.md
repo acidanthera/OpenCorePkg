@@ -55,6 +55,7 @@ OpenCore Changelog
 - Improved OpenCanopy pointer acceleration
 - Added more precise control on `AppleEvent` protocol properties and features
 - Added dynamic keyboard protocol installation on CrScreenshotDxe
+- Support starting UEFI tools with argument support (e.g. `ControlMsrE2`) without arguments from picker
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found
