@@ -460,6 +460,9 @@ OcShowSimpleBootMenu (
         if (BootEntries[Index]->IsExternal) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_EXTERNAL);
         }
+        if (BootEntries[Index]->IsFolder) {
+          gST->ConOut->OutputString (gST->ConOut, OC_MENU_DISK_IMAGE);
+        }
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
       }
 
