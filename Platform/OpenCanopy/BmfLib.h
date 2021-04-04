@@ -20,7 +20,6 @@ typedef struct {
   UINT32                        NumChars;
   UINT32                        NumKerningPairs;
   UINT16                        Height;
-  INT16                         OffsetY;
 } BMF_CONTEXT;
 
 typedef struct {
