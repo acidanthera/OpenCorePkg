@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Apr  3 05:21:28 2021
-%DIF ADD ../Configuration.tex        Sat Apr  3 05:31:00 2021
+%DIF DEL PreviousConfiguration.tex   Wed Mar  3 01:46:28 2021
+%DIF ADD ../Configuration.tex        Sun Apr  4 12:49:49 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -907,9 +907,11 @@ can also be found in \href{https://dortania.github.io}{Dortania}'s
 For more exotic cases, there are several alternatives such as
 \href{https://github.com/daliansky}{daliansky}'s
 \href{https://github.com/daliansky/OC-little}{ACPI sample collection}
-\DIFaddbegin \DIFadd{(}\href{https://github.com/5T33Z0/OC-Little-Translated}{English Translation by 5T33Z0 et al}\DIFadd{,
-may be outdated and contain typos)}\DIFaddend . Note however that the quality of the suggested solutions
-will be variable.
+\DIFaddbegin \DIFadd{(}\href{https://github.com/5T33Z0/OC-Little-Translated}{\DIFadd{English Translation by 5T33Z0 et al}}\DIFadd{).
+Please note however, that suggested solutions from third parties may be outdated or may contain errors}\DIFaddend .
+\DIFdelbegin \DIFdel{Note howeverthat the
+quality of the suggested solutions will be variable.
+}\DIFdelend 
 
 \subsection{Properties}\label{acpiprops}
 
@@ -1305,8 +1307,8 @@ should be met before starting:
   \texttt{No slide values are usable! Use custom slide!} message can be seen in the log.
 \item \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) disabled in
   firmware settings if present. \DIFdelbegin \DIFdel{Consider
-}%DIFDELCMD < \href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching it}
-%DIFDELCMD <   %%%
+}\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFdel{patching it}}
+  %DIFAUXCMD
 \DIFdel{if no option is available (for advanced users only). See
 }%DIFDELCMD < \hyperref[kernelpropsquirks]{VerifyMsrE2}
 %DIFDELCMD <   %%%
@@ -2525,7 +2527,7 @@ blocking.
 }
 
   \DIFadd{As a last resort, consider
-  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{patching the BIOS}
+  }\href{https://github.com/LongSoft/UEFITool/blob/master/UEFIPatch/patches.txt}{\DIFadd{patching the BIOS}}
   \DIFadd{(for advanced users only).
 }
 
@@ -2763,7 +2765,7 @@ blocking.
   IOUSBHostFamily.kext) to remove USB port count limit of 15 ports.
 
   \emph{Note}: This option should be avoided whenever possible\DIFdelbegin \DIFdel{and may no longer
-  }%DIFDELCMD < \href{https://github.com/acidanthera/bugtracker/issues/1514}{function correctly} %%%
+  }\href{https://github.com/acidanthera/bugtracker/issues/1514}{\DIFdel{function correctly}} %DIFAUXCMD
 \DIFdel{in macOS 11.
   }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend USB port limit
   is imposed by the amount of used bits in locationID format and there is no
@@ -3463,8 +3465,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   a recovery partition. Hold the \texttt{CMD+R} key combination down to choose this option.
   \end{itemize}
 
-  \emph{Note 1}: The \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are required for key
-  handling. However, not all of the key handling functions can be implemented on several types of firmware.
+  \emph{Note 1}: \DIFdelbegin \DIFdel{The }\DIFdelend \DIFaddbegin \DIFadd{On non-Apple firmware }\DIFaddend \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are
+  required for key handling. However, not all of the key handling functions can be implemented on several
+  types of firmware.
 
   \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using \DIFaddbegin \DIFadd{both }\DIFaddend the \texttt{Escape}
   \DIFdelbegin \DIFdel{key to display
@@ -5973,8 +5976,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
   Defaults to \texttt{ColdReset}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
-\DIFdelbegin %DIFDELCMD < \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{VerifyMsrE2}}%%%
-\DIFdelend \DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\DIFaddend \textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\DIFdelbegin \texttt{\DIFdel{VerifyMsrE2}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \texttt{\DIFadd{ControlMsrE2}}\DIFaddend }\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
 across all cores \DIFaddbegin \DIFadd{and change such hidden options on selected platforms}\DIFaddend .
 \end{tabular}
@@ -6326,9 +6329,9 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \tightlist
-  \item \DIFadd{If }\texttt{\DIFadd{Auto}} \DIFadd{is treated as }\texttt{\DIFadd{Enabled}} \DIFadd{when }\texttt{\DIFadd{KeySupport}} \DIFadd{is }\texttt{\DIFadd{true}} \DIFadd{and }\texttt{\DIFadd{Disabled}} \DIFadd{otherwise.
-  }\item \DIFadd{If }\texttt{\DIFadd{Enabled}} \DIFadd{the values }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{are used.
-  }\item \DIFadd{If }\texttt{\DIFadd{Disabled}} \DIFadd{Apple default values of 500ms (}\texttt{\DIFadd{50}}\DIFadd{) and 50ms (}\texttt{\DIFadd{5}}\DIFadd{) are used.
+  \item \texttt{\DIFadd{Auto}} \DIFadd{--- Treated as }\texttt{\DIFadd{Enabled}} \DIFadd{when }\texttt{\DIFadd{KeySupport}} \DIFadd{is }\texttt{\DIFadd{true}} \DIFadd{and }\texttt{\DIFadd{Disabled}} \DIFadd{otherwise.
+  }\item \texttt{\DIFadd{Enabled}} \DIFadd{--- The values }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{and }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{are used.
+  }\item \texttt{\DIFadd{Disabled}} \DIFadd{--- Apple default values of 500ms (}\texttt{\DIFadd{50}}\DIFadd{) and 50ms (}\texttt{\DIFadd{5}}\DIFadd{) are used.
   }\end{itemize}
 
 \item
@@ -6339,16 +6342,20 @@ functioning. Feature highlights:
   of Apple Event protocol, in units of 10ms.
 }
 
-  \DIFadd{When not using }\texttt{\DIFadd{KeySupport}}\DIFadd{, this option will configure the initial delay before
-  key repeat as expected. The Apple OEM default value is }\texttt{\DIFadd{50}} \DIFadd{(500ms).
+  \DIFadd{Configures the initial delay before key repeat. The Apple OEM default value is }\texttt{\DIFadd{50}}
+  \DIFadd{(500ms).
 }
 
-  \DIFadd{When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
-  before normal speed key repeat starts. If so, your initial key repeat delay is being
-  driven by your BIOS firmware and cannot be overriden by OC. To avoid this minor undesired
-  effect, set }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}}\DIFadd{. If doing this, to avoid multiple
-  reponses to single key presses, you should set }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to at least
-  the value of your }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{setting.
+  \emph{\DIFadd{Note}}\DIFadd{: When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get an additional slow key
+  repeat before normal speed key repeat starts. If so, your initial key repeat delay is being
+  driven by your BIOS firmware and cannot be overriden by OC (due to technical limitations
+  of how }\texttt{\DIFadd{KeySupport}} \DIFadd{works, to derive raw key data from the non-raw key
+  data which is all that UEFI makes available). To avoid this minor but undesired effect of
+  two long repeats, you can simply cancel the second, Apple Event, repeat by setting
+  }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}}\DIFadd{. When doing this you should also set
+  }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to at least the value of your }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{setting (see more information in the }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{setting).
+  The instructions in this note only apply on systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{.
 }
 
 \item
@@ -6363,12 +6370,18 @@ functioning. Feature highlights:
   }\texttt{\DIFadd{0}} \DIFadd{is an invalid value for this option.
 }
 
-  \DIFadd{When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
+  \emph{\DIFadd{Note}}\DIFadd{: When using }\texttt{\DIFadd{KeySupport}}\DIFadd{, you may find that you get one additional slow key repeat
   before normal speed key repeat starts. If so, set }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}}
-  \DIFadd{and set this option to at least the value of your }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{setting. (In
-  the unlikely event that you still get frequent, or occasional, double key responses after doing
-  this, proceed to set this value to one or two greater than }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{- use
-  the lowest value which works.)
+  \DIFadd{and set }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{to at least the value of your }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{setting. The reason for this is that the key-smoothing parameter }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{effectively acts as the shortest time for which a key can appear to be held, therefore a
+  key repeat delay less than this will guarantee at least one extra repeat for every
+  key press, however quickly the key is physically tapped.
+  (In the unlikely event that you still get frequent, or occasional, double key responses after
+  setting }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{equal to your system's value of }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{,
+  then increase }\texttt{\DIFadd{KeySubsequentDelay}} \DIFadd{by one or two more until this effect goes away - for
+  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses.)
+  The instructions in this note only apply on systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{.
 }
 
 \item
@@ -6609,7 +6622,9 @@ functioning. Feature highlights:
   \DIFaddbegin \DIFadd{the }\DIFaddend \texttt{AppleKeyMapAggregator} database for input functioning. In \DIFdelbegin \DIFdel{case
   }\DIFdelend \DIFaddbegin \DIFadd{cases
   where }\DIFaddend a separate driver \DIFdelbegin \DIFdel{is used, }\DIFdelend such as \texttt{OpenUsbKbDxe} \DIFaddbegin \DIFadd{is used}\DIFaddend , this option
-  should never be enabled.
+  should never be enabled. \DIFaddbegin \DIFadd{Additionally, this option is not required and
+  should not be enabled with Apple firmware.
+}\DIFaddend 
 
 \item
   \texttt{KeySupportMode}\\
