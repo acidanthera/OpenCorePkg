@@ -14,6 +14,7 @@
 
 #include "OpenCanopy.h"
 #include "BmfLib.h"
+#include "GuiApp.h"
 
 CONST BMF_CHAR *
 BmfGetChar (
@@ -621,8 +622,8 @@ GuiGetLabel (
     &Context->BmfContext,
     String,
     StringLen,
-    2 * Context->Scale,
-    2 * Context->Scale
+    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale,
+    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale
     );
   if (TextInfo == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: GetTextInfo failed\n"));

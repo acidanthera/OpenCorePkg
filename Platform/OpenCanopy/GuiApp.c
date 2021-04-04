@@ -490,12 +490,12 @@ InternalContextConstruct (
       FontDataSize,
       Context->Scale 
       );
-    if (Context->FontContext.BmfContext.Height != BOOT_ENTRY_LABEL_HEIGHT * Context->Scale) {
+    if (Context->FontContext.BmfContext.Height != (BOOT_ENTRY_LABEL_HEIGHT - BOOT_ENTRY_LABEL_TEXT_OFFSET) * Context->Scale) {
         DEBUG((
           DEBUG_WARN,
           "OCUI: Font has height %d instead of %d\n",
           Context->FontContext.BmfContext.Height,
-          BOOT_ENTRY_LABEL_HEIGHT * Context->Scale
+          (BOOT_ENTRY_LABEL_HEIGHT - BOOT_ENTRY_LABEL_TEXT_OFFSET) * Context->Scale
           ));
       Result = FALSE;
     }
