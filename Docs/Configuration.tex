@@ -3349,8 +3349,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   a recovery partition. Hold the \texttt{CMD+R} key combination down to choose this option.
   \end{itemize}
 
-  \emph{Note 1}: The \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are required for key
-  handling. However, not all of the key handling functions can be implemented on several types of firmware.
+  \emph{Note 1}: On non-Apple firmware \texttt{KeySupport}, \texttt{OpenUsbKbDxe}, or similar drivers are
+  required for key handling. However, not all of the key handling functions can be implemented on several
+  types of firmware.
 
   \emph{Note 2}: In addition to \texttt{OPT}, OpenCore supports using both the \texttt{Escape}
   and \texttt{Zero} keys to enter the OpenCore picker when \texttt{ShowPicker} is disabled.
@@ -6173,9 +6174,9 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \tightlist
-  \item If \texttt{Auto} is treated as \texttt{Enabled} when \texttt{KeySupport} is \texttt{true} and \texttt{Disabled} otherwise.
-  \item If \texttt{Enabled} the values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
-  \item If \texttt{Disabled} Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+  \item \texttt{Auto} --- Treated as \texttt{Enabled} when \texttt{KeySupport} is \texttt{true} and \texttt{Disabled} otherwise.
+  \item \texttt{Enabled} --- The values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
+  \item \texttt{Disabled} --- Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
   \end{itemize}
 
 \item
@@ -6185,15 +6186,19 @@ functioning. Feature highlights:
   \textbf{Description}: Configure initial keyboard repeat delay in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 
-  When not using \texttt{KeySupport}, this option will configure the initial delay before
-  key repeat as expected. The Apple OEM default value is \texttt{50} (500ms).
+  Configures the initial delay before key repeat. The Apple OEM default value is \texttt{50}
+  (500ms).
 
-  When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
-  before normal speed key repeat starts. If so, your initial key repeat delay is being
-  driven by your BIOS firmware and cannot be overriden by OC. To avoid this minor undesired
-  effect, set \texttt{KeyInitialDelay} to \texttt{0}. If doing this, to avoid multiple
-  reponses to single key presses, you should set \texttt{KeySubsequentDelay} to at least
-  the value of your \texttt{KeyForgetThreshold} setting.
+  \emph{Note}: When using \texttt{KeySupport}, you may find that you get an additional slow key
+  repeat before normal speed key repeat starts. If so, your initial key repeat delay is being
+  driven by your BIOS firmware and cannot be overriden by OC (due to technical limitations
+  of how \texttt{KeySupport} works, to derive raw key data from the non-raw key
+  data which is all that UEFI makes available). To avoid this minor but undesired effect of
+  two long repeats, you can simple cancel the second, Apple Event, repeat by setting
+  \texttt{KeyInitialDelay} to \texttt{0}. When doing this you should also set
+  \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
+  setting (see more information in the \texttt{KeySubsequentDelay} setting).
+  The instructions in this note only apply on systems using \texttt{KeySupport}.
 
 \item
   \texttt{KeySubsequentDelay}\\
@@ -6205,12 +6210,18 @@ functioning. Feature highlights:
   Configures the gap between key repeats. The Apple OEM default value is \texttt{5} (50ms).
   \texttt{0} is an invalid value for this option.
 
-  When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
+  \emph{Note}: When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
   before normal speed key repeat starts. If so, set \texttt{KeyInitialDelay} to \texttt{0}
-  and set this option to at least the value of your \texttt{KeyForgetThreshold} setting. (In
-  the unlikely event that you still get frequent, or occasional, double key responses after doing
-  this, proceed to set this value to one or two greater than \texttt{KeyForgetThreshold} - use
-  the lowest value which works.)
+  and set \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
+  setting. The reason for this is that the key-smoothing parameter \texttt{KeyForgetThreshold}
+  effectively acts as the shortest time for which a key can appear to be held, therefore a
+  key repeat delay less than this will guarantee at least one extra repeat for every
+  key press, however quickly the key is physically tapped.
+  (In the unlikely event that you still get frequent, or occasional, double key responses after
+  setting \texttt{KeySubsequentDelay} equal to your system's value of \texttt{KeyForgetThreshold},
+  then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away - for
+  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses.)
+  The instructions in this note only apply on systems using \texttt{KeySupport}.
 
 \item
   \texttt{PointerSpeedDiv}\\
@@ -6434,7 +6445,8 @@ functioning. Feature highlights:
   \texttt{AppleGenericInput}, also known as \texttt{AptioInputFix}, to fill
   the \texttt{AppleKeyMapAggregator} database for input functioning. In cases
   where a separate driver such as \texttt{OpenUsbKbDxe} is used, this option
-  should never be enabled.
+  should never be enabled. Additionally, this option is not required and
+  should not be enabled with Apple firmware.
 
 \item
   \texttt{KeySupportMode}\\
