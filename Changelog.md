@@ -57,6 +57,7 @@ OpenCore Changelog
 - Added dynamic keyboard protocol installation on CrScreenshotDxe
 - Support starting UEFI tools with argument support (e.g. `ControlMsrE2`) without arguments from picker
 - Fixed OpenCanopy font height calculation, may reject previously working fonts and mitigate memory corruption
+- Fixed incorrect identification of Xeon E5XXX/E5-XXXX and Xeon WXXXX/W-XXXX CPUs
 
 #### v0.6.7
 - Fixed ocvalidate return code to be non-zero when issues are found

@@ -103,10 +103,10 @@ InternalDetectAppleMajorType (
       }
     }
 
-    if (AsciiStrnCmp (BrandInfix, "E5", L_STR_LEN ("E5")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "E5-", L_STR_LEN ("E5-")) == 0) {
       return AppleProcessorMajorXeonE5;
     }
-    if (AsciiStrnCmp (BrandInfix, "W", L_STR_LEN ("W")) == 0) {
+    if (AsciiStrnCmp (BrandInfix, "W-", L_STR_LEN ("W-")) == 0) {
       return AppleProcessorMajorXeonW;
     }
     return AppleProcessorMajorXeonNehalem;
