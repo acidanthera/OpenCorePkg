@@ -66,6 +66,7 @@ Kexts
 | [VoodooTSCSync.kext](https://github.com/RehabMan/VoodooTSCSync) | — | — |
 | [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | — |
 | [FakeSMC.kext](https://github.com/CloverHackyColor/FakeSMC3_with_plugins) | 10.0.0 (10.6) | — |
+| [FakeSMC-32.kext](https://github.com/khronokernel/Legacy-Kexts/blob/master/32Bit-only/Zip/FakeSMC-32.kext.zip?raw=true) | 8.0.0 (10.4) | 11.9.9 (10.7) |
 | [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — |
 | [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) Not tested | — |
 | [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) Not tested | — |
