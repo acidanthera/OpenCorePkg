@@ -674,6 +674,55 @@ AcpiNormalizeTableHeaders (
   return Modified;
 }
 
+/**
+  Cleanup RSDP table from unprintable symbols.
+  Reference: https://alextjam.es/debugging-appleacpiplatform/.
+
+  @param Rsdp        RSDP table.
+  @param HasXsdt     RSDP has XSDT and is extended.
+**/
+STATIC
+BOOLEAN
+AcpiNormalizeRsdp (
+  IN EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER  *Rsdp,
+  IN BOOLEAN                                       HasXsdt
+  )
+{
+  BOOLEAN  Modified;
+  CHAR8    *Walker;
+  UINT32   Index;
+
+  Modified = FALSE;
+
+  Walker = (CHAR8 *) &Rsdp->OemId;
+  for (Index = 0; Index < sizeof (Rsdp->OemId); ++Index) {
+    if (!IsAsciiPrint (Walker[Index])) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  if (Modified) {
+    //
+    // Checksum is to be the first 0-19 bytes of RSDP.
+    // ExtendedChecksum is the entire table, only if newer than ACPI 1.0.
+    //
+    Rsdp->Checksum = 0;
+    Rsdp->Checksum = CalculateCheckSum8 (
+      (UINT8 *) Rsdp, 20
+      );
+
+    if (HasXsdt) {
+      Rsdp->ExtendedChecksum = 0;
+      Rsdp->ExtendedChecksum = CalculateCheckSum8 (
+        (UINT8 *) Rsdp, Rsdp->Length
+        );
+    }
+  }
+
+  return Modified;
+}
+
 EFI_STATUS
 AcpiInitContext (
   IN OUT OC_ACPI_CONTEXT  *Context
@@ -1106,6 +1155,37 @@ AcpiNormalizeHeaders (
   UINT32                  Index;
   EFI_ACPI_COMMON_HEADER  *NewTable;
   UINT32                  TablePrintSignature;
+
+  AcpiNormalizeRsdp (Context->Rsdp, Context->Xsdt != NULL);
+  DEBUG ((DEBUG_INFO, "OCA: Normalized RSDP\n"));
+
+  if (Context->Xsdt != NULL) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt, 0, &NewTable);
+      if (EFI_ERROR (Status)) {
+        return;
+      }
+      Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+    }
+
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Xsdt)) {
+      DEBUG ((DEBUG_INFO, "OCA: Normalized XSDT of %u bytes headers\n", Context->Xsdt->Header.Length));
+    }
+  }
+
+  if (Context->Rsdt != NULL) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt, 0, &NewTable);
+      if (EFI_ERROR (Status)) {
+        return;
+      }
+      Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+    }
+
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Rsdt)) {
+      DEBUG ((DEBUG_INFO, "OCA: Normalized RSDT of %u bytes headers\n", Context->Rsdt->Header.Length));
+    }
+  }
 
   if (Context->Dsdt != NULL) {
     if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
