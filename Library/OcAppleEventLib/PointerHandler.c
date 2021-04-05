@@ -496,6 +496,12 @@ InternalGetScreenResolution (
       mScreenResolutionSet   = TRUE;
     }
 
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAE: Failed to handle GOP, discovering UGA - %r\n",
+      Status
+      ));
+
     Status = EFI_SUCCESS;
   } else if (!EFI_ERROR (Status)) {
     Info                   = GraphicsOutput->Mode->Info;
@@ -510,7 +516,22 @@ InternalGetScreenResolution (
     } else {
       Status = EFI_NOT_READY;
     }
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAE: Failed to handle GOP - %r\n",
+      Status
+      ));
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAE: Set screen resolution to %dx%d [%d] - %r\n",
+    mResolution.Horizontal,
+    mResolution.Vertical,
+    mScreenResolutionSet,
+    Status
+    ));
 
   return Status;
 }
