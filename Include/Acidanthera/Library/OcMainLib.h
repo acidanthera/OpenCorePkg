@@ -31,7 +31,7 @@
   OpenCore version reported to log and NVRAM.
   OPEN_CORE_VERSION must follow X.Y.Z format, where X.Y.Z are single digits.
 **/
-#define OPEN_CORE_VERSION          "0.6.8"
+#define OPEN_CORE_VERSION          "0.6.9"
 
 /**
   OpenCore build type reported to log and NVRAM.
