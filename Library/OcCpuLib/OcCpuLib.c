@@ -306,7 +306,7 @@ SetMaxBusRatioAndMaxBusRatioDiv (
   //
   // Refer to Intel SDM (MSRs in Processors Based on Intel... table).
   //
-  if (CpuModel >= CPU_MODEL_NEHALEM) {
+  if (CpuModel >= CPU_MODEL_NEHALEM && CpuModel != CPU_MODEL_BONNELL) {
     PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
     *MaxBusRatio        = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
     *MaxBusRatioDiv     = 0;
