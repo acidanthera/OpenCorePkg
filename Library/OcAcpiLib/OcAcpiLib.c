@@ -1156,8 +1156,9 @@ AcpiNormalizeHeaders (
   EFI_ACPI_COMMON_HEADER  *NewTable;
   UINT32                  TablePrintSignature;
 
-  AcpiNormalizeRsdp (Context->Rsdp, Context->Xsdt != NULL);
-  DEBUG ((DEBUG_INFO, "OCA: Normalized RSDP\n"));
+  if (AcpiNormalizeRsdp (Context->Rsdp, Context->Xsdt != NULL)) {
+    DEBUG ((DEBUG_INFO, "OCA: Normalized RSDP\n"));
+  }
 
   if (Context->Xsdt != NULL) {
     if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt)) {
