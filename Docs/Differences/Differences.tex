@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Apr  5 22:40:57 2021
-%DIF ADD ../Configuration.tex        Mon Apr  5 22:43:19 2021
+%DIF DEL PreviousConfiguration.tex   Tue Apr  6 14:18:04 2021
+%DIF ADD ../Configuration.tex        Tue Apr  6 14:19:32 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6835,14 +6835,26 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the Apple Debug Log protocol with a builtin
-  version.
+  version\DIFdelbegin \DIFdel{.
+}%DIFDELCMD < 
 
-\item
-  \texttt{AppleEvent}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Replaces the Apple Event protocol with a builtin
-  version. This may be used to ensure FileVault 2 compatibility on VMs and legacy Macs.
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{AppleEvent}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ boolean}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{false}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Replaces the Apple Event protocol with a builtin
+  version. This may be used to ensure FileVault 2 compatibility on VMs and legacy Macs}\DIFdelend .
 
 \item
   \texttt{AppleFramebufferInfo}\\
