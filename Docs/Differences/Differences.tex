@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Apr  6 14:18:04 2021
-%DIF ADD ../Configuration.tex        Tue Apr  6 14:19:32 2021
+%DIF DEL PreviousConfiguration.tex   Tue Apr  6 17:30:22 2021
+%DIF ADD ../Configuration.tex        Tue Apr  6 22:57:35 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6216,20 +6216,36 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Auto} --- Performs automatic choice of implementation. Because of optimisations used to achieve
-  fast boot times, this actually means that the OpenCore re-implementation will be found and used
-  except in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
-  Apple's boot picker (where present).
-  \item \texttt{Builtin} --- Use OpenCore's updated re-implementation of the Apple Event protocol. Recommended.
+  \item \texttt{Auto} --- \DIFdelbegin \DIFdel{Performs automatic choice of implementation . Because of optimisations used to achieve
+  fast boot times, this actually means that the OpenCore re-implementation will be found and usedexcept in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
+  Apple 's boot picker (where present).
+  }\DIFdelend \DIFaddbegin \DIFadd{Use OEM Apple Event implementation if available, connected and
+  recent enough to be used, otherwise use OC reimplementation.
+  One some Macs (e.g. Mac Pro) this will find the Apple implementation. On both older and
+  newer Macs than this, this option will always or often use the OC implementation. On older Macs
+  this is because the implementation available is too old to be used, on newer Macs it is
+  because of optimisations added by Apple which do not connect the Apple Event protocol
+  except when needed -- e.g. except when the Apple boot picker is explicitly started.
+  Due to its somewhat unpredicatable results, this option is not normally recommended.
+  }\DIFaddend \item \texttt{Builtin} ---  Use OpenCore's updated re-implementation of the Apple Event protocol.
+  \DIFdelbegin \DIFdel{Recommended}\DIFdelend \DIFaddbegin \DIFadd{Using this setting is recommended even on Apple hardware where the OEM version can be used, due to
+  improvements (better fine mouse control, configurable key delays) made in the OC re-implementation
+  of the protocol}\DIFaddend .
   \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. This results in Apple's
-  implementation being reliably used on Apple systems. It results in no keyboard or mouse support otherwise.
-  \end{itemize}
+  implementation being \DIFdelbegin \DIFdel{reliably used on }\DIFdelend \DIFaddbegin \DIFadd{used on most (except the oldest) }\DIFaddend Apple systems. It results in no keyboard or mouse support
+  otherwise. \DIFaddbegin \DIFadd{On all Apple hardware where a recent enough version of the OEM protocol is available -- whether
+  connected automatically by Apple's firmware or not -- this option will work reliably; nevertheless for
+  the reasons stated }\texttt{\DIFadd{Builtin}} \DIFadd{is recommended in preference to this option in most use cases.
+  }\DIFaddend \end{itemize}
 
 \item
   \texttt{CustomDelays}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
-  \textbf{Description}: Enable custom key repeat delays.
+  \textbf{Description}: Enable custom key repeat delays \DIFdelbegin \DIFdel{.
+}\DIFdelend \DIFaddbegin \DIFadd{when using the OpenCore implementation of the Apple Event protocol.
+  Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}\DIFaddend 
 
   \begin{itemize}
   \tightlist
@@ -6248,8 +6264,8 @@ functioning. Feature highlights:
   Configures the initial delay before key repeat. The Apple OEM default value is \texttt{50}
   (500ms).
 
-  \emph{Note}: When using \texttt{KeySupport}, you may find that you get an additional slow key
-  repeat before normal speed key repeat starts. If so, your initial key repeat delay is being
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: When using \texttt{KeySupport}, you may find that you get an additional slow key
+  repeat before normal speed key repeat starts. If so, \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend initial key repeat delay is being
   driven by your BIOS firmware and cannot be overriden by OC (due to technical limitations
   of how \texttt{KeySupport} works, to derive raw key data from the non-raw key
   data which is all that UEFI makes available). To avoid this minor but undesired effect of
@@ -6257,7 +6273,13 @@ functioning. Feature highlights:
   \texttt{KeyInitialDelay} to \texttt{0}. When doing this you should also set
   \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
   setting (see more information in the \texttt{KeySubsequentDelay} setting).
-  The instructions in this note only apply on systems using \texttt{KeySupport}.
+\DIFdelbegin \DIFdel{The instructions in this note only apply on }\DIFdelend \DIFaddbegin 
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: On }\DIFaddend systems using \texttt{KeySupport}\DIFdelbegin \DIFdel{.
+}\DIFdelend \DIFaddbegin \DIFadd{, the recommended value is }\texttt{\DIFadd{0}}\DIFadd{.
+  On other systems the recommended value is }\texttt{\DIFadd{50}}\DIFadd{, which may optionally
+  be tuned up or down according to user preference.
+}\DIFaddend 
 
 \item
   \texttt{KeySubsequentDelay}\\
@@ -6269,7 +6291,7 @@ functioning. Feature highlights:
   Configures the gap between key repeats. The Apple OEM default value is \texttt{5} (50ms).
   \texttt{0} is an invalid value for this option.
 
-  \emph{Note}: When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
   before normal speed key repeat starts. If so, set \texttt{KeyInitialDelay} to \texttt{0}
   and set \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
   setting. The reason for this is that the key-smoothing parameter \texttt{KeyForgetThreshold}
@@ -6278,30 +6300,51 @@ functioning. Feature highlights:
   key press, however quickly the key is physically tapped.
   (In the unlikely event that you still get frequent, or occasional, double key responses after
   setting \texttt{KeySubsequentDelay} equal to your system's value of \texttt{KeyForgetThreshold},
-  then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away - for
-  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses.)
-  The instructions in this note only apply on systems using \texttt{KeySupport}.
+  then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away\DIFdelbegin \DIFdel{- for
+  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses. )
+  The instructions in this note only apply on systems }\DIFdelend \DIFaddbegin \DIFadd{.)
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: On systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, the recommended setting is to use the same
+  value as }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{. This value may then be tuned upwards for slower key repeat
+  if desired, but not downwards.
+  On systems not }\DIFaddend using \texttt{KeySupport} \DIFaddbegin \DIFadd{the recommended starting value is }\texttt{\DIFadd{5}}\DIFadd{,
+  and this may optionally be tuned up or down according to user preference}\DIFaddend .
 
 \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{1})\\
+  \textbf{Failsafe}: \texttt{1}\DIFdelbegin \DIFdel{)}\DIFdelend \\
   \textbf{Description}: Configure pointer speed divisor in OpenCore implementation
   of Apple Event protocol.
+  \DIFaddbegin \DIFadd{Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}\DIFaddend 
 
   Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
   \texttt{0} is an invalid value for this option.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: The recommended value for this option is }\texttt{\DIFadd{1}}\DIFadd{. This value may
+  optionally be modified in combination with }\texttt{\DIFadd{PointerSpeedMul}}\DIFadd{, according to user
+  preference, to achieve customised mouse movement scaling.
+}
+
+\DIFaddend \item
   \texttt{PointerSpeedMul}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0})\\
+  \textbf{Failsafe}: \texttt{0}\DIFdelbegin \DIFdel{)}\DIFdelend \\
   \textbf{Description}: Configure pointer speed multiplier in OpenCore implementation
   of Apple Event protocol.
+  \DIFaddbegin \DIFadd{Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}\DIFaddend 
 
   Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
 
-\end{enumerate}
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: The recommended value for this option is }\texttt{\DIFadd{1}}\DIFadd{. This value may
+  optionally be modified in combination with }\texttt{\DIFadd{PointerSpeedDiv}}\DIFadd{, according to user
+  preference, to achieve customised mouse movement scaling.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Audio Properties}\label{uefiaudioprops}
 
