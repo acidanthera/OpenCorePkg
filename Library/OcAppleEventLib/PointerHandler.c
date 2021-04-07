@@ -125,11 +125,8 @@ STATIC DIMENSION mCursorPosition;
 // mMouseMoved
 STATIC BOOLEAN mMouseMoved;
 
-// mScreenResolutionSet
-STATIC BOOLEAN mScreenResolutionSet;
-
 // mScreenResolution
-STATIC DIMENSION mResolution;
+STATIC DIMENSION mResolution = { 800, 600 };
 
 STATIC UINT64 mMaxPointerResolutionX = 1;
 STATIC UINT64 mMaxPointerResolutionY = 1;
@@ -439,7 +436,7 @@ EventCloseSimplePointerInstallNotifyEvent (
 
 // InternalGetScreenResolution
 STATIC
-EFI_STATUS
+VOID
 InternalGetScreenResolution (
   VOID
   )
@@ -455,85 +452,75 @@ InternalGetScreenResolution (
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetScreenResolution\n"));
 
+  //
+  // CHANGE: Do not cache screen resolution to account for changes.
+  //
+
+  HorizontalResolution = 0;
+  VerticalResolution   = 0;
+
   Status = gBS->HandleProtocol (
-                  gST->ConsoleOutHandle,
-                  &gEfiGraphicsOutputProtocolGuid,
-                  (VOID **)&GraphicsOutput
-                  );
-
-  if (Status == EFI_UNSUPPORTED) {
-    //
-    // Fallback to default resolution.
-    //
-    mResolution.Horizontal = 800;
-    mResolution.Vertical   = 600;
-
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **)&GraphicsOutput
+    );
+  if (!EFI_ERROR (Status)) {
+    Info                 = GraphicsOutput->Mode->Info;
+    HorizontalResolution = Info->HorizontalResolution;
+    VerticalResolution   = Info->VerticalResolution;
+  } else if (Status == EFI_UNSUPPORTED) {
     Status = gBS->HandleProtocol (
-                    gST->ConsoleOutHandle,
-                    &gEfiUgaDrawProtocolGuid,
-                    (VOID **)&UgaDraw
-                    );
-
-    if (!EFI_ERROR (Status)) {
-      Status = UgaDraw->GetMode (
-                          UgaDraw,
-                          &HorizontalResolution,
-                          &VerticalResolution,
-                          &ColorDepth,
-                          &RefreshRate
-                          );
-    }
-
-    //
-    // Apple does not check for Horizontal/Vertical resolution being > 0 here
-    //
-    if (!EFI_ERROR (Status) && HorizontalResolution > 0 && VerticalResolution > 0) {
-      mResolution.Horizontal = HorizontalResolution;
-      mResolution.Vertical   = VerticalResolution;
-      //
-      // Apple does not set mScreenResolutionSet to true here
-      //
-      mScreenResolutionSet   = TRUE;
-    }
-
+      gST->ConsoleOutHandle,
+      &gEfiUgaDrawProtocolGuid,
+      (VOID **)&UgaDraw
+      );
     DEBUG ((
       DEBUG_INFO,
       "OCAE: Failed to handle GOP, discovering UGA - %r\n",
       Status
       ));
 
-    Status = EFI_SUCCESS;
-  } else if (!EFI_ERROR (Status)) {
-    Info                   = GraphicsOutput->Mode->Info;
-    mResolution.Horizontal = Info->HorizontalResolution;
-    mResolution.Vertical   = Info->VerticalResolution;
+    if (!EFI_ERROR (Status)) {
+      Status = UgaDraw->GetMode (
+        UgaDraw,
+        &HorizontalResolution,
+        &VerticalResolution,
+        &ColorDepth,
+        &RefreshRate
+        );
+    }
+  }
 
-    //
-    // Apple does not check Info->HorizontalResolution being > 0 here
-    //
-    if (Info->HorizontalResolution > 0 && Info->VerticalResolution > 0) {
-      mScreenResolutionSet = TRUE;
+  if (!EFI_ERROR (Status)) {
+    if (HorizontalResolution > 0 && VerticalResolution > 0) {
+      mResolution.Horizontal = (INT32) HorizontalResolution;
+      mResolution.Vertical   = (INT32) VerticalResolution;
+
+      if (mCursorPosition.Horizontal >= mResolution.Horizontal) {
+        mCursorPosition.Horizontal = mResolution.Horizontal - 1;
+      }
+
+      if (mCursorPosition.Vertical >= mResolution.Vertical) {
+        mCursorPosition.Vertical = mResolution.Vertical - 1;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAE: Set screen resolution to %dx%d - %r\n",
+        mResolution.Horizontal,
+        mResolution.Vertical,
+        Status
+        ));
     } else {
-      Status = EFI_NOT_READY;
+      DEBUG ((DEBUG_INFO, "OCAE: Screen resolution has 0-dimension\n"));
     }
   } else {
     DEBUG ((
       DEBUG_INFO,
-      "OCAE: Failed to handle GOP - %r\n",
+      "OCAE: Failed to get screen resolution - %r\n",
       Status
       ));
   }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OCAE: Set screen resolution to %dx%d [%d] - %r\n",
-    mResolution.Horizontal,
-    mResolution.Vertical,
-    mScreenResolutionSet,
-    Status
-    ));
-
-  return Status;
 }
 
 // InternalGetUiScaleData
@@ -988,34 +975,28 @@ EventSetCursorPositionImpl (
 
   DEBUG ((DEBUG_VERBOSE, "EventSetCursorPositionImpl\n"));
 
-  if (!mScreenResolutionSet) {
-    Status = InternalGetScreenResolution ();
-  }
+  InternalGetScreenResolution ();
 
-  if (mScreenResolutionSet) {
-    Status = EFI_INVALID_PARAMETER;
+  Status = EFI_INVALID_PARAMETER;
 
-    //
-    // Apple did not check for negatives here.
-    //
+  //
+  // Apple did not check for negatives here.
+  //
 
-    if (Position->Horizontal >= 0 && Position->Vertical >= 0
-     && (Position->Horizontal < mResolution.Horizontal)
-     && (Position->Vertical < mResolution.Vertical)) {
-      mCursorPosition.Horizontal = Position->Horizontal;
-      mCursorPosition.Vertical   = Position->Vertical;
-      mPointerRawX = MultS64x64 (
-        mCursorPosition.Horizontal,
-        (INT64) mMaxPointerResolutionX
-        );
-      mPointerRawY = MultS64x64 (
-        mCursorPosition.Vertical,
-        (INT64) mMaxPointerResolutionY
-        );
-      Status = EFI_SUCCESS;
-    }
-  } else if (EFI_ERROR (Status)) {
-    Status = EFI_NOT_READY;
+  if (Position->Horizontal >= 0 && Position->Vertical >= 0
+    && (Position->Horizontal < mResolution.Horizontal)
+    && (Position->Vertical < mResolution.Vertical)) {
+    mCursorPosition.Horizontal = Position->Horizontal;
+    mCursorPosition.Vertical   = Position->Vertical;
+    mPointerRawX = MultS64x64 (
+      mCursorPosition.Horizontal,
+      (INT64) mMaxPointerResolutionX
+      );
+    mPointerRawY = MultS64x64 (
+      mCursorPosition.Vertical,
+      (INT64) mMaxPointerResolutionY
+      );
+    Status = EFI_SUCCESS;
   }
 
   return Status;

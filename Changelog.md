@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.6.9
+- Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
+
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
 - Reduced legacy boot install interaction effort
