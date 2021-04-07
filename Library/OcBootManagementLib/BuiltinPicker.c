@@ -351,7 +351,7 @@ OcShowSimpleBootMenu (
   PlayChosen     = FALSE;
 
   DEBUG_CODE_BEGIN ();
-  if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+  if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_SHOW_DEBUG_DISPLAY) != 0) {
     DEBUG ((DEBUG_INFO, "OCB: Init builtin picker debug\n"));
     InitKbDebugDisplay();
     BootContext->PickerContext->KbDebug = &mSimplePickerKbDebug;
@@ -413,7 +413,7 @@ OcShowSimpleBootMenu (
       }
 
       DEBUG_CODE_BEGIN ();
-      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_SHOW_DEBUG_DISPLAY) != 0) {
         //
         // Varying part of milliseconds display
         //
@@ -440,7 +440,7 @@ OcShowSimpleBootMenu (
       }
 
       DEBUG_CODE_BEGIN ();
-      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_SHOW_DEBUG_DISPLAY) != 0) {
         //
         // Fixed part of milliseconds display
         //
@@ -503,7 +503,7 @@ OcShowSimpleBootMenu (
 #endif
 
       DEBUG_CODE_BEGIN ();
-      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_DEBUG_DISPLAY) != 0) {
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_SHOW_DEBUG_DISPLAY) != 0) {
         //
         // Parts of main debug display which do not need to reprint every frame
         // TODO: Could do more here
