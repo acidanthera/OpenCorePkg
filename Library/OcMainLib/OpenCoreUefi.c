@@ -374,20 +374,18 @@ OcReinstallProtocols (
   }
 
 
-  if (InstallAppleEvent) {
-    if (OcAppleEventInstallProtocol (
-      OverrideAppleEvent,
-      UseCustomDelays,
-      Config->Uefi.AppleInput.KeyInitialDelay,
-      Config->Uefi.AppleInput.KeySubsequentDelay,
-      Config->Uefi.AppleInput.PointerSpeedDiv,
-      Config->Uefi.AppleInput.PointerSpeedMul
-      ) == NULL) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to install apple event protocol\n"));
-    }
-  } else {
-    DEBUG ((DEBUG_INFO, "OC: Allowing OEM apple event protocol to connect\n"));
-  }
+  if (OcAppleEventInstallProtocol (
+    InstallAppleEvent,
+    OverrideAppleEvent,
+    UseCustomDelays,
+    Config->Uefi.AppleInput.KeyInitialDelay,
+    Config->Uefi.AppleInput.KeySubsequentDelay,
+    Config->Uefi.AppleInput.PointerSpeedDiv,
+    Config->Uefi.AppleInput.PointerSpeedMul
+    ) == NULL
+    && InstallAppleEvent) {
+    DEBUG ((DEBUG_ERROR, "OC: Failed to install apple event protocol\n"));
+  };
 
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {
     DEBUG ((DEBUG_ERROR, "OC: Failed to install firmware volume protocol\n"));

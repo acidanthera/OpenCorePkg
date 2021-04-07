@@ -548,17 +548,22 @@ AppleEventUnload (
 /**
   Install and initialise Apple Event protocol.
 
-  @param[in] Reinstall          Overwrite installed protocol.
+  @param[in] Install            If false, do not install even when no suitable OEM version found.
+  @param[in] Reinstall          If true, force overwrite installed protocol.
+                                If false, use Apple OEM protocol where possible.
   @param[in] CustomDelays       If true, use key delays specified.
                                 If false, use Apple OEM default key delay values.
   @param[in] KeyInitialDelay    Key repeat initial delay in 10ms units.
   @param[in] KeySubsequentDelay Key repeat subsequent delay in 10ms units.
                                 If zero, warn and use 1.
+  @param[in] PointerSpeedDiv    Pointer speed divisor. If zero, warn and use 1.
+  @param[in] PointerSpeedMul    Pointer speed multiplier.
 
   @retval installed or located protocol or NULL.
 **/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
+  IN BOOLEAN  Install,
   IN BOOLEAN  Reinstall,
   IN BOOLEAN  CustomDelays,
   IN UINT16   KeyInitialDelay,
@@ -567,34 +572,52 @@ OcAppleEventInstallProtocol (
   IN UINT16   PointerSpeedMul
   )
 {
-  EFI_STATUS           Status;
-  APPLE_EVENT_PROTOCOL *Protocol;
+  EFI_STATUS                    Status;
+  APPLE_EVENT_PROTOCOL          *AppleEvent;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
-  if (Reinstall) {
-    Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed: %r\n", Status));
-      return NULL;
-    }
-  } else {
+  if (!Reinstall) {
     Status = gBS->LocateProtocol (
       &gAppleEventProtocolGuid,
       NULL,
-      (VOID *) &Protocol
+      (VOID *) &AppleEvent
       );
 
     if (!EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAE: Using OEM\n"));
-      return Protocol;
+      if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION_MINIMUM) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAE: Not using OEM revision %u, required %u\n",
+          (UINT32) AppleEvent->Revision,
+          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          ));
+        Reinstall = TRUE;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAE: Using OEM revision %u, matches required %u\n",
+          (UINT32) AppleEvent->Revision,
+          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          ));
+        return AppleEvent;
+      }
     }
   }
 
-  if (CustomDelays) {
-    InternalSetKeyDelays (KeyInitialDelay, KeySubsequentDelay);
+  if (!Install) {
+    DEBUG ((DEBUG_INFO, "OCAE: Letting OEM protocol connect later\n"));
+    return NULL;
   }
 
+  Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed: %r\n", Status));
+    return NULL;
+  }
+
+  InternalSetKeyDelays (CustomDelays, KeyInitialDelay, KeySubsequentDelay);
+  
   InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
 
   Status = gBS->InstallMultipleProtocolInterfaces (
@@ -611,11 +634,11 @@ OcAppleEventInstallProtocol (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCAE: Install failed\n"));
+    DEBUG ((DEBUG_ERROR, "OCAE: Builtin install failed\n"));
     AppleEventUnload ();
     return NULL;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAE: Installed\n"));
+  DEBUG ((DEBUG_INFO, "OCAE: Builtin installed\n"));
   return &mAppleEventProtocol;
 }

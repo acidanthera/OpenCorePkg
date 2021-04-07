@@ -157,6 +157,7 @@ EventInputKeyFromAppleKeyCode (
 // InternalSetKeyDelays
 VOID
 InternalSetKeyDelays (
+  IN  BOOLEAN         CustomDelays,
   IN  UINT16          KeyInitialDelay,
   IN  UINT16          KeySubsequentDelay
   );

@@ -21,7 +21,9 @@
 /**
   Install and initialise Apple Event protocol.
 
-  @param[in] Reinstall          Overwrite installed protocol.
+  @param[in] Install            If false, do not install even when no suitable OEM version found.
+  @param[in] Reinstall          If true, force overwrite installed protocol.
+                                If false, use Apple OEM protocol where possible.
   @param[in] CustomDelays       If true, use key delays specified.
                                 If false, use Apple OEM default key delay values.
   @param[in] KeyInitialDelay    Key repeat initial delay in 10ms units.
@@ -34,6 +36,7 @@
 **/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
+  IN BOOLEAN  Install,
   IN BOOLEAN  Reinstall,
   IN BOOLEAN  CustomDelays,
   IN UINT16   KeyInitialDelay,

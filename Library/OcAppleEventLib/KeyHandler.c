@@ -78,25 +78,28 @@ STATIC APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *mKeyMapAggregator = NULL;
 // InternalSetKeyDelays
 VOID
 InternalSetKeyDelays (
+  IN  BOOLEAN         CustomDelays,
   IN  UINT16          KeyInitialDelay,
   IN  UINT16          KeySubsequentDelay
   )
 {
-  //
-  // Zero is meaningful
-  //
-  mKeyInitialDelay    = KeyInitialDelay;
+  if (CustomDelays) {
+    //
+    // Zero is meaningful
+    //
+    mKeyInitialDelay    = KeyInitialDelay;
 
-  //
-  // Zero is meaningless (also div by zero expception): warn and use 1
-  //
-  if (KeySubsequentDelay == 0) {
-    KeySubsequentDelay = 1;
-    DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
+    //
+    // Zero is meaningless (also div by zero expception): warn and use 1
+    //
+    if (KeySubsequentDelay == 0) {
+      KeySubsequentDelay = 1;
+      DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
+    }
+    mKeySubsequentDelay = KeySubsequentDelay;
   }
-  mKeySubsequentDelay = KeySubsequentDelay;
   
-  DEBUG ((DEBUG_INFO, "OCAE: Using %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
+  DEBUG ((DEBUG_INFO, "OCAE: Using key delays %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
 }
 
 // InternalGetAppleKeyStrokes
