@@ -256,7 +256,7 @@ SmbiosDebugProcessorInformation (
     DEBUG_INFO,
     " %-16a %a\n",
     "Manufacturer",
-    SmbiosGetString (Record, Record.Standard.Type4->ProcessorManufacture)
+    SmbiosGetString (Record, Record.Standard.Type4->ProcessorManufacturer)
     ));
 
   DEBUG_SMBIOS ((

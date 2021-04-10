@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
+- Updated underlying EDK II package to edk2-stable202102
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

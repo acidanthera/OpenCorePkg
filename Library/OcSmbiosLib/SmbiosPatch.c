@@ -507,7 +507,7 @@ PatchProcessorInformation (
     SMBIOS_OVERRIDE_S (Table, Standard.Type4->Socket, Original, NULL, &StringIndex, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorType, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorManufacture, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorManufacturer, Original, NULL, &StringIndex, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorId, Original, NULL, NULL);
     SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
