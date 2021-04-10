@@ -34,6 +34,7 @@
   Md5.c
   RsaDigitalSign.c
   Sha1.c
+  Sha2-avx.h
   Sha2.c
   SecureMem.c
   PasswordHash.c
@@ -47,6 +48,8 @@
 
 [Sources.X64]
   X64/BigNumWordMul64.c
+  X64/Sha2-avx.c
+  X64/sha512-avx.nasm
 
 [FixedPcd]
   gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli
