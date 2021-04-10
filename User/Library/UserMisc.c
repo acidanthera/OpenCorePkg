@@ -662,3 +662,13 @@ GetFirstGuidHob (
 {
   return NULL;
 }
+
+EFI_DEVICE_PATH_PROTOCOL *
+EFIAPI
+DevicePathFromHandle (
+  IN EFI_HANDLE                      Handle
+  )
+{
+  return NULL;
+}
+
