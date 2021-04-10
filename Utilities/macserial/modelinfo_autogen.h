@@ -472,7 +472,7 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* Xserve3,1      */ {"63C", "1PH"},
   /* iMac10,1       */ {"000"},
   /* iMac11,1       */ {"000"},
-  /* iMac11,2       */ {"000"},
+  /* iMac11,2       */ {"DCJN"},
   /* iMac11,3       */ {"000"},
   /* iMac12,1       */ {"DJWK", "DM66", "DNJK", "DP0H", "DKG1", "DM65", "DNJJ", "DKG2", "DM67", "DNJL", "DP0K", "DP00"},
   /* iMac12,2       */ {"DJWM", "DMT3", "DMT5", "DJWN", "DM69", "DJWP", "DM6C"},

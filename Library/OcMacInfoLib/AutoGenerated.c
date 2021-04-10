@@ -2170,7 +2170,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .SmcPlatform = {107, 55, 52, 0, 0, 0, 0, 0},
   .BIOSVersion = "99.0.0.0.0",
   .BIOSReleaseDate = "06/13/2019",
-  .SystemVersion = "1.2",
+  .SystemVersion = "1.0",
   .SystemSKUNumber = "",
   .SystemFamily = "iMac",
   .BoardVersion = "iMac11,2",
@@ -2182,7 +2182,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0x9,
   .PlatformFeature = MAC_INFO_PLATFORM_FEATURE_MISSING,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xE00DE137ULL,
+  .FirmwareFeatures = 0xC00C9423ULL,
   .FirmwareFeaturesMask = 0xFF1FFF3FULL,
  },
  {

@@ -4,7 +4,7 @@ BIOSLegacyVersion: "IM112.88Z.F000.B00.1906132310"
 BIOSReleaseDate: "06/13/2019"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac11,2"
-SystemVersion: "1.2"
+SystemVersion: "1.0"
 # Note, this one is used by macserial
 SystemSerialNumber: "W8034342DB7"
 SystemSKUNumber: ""
@@ -23,13 +23,9 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-F2238AC8"
 ChassisAssetTag: ""
-# FIXME: check
-FirmwareFeatures: 0xE00DE137
-# FIXME: check
+FirmwareFeatures: 0xC00C9423
 FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000E00DE137
-# FIXME: check
+ExtendedFirmwareFeatures: 0x00000000C00C9423
 ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
 MemoryFormFactor: 0x9
 # FIXME: check values (most should be correct?) and add missing, if any
@@ -143,7 +139,7 @@ AppleModelCode:
 # Note, first board code is used by macserial
 # FIXME: check
 AppleBoardCode:
-  - "000"
+  - "DCJN"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2010
