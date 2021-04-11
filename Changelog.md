@@ -8,6 +8,7 @@ OpenCore Changelog
 - Changed key repeat failsafes and sample values to Apple OEM values
 - Changed PointerSpeedMul failsafe to Apple OEM value
 - Updated docs to include configuration of key repeat settings on AMI KeySupport vs. V1 or V2 KeySupport vs. systems not using KeySupport
+- Prevented 'set default' UI when action not permitted by security config
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
