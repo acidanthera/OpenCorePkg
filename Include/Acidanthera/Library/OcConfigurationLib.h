@@ -587,11 +587,11 @@ typedef enum {
 ///
 #define OC_UEFI_APPLEINPUT_FIELDS(_, __) \
   _(OC_STRING                   , AppleEvent         ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING) ) \
-  _(OC_STRING                   , CustomDelays       ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING) ) \
-  _(UINT16                      , KeyInitialDelay    ,     , 0                                 , ()) \
-  _(UINT16                      , KeySubsequentDelay ,     , 1                                 , ()) \
+  _(BOOLEAN                     , CustomDelays       ,     , FALSE                             , ()) \
+  _(UINT16                      , KeyInitialDelay    ,     , 50                                , ()) \
+  _(UINT16                      , KeySubsequentDelay ,     , 5                                 , ()) \
   _(UINT16                      , PointerSpeedDiv    ,     , 1                                 , ()) \
-  _(UINT16                      , PointerSpeedMul    ,     , 0                                 , ())
+  _(UINT16                      , PointerSpeedMul    ,     , 1                                 , ())
   OC_DECLARE (OC_UEFI_APPLEINPUT)
 
 ///

@@ -152,7 +152,6 @@ CheckUEFIAppleInput (
   UINT32          ErrorCount;
   OC_UEFI_CONFIG  *UserUefi;
   CONST CHAR8     *AppleEvent;
-  CONST CHAR8     *CustomDelays;
 
   ErrorCount      = 0;
   UserUefi        = &Config->Uefi;
@@ -167,23 +166,14 @@ CheckUEFIAppleInput (
     ++ErrorCount;
   }
 
-  CustomDelays = OC_BLOB_GET (&UserUefi->AppleInput.CustomDelays);
-  if (AsciiStrCmp (CustomDelays, "Auto") != 0
-    && AsciiStrCmp (CustomDelays, "Enabled") != 0
-    && AsciiStrCmp (CustomDelays, "Disabled") != 0) {
-    DEBUG ((DEBUG_WARN, "UEFI->AppleInput->CustomDelays is illegal (Can only be Auto, Enabled, Disabled)!\n"));
-    ++ErrorCount;
-  }
-
-  if (UserUefi->Input.KeySupport
-    && AsciiStrCmp (CustomDelays, "Disabled") != 0) {
+  if (UserUefi->Input.KeySupport && UserUefi->AppleInput.CustomDelays) {
     if (UserUefi->AppleInput.KeyInitialDelay != 0
       && UserUefi->AppleInput.KeyInitialDelay < UserUefi->Input.KeyForgetThreshold) {
-      DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is less than the KeyForgetThreshold value (likely to result in uncontrolled key repeats); use zero (0) instead!\n"));
+      DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is less than the KeyForgetThreshold value (will result in uncontrolled key repeats)!\n"));
       ++ErrorCount;
     }
     if (UserUefi->AppleInput.KeySubsequentDelay < UserUefi->Input.KeyForgetThreshold) {
-      DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is less than the KeyForgetThreshold value (likely to result in uncontrolled key repeats); use the KeyForgetThreshold value, or greater, instead!\n"));
+      DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is less than the KeyForgetThreshold value (will result in uncontrolled key repeats)!\n"));
       ++ErrorCount;
     }
   }

@@ -588,7 +588,7 @@ OcAppleEventInstallProtocol (
       if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION_MINIMUM) {
         DEBUG ((
           DEBUG_INFO,
-          "OCAE: Not using OEM revision %u, required %u\n",
+          "OCAE: Not using OEM revision %u, does not meet required minimum %u\n",
           (UINT32) AppleEvent->Revision,
           (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));
@@ -596,7 +596,7 @@ OcAppleEventInstallProtocol (
       } else {
         DEBUG ((
           DEBUG_INFO,
-          "OCAE: Using OEM revision %u, matches required %u\n",
+          "OCAE: Using OEM revision %u, meets required minimum %u\n",
           (UINT32) AppleEvent->Revision,
           (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
           ));

@@ -97,9 +97,9 @@ InternalSetKeyDelays (
       DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
     }
     mKeySubsequentDelay = KeySubsequentDelay;
+
+    DEBUG ((DEBUG_INFO, "OCAE: Using key delays %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
   }
-  
-  DEBUG ((DEBUG_INFO, "OCAE: Using key delays %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
 }
 
 // InternalGetAppleKeyStrokes
