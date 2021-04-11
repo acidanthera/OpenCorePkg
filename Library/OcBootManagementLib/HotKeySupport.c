@@ -225,7 +225,11 @@ GetPickerKeyInfo (
   //
   // Set OcModifiers early, so they are correct even if - say - a hotkey or non-repeating key returns first.
   //
-  ValidBootModifiers = APPLE_MODIFIERS_CONTROL;
+  ValidBootModifiers = APPLE_MODIFIERS_NONE;
+  
+  if (Context->AllowSetDefault) {
+    ValidBootModifiers |= APPLE_MODIFIERS_CONTROL;
+  }
 
   //
   // NB As historically SHIFT handling here is considered a 'hotkey':
@@ -252,7 +256,8 @@ GetPickerKeyInfo (
   // Alternative 'set default' key, if modifiers not working;
   // useful both for 'set default' and for tuning KeyForgetThreshold.
   //
-  if (OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyEquals)) {
+  if (Context->AllowSetDefault
+    && OcKeyMapHasKey (AkmaKeys, AkmaNumKeys, AppleHidUsbKbUsageKeyEquals)) {
     PickerKeyInfo->OcModifiers |= OC_MODIFIERS_SET_DEFAULT;
   }
 
