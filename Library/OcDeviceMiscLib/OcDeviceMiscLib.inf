@@ -51,6 +51,7 @@
   OcGuardLib
   PrintLib
   UefiLib
+  ShellCommandLib
   UefiBootServicesTableLib
 
 [Sources]
