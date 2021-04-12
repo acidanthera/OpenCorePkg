@@ -800,6 +800,14 @@ OcLoadUefiSupport (
     OcInstallPermissiveSecurityPolicy ();
   }
 
+  if (Config->Uefi.Quirks.ForgeUefiSupport) {
+    OcForgeUefiSupport ();
+  }
+
+  if (Config->Uefi.Quirks.ReloadOptionRoms) {
+    OcReloadOptionRoms ();
+  }
+
   OcMiscUefiQuirksLoaded (Config);
 
   //

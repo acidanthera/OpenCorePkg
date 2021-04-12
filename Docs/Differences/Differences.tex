@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Apr  6 17:30:22 2021
-%DIF ADD ../Configuration.tex        Tue Apr  6 22:57:35 2021
+%DIF DEL PreviousConfiguration.tex   Sat Apr 10 16:12:14 2021
+%DIF ADD ../Configuration.tex        Mon Apr 12 23:56:25 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -653,7 +653,19 @@ cross-platform and open-source alternative, the
 \href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
 utilised.
 
-For BIOS booting, a third-party UEFI environment provider is required and
+\DIFaddbegin \DIFadd{It is strongly advised not to use any software that is aware of the internal
+configration structure as it constantly gets out of date and will cause
+incorrect configuration to be generated. If it is a must desprite the
+warning one should make sure to only use stable versions of OpenCore
+with explicit support for the particular version in the app. The choice
+of open-source implementations with transparent binary generation
+is encouraged (e.g. }\href{https://github.com/ic005k/QtOpenCoreConfig}{\DIFadd{OCAT}}\DIFadd{),
+since other tools may contain malware. Remember that a configuration
+made for a different hardware setup shall never be used on another hardware
+setup.
+}
+
+\DIFaddend For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
 To run OpenCore on such a legacy system, \texttt{OpenDuetPkg} can be installed
 with a dedicated tool --- BootInstall (bundled with OpenCore).
@@ -701,7 +713,8 @@ approach could be \href{https://www.sublimetext.com}{Sublime Text} with
 \href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
 Add \texttt{.clang\_complete} file with similar content to the UDK root:
 
-\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash,alsolanguage=DIFcode]
 -I/UefiPackages/MdePkg
 -I/UefiPackages/MdePkg/Include
 -I/UefiPackages/MdePkg/Include/X64
@@ -719,6 +732,7 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -I/UefiPackages/OpenCorePkg/Include/Nvidia
 -I/UefiPackages/OpenCorePkg/Include/VMware
 -I/UefiPackages/OvmfPkg/Include
+%DIF > -I/UefiPackages/ShellPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
 -include
@@ -736,6 +750,7 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DOC_TARGET_NOOPT=1
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
+\DIFmodend
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
@@ -3279,7 +3294,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0010} --- \texttt{OC\_ATTR\_USE\_POINTER\_CONTROL}, enables pointer control
   in the OpenCore picker when available. For example, this could make use of mouse or trackpad to
   control UI elements.
-  \item \texttt{0x0020} --- \texttt{OC\_ATTR\_DEBUG\_DISPLAY}, enable display of additional
+  \item \texttt{0x0020} --- \texttt{OC\_ATTR\_\DIFaddbegin \DIFadd{SHOW\_}\DIFaddend DEBUG\_DISPLAY}, enable display of additional
   timing and debug information, in Builtin picker in \texttt{DEBUG} and \texttt{NOOPT}
   builds only.
   \end{itemize}
@@ -6217,31 +6232,35 @@ functioning. Feature highlights:
   \begin{itemize}
   \tightlist
   \item \texttt{Auto} --- \DIFdelbegin \DIFdel{Performs automatic choice of implementation . Because of optimisations used to achieve
-  fast boot times, this actually means that the OpenCore re-implementation will be found and usedexcept in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
+  fast boot times, this actually means that the OpenCore re-implementation will be found and
+  used
+  except in the case that OpenCore was been explicitly selected and started (not just auto-booted) from
   Apple 's boot picker (where present).
   }\DIFdelend \DIFaddbegin \DIFadd{Use OEM Apple Event implementation if available, connected and
   recent enough to be used, otherwise use OC reimplementation.
-  One some Macs (e.g. Mac Pro) this will find the Apple implementation. On both older and
+  On non-Apple hardware this will use the OpenCore builtin implementation.
+  On some Macs (e.g. classic Mac Pro) this will find the Apple implementation. On both older and
   newer Macs than this, this option will always or often use the OC implementation. On older Macs
   this is because the implementation available is too old to be used, on newer Macs it is
   because of optimisations added by Apple which do not connect the Apple Event protocol
   except when needed -- e.g. except when the Apple boot picker is explicitly started.
   Due to its somewhat unpredicatable results, this option is not normally recommended.
-  }\DIFaddend \item \texttt{Builtin} ---  Use OpenCore's updated re-implementation of the Apple Event protocol.
-  \DIFdelbegin \DIFdel{Recommended}\DIFdelend \DIFaddbegin \DIFadd{Using this setting is recommended even on Apple hardware where the OEM version can be used, due to
+  }\DIFaddend \item \texttt{Builtin} ---  \DIFdelbegin \DIFdel{Use }\DIFdelend \DIFaddbegin \DIFadd{Always use }\DIFaddend OpenCore's updated re-implementation of the Apple Event protocol.
+  \DIFdelbegin \DIFdel{Recommended}\DIFdelend \DIFaddbegin \DIFadd{Use of this setting is recommended even on Apple hardware, due to
   improvements (better fine mouse control, configurable key delays) made in the OC re-implementation
   of the protocol}\DIFaddend .
-  \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. This results in Apple's
-  implementation being \DIFdelbegin \DIFdel{reliably used on }\DIFdelend \DIFaddbegin \DIFadd{used on most (except the oldest) }\DIFaddend Apple systems. It results in no keyboard or mouse support
-  otherwise. \DIFaddbegin \DIFadd{On all Apple hardware where a recent enough version of the OEM protocol is available -- whether
-  connected automatically by Apple's firmware or not -- this option will work reliably; nevertheless for
-  the reasons stated }\texttt{\DIFadd{Builtin}} \DIFadd{is recommended in preference to this option in most use cases.
+  \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. \DIFdelbegin \DIFdel{This results in Apple 's
+  implementation being reliably used on Apple systems. It results }\DIFdelend \DIFaddbegin \DIFadd{On all Apple hardware
+  where a recent enough Apple OEM version of the protocol is available -- whether or not connected automatically
+  by Apple's firmware -- this option will reliably access the Apple implementation. On all other systems, this
+  option will result }\DIFaddend in no keyboard or mouse support\DIFdelbegin \DIFdel{otherwise. }\DIFdelend \DIFaddbegin \DIFadd{. For the reasons stated, }\texttt{\DIFadd{Builtin}} \DIFadd{is recommended in
+  preference to this option in most cases.
   }\DIFaddend \end{itemize}
 
 \item
   \texttt{CustomDelays}\\
-  \textbf{Type}: \texttt{plist\ string}\\
-  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{string}\DIFdelend \DIFaddbegin \DIFadd{boolean}\DIFaddend }\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{false}\DIFaddend }\\
   \textbf{Description}: Enable custom key repeat delays \DIFdelbegin \DIFdel{.
 }\DIFdelend \DIFaddbegin \DIFadd{when using the OpenCore implementation of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
@@ -6249,69 +6268,113 @@ functioning. Feature highlights:
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Auto} --- Treated as \texttt{Enabled} when \texttt{KeySupport} is \texttt{true} and \texttt{Disabled} otherwise.
-  \item \texttt{Enabled} --- The values \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
-  \item \texttt{Disabled} --- Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
+  \item \DIFdelbegin \texttt{\DIFdel{Auto}} %DIFAUXCMD
+\DIFdel{--- Treated as }\texttt{\DIFdel{Enabled}} %DIFAUXCMD
+\DIFdel{when }\texttt{\DIFdel{KeySupport}} %DIFAUXCMD
+\DIFdel{is }\DIFdelend \texttt{true} \DIFdelbegin \DIFdel{and }\texttt{\DIFdel{Disabled}} %DIFAUXCMD
+\DIFdel{otherwise.
+  }%DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{Enabled}} %DIFAUXCMD
+\DIFdelend --- The values \DIFaddbegin \DIFadd{of }\DIFaddend \texttt{KeyInitialDelay} and \texttt{KeySubsequentDelay} are used.
+  \item \texttt{\DIFdelbegin \DIFdel{Disabled}\DIFdelend \DIFaddbegin \DIFadd{false}\DIFaddend } --- Apple default values of 500ms (\texttt{50}) and 50ms (\texttt{5}) are used.
   \end{itemize}
 
 \item
   \texttt{KeyInitialDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0} (no initial delay, immediate repeat)\\
-  \textbf{Description}: Configure initial keyboard repeat delay in OpenCore implementation
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{50}\DIFaddend } (\DIFdelbegin \DIFdel{no initial delay, immediate }\DIFdelend \DIFaddbegin \DIFadd{500ms before first key }\DIFaddend repeat)\\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Configure initial keyboard repeat delay }\DIFdelend \DIFaddbegin \DIFadd{Configures the initial delay before keyboard key repeats }\DIFaddend in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 
-  Configures the initial delay before key repeat. The Apple OEM default value is \texttt{50}
-  (500ms).
+  \DIFdelbegin \DIFdel{Configures the initial delay before key repeat. }\DIFdelend The Apple OEM default value is \texttt{50} (500ms).
 
-  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: When using \texttt{KeySupport}, you may find that you get an additional slow key
-  repeat before normal speed key repeat starts. If so, \DIFdelbegin \DIFdel{your }\DIFdelend \DIFaddbegin \DIFadd{the }\DIFaddend initial key repeat delay is being
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: \DIFdelbegin \DIFdel{When }\DIFdelend \DIFaddbegin \DIFadd{On systems not }\DIFaddend using \texttt{KeySupport}, \DIFaddbegin \DIFadd{this setting may be freely used
+  to configure key repeat behaviour.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: On systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, but which do not show the `two long
+  delays' behavior (see Note 3) and/or which always show a solid `set default' indicator (see }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{)
+  then this setting may also be freely used to configure key repeat initial delay behaviour,
+  except that it should never be set to less than }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{to avoid
+  uncontrolled key repeats.
+}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: On some systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, }\DIFaddend you may find that you \DIFdelbegin \DIFdel{get an }\DIFdelend \DIFaddbegin \DIFadd{see
+  one }\DIFaddend additional slow key repeat before normal speed key repeat starts\DIFaddbegin \DIFadd{, when holding a
+  key down}\DIFaddend . If so, \DIFdelbegin \DIFdel{your initial key repeat delay is being
   driven by your BIOS firmware and cannot be overriden by OC (due to technical limitations
-  of how \texttt{KeySupport} works, to derive raw key data from the non-raw key
+  of how }\texttt{\DIFdel{KeySupport}} %DIFAUXCMD
+\DIFdel{works, to derive raw key data from the non-raw key
   data which is all that UEFI makes available). To avoid this minor but undesired effect of
   two long repeats, you can simply cancel the second, Apple Event, repeat by setting
-  \texttt{KeyInitialDelay} to \texttt{0}. When doing this you should also set
-  \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
-  setting (see more information in the \texttt{KeySubsequentDelay} setting).
-\DIFdelbegin \DIFdel{The instructions in this note only apply on }\DIFdelend \DIFaddbegin 
+  }\texttt{\DIFdel{KeyInitialDelay}} %DIFAUXCMD
+\DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{you may wish to configure }\DIFaddend \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{KeyInitialDelay}\DIFaddend } \DIFdelbegin \DIFdel{. When doing this you should also set
+  }\DIFdelend \DIFaddbegin \DIFadd{and }\DIFaddend \texttt{KeySubsequentDelay}
+  \DIFdelbegin \DIFdel{to at least the value of your }\texttt{\DIFdel{KeyForgetThreshold}}
+  %DIFAUXCMD
+\DIFdel{setting (see more information in the }\DIFdelend \DIFaddbegin \DIFadd{according to the instructions at Note 3 of }\DIFaddend \texttt{KeySubsequentDelay}\DIFdelbegin \DIFdel{setting).
+The instructions in this note only apply on systems using }\texttt{\DIFdel{KeySupport}}%DIFAUXCMD
+\DIFdelend .
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: On }\DIFaddend systems using \texttt{KeySupport}\DIFdelbegin \DIFdel{.
-}\DIFdelend \DIFaddbegin \DIFadd{, the recommended value is }\texttt{\DIFadd{0}}\DIFadd{.
-  On other systems the recommended value is }\texttt{\DIFadd{50}}\DIFadd{, which may optionally
-  be tuned up or down according to user preference.
-}\DIFaddend 
 
 \item
   \texttt{KeySubsequentDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure subsequent keyboard repeat delay in OpenCore implementation
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{1}\DIFdelend \DIFaddbegin \DIFadd{5}\DIFaddend } \DIFaddbegin \DIFadd{(50ms between subsequent key repeats)}\DIFaddend \\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Configure subsequent keyboard repeat delay }\DIFdelend \DIFaddbegin \DIFadd{Configures the gap between keyboard key repeats }\DIFaddend in OpenCore implementation
   of Apple Event protocol, in units of 10ms.
 
-  Configures the gap between key repeats. The Apple OEM default value is \texttt{5} (50ms).
-  \texttt{0} is an invalid value for this option.
+  \DIFdelbegin \DIFdel{Configures the gap between key repeats. }\DIFdelend The Apple OEM default value is \texttt{5} (50ms).
+  \texttt{0} is an invalid value for this option \DIFaddbegin \DIFadd{(will issue a debug log warning and use }\texttt{\DIFadd{1}} \DIFadd{instead)}\DIFaddend .
 
-  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: When using \texttt{KeySupport}, you may find that you get one additional slow key repeat
-  before normal speed key repeat starts. If so, set \texttt{KeyInitialDelay} to \texttt{0}
-  and set \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold}
-  setting. The reason for this is that the key-smoothing parameter \texttt{KeyForgetThreshold}
-  effectively acts as the shortest time for which a key can appear to be held, therefore a
-  key repeat delay less than this will guarantee at least one extra repeat for every
-  key press, however quickly the key is physically tapped.
-  (In the unlikely event that you still get frequent, or occasional, double key responses after
-  setting \texttt{KeySubsequentDelay} equal to your system's value of \texttt{KeyForgetThreshold},
-  then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away\DIFdelbegin \DIFdel{- for
-  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses. )
-  The instructions in this note only apply on systems }\DIFdelend \DIFaddbegin \DIFadd{.)
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: \DIFdelbegin \DIFdel{When }\DIFdelend \DIFaddbegin \DIFadd{On systems not }\DIFaddend using \texttt{KeySupport}, \DIFaddbegin \DIFadd{this setting may be freely used
+  to configure key repeat behaviour.
 }
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: On systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, the recommended setting is to use the same
-  value as }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{. This value may then be tuned upwards for slower key repeat
-  if desired, but not downwards.
-  On systems not }\DIFaddend using \texttt{KeySupport} \DIFaddbegin \DIFadd{the recommended starting value is }\texttt{\DIFadd{5}}\DIFadd{,
-  and this may optionally be tuned up or down according to user preference}\DIFaddend .
+  \emph{\DIFadd{Note 2}}\DIFadd{: On systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, but which do not show the `two long
+  delays' behaviour (see Note 3) and/or which always show a solid `set default' indicator
+  (see }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{) (which should apply to many/most systems using }\texttt{\DIFadd{AMI}}
+  \texttt{\DIFadd{KeySupport}} \DIFadd{mode) then this setting may be freely used to configure key repeat
+  subsequent delay behaviour, except that it should never be set to less than }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{to avoid uncontrolled key repeats.
+}
 
-\item
+  \emph{\DIFadd{Note 3}}\DIFadd{: On some systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{, particularly }\texttt{\DIFadd{KeySupport}}
+  \DIFadd{in non-}\texttt{\DIFadd{AMI}} \DIFadd{mode, }\DIFaddend you may find that \DIFaddbegin \DIFadd{after configuring }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFaddend you get one additional slow key repeat before normal speed key repeat starts\DIFdelbegin \DIFdel{. If so, set }\DIFdelend \DIFaddbegin \DIFadd{, when holding a key down.
+  On systems where this is the case, it is an unavoidable artefect of using }\texttt{\DIFadd{KeySupport}} \DIFadd{to emulate
+  raw keyboard data, which is not made available by UEFI. While this `two long delays' issue has minimal
+  effect on overall usability, nevertheless you may wish to resolve it, and it is possible to do
+  so as follows:
+  }\begin{itemize}
+    \tightlist
+    \item \DIFadd{Set }\texttt{\DIFadd{CustomDelays}} \DIFadd{to }\texttt{\DIFadd{true}}
+    \item \DIFadd{Set }\DIFaddend \texttt{KeyInitialDelay} to \texttt{0}
+    \DIFdelbegin \DIFdel{and set }\DIFdelend \DIFaddbegin \item \DIFadd{Set }\DIFaddend \texttt{KeySubsequentDelay} to at least the value of your \texttt{KeyForgetThreshold} setting
+  \DIFdelbegin \DIFdel{. The reason for this is that the key-smoothing }\DIFdelend \DIFaddbegin \end{itemize}
+  \DIFadd{The above procedure works as follows:
+  }\begin{itemize}
+    \tightlist
+    \item \DIFadd{Setting }\texttt{\DIFadd{KeyInitialDelay}} \DIFadd{to }\texttt{\DIFadd{0}} \DIFadd{cancels the Apple Event initial repeat
+    delay (when using the OC builtin Apple Event implementation with }\texttt{\DIFadd{CustomDelays}} \DIFadd{enabled),
+    therefore the only long delay you will see is the the non-configurable and non-avoidable initial
+    long delay introduced by the BIOS key support on these machines.
+    }\item \DIFadd{Key-smoothing }\DIFaddend parameter \texttt{KeyForgetThreshold}
+    effectively acts as the shortest time for which a key can appear to be held, therefore a
+    key repeat delay \DIFaddbegin \DIFadd{of }\DIFaddend less than this will guarantee at least one extra repeat for every
+    key press, however quickly the key is physically tapped.
+    \DIFdelbegin \DIFdel{(}\DIFdelend \DIFaddbegin \item \DIFaddend In the unlikely event that you still get frequent, or occasional, double key responses after
+    setting \texttt{KeySubsequentDelay} equal to your system's value of \texttt{KeyForgetThreshold},
+    then increase \texttt{KeySubsequentDelay} by one or two more until this effect goes away\DIFdelbegin \DIFdel{- for
+  greatest keyboard responsiveness, use the lowest value which avoids multiple keypresses.
+  )
+  The instructions in this note only apply on systems using }\texttt{\DIFdel{KeySupport}}%DIFAUXCMD
+\DIFdelend .
+  \DIFaddbegin \end{itemize}
+\DIFaddend 
+
+  \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\DIFdelbegin \DIFdel{)}\DIFdelend \\
@@ -6331,7 +6394,7 @@ functioning. Feature highlights:
 \DIFaddend \item
   \texttt{PointerSpeedMul}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\DIFdelbegin \DIFdel{)}\DIFdelend \\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{1}\DIFaddend }\DIFdelbegin \DIFdel{)}\DIFdelend \\
   \textbf{Description}: Configure pointer speed multiplier in OpenCore implementation
   of Apple Event protocol.
   \DIFaddbegin \DIFadd{Has no effect when using the OEM Apple implementation (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
@@ -6525,16 +6588,44 @@ functioning. Feature highlights:
   \texttt{100} milliseconds for the same platforms. Ideally, \texttt{KeyForgetThreshold}
   should remain lower than this value, to avoid merging real key presses.
 
-  \emph{Note}: If you wish to fine tune this value, a good heuristic is to use
-  the `set default' indicator within either OpenCanopy or the builtin picker. When
-  \texttt{KeyForgetThreshold} is configured correctly, this indicator should
-  flicker once, when first pressing and holding the \texttt{CTRL} or \texttt{=/+} key, and then
-  after a further very brief interval should go on and stay on. (The initial flicker
-  is an unavoidable artefact of using \texttt{KeySupport} to emulate raw keyboard
-  data.) If \texttt{KeyForgetThreshold} is configured too low for the system, then
-  the `set default' indicator will continue to flicker while \texttt{CTRL} or \texttt{=/+} is held. Configure
+  \DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: If you wish to fine tune this value , a good heuristic is to }\DIFdelend \DIFaddbegin \DIFadd{Tuning the value of }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{is necessary for accurate
+  and responsive keyboard input on systems on which }\texttt{\DIFadd{KeySupport}} \DIFadd{is
+  enabled, and it is recommended to follow the instructions below
+  to tune it correctly for your system.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: To tune }\texttt{\DIFadd{KeyForgetThreshold}}\DIFadd{, you may }\DIFaddend use
+  the `set default' indicator within either OpenCanopy or the builtin picker.
+  \DIFdelbegin \DIFdel{When
+  }\DIFdelend \DIFaddbegin \DIFadd{If }\DIFaddend \texttt{KeyForgetThreshold} is \DIFdelbegin \DIFdel{configured correctly, this indicator should
+  }\DIFdelend \DIFaddbegin \DIFadd{too low then the `set default' indicator
+  will continue to flicker while }\texttt{\DIFadd{CTRL}} \DIFadd{or }\texttt{\DIFadd{=/+}} \DIFadd{is held down.
+  You should configure the lowest value which avoids this flicker.
+  On some systems (e.g. Aptio IV and potentially other systems using }\texttt{\DIFadd{AMI}}
+  \texttt{\DIFadd{KeySupport}} \DIFadd{mode) you will be able to find a minimum }\texttt{\DIFadd{KeyForgetThreshold}}
+  \DIFadd{value at which the `set default' indicator goes on and stays on with no flicker
+  at all - if so, use this value. On most other systems using }\texttt{\DIFadd{KeySupport}}\DIFadd{,
+  you will find that the `set default' indicator will }\DIFaddend flicker once, when first pressing
+  and holding the \texttt{CTRL} or \texttt{=/+} key, and then after a further very brief
+  interval \DIFdelbegin \DIFdel{should }\DIFdelend \DIFaddbegin \DIFadd{will }\DIFaddend go on and stay on. \DIFdelbegin \DIFdel{(The initial flicker }\DIFdelend \DIFaddbegin \DIFadd{On such systems, you should chose the lowest value of
+  }\texttt{\DIFadd{KeyForgetThreshold}} \DIFadd{at which you see only one initial flicker and then
+  no subsequent flickering. (Where this happens, it }\DIFaddend is an unavoidable \DIFdelbegin \DIFdel{artefact }\DIFdelend \DIFaddbegin \DIFadd{artefect
+  on those systems }\DIFaddend of using \texttt{KeySupport} to emulate raw keyboard data\DIFdelbegin \DIFdel{.) If }\DIFdelend \DIFaddbegin \DIFadd{, which
+  is not made available by UEFI.)
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: }\DIFaddend \texttt{KeyForgetThreshold} \DIFdelbegin \DIFdel{is configured too low for the system, then
+  }\DIFdelend \DIFaddbegin \DIFadd{should never need to be more than about }\texttt{\DIFadd{9}}
+  \DIFadd{or }\texttt{\DIFadd{10}} \DIFadd{at most. If it is set to a value much higher than this, it will result in noticeably unresponsive
+  keyboard input. Therefore, for overall key responsiveness, it is strongly recommended to configure a
+  relatively lower value, at which }\DIFaddend the `set default' indicator \DIFdelbegin \DIFdel{will continue to flickerwhile }\texttt{\DIFdel{CTRL}} %DIFAUXCMD
+\DIFdel{or }\texttt{\DIFdel{=/+}} %DIFAUXCMD
+\DIFdel{is held. Configure
   the lowest value which causes this indicator to go on and stay on after the first
-  initial flicker.
+  initial flicker }\DIFdelend \DIFaddbegin \DIFadd{flickers once and then does not flicker, rather
+  than using a much higher value (i.e. significantly greater than }\texttt{\DIFadd{10}}\DIFadd{), which you may be
+  able to find but should not use, where the `set default' indicator does not flicker at all}\DIFaddend .
 
 \item
   \texttt{KeySupport}\\
@@ -6878,13 +6969,10 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the Apple Debug Log protocol with a builtin
-  version\DIFdelbegin \DIFdel{.
-}%DIFDELCMD < 
+  version.
 
-%DIFDELCMD < \item
-\item%DIFAUXCMD
-%DIFDELCMD <   %%%
-\texttt{\DIFdel{AppleEvent}}%DIFAUXCMD
+\item
+  \DIFdelbegin \texttt{\DIFdel{AppleEvent}}%DIFAUXCMD
 %DIFDELCMD < \\
 %DIFDELCMD <   %%%
 \textbf{\DIFdel{Type}}%DIFAUXCMD
@@ -6897,10 +6985,13 @@ functioning. Feature highlights:
 %DIFDELCMD <   %%%
 \textbf{\DIFdel{Description}}%DIFAUXCMD
 \DIFdel{: Replaces the Apple Event protocol with a builtin
-  version. This may be used to ensure FileVault 2 compatibility on VMs and legacy Macs}\DIFdelend .
+  version. This may be used to ensure FileVault 2 compatibility on VMs and legacy Macs.
+}%DIFDELCMD < 
 
-\item
-  \texttt{AppleFramebufferInfo}\\
+%DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\DIFdelend \texttt{AppleFramebufferInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the Apple Framebuffer Info protocol with a builtin
@@ -7067,7 +7158,18 @@ functioning. Feature highlights:
   and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
-  \texttt{IgnoreInvalidFlexRatio}\\
+  \DIFaddbegin \texttt{\DIFadd{ForgeUefiSupport}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Implement partial UEFI 2.x support on EFI 1.x firmware.
+}
+
+  \DIFadd{This setting allows running some software written for UEFI 2.x firmware like NVIDIA GOP
+  Option ROMs on hardware with older EFI 1.x firmware like }\texttt{\DIFadd{MacPro5,1}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{IgnoreInvalidFlexRatio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Some types of firmware (such as APTIO IV) may contain invalid values in the
@@ -7084,7 +7186,18 @@ functioning. Feature highlights:
   \textbf{Description}: Attempt to detach USB controller ownership from
   the firmware driver. While most types of firmware manage to do this properly,
   or at least have an option for this, some do not. As a result, the operating
-  system may freeze upon boot. Not recommended unless specifically required.
+  system may freeze upon boot. Not recommended unless specifically required\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ReloadOptionRoms}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Query PCI devices and reload their Option ROMs if available.
+}
+
+  \DIFadd{For example, this option allows reloading NVIDIA GOP Option ROM on older Macs
+  after the firmware version is upgraded via }\texttt{\DIFadd{ForgeUefiSupport}}\DIFaddend .
 
 \item
   \texttt{RequestBootVarRouting}\\

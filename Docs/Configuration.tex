@@ -593,6 +593,17 @@ cross-platform and open-source alternative, the
 \href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
 utilised.
 
+It is strongly advised not to use any software that is aware of the internal
+configration structure as it constantly gets out of date and will cause
+incorrect configuration to be generated. If it is a must desprite the
+warning one should make sure to only use stable versions of OpenCore
+with explicit support for the particular version in the app. The choice
+of open-source implementations with transparent binary generation
+is encouraged (e.g. \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}),
+since other tools may contain malware. Remember that a configuration
+made for a different hardware setup shall never be used on another hardware
+setup.
+
 For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
 To run OpenCore on such a legacy system, \texttt{OpenDuetPkg} can be installed
@@ -659,6 +670,7 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -I/UefiPackages/OpenCorePkg/Include/Nvidia
 -I/UefiPackages/OpenCorePkg/Include/VMware
 -I/UefiPackages/OvmfPkg/Include
+-I/UefiPackages/ShellPkg/Include
 -I/UefiPackages/UefiCpuPkg/Include
 -IInclude
 -include
@@ -6200,7 +6212,7 @@ functioning. Feature highlights:
 
   \emph{Note 1}: On systems not using \texttt{KeySupport}, this setting may be freely used
   to configure key repeat behaviour.
-  
+
   \emph{Note 2}: On systems using \texttt{KeySupport}, but which do not show the `two long
   delays' behavior (see Note 3) and/or which always show a solid `set default' indicator (see \texttt{KeyForgetThreshold})
   then this setting may also be freely used to configure key repeat initial delay behaviour,
@@ -6225,7 +6237,7 @@ functioning. Feature highlights:
 
   \emph{Note 1}: On systems not using \texttt{KeySupport}, this setting may be freely used
   to configure key repeat behaviour.
-  
+
   \emph{Note 2}: On systems using \texttt{KeySupport}, but which do not show the `two long
   delays' behaviour (see Note 3) and/or which always show a solid `set default' indicator
   (see \texttt{KeyForgetThreshold}) (which should apply to many/most systems using \texttt{AMI}
@@ -6493,7 +6505,7 @@ functioning. Feature highlights:
   no subsequent flickering. (Where this happens, it is an unavoidable artefect
   on those systems of using \texttt{KeySupport} to emulate raw keyboard data, which
   is not made available by UEFI.)
-  
+
   \emph{Note 2}: \texttt{KeyForgetThreshold} should never need to be more than about \texttt{9}
   or \texttt{10} at most. If it is set to a value much higher than this, it will result in noticeably unresponsive
   keyboard input. Therefore, for overall key responsiveness, it is strongly recommended to configure a
@@ -7013,6 +7025,15 @@ functioning. Feature highlights:
   and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
+  \texttt{ForgeUefiSupport}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Implement partial UEFI 2.x support on EFI 1.x firmware.
+
+  This setting allows running some software written for UEFI 2.x firmware like NVIDIA GOP
+  Option ROMs on hardware with older EFI 1.x firmware like \texttt{MacPro5,1}.
+
+\item
   \texttt{IgnoreInvalidFlexRatio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -7031,6 +7052,15 @@ functioning. Feature highlights:
   the firmware driver. While most types of firmware manage to do this properly,
   or at least have an option for this, some do not. As a result, the operating
   system may freeze upon boot. Not recommended unless specifically required.
+
+\item
+  \texttt{ReloadOptionRoms}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Query PCI devices and reload their Option ROMs if available.
+
+  For example, this option allows reloading NVIDIA GOP Option ROM on older Macs
+  after the firmware version is upgraded via \texttt{ForgeUefiSupport}.
 
 \item
   \texttt{RequestBootVarRouting}\\

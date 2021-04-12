@@ -51,4 +51,24 @@ ActivateHpetSupport (
   VOID
   );
 
+/**
+  Upgrade UEFI version to 2.x.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcForgeUefiSupport (
+  VOID
+  );
+
+/**
+  Reload Option ROMs.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcReloadOptionRoms (
+  VOID
+  );
+
 #endif // OC_DEVICE_MISC_LIB_H

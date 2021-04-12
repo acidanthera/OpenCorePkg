@@ -673,8 +673,10 @@ typedef enum {
   _(UINT32                      , TscSyncTimeout              ,     , 0      , ()) \
   _(BOOLEAN                     , ActivateHpetSupport         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSecurityPolicy       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ForgeUefiSupport            ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ReloadOptionRoms            ,     , FALSE  , ()) \
   _(BOOLEAN                     , RequestBootVarRouting       ,     , FALSE  , ()) \
   _(BOOLEAN                     , UnblockFsConnect            ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_QUIRKS)

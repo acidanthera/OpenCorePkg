@@ -7,8 +7,10 @@ OpenCore Changelog
 - Changed CustomDelays to less surprising boolean setting with failsafe of false
 - Changed key repeat failsafes and sample values to Apple OEM values
 - Changed PointerSpeedMul failsafe to Apple OEM value
-- Updated docs to include configuration of key repeat settings on AMI KeySupport vs. V1 or V2 KeySupport vs. systems not using KeySupport
+- Updated docs to include configuration of key repeat settings with and without KeySupport
 - Prevented 'set default' UI when action not permitted by security config
+- Added `ForgeUefiSupport` quirk to workaround legacy EFI 1.x firmwares compatibility
+- Added `ReloadOptionRoms` quirk to force-load Option ROMs on PCI devices
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

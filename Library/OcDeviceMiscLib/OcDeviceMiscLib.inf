@@ -30,20 +30,33 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  ShellPkg/ShellPkg.dec
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+  gEfiEventVirtualAddressChangeGuid
 
 [Protocols]
   gEfiPciIoProtocolGuid
+  gEfiDecompressProtocolGuid
 
 [LibraryClasses]
   BaseLib
+  BaseMemoryLib
   DebugLib
+  DevicePathLib
+  HandleParsingLib
   IoLib
+  MemoryAllocationLib
   OcGuardLib
+  PrintLib
   UefiLib
   UefiBootServicesTableLib
 
 [Sources]
   ActivateHpetSupport.c
   DirectReset.c
+  ForgeUefi.c
   ReleaseUsbOwnership.c
+  ReloadOptionRoms.c
   ResetAudioTrafficClass.c
