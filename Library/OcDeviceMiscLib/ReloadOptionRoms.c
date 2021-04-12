@@ -243,7 +243,7 @@ OcReloadOptionRoms (
       if (BindingHandleCount == 0) {
         HandleIndex = ConvertHandleToHandleIndex (HandleArray[Index]);
         UnicodeSPrint (RomFileName, sizeof (RomFileName), L"Handle%X", HandleIndex);
-        Status = ReloadPciRom (PciIo->RomImage, PciIo->RomSize, RomFileName);
+        Status = ReloadPciRom (PciIo->RomImage, (UINTN) PciIo->RomSize, RomFileName);
         if (EFI_ERROR (ReturnStatus)) {
           ReturnStatus = Status;
         }
