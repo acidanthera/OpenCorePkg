@@ -47,7 +47,7 @@ STATIC
 EFI_STATUS
 ReloadPciRom (
   IN VOID          *RomBar,
-  IN UINTN         RomSize,
+  IN UINT64        RomSize,
   IN CONST CHAR16  *FileName
   )
 {
