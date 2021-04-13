@@ -78,8 +78,8 @@ OcForgeUefiSupport (
     DEBUG_INFO,
     "OCDM: Found 0x%X UEFI version (%u bytes, rebuilding to %u)\n",
     gST->Hdr.Revision,
-    gST->Hdr.HeaderSize,
-    (UINT32) sizeof (*gBS)
+    gBS->Hdr.HeaderSize,
+    (UINT32) sizeof (EFI_BOOT_SERVICES)
     ));
 
   //
@@ -89,20 +89,20 @@ OcForgeUefiSupport (
     return EFI_ALREADY_STARTED;
   }
 
-  if (gST->Hdr.HeaderSize > OFFSET_OF (EFI_BOOT_SERVICES, CreateEventEx)) {
+  if (gBS->Hdr.HeaderSize > OFFSET_OF (EFI_BOOT_SERVICES, CreateEventEx)) {
     return EFI_INVALID_PARAMETER;
   }
 
-  NewBS = AllocateZeroPool (sizeof (*gBS));
+  NewBS = AllocateZeroPool (sizeof (EFI_BOOT_SERVICES));
   if (NewBS == NULL) {
     DEBUG ((DEBUG_INFO, "OCDM: Failed to allocate BS copy\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyMem (NewBS, gBS, gST->Hdr.HeaderSize);
+  CopyMem (NewBS, gBS, gBS->Hdr.HeaderSize);
 
   NewBS->CreateEventEx = OcCreateEventEx;
-  NewBS->Hdr.HeaderSize = sizeof (*gBS);
+  NewBS->Hdr.HeaderSize = sizeof (EFI_BOOT_SERVICES);
   NewBS->Hdr.Revision = EFI_2_30_SYSTEM_TABLE_REVISION;
   NewBS->Hdr.CRC32 = 0;
   NewBS->Hdr.CRC32 = CalculateCrc32 (NewBS, NewBS->Hdr.HeaderSize);
