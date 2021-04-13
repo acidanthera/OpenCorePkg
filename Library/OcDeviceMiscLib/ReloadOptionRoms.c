@@ -184,7 +184,9 @@ ReloadPciRom (
           }
         }
 
-        FreePool (DecompressedImageBuffer);
+        if (DecompressedImageBuffer != NULL) {
+          FreePool (DecompressedImageBuffer);
+        }
       }
     }
 
