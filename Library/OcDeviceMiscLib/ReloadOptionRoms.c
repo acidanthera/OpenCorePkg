@@ -252,9 +252,13 @@ OcReloadOptionRoms (
         }
       }
 
-      FreePool (BindingHandleBuffer);
+      if (BindingHandleBuffer != NULL) {
+        FreePool (BindingHandleBuffer);
+      }
     }
   }
+
+  FreePool (HandleArray);
 
   return ReturnStatus;
 }
