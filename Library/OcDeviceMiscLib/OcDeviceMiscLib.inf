@@ -30,7 +30,6 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  ShellPkg/ShellPkg.dec
 
 [Guids]
   gEfiEventExitBootServicesGuid
@@ -40,18 +39,27 @@
   gEfiPciIoProtocolGuid
   gEfiDecompressProtocolGuid
 
+  # For handle parsing
+  gEfiLoadedImageProtocolGuid
+  gEfiDriverBindingProtocolGuid
+  gEfiDriverConfiguration2ProtocolGuid
+  gEfiDriverConfigurationProtocolGuid
+  gEfiDriverDiagnostics2ProtocolGuid
+  gEfiDriverDiagnosticsProtocolGuid
+  gEfiComponentName2ProtocolGuid
+  gEfiComponentNameProtocolGuid
+  gEfiDevicePathProtocolGuid
+
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
   DebugLib
   DevicePathLib
-  HandleParsingLib
   IoLib
   MemoryAllocationLib
   OcGuardLib
   PrintLib
   UefiLib
-  ShellCommandLib
   UefiBootServicesTableLib
 
 [Sources]
@@ -61,3 +69,5 @@
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c
   ResetAudioTrafficClass.c
+  HandleParsingMin.c
+  HandleParsingMin.h
