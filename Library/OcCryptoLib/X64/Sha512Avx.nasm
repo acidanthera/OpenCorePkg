@@ -19,7 +19,7 @@
 ; ### Binary Data
 BITS 64
 
-extern SHA512_K
+extern ASM_PFX(SHA512_K)
 
 section .rodata
 align 16
@@ -80,7 +80,7 @@ section .text
 %define MSG(i)    [msg + 8*i]
 
 ; SHA Constants (static mem)
-%define K_t(i)    [rel 8*i + SHA512_K]
+%define K_t(i)    [rel 8*i + ASM_PFX(SHA512_K)]
 
 ; Message Schedule (stack frame)
 %define W_t(i)    [rsp + 8*i + frame_W]
