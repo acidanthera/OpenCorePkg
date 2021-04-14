@@ -34,7 +34,7 @@
   Md5.c
   RsaDigitalSign.c
   Sha1.c
-  Sha2Avx.h
+  Sha2Internal.h
   Sha2.c
   SecureMem.c
   PasswordHash.c
@@ -48,7 +48,6 @@
 
 [Sources.X64]
   X64/BigNumWordMul64.c
-  X64/Sha2Avx.c
   X64/Sha512Avx.nasm
 
 [FixedPcd]

@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef SHA2_AVX_H
-#define SHA2_AVX_H
+#ifndef SHA2_INTERNAL_H
+#define SHA2_INTERNAL_H
 
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcCryptoLib.h>
@@ -63,21 +63,11 @@ STATIC CONST UINT64 SHA512_H0[8] = {
 };
 
 VOID
-Sha512Avx (
-  IN OUT UINT8        *Hash,
-  IN     CONST UINT8  *Data,
-  IN     UINTN        Len
-  );
-
-VOID
-Sha384Avx (
-  IN OUT UINT8        *Hash,
-  IN     CONST UINT8  *Data,
-  IN     UINTN        Len
-  );
-
-BOOLEAN
 EFIAPI
-IsAvxSupported ();
+Sha512TransformAvx (
+  IN OUT UINT64      *State,
+  IN     CONST UINT8 *Data,
+  IN     UINTN       BlockNb
+  );
 
-#endif // SHA2_AVX_H
+#endif // SHA2_INTERNAL_H

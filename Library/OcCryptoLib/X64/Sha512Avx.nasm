@@ -392,12 +392,12 @@ section .text
 %endmacro
 
 ; #######################################################################
-; BOOLEAN IsAvxSupported ()
+; BOOLEAN TryEnableAvx ()
 ; To run in QEMU use options: -enable-kvm -cpu Penryn,+avx,+xsave,+xsaveopt
 ; #######################################################################
 align 8
-global ASM_PFX(IsAvxSupported)
-ASM_PFX(IsAvxSupported):
+global ASM_PFX(TryEnableAvx)
+ASM_PFX(TryEnableAvx):
   ; Detect CPUID.1:ECX.XSAVE[bit 26] = 1 (CR4.OSXSAVE can be set to 1).
   ; Detect CPUID.1:ECX.AVX[bit 28] = 1 (AVX instructions supported).
   mov eax, 1          ; Feature Information
