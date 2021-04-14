@@ -1,7 +1,6 @@
 ; @file
+; Copyright (C) 2013 Intel Corporation. All rights reserved.
 ; Copyright (C) 2021, ISP RAS. All rights reserved.
-;
-; All rights reserved.
 ;
 ; This program and the accompanying materials
 ; are licensed and made available under the terms and conditions of the BSD License
@@ -178,9 +177,9 @@ section .text
   RORQ    tmp0, 6  ; 34     ; tmp = ((a ror 5) ^ a) ror 6
   xor     tmp0, a_64        ; tmp = (((a ror 5) ^ a) ror 6) ^ a
   lea     h_64, [T1 + T2]   ; a(next_state) = T1 + Maj(a,b,c)
-	RORQ    tmp0, 28  ; 28    ; tmp = ((((a ror5)^a)ror6)^a)ror28 = S0(a)
-	add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
-	RotateState
+  RORQ    tmp0, 28  ; 28    ; tmp = ((((a ror5)^a)ror6)^a)ror28 = S0(a)
+  add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
+  RotateState
 %endmacro
 
 ; Compute Round t
@@ -188,18 +187,18 @@ section .text
   ; Ch(e,f,g) = (e & f) ^ (~e & g)
   mov T1, e_64         ; T1 = e
   and T1, f_64         ; T1 = e & f
-	mov tmp0, e_64       ; tmp0 = e
+  mov tmp0, e_64       ; tmp0 = e
   not tmp0             ; tmp0 = ~e
   and tmp0, g_64       ; tmp0 = ~e & g
   xor T1, tmp0         ; T1 = (e & f) ^ (~e & g)
 
   ; Sigma[1,512](e) = (e ROTR 14) ^ (e ROTR 18) ^ (e ROTR 41)
   mov  tmp0, e_64      ; tmp0 = e
-	RORQ tmp0, 14        ; tmp0 = e ROTR 14
+  RORQ tmp0, 14        ; tmp0 = e ROTR 14
   mov  T2, e_64        ; T2 = e
-	RORQ T2, 18          ; T2 = e ROTR 18
+  RORQ T2, 18          ; T2 = e ROTR 18
   xor  tmp0, T2        ; tmp0 = (e ROTR 14) ^ (e ROTR 18)
-	RORQ T2, 23          ; T2 = e ROTR 41
+  RORQ T2, 23          ; T2 = e ROTR 41
   xor  tmp0, T2        ; tmp0 = (e ROTR 14) ^ (e ROTR 18) ^ (e ROTR 41)
 
   ; T1 = h + Sigma[1,512](e) + Ch(e,f,g) + K[t] + W[t]
@@ -226,7 +225,7 @@ section .text
   mov  T1, b_64        ; T1 = a, because now b == a
   RORQ T1, 28          ; T1 = a ROTR 28
   mov  tmp0, b_64      ; tmp0 = a
-	RORQ tmp0, 34        ; tmp0 = a ROTR 34
+  RORQ tmp0, 34        ; tmp0 = a ROTR 34
   xor T1, tmp0         ; T1 = (a ROTR 28) ^ (a ROTR 34)
   RORQ tmp0, 5         ; tmp0 = a ROTR 39
   xor T1, tmp0         ; T1 = (a ROTR 28) ^ (a ROTR 34) ^ (a ROTR 39)
@@ -251,7 +250,7 @@ section .text
   ; stitched to take advantage of instruction-level parallelism.
 
 	%assign idx  (%1 - 2)
-  vmovdqu	xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
+  vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
   mov     T1, f_64          ; T1 = f
   mov     tmp0, e_64        ; tmp = e
   vpsrlq  xmm0, xmm4, 19      ; xmm0 = W[t-2] >> 19
@@ -283,7 +282,7 @@ section .text
   xor     T2, tmp0          ; T2 = ((a ^ c) & b) ^ (a & c) = Maj(a,b,c)
   mov     tmp0, a_64        ; tmp = a
   %assign idx  (%1 - 15)
-  vmovdqu	xmm4, W_t(idx)      ; xmm4 = W[t-15]|W[t-14]
+  vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-15]|W[t-14]
   RORQ    tmp0, 5  ; 39     ; tmp = a ror 5
   xor     tmp0, a_64        ; tmp = (a ror 5) ^ a
   vpsrlq  xmm1, xmm4, 1       ; xmm1 = W[t-15] >> 1
@@ -294,8 +293,8 @@ section .text
   lea     h_64, [T1 + T2]   ; a(next_state) = T1 + Maj(a,b,c)
   vpor   xmm1, xmm1, xmm2     ; xmm1 = (W[t-15] >> 1) | (W[t-15] << 64-1)
   RORQ    tmp0, 28  ; 28    ; tmp = ((((a ror5)^a)ror6)^a)ror28 = S0(a)
-	add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
-	RotateState
+  add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
+  RotateState
   vpsrlq  xmm3, xmm4, 8       ; xmm3 = W[t-15] >> 8
   mov     T1, f_64          ; T1 = f
   mov     tmp0, e_64        ; tmp = e
@@ -327,20 +326,20 @@ section .text
   and     tmp0, c_64        ; tmp = a & c
   and     T2, b_64          ; T2 = (a ^ c) & b
   %assign idx  %1
-  vmovdqa	W_t(idx), xmm0	    ; Store W[t]
+  vmovdqa W_t(idx), xmm0	    ; Store W[t]
   xor     T2, tmp0          ; T2 = ((a ^ c) & b) ^ (a & c) = Maj(a,b,c)
   mov     tmp0, a_64        ; tmp = a
   vpaddq xmm0, xmm0, K_t(idx) ; Compute W[t]+K[t]
   RORQ    tmp0, 5  ; 39     ; tmp = a ror 5
   xor     tmp0, a_64        ; tmp = (a ror 5) ^ a
-  vmovdqa	WK_2(idx), xmm0     ; Store W[t]+K[t] for next rounds
+  vmovdqa WK_2(idx), xmm0     ; Store W[t]+K[t] for next rounds
   add     d_64, T1          ; e(next_state) = d + T1
   RORQ    tmp0, 6  ; 34     ; tmp = ((a ror 5) ^ a) ror 6
   xor     tmp0, a_64        ; tmp = (((a ror 5) ^ a) ror 6) ^ a
   lea     h_64, [T1 + T2]   ; a(next_state) = T1 + Maj(a,b,c)
   RORQ    tmp0, 28  ; 28    ; tmp = ((((a ror5)^a)ror6)^a)ror28 = S0(a)
-	add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
-	RotateState
+  add     h_64, tmp0        ; a(next_state) = T1 + Maj(a,b,c) S0(a)
+  RotateState
 %endmacro
 
 ; Compute message schedules t and t+1
@@ -350,7 +349,7 @@ section .text
   ; sigma[1,512](W[t-2]) = (W[t-2] ROTR 19) ^ (W[t-2] ROTR 61) ^ (W[t-2] SHR 6)
 	%assign idx  (%1 - 2)
   ; W[t-2] ROTR 19
-  vmovdqu	xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
+  vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
   vpsrlq  xmm0, xmm4, 19      ; xmm0 = W[t-2] >> 19
   vpsllq  xmm1, xmm4, (64-19) ; xmm1 = W[t-2] << 64-19
   vpor    xmm0, xmm0, xmm1    ; xmm0 = (W[t-2] >> 19) | (W[t-2] << 64-19)
@@ -366,12 +365,12 @@ section .text
   ; sigma[0,512](W[t-15]) = (W[t-15] ROTR 1) ^ (W[t-15] ROTR 8) ^ (W[t-15] SHR 7)
   %assign idx  (%1 - 15)
   ; W[t-15] ROTR 1
-  vmovdqu	xmm4, W_t(idx)      ; xmm4 = W[t-15]|W[t-14]
-	vpsrlq  xmm1, xmm4, 1       ; xmm1 = W[t-15] >> 1
+  vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-15]|W[t-14]
+  vpsrlq  xmm1, xmm4, 1       ; xmm1 = W[t-15] >> 1
   vpsllq  xmm2, xmm4, (64-1)  ; xmm2 = W[t-15] << 64-1
   vpor   xmm1, xmm1, xmm2     ; xmm1 = (W[t-15] >> 1) | (W[t-15] << 64-1)
   ; W[t-15] ROTR 8
-	vpsrlq  xmm3, xmm4, 8       ; xmm3 = W[t-15] >> 8
+  vpsrlq  xmm3, xmm4, 8       ; xmm3 = W[t-15] >> 8
   vpsllq  xmm2, xmm4, (64-8)  ; xmm2 = W[t-15] << 64-8
   vpor   xmm3, xmm3, xmm2     ; xmm3 = (W[t-15] >> 8) | (W[t-15] << 64-8)
   vpxor	 xmm1, xmm1, xmm3     ; xmm1 = (W[t-15] ROTR 1) ^ (W[t-15] ROTR 8)
@@ -385,10 +384,10 @@ section .text
   vpaddq xmm0, xmm0, xmm1     ; xmm0 = sigma[1,512](W[t-2]) + W[t-7] + sigma[0,512](W[t-15])
   %assign idx  (%1 - 16)
   vpaddq xmm0, xmm0, W_t(idx) ; xmm0 = sigma[1,512](W[t-2]) + W[t-7] + sigma[0,512](W[t-15]) + W[t-16]
-	%assign idx  %1
-	vmovdqa	W_t(idx), xmm0	    ; Store W[t]
-	vpaddq xmm0, xmm0, K_t(idx) ; Compute W[t]+K[t]
-	vmovdqa	WK_2(idx), xmm0     ; Store W[t]+K[t] for next rounds
+  %assign idx  %1
+  vmovdqa W_t(idx), xmm0	    ; Store W[t]
+  vpaddq xmm0, xmm0, K_t(idx) ; Compute W[t]+K[t]
+  vmovdqa WK_2(idx), xmm0     ; Store W[t]+K[t] for next rounds
 %endmacro
 
 ; #######################################################################
@@ -411,10 +410,10 @@ ASM_PFX(TryEnableAvx):
   mov cr4, rax
 
   mov ecx, 0          ; read the contents of XCR0 register
-  XGETBV              ; result in EDX:EAX
+  xgetbv              ; result in EDX:EAX
   or  eax, 06H        ; enable both XMM and YMM state support
   ; XSETBV must be executed at privilege level 0 or in real-address mode.
-  XSETBV
+  xsetbv
   mov rax, 1
   jmp done
 noAVX:
@@ -433,100 +432,100 @@ done:
 align 8
 global ASM_PFX(Sha512TransformAvx)
 ASM_PFX(Sha512TransformAvx):
-	test msglen, msglen
-	je nowork
+  test msglen, msglen
+  je nowork
 
-	; Allocate Stack Space
-	mov	rax, rsp
-	sub rsp, frame_size
-	and	rsp, ~(0x20 - 1)
-	mov	[rsp + frame_RSPSAVE], rax
+  ; Allocate Stack Space
+  mov rax, rsp
+  sub rsp, frame_size
+  and rsp, ~(0x20 - 1)
+  mov [rsp + frame_RSPSAVE], rax
 
-	; Save GPRs
+  ; Save GPRs
   ; Registers RBX, RBP, RDI, RSI, R12, R13, R14, R15, and XMM6-XMM15 are nonvolatile,
   ; but XMM6-XMM15 are not used.
-	mov     [rsp + frame_GPRSAVE], rbx
-  mov     [rsp + frame_GPRSAVE + 8*1], rbp
-  mov     [rsp + frame_GPRSAVE + 8*2], rdi
-  mov     [rsp + frame_GPRSAVE + 8*3], rsi
-	mov     [rsp + frame_GPRSAVE + 8*4], r12
-	mov     [rsp + frame_GPRSAVE + 8*5], r13
-	mov     [rsp + frame_GPRSAVE + 8*6], r14
-	mov     [rsp + frame_GPRSAVE + 8*7], r15
+  mov [rsp + frame_GPRSAVE], rbx
+  mov [rsp + frame_GPRSAVE + 8*1], rbp
+  mov [rsp + frame_GPRSAVE + 8*2], rdi
+  mov [rsp + frame_GPRSAVE + 8*3], rsi
+  mov [rsp + frame_GPRSAVE + 8*4], r12
+  mov [rsp + frame_GPRSAVE + 8*5], r13
+  mov [rsp + frame_GPRSAVE + 8*6], r14
+  mov [rsp + frame_GPRSAVE + 8*7], r15
 
 updateblock:
   ; Load state variables
-	mov a_64, DIGEST(0)
-	mov b_64, DIGEST(1)
-	mov c_64, DIGEST(2)
-	mov d_64, DIGEST(3)
-	mov e_64, DIGEST(4)
-	mov f_64, DIGEST(5)
-	mov g_64, DIGEST(6)
-	mov h_64, DIGEST(7)
+  mov a_64, DIGEST(0)
+  mov b_64, DIGEST(1)
+  mov c_64, DIGEST(2)
+  mov d_64, DIGEST(3)
+  mov e_64, DIGEST(4)
+  mov f_64, DIGEST(5)
+  mov g_64, DIGEST(6)
+  mov h_64, DIGEST(7)
 
-	%assign t  0
+  %assign t  0
   %rep 80/2 + 1
   ; (80 rounds) / (2 rounds/iteration) + (1 iteration)
   ; +1 iteration because the scheduler leads hashing by 1 iteration
     %if t < 2
-		  ; BSWAP 2 QWORDS
-			vmovdqa  xmm1, [rel XMM_QWORD_BSWAP]
-			vmovdqu  xmm0, MSG(t)
-			vpshufb  xmm0, xmm0, xmm1    ; BSWAP
-			vmovdqa  W_t(t), xmm0        ; Store Scheduled Pair
-			vpaddq   xmm0, xmm0, K_t(t)  ; Compute W[t]+K[t]
-			vmovdqa  WK_2(t), xmm0       ; Store into WK for rounds
+      ; BSWAP 2 QWORDS
+      vmovdqa xmm1, [rel XMM_QWORD_BSWAP]
+      vmovdqu xmm0, MSG(t)
+      vpshufb xmm0, xmm0, xmm1    ; BSWAP
+      vmovdqa W_t(t), xmm0        ; Store Scheduled Pair
+      vpaddq  xmm0, xmm0, K_t(t)  ; Compute W[t]+K[t]
+      vmovdqa WK_2(t), xmm0       ; Store into WK for rounds
     %elif t < 16
-		  ; BSWAP 2 QWORDS ; Compute 2 Rounds
-			vmovdqu  xmm0, MSG(t)
-			vpshufb  xmm0, xmm0, xmm1    ; BSWAP
-			SHA512_Round_Optimized t-2   ; Round t-2
-			vmovdqa  W_t(t), xmm0        ; Store Scheduled Pair
-			vpaddq   xmm0, xmm0, K_t(t)  ; Compute W[t]+K[t]
-			SHA512_Round_Optimized t-1   ; Round t-1
-			vmovdqa  WK_2(t), xmm0       ; Store W[t]+K[t] into WK
+      ; BSWAP 2 QWORDS ; Compute 2 Rounds
+      vmovdqu xmm0, MSG(t)
+      vpshufb xmm0, xmm0, xmm1    ; BSWAP
+      SHA512_Round_Optimized t-2  ; Round t-2
+      vmovdqa W_t(t), xmm0        ; Store Scheduled Pair
+      vpaddq  xmm0, xmm0, K_t(t)  ; Compute W[t]+K[t]
+      SHA512_Round_Optimized t-1  ; Round t-1
+      vmovdqa WK_2(t), xmm0       ; Store W[t]+K[t] into WK
     %elif t < 79
-		  ; Schedule 2 QWORDS ; Compute 2 Rounds
+      ; Schedule 2 QWORDS ; Compute 2 Rounds
       ; SHA512_Round_Optimized t-2
-			; SHA512_Round_Optimized t-1
+      ; SHA512_Round_Optimized t-1
       ; SHA512_2Sched t
       SHA512_Stitched t
     %else
-		  ; Compute 2 Rounds
-			SHA512_Round_Optimized t-2
-			SHA512_Round_Optimized t-1
-		%endif
-		%assign t  t+2
+      ; Compute 2 Rounds
+      SHA512_Round_Optimized t-2
+      SHA512_Round_Optimized t-1
+    %endif
+    %assign t  t+2
   %endrep
 
   ; Update digest
-	add     DIGEST(0), a_64
-	add     DIGEST(1), b_64
-	add     DIGEST(2), c_64
-	add     DIGEST(3), d_64
-	add     DIGEST(4), e_64
-	add     DIGEST(5), f_64
-	add     DIGEST(6), g_64
-	add     DIGEST(7), h_64
+  add DIGEST(0), a_64
+  add DIGEST(1), b_64
+  add DIGEST(2), c_64
+  add DIGEST(3), d_64
+  add DIGEST(4), e_64
+  add DIGEST(5), f_64
+  add DIGEST(6), g_64
+  add DIGEST(7), h_64
 
   ; Advance to next message block
-	add     msg, 16*8
-	dec     msglen
-	jnz     updateblock
+  add msg, 16*8
+  dec msglen
+  jnz updateblock
 
   ; Restore GPRs
-	mov     rbx, [rsp + frame_GPRSAVE]
-  mov     rbp, [rsp + frame_GPRSAVE + 8*1]
-	mov     rdi, [rsp + frame_GPRSAVE + 8*2]
-	mov     rsi, [rsp + frame_GPRSAVE + 8*3]
-	mov     r12, [rsp + frame_GPRSAVE + 8*4]
-	mov     r13, [rsp + frame_GPRSAVE + 8*5]
-	mov     r14, [rsp + frame_GPRSAVE + 8*6]
-	mov     r15, [rsp + frame_GPRSAVE + 8*7]
+  mov rbx, [rsp + frame_GPRSAVE]
+  mov rbp, [rsp + frame_GPRSAVE + 8*1]
+  mov rdi, [rsp + frame_GPRSAVE + 8*2]
+  mov rsi, [rsp + frame_GPRSAVE + 8*3]
+  mov r12, [rsp + frame_GPRSAVE + 8*4]
+  mov r13, [rsp + frame_GPRSAVE + 8*5]
+  mov r14, [rsp + frame_GPRSAVE + 8*6]
+  mov r15, [rsp + frame_GPRSAVE + 8*7]
 
   ; Restore Stack Pointer
-	mov	rsp, [rsp + frame_RSPSAVE]
+  mov rsp, [rsp + frame_RSPSAVE]
 
 nowork:
-	ret
+  ret

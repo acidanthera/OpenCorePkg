@@ -34,7 +34,6 @@
   Md5.c
   RsaDigitalSign.c
   Sha1.c
-  Sha2Internal.h
   Sha2.c
   SecureMem.c
   PasswordHash.c
