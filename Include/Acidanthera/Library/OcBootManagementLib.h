@@ -69,11 +69,13 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_ATTR_USE_GENERIC_LABEL_IMAGE  BIT2
 #define OC_ATTR_HIDE_THEMED_ICONS        BIT3
 #define OC_ATTR_USE_POINTER_CONTROL      BIT4
-#define OC_ATTR_SHOW_DEBUG_DISPLAY            BIT5
+#define OC_ATTR_SHOW_DEBUG_DISPLAY       BIT5
+#define OC_ATTR_USE_MINIMAL_UI           BIT6
 #define OC_ATTR_ALL_BITS (\
   OC_ATTR_USE_VOLUME_ICON         | OC_ATTR_USE_DISK_LABEL_FILE | \
   OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_HIDE_THEMED_ICONS   | \
-  OC_ATTR_USE_POINTER_CONTROL     | OC_ATTR_SHOW_DEBUG_DISPLAY )
+  OC_ATTR_USE_POINTER_CONTROL     | OC_ATTR_SHOW_DEBUG_DISPLAY  | \
+  OC_ATTR_USE_MINIMAL_UI )
 
 /**
   Default timeout for IDLE timeout during menu picker navigation
@@ -1189,7 +1191,7 @@ OcLoadPickerHotKeys (
 #define OC_INPUT_TYPING_LEFT          -16       ///< Move left while typing (UI does not have to support)
 #define OC_INPUT_TYPING_RIGHT         -17       ///< Move right while typing (UI does not have to support)
 #define OC_INPUT_TYPING_CONFIRM       -18       ///< Confirm input while typing (press enter)
-#define OC_INPUT_SWITCH_CONTEXT       -19       ///< Switch context (tab and shift+tab)
+#define OC_INPUT_SWITCH_FOCUS         -19       ///< Switch UI focus (tab and shift+tab)
 #define OC_INPUT_FUNCTIONAL(x)        (-50 - (x))  ///< Function hotkeys
 
 /**
@@ -1197,7 +1199,7 @@ OcLoadPickerHotKeys (
 **/
 #define OC_MODIFIERS_NONE                     0
 #define OC_MODIFIERS_SET_DEFAULT              BIT0
-#define OC_MODIFIERS_REVERSE_SWITCH_CONTEXT   BIT1
+#define OC_MODIFIERS_REVERSE_SWITCH_FOCUS     BIT1
 
 #define OC_PICKER_KEYS_TYPING                 BIT0
 #define OC_PICKER_KEYS_HOTKEYS                BIT1

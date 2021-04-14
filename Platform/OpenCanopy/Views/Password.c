@@ -67,6 +67,10 @@ STATIC GUI_OBJ *mPasswordFocusList[] = {
   &mCommonShutDown.Hdr.Obj
 };
 
+STATIC GUI_OBJ *mPasswordFocusListMinimal[] = {
+  &mPasswordBoxContainer.Obj
+};
+
 STATIC UINT8 mPasswordNumTries = 0;
 
 STATIC
@@ -575,6 +579,11 @@ STATIC GUI_OBJ_CHILD *mPasswordViewChilds[] = {
   &mCommonActionButtonsContainer
 };
 
+STATIC GUI_OBJ_CHILD *mPasswordViewChildsMinimal[] = {
+  &mPasswordLock,
+  &mPasswordBoxContainer
+};
+
 STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
@@ -585,6 +594,18 @@ STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
   InternalPasswordExitLoop,
   mPasswordFocusList,
   ARRAY_SIZE (mPasswordFocusList)
+};
+
+STATIC GUI_VIEW_CONTEXT mPasswordViewContextMinimal = {
+  InternalCommonViewDraw,
+  InternalPasswordViewPtrEvent,
+  ARRAY_SIZE (mPasswordViewChildsMinimal),
+  mPasswordViewChildsMinimal,
+  InternalPasswordViewKeyEvent,
+  InternalGetCursorImage,
+  InternalPasswordExitLoop,
+  mPasswordFocusListMinimal,
+  ARRAY_SIZE (mPasswordFocusListMinimal)
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordLock = {
@@ -714,7 +735,13 @@ PasswordViewInitialize (
 
   mKeyContext->KeyFilter = OC_PICKER_KEYS_FOR_TYPING;
 
-  CommonViewInitialize (DrawContext, GuiContext, &mPasswordViewContext);
+  CommonViewInitialize (
+    DrawContext,
+    GuiContext,
+    (GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0
+      ? &mPasswordViewContext
+      : &mPasswordViewContextMinimal
+    );
 
   LockImage  = &GuiContext->Icons[ICON_LOCK][ICON_TYPE_BASE];
   BoxImage   = &GuiContext->Icons[ICON_PASSWORD][ICON_TYPE_BASE];

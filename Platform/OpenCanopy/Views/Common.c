@@ -114,34 +114,38 @@ InternalFocusKeyHandler (
   UINT8   CommonFocusState;
   GUI_OBJ *FocusChangedObj;
 
-  if (KeyEvent->OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
-    mCommonFocusList[mCommonFocusState]->Focus (
-      mCommonFocusList[mCommonFocusState],
-      DrawContext,
-      FALSE
-      );
+  if (KeyEvent->OcKeyCode == OC_INPUT_SWITCH_FOCUS) {
+    if (mNumCommonFocusList > 1) {
+      mCommonFocusList[mCommonFocusState]->Focus (
+        mCommonFocusList[mCommonFocusState],
+        DrawContext,
+        FALSE
+        );
 
-    if ((KeyEvent->OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) == 0) {
-      CommonFocusState = mCommonFocusState + 1;
-      if (CommonFocusState == mNumCommonFocusList) {
-        CommonFocusState = 0;
+      if ((KeyEvent->OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_FOCUS) == 0) {
+        CommonFocusState = mCommonFocusState + 1;
+        if (CommonFocusState == mNumCommonFocusList) {
+          CommonFocusState = 0;
+        }
+      } else {
+        CommonFocusState = mCommonFocusState - 1;
+        if (CommonFocusState == MAX_UINT8) {
+          CommonFocusState = mNumCommonFocusList - 1;
+        }
       }
+
+      mCommonFocusState = CommonFocusState;
+
+      mCommonFocusList[CommonFocusState]->Focus (
+        mCommonFocusList[CommonFocusState],
+        DrawContext,
+        TRUE
+        );
+
+      FocusChangedObj = mCommonFocusList[CommonFocusState];
     } else {
-      CommonFocusState = mCommonFocusState - 1;
-      if (CommonFocusState == MAX_UINT8) {
-        CommonFocusState = mNumCommonFocusList - 1;
-      }
+      FocusChangedObj = NULL;
     }
-
-    mCommonFocusState = CommonFocusState;
-
-    mCommonFocusList[CommonFocusState]->Focus (
-      mCommonFocusList[CommonFocusState],
-      DrawContext,
-      TRUE
-      );
-
-    FocusChangedObj = mCommonFocusList[CommonFocusState];
   } else {
     mCommonFocusList[mCommonFocusState]->KeyEvent (
       mCommonFocusList[mCommonFocusState],

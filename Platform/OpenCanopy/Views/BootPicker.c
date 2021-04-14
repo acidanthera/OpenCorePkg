@@ -60,6 +60,10 @@ STATIC GUI_OBJ *mBootPickerFocusList[] = {
   &mCommonShutDown.Hdr.Obj
 };
 
+STATIC GUI_OBJ *mBootPickerFocusListMinimal[] = {
+  &mBootPicker.Hdr.Obj
+};
+
 STATIC
 GUI_VOLUME_ENTRY *
 InternalGetVolumeEntry (
@@ -1209,6 +1213,12 @@ STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
   &mBootPickerRightScroll.Hdr
 };
 
+STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
+  &mBootPickerContainer,
+  &mBootPickerLeftScroll.Hdr,
+  &mBootPickerRightScroll.Hdr
+};
+
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
@@ -1219,6 +1229,18 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
   InternalBootPickerExitLoop,
   mBootPickerFocusList,
   ARRAY_SIZE (mBootPickerFocusList)
+};
+
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContextMinimal = {
+  InternalCommonViewDraw,
+  InternalCommonViewPtrEvent,
+  ARRAY_SIZE (mBootPickerViewChildsMinimal),
+  mBootPickerViewChildsMinimal,
+  InternalBootPickerViewKeyEvent,
+  InternalGetCursorImage,
+  InternalBootPickerExitLoop,
+  mBootPickerFocusListMinimal,
+  ARRAY_SIZE (mBootPickerFocusListMinimal)
 };
 
 STATIC
@@ -1747,7 +1769,9 @@ BootPickerViewInitialize (
   CommonViewInitialize (
     DrawContext,
     GuiContext,
-    &mBootPickerViewContext
+    (GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0
+      ? &mBootPickerViewContext
+      : &mBootPickerViewContextMinimal
     );
 
   mBackgroundImageOffsetX = DivS64x64Remainder (

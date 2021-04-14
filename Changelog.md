@@ -11,6 +11,7 @@ OpenCore Changelog
 - Prevented 'set default' UI when action not permitted by security config
 - Added `ForgeUefiSupport` quirk to workaround legacy EFI 1.x firmwares compatibility
 - Added `ReloadOptionRoms` quirk to force-load Option ROMs on PCI devices
+- Added `OC_ATTR_USE_MINIMAL_UI` to allow running pickers with no Shutdown and Restart buttons
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

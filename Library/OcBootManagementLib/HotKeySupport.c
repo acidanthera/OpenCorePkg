@@ -266,7 +266,7 @@ GetPickerKeyInfo (
   //
   if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
     && (Modifiers & APPLE_MODIFIERS_SHIFT) != 0) {
-    PickerKeyInfo->OcModifiers |= OC_MODIFIERS_REVERSE_SWITCH_CONTEXT;
+    PickerKeyInfo->OcModifiers |= OC_MODIFIERS_REVERSE_SWITCH_FOCUS;
   }
 
   //
@@ -401,7 +401,7 @@ GetPickerKeyInfo (
   if (NumKeys == 1) {
     if ((KeyFilter & OC_PICKER_KEYS_TAB_CONTROL) != 0
       && Keys[0] == AppleHidUsbKbUsageKeyTab) {
-      PickerKeyInfo->OcKeyCode = OC_INPUT_SWITCH_CONTEXT;
+      PickerKeyInfo->OcKeyCode = OC_INPUT_SWITCH_FOCUS;
       return;
     }
 

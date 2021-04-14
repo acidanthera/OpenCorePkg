@@ -62,7 +62,25 @@ typedef enum {
   TAB_TYPING_DEMO,
 #endif
   TAB_MAX
-} TAB_CONTEXT;
+} _TAB_FOCUS;
+
+typedef _TAB_FOCUS TAB_FOCUS;
+
+STATIC TAB_FOCUS mFocusList[] = {
+  TAB_PICKER,
+  TAB_RESTART,
+  TAB_SHUTDOWN,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  TAB_TYPING_DEMO
+#endif
+};
+
+STATIC TAB_FOCUS mFocusListMinimal[] = {
+  TAB_PICKER,
+#if defined(BUILTIN_DEMONSTRATE_TYPING)
+  TAB_TYPING_DEMO
+#endif
+};
 
 #define OC_KB_DBG_MAX_COLUMN           80
 #define OC_KB_DBG_DELTA_SAMPLE_COLUMN  0 //40
@@ -221,7 +239,7 @@ UpdateTabContext (
   IN  BOOLEAN                       IsEntering,
   IN  OC_BOOT_CONTEXT               *BootContext,
   IN  OC_BOOT_ENTRY                 **BootEntries,
-  IN  TAB_CONTEXT                   TabContext,
+  IN  TAB_FOCUS                     TabFocus,
   IN  INTN                          ChosenEntry,
   IN  CHAR16                        OldEntryCursor,
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
@@ -238,7 +256,7 @@ UpdateTabContext (
 
   Code[1]      = L'\0';
 
-  if (TabContext == TAB_PICKER) {
+  if (TabFocus == TAB_PICKER) {
     if (ChosenEntry >= 0) {
       gST->ConOut->SetCursorPosition (gST->ConOut, 0, FirstIndexRow + ChosenEntry);
       Code[0] = IsEntering ? OldEntryCursor : L' ';
@@ -255,8 +273,8 @@ UpdateTabContext (
         // 
       }
     }
-  } else if (TabContext == TAB_SHUTDOWN || TabContext == TAB_RESTART) {
-    if (TabContext == TAB_SHUTDOWN) {
+  } else if (TabFocus == TAB_SHUTDOWN || TabFocus == TAB_RESTART) {
+    if (TabFocus == TAB_SHUTDOWN) {
       gST->ConOut->SetCursorPosition (gST->ConOut, ShutdownColumn, ShutdownRestartRow);
     } else {
       gST->ConOut->SetCursorPosition (gST->ConOut, RestartColumn, ShutdownRestartRow);
@@ -264,7 +282,7 @@ UpdateTabContext (
 
     Code[0] = IsEntering ? L'[' : '|';
     gST->ConOut->OutputString (gST->ConOut, Code);
-    if (TabContext == TAB_SHUTDOWN) {
+    if (TabFocus == TAB_SHUTDOWN) {
       gST->ConOut->OutputString (gST->ConOut, L"Shutdown");
     } else {
       gST->ConOut->OutputString (gST->ConOut, L"Restart");
@@ -273,7 +291,7 @@ UpdateTabContext (
     gST->ConOut->OutputString (gST->ConOut, Code);
 
     if (IsEntering) {
-      if (TabContext == TAB_SHUTDOWN) {
+      if (TabFocus == TAB_SHUTDOWN) {
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileSelected, FALSE);
         OcPlayAudioFile (BootContext->PickerContext, OcVoiceOverAudioFileShutDown, FALSE);
       } else {
@@ -283,7 +301,7 @@ UpdateTabContext (
     }
   }
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
-  else if (TabContext == TAB_TYPING_DEMO) {
+  else if (TabFocus == TAB_TYPING_DEMO) {
     gST->ConOut->SetCursorPosition (gST->ConOut, TypingColumn, TypingRow);
     Code[0] = IsEntering ? L'_' : ' ';
     gST->ConOut->OutputString (gST->ConOut, Code);
@@ -324,7 +342,9 @@ OcShowSimpleBootMenu (
   INT32                              ShutdownRestartRow;
   INT32                              ShutdownColumn;
   INT32                              RestartColumn;
-  TAB_CONTEXT                        TabContext;
+  UINTN                              FocusState;
+  TAB_FOCUS                          *FocusList;
+  UINTN                              NumFocusList;
 
   Code[1]        = L'\0';
 
@@ -340,7 +360,14 @@ OcShowSimpleBootMenu (
 
   FirstIndexRow  = -1;
 
-  TabContext     = TAB_PICKER;
+  FocusState     = 0;
+  if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0) {
+    FocusList = mFocusList;
+    NumFocusList = ARRAY_SIZE (mFocusList);
+  } else {
+    FocusList = mFocusListMinimal;
+    NumFocusList = ARRAY_SIZE (mFocusListMinimal);
+  }
 
   //
   // Used to detect changes.
@@ -478,17 +505,28 @@ OcShowSimpleBootMenu (
         gST->ConOut->OutputString (gST->ConOut, L"\r\n");
       }
 
+      if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_MINIMAL_UI) == 0) {
+        gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+
+        ShutdownRestartRow = gST->ConOut->Mode->CursorRow;
+        gST->ConOut->OutputString (gST->ConOut, L" ");
+        RestartColumn = gST->ConOut->Mode->CursorColumn;
+        gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
+        gST->ConOut->OutputString (gST->ConOut, L"  ");
+        ShutdownColumn = gST->ConOut->Mode->CursorColumn;
+        gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
+
+        gST->ConOut->OutputString (gST->ConOut, L"\r\n");
+      } else {
+        //
+        // prevent uninitialized err
+        //
+        ShutdownRestartRow = 0;
+        RestartColumn = 0;
+        ShutdownColumn = 0;
+      }
+
       gST->ConOut->OutputString (gST->ConOut, L"\r\n");
-
-      ShutdownRestartRow = gST->ConOut->Mode->CursorRow;
-      gST->ConOut->OutputString (gST->ConOut, L" ");
-      RestartColumn = gST->ConOut->Mode->CursorColumn;
-      gST->ConOut->OutputString (gST->ConOut, L"|Restart|");
-      gST->ConOut->OutputString (gST->ConOut, L"  ");
-      ShutdownColumn = gST->ConOut->Mode->CursorColumn;
-      gST->ConOut->OutputString (gST->ConOut, L"|Shutdown|");
-
-      gST->ConOut->OutputString (gST->ConOut, L"\r\n\r\n");
       gST->ConOut->OutputString (gST->ConOut, OC_MENU_CHOOSE_OS);
 
       mStatusRow     = gST->ConOut->Mode->CursorRow;
@@ -551,18 +589,18 @@ OcShowSimpleBootMenu (
       ModifiersChanged = BootContext->PickerContext->HotKeyContext->WaitForKeyInfo (
         BootContext->PickerContext,
         KeyEndTime,
-        (TabContext != TAB_PICKER)
+        (FocusList[FocusState] != TAB_PICKER)
           ? OC_PICKER_KEYS_FOR_TYPING
           : OC_PICKER_KEYS_FOR_PICKER,
         &PickerKeyInfo
         );
 
-      if (PickerKeyInfo.OcKeyCode == OC_INPUT_SWITCH_CONTEXT) {
+      if (NumFocusList > 1 && PickerKeyInfo.OcKeyCode == OC_INPUT_SWITCH_FOCUS) {
         UpdateTabContext (
           FALSE,
           BootContext,
           BootEntries,
-          TabContext,
+          FocusList[FocusState],
           ChosenEntry,
           OldEntryCursor,
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
@@ -579,19 +617,19 @@ OcShowSimpleBootMenu (
         // On leaving picker the first time, any timeout gets cancelled (correctly), therefore text
         // cursor changes, therefore text cursor gets redrawn - unless we do this.
         //
-        if (TabContext == TAB_PICKER && TimeOutSeconds > 0) {
+        if (FocusList[FocusState] == TAB_PICKER && TimeOutSeconds > 0) {
           OldEntryCursor = GetPickerEntryCursor(BootContext, 0, ChosenEntry, ChosenEntry, PickerKeyInfo.OcModifiers);
         }
 
-        if ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_CONTEXT) != 0) {
-          if (TabContext == 0) {
-            TabContext = TAB_MAX;
+        if ((PickerKeyInfo.OcModifiers & OC_MODIFIERS_REVERSE_SWITCH_FOCUS) != 0) {
+          if (FocusState == 0) {
+            FocusState = NumFocusList;
           }
-          TabContext--;
+          FocusState--;
         } else {
-          TabContext++;
-          if (TabContext == TAB_MAX) {
-            TabContext = 0;
+          FocusState++;
+          if (FocusState == NumFocusList) {
+            FocusState = 0;
           }
         }
 
@@ -599,7 +637,7 @@ OcShowSimpleBootMenu (
           TRUE,
           BootContext,
           BootEntries,
-          TabContext,
+          FocusList[FocusState],
           ChosenEntry,
           OldEntryCursor,
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
@@ -615,7 +653,7 @@ OcShowSimpleBootMenu (
         gST->ConOut->SetCursorPosition (gST->ConOut, mStatusColumn, mStatusRow);
       }
 
-      if (TabContext == TAB_RESTART) {
+      if (FocusList[FocusState] == TAB_RESTART) {
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_RESTART);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
@@ -623,7 +661,7 @@ OcShowSimpleBootMenu (
           ResetWarm();
           return EFI_SUCCESS;
         }
-      } else if (TabContext == TAB_SHUTDOWN) {
+      } else if (FocusList[FocusState] == TAB_SHUTDOWN) {
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_CONFIRM) {
           gST->ConOut->OutputString (gST->ConOut, OC_MENU_SHUTDOWN);
           gST->ConOut->OutputString (gST->ConOut, L"\r\n");
@@ -633,7 +671,7 @@ OcShowSimpleBootMenu (
         }
       }
 #if defined(BUILTIN_DEMONSTRATE_TYPING)
-      else if (TabContext == TAB_TYPING_DEMO) {
+      else if (FocusList[FocusState] == TAB_TYPING_DEMO) {
         if (PickerKeyInfo.OcKeyCode == OC_INPUT_TYPING_BACKSPACE && TypingColumn > TypingStartColumn) {
           //
           // Backspace and move cursor.
