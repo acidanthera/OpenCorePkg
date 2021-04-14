@@ -42,15 +42,6 @@
            | LShiftU64 (*((str) + 0), 56);       \
   } while (0)
 
-typedef struct {
-  UINT64 State[8];
-  UINT64 Length;
-  UINT64 TotalLength;
-  UINT8  Block[2 * SHA512_BLOCK_SIZE];
-} SHA512_STATE;
-
-typedef SHA512_STATE SHA384_STATE;
-
 //
 // Sha 384 Init State
 //

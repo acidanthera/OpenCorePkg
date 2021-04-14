@@ -22,14 +22,14 @@
 VOID
 EFIAPI
 Sha512TransformAvx (
-  IN OUT SHA512_STATE  *State,
-  IN     CONST UINT8   *Data,
-  IN     UINTN         BlockNb
+  IN OUT UINT64      *State,
+  IN     CONST UINT8 *Data,
+  IN     UINTN       BlockNb
   );
 
 VOID
 Sha512InitAvx (
-  IN OUT SHA512_STATE  *Context
+  IN OUT SHA512_CONTEXT  *Context
   )
 {
   UINTN  Index;
@@ -49,9 +49,9 @@ Sha512InitAvx (
 
 VOID
 Sha512UpdateAvx (
-  IN OUT SHA512_STATE  *Context,
-  IN     CONST UINT8   *Data,
-  IN     UINTN         Len
+  IN OUT SHA512_CONTEXT *Context,
+  IN     CONST UINT8    *Data,
+  IN     UINTN          Len
   )
 {
   UINTN        BlockNb;
@@ -75,8 +75,8 @@ Sha512UpdateAvx (
 
   ShiftedMsg = Data + RemLen;
 
-  Sha512TransformAvx (Context, Context->Block, 1);
-  Sha512TransformAvx (Context, ShiftedMsg, BlockNb);
+  Sha512TransformAvx (Context->State, Context->Block, 1);
+  Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
 
   RemLen = NewLen % SHA512_BLOCK_SIZE;
 
@@ -88,8 +88,8 @@ Sha512UpdateAvx (
 
 VOID
 Sha512FinalAvx (
-  IN OUT SHA512_STATE  *Context,
-  IN OUT UINT8         *HashDigest
+  IN OUT SHA512_CONTEXT *Context,
+  IN OUT UINT8          *HashDigest
   )
 {
   UINTN   BlockNb;
@@ -105,7 +105,7 @@ Sha512FinalAvx (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  Sha512TransformAvx (Context, Context->Block, BlockNb);
+  Sha512TransformAvx (Context->State, Context->Block, BlockNb);
 
   CopyMem (HashDigest, Context->State, SHA512_DIGEST_SIZE);
 }
@@ -117,7 +117,7 @@ Sha512Avx (
   IN     UINTN        Len
   )
 {
-  SHA512_STATE  Ctx;
+  SHA512_CONTEXT  Ctx;
 
   Sha512InitAvx (&Ctx);
   Sha512UpdateAvx (&Ctx, Data, Len);
@@ -130,7 +130,7 @@ Sha512Avx (
 //
 VOID
 Sha384InitAvx (
-  IN OUT SHA384_STATE  *Context
+  IN OUT SHA384_CONTEXT  *Context
   )
 {
   UINTN  Index;
@@ -145,9 +145,9 @@ Sha384InitAvx (
 
 VOID
 Sha384UpdateAvx (
-  IN OUT SHA384_STATE  *Context,
-  IN     CONST UINT8   *Data,
-  IN     UINTN         Len
+  IN OUT SHA384_CONTEXT *Context,
+  IN     CONST UINT8    *Data,
+  IN     UINTN          Len
   )
 {
   UINTN        BlockNb;
@@ -171,8 +171,8 @@ Sha384UpdateAvx (
 
   ShiftedMessage = Data + RemLen;
 
-  Sha512TransformAvx (Context, Context->Block, 1);
-  Sha512TransformAvx (Context, ShiftedMessage, BlockNb);
+  Sha512TransformAvx (Context->State, Context->Block, 1);
+  Sha512TransformAvx (Context->State, ShiftedMessage, BlockNb);
 
   RemLen = NewLen % SHA384_BLOCK_SIZE;
 
@@ -188,8 +188,8 @@ Sha384UpdateAvx (
 
 VOID
 Sha384FinalAvx (
-  IN OUT SHA384_STATE  *Context,
-  IN OUT UINT8         *HashDigest
+  IN OUT SHA384_CONTEXT *Context,
+  IN OUT UINT8          *HashDigest
   )
 {
   UINTN    BlockNb;
@@ -206,7 +206,7 @@ Sha384FinalAvx (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  Sha512TransformAvx (Context, Context->Block, BlockNb);
+  Sha512TransformAvx (Context->State, Context->Block, BlockNb);
 
   CopyMem (HashDigest, Context->State, SHA384_DIGEST_SIZE);
 }
@@ -218,7 +218,7 @@ Sha384Avx (
   IN     UINTN        Len
   )
 {
-  SHA384_STATE Ctx;
+  SHA384_CONTEXT Ctx;
 
   Sha384InitAvx (&Ctx);
   Sha384UpdateAvx (&Ctx, Data, Len);

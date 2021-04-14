@@ -117,11 +117,11 @@ section .text
 ; MSG, DIGEST, K_t, W_t are arrays
 ; WK_2(t) points to 1 of 2 qwords at frame.WK depdending on t being odd/even
 
-; Input message (arg1)
-%define MSG(i)    [msg + 8*i]
-
-; Output Digest (arg2)
+; Output Digest (arg1)
 %define DIGEST(i) [digest + 8*i]
+
+; Input message (arg2)
+%define MSG(i)    [msg + 8*i]
 
 ; SHA Constants (static mem)
 %define K_t(i)    [rel 8*i + K512]
