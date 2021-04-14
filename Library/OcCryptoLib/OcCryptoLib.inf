@@ -44,6 +44,7 @@
 
 [Sources.Ia32]
   Ia32/BigNumWordMul64.c
+  Ia32/Sha512AvxDummy.nasm
 
 [Sources.X64]
   X64/BigNumWordMul64.c
