@@ -12,7 +12,7 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include "../Sha2-avx.h"
+#include "../Sha2Avx.h"
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 

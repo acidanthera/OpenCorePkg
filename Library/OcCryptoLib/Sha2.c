@@ -36,7 +36,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #endif
 
 #include <Library/OcCryptoLib.h>
-#include "Sha2-avx.h"
+#include "Sha2Avx.h"
 
 
 #define SHFR(a, b)    (a >> b)
