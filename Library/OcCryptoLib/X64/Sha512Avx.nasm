@@ -132,21 +132,21 @@ section .text
 %define WK_2(i)   [rsp + 8*((i % 2)) + frame_WK]
 
 %macro RotateState 0
-	; Rotate symbols a..h right
+  ; Rotate symbols a..h right
   %xdefine TMP  h_64
-	%xdefine h_64 g_64
-	%xdefine g_64 f_64
-	%xdefine f_64 e_64
-	%xdefine e_64 d_64
-	%xdefine d_64 c_64
-	%xdefine c_64 b_64
-	%xdefine b_64 a_64
-	%xdefine a_64 TMP
+  %xdefine h_64 g_64
+  %xdefine g_64 f_64
+  %xdefine f_64 e_64
+  %xdefine e_64 d_64
+  %xdefine d_64 c_64
+  %xdefine c_64 b_64
+  %xdefine b_64 a_64
+  %xdefine a_64 TMP
 %endmacro
 
 %macro RORQ 2
-	; shld is faster than ror on Sandybridge
-	shld	%1, %1, (64-%2)
+  ; shld is faster than ror on Sandybridge
+  shld %1, %1, (64-%2)
 %endmacro
 
 %macro SHA512_Round_Optimized 1
@@ -249,7 +249,7 @@ section .text
   ;   The computation of the message schedule and the rounds are tightly
   ; stitched to take advantage of instruction-level parallelism.
 
-	%assign idx  (%1 - 2)
+  %assign idx  (%1 - 2)
   vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
   mov     T1, f_64          ; T1 = f
   mov     tmp0, e_64        ; tmp = e
@@ -347,7 +347,7 @@ section .text
   ; x ROTR n = (x >> n) | (x << 64-n)
 
   ; sigma[1,512](W[t-2]) = (W[t-2] ROTR 19) ^ (W[t-2] ROTR 61) ^ (W[t-2] SHR 6)
-	%assign idx  (%1 - 2)
+  %assign idx  (%1 - 2)
   ; W[t-2] ROTR 19
   vmovdqu xmm4, W_t(idx)      ; xmm4 = W[t-2]|W[t-1]
   vpsrlq  xmm0, xmm4, 19      ; xmm0 = W[t-2] >> 19
