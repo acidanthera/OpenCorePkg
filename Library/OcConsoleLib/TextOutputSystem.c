@@ -264,7 +264,7 @@ ConsoleControlSetMode (
       );
 
     if (!EFI_ERROR (Status)) {
-      Status = GraphicsOutput->Blt (
+      GraphicsOutput->Blt (
         GraphicsOutput,
         &mEfiBackgroundColors[BitFieldRead32 ((UINT32) gST->ConOut->Mode->Attribute, 4, 6)],
         EfiBltVideoFill,
