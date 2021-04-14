@@ -106,6 +106,7 @@ OcForgeUefiSupport (
   NewBS->Hdr.Revision = EFI_2_30_SYSTEM_TABLE_REVISION;
   NewBS->Hdr.CRC32 = 0;
   NewBS->Hdr.CRC32 = CalculateCrc32 (NewBS, NewBS->Hdr.HeaderSize);
+  gBS = NewBS;
 
   gST->BootServices = NewBS;
   gST->Hdr.Revision = EFI_2_30_SYSTEM_TABLE_REVISION;
