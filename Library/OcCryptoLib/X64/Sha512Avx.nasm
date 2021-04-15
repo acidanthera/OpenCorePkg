@@ -27,6 +27,10 @@ align 16
 XMM_QWORD_BSWAP:
 	dq 0x0001020304050607,0x08090a0b0c0d0e0f
 
+section .bss
+global ASM_PFX(mIsAvxEnabled)
+ASM_PFX(mIsAvxEnabled): db 0
+
 ; ########################################################################
 ; ### Code
 section .text
@@ -372,6 +376,7 @@ ASM_PFX(TryEnableAvx):
   ; XSETBV must be executed at privilege level 0 or in real-address mode.
   xsetbv
   mov rax, 1
+  mov byte [rel ASM_PFX(mIsAvxEnabled)], 1
   jmp done
 noAVX:
   mov rax, 0

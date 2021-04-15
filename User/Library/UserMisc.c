@@ -8,6 +8,8 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/DebugLib.h>
 
+BOOLEAN mIsAvxEnabled;
+
 VOID
 EFIAPI
 CpuBreakpoint (
@@ -691,4 +693,3 @@ TryEnableAvx (
 {
   return FALSE;
 }
-
