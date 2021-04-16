@@ -691,5 +691,6 @@ TryEnableAvx (
   VOID
   )
 {
+  mIsAvxEnabled = FALSE;
   return FALSE;
 }

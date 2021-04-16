@@ -334,9 +334,9 @@ Sha512TransformAvx (
 
 VOID
 Sha512Transform (
-  SHA512_CONTEXT  *Context,
-  CONST UINT8     *Data,
-  UINTN           BlockNb
+  UINT64      *State,
+  CONST UINT8 *Data,
+  UINTN       BlockNb
   )
 {
   UINT64       W[80];
@@ -361,7 +361,7 @@ Sha512Transform (
     // Initialize the 8 working registers
     //
     for (Index2 = 0; Index2 < 8; ++Index2) {
-      Wv[Index2] = Context->State[Index2];
+      Wv[Index2] = State[Index2];
     }
 
     for (Index2 = 0; Index2 < 80; ++Index2) {
@@ -397,7 +397,7 @@ Sha512Transform (
     // Update the hash value
     //
     for (Index2 = 0; Index2 < 8; ++Index2) {
-      Context->State[Index2] += Wv[Index2];
+      State[Index2] += Wv[Index2];
     }
   }
 }
@@ -455,8 +455,8 @@ Sha512Update (
     Sha512TransformAvx (Context->State, Context->Block, 1);
     Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
   } else {
-    Sha512Transform (Context, Context->Block, 1);
-    Sha512Transform (Context, ShiftedMsg, BlockNb);
+    Sha512Transform (Context->State, Context->Block, 1);
+    Sha512Transform (Context->State, ShiftedMsg, BlockNb);
   }
 
   RemLen = NewLen % SHA512_BLOCK_SIZE;
@@ -489,7 +489,7 @@ Sha512Final (
   if (mIsAvxEnabled) {
     Sha512TransformAvx (Context->State, Context->Block, BlockNb);
   } else {
-    Sha512Transform (Context, Context->Block, BlockNb);
+    Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
   CopyMem (HashDigest, Context->State, SHA512_DIGEST_SIZE);
@@ -557,8 +557,8 @@ Sha384Update (
     Sha512TransformAvx (Context->State, Context->Block, 1);
     Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
   } else {
-    Sha512Transform (Context, Context->Block, 1);
-    Sha512Transform (Context, ShiftedMsg, BlockNb);
+    Sha512Transform (Context->State, Context->Block, 1);
+    Sha512Transform (Context->State, ShiftedMsg, BlockNb);
   }
 
   RemLen = NewLen % SHA384_BLOCK_SIZE;
@@ -592,7 +592,7 @@ Sha384Final (
   if (mIsAvxEnabled) {
     Sha512TransformAvx (Context->State, Context->Block, BlockNb);
   } else {
-    Sha512Transform (Context, Context->Block, BlockNb);
+    Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
   CopyMem (HashDigest, Context->State, SHA512_DIGEST_SIZE);
