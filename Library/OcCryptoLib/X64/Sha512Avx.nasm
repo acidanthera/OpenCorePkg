@@ -65,7 +65,7 @@ section .text
 ; W[t] + K[t] | W[t+1] + K[t+1]
 %define WK_SIZE       2*8
 %define RSPSAVE_SIZE  1*8
-%define GPRSAVE_SIZE  8*8
+%define GPRSAVE_SIZE  8*8+5*16
 
 %define frame_W        0
 %define frame_WK       frame_W + W_SIZE
@@ -399,13 +399,15 @@ ASM_PFX(Sha512TransformAvx):
 
   ; Allocate Stack Space
   mov rax, rsp
+  pushfq
+  cli
   sub rsp, frame_size
   and rsp, ~(0x20 - 1)
   mov [rsp + frame_RSPSAVE], rax
 
   ; Save GPRs
-  ; Registers RBX, RBP, RDI, RSI, R12, R13, R14, R15, and XMM6-XMM15 are nonvolatile,
-  ; but XMM6-XMM15 are not used.
+  ; Registers RBX, RBP, RDI, RSI, R12, R13, R14, R15 are nonvolatile,
+  ; UEFI does not (officially) support vector registers as a part of the context.
   mov [rsp + frame_GPRSAVE], rbx
   mov [rsp + frame_GPRSAVE + 8*1], rbp
   mov [rsp + frame_GPRSAVE + 8*2], rdi
@@ -414,6 +416,11 @@ ASM_PFX(Sha512TransformAvx):
   mov [rsp + frame_GPRSAVE + 8*5], r13
   mov [rsp + frame_GPRSAVE + 8*6], r14
   mov [rsp + frame_GPRSAVE + 8*7], r15
+  vmovdqu [rsp + frame_GPRSAVE + 8*8], xmm0
+  vmovdqu [rsp + frame_GPRSAVE + 8*8 + 16*1], xmm1
+  vmovdqu [rsp + frame_GPRSAVE + 8*8 + 16*2], xmm2
+  vmovdqu [rsp + frame_GPRSAVE + 8*8 + 16*3], xmm3
+  vmovdqu [rsp + frame_GPRSAVE + 8*8 + 16*4], xmm4
 
 updateblock:
   ; Load state variables
@@ -485,9 +492,20 @@ updateblock:
   mov r13, [rsp + frame_GPRSAVE + 8*5]
   mov r14, [rsp + frame_GPRSAVE + 8*6]
   mov r15, [rsp + frame_GPRSAVE + 8*7]
+  vmovdqu xmm0, [rsp + frame_GPRSAVE + 8*8]
+  vmovdqu xmm1, [rsp + frame_GPRSAVE + 8*8 + 16*1]
+  vmovdqu xmm2, [rsp + frame_GPRSAVE + 8*8 + 16*2]
+  vmovdqu xmm3, [rsp + frame_GPRSAVE + 8*8 + 16*3]
+  vmovdqu xmm4, [rsp + frame_GPRSAVE + 8*8 + 16*4]
 
   ; Restore Stack Pointer
   mov rsp, [rsp + frame_RSPSAVE]
+  ; Reenable the interrupts if they were previously enabled
+  mov rax, [rsp - 8]
+  and rax, 200H
+  cmp rax, 200H
+  jne nowork
+  sti
 
 nowork:
   ret
