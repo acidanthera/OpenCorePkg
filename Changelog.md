@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added `ForgeUefiSupport` quirk to workaround legacy EFI 1.x firmwares compatibility
 - Added `ReloadOptionRoms` quirk to force-load Option ROMs on PCI devices
 - Added `OC_ATTR_USE_MINIMAL_UI` to allow running pickers with no Shutdown and Restart buttons
+- Added display of OpenCore version number to OpenCanopy as well as builtin picker, depending on existing ExposeSensitiveData bit
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
