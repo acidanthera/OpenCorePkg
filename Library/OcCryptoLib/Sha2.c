@@ -334,9 +334,9 @@ Sha512TransformAvx (
 
 VOID
 Sha512Transform (
-  UINT64      *State,
-  CONST UINT8 *Data,
-  UINTN       BlockNb
+  IN OUT UINT64      *State,
+  IN     CONST UINT8 *Data,
+  IN     UINTN       BlockNb
   )
 {
   UINT64       W[80];
@@ -476,6 +476,7 @@ Sha512Final (
   UINTN   BlockNb;
   UINTN   PmLen;
   UINT64  LenB;
+  UINTN   Index;
 
   BlockNb = ((SHA512_BLOCK_SIZE - 17) < (Context->Length % SHA512_BLOCK_SIZE)) + 1;
 
@@ -492,7 +493,9 @@ Sha512Final (
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
-  CopyMem (HashDigest, Context->State, SHA512_DIGEST_SIZE);
+  for (Index = 0 ; Index < 8; ++Index) {
+    UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
+  }
 }
 
 VOID
@@ -578,6 +581,7 @@ Sha384Final (
   UINTN    BlockNb;
   UINTN    PmLen;
   UINT64   LenB;
+  UINTN    Index;
 
   BlockNb = ((SHA384_BLOCK_SIZE - 17) < (Context->Length % SHA384_BLOCK_SIZE)) + 1;
 
@@ -595,7 +599,9 @@ Sha384Final (
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
 
-  CopyMem (HashDigest, Context->State, SHA512_DIGEST_SIZE);
+  for (Index = 0 ; Index < 6; ++Index) {
+    UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
+  }
 }
 
 VOID
