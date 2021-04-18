@@ -11,9 +11,7 @@
 ;
 BITS 32
 
-section .bss
-global ASM_PFX(mIsAvxEnabled)
-ASM_PFX(mIsAvxEnabled): db 0
+extern ASM_PFX(mIsAvxEnabled)
 
 section .text
 
@@ -21,6 +19,7 @@ align 8
 global ASM_PFX(TryEnableAvx)
 ASM_PFX(TryEnableAvx):
   mov eax, 0
+  mov byte [rel ASM_PFX(mIsAvxEnabled)], 0
   ret
 
 align 8

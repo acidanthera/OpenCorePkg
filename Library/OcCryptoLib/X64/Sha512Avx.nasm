@@ -20,16 +20,13 @@
 BITS 64
 
 extern ASM_PFX(SHA512_K)
+extern ASM_PFX(mIsAvxEnabled)
 
 section .rodata
 align 16
 ; Mask for byte-swapping a couple of qwords in an XMM register using (v)pshufb.
 XMM_QWORD_BSWAP:
 	dq 0x0001020304050607,0x08090a0b0c0d0e0f
-
-section .bss
-global ASM_PFX(mIsAvxEnabled)
-ASM_PFX(mIsAvxEnabled): db 0
 
 ; ########################################################################
 ; ### Code
@@ -370,7 +367,7 @@ ASM_PFX(TryEnableAvx):
   bts rax, 18  ; OSXSAVE: enables XGETBV and XSETBV
   mov cr4, rax
 
-  mov ecx, 0          ; read the contents of XCR0 register
+  xor ecx, ecx        ; read the contents of XCR0 register
   xgetbv              ; result in EDX:EAX
   or  eax, 06H        ; enable both XMM and YMM state support
   ; XSETBV must be executed at privilege level 0 or in real-address mode.
@@ -379,7 +376,8 @@ ASM_PFX(TryEnableAvx):
   mov byte [rel ASM_PFX(mIsAvxEnabled)], 1
   jmp done
 noAVX:
-  mov rax, 0
+  xor rax, rax
+  mov byte [rel ASM_PFX(mIsAvxEnabled)], 0
 done:
   ret
 
