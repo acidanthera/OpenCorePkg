@@ -1013,6 +1013,37 @@ InternalBootPickerRightScrollPtrEvent (
   return This;
 }
 
+STATIC GUI_IMAGE mVersionLabelImage;
+
+VOID
+InternalVersionLabelDraw (
+  IN OUT GUI_OBJ                 *This,
+  IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
+  IN     BOOT_PICKER_GUI_CONTEXT *Context,
+  IN     INT64                   BaseX,
+  IN     INT64                   BaseY,
+  IN     UINT32                  OffsetX,
+  IN     UINT32                  OffsetY,
+  IN     UINT32                  Width,
+  IN     UINT32                  Height,
+  IN     UINT8                   Opacity
+  )
+{
+  if (mVersionLabelImage.Buffer != NULL) {
+    GuiDrawToBuffer (
+      &mVersionLabelImage,
+      Opacity,
+      DrawContext,
+      BaseX,
+      BaseY,
+      OffsetX,
+      OffsetY,
+      Width,
+      Height
+      );
+  }
+}
+
 VOID
 InternalBootPickerViewKeyEvent (
   IN OUT GUI_OBJ                 *This,
@@ -1206,17 +1237,32 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerRightScroll = {
   0
 };
 
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerVersionLabel = {
+  {
+    0, 0, 0, 0, 0xFF,
+    InternalVersionLabelDraw,
+    NULL,
+    GuiObjDelegatePtrEvent,
+    NULL,
+    0,
+    NULL
+  },
+  NULL
+};
+
 STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
   &mBootPickerContainer,
   &mCommonActionButtonsContainer,
   &mBootPickerLeftScroll.Hdr,
-  &mBootPickerRightScroll.Hdr
+  &mBootPickerRightScroll.Hdr,
+  &mBootPickerVersionLabel
 };
 
 STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
   &mBootPickerContainer,
   &mBootPickerLeftScroll.Hdr,
-  &mBootPickerRightScroll.Hdr
+  &mBootPickerRightScroll.Hdr,
+  &mBootPickerVersionLabel
 };
 
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
@@ -1759,6 +1805,9 @@ BootPickerViewInitialize (
   CONST GUI_IMAGE *SelectorButtonImage;
   UINT32          ContainerMaxWidth;
   UINT32          ContainerWidthDelta;
+  UINTN           DestLen;
+  CHAR16          *UString;
+  BOOLEAN         Result;
 
   ASSERT (DrawContext != NULL);
   ASSERT (GuiContext != NULL);
@@ -1855,6 +1904,43 @@ BootPickerViewInitialize (
     return EFI_OUT_OF_RESOURCES;
   }
   mBootPicker.Hdr.Obj.NumChildren = NumBootEntries;
+
+  if (GuiContext->PickerContext->TitleSuffix == NULL) {
+    mVersionLabelImage.Buffer = NULL;
+
+    mBootPickerVersionLabel.Obj.Width   = 0;
+    mBootPickerVersionLabel.Obj.Height  = 0;
+    mBootPickerVersionLabel.Obj.OffsetX = 0;
+    mBootPickerVersionLabel.Obj.OffsetY = 0;
+  } else {
+    DestLen = AsciiStrLen (GuiContext->PickerContext->TitleSuffix);
+    UString = AllocateZeroPool ((DestLen + 1) * sizeof(CHAR16));
+    if (UString == NULL) {
+      return EFI_OUT_OF_RESOURCES;
+    }
+
+    AsciiStrToUnicodeStrS (GuiContext->PickerContext->TitleSuffix, UString, DestLen + 1);
+
+    Result = GuiGetLabel (
+      &mVersionLabelImage,
+      &GuiContext->FontContext,
+      UString,
+      DestLen,
+      GuiContext->LightBackground
+      );
+
+    FreePool (UString);
+    
+    if (!Result) {
+      DEBUG ((DEBUG_WARN, "OCUI: version label failed\n"));
+      return Result;
+    }
+
+    mBootPickerVersionLabel.Obj.Width   = mVersionLabelImage.Width;
+    mBootPickerVersionLabel.Obj.Height  = mVersionLabelImage.Height;
+    mBootPickerVersionLabel.Obj.OffsetX = DrawContext->Screen.Width  - ((3 * mBootPickerVersionLabel.Obj.Width ) / 2);
+    mBootPickerVersionLabel.Obj.OffsetY = DrawContext->Screen.Height - ((5 * mBootPickerVersionLabel.Obj.Height) / 2);
+  }
 
   // TODO: animations should be tied to UI objects, not global
   // Each object has its own list of animations.
@@ -1970,6 +2056,11 @@ BootPickerViewDeinitialize (
   )
 {
   UINT32 Index;
+
+  if (mVersionLabelImage.Buffer != NULL) {
+    FreePool (mVersionLabelImage.Buffer);
+    mVersionLabelImage.Buffer = NULL;
+  }
 
   for (Index = 0; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
     InternalBootPickerEntryDestruct (InternalGetVolumeEntry (Index));
