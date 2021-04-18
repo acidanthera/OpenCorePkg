@@ -1914,12 +1914,7 @@ BootPickerViewInitialize (
     mBootPickerVersionLabel.Obj.OffsetY = 0;
   } else {
     DestLen = AsciiStrLen (GuiContext->PickerContext->TitleSuffix);
-    UString = AllocateZeroPool ((DestLen + 1) * sizeof(CHAR16));
-    if (UString == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    AsciiStrToUnicodeStrS (GuiContext->PickerContext->TitleSuffix, UString, DestLen + 1);
+    UString = AsciiStrCopyToUnicode (GuiContext->PickerContext->TitleSuffix, DestLen);
 
     Result = GuiGetLabel (
       &mVersionLabelImage,
