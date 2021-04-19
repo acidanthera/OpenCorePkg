@@ -181,11 +181,11 @@ InterpretArguments (
 
       Token[TokenIndex] = '\0';
 
-      if (StriCmp (Parameter, L"lock") == 0) {
+      if (OcStriCmp (Parameter, L"lock") == 0) {
         mArgumentFlags = ARG_LOCK;
-      } else if (StriCmp (Parameter, L"unlock") == 0) {
+      } else if (OcStriCmp (Parameter, L"unlock") == 0) {
         mArgumentFlags = ARG_UNLOCK;
-      } else if (StriCmp (Parameter, L"interactive") == 0) {
+      } else if (OcStriCmp (Parameter, L"interactive") == 0) {
         mArgumentFlags = ARG_INTERACTIVE;
       } else {
         Print (L"Unknown command line argument: %s\n", Parameter);
