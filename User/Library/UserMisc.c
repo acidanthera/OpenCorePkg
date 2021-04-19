@@ -671,4 +671,3 @@ DevicePathFromHandle (
 {
   return NULL;
 }
-

@@ -44,9 +44,11 @@
 
 [Sources.Ia32]
   Ia32/BigNumWordMul64.c
+  Sha512AvxDummy.c
 
 [Sources.X64]
   X64/BigNumWordMul64.c
+  X64/Sha512Avx.nasm
 
 [FixedPcd]
   gOpenCorePkgTokenSpaceGuid.PcdOcCryptoAllowedRsaModuli

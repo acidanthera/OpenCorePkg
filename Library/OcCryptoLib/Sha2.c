@@ -91,7 +91,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
           + SHA512_SIG0(W[Index - 15]) + W[Index - 16];     \
   } while(0)
 
-
+GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN mIsAvxEnabled;
 
 STATIC CONST UINT32 SHA256_K[64] = {
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
@@ -105,7 +105,7 @@ STATIC CONST UINT32 SHA256_K[64] = {
 };
 
 
-STATIC UINT64 SHA512_K[80] = {
+CONST UINT64 SHA512_K[80] = {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
   0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
   0x923f82a4af194f9bULL, 0xab1c5ed5da6d8118ULL, 0xd807aa98a3030242ULL,
@@ -325,10 +325,18 @@ Sha256 (
 // Sha 512 functions
 //
 VOID
+EFIAPI
+Sha512TransformAvx (
+  IN OUT UINT64      *State,
+  IN     CONST UINT8 *Data,
+  IN     UINTN       BlockNb
+  );
+
+VOID
 Sha512Transform (
-  SHA512_CONTEXT  *Context,
-  CONST UINT8     *Data,
-  UINTN           BlockNb
+  IN OUT UINT64      *State,
+  IN     CONST UINT8 *Data,
+  IN     UINTN       BlockNb
   )
 {
   UINT64       W[80];
@@ -353,7 +361,7 @@ Sha512Transform (
     // Initialize the 8 working registers
     //
     for (Index2 = 0; Index2 < 8; ++Index2) {
-      Wv[Index2] = Context->State[Index2];
+      Wv[Index2] = State[Index2];
     }
 
     for (Index2 = 0; Index2 < 80; ++Index2) {
@@ -389,7 +397,7 @@ Sha512Transform (
     // Update the hash value
     //
     for (Index2 = 0; Index2 < 8; ++Index2) {
-      Context->State[Index2] += Wv[Index2];
+      State[Index2] += Wv[Index2];
     }
   }
 }
@@ -399,14 +407,10 @@ Sha512Init (
   SHA512_CONTEXT  *Context
   )
 {
-  UINTN  Index;
-
   //
   // Set initial hash value
   //
-  for (Index = 0; Index < 8; ++Index) {
-    Context->State[Index] = SHA512_H0[Index];
-  }
+  CopyMem (Context->State, SHA512_H0, SHA512_DIGEST_SIZE);
 
   //
   // Number of bytes in the buffer
@@ -447,8 +451,13 @@ Sha512Update (
 
   ShiftedMsg = Data + RemLen;
 
-  Sha512Transform (Context, Context->Block, 1);
-  Sha512Transform (Context, ShiftedMsg, BlockNb);
+  if (mIsAvxEnabled) {
+    Sha512TransformAvx (Context->State, Context->Block, 1);
+    Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
+  } else {
+    Sha512Transform (Context->State, Context->Block, 1);
+    Sha512Transform (Context->State, ShiftedMsg, BlockNb);
+  }
 
   RemLen = NewLen % SHA512_BLOCK_SIZE;
 
@@ -478,7 +487,11 @@ Sha512Final (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  Sha512Transform (Context, Context->Block, BlockNb);
+  if (mIsAvxEnabled) {
+    Sha512TransformAvx (Context->State, Context->Block, BlockNb);
+  } else {
+    Sha512Transform (Context->State, Context->Block, BlockNb);
+  }
 
   for (Index = 0 ; Index < 8; ++Index) {
     UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
@@ -509,11 +522,7 @@ Sha384Init (
   SHA384_CONTEXT  *Context
   )
 {
-  UINTN  Index;
-
-  for (Index = 0; Index < 8; ++Index) {
-    Context->State[Index] = SHA384_H0[Index];
-  }
+  CopyMem (Context->State, SHA384_H0, SHA512_DIGEST_SIZE);
 
   Context->Length = 0;
   Context->TotalLength = 0;
@@ -530,7 +539,7 @@ Sha384Update (
   UINTN        NewLen;
   UINTN        RemLen;
   UINTN        TmpLen;
-  CONST UINT8  *ShiftedMessage;
+  CONST UINT8  *ShiftedMsg;
 
   TmpLen = SHA384_BLOCK_SIZE - Context->Length;
   RemLen = Len < TmpLen ? Len : TmpLen;
@@ -545,18 +554,19 @@ Sha384Update (
   NewLen = Len - RemLen;
   BlockNb = NewLen / SHA384_BLOCK_SIZE;
 
-  ShiftedMessage = Data + RemLen;
+  ShiftedMsg = Data + RemLen;
 
-  Sha512Transform (Context, Context->Block, 1);
-  Sha512Transform (Context, ShiftedMessage, BlockNb);
+  if (mIsAvxEnabled) {
+    Sha512TransformAvx (Context->State, Context->Block, 1);
+    Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
+  } else {
+    Sha512Transform (Context->State, Context->Block, 1);
+    Sha512Transform (Context->State, ShiftedMsg, BlockNb);
+  }
 
   RemLen = NewLen % SHA384_BLOCK_SIZE;
 
-  CopyMem (
-    Context->Block,
-    &ShiftedMessage[BlockNb << 7],
-    RemLen
-    );
+  CopyMem (Context->Block, &ShiftedMsg[BlockNb << 7], RemLen);
 
   Context->Length = RemLen;
   Context->TotalLength += (BlockNb + 1) << 7;
@@ -583,7 +593,11 @@ Sha384Final (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  Sha512Transform (Context, Context->Block, BlockNb);
+  if (mIsAvxEnabled) {
+    Sha512TransformAvx (Context->State, Context->Block, BlockNb);
+  } else {
+    Sha512Transform (Context->State, Context->Block, BlockNb);
+  }
 
   for (Index = 0 ; Index < 6; ++Index) {
     UNPACK64 (Context->State[Index], &HashDigest[Index << 3]);
