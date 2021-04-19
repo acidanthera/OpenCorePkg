@@ -47,7 +47,7 @@ UefiMain (
     Mode = L"ColdReset";
   }
 
-  if (StrCmp (Mode, L"Firmware") == 0) {
+  if (StriCmp (Mode, L"Firmware") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Entering firmware...\n"));
     DataSize = sizeof (OsIndications);
     Status = gRT->GetVariable (
@@ -94,13 +94,13 @@ UefiMain (
     Mode = L"ColdReset";
   }
 
-  if (StrCmp (Mode, L"ColdReset") == 0) {
+  if (StriCmp (Mode, L"ColdReset") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform cold reset...\n"));
     ResetMode = EfiResetCold;
-  } else if (StrCmp (Mode, L"WarmReset") == 0) {
+  } else if (StriCmp (Mode, L"WarmReset") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform warm reset...\n"));
     ResetMode = EfiResetWarm;
-  } else if (StrCmp (Mode, L"Shutdown") == 0) {
+  } else if (StriCmp (Mode, L"Shutdown") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform shutdown...\n"));
     ResetMode = EfiResetShutdown;
   } else {
