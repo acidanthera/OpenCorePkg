@@ -46,6 +46,7 @@
   BaseMemoryLib
   OcConsoleControlEntryModeGenericLib
   OcMiscLib
+  OcStringLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
   UefiLib

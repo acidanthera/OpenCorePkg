@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -43,11 +44,11 @@ UefiMain (
   if (!EFI_ERROR (Status) && Argc >= 2) {
     Mode = Argv[1];
   } else {
-    DEBUG ((DEBUG_INFO, "OCRST: Assuming default to be ResetCold - %r\n", Status));
-    Mode = L"ColdReset";
+    DEBUG ((DEBUG_INFO, "OCRST: Assuming default to be coldreset - %r\n", Status));
+    Mode = L"coldreset";
   }
 
-  if (StrCmp (Mode, L"Firmware") == 0) {
+  if (OcStriCmp (Mode, L"firmware") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Entering firmware...\n"));
     DataSize = sizeof (OsIndications);
     Status = gRT->GetVariable (
@@ -91,16 +92,16 @@ UefiMain (
       DEBUG ((DEBUG_WARN, "OCRST: Failed to acquire firmware features - %r\n", Status));
       return EFI_NOT_FOUND;
     }
-    Mode = L"ColdReset";
+    Mode = L"coldreset";
   }
 
-  if (StrCmp (Mode, L"ColdReset") == 0) {
+  if (OcStriCmp (Mode, L"coldreset") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform cold reset...\n"));
     ResetMode = EfiResetCold;
-  } else if (StrCmp (Mode, L"WarmReset") == 0) {
+  } else if (OcStriCmp (Mode, L"warmreset") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform warm reset...\n"));
     ResetMode = EfiResetWarm;
-  } else if (StrCmp (Mode, L"Shutdown") == 0) {
+  } else if (OcStriCmp (Mode, L"shutdown") == 0) {
     DEBUG ((DEBUG_INFO, "OCRST: Perform shutdown...\n"));
     ResetMode = EfiResetShutdown;
   } else {
