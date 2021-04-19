@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -87,7 +88,7 @@ UefiMain (
   HdaProtocol     = NULL;
   BeepGenProtocol = NULL;
 
-  if (StrCmp (Argv[1], L"any") == 0 || StrCmp (Argv[1], L"beep") == 0) {
+  if (OcStriCmp (Argv[1], L"any") == 0 || OcStriCmp (Argv[1], L"beep") == 0) {
     Status = gBS->LocateProtocol (
       &gAppleBeepGenProtocolGuid,
       NULL,
@@ -99,7 +100,7 @@ UefiMain (
     }
   }
 
-  if (BeepGenProtocol == NULL && (StrCmp (Argv[1], L"any") == 0 || StrCmp (Argv[1], L"hda") == 0)) {
+  if (BeepGenProtocol == NULL && (OcStriCmp (Argv[1], L"any") == 0 || OcStriCmp (Argv[1], L"hda") == 0)) {
     Status = gBS->LocateProtocol (
       &gAppleHighDefinitionAudioProtocolGuid,
       NULL,

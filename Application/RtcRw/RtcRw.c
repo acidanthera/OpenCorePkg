@@ -19,6 +19,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcConsoleLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcRtcLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -48,7 +49,7 @@ UefiMain (
 
   Status = GetArguments (&Argc, &Argv);
   if (!EFI_ERROR (Status) && Argc >= 2) {
-    if (StrCmp (Argv[1], L"dump") == 0 && Argc == 2) {
+    if (OcStriCmp (Argv[1], L"dump") == 0 && Argc == 2) {
       for (Index = 0; Index < ARRAY_SIZE (Rtc); ++Index) {
         Rtc[Index] = OcRtcRead ((UINT8) Index);
       }
@@ -79,7 +80,7 @@ UefiMain (
       return EFI_SUCCESS;
     }
 
-    if (StrCmp (Argv[1], L"read") == 0 && Argc == 3)  {
+    if (OcStriCmp (Argv[1], L"read") == 0 && Argc == 3)  {
       Status = StrHexToUintnS (Argv[2], NULL, &Addr);
       if (EFI_ERROR (Status) || Addr > 0xFF) {
         Print (L"Invalid addr %LX - %r\n", (UINT64) Addr, Status);
@@ -90,7 +91,7 @@ UefiMain (
       return EFI_SUCCESS;
     }
 
-    if (StrCmp (Argv[1], L"write") == 0 && Argc == 4)  {
+    if (OcStriCmp (Argv[1], L"write") == 0 && Argc == 4)  {
       Status = StrHexToUintnS (Argv[2], NULL, &Addr);
       if (EFI_ERROR (Status) || Addr > 0xFF) {
         Print (L"Invalid addr %LX - %r\n", (UINT64) Addr, Status);
