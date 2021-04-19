@@ -8,8 +8,6 @@
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/DebugLib.h>
 
-BOOLEAN mIsAvxEnabled;
-
 VOID
 EFIAPI
 CpuBreakpoint (
@@ -672,25 +670,4 @@ DevicePathFromHandle (
   )
 {
   return NULL;
-}
-
-VOID
-EFIAPI
-Sha512TransformAvx (
-  IN OUT UINT64      *State,
-  IN     CONST UINT8 *Data,
-  IN     UINTN       BlockNb
-  )
-{
-  ASSERT (FALSE);
-}
-
-BOOLEAN
-EFIAPI
-TryEnableAvx (
-  VOID
-  )
-{
-  mIsAvxEnabled = FALSE;
-  return FALSE;
 }
