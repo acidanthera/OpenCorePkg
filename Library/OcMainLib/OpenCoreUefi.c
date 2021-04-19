@@ -749,6 +749,7 @@ OcLoadUefiSupport (
 {
   EFI_HANDLE            *DriversToConnect;
   EFI_EVENT             Event;
+  BOOLEAN               AvxEnabled;
 
   OcReinstallProtocols (Config);
 
@@ -806,6 +807,11 @@ OcLoadUefiSupport (
 
   if (Config->Uefi.Quirks.ReloadOptionRoms) {
     OcReloadOptionRoms ();
+  }
+
+  if (Config->Uefi.Quirks.EnableVectorAcceleration) {
+    AvxEnabled = TryEnableAvx ();
+    DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AvxEnabled));
   }
 
   OcMiscUefiQuirksLoaded (Config);

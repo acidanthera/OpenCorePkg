@@ -673,6 +673,7 @@ typedef enum {
   _(UINT32                      , TscSyncTimeout              ,     , 0      , ()) \
   _(BOOLEAN                     , ActivateHpetSupport         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSecurityPolicy       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , EnableVectorAcceleration    ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForgeUefiSupport            ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReleaseUsbOwnership         ,     , FALSE  , ()) \

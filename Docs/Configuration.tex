@@ -7003,7 +7003,13 @@ functioning. Feature highlights:
   Older boards like ICH6 may not always have HPET setting in the firmware preferences,
   this option tries to force enable it.
 
-\item
+  \item
+  \texttt{EnableVectorAcceleration}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
+
+  \item
   \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

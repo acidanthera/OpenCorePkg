@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added `OC_ATTR_USE_MINIMAL_UI` to allow running pickers with no Shutdown and Restart buttons
 - Added display of OpenCore version number to OpenCanopy as well as builtin picker, depending on existing ExposeSensitiveData bit
 - Added support for case-insensitive argument handling in the UEFI tools
+- Added vector acceleration of SHA-512 and SHA-384 hashing algorithms, thx @MikhailKrichanov
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
