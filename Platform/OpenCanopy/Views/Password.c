@@ -188,12 +188,10 @@ InternalConfirmPassword (
 
   Privilege = Context->PickerContext->PrivilegeContext;
 
-  Result = OcVerifyPasswordSha512 (
+  Result = Context->PickerContext->VerifyPassword (
     (CONST UINT8 *) mPasswordBox.PasswordInfo.Password,
     mPasswordBox.PasswordInfo.PasswordLen,
-    Privilege->Salt,
-    Privilege->SaltSize,
-    Privilege->Hash
+    Privilege
     );
   
   GuiKeyReset (mKeyContext);

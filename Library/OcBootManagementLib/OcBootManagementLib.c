@@ -107,6 +107,27 @@ RunShowMenu (
   return Status;
 }
 
+BOOLEAN
+EFIAPI
+OcVerifyPassword (
+  IN CONST UINT8                  *Password,
+  IN UINT32                       PasswordSize,
+  IN CONST OC_PRIVILEGE_CONTEXT   *PrivilegeContext
+  )
+{
+  BOOLEAN   Result;
+
+  Result = OcVerifyPasswordSha512 (
+    Password,
+    PasswordSize,
+    PrivilegeContext->Salt,
+    PrivilegeContext->SaltSize,
+    PrivilegeContext->Hash
+    );
+
+  return Result;
+}
+
 EFI_STATUS
 InternalRunRequestPrivilege (
   IN OC_PICKER_CONTEXT   *PickerContext,

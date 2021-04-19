@@ -710,6 +710,17 @@ typedef struct {
 } OC_PRIVILEGE_CONTEXT;
 
 /**
+  Password verification.
+**/
+typedef
+BOOLEAN
+(EFIAPI *OC_VERIFY_PASSWORD)(
+  IN CONST UINT8                  *Password,
+  IN UINT32                       PasswordSize,
+  IN CONST OC_PRIVILEGE_CONTEXT   *PrivilegeContext
+  );
+
+/**
   Boot picker context describing picker behaviour.
 **/
 struct OC_PICKER_CONTEXT_ {
@@ -774,6 +785,10 @@ struct OC_PICKER_CONTEXT_ {
   // Privilege escalation requesting routine.
   //
   OC_REQ_PRIVILEGE           RequestPrivilege;
+  //
+  // Password verification.
+  //
+  OC_VERIFY_PASSWORD         VerifyPassword;
   //
   // Picker typing context.
   //
@@ -1072,6 +1087,28 @@ EFIAPI
 OcShowSimplePasswordRequest (
   IN OC_PICKER_CONTEXT      *Context,
   IN OC_PRIVILEGE_LEVEL     Level
+  );
+
+/**
+  Verify password.
+
+  Shared context function to be used by all pickers rather than directly linked call
+  to OcVerifyPasswordSha512, to pick up status of Avx acceleration as enabled within
+  OpenCore.efi and to avoid unnecessary OcCryptoLib lib linking into external picker.
+
+
+  @param[in]  Password          Password.
+  @param[in]  PasswordSize      Password size.
+  @param[in]  PrivilegeContext  Privilege context.
+
+  @retval                       True if password verified successfully.
+**/
+BOOLEAN
+EFIAPI
+OcVerifyPassword (
+  IN CONST UINT8                  *Password,
+  IN UINT32                       PasswordSize,
+  IN CONST OC_PRIVILEGE_CONTEXT   *PrivilegeContext
   );
 
 /**

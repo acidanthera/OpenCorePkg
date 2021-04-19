@@ -912,12 +912,10 @@ OcShowSimplePasswordRequest (
       gST->ConOut->OutputString (gST->ConOut, L" ");
     }
 
-    Result = OcVerifyPasswordSha512 (
+    Result = Context->VerifyPassword (
       Password,
       PwIndex,
-      Context->PrivilegeContext->Salt,
-      Context->PrivilegeContext->SaltSize,
-      Context->PrivilegeContext->Hash
+      Context->PrivilegeContext
       );
 
     SecureZeroMem (Password, PwIndex);

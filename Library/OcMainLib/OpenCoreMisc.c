@@ -24,6 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAcpiLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcAudioLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcSmbiosLib.h>
@@ -958,6 +959,7 @@ OcMiscBoot (
   Context->CustomDescribe        = OcToolDescribeEntry;
   Context->PrivilegeContext      = Privilege;
   Context->RequestPrivilege      = OcShowSimplePasswordRequest;
+  Context->VerifyPassword        = OcVerifyPassword;
   Context->ShowMenu              = OcShowSimpleBootMenu;
   Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
   Context->GetEntryIcon          = OcGetBootEntryIcon;
