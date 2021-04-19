@@ -48,16 +48,17 @@
   BaseLib
   BaseMemoryLib
   DebugLib
+  HiiLib
+  IoLib
   MemoryAllocationLib
+  OcConsoleControlEntryModeGenericLib
   OcMemoryLib
   OcMiscLib
-  OcConsoleControlEntryModeGenericLib
-  UefiApplicationEntryPoint
-  UefiLib
-  HiiLib
-  UefiHiiServicesLib
+  OcStringLib
   PcdLib
-  IoLib
+  UefiApplicationEntryPoint
+  UefiHiiServicesLib
+  UefiLib
 
 [Guids]
 gEfiHiiPlatformSetupFormsetGuid
