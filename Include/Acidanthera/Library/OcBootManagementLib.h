@@ -151,7 +151,7 @@ typedef enum OC_PICKER_MODE_ {
 **/
 typedef
 EFI_STATUS
-(*OC_BOOT_SYSTEM_ACTION)(
+(*OC_BOOT_SYSTEM_ACTION) (
   VOID
   );
 
@@ -533,7 +533,7 @@ typedef struct {
 **/
 typedef
 EFI_STATUS
-(EFIAPI *OC_REQ_PRIVILEGE)(
+(EFIAPI *OC_REQ_PRIVILEGE) (
   IN OC_PICKER_CONTEXT   *Context,
   IN OC_PRIVILEGE_LEVEL  Level
   );
@@ -714,7 +714,7 @@ typedef struct {
 **/
 typedef
 BOOLEAN
-(EFIAPI *OC_VERIFY_PASSWORD)(
+(EFIAPI *OC_VERIFY_PASSWORD) (
   IN CONST UINT8                  *Password,
   IN UINT32                       PasswordSize,
   IN CONST OC_PRIVILEGE_CONTEXT   *PrivilegeContext
