@@ -412,25 +412,26 @@ InternalBootPickerKeyEvent (
   BaseY = mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY;
 
   if (KeyEvent->OcKeyCode == OC_INPUT_RIGHT) {
-    if (mBootPicker.SelectedIndex + 1 < mBootPicker.Hdr.Obj.NumChildren) {
-      InternalBootPickerChangeEntry (
-        Picker,
-        DrawContext,
-        BaseX,
-        BaseY,
-        mBootPicker.SelectedIndex + 1
-        );
-    }
+    InternalBootPickerChangeEntry (
+      Picker,
+      DrawContext,
+      BaseX,
+      BaseY,
+      mBootPicker.SelectedIndex + 1 < mBootPicker.Hdr.Obj.NumChildren
+        ? mBootPicker.SelectedIndex + 1
+        : 0
+      );
   } else if (KeyEvent->OcKeyCode == OC_INPUT_LEFT) {
-    if (mBootPicker.SelectedIndex > 0) {
-      InternalBootPickerChangeEntry (
-        Picker,
-        DrawContext,
-        BaseX,
-        BaseY,
-        mBootPicker.SelectedIndex - 1
-        );
-    }
+    ASSERT (mBootPicker.Hdr.Obj.NumChildren > 0);
+    InternalBootPickerChangeEntry (
+      Picker,
+      DrawContext,
+      BaseX,
+      BaseY,
+      mBootPicker.SelectedIndex > 0
+        ? mBootPicker.SelectedIndex - 1
+        : mBootPicker.Hdr.Obj.NumChildren - 1
+      );
   } else if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE) {
     if (mBootPicker.Hdr.Obj.NumChildren > 0) {
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);
