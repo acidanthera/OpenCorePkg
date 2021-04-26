@@ -17,6 +17,7 @@ OpenCore Changelog
 - Added vector acceleration of SHA-512 and SHA-384 hashing algorithms, thx @MikhailKrichanov
 - Fixed wraparound when using arrow keys in OpenCanopy
 - Updated builtin firmware versions for SMBIOS and the rest
+- Added bundled Linux versions for userspace utilities
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

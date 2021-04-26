@@ -38,24 +38,28 @@ UDK_ARCH ?= X64
 #
 CFLAGS   := -c -fshort-wchar -Wall -Wextra -D EFIUSER
 
+ifeq ($(STATIC),1)
+	LDFLAGS += -static
+endif
+
 ifeq ($(WERROR),1)
-	CFLAGS  += -Werror
+	CFLAGS += -Werror
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-unused-parameter -x c -c - -o /dev/null 2>&1),)
-	CFLAGS  += -Wno-unused-parameter
+	CFLAGS += -Wno-unused-parameter
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-implicit-fallthrough -x c -c - -o /dev/null 2>&1),)
-	CFLAGS  += -Wno-implicit-fallthrough
+	CFLAGS += -Wno-implicit-fallthrough
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-strict-aliasing -x c -c - -o /dev/null 2>&1),)
-	CFLAGS  += -Wno-strict-aliasing
+	CFLAGS += -Wno-strict-aliasing
 endif
 
 ifeq ($(shell echo 'int a;' | "${CC}" -Wno-address -x c -c - -o /dev/null 2>&1),)
-	CFLAGS  += -Wno-address
+	CFLAGS += -Wno-address
 endif
 
 ifeq ($(DIST),Darwin)
@@ -66,8 +70,8 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX  := .exe
-	CFLAGS  += -D_ISOC99_SOURCE=1
+	SUFFIX := .exe
+	CFLAGS += -D_ISOC99_SOURCE=1
 endif
 
 ifeq ($(SANITIZE),1)

@@ -7,6 +7,7 @@ xcshareddata
 xcuserdata
 project.xcworkspace
 *.dSYM
+*.linux
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
