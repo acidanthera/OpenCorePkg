@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Apr 10 16:12:14 2021
-%DIF ADD ../Configuration.tex        Mon Apr 12 23:56:25 2021
+%DIF DEL PreviousConfiguration.tex   Tue Apr 27 20:14:51 2021
+%DIF ADD ../Configuration.tex        Tue Apr 27 20:14:51 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3297,7 +3297,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0020} --- \texttt{OC\_ATTR\_\DIFaddbegin \DIFadd{SHOW\_}\DIFaddend DEBUG\_DISPLAY}, enable display of additional
   timing and debug information, in Builtin picker in \texttt{DEBUG} and \texttt{NOOPT}
   builds only.
-  \end{itemize}
+  \DIFaddbegin \item \texttt{\DIFadd{0x0040}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_MINIMAL\_UI}}\DIFadd{, use minimal UI display, no
+  Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
+  }\DIFaddend \end{itemize}
 
 \item
   \texttt{PickerAudioAssist}\\
@@ -5902,8 +5904,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Perform EPID provisioning (requires certificate data configuration). \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ResetSystem}}\textbf{*}
 & Utility to perform system reset. Takes reset type as an argument:
-  \texttt{ColdReset}, \texttt{Firmware}, \texttt{Shutdown}, \texttt{WarmReset}.
-  Defaults to \texttt{ColdReset}. \\
+  \texttt{\DIFdelbegin \DIFdel{ColdReset}\DIFdelend \DIFaddbegin \DIFadd{coldreset}\DIFaddend }, \texttt{\DIFdelbegin \DIFdel{Firmware}\DIFdelend \DIFaddbegin \DIFadd{firmware}\DIFaddend }, \texttt{\DIFdelbegin \DIFdel{Shutdown}\DIFdelend \DIFaddbegin \DIFadd{shutdown}\DIFaddend }, \texttt{\DIFdelbegin \DIFdel{WarmReset}\DIFdelend \DIFaddbegin \DIFadd{warmreset}\DIFaddend }.
+  Defaults to \texttt{\DIFdelbegin \DIFdel{ColdReset}\DIFdelend \DIFaddbegin \DIFadd{coldreset}\DIFaddend }. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{RtcRw}}\textbf{*}
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\textbf{*}
@@ -7134,8 +7136,15 @@ The instructions in this note only apply on systems using }\texttt{\DIFdel{KeySu
   Older boards like ICH6 may not always have HPET setting in the firmware preferences,
   this option tries to force enable it.
 
-\item
-  \texttt{DisableSecurityPolicy}\\
+  \item
+  \DIFaddbegin \texttt{\DIFadd{EnableVectorAcceleration}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
+}
+
+  \item
+  \DIFaddend \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Disable platform security policy.

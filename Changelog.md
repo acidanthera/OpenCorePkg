@@ -16,6 +16,7 @@ OpenCore Changelog
 - Added support for case-insensitive argument handling in the UEFI tools
 - Added vector acceleration of SHA-512 and SHA-384 hashing algorithms, thx @MikhailKrichanov
 - Fixed wraparound when using arrow keys in OpenCanopy
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds
