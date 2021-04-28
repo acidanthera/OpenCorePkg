@@ -829,7 +829,6 @@ PatchMemoryDevice (
   UINT8        MinLength;
   UINT8        StringIndex;
   UINT8        FormFactor;
-  CONST CHAR8  *DummyString;
 
   *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type17);
