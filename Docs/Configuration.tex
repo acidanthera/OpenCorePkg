@@ -5329,6 +5329,21 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \textbf{SMBIOS}: Memory Device (Type 17) --- Manufacturer\\
   \textbf{Description}: Specifies the manufacturer of this memory device.
 
+  For empty slot this must be set to \texttt{NO DIMM} for macOS System Profiler
+  to correctly display memory slots on certain Mac models, e.g. \texttt{MacPro7,1}.
+  \texttt{MacPro7,1} imposes additional requirements on the memory layout:
+  \begin{itemize}
+    \tightlist
+    \item The amount of installed sticks must one of the following: 4, 6, 8, 10, 12.
+          Using any different value will cause an error in the System Profiler.
+    \item The amount of memory slots must equal to 12. Using any different value
+          will cause an error in the System Profiler.
+    \item Memory sticks must be installed in dedicated memory slots as explained
+          on the \href{https://support.apple.com/HT210103}{support page}. SMBIOS
+          memory devices are mapped to the following slots:
+          \texttt{8, 7, 10, 9, 12, 11, 5, 6, 3, 4, 1, 2}.
+  \end{itemize}
+
 \item
   \texttt{PartNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\

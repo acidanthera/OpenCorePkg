@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Apr 27 20:14:51 2021
-%DIF ADD ../Configuration.tex        Tue Apr 27 20:14:51 2021
+%DIF DEL PreviousConfiguration.tex   Sat Apr 10 16:12:14 2021
+%DIF ADD ../Configuration.tex        Thu Apr 29 01:37:41 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5392,8 +5392,23 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   \textbf{SMBIOS}: Memory Device (Type 17) --- Manufacturer\\
   \textbf{Description}: Specifies the manufacturer of this memory device.
 
+  \DIFaddbegin \DIFadd{For empty slot this must be set to }\texttt{\DIFadd{NO DIMM}} \DIFadd{for macOS System Profiler
+  to correctly display memory slots on certain Mac models, e.g. }\texttt{\DIFadd{MacPro7,1}}\DIFadd{.
+  }\texttt{\DIFadd{MacPro7,1}} \DIFadd{imposes additional requirements on the memory layout:
+  }\begin{itemize}
+    \tightlist
+    \DIFaddend \item \DIFaddbegin \DIFadd{The amount of installed sticks must one of the following: 4, 6, 8, 10, 12.
+          Using any different value will cause an error in the System Profiler.
+    }\item \DIFadd{The amount of memory slots must equal to 12. Using any different value
+          will cause an error in the System Profiler.
+    }\item \DIFadd{Memory sticks must be installed in dedicated memory slots as explained
+          on the }\href{https://support.apple.com/HT210103}{\DIFadd{support page}}\DIFadd{. SMBIOS
+          memory devices are mapped to the following slots:
+          }\texttt{\DIFadd{8, 7, 10, 9, 12, 11, 5, 6, 3, 4, 1, 2}}\DIFadd{.
+  }\end{itemize}
+
 \item
-  \texttt{PartNumber}\\
+  \DIFaddend \texttt{PartNumber}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Unknown}\\
   \textbf{SMBIOS}: Memory Device (Type 17) --- Part Number\\

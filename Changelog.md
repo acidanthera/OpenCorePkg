@@ -18,6 +18,7 @@ OpenCore Changelog
 - Fixed wraparound when using arrow keys in OpenCanopy
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added bundled Linux versions for userspace utilities
+- Fixed fallback SMBIOS `Manufacturer` value to `NO DIMM` for empty slots
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

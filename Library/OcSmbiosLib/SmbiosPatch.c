@@ -826,9 +826,10 @@ PatchMemoryDevice (
      OUT SMBIOS_HANDLE                   *Handle
   )
 {
-  UINT8    MinLength;
-  UINT8    StringIndex;
-  UINT8    FormFactor;
+  UINT8        MinLength;
+  UINT8        StringIndex;
+  UINT8        FormFactor;
+  CONST CHAR8  *DummyString;
 
   *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type17);
@@ -863,11 +864,21 @@ PatchMemoryDevice (
   //
   // Some machines may have NULL values for these fields, which will cause SPMemoryReporter
   // crashes or ??? to be displayed in About This Mac. Fallback to "Unknown" for such fields.
+  // If there is no stick in the slot, the Manufacturer value must be "NO DIMM", this
+  // is checked in System Profiler, at least by iMacPro1,1 (see ExpansionSlotSupport.framework).
   //
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, "Unknown");
+  if (Table->CurrentPtr.Standard.Type17->Size > 0) {
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, "Unknown");
+  } else {
+    SmbiosOverrideString (Table, "NO DIMM", &StringIndex);
+    Table->CurrentPtr.Standard.Type17->Manufacturer = StringIndex;
+    Table->CurrentPtr.Standard.Type17->SerialNumber = StringIndex;
+    Table->CurrentPtr.Standard.Type17->AssetTag     = StringIndex;
+    Table->CurrentPtr.Standard.Type17->PartNumber   = StringIndex;
+  }
 
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Attributes, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->ExtendedSize, Original, NULL, NULL);
