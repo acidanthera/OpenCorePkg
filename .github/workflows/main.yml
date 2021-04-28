@@ -24,10 +24,10 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Add Linux Toolchain
-        run: brew tap MarioSchwalbe/gcc-musl-cross
+        run: brew tap FiloSottile/homebrew-musl-cross
 
       - name: Install Linux Toolchain
-        run: brew install gcc-8-musl-cross --without-armhf --without-aarch64
+        run: brew install musl-cross
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
           HOMEBREW_NO_AUTO_UPDATE: 1
