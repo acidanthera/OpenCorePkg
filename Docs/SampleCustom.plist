@@ -1271,13 +1271,13 @@
 					<key>Manufacturer</key>
 					<string>Acidanthera</string>
 					<key>PartNumber</key>
-					<string>M00001-4GB</string>
+					<string>M00001-8GB</string>
 					<key>SerialNumber</key>
 					<string>AAA000000001</string>
 					<key>Size</key>
-					<integer>4096</integer>
+					<integer>8192</integer>
 					<key>Speed</key>
-					<integer>2666</integer>
+					<integer>2400</integer>
 				</dict>
 				<dict>
 					<key>AssetTag</key>
@@ -1287,7 +1287,7 @@
 					<key>DeviceLocator</key>
 					<string>ChannelA-DIMM1</string>
 					<key>Manufacturer</key>
-					<string></string>
+					<string>NO DIMM</string>
 					<key>PartNumber</key>
 					<string></string>
 					<key>SerialNumber</key>
@@ -1307,13 +1307,13 @@
 					<key>Manufacturer</key>
 					<string>Acidanthera</string>
 					<key>PartNumber</key>
-					<string>M00001-4GB</string>
+					<string>M00001-8GB</string>
 					<key>SerialNumber</key>
 					<string>AAA000000002</string>
 					<key>Size</key>
-					<integer>4096</integer>
+					<integer>8192</integer>
 					<key>Speed</key>
-					<integer>2666</integer>
+					<integer>2400</integer>
 				</dict>
 				<dict>
 					<key>AssetTag</key>
@@ -1323,7 +1323,151 @@
 					<key>DeviceLocator</key>
 					<string>ChannelB-DIMM1</string>
 					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
 					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 4</string>
+					<key>DeviceLocator</key>
+					<string>ChannelC-DIMM0</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
+					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 5</string>
+					<key>DeviceLocator</key>
+					<string>ChannelC-DIMM1</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
+					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string>123456789</string>
+					<key>BankLocator</key>
+					<string>BANK 0</string>
+					<key>DeviceLocator</key>
+					<string>ChannelA-DIMM0</string>
+					<key>Manufacturer</key>
+					<string>Acidanthera</string>
+					<key>PartNumber</key>
+					<string>M00001-8GB</string>
+					<key>SerialNumber</key>
+					<string>AAA000000001</string>
+					<key>Size</key>
+					<integer>8192</integer>
+					<key>Speed</key>
+					<integer>2400</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 1</string>
+					<key>DeviceLocator</key>
+					<string>ChannelA-DIMM1</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
+					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string>123456789</string>
+					<key>BankLocator</key>
+					<string>BANK 2</string>
+					<key>DeviceLocator</key>
+					<string>ChannelB-DIMM0</string>
+					<key>Manufacturer</key>
+					<string>Acidanthera</string>
+					<key>PartNumber</key>
+					<string>M00001-8GB</string>
+					<key>SerialNumber</key>
+					<string>AAA000000002</string>
+					<key>Size</key>
+					<integer>8192</integer>
+					<key>Speed</key>
+					<integer>2400</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 3</string>
+					<key>DeviceLocator</key>
+					<string>ChannelB-DIMM1</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
+					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 4</string>
+					<key>DeviceLocator</key>
+					<string>ChannelC-DIMM0</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
+					<key>PartNumber</key>
+					<string></string>
+					<key>SerialNumber</key>
+					<string></string>
+					<key>Size</key>
+					<integer>0</integer>
+					<key>Speed</key>
+					<integer>0</integer>
+				</dict>
+				<dict>
+					<key>AssetTag</key>
+					<string></string>
+					<key>BankLocator</key>
+					<string>BANK 5</string>
+					<key>DeviceLocator</key>
+					<string>ChannelC-DIMM1</string>
+					<key>Manufacturer</key>
+					<string>NO DIMM</string>
 					<key>PartNumber</key>
 					<string></string>
 					<key>SerialNumber</key>
