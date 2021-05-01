@@ -18,7 +18,7 @@ typedef struct GUI_KEY_CONTEXT_     GUI_KEY_CONTEXT;
 
 GUI_OUTPUT_CONTEXT *
 GuiOutputConstruct (
-  VOID
+  IN UINT32  Scale
   );
 
 EFI_STATUS

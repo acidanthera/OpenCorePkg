@@ -811,7 +811,7 @@ GuiLibConstruct (
   INT64                                      CursorX;
   INT64                                      CursorY;
 
-  mOutputContext = GuiOutputConstruct ();
+  mOutputContext = GuiOutputConstruct (GuiContext->Scale);
   if (mOutputContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise output\n"));
     return EFI_UNSUPPORTED;
