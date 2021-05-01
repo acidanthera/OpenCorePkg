@@ -19,6 +19,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Added bundled Linux versions for userspace utilities
 - Fixed fallback SMBIOS `Manufacturer` value to `NO DIMM` for empty slots
+- Fixed assertions when running OpenCanopy with low resolution, will fallbacks to builtin now
 
 #### v0.6.8
 - Switched to VS2019 toolchain for Windows builds

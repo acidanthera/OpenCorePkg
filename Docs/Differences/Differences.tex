@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sat Apr 10 16:12:14 2021
-%DIF ADD ../Configuration.tex        Thu Apr 29 01:37:41 2021
+%DIF ADD ../Configuration.tex        Sat May  1 18:31:24 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4275,7 +4275,10 @@ operating system makes use of several GUIDs, including but not limited to:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82}
   (\texttt{APPLE\_BOOT\_VARIABLE\_GUID})
 \item
-  \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}
+  \DIFaddbegin \texttt{\DIFadd{5EDDA193-A070-416A-85EB-2A1181F45B18}}
+  \DIFadd{(Apple Hardware Configuration Storage for }\texttt{\DIFadd{MacPro7,1}}\DIFadd{)
+}\item
+  \DIFaddend \texttt{8BE4DF61-93CA-11D2-AA0D-00E098032B8C}
   (\texttt{EFI\_GLOBAL\_VARIABLE\_GUID})
 \item
   \texttt{4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102}
@@ -4697,9 +4700,39 @@ troubleshooting:
   volume range specific to installed audio codec. The value is capped
   by \texttt{MaximumBootBeepVolume} AppleHDA layout value to avoid
   too loud audio playback in the firmware.
+\DIFaddbegin \item
+  \texttt{\DIFadd{5EDDA193-A070-416A-85EB-2A1181F45B18:PEXConf}}
+  \break
+  \DIFadd{PCI expansion slot configuration for }\texttt{\DIFadd{MacPro7,1}}\DIFadd{.
+  8-byte sequence describing default PCI slot configuration.
+  Each byte refers to a configuration for a dedicated PCI slot.
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \DIFadd{Slot 1 resides at }\texttt{\DIFadd{IOService:/AppleACPIPlatformExpert/PC01@0/AppleACPIPCI/BR1A@0}}
+      \DIFadd{and its path is hardcoded. This slot is not behind a muxer.
+    }\item \DIFadd{Slot 3 resides at }\texttt{\DIFadd{IOService:/AppleACPIPlatformExpert/PC03@0/AppleACPIPCI/BR3A@0}}
+      \DIFadd{and its path is hardcoded. This slot is not behind a muxer.
+    }\item \DIFadd{Slots 2, 4-8 are dynamic and are matched based on }\texttt{\DIFadd{AAPL,slot-name}} \DIFadd{property
+      with }\texttt{\DIFadd{Slot-N}} \DIFadd{value, where }\texttt{\DIFadd{N}} \DIFadd{is the slot number. All these slots are
+      behind the muxer.
+  }\DIFaddend \end{itemize}
+
+  \DIFaddbegin \DIFadd{Refer to the }\href{https://support.apple.com/HT210104}{\DIFadd{support page}}
+  \DIFadd{for more details on how }\texttt{\DIFadd{MacPro7,1}} \DIFadd{slots are configured.
+}
+
+\item
+  \texttt{\DIFadd{5EDDA193-A070-416A-85EB-2A1181F45B18:SlotUtilPEXConf}}
+  \break
+  \DIFadd{User PCI expansion slot configuration for }\texttt{\DIFadd{MacPro7,1}}\DIFadd{.
+  8-byte sequence describing user PCI slot configuration.
+}
+
 \end{itemize}
 
-\section{PlatformInfo}\label{platforminfo}
+\DIFaddend \section{PlatformInfo}\label{platforminfo}
 
 Platform information consists of several identification fields
 generated or filled manually to be compatible with macOS services. The
