@@ -445,6 +445,19 @@ InternalContextConstruct (
           ICON_GENERIC_HDD < ICON_NUM_MANDATORY,
           "The base icon should must be cleaned up explicitly."
           );
+      } else if (Index == ICON_CURSOR) {
+        if (Context->Icons[ICON_CURSOR][ICON_TYPE_BASE].Width < MIN_CURSOR_DIMENSION * Context->Scale
+         || Context->Icons[ICON_CURSOR][ICON_TYPE_BASE].Height < MIN_CURSOR_DIMENSION * Context->Scale) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCUI: Expected at least %dx%d for cursor, actual %dx%d\n",
+             MIN_CURSOR_DIMENSION * Context->Scale,
+             MIN_CURSOR_DIMENSION * Context->Scale,
+             Context->Icons[ICON_CURSOR][ICON_TYPE_BASE].Width,
+             Context->Icons[ICON_CURSOR][ICON_TYPE_BASE].Height
+            ));
+          Status = EFI_UNSUPPORTED;
+        }
       }
     } else {
       ZeroMem (&Context->Icons[Index], sizeof (Context->Icons[Index]));
