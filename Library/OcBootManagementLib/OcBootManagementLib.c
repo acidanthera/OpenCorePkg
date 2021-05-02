@@ -271,7 +271,7 @@ OcRunBootPicker (
 
       if (EFI_ERROR (Status) && Status != EFI_ABORTED) {
         if (BootContext->PickerContext->ShowMenu != OcShowSimpleBootMenu) {
-          DEBUG ((DEBUG_WARN, "OC: External interface failure, fallback to builtin - %r\n", Status));
+          DEBUG ((DEBUG_WARN, "OCB: External interface ShowMenu failure, fallback to builtin - %r\n", Status));
           BootContext->PickerContext->ShowMenu = OcShowSimpleBootMenu;
           BootContext->PickerContext->RequestPrivilege = OcShowSimplePasswordRequest;
           Status = RunShowMenu (BootContext, &Chosen);
