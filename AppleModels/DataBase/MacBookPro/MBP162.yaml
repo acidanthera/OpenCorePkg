@@ -26,7 +26,6 @@ FirmwareFeaturesMask: 0xFFFFFF7F
 ExtendedFirmwareFeatures: 0x00000000FFAFF06E
 ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
 MemoryFormFactor: 0xD
-# FIXME: Correct this one
 ProcessorType:
   - 0x060B
 # FIXME: Correct this one
