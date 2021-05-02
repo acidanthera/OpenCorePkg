@@ -429,7 +429,7 @@ static const char *AppleBoardCode[][APPLE_BOARD_CODE_MAX] = {
   /* MacBookPro15,3 */ {"0000"},
   /* MacBookPro15,4 */ {"0000"},
   /* MacBookPro16,1 */ {"N9PR"},
-  /* MacBookPro16,2 */ {"0000"},
+  /* MacBookPro16,2 */ {"P8PG"},
   /* MacBookPro16,3 */ {"0000"},
   /* MacBookPro16,4 */ {"0000"},
   /* MacBookPro2,1  */ {"000"},

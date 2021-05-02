@@ -12,7 +12,7 @@ SystemFamily: "MacBook Pro"
 BoardManufacturer: "Apple Inc."
 BoardProduct: "Mac-5F9802EFE386AA28"
 BoardVersion: "MacBookPro16,2"
-BoardRevision: 0x3
+BoardRevision: 0x6
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -20,16 +20,15 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0x9
 ChassisVersion: "Mac-5F9802EFE386AA28"
 ChassisAssetTag: ""
-PlatformFeature: 0x32
-FirmwareFeatures: 0xFDAFF066
+PlatformFeature: 0x3A
+FirmwareFeatures: 0xFFAFF06E
 FirmwareFeaturesMask: 0xFFFFFF7F
-ExtendedFirmwareFeatures: 0x00000000FDAFF066
+ExtendedFirmwareFeatures: 0x00000000FFAFF06E
 ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
 MemoryFormFactor: 0xD
 # FIXME: Correct this one
 ProcessorType:
-  - 0x0701
-  - 0x1001
+  - 0x060B
 # FIXME: Correct this one
 ProcessorBusSpeed:
   - 12345
@@ -85,7 +84,7 @@ AppleModelCode:
   - "0DHT"
 # Note, first board code is used by macserial
 AppleBoardCode:
-  - "0000"
+  - "P8PG"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2020

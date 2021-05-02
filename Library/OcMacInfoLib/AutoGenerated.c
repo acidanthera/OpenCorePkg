@@ -1132,7 +1132,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
  {
   .SystemProductName = "MacBookPro16,2",
   .BoardProduct = "Mac-5F9802EFE386AA28",
-  .BoardRevision = 0x3,
+  .BoardRevision = 0x6,
   .SmcRevision = {0},
   .SmcBranch = {0},
   .SmcPlatform = {106, 50, 49, 52, 107, 0, 0, 0},
@@ -1148,9 +1148,9 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .BoardType = 0xA,
   .ChassisType = 0x9,
   .MemoryFormFactor = 0xD,
-  .PlatformFeature = 0x32,
+  .PlatformFeature = 0x3A,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xFDAFF066ULL,
+  .FirmwareFeatures = 0xFFAFF06EULL,
   .FirmwareFeaturesMask = 0xFFFFFF7FULL,
  },
  {
