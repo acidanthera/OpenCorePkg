@@ -80,7 +80,8 @@ IsDeletableVariable (
     // Only erase boot and driver entries for BDS
     // I.e. BootOrder, Boot####, DriverOrder, Driver####
     //
-    if (StrnCmp (Name, L"Boot", StrLen(L"Boot")) == 0
+    if ((StrnCmp (Name, L"Boot", StrLen(L"Boot")) == 0
+      && StrCmp (Name, L"BootOptionSupport") != 0)
       || StrnCmp (Name, L"Driver", StrLen(L"Driver")) == 0) {
       return TRUE;
     }
