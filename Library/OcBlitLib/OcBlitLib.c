@@ -118,6 +118,20 @@ BlitLibVideoFill (
   //
   // BltBuffer to Video: Source is BltBuffer, destination is Video
   //
+  if (DestinationY + Height > Configure->RotatedHeight) {
+    DEBUG ((DEBUG_VERBOSE, "OCBLT: Past screen (Y)\n"));
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (DestinationX + Width > Configure->RotatedWidth) {
+    DEBUG ((DEBUG_VERBOSE, "OCBLT: Past screen (X)\n"));
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (Width == 0 || Height == 0) {
+    DEBUG ((DEBUG_VERBOSE, "OCBLT: Width or Height is 0\n"));
+    return RETURN_INVALID_PARAMETER;
+  }
 
   if (Configure->Rotation == 90) {
     //
@@ -145,21 +159,6 @@ BlitLibVideoFill (
     Tmp          = DestinationX;
     DestinationX = Configure->Width - DestinationY - Width;
     DestinationY = Tmp;
-  }
-
-  if (DestinationY + Height > Configure->Height) {
-    DEBUG ((DEBUG_VERBOSE, "OCBLT: Past screen (Y)\n"));
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (DestinationX + Width > Configure->Width) {
-    DEBUG ((DEBUG_VERBOSE, "OCBLT: Past screen (X)\n"));
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (Width == 0 || Height == 0) {
-    DEBUG ((DEBUG_VERBOSE, "OCBLT: Width or Height is 0\n"));
-    return RETURN_INVALID_PARAMETER;
   }
 
   WidthInBytes = Width * Configure->BytesPerPixel;
@@ -310,11 +309,11 @@ BlitLibVideoToBuffer (
   //
   // Video to BltBuffer: Source is Video, destination is BltBuffer
   //
-  if (SourceY + Height > Configure->Height) {
+  if (SourceY + Height > Configure->RotatedHeight) {
     return RETURN_INVALID_PARAMETER;
   }
 
-  if (SourceX + Width > Configure->Width) {
+  if (SourceX + Width > Configure->RotatedWidth) {
     return RETURN_INVALID_PARAMETER;
   }
 
@@ -426,11 +425,11 @@ BlitLibBufferToVideo (
   //
   // BltBuffer to Video: Source is BltBuffer, destination is Video
   //
-  if (DestinationY + Height > Configure->Height) {
+  if (DestinationY + Height > Configure->RotatedHeight) {
     return RETURN_INVALID_PARAMETER;
   }
 
-  if (DestinationX + Width > Configure->Width) {
+  if (DestinationX + Width > Configure->RotatedWidth) {
     return RETURN_INVALID_PARAMETER;
   }
 
@@ -521,6 +520,29 @@ BlitLibVideoToVideo (
   UINTN                                     Tmp;
   INTN                                      LineStride;
 
+  //
+  // Video to Video: Source is Video, destination is Video
+  //
+  if (SourceY + Height > Configure->RotatedHeight) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (SourceX + Width > Configure->RotatedWidth) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (DestinationY + Height > Configure->RotatedHeight) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (DestinationX + Width > Configure->RotatedWidth) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
+  if (Width == 0 || Height == 0) {
+    return RETURN_INVALID_PARAMETER;
+  }
+
   if (Configure->Rotation == 90) {
     //
     // Perform -90 rotation.
@@ -555,29 +577,6 @@ BlitLibVideoToVideo (
     Tmp          = SourceX;
     SourceX      = Configure->Width - SourceY - Width;
     SourceY      = Tmp;
-  }
-
-  //
-  // Video to Video: Source is Video, destination is Video
-  //
-  if (SourceY + Height > Configure->Height) {
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (SourceX + Width > Configure->Width) {
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (DestinationY + Height > Configure->Height) {
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (DestinationX + Width > Configure->Width) {
-    return RETURN_INVALID_PARAMETER;
-  }
-
-  if (Width == 0 || Height == 0) {
-    return RETURN_INVALID_PARAMETER;
   }
 
   WidthInBytes = Width * Configure->BytesPerPixel;
@@ -678,6 +677,14 @@ OcBlitConfigure (
   Configure->Height            = FrameBufferInfo->VerticalResolution;
   Configure->PixelsPerScanLine = FrameBufferInfo->PixelsPerScanLine;
   Configure->Rotation          = Rotation;
+
+  if (Rotation == 90 || Rotation == 270) {
+    Configure->RotatedWidth  = FrameBufferInfo->VerticalResolution;
+    Configure->RotatedHeight = FrameBufferInfo->HorizontalResolution;
+  } else {
+    Configure->RotatedWidth  = FrameBufferInfo->HorizontalResolution;
+    Configure->RotatedHeight = FrameBufferInfo->VerticalResolution;
+  }
 
   return RETURN_SUCCESS;
 }

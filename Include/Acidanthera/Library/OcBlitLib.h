@@ -22,12 +22,14 @@ typedef struct OC_BLIT_CONFIGURE {
   UINT32                          BytesPerPixel;
   UINT32                          Width;
   UINT32                          Height;
+  UINT32                          RotatedWidth;
+  UINT32                          RotatedHeight;
+  UINT32                          Rotation;
   UINT8                           *FrameBuffer;
   EFI_GRAPHICS_PIXEL_FORMAT       PixelFormat;
   EFI_PIXEL_BITMASK               PixelMasks;
   INT8                            PixelShl[4]; // R-G-B-Rsvd
   INT8                            PixelShr[4]; // R-G-B-Rsvd
-  UINT32                          Rotation;
   OC_ALIGNAS(64) UINT8            LineBuffer[];
 } OC_BLIT_CONFIGURE;
 
