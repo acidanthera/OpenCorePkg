@@ -793,6 +793,9 @@
   OcAudioLib|Include/Acidanthera/Library/OcAudioLib.h
 
   ##  @libraryclass
+  OcBlitLib|Include/Acidanthera/Library/OcBlitLib.h
+
+  ##  @libraryclass
   OcBootManagementLib|Include/Acidanthera/Library/OcBootManagementLib.h
 
   ##  @libraryclass

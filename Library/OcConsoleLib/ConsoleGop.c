@@ -21,7 +21,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
-#include <Library/FrameBufferBltLib.h>
+#include <Library/OcBlitLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/MtrrLib.h>
 #include <Library/OcConsoleLib.h>
@@ -39,8 +39,12 @@ EFI_GRAPHICS_OUTPUT_PROTOCOL *
 mConsoleGraphicsOutput;
 
 STATIC
-FRAME_BUFFER_CONFIGURE *
+OC_BLIT_CONFIGURE *
 mFramebufferContext;
+
+STATIC
+UINT32
+mFramebufferContextPageCount;
 
 STATIC
 EFI_GRAPHICS_OUTPUT_PROTOCOL_SET_MODE
@@ -49,6 +53,10 @@ mOriginalGopSetMode;
 STATIC
 INT32
 mCachePolicy;
+
+STATIC
+UINT32
+mRotation;
 
 STATIC
 EFI_STATUS
@@ -199,21 +207,23 @@ OcProvideConsoleGop (
 }
 
 STATIC
-FRAME_BUFFER_CONFIGURE *
+OC_BLIT_CONFIGURE *
 EFIAPI
 DirectGopFromTarget (
-  IN EFI_PHYSICAL_ADDRESS                  FramebufferBase,
-  IN EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info
+  IN  EFI_PHYSICAL_ADDRESS                  FramebufferBase,
+  IN  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info,
+  OUT UINT32                                *PageCount
   )
 {
   EFI_STATUS                    Status;
   UINTN                         ConfigureSize;
-  FRAME_BUFFER_CONFIGURE        *Context;
+  OC_BLIT_CONFIGURE             *Context;
 
   ConfigureSize = 0;
-  Status = FrameBufferBltConfigure (
+  Status = OcBlitConfigure (
     (VOID *)(UINTN) FramebufferBase,
     Info,
+    mRotation,
     NULL,
     &ConfigureSize
     );
@@ -221,19 +231,21 @@ DirectGopFromTarget (
     return NULL;
   }
 
-  Context = AllocatePool (ConfigureSize);
+  *PageCount = EFI_SIZE_TO_PAGES (ConfigureSize);
+  Context = AllocatePages (*PageCount);
   if (Context == NULL) {
     return NULL;
   }
 
-  Status = FrameBufferBltConfigure (
+  Status = OcBlitConfigure (
     (VOID *)(UINTN) FramebufferBase,
     Info,
+    mRotation,
     Context,
     &ConfigureSize
     );
   if (EFI_ERROR (Status)) {
-    FreePool (Context);
+    FreePages (Context, *PageCount);
     return NULL;
   }
 
@@ -250,7 +262,7 @@ DirectGopSetMode (
 {
   EFI_STATUS              Status;
   EFI_TPL                 OldTpl;
-  FRAME_BUFFER_CONFIGURE  *Original;
+  OC_BLIT_CONFIGURE       *Original;
 
   if (ModeNumber == This->Mode->Mode) {
     return EFI_SUCCESS;
@@ -272,10 +284,14 @@ DirectGopSetMode (
   }
 
   if (Original != NULL) {
-    FreePool (Original);
+    FreePages (Original, mFramebufferContextPageCount);
   }
 
-  mFramebufferContext = DirectGopFromTarget (This->Mode->FrameBufferBase, This->Mode->Info);
+  mFramebufferContext = DirectGopFromTarget (
+    This->Mode->FrameBufferBase,
+    This->Mode->Info,
+    &mFramebufferContextPageCount
+    );
   if (mFramebufferContext == NULL) {
     gBS->RestoreTPL (OldTpl);
     return EFI_DEVICE_ERROR;
@@ -310,7 +326,7 @@ DirectGopBlt (
   )
 {
   if (mFramebufferContext != NULL) {
-    return FrameBufferBlt (
+    return OcBlitRender (
       mFramebufferContext,
       BltBuffer,
       BltOperation,
@@ -407,7 +423,11 @@ OcUseDirectGop (
     return EFI_UNSUPPORTED;
   }
 
-  mFramebufferContext = DirectGopFromTarget (Gop->Mode->FrameBufferBase, Gop->Mode->Info);
+  mFramebufferContext = DirectGopFromTarget (
+    Gop->Mode->FrameBufferBase,
+    Gop->Mode->Info,
+    &mFramebufferContextPageCount
+    );
   if (mFramebufferContext == NULL) {
     DEBUG ((DEBUG_INFO, "OCC: Delaying direct GOP configuration...\n"));
     //

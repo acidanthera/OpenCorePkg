@@ -294,6 +294,9 @@ RsaVerifySigHashFromProcessed (
   Index = NumWords;
   while (Index > 0) {
     --Index;
+    //
+    // Note: This does work with Big Endian systems.
+    //
     Tmp = BigNumSwapWord (
             DecryptedSigNum[NumWords - 1 - Index]
             );
