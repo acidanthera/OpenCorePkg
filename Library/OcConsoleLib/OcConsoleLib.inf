@@ -32,6 +32,7 @@
 
 [Protocols]
   gAppleFramebufferInfoProtocolGuid
+  gAppleEg2InfoProtocolGuid
   gEfiConsoleControlProtocolGuid
   gEfiGraphicsOutputProtocolGuid
   gEfiSimpleTextOutProtocolGuid
@@ -42,6 +43,7 @@
   ConsoleControl.c
   ConsoleGop.c
   GopPassThrough.c
+  Eg2Info.c
   FramebufferInfo.c
   OcConsoleLib.c
   OcConsoleLibInternal.h

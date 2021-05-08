@@ -217,6 +217,13 @@ typedef enum {
 #define APPLE_PANIC_INFO_NO_VARIABLE_NAME L"AAPL,PanicInfo%04x"
 
 ///
+/// Set display rotation angle.
+/// UINT32: 0, 90, 180, 270.
+/// gAppleBootVariableGuid
+///
+#define APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME L"ForceDisplayRotationInEFI"
+
+///
 /// BootCampt device path.
 /// UEFI Device Path.
 /// gAppleBootVariableGuid

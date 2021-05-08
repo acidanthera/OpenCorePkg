@@ -15,6 +15,7 @@
 #include "OcConsoleLibInternal.h"
 #include "ConsoleGopInternal.h"
 
+#include <Protocol/AppleEg2Info.h>
 #include <Protocol/ConsoleControl.h>
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/SimpleTextOut.h>
@@ -466,12 +467,13 @@ OcReconnectConsole (
 
 EFI_STATUS
 OcUseDirectGop (
-  IN INT32  CacheType,
-  IN UINT32 Rotation
+  IN INT32  CacheType
   )
 {
   EFI_STATUS                    Status;
   EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  APPLE_EG2_INFO_PROTOCOL       *Eg2;
+  UINT32                        Rotation;
 
   DEBUG ((DEBUG_INFO, "OCC: Switching to direct GOP renderer...\n"));
 
@@ -491,8 +493,34 @@ OcUseDirectGop (
     return EFI_UNSUPPORTED;
   }
 
-  mGop.Rotation = Rotation;
-  RotateMode (Gop, Rotation);
+  Status = gBS->LocateProtocol (
+    &gAppleEg2InfoProtocolGuid,
+    NULL,
+    (VOID **) &Eg2
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCC: Found EG2 support %X\n", Eg2->Revision));
+    if (Eg2->Revision >= APPLE_EG2_INFO_PROTOCOL_REVISION) {
+      Rotation = 0;
+      Status   = Eg2->GetRotation (Eg2, &Rotation);
+      if (!EFI_ERROR (Status) && Rotation < AppleDisplayRotateMax)  {
+        if (Rotation == AppleDisplayRotate90) {
+          mGop.Rotation = 90;
+        } else if (Rotation == AppleDisplayRotate180) {
+          mGop.Rotation = 180;
+        } else if (Rotation == AppleDisplayRotate270) {
+          mGop.Rotation = 270;
+        }
+        DEBUG ((DEBUG_INFO, "OCC: Got rotation %u degrees from EG2\n", mGop.Rotation));
+      } else {
+        DEBUG ((DEBUG_INFO, "OCC: Invalid rotation %u from EG2 - %r\n", Rotation, Status));
+      }
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCC: No Apple EG2 support - %r\n", Status));
+  }
+
+  RotateMode (Gop, mGop.Rotation);
 
   mGop.FramebufferContext = DirectGopFromTarget (
     Gop->Mode->FrameBufferBase,

@@ -4432,6 +4432,11 @@ improvements:
   One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:ForceDisplayRotationInEFI}
+  \break
+  32-bit integer defining display rotation. Can be \textbf{0} for no rotation
+  or any of \texttt{90}, \texttt{180}, \texttt{270} for matching rotation in degrees.
+ \item
   \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
   Four-byte \texttt{BGRA} data defining \texttt{boot.efi} user interface background colour.
@@ -6776,6 +6781,9 @@ functioning. Feature highlights:
   performance or fix rendering issues. However, this option is not recommended unless
   there is an obvious benefit as it may result in issues such as slower scrolling.
 
+  This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
+  screen rotation for all EFI applications.
+
 \item
   \texttt{GopPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -6904,6 +6912,17 @@ functioning. Feature highlights:
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the Apple Debug Log protocol with a builtin
   version.
+
+\item
+  \texttt{AppleEg2Info}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Replaces the Apple EFI Graphics 2 protocol with a builtin
+  version.
+
+  \emph{Note}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
+  to expose screen rotation to macOS. Refer to \texttt{ForceDisplayRotationInEFI}
+  variable description on how to set screen rotation angle.
 
 \item
   \texttt{AppleFramebufferInfo}\\

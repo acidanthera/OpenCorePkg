@@ -17,6 +17,7 @@
 
 #include <Protocol/ConsoleControl.h>
 #include <Protocol/AppleFramebufferInfo.h>
+#include <Protocol/AppleEg2Info.h>
 
 /**
   Console renderer to use.
@@ -158,8 +159,7 @@ OcReconnectConsole (
 **/
 EFI_STATUS
 OcUseDirectGop (
-  IN INT32   CacheType,
-  IN UINT32  Rotation
+  IN INT32   CacheType
   );
 
 /**
@@ -206,6 +206,20 @@ OcProvideGopPassThrough (
 **/
 APPLE_FRAMEBUFFER_INFO_PROTOCOL *
 OcAppleFbInfoInstallProtocol (
+  IN BOOLEAN  Reinstall
+  );
+
+/**
+  Install and initialise Apple EG2 Info protocol
+  on top of GOP protocol. For newer EfiBoot this is the way
+  to obtain screen rotation angle.
+
+  @param[in] Reinstall  Overwrite installed protocol.
+
+  @retval installed or located protocol or NULL.
+**/
+APPLE_EG2_INFO_PROTOCOL *
+OcAppleEg2InfoInstallProtocol (
   IN BOOLEAN  Reinstall
   );
 

@@ -2,6 +2,8 @@ OpenCore Changelog
 ==================
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
+- Improved direct GOP renderer performance for certain cases
+- Added support for display rotation in direct GOP renderer
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
