@@ -108,10 +108,8 @@ BlitLibVideoFill (
   UINTN                             IndexY;
   UINTN                             Tmp;
   UINT8                             *Destination;
-  UINT8                             Uint8;
   UINT32                            Uint32;
   UINT64                            WideFill;
-  BOOLEAN                           UseWideFill;
   BOOLEAN                           LineBufferReady;
   UINTN                             Offset;
   UINTN                             WidthInBytes;
@@ -182,31 +180,11 @@ BlitLibVideoFill (
   // If the size of the pixel data evenly divides the sizeof
   // WideFill, then a wide fill operation can be used
   //
-  UseWideFill = TRUE;
-  if ((sizeof (WideFill) % BYTES_PER_PIXEL) == 0) {
-    for (IndexX = BYTES_PER_PIXEL; IndexX < sizeof (WideFill); IndexX++) {
-      ((UINT8*) &WideFill)[IndexX] = ((UINT8*) &WideFill)[IndexX % BYTES_PER_PIXEL];
-    }
-  } else {
-    //
-    // If all the bytes in the pixel are the same value, then use
-    // a wide fill operation.
-    //
-    for (
-      IndexX = 1, Uint8 = ((UINT8*) &WideFill)[0];
-      IndexX < BYTES_PER_PIXEL;
-      IndexX++) {
-      if (Uint8 != ((UINT8*) &WideFill)[IndexX]) {
-        UseWideFill = FALSE;
-        break;
-      }
-    }
-    if (UseWideFill) {
-      SetMem (&WideFill, sizeof (WideFill), Uint8);
-    }
+  for (IndexX = BYTES_PER_PIXEL; IndexX < sizeof (WideFill); IndexX++) {
+    ((UINT8*) &WideFill)[IndexX] = ((UINT8*) &WideFill)[IndexX % BYTES_PER_PIXEL];
   }
 
-  if (UseWideFill && (DestinationX == 0) && (Width == Configure->PixelsPerScanLine)) {
+  if (DestinationX == 0 && Width == Configure->PixelsPerScanLine) {
     DEBUG ((DEBUG_VERBOSE, "OCBLT: VideoFill (wide, one-shot)\n"));
     Offset = DestinationY * Configure->PixelsPerScanLine;
     Offset = BYTES_PER_PIXEL * Offset;
@@ -227,7 +205,7 @@ BlitLibVideoFill (
       Offset = BYTES_PER_PIXEL * Offset;
       Destination = Configure->FrameBuffer + Offset;
 
-      if (UseWideFill && (((UINTN) Destination & 7) == 0)) {
+      if (((UINTN) Destination & 7) == 0) {
         DEBUG ((DEBUG_VERBOSE, "OCBLT: VideoFill (wide)\n"));
         SizeInBytes = WidthInBytes;
         if (SizeInBytes >= 8) {
