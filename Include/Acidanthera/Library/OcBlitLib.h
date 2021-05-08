@@ -38,6 +38,8 @@ typedef struct OC_BLIT_CONFIGURE {
 
   @param[in] FrameBuffer       Pointer to the start of the frame buffer.
   @param[in] FrameBufferInfo   Describes the frame buffer characteristics.
+                               The information in FramebufferInfo must refer to unmodified
+                               (not rotated) framebuffer.
   @param[in] Rotation          Rotation scheme in degrees (must be one of 0, 90, 180, 270).
   @param[in,out] Configure     The created configuration information.
   @param[in,out] ConfigureSize Size of the configuration information.

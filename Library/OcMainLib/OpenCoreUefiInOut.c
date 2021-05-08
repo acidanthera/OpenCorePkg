@@ -247,7 +247,7 @@ OcLoadUefiOutputSupport (
   }
 
   if (Config->Uefi.Output.DirectGopRendering) {
-    OcUseDirectGop (-1);
+    OcUseDirectGop (-1, 0);
   }
 
   if (Config->Uefi.Output.ReconnectOnResChange && !EFI_ERROR (Status)) {

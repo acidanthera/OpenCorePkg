@@ -152,12 +152,14 @@ OcReconnectConsole (
   Use direct GOP renderer for console.
 
   @param[in] CacheType   Caching type, e.g. CacheWriteCombining or -1 to disable.
+  @param[in] Rotation    Rotation scheme in degrees (must be one of 0, 90, 180, 270).
 
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 OcUseDirectGop (
-  IN INT32  CacheType
+  IN INT32   CacheType,
+  IN UINT32  Rotation
   );
 
 /**
