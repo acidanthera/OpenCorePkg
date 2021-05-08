@@ -194,13 +194,24 @@ STATIC
 VOID
 SwitchMode (
   IN OUT EFI_GRAPHICS_OUTPUT_PROTOCOL          *This,
-  IN     EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Source
+  IN     BOOLEAN                               UseCustom
   )
 {
+  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Source;
+
   ASSERT (This != NULL);
   ASSERT (This->Mode != NULL);
   ASSERT (This->Mode->Info != NULL);
-  ASSERT (Source != NULL);
+
+  if (UseCustom) {
+    Source = &mGop.CustomModeInfo;
+    This->Mode->FrameBufferBase  = 0;
+    This->Mode->FrameBufferSize  = 0;
+  } else {
+    Source = &mGop.OriginalModeInfo;
+    This->Mode->FrameBufferBase = mGop.OriginalFrameBufferBase;
+    This->Mode->FrameBufferSize = mGop.OriginalFrameBufferSize;
+  }
 
   This->Mode->Info->VerticalResolution   = Source->VerticalResolution;
   This->Mode->Info->HorizontalResolution = Source->HorizontalResolution;
@@ -231,6 +242,14 @@ RotateMode (
     This->Mode->Info->HorizontalResolution = mGop.OriginalModeInfo.VerticalResolution;
     This->Mode->Info->VerticalResolution   = mGop.OriginalModeInfo.HorizontalResolution;
     This->Mode->Info->PixelsPerScanLine    = This->Mode->Info->HorizontalResolution;
+  }
+
+  mGop.OriginalFrameBufferBase = This->Mode->FrameBufferBase;
+  mGop.OriginalFrameBufferSize = This->Mode->FrameBufferSize;
+
+  if (Rotation != 0) {
+    This->Mode->FrameBufferBase  = 0;
+    This->Mode->FrameBufferSize  = 0;
   }
 
   CopyMem (&mGop.CustomModeInfo, This->Mode->Info, sizeof (mGop.CustomModeInfo));
@@ -309,11 +328,11 @@ DirectGopSetMode (
   //
   // Protect from mishandling of rotated info.
   //
-  SwitchMode (This, &mGop.OriginalModeInfo);
+  SwitchMode (This, FALSE);
 
   Status = mGop.OriginalGopSetMode (This, ModeNumber);
   if (EFI_ERROR (Status)) {
-    SwitchMode (This, &mGop.CustomModeInfo);
+    SwitchMode (This, TRUE);
     mGop.FramebufferContext = Original;
     gBS->RestoreTPL (OldTpl);
     return Status;
@@ -326,7 +345,7 @@ DirectGopSetMode (
   RotateMode (This, mGop.Rotation);
 
   mGop.FramebufferContext = DirectGopFromTarget (
-    This->Mode->FrameBufferBase,
+    mGop.OriginalFrameBufferBase,
     &mGop.OriginalModeInfo,
     &mGop.FramebufferContextPageCount
     );
@@ -360,10 +379,10 @@ DirectQueryMode (
   EFI_STATUS  Status;
   UINT32      HorizontalResolution;
 
-  SwitchMode (This, &mGop.OriginalModeInfo);
+  SwitchMode (This, FALSE);
   Status = mGop.OriginalGopQueryMode (This, ModeNumber, SizeOfInfo, Info);
   if (EFI_ERROR (Status)) {
-    SwitchMode (This, &mGop.CustomModeInfo);
+    SwitchMode (This, TRUE);
     return Status;
   }
 
@@ -523,7 +542,7 @@ OcUseDirectGop (
   RotateMode (Gop, mGop.Rotation);
 
   mGop.FramebufferContext = DirectGopFromTarget (
-    Gop->Mode->FrameBufferBase,
+    mGop.OriginalFrameBufferBase,
     &mGop.OriginalModeInfo,
     &mGop.FramebufferContextPageCount
     );
@@ -561,4 +580,16 @@ OcUseDirectGop (
   }
 
   return EFI_SUCCESS;
+}
+
+CONST CONSOLE_GOP_CONTEXT *
+InternalGetDirectGopContext (
+  VOID
+  )
+{
+  if (mGop.Rotation != 0 && mGop.OriginalGopSetMode != NULL) {
+    return &mGop;
+  }
+
+  return NULL;
 }

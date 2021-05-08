@@ -29,6 +29,7 @@
 
 [Guids]
   gAppleVendorVariableGuid
+  gAppleBootVariableGuid
 
 [Protocols]
   gAppleFramebufferInfoProtocolGuid

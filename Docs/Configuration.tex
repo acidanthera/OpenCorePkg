@@ -6782,7 +6782,9 @@ functioning. Feature highlights:
   there is an obvious benefit as it may result in issues such as slower scrolling.
 
   This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
-  screen rotation for all EFI applications.
+  screen rotation for all EFI applications. In order to provide seamless rotation
+  compatibility with \texttt{EfiBoot}, builtin \texttt{AppleFramebufferInfo} should
+  also be used, i.e. it may need to be overridden on Mac EFI.
 
 \item
   \texttt{GopPassThrough}\\

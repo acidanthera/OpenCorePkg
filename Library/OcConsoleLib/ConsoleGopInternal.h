@@ -56,9 +56,22 @@ typedef struct CONSOLE_GOP_CONTEXT {
   ///
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    OriginalModeInfo;
   ///
+  /// Original (not rotated) linear frame buffer.
+  ///
+  EFI_PHYSICAL_ADDRESS                    OriginalFrameBufferBase;
+  ///
+  /// Original (not rotated) linear frame buffer size.
+  ///
+  UINTN                                   OriginalFrameBufferSize;
+  ///
   /// Ours (rotated) mode informaation.
   ///
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION    CustomModeInfo;
 } CONSOLE_GOP_CONTEXT;
+
+CONST CONSOLE_GOP_CONTEXT *
+InternalGetDirectGopContext (
+  VOID
+  );
 
 #endif // CONSOLE_GOP_INTERNAL_H

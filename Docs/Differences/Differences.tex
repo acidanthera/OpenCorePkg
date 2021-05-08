@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
-%DIF ADD ../Configuration.tex        Sun May  9 00:12:30 2021
+%DIF ADD ../Configuration.tex        Sun May  9 02:38:36 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6842,7 +6842,9 @@ functioning. Feature highlights:
   there is an obvious benefit as it may result in issues such as slower scrolling.
 
   \DIFaddbegin \DIFadd{This renderer fully supports }\texttt{\DIFadd{AppleEg2Info}} \DIFadd{protocol and will provide
-  screen rotation for all EFI applications.
+  screen rotation for all EFI applications. In order to provide seamless rotation
+  compatibility with }\texttt{\DIFadd{EfiBoot}}\DIFadd{, builtin }\texttt{\DIFadd{AppleFramebufferInfo}} \DIFadd{should
+  also be used, i.e. it may need to be overridden on Mac EFI.
 }
 
 \DIFaddend \item
