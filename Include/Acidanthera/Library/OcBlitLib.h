@@ -91,7 +91,7 @@ RETURN_STATUS
 EFIAPI
 OcBlitRender (
   IN     OC_BLIT_CONFIGURE                  *Configure,
-  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer, OPTIONAL
+  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL      *BltBuffer OPTIONAL,
   IN     EFI_GRAPHICS_OUTPUT_BLT_OPERATION  BltOperation,
   IN     UINTN                              SourceX,
   IN     UINTN                              SourceY,

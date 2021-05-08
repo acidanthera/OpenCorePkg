@@ -104,6 +104,7 @@ BlitLibVideoFill (
 {
   UINTN                             IndexX;
   UINTN                             IndexY;
+  UINTN                             Tmp;
   UINT8                             *Destination;
   UINT8                             Uint8;
   UINT32                            Uint32;
@@ -117,6 +118,35 @@ BlitLibVideoFill (
   //
   // BltBuffer to Video: Source is BltBuffer, destination is Video
   //
+
+  if (Configure->Rotation == 90) {
+    //
+    // Perform -90 rotation.
+    //
+    Tmp          = Width;
+    Width        = Height;
+    Height       = Tmp;
+    Tmp          = DestinationX;
+    DestinationX = DestinationY;
+    DestinationY = Configure->Height - Tmp - Height;
+  } else if (Configure->Rotation == 180) {
+    //
+    // Perform -180 rotation.
+    //
+    DestinationX = Configure->Width  - DestinationX - Width;
+    DestinationY = Configure->Height - DestinationY - Height;
+  } else if (Configure->Rotation == 270) {
+    //
+    // Perform +90 rotation.
+    //
+    Tmp          = Width;
+    Width        = Height;
+    Height       = Tmp;
+    Tmp          = DestinationX;
+    DestinationX = Configure->Width - DestinationY - Width;
+    DestinationY = Tmp;
+  }
+
   if (DestinationY + Height > Configure->Height) {
     DEBUG ((DEBUG_VERBOSE, "OCBLT: Past screen (Y)\n"));
     return RETURN_INVALID_PARAMETER;
@@ -271,6 +301,13 @@ BlitLibVideoToBuffer (
   UINTN                                  WidthInBytes;
 
   //
+  // TODO: Implement.
+  //
+  if (Configure->Rotation != 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // Video to BltBuffer: Source is Video, destination is BltBuffer
   //
   if (SourceY + Height > Configure->Height) {
@@ -380,6 +417,13 @@ BlitLibBufferToVideo (
   UINTN                                    WidthInBytes;
 
   //
+  // TODO: Implement.
+  //
+  if (Configure->Rotation != 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
   // BltBuffer to Video: Source is BltBuffer, destination is Video
   //
   if (DestinationY + Height > Configure->Height) {
@@ -474,7 +518,44 @@ BlitLibVideoToVideo (
   UINT8                                     *Destination;
   UINTN                                     Offset;
   UINTN                                     WidthInBytes;
+  UINTN                                     Tmp;
   INTN                                      LineStride;
+
+  if (Configure->Rotation == 90) {
+    //
+    // Perform -90 rotation.
+    //
+    Tmp          = Width;
+    Width        = Height;
+    Height       = Tmp;
+    Tmp          = DestinationX;
+    DestinationX = DestinationY;
+    DestinationY = Configure->Height - Tmp - Height;
+    Tmp          = SourceX;
+    SourceX      = SourceY;
+    SourceY      = Configure->Height - Tmp - Height;
+  } else if (Configure->Rotation == 180) {
+    //
+    // Perform -180 rotation.
+    //
+    DestinationX = Configure->Width  - DestinationX - Width;
+    DestinationY = Configure->Height - DestinationY - Height;
+    SourceX      = Configure->Width  - SourceX - Width;
+    SourceY      = Configure->Height - SourceY - Height;
+  } else if (Configure->Rotation == 270) {
+    //
+    // Perform +90 rotation.
+    //
+    Tmp          = Width;
+    Width        = Height;
+    Height       = Tmp;
+    Tmp          = DestinationX;
+    DestinationX = Configure->Width - DestinationY - Width;
+    DestinationY = Tmp;
+    Tmp          = SourceX;
+    SourceX      = Configure->Width - SourceY - Width;
+    SourceY      = Tmp;
+  }
 
   //
   // Video to Video: Source is Video, destination is Video
@@ -605,7 +686,7 @@ RETURN_STATUS
 EFIAPI
 OcBlitRender (
   IN     OC_BLIT_CONFIGURE                     *Configure,
-  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer, OPTIONAL
+  IN OUT EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer OPTIONAL,
   IN     EFI_GRAPHICS_OUTPUT_BLT_OPERATION     BltOperation,
   IN     UINTN                                 SourceX,
   IN     UINTN                                 SourceY,
@@ -616,9 +697,7 @@ OcBlitRender (
   IN     UINTN                                 Delta
   )
 {
-  if (Configure == NULL) {
-    return RETURN_INVALID_PARAMETER;
-  }
+  ASSERT (Configure != NULL);
 
   switch (BltOperation) {
   case EfiBltVideoToBltBuffer:
