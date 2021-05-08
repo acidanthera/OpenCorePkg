@@ -18,6 +18,7 @@
 [Sources.common]
   BlitBufferToVideo.c
   BlitInternal.h
+  BlitVideoToBuffer.c
   OcBlitLib.c
 
 [LibraryClasses]

@@ -202,7 +202,6 @@ BlitLibBufferToVideo180 (
       Destination -= PixelsPerScanLine;
       Height--;
     }
-    return EFI_UNSUPPORTED;
   }
 
   return EFI_SUCCESS;
