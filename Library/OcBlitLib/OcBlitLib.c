@@ -161,7 +161,7 @@ BlitLibVideoFill (
     DestinationY = Tmp;
   }
 
-  WidthInBytes = Width * Configure->BytesPerPixel;
+  WidthInBytes = Width * BYTES_PER_PIXEL;
 
   Uint32 = *(UINT32*) Color;
   WideFill =
@@ -180,9 +180,9 @@ BlitLibVideoFill (
   // WideFill, then a wide fill operation can be used
   //
   UseWideFill = TRUE;
-  if ((sizeof (WideFill) % Configure->BytesPerPixel) == 0) {
-    for (IndexX = Configure->BytesPerPixel; IndexX < sizeof (WideFill); IndexX++) {
-      ((UINT8*) &WideFill)[IndexX] = ((UINT8*) &WideFill)[IndexX % Configure->BytesPerPixel];
+  if ((sizeof (WideFill) % BYTES_PER_PIXEL) == 0) {
+    for (IndexX = BYTES_PER_PIXEL; IndexX < sizeof (WideFill); IndexX++) {
+      ((UINT8*) &WideFill)[IndexX] = ((UINT8*) &WideFill)[IndexX % BYTES_PER_PIXEL];
     }
   } else {
     //
@@ -191,7 +191,7 @@ BlitLibVideoFill (
     //
     for (
       IndexX = 1, Uint8 = ((UINT8*) &WideFill)[0];
-      IndexX < Configure->BytesPerPixel;
+      IndexX < BYTES_PER_PIXEL;
       IndexX++) {
       if (Uint8 != ((UINT8*) &WideFill)[IndexX]) {
         UseWideFill = FALSE;
@@ -206,7 +206,7 @@ BlitLibVideoFill (
   if (UseWideFill && (DestinationX == 0) && (Width == Configure->PixelsPerScanLine)) {
     DEBUG ((DEBUG_VERBOSE, "OCBLT: VideoFill (wide, one-shot)\n"));
     Offset = DestinationY * Configure->PixelsPerScanLine;
-    Offset = Configure->BytesPerPixel * Offset;
+    Offset = BYTES_PER_PIXEL * Offset;
     Destination = Configure->FrameBuffer + Offset;
     SizeInBytes = WidthInBytes * Height;
     if (SizeInBytes >= 8) {
@@ -221,7 +221,7 @@ BlitLibVideoFill (
     LineBufferReady = FALSE;
     for (IndexY = DestinationY; IndexY < (Height + DestinationY); IndexY++) {
       Offset = (IndexY * Configure->PixelsPerScanLine) + DestinationX;
-      Offset = Configure->BytesPerPixel * Offset;
+      Offset = BYTES_PER_PIXEL * Offset;
       Destination = Configure->FrameBuffer + Offset;
 
       if (UseWideFill && (((UINTN) Destination & 7) == 0)) {
@@ -238,12 +238,12 @@ BlitLibVideoFill (
       } else {
         DEBUG ((DEBUG_VERBOSE, "OCBLT: VideoFill (not wide)\n"));
         if (!LineBufferReady) {
-          CopyMem (Configure->LineBuffer, &WideFill, Configure->BytesPerPixel);
+          CopyMem (Configure->LineBuffer, &WideFill, BYTES_PER_PIXEL);
           for (IndexX = 1; IndexX < Width; ) {
             CopyMem (
-              (Configure->LineBuffer + (IndexX * Configure->BytesPerPixel)),
+              (Configure->LineBuffer + (IndexX * BYTES_PER_PIXEL)),
               Configure->LineBuffer,
-              MIN (IndexX, Width - IndexX) * Configure->BytesPerPixel
+              MIN (IndexX, Width - IndexX) * BYTES_PER_PIXEL
             );
             IndexX += MIN (IndexX, Width - IndexX);
           }
@@ -330,7 +330,7 @@ BlitLibVideoToBuffer (
     Delta = Width * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
   }
 
-  WidthInBytes = Width * Configure->BytesPerPixel;
+  WidthInBytes = Width * BYTES_PER_PIXEL;
 
   //
   // Video to BltBuffer: Source is Video, destination is BltBuffer
@@ -340,7 +340,7 @@ BlitLibVideoToBuffer (
        SrcY++, DstY++) {
 
     Offset = (SrcY * Configure->PixelsPerScanLine) + SourceX;
-    Offset = Configure->BytesPerPixel * Offset;
+    Offset = BYTES_PER_PIXEL * Offset;
     Source = Configure->FrameBuffer + Offset;
 
     if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
@@ -356,7 +356,7 @@ BlitLibVideoToBuffer (
         Blt = (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *)
           ((UINT8 *) BltBuffer + (DstY * Delta) +
           (DestinationX + IndexX) * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
-        Uint32 = *(UINT32*) (Configure->LineBuffer + (IndexX * Configure->BytesPerPixel));
+        Uint32 = *(UINT32*) (Configure->LineBuffer + (IndexX * BYTES_PER_PIXEL));
         *(UINT32*) Blt =
           (UINT32) (
           (((Uint32 & Configure->PixelMasks.RedMask) >>
@@ -372,6 +372,178 @@ BlitLibVideoToBuffer (
 
   return RETURN_SUCCESS;
 }
+
+/**
+  Performs a UEFI Graphics Output Protocol Blt Buffer to Video operation
+  with extended parameters at 0 degree rotation.
+
+  @param[in]  Configure     Pointer to a configuration which was successfully
+                            created by FrameBufferBltConfigure ().
+  @param[in]  BltBuffer     Output buffer for pixel color data.
+  @param[in]  SourceX       X location within BltBuffer.
+  @param[in]  SourceY       Y location within BltBuffer.
+  @param[in]  DestinationX  X location within video.
+  @param[in]  DestinationY  Y location within video.
+  @param[in]  Width         Width (in pixels).
+  @param[in]  Height        Height.
+  @param[in]  DeltaPixels   Number of pixels in a row of BltBuffer.
+
+  @retval RETURN_INVALID_PARAMETER Invalid parameter were passed in.
+  @retval RETURN_SUCCESS           The Blt operation was performed successfully.
+**/
+STATIC
+RETURN_STATUS
+BlitLibBufferToVideo0 (
+  IN  OC_BLIT_CONFIGURE                     *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
+  IN  UINTN                                 SourceX,
+  IN  UINTN                                 SourceY,
+  IN  UINTN                                 DestinationX,
+  IN  UINTN                                 DestinationY,
+  IN  UINTN                                 Width,
+  IN  UINTN                                 Height,
+  IN  UINTN                                 DeltaPixels
+  )
+{
+  UINT32                                   *Source;
+  UINT32                                   *Destination;
+  UINTN                                    IndexX;
+  UINT32                                   Uint32;
+  UINTN                                    WidthInBytes;
+  UINTN                                    PixelsPerScanLine;
+  UINT32                                   *SourceWalker;
+  UINT32                                   *DestinationWalker;
+
+  WidthInBytes      = Width * BYTES_PER_PIXEL;
+  PixelsPerScanLine = Configure->PixelsPerScanLine;
+
+  Destination = (UINT32 *) Configure->FrameBuffer
+    + DestinationY * PixelsPerScanLine + DestinationX;
+  Source = (UINT32 *) BltBuffer
+    + SourceY * DeltaPixels + SourceX;
+  if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    while (Height > 0) {
+      CopyMem (Destination, Source, WidthInBytes);
+      Source      += DeltaPixels;
+      Destination += PixelsPerScanLine;
+      Height--;
+    }
+  } else {
+    while (Height > 0) {
+      DestinationWalker = (UINT32 *) Configure->LineBuffer;
+      SourceWalker      = (UINT32 *) Source;
+      for (IndexX = 0; IndexX < Width; IndexX++) {
+        Uint32 = *SourceWalker++;
+        *DestinationWalker++ =
+          (UINT32) (
+            (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
+             Configure->PixelMasks.RedMask) |
+            (((Uint32 << Configure->PixelShl[1]) >> Configure->PixelShr[1]) &
+             Configure->PixelMasks.GreenMask) |
+            (((Uint32 << Configure->PixelShl[2]) >> Configure->PixelShr[2]) &
+             Configure->PixelMasks.BlueMask)
+            );
+      }
+
+      CopyMem (Destination, Configure->LineBuffer, WidthInBytes);
+      Source      += DeltaPixels;
+      Destination += PixelsPerScanLine;
+      Height--;
+    }
+  }
+
+  return EFI_SUCCESS;
+}
+
+/**
+  Performs a UEFI Graphics Output Protocol Blt Buffer to Video operation
+  with extended parameters at 180 degree rotation.
+
+  @param[in]  Configure     Pointer to a configuration which was successfully
+                            created by FrameBufferBltConfigure ().
+  @param[in]  BltBuffer     Output buffer for pixel color data.
+  @param[in]  SourceX       X location within BltBuffer.
+  @param[in]  SourceY       Y location within BltBuffer.
+  @param[in]  DestinationX  X location within video.
+  @param[in]  DestinationY  Y location within video.
+  @param[in]  Width         Width (in pixels).
+  @param[in]  Height        Height.
+  @param[in]  DeltaPixels   Number of pixels in a row of BltBuffer.
+
+  @retval RETURN_INVALID_PARAMETER Invalid parameter were passed in.
+  @retval RETURN_SUCCESS           The Blt operation was performed successfully.
+**/
+STATIC
+RETURN_STATUS
+BlitLibBufferToVideo180 (
+  IN  OC_BLIT_CONFIGURE                     *Configure,
+  IN  EFI_GRAPHICS_OUTPUT_BLT_PIXEL         *BltBuffer,
+  IN  UINTN                                 SourceX,
+  IN  UINTN                                 SourceY,
+  IN  UINTN                                 DestinationX,
+  IN  UINTN                                 DestinationY,
+  IN  UINTN                                 Width,
+  IN  UINTN                                 Height,
+  IN  UINTN                                 DeltaPixels
+  )
+{
+  UINT32                                   *Source;
+  UINT32                                   *Destination;
+  UINTN                                    IndexX;
+  UINT32                                   Uint32;
+  UINTN                                    WidthInBytes;
+  UINTN                                    PixelsPerScanLine;
+  UINT32                                   *SourceWalker;
+  UINT32                                   *DestinationWalker;
+
+  WidthInBytes      = Width * BYTES_PER_PIXEL;
+  PixelsPerScanLine = Configure->PixelsPerScanLine;
+
+  DestinationX = Configure->Width  - DestinationX - Width;
+  DestinationY = Configure->Height - DestinationY - Height;
+
+  Destination = (UINT32 *) Configure->FrameBuffer
+    + (DestinationY + (Height - 1)) * PixelsPerScanLine + DestinationX;
+  Source = (UINT32 *) BltBuffer
+    + SourceY * DeltaPixels + SourceX;
+
+  if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source + (Width - 1);
+      for (IndexX = 0; IndexX < Width; IndexX++) {
+        *DestinationWalker++ = *SourceWalker--;
+      }
+      Source      += DeltaPixels;
+      Destination -= PixelsPerScanLine;
+      Height--;
+    }
+  } else {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source + (Width - 1);
+      for (IndexX = 0; IndexX < Width; IndexX++) {
+        Uint32 = *SourceWalker--;
+        *DestinationWalker++ =
+          (UINT32) (
+            (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
+             Configure->PixelMasks.RedMask) |
+            (((Uint32 << Configure->PixelShl[1]) >> Configure->PixelShr[1]) &
+             Configure->PixelMasks.GreenMask) |
+            (((Uint32 << Configure->PixelShl[2]) >> Configure->PixelShr[2]) &
+             Configure->PixelMasks.BlueMask)
+            );
+      }
+      Source      += DeltaPixels;
+      Destination -= PixelsPerScanLine;
+      Height--;
+    }
+    return EFI_UNSUPPORTED;
+  }
+
+  return EFI_SUCCESS;
+}
+
 
 /**
   Performs a UEFI Graphics Output Protocol Blt Buffer to Video operation
@@ -405,20 +577,10 @@ BlitLibBufferToVideo (
   IN  UINTN                                 Delta
   )
 {
-  UINTN                                    DstY;
-  UINTN                                    SrcY;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL            *Blt;
-  UINT8                                    *Source;
-  UINT8                                    *Destination;
-  UINTN                                    IndexX;
-  UINT32                                   Uint32;
-  UINTN                                    Offset;
-  UINTN                                    WidthInBytes;
-
   //
   // TODO: Implement.
   //
-  if (Configure->Rotation != 0) {
+  if (Configure->Rotation == 90 || Configure->Rotation == 270) {
     return EFI_UNSUPPORTED;
   }
 
@@ -443,44 +605,37 @@ BlitLibBufferToVideo (
   // pixels size, the number of bytes in each row can be computed.
   //
   if (Delta == 0) {
-    Delta = Width * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
+    Delta = Width;
+  } else {
+    Delta /= BYTES_PER_PIXEL;
   }
 
-  WidthInBytes = Width * Configure->BytesPerPixel;
+  if (Configure->Rotation == 0) {
+    return BlitLibBufferToVideo0 (
+      Configure,
+      BltBuffer,
+      SourceX,
+      SourceY,
+      DestinationX,
+      DestinationY,
+      Width,
+      Height,
+      Delta
+      );
+  }
 
-  for (SrcY = SourceY, DstY = DestinationY;
-       SrcY < (Height + SourceY);
-       SrcY++, DstY++) {
-
-    Offset = (DstY * Configure->PixelsPerScanLine) + DestinationX;
-    Offset = Configure->BytesPerPixel * Offset;
-    Destination = Configure->FrameBuffer + Offset;
-
-    if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
-      Source = (UINT8 *) BltBuffer + (SrcY * Delta) + SourceX * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL);
-    } else {
-      for (IndexX = 0; IndexX < Width; IndexX++) {
-        Blt =
-          (EFI_GRAPHICS_OUTPUT_BLT_PIXEL *) (
-              (UINT8 *) BltBuffer +
-              (SrcY * Delta) +
-              ((SourceX + IndexX) * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL))
-            );
-        Uint32 = *(UINT32*) Blt;
-        *(UINT32*) (Configure->LineBuffer + (IndexX * Configure->BytesPerPixel)) =
-          (UINT32) (
-              (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
-               Configure->PixelMasks.RedMask) |
-              (((Uint32 << Configure->PixelShl[1]) >> Configure->PixelShr[1]) &
-               Configure->PixelMasks.GreenMask) |
-              (((Uint32 << Configure->PixelShl[2]) >> Configure->PixelShr[2]) &
-               Configure->PixelMasks.BlueMask)
-            );
-      }
-      Source = Configure->LineBuffer;
-    }
-
-    CopyMem (Destination, Source, WidthInBytes);
+  if (Configure->Rotation == 180) {
+    return BlitLibBufferToVideo180 (
+      Configure,
+      BltBuffer,
+      SourceX,
+      SourceY,
+      DestinationX,
+      DestinationY,
+      Width,
+      Height,
+      Delta
+      );
   }
 
   return RETURN_SUCCESS;
@@ -579,17 +734,17 @@ BlitLibVideoToVideo (
     SourceY      = Tmp;
   }
 
-  WidthInBytes = Width * Configure->BytesPerPixel;
+  WidthInBytes = Width * BYTES_PER_PIXEL;
 
   Offset = (SourceY * Configure->PixelsPerScanLine) + SourceX;
-  Offset = Configure->BytesPerPixel * Offset;
+  Offset = BYTES_PER_PIXEL * Offset;
   Source = Configure->FrameBuffer + Offset;
 
   Offset = (DestinationY * Configure->PixelsPerScanLine) + DestinationX;
-  Offset = Configure->BytesPerPixel * Offset;
+  Offset = BYTES_PER_PIXEL * Offset;
   Destination = Configure->FrameBuffer + Offset;
 
-  LineStride = Configure->BytesPerPixel * Configure->PixelsPerScanLine;
+  LineStride = BYTES_PER_PIXEL * Configure->PixelsPerScanLine;
   if (Destination > Source) {
     //
     // Copy from last line to avoid source is corrupted by copying
@@ -656,10 +811,14 @@ OcBlitConfigure (
 
   BlitLibConfigurePixelFormat (BitMask, &BytesPerPixel, PixelShl, PixelShr);
 
+  if (BytesPerPixel != sizeof (UINT32)) {
+    return RETURN_UNSUPPORTED;
+  }
+
   if (*ConfigureSize < sizeof (OC_BLIT_CONFIGURE)
-                     + FrameBufferInfo->HorizontalResolution * BytesPerPixel) {
+                     + FrameBufferInfo->HorizontalResolution * sizeof (UINT32)) {
     *ConfigureSize = sizeof (OC_BLIT_CONFIGURE)
-                   + FrameBufferInfo->HorizontalResolution * BytesPerPixel;
+                   + FrameBufferInfo->HorizontalResolution * sizeof (UINT32);
     return RETURN_BUFFER_TOO_SMALL;
   }
 
@@ -670,7 +829,6 @@ OcBlitConfigure (
   CopyMem (&Configure->PixelMasks, BitMask,  sizeof (*BitMask));
   CopyMem (Configure->PixelShl,    PixelShl, sizeof (PixelShl));
   CopyMem (Configure->PixelShr,    PixelShr, sizeof (PixelShr));
-  Configure->BytesPerPixel     = BytesPerPixel;
   Configure->PixelFormat       = FrameBufferInfo->PixelFormat;
   Configure->FrameBuffer       = (UINT8*) FrameBuffer;
   Configure->Width             = FrameBufferInfo->HorizontalResolution;

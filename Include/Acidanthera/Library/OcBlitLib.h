@@ -15,11 +15,16 @@
 #include <Library/OcGuardLib.h>
 
 //
+// Limit bytes per pixel to most common value for simplicity.
+//
+#define BYTES_PER_PIXEL sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL)
+STATIC_ASSERT (BYTES_PER_PIXEL == sizeof (UINT32), "Non 4-byte pixels are unsupported!");
+
+//
 // Read-only structure for the frame buffer configure.
 //
 typedef struct OC_BLIT_CONFIGURE {
   UINT32                          PixelsPerScanLine;
-  UINT32                          BytesPerPixel;
   UINT32                          Width;
   UINT32                          Height;
   UINT32                          RotatedWidth;

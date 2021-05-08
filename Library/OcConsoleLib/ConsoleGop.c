@@ -229,7 +229,7 @@ RotateMode (
   if (Rotation == 90 || Rotation == 270) {
     This->Mode->Info->HorizontalResolution = mGop.OriginalModeInfo.VerticalResolution;
     This->Mode->Info->VerticalResolution   = mGop.OriginalModeInfo.HorizontalResolution;
-    This->Mode->Info->PixelsPerScanLine    = This->Mode->Info->HorizontalResolution * sizeof (UINT32);
+    This->Mode->Info->PixelsPerScanLine    = This->Mode->Info->HorizontalResolution;
   }
 
   CopyMem (&mGop.CustomModeInfo, This->Mode->Info, sizeof (mGop.CustomModeInfo));
@@ -370,7 +370,7 @@ DirectQueryMode (
     HorizontalResolution          = (*Info)->HorizontalResolution;
     (*Info)->HorizontalResolution = (*Info)->VerticalResolution;
     (*Info)->VerticalResolution   = HorizontalResolution;
-    (*Info)->PixelsPerScanLine    = (*Info)->HorizontalResolution * sizeof (UINT32);
+    (*Info)->PixelsPerScanLine    = (*Info)->HorizontalResolution;
   }
 
   return Status;
