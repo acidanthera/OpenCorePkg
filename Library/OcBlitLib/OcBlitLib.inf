@@ -16,6 +16,8 @@
   LIBRARY_CLASS                  = OcBlitLib
 
 [Sources.common]
+  BlitBufferToVideo.c
+  BlitInternal.h
   OcBlitLib.c
 
 [LibraryClasses]
