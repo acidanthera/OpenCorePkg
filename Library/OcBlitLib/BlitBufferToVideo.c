@@ -100,7 +100,7 @@ BlitLibBufferToVideo90 (
   PixelsPerScanLine = Configure->PixelsPerScanLine;
 
   Destination = (UINT32 *) Configure->FrameBuffer
-    + (Configure->Width - DestinationY);
+    + (Configure->Width - DestinationY - 1);
   Source = (UINT32 *) BltBuffer
     + SourceY * DeltaPixels + SourceX;
 
@@ -108,8 +108,8 @@ BlitLibBufferToVideo90 (
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
-      for (IndexX = 0; IndexX < Width; IndexX++) {
-        DestinationWalker[(DestinationX + IndexX) * PixelsPerScanLine] = *SourceWalker++;
+      for (IndexX = DestinationX; IndexX < DestinationX + Width; IndexX++) {
+        DestinationWalker[IndexX * PixelsPerScanLine] = *SourceWalker++;
       }
       Source += DeltaPixels;
       Destination--;
@@ -119,9 +119,9 @@ BlitLibBufferToVideo90 (
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
-      for (IndexX = 0; IndexX < Width; IndexX++) {
+      for (IndexX = DestinationX; IndexX < DestinationX + Width; IndexX++) {
         Uint32 = *SourceWalker++;
-        DestinationWalker[(DestinationX + IndexX) * PixelsPerScanLine] =
+        DestinationWalker[IndexX * PixelsPerScanLine] =
           (UINT32) (
             (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
              Configure->PixelMasks.RedMask) |
