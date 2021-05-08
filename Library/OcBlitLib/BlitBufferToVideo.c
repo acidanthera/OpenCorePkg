@@ -224,6 +224,7 @@ BlitLibBufferToVideo270 (
   UINT32                                   *Destination;
   UINT32                                   *SourceWalker;
   UINT32                                   *DestinationWalker;
+  UINTN                                    LastX;
   UINTN                                    IndexX;
   UINTN                                    PixelsPerScanLine;
   UINT32                                   Uint32;
@@ -239,8 +240,9 @@ BlitLibBufferToVideo270 (
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
-      for (IndexX = 0; IndexX < Width; IndexX++) {
-        DestinationWalker[(Configure->Height - DestinationX - IndexX) * PixelsPerScanLine] = *SourceWalker++;
+      LastX = Configure->Height - DestinationX - 1;
+      for (IndexX = LastX; IndexX > LastX - Width; IndexX--) {
+        DestinationWalker[IndexX * PixelsPerScanLine] = *SourceWalker++;
       }
       Source += DeltaPixels;
       Destination++;
@@ -250,9 +252,10 @@ BlitLibBufferToVideo270 (
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
-      for (IndexX = 0; IndexX < Width; IndexX++) {
+      LastX = Configure->Height - DestinationX - 1;
+      for (IndexX = LastX; IndexX > LastX - Width; IndexX--) {
         Uint32 = *SourceWalker++;
-        DestinationWalker[(DestinationX + IndexX) * PixelsPerScanLine] =
+        DestinationWalker[IndexX * PixelsPerScanLine] =
           (UINT32) (
             (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
              Configure->PixelMasks.RedMask) |
