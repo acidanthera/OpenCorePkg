@@ -143,8 +143,8 @@ BlitLibVideoFill (
     Width        = Height;
     Height       = Tmp;
     Tmp          = DestinationX;
-    DestinationX = DestinationY;
-    DestinationY = Configure->Height - Tmp - Height;
+    DestinationX = Configure->Width - DestinationY - Width;
+    DestinationY = Tmp;
   } else if (Configure->Rotation == 180) {
     //
     // Perform -180 rotation.
@@ -158,9 +158,10 @@ BlitLibVideoFill (
     Tmp          = Width;
     Width        = Height;
     Height       = Tmp;
+
     Tmp          = DestinationX;
-    DestinationX = Configure->Width - DestinationY - Width;
-    DestinationY = Tmp;
+    DestinationX = DestinationY;
+    DestinationY = Configure->Height - Tmp - Height;
   }
 
   WidthInBytes = Width * BYTES_PER_PIXEL;
@@ -555,11 +556,11 @@ BlitLibVideoToVideo (
     Width        = Height;
     Height       = Tmp;
     Tmp          = DestinationX;
-    DestinationX = DestinationY;
-    DestinationY = Configure->Height - Tmp - Height;
+    DestinationX = Configure->Width - DestinationY - Width;
+    DestinationY = Tmp;
     Tmp          = SourceX;
-    SourceX      = SourceY;
-    SourceY      = Configure->Height - Tmp - Height;
+    SourceX      = Configure->Width - SourceY - Width;
+    SourceY      = Tmp;
   } else if (Configure->Rotation == 180) {
     //
     // Perform -180 rotation.
@@ -576,11 +577,11 @@ BlitLibVideoToVideo (
     Width        = Height;
     Height       = Tmp;
     Tmp          = DestinationX;
-    DestinationX = Configure->Width - DestinationY - Width;
-    DestinationY = Tmp;
+    DestinationX = DestinationY;
+    DestinationY = Configure->Height - Tmp - Height;
     Tmp          = SourceX;
-    SourceX      = Configure->Width - SourceY - Width;
-    SourceY      = Tmp;
+    SourceX      = SourceY;
+    SourceY      = Configure->Height - Tmp - Height;
   }
 
   WidthInBytes = Width * BYTES_PER_PIXEL;
