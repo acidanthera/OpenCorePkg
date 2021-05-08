@@ -89,7 +89,55 @@ BlitLibVideoToBuffer90 (
   IN     UINTN                           DeltaPixels
   )
 {
-  return EFI_UNSUPPORTED;
+  UINT32                                   *Source;
+  UINT32                                   *Destination;
+  UINT32                                   *SourceWalker;
+  UINT32                                   *DestinationWalker;
+  UINTN                                    IndexX;
+  UINTN                                    PixelsPerScanLine;
+  UINT32                                   Uint32;
+
+  PixelsPerScanLine = Configure->PixelsPerScanLine;
+
+  Destination = (UINT32 *) BltBuffer
+    + DestinationY * DeltaPixels + DestinationX;
+  Source = (UINT32 *) Configure->FrameBuffer
+    + (Configure->Width - SourceY - 1);
+
+  if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source;
+      for (IndexX = SourceX; IndexX < SourceX + Width; IndexX++) {
+        *DestinationWalker++ = SourceWalker[IndexX * PixelsPerScanLine];
+      }
+      Source--;
+      Destination += DeltaPixels;
+      Height--;
+    }
+  } else {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source;
+      for (IndexX = SourceX; IndexX < SourceX + Width; IndexX++) {
+        Uint32 = SourceWalker[IndexX * PixelsPerScanLine];
+        *DestinationWalker++ =
+          (UINT32) (
+            (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
+             Configure->PixelMasks.RedMask) |
+            (((Uint32 << Configure->PixelShl[1]) >> Configure->PixelShr[1]) &
+             Configure->PixelMasks.GreenMask) |
+            (((Uint32 << Configure->PixelShl[2]) >> Configure->PixelShr[2]) &
+             Configure->PixelMasks.BlueMask)
+            );
+      }
+      Source--;
+      Destination += DeltaPixels;
+      Height--;
+    }
+  }
+
+  return EFI_SUCCESS;
 }
 
 RETURN_STATUS
@@ -172,5 +220,56 @@ BlitLibVideoToBuffer270 (
   IN     UINTN                           DeltaPixels
   )
 {
-  return EFI_UNSUPPORTED;
+  UINT32                                   *Source;
+  UINT32                                   *Destination;
+  UINT32                                   *SourceWalker;
+  UINT32                                   *DestinationWalker;
+  UINTN                                    IndexX;
+  UINTN                                    LastX;
+  UINTN                                    PixelsPerScanLine;
+  UINT32                                   Uint32;
+
+  PixelsPerScanLine = Configure->PixelsPerScanLine;
+
+  Destination = (UINT32 *) BltBuffer
+    + DestinationY * DeltaPixels + DestinationX;
+  Source = (UINT32 *) Configure->FrameBuffer
+    + SourceY;
+
+  if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source;
+      LastX = Configure->Height - SourceX - 1;
+      for (IndexX = LastX; IndexX > LastX - Width; IndexX--) {
+        *DestinationWalker++ = SourceWalker[IndexX * PixelsPerScanLine];
+      }
+      Source++;
+      Destination += DeltaPixels;
+      Height--;
+    }
+  } else {
+    while (Height > 0) {
+      DestinationWalker = Destination;
+      SourceWalker      = Source;
+      LastX = Configure->Height - SourceX - 1;
+      for (IndexX = LastX; IndexX > LastX - Width; IndexX--) {
+        Uint32 = SourceWalker[IndexX * PixelsPerScanLine];
+        *DestinationWalker++ =
+          (UINT32) (
+            (((Uint32 << Configure->PixelShl[0]) >> Configure->PixelShr[0]) &
+             Configure->PixelMasks.RedMask) |
+            (((Uint32 << Configure->PixelShl[1]) >> Configure->PixelShr[1]) &
+             Configure->PixelMasks.GreenMask) |
+            (((Uint32 << Configure->PixelShl[2]) >> Configure->PixelShr[2]) &
+             Configure->PixelMasks.BlueMask)
+            );
+      }
+      Source++;
+      Destination += DeltaPixels;
+      Height--;
+    }
+  }
+
+  return EFI_SUCCESS;
 }
