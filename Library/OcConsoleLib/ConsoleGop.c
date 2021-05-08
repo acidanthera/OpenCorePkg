@@ -43,7 +43,7 @@ OC_BLIT_CONFIGURE *
 mFramebufferContext;
 
 STATIC
-UINT32
+UINTN
 mFramebufferContextPageCount;
 
 STATIC
@@ -212,7 +212,7 @@ EFIAPI
 DirectGopFromTarget (
   IN  EFI_PHYSICAL_ADDRESS                  FramebufferBase,
   IN  EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info,
-  OUT UINT32                                *PageCount
+  OUT UINTN                                 *PageCount
   )
 {
   EFI_STATUS                    Status;
