@@ -369,8 +369,8 @@ DirectGopSetMode (
 
   if (mGop.CachePolicy >= 0) {
     MtrrSetMemoryAttribute (
-      This->Mode->FrameBufferBase,
-      This->Mode->FrameBufferSize,
+      mGop.OriginalFrameBufferBase,
+      mGop.OriginalFrameBufferSize,
       mGop.CachePolicy
       );
   }
@@ -575,15 +575,15 @@ OcUseDirectGop (
 
   if (CacheType >= 0) {
     Status = MtrrSetMemoryAttribute (
-      Gop->Mode->FrameBufferBase,
-      Gop->Mode->FrameBufferSize,
+      mGop.OriginalFrameBufferBase,
+      mGop.OriginalFrameBufferSize,
       CacheType
       );
     DEBUG ((
       DEBUG_INFO,
       "OCC: FB (%Lx, %Lx) MTRR (%x) - %r\n",
-      (UINT64) Gop->Mode->FrameBufferBase,
-      (UINT64) Gop->Mode->FrameBufferSize,
+      (UINT64) mGop.OriginalFrameBufferBase,
+      (UINT64) mGop.OriginalFrameBufferSize,
       CacheType,
       Status
       ));
