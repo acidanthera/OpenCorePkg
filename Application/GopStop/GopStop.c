@@ -246,21 +246,23 @@ RunGopTest (
 
   STATIC UINT32 mColorsTest[9] = {12, 10, 9, 15, 7, 0, 11, 5, 14};
 
-  //
-  // 1. Fill screen with Red (#FF0000) in direct mode.
-  //
-  SetMem32 (
-    (VOID *)(UINTN) Gop->Mode->FrameBufferBase,
-    Gop->Mode->Info->VerticalResolution * Gop->Mode->Info->PixelsPerScanLine * sizeof (UINT32),
-    *(UINT32 *) &mGraphicsEfiColors[mColorsTest[0]]
-    );
+  if (Gop->Mode->FrameBufferBase != 0) {
+    //
+    // 1. Fill screen with Red (#FF0000) in direct mode.
+    //
+    SetMem32 (
+      (VOID *)(UINTN) Gop->Mode->FrameBufferBase,
+      Gop->Mode->Info->VerticalResolution * Gop->Mode->Info->PixelsPerScanLine * sizeof (UINT32),
+      *(UINT32 *) &mGraphicsEfiColors[mColorsTest[0]]
+      );
 
-  //
-  // 2. Wait 5 seconds.
-  // Note: Ensure that stall value is within UINT32 in nanoseconds.
-  //
-  for (Index = 0; Index < 5; ++Index) {
-    gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+    //
+    // 2. Wait 5 seconds.
+    // Note: Ensure that stall value is within UINT32 in nanoseconds.
+    //
+    for (Index = 0; Index < 5; ++Index) {
+      gBS->Stall (SECONDS_TO_MICROSECONDS (1));
+    }
   }
 
   //
