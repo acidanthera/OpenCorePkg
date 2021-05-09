@@ -216,6 +216,7 @@ SwitchMode (
   This->Mode->Info->VerticalResolution   = Source->VerticalResolution;
   This->Mode->Info->HorizontalResolution = Source->HorizontalResolution;
   This->Mode->Info->PixelsPerScanLine    = Source->PixelsPerScanLine;
+  This->Mode->Info->PixelFormat          = Source->PixelFormat;
 }
 
 /**
@@ -248,8 +249,20 @@ RotateMode (
   mGop.OriginalFrameBufferSize = This->Mode->FrameBufferSize;
 
   if (Rotation != 0) {
-    This->Mode->FrameBufferBase  = 0;
-    This->Mode->FrameBufferSize  = 0;
+    //
+    // macOS requires FrameBufferBase to be 0 for rotation to work, which
+    // forces it inspect the AppleFramebufferInfo protocol. REF:
+    // https://github.com/acidanthera/bugtracker/issues/1498#issuecomment-782822654
+    //
+    // Windows bootloader only draws directly to the framebuffer, and unlike
+    // macOS, which always draws to ConOut only, Windows iterates over all GOPs
+    // finding the one with the framebuffer. Marking our protocol Blit-only
+    // is not only more consistent, but it also forces Windows to pick another GOP
+    // protocol (if present) and draw without the rotation on these systems.
+    //
+    This->Mode->FrameBufferBase   = 0;
+    This->Mode->FrameBufferSize   = 0;
+    This->Mode->Info->PixelFormat = PixelBltOnly;
   }
 
   CopyMem (&mGop.CustomModeInfo, This->Mode->Info, sizeof (mGop.CustomModeInfo));
