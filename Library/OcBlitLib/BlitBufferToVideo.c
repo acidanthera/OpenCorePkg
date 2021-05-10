@@ -105,6 +105,96 @@ BlitLibBufferToVideo90 (
     + SourceY * DeltaPixels + SourceX;
 
   if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    Uint32 = ((UINT32) SourceX | (UINT32) SourceY
+      | (UINT32) DestinationX  | (UINT32) DestinationY
+      | (UINT32) Width         | (UINT32) Height
+      | (UINT32) DeltaPixels   | (UINT32) PixelsPerScanLine) & (16 - 1);
+
+    switch (Uint32) {
+      case 0:
+        {
+          CONST UINTN BlockWidth = 16;
+          Destination += DestinationX * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination + Index2 * PixelsPerScanLine - Index;
+              //
+              // Unrolling this one is ineffecient due to loop size(?). Gets down from 160 to 90 FPS.
+              //
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex2 * PixelsPerScanLine - BlockIndex] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 8:
+        {
+          CONST UINTN BlockWidth = 8;
+          Destination += DestinationX * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination + Index2 * PixelsPerScanLine - Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex2 * PixelsPerScanLine - BlockIndex] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 4:
+        {
+          CONST UINTN BlockWidth = 4;
+          Destination += DestinationX * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination + Index2 * PixelsPerScanLine - Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex2 * PixelsPerScanLine - BlockIndex] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 2:
+        {
+          CONST UINTN BlockWidth = 2;
+          Destination += DestinationX * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination + Index2 * PixelsPerScanLine - Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex2 * PixelsPerScanLine - BlockIndex] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      default:
+        break;
+    }
+
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
@@ -237,6 +327,96 @@ BlitLibBufferToVideo270 (
     + SourceY * DeltaPixels + SourceX;
 
   if (Configure->PixelFormat == PixelBlueGreenRedReserved8BitPerColor) {
+    Uint32 = ((UINT32) SourceX | (UINT32) SourceY
+      | (UINT32) DestinationX  | (UINT32) DestinationY
+      | (UINT32) Width         | (UINT32) Height
+      | (UINT32) DeltaPixels   | (UINT32) PixelsPerScanLine) & (16 - 1);
+
+    switch (Uint32) {
+      case 0:
+        {
+          CONST UINTN BlockWidth = 16;
+          Destination += (Configure->Height - DestinationX - 1) * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination - Index2 * PixelsPerScanLine + Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex - BlockIndex2 * PixelsPerScanLine] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 8:
+        {
+          CONST UINTN BlockWidth = 8;
+          Destination += (Configure->Height - DestinationX - 1) * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination - Index2 * PixelsPerScanLine + Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex - BlockIndex2 * PixelsPerScanLine] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 4:
+        {
+          CONST UINTN BlockWidth = 4;
+          Destination += (Configure->Height - DestinationX - 1) * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination - Index2 * PixelsPerScanLine + Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex - BlockIndex2 * PixelsPerScanLine] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      case 2:
+        {
+          CONST UINTN BlockWidth = 2;
+          Destination += (Configure->Height - DestinationX - 1) * PixelsPerScanLine;
+          for (UINTN Index = 0; Index < Height; Index += BlockWidth) {
+            for (UINTN Index2 = 0; Index2 < Width; Index2 += BlockWidth) {
+              UINT32 *A = Source + Index * DeltaPixels + Index2;
+              UINT32 *B = Destination - Index2 * PixelsPerScanLine + Index;
+              for (UINTN BlockIndex = 0; BlockIndex < BlockWidth; BlockIndex++) {
+                #if 0 /* Old compilers cannot unroll, disable for now */
+                #pragma clang loop unroll(full)
+                #endif
+                for (UINTN BlockIndex2 = 0; BlockIndex2 < BlockWidth; BlockIndex2++) {
+                  B[BlockIndex - BlockIndex2 * PixelsPerScanLine] = A[BlockIndex * DeltaPixels + BlockIndex2];
+                }
+              }
+            }
+          }
+        }
+        return EFI_SUCCESS;
+      default:
+        break;
+    }
+
     while (Height > 0) {
       DestinationWalker = Destination;
       SourceWalker      = Source;
