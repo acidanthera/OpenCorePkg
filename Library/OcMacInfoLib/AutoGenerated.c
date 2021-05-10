@@ -1606,8 +1606,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0xD,
   .PlatformFeature = MAC_INFO_PLATFORM_FEATURE_MISSING,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xC00DE137ULL,
-  .FirmwareFeaturesMask = 0xFF1FFF3FULL,
+  .FirmwareFeatures = 0xC10DF577ULL,
+  .FirmwareFeaturesMask = 0xFF1FFF7FULL,
  },
  {
   .SystemProductName = "MacPro1,1",
@@ -2350,8 +2350,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0x9,
   .PlatformFeature = 0x1,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xE00FE137ULL,
-  .FirmwareFeaturesMask = 0xFF1FFF3FULL,
+  .FirmwareFeatures = 0xFB0FF577ULL,
+  .FirmwareFeaturesMask = 0xFF1FFF7FULL,
  },
  {
   .SystemProductName = "iMac14,2",

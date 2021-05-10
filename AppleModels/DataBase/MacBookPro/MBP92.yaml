@@ -18,22 +18,16 @@ BoardProduct: "Mac-6F01561E16C75D06"
 BoardVersion: "MacBookPro9,2"
 BoardAssetTag: "Base Board Asset Tag#"
 BoardType: 0xA
-# FIXME: check
 BoardLocationInChassis: "Part Component"
 ChassisManufacturer: "Apple Inc."
 ChassisType: 0xA
 ChassisVersion: "Mac-6F01561E16C75D06"
 ChassisAssetTag: ""
-# FIXME: check
-FirmwareFeatures: 0xC00DE137
-# FIXME: check
-FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000C00DE137
-# FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xC10DF577
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000C10DF577
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0xD
-# FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
   - 0x0604
   - 0x0704

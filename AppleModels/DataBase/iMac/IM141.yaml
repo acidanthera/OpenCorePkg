@@ -24,16 +24,11 @@ ChassisType: 0xD
 ChassisVersion: "Mac-031B6874CF7F642A"
 ChassisAssetTag: ""
 PlatformFeature: 0x1
-# FIXME: check
-FirmwareFeatures: 0xE00FE137
-# FIXME: check
-FirmwareFeaturesMask: 0xFF1FFF3F
-# FIXME: check
-ExtendedFirmwareFeatures: 0x00000000E00FE137
-# FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+FirmwareFeatures: 0xFB0FF577
+FirmwareFeaturesMask: 0xFF1FFF7F
+ExtendedFirmwareFeatures: 0x00000000FB0FF577
+ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
 MemoryFormFactor: 0x9
-# FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
   - 0x0605
 # FIXME: Correct this one
