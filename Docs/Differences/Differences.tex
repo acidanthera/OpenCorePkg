@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
-%DIF ADD ../Configuration.tex        Sun May  9 02:38:36 2021
+%DIF DEL PreviousConfiguration.tex   Mon May 10 14:11:32 2021
+%DIF ADD ../Configuration.tex        Tue May 11 22:31:09 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2208,7 +2208,10 @@ blocking.
     \item Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
     \texttt{Cpuid1Data}: \texttt{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-  \end{itemize}
+    \DIFaddbegin \item \DIFadd{Comet Lake U62 (}\texttt{\DIFadd{0x0A0660}}\DIFadd{) to Comet Lake U42 (}\texttt{\DIFadd{0x0806EC}}\DIFadd{):}\\
+    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
+    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
+  \DIFaddend \end{itemize}
 
   \emph{Note 4}: Be aware that the following configurations are unsupported by XCPM (at least out of the box):
 
