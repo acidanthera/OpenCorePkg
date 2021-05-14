@@ -213,6 +213,7 @@ OcBootstrap (
     DEBUG ((DEBUG_ERROR, "OC: Failed to get launcher path\n"));
     return EFI_UNSUPPORTED;
   }
+  DEBUG ((DEBUG_INFO, "OC: Storage root %s\n", mStorageRoot));
 
   ASSERT (RemainingPath != NULL);
 

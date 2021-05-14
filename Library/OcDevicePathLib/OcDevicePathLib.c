@@ -1067,7 +1067,10 @@ OcFileDevicePathFullNameLen (
     }
 
     FilePath    = (FILEPATH_DEVICE_PATH *)DevicePath;
-    PathLength += OcFileDevicePathNameLen (FilePath);
+    //
+    // Each node requires separator or CHAR_NULL
+    //
+    PathLength += OcFileDevicePathNameLen (FilePath) + 1;
 
     DevicePath = NextDevicePathNode (DevicePath);
   } while (!IsDevicePathEnd (DevicePath));
@@ -1090,7 +1093,7 @@ OcFileDevicePathFullNameSize (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  return (OcFileDevicePathFullNameLen (DevicePath) + 1) * sizeof (CHAR16);
+  return OcFileDevicePathFullNameLen (DevicePath) * sizeof (CHAR16);
 }
 
 /**
@@ -1118,10 +1121,6 @@ OcFileDevicePathFullName (
   ASSERT (IsDevicePathValid (&FilePath->Header, 0));
   ASSERT (PathNameSize == OcFileDevicePathFullNameSize (&FilePath->Header));
 
-  //
-  // FIXME: Insert separators between nodes if not present already.
-  //
-
   do {
     PathLen = OcFileDevicePathNameLen (FilePath);
     CopyMem (
@@ -1130,10 +1129,11 @@ OcFileDevicePathFullName (
       PathLen * sizeof (*FilePath->PathName)
       );
     PathName += PathLen;
+    *PathName++ = L'\\';
 
     FilePath = (CONST FILEPATH_DEVICE_PATH *)NextDevicePathNode (FilePath);
   } while (!IsDevicePathEnd (FilePath));
-  *PathName = CHAR_NULL;
+  *(PathName - 1) = CHAR_NULL;
 }
 
 CHAR16 *
@@ -1277,7 +1277,7 @@ OcDevicePathHasFilePathSuffix (
     return FALSE;
   }
 
-  PathNameLen = OcFileDevicePathFullNameLen (&FilePath->Header);
+  PathNameLen = OcFileDevicePathFullNameLen (&FilePath->Header) - 1;
   if (PathNameLen < SuffixLen) {
     return FALSE;
   }
