@@ -1075,7 +1075,7 @@ OcFileDevicePathFullNameLen (
     DevicePath = NextDevicePathNode (DevicePath);
   } while (!IsDevicePathEnd (DevicePath));
 
-  return PathLength;
+  return PathLength - 1;
 }
 
 /**
@@ -1093,7 +1093,15 @@ OcFileDevicePathFullNameSize (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
-  return OcFileDevicePathFullNameLen (DevicePath) * sizeof (CHAR16);
+  UINTN        Len;
+
+  Len = OcFileDevicePathFullNameLen (DevicePath);
+
+  if (Len == 0) {
+    return 0;
+  }
+
+  return (Len + 1) * sizeof (CHAR16);
 }
 
 /**
@@ -1121,6 +1129,12 @@ OcFileDevicePathFullName (
   ASSERT (IsDevicePathValid (&FilePath->Header, 0));
   ASSERT (PathNameSize == OcFileDevicePathFullNameSize (&FilePath->Header));
 
+  //
+  // Note: The UEFI spec declares that a path separator may optionally be
+  // present at the beginning or end of any node's PathName. This is not
+  // currently supported here. Any fix would need to be applied here and
+  // in OcFileDevicePathNameLen.
+  //
   do {
     PathLen = OcFileDevicePathNameLen (FilePath);
     CopyMem (
@@ -1277,7 +1291,7 @@ OcDevicePathHasFilePathSuffix (
     return FALSE;
   }
 
-  PathNameLen = OcFileDevicePathFullNameLen (&FilePath->Header) - 1;
+  PathNameLen = OcFileDevicePathFullNameLen (&FilePath->Header);
   if (PathNameLen < SuffixLen) {
     return FALSE;
   }
