@@ -145,7 +145,7 @@ LoadImageFileFromStorage (
     Status = OcUnicodeSafeSPrint (
       Path,
       sizeof (Path),
-      OPEN_CORE_IMAGE_PATH L"%a%a%a.icns",
+      OPEN_CORE_IMAGE_PATH L"%a\\%a%a.icns",
       Prefix,
       Index > 0 ? "Ext" : "",
       ImageFilePath
@@ -330,12 +330,12 @@ InternalContextConstruct (
 
   if (AsciiStrCmp (Picker->PickerVariant, "Auto") == 0) {
     if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
-      Prefix = "Old";
+      Prefix = "Acidanthera\\Chardonnay";
     } else {
-      Prefix = "";
+      Prefix = "Acidanthera\\GoldenGate";
     }
   } else if (AsciiStrCmp (Picker->PickerVariant, "Default") == 0) {
-    Prefix = "";
+    Prefix = "Acidanthera\\GoldenGate";
   } else {
     Prefix = Picker->PickerVariant;
   }
@@ -464,7 +464,7 @@ InternalContextConstruct (
     }
 
     if (EFI_ERROR (Status) && Index < ICON_NUM_MANDATORY) {
-      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images\n"));
+      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images for %a\n", Prefix));
       InternalContextDestruct (Context);
       return EFI_UNSUPPORTED;
     }

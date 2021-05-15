@@ -5,6 +5,8 @@ OpenCore Changelog
 - Improved direct GOP renderer performance for certain cases
 - Added support for display rotation in direct GOP renderer
 - Fixed handling multinode device paths in LoadedImage and elsewhere
+- Changed OpenCanopy image directory to support directory prefixes
+- Changed OpenCanopy preferred image set to `Acidanthera\GoldenGate`
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe

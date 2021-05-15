@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon May 10 14:11:32 2021
-%DIF ADD ../Configuration.tex        Tue May 11 22:31:09 2021
+%DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
+%DIF ADD ../Configuration.tex        Sat May 15 13:54:49 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3450,15 +3450,33 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Choose specific icon set to be used for boot management.
 
-  The following values are supported:
+  \DIFdelbegin \DIFdel{The following values are supported}\DIFdelend \DIFaddbegin \DIFadd{An icon set is a directory path relative to }\texttt{\DIFadd{Resources\textbackslash Image}}\DIFadd{,
+  where the icons and an optional manifest are located. It is recommended for
+  the artists to use provide their sets in the }\texttt{\DIFadd{Vendor\textbackslash Set}} \DIFadd{format,
+  e.g. }\texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}}\DIFadd{.
+}
+
+  \DIFadd{Sample resources provided as a part of
+  }\href{https://github.com/acidanthera/OcBinaryData}{\DIFadd{OcBinaryData repository}}
+  \DIFadd{provide the following icon set}\DIFaddend :
   \begin{itemize}
-  \tightlist
-  \item \texttt{Auto} --- Automatically select one set of icons based on the \texttt{DefaultBackground}
-  colour.
-  \item \texttt{Default} --- Normal icon set (without prefix).
-  \item \texttt{Old} --- Vintage icon set (\texttt{Old} filename prefix).
-  \item \texttt{Modern} --- Nouveau icon set (\texttt{Modern} filename prefix).
-  \item Other value --- Custom icon set if supported by installed resources.
+    \tightlist
+    \item \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash GoldenGate}\DIFaddend } --- \DIFdelbegin \DIFdel{Automatically select one setof icons based on the }\texttt{\DIFdel{DefaultBackground}}
+  %DIFAUXCMD
+\DIFdel{colour}\DIFdelend \DIFaddbegin \DIFadd{macOS 11 styled icon set}\DIFaddend .
+    \item \texttt{\DIFdelbegin \DIFdel{Default}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash Syrah}\DIFaddend } --- \DIFdelbegin \DIFdel{Normal icon set(without prefix)}\DIFdelend \DIFaddbegin \DIFadd{macOS 10.10 styled icon set}\DIFaddend .
+    \item \texttt{\DIFdelbegin \DIFdel{Old}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash Chardonnay}\DIFaddend } --- \DIFdelbegin \DIFdel{Vintage icon set(}\texttt{\DIFdel{Old}} %DIFAUXCMD
+\DIFdel{filename prefix).
+  }\DIFdelend \DIFaddbegin \DIFadd{macOS 10.4 styled icon set.
+  }\end{itemize}
+
+  \DIFadd{For convenience purposes there also are predefined aliases:
+  }\begin{itemize}
+    \tightlist
+    \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{Modern}\DIFdelend \DIFaddbegin \DIFadd{Auto}\DIFaddend } --- \DIFdelbegin \DIFdel{Nouveau icon set (}\DIFdelend \DIFaddbegin \DIFadd{Automatically select one set of icons based on the }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Modern}\DIFdelend \DIFaddbegin \DIFadd{DefaultBackground}\DIFaddend }
+      \DIFdelbegin \DIFdel{filename prefix)}\DIFdelend \DIFaddbegin \DIFadd{colour: }\texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}} \DIFadd{for Syrah Black and
+      }\texttt{\DIFadd{Acidanthera\textbackslash Chardonnay}} \DIFadd{for Light Gray}\DIFaddend .
+    \item \DIFdelbegin \DIFdel{Other value }\DIFdelend \DIFaddbegin \texttt{\DIFadd{Default}} \DIFaddend --- \DIFdelbegin \DIFdel{Custom icon set if supported by installed resources}\DIFdelend \DIFaddbegin \texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}}\DIFaddend .
   \end{itemize}
 
 \end{enumerate}
@@ -5977,12 +5995,13 @@ Sample resources (fonts and images) can be found in
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
-builtin icon set. The default chosen icon set depends on the \texttt{DefaultBackgroundColor}
-variable value. For Light Gray \texttt{Old} icon set will be used, for other colours ---
-the one without a prefix.
+builtin icon set. The \DIFdelbegin \DIFdel{default }\DIFdelend chosen icon set \DIFdelbegin \DIFdel{depends }\DIFdelend \DIFaddbegin \DIFadd{may depend }\DIFaddend on the \texttt{DefaultBackgroundColor}
+variable value. \DIFdelbegin \DIFdel{For Light Gray }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Old}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{icon set will be used, for other colours ---
+the one without a prefix}\DIFdelend \DIFaddbegin \DIFadd{PickerVariant}} \DIFadd{for more details}\DIFaddend .
 
-Predefined icons are saved in the
-\texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
+Predefined icons are saved in the \DIFaddbegin \texttt{\DIFadd{PickerVariant}}\DIFadd{-derived subdirectory of the
+}\DIFaddend \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
 directory. A full list of supported icons (in \texttt{.icns} format) is provided below. When optional icons
 are missing, the closest available icon will be used. External entries will use \texttt{Ext}-prefixed
 icon if available (e.g. \texttt{OldExtHardDrive.icns}).
