@@ -166,6 +166,7 @@ enum {
 #define CPU_MODEL_SANDYBRIDGE    0x2A  ///< Sandy Bridge
 #define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon E5, Core i7 Extreme
 #define CPU_MODEL_SALTWELL       0x36  ///< Saltwell, Cedarview
+#define CPU_MODEL_SILVERMONT     0x37  ///< Bay Trail
 #define CPU_MODEL_IVYBRIDGE      0x3A  ///< Ivy Bridge
 #define CPU_MODEL_IVYBRIDGE_EP   0x3E
 #define CPU_MODEL_CRYSTALWELL    0x46

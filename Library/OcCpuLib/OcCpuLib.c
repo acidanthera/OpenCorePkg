@@ -546,7 +546,8 @@ ScanIntelProcessor (
   if (Cpu->MaxId >= CPUID_CACHE_PARAMS
     && (Cpu->CpuGeneration == OcCpuGenerationPrePenryn
     || Cpu->CpuGeneration == OcCpuGenerationPenryn
-    || Cpu->CpuGeneration == OcCpuGenerationBonnel
+    || Cpu->CpuGeneration == OcCpuGenerationBonnell
+    || Cpu->CpuGeneration == OcCpuGenerationSilvermont
     || Cpu->Hypervisor)) {
     AsmCpuidEx (CPUID_CACHE_PARAMS, 0, &CpuidCacheEax.Uint32, &CpuidCacheEbx.Uint32, NULL, NULL);
     if (CpuidCacheEax.Bits.CacheType != CPUID_CACHE_PARAMS_CACHE_TYPE_NULL) {
@@ -966,9 +967,8 @@ OcCpuCorrectFlexRatio (
   UINT64  FlexRatio;
 
   if (Cpu->Vendor[0] == CPUID_VENDOR_INTEL
-    && Cpu->Model != CPU_MODEL_GOLDMONT
-    && Cpu->Model != CPU_MODEL_AIRMONT
-    && Cpu->Model != CPU_MODEL_AVOTON) {
+    && Cpu->CpuGeneration != OcCpuGenerationBonnell
+    && Cpu->CpuGeneration != OcCpuGenerationSilvermont) {
     Msr = AsmReadMsr64 (MSR_FLEX_RATIO);
     if (Msr & FLEX_RATIO_EN) {
       FlexRatio = BitFieldRead64 (Msr, 8, 15);
@@ -1115,7 +1115,8 @@ InternalDetectIntelProcessorGeneration (
         break;
       case CPU_MODEL_BONNELL:
       case CPU_MODEL_BONNELL_MID:
-        CpuGeneration = OcCpuGenerationBonnel;
+      case CPU_MODEL_AVOTON: /* perhaps should be distinct */
+        CpuGeneration = OcCpuGenerationBonnell;
         break;
       case CPU_MODEL_DALES_32NM:
       case CPU_MODEL_WESTMERE:
@@ -1125,6 +1126,11 @@ InternalDetectIntelProcessorGeneration (
       case CPU_MODEL_SANDYBRIDGE:
       case CPU_MODEL_JAKETOWN:
         CpuGeneration = OcCpuGenerationSandyBridge;
+        break;
+      case CPU_MODEL_SILVERMONT:
+      case CPU_MODEL_GOLDMONT:
+      case CPU_MODEL_AIRMONT:
+        CpuGeneration = OcCpuGenerationSilvermont;
         break;
       case CPU_MODEL_IVYBRIDGE:
       case CPU_MODEL_IVYBRIDGE_EP:
