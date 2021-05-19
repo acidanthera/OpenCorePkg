@@ -926,3 +926,130 @@ PatchKernelCpuId (
 
   return EFI_UNSUPPORTED;
 }
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoVmTscFsbFind[] = {
+  // jb XXXX
+  0x72, 0x00,
+  // mov eax, 0x40000010
+  0xB8, 0x10, 0x00, 0x00, 0x40,
+  // xor ebx, ebx
+  0x31, 0xDB,
+  // xor ecx, ecx
+  0x31, 0xC9,
+  // xor edx, edx
+  0x31, 0xD2,
+  // cpuid
+  0x0F, 0xA2
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoVmTscFsbMask[] = {
+  0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoVmTscFsbReplace[] = {
+  // xor ecx, ecx
+  0x31, 0xC9,
+  // xor edx, edx
+  0x31, 0xD2,
+  // mov eax, [TSC in kHz]
+  0xB8, 0x00, 0x00, 0x00, 0x00,
+  // mov ebx [FSB in kHz]
+  0xBB, 0x00, 0x00, 0x00, 0x00,
+  // nop
+  0x90
+};
+
+#define PROVIDE_CPU_INFO_TSC_OFFSET   5
+#define PROVIDE_CPU_INFO_FSB_OFFSET   10
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoVmTscFsbPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoVmTscFsb"),
+  .Base        = "_cpuid_vmm_info",
+  .Find        = mProvideCurrentCpuInfoVmTscFsbFind,
+  .Mask        = mProvideCurrentCpuInfoVmTscFsbMask,
+  .Replace     = mProvideCurrentCpuInfoVmTscFsbReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoVmTscFsbFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoTopologyValidationReplace[] = {
+  // ret
+  0xC3
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyValidationPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoTopologyValidation"),
+  .Base        = "_x86_validate_topology",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoTopologyValidationReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyValidationReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+EFI_STATUS
+PatchProvideCurrentCpuInfo(
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  ASSERT (Patcher != NULL);
+
+  //
+  // Patch VMM TSC/FSB on 10.8 and above.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_TSC_OFFSET]) = DivU64x32 (CpuInfo->CPUFrequency, 1000);
+    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_FSB_OFFSET]) = DivU64x32 (CpuInfo->FSBFrequency, 1000);
+
+    DebugPrintHexDump(DEBUG_BULK_INFO, "Bytes ", mProvideCurrentCpuInfoVmTscFsbReplace, sizeof (mProvideCurrentCpuInfoVmTscFsbReplace));
+
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mProvideCurrentCpuInfoVmTscFsbPatch
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find VMM TSC/FSB patch - %r\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping VMM TSC/FSB patch on %u\n", KernelVersion));
+  }
+
+  //
+  // Disable _x86_validate_topology on 10.13 and above.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mProvideCurrentCpuInfoTopologyValidationPatch
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU topology validation patch - %r\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU topology validation patch on %u\n", KernelVersion));
+  }
+
+  return EFI_SUCCESS;
+}

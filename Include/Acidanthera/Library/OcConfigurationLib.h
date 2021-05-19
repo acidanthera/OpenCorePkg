@@ -292,6 +292,7 @@
   _(BOOLEAN                     , LapicKernelPanic            ,     , FALSE  , ()) \
   _(BOOLEAN                     , LegacyCommpage              ,     , FALSE  , ()) \
   _(BOOLEAN                     , PanicNoKextDump             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ProvideCurrentCpuInfo       ,     , FALSE  , ()) \
   _(BOOLEAN                     , PowerTimeoutKernelPanic     ,     , FALSE  , ()) \
   _(BOOLEAN                     , ThirdPartyDrives            ,     , FALSE  , ()) \
   _(BOOLEAN                     , XhciPortLimit               ,     , FALSE  , ())

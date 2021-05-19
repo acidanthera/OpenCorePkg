@@ -1120,7 +1120,7 @@ PatchSetApfsTimeout (
   @param CpuInfo        CPU information.
   @param Data           4 32-bit integers with CPUID data.
   @param DataMask       4 32-bit integers with CPUID enabled overrides data.
-  @param KernelVersion  Curent kernel version.
+  @param KernelVersion  Current kernel version.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1130,6 +1130,22 @@ PatchKernelCpuId (
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
   IN     UINT32           *DataMask,
+  IN     UINT32           KernelVersion
+  );
+
+/**
+  Apply current CPU information patches.
+
+  @param Patcher        Patcher context.
+  @param CpuInfo        CPU information.
+  @param KernelVersion  Current kernel version.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatchProvideCurrentCpuInfo(
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           KernelVersion
   );
 

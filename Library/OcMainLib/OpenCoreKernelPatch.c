@@ -340,6 +340,10 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.LegacyCommpage) {
       OcKernelApplyQuirk (KernelQuirkLegacyCommpage, CacheType, DarwinVersion, NULL, &KernelPatcher);     
     }
+
+    if (Config->Kernel.Quirks.ProvideCurrentCpuInfo) {
+      PatchProvideCurrentCpuInfo (&KernelPatcher, CpuInfo, DarwinVersion);  
+    }
   }
 }
 

@@ -10,6 +10,7 @@ OpenCore Changelog
 - Removed `<BOOTPATH>.icns` and `<TOOLPATH>.icns` support
 - Added content flavour system allowing custom boot entry icons compatible across icon packs
 - Added automatic flavour detection for macOS boot entries
+- Added `ProvideCurrentCpuInfo` quirk to provide correct TSC/FSB for Hyper-V virtual machines
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
