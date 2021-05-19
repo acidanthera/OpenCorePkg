@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
-%DIF ADD ../Configuration.tex        Sat May 15 13:54:49 2021
+%DIF DEL PreviousConfiguration.tex   Wed May 19 10:54:39 2021
+%DIF ADD ../Configuration.tex        Wed May 19 10:55:46 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3233,23 +3233,48 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
 
-    For \texttt{Tools}, OpenCore will attempt loading a custom icon and fallback to a default icon on failure:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{ResetNVRAM} --- \texttt{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}
-        --- \texttt{ResetNVRAM.icns} from icons directory.
-      \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
-        --- icon near the tool file with appended \texttt{.icns} extension.
-    \end{itemize} \medskip
+    \DIFdelbegin \DIFdel{For }\texttt{\DIFdel{Tools}}%DIFAUXCMD
+\DIFdel{, }\DIFdelend OpenCore will attempt loading a \DIFdelbegin \DIFdel{custom icon and fallback to a default icon on failure:
+    }%DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <     \tightlist
+%DIFDELCMD <       \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{ResetNVRAM}} %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}}
+        %DIFAUXCMD
+\DIFdel{--- }\texttt{\DIFdel{ResetNVRAM.icns}} %DIFAUXCMD
+\DIFdel{from icons directory.
+      }%DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}}
+        %DIFAUXCMD
+\DIFdel{--- icon near the tool file with appended }\texttt{\DIFdel{.icns}} %DIFAUXCMD
+\DIFdel{extension.
+    }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize} \medskip
+%DIFDELCMD < 
 
-    For custom boot \texttt{Entries}, OpenCore will attempt loading a custom icon and fallback
+%DIFDELCMD <     %%%
+\DIFdel{For custom boot }\texttt{\DIFdel{Entries}}%DIFAUXCMD
+\DIFdel{, OpenCore will attempt loading a custom icon and fallback
     to the volume icon or the default icon on failure:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
-    \end{itemize} \medskip
+    }%DIFDELCMD < \begin{itemize}
+\begin{itemize}%DIFAUXCMD
+%DIFDELCMD <     \tightlist
+%DIFDELCMD <       \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{<ENTRY\_PATH>.icns}} %DIFAUXCMD
+\DIFdel{--- icon near the entry file with appended }\texttt{\DIFdel{.icns}} %DIFAUXCMD
+\DIFdel{extension.
+    }
+\end{itemize}%DIFAUXCMD
+%DIFDELCMD < \end{itemize} \medskip
+%DIFDELCMD < 
 
-    For all other entries, OpenCore will attempt loading a volume icon by searching
+%DIFDELCMD <     %%%
+\DIFdel{For all other entries, OpenCore will attempt loading a volume icon }\DIFdelend \DIFaddbegin \DIFadd{volume icon }\DIFaddend by searching
     as follows, and will fallback to the default icon on failure:
     \begin{itemize}
     \tightlist
@@ -3299,10 +3324,67 @@ the default boot entry choice will remain changed until the next manual reconfig
   builds only.
   \item \texttt{0x0040} --- \texttt{OC\_ATTR\_USE\_MINIMAL\_UI}, use minimal UI display, no
   Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
+  \DIFaddbegin \item \texttt{\DIFadd{0x0080}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_FLAVOUR\_ICON}}\DIFadd{, provides flexible boot entry
+  content description, suitable for picking the best media across different content sets:
+}
+
+  \DIFadd{When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
+  and builtin boot picker are chosen by something called content flavour. To determine
+  content flavour the following algorithm is used:
+}
+
+    \begin{itemize}
+    \tightlist
+      \item \DIFadd{For a Tool the value is read from }\texttt{\DIFadd{Flavour}} \DIFadd{field.
+      }\item \DIFadd{For an automatically discovered entry it is read from the }\texttt{\DIFadd{.contentFlavour}}
+      \DIFadd{file next to the bootloader, if present.
+      }\item \DIFadd{For a custom entry it is read from the }\texttt{\DIFadd{.contentFlavour}} \DIFadd{file next to the
+      bootloader if }\texttt{\DIFadd{Flavour}} \DIFadd{is }\texttt{\DIFadd{Auto}}\DIFadd{, otherwise specified via the }\texttt{\DIFadd{Flavour}}
+      \DIFadd{value itself.
+      }\item \DIFadd{If read flavour is }\texttt{\DIFadd{Auto}} \DIFadd{or there is no }\texttt{\DIFadd{.contentFlavour}}\DIFadd{, entry
+      flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).
+    }\DIFaddend \end{itemize}
+    \DIFaddbegin \medskip
+\DIFaddend 
+
+  \DIFaddbegin \DIFadd{The Flavour value is a sequence of }\texttt{\DIFadd{:}} \DIFadd{separated names limited to 64 characters of
+  printable 7-bit ASCII. This is designed to support up to approximately five names. Each name
+  refers to a flavour, with the first name having the highest priority and the last name having
+  the lowest priority. Such a structure allows describing an entry in a more specific way, with
+  icons selected flexibly depending on support by the audio-visual pack. A missing audio or icon
+  file means the next flavour should be tried, and if all are missing the choice happens based
+  on the type of the entry.
+  Example flavour values: }\texttt{\DIFadd{BigSur:Apple}}\DIFadd{, }\texttt{\DIFadd{Windows10:Windows}}\DIFadd{. }\texttt{\DIFadd{OpenShell:UEFIShell:Shell}}\DIFadd{.
+  }\medskip
+
+  \DIFadd{Using flavours means that you can switch between icon sets easily, with the flavour selecting
+  the best available icons from each set. E.g. specifying icon flavour }\texttt{\DIFadd{Debian:Linux}}
+  \DIFadd{will use the icon }\texttt{\DIFadd{Debian.icns}} \DIFadd{if provided, then will try }\texttt{\DIFadd{Linux.icns}}\DIFadd{, then will
+  fall back to the default for an OS, which is }\texttt{\DIFadd{HardDrive.icns}}\DIFadd{.
+  }\medskip
+
+  \DIFadd{Things to keep in mind:
+}
+
+    \begin{itemize}
+    \tightlist
+      \DIFaddend \item \DIFaddbegin \DIFadd{For security reasons }\texttt{\DIFadd{Ext<Flavour>.icns}} \DIFadd{and }\texttt{\DIFadd{<Flavour>.icns}} \DIFadd{are both
+      supported, and only }\texttt{\DIFadd{Ext<Flavour>.icns}} \DIFadd{will be used if the entry is on an external drive
+      (followed by default fallback }\texttt{\DIFadd{ExtHardDrive.icns}}\DIFadd{).
+      }\item \DIFadd{Where both apply }\texttt{\DIFadd{.VolumeIcon.icns}} \DIFadd{takes precence over }\texttt{\DIFadd{.contentFlavour}}\DIFadd{.
+      }\item \DIFadd{In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
+      system default boot entry icons (see }\texttt{\DIFadd{Docs/Flavours.md}}\DIFadd{) specified in the }\texttt{\DIFadd{Flavour}}
+      \DIFadd{setting for }\texttt{\DIFadd{Tools}} \DIFadd{or }\texttt{\DIFadd{Entries}} \DIFadd{will continue to apply even when flavour is disabled.
+      Non-system icons will be ignored in this  case. In addition, the flavours }\texttt{\DIFadd{UEFIShell}} \DIFadd{and
+      }\texttt{\DIFadd{NVRAMReset}} \DIFadd{are given special processing, identifying their respective tools to apply correct
+      audio-assist, default builtin labels, etc.
+      }\item \DIFadd{A list of recommended flavours is provided in }\texttt{\DIFadd{Docs/Flavours.md}}\DIFadd{.
+    }\end{itemize}
+    \medskip
   \end{itemize}
 
 \item
-  \texttt{PickerAudioAssist}\\
+  \DIFaddend \texttt{PickerAudioAssist}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable screen reader by default in the OpenCore picker.
