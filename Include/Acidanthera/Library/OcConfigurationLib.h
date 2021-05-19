@@ -386,6 +386,7 @@ typedef enum {
 #define OC_MISC_TOOLS_ENTRY_FIELDS(_, __) \
   _(OC_STRING                   , Arguments        ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
   _(OC_STRING                   , Comment          ,     , OC_STRING_CONSTR ("", _, __), OC_DESTR (OC_STRING) ) \
+  _(OC_STRING                   , Flavour          ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING) ) \
   _(BOOLEAN                     , Auxiliary        ,     , FALSE                       , ()                   ) \
   _(BOOLEAN                     , Enabled          ,     , FALSE                       , ()                   ) \
   _(BOOLEAN                     , RealPath         ,     , FALSE                       , ()                   ) \

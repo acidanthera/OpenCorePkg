@@ -3173,23 +3173,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
 
-    For \texttt{Tools}, OpenCore will attempt loading a custom icon and fallback to a default icon on failure:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{ResetNVRAM} --- \texttt{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}
-        --- \texttt{ResetNVRAM.icns} from icons directory.
-      \item \texttt{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}
-        --- icon near the tool file with appended \texttt{.icns} extension.
-    \end{itemize} \medskip
-
-    For custom boot \texttt{Entries}, OpenCore will attempt loading a custom icon and fallback
-    to the volume icon or the default icon on failure:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{<ENTRY\_PATH>.icns} --- icon near the entry file with appended \texttt{.icns} extension.
-    \end{itemize} \medskip
-
-    For all other entries, OpenCore will attempt loading a volume icon by searching
+    OpenCore will attempt loading a volume icon by searching
     as follows, and will fallback to the default icon on failure:
     \begin{itemize}
     \tightlist
@@ -3239,6 +3223,59 @@ the default boot entry choice will remain changed until the next manual reconfig
   builds only.
   \item \texttt{0x0040} --- \texttt{OC\_ATTR\_USE\_MINIMAL\_UI}, use minimal UI display, no
   Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
+  \item \texttt{0x0080} --- \texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}, provides flexible boot entry
+  content description, suitable for picking the best media across different content sets:
+
+  When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
+  and builtin boot picker are chosen by something called content flavour. To determine
+  content flavour the following algorithm is used:
+
+    \begin{itemize}
+    \tightlist
+      \item For a Tool the value is read from \texttt{Flavour} field.
+      \item For an automatically discovered entry it is read from the \texttt{.contentFlavour}
+      file next to the bootloader, if present.
+      \item For a custom entry it is read from the \texttt{.contentFlavour} file next to the
+      bootloader if \texttt{Flavour} is \texttt{Auto}, otherwise specified via the \texttt{Flavour}
+      value itself.
+      \item If read flavour is \texttt{Auto} or there is no \texttt{.contentFlavour}, entry
+      flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).
+    \end{itemize}
+    \medskip
+
+  The Flavour value is a sequence of \texttt{:} separated names limited to 64 characters of
+  printable 7-bit ASCII. This is designed to support up to approximately five names. Each name
+  refers to a flavour, with the first name having the highest priority and the last name having
+  the lowest priority. Such a structure allows describing an entry in a more specific way, with
+  icons selected flexibly depending on support by the audio-visual pack. A missing audio or icon
+  file means the next flavour should be tried, and if all are missing the choice happens based
+  on the type of the entry.
+  Example flavour values: \texttt{BigSur:Apple}, \texttt{Windows10:Windows}. \texttt{OpenShell:UEFIShell:Shell}.
+  \medskip
+
+  Using flavours means that you can switch between icon sets easily, with the flavour selecting
+  the best available icons from each set. E.g. specifying icon flavour \texttt{Debian:Linux}
+  will use the icon \texttt{Debian.icns} if provided, then will try \texttt{Linux.icns}, then will
+  fall back to the default for an OS, which is \texttt{HardDrive.icns}.
+  \medskip
+
+  Things to keep in mind:
+
+    \begin{itemize}
+    \tightlist
+      \item For security reasons \texttt{Ext<Flavour>.icns} and \texttt{<Flavour>.icns} are both
+      supported, and only \texttt{Ext<Flavour>.icns} will be used if the entry is on an external drive
+      (followed by default fallback \texttt{ExtHardDrive.icns}).
+      \item Where both apply \texttt{.VolumeIcon.icns} takes precence over \texttt{.contentFlavour}.
+      \item In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
+      system default boot entry icons (see \texttt{Docs/Flavours.md}) specified in the \texttt{Flavour}
+      setting for \texttt{Tools} or \texttt{Entries} will continue to apply even when flavour is disabled.
+      Non-system icons will be ignored in this  case. In addition, the flavours \texttt{UEFIShell} and
+      \texttt{NVRAMReset} are given special processing, identifying their respective tools to apply correct
+      audio-assist, default builtin labels, etc.
+      \item A list of recommended flavours is provided in \texttt{Docs/Flavours.md}.
+    \end{itemize}
+    \medskip
   \end{itemize}
 
 \item

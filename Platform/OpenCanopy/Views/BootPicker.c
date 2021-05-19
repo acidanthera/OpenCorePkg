@@ -1327,11 +1327,14 @@ BootPickerEntriesSet (
   UINT32                      IconTypeIndex;
   VOID                        *IconFileData;
   BOOLEAN                     UseVolumeIcon;
+  BOOLEAN                     UseFlavourIcon;
   BOOLEAN                     UseDiskLabel;
   BOOLEAN                     UseGenericLabel;
   BOOLEAN                     Result;
   CHAR16                      *EntryName;
   UINTN                       EntryNameLength;
+  CHAR8                       *FlavourNameStart;
+  CHAR8                       *FlavourNameEnd;
 
   ASSERT (GuiContext != NULL);
   ASSERT (Entry != NULL);
@@ -1340,6 +1343,7 @@ BootPickerEntriesSet (
   DEBUG ((DEBUG_INFO, "OCUI: Console attributes: %d\n", Context->ConsoleAttributes));
 
   UseVolumeIcon   = (Context->PickerAttributes & OC_ATTR_USE_VOLUME_ICON) != 0;
+  UseFlavourIcon  = (Context->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0;
   UseDiskLabel    = (Context->PickerAttributes & OC_ATTR_USE_DISK_LABEL_FILE) != 0;
   UseGenericLabel = (Context->PickerAttributes & OC_ATTR_USE_GENERIC_LABEL_IMAGE) != 0;
 
@@ -1393,9 +1397,9 @@ BootPickerEntriesSet (
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
         break;
       case OC_BOOT_EXTERNAL_TOOL:
-        if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
+        if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
-        } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
+        } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SHELL]);
         } else {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_TOOL]);
@@ -1477,64 +1481,53 @@ BootPickerEntriesSet (
     Status = EFI_UNSUPPORTED;
   }
 
+  //
+  // Flavour system is used internally for icon priorities even when
+  // user-specified flavours from .contentFlavour are not being read
+  //
   if (EFI_ERROR (Status)) {
-    SuggestedIcon = NULL;
+    ASSERT (Entry->Flavour != NULL);
+
     IconTypeIndex = Entry->IsExternal ? ICON_TYPE_EXTERNAL : ICON_TYPE_BASE;
-    switch (Entry->Type) {
-      case OC_BOOT_APPLE_OS:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
-        break;
-      case OC_BOOT_APPLE_FW_UPDATE:
-      case OC_BOOT_APPLE_RECOVERY:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_RECOVERY][IconTypeIndex];
-        if (SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
-        }
-        break;
-      case OC_BOOT_APPLE_TIME_MACHINE:
-        SuggestedIcon = &GuiContext->Icons[ICON_APPLE_TIME_MACHINE][IconTypeIndex];
-        if (SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_APPLE][IconTypeIndex];
-        }
-        break;
-      case OC_BOOT_WINDOWS:
-        SuggestedIcon = &GuiContext->Icons[ICON_WINDOWS][IconTypeIndex];
-        break;
-      case OC_BOOT_EXTERNAL_OS:
-        SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
-        break;
-      case OC_BOOT_RESET_NVRAM:
-        SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][IconTypeIndex];
-        if (SuggestedIcon->Buffer == NULL) {
+
+    FlavourNameEnd = Entry->Flavour - 1;
+    do
+    {
+      for (FlavourNameStart = ++FlavourNameEnd; *FlavourNameEnd != '\0' && *FlavourNameEnd != ':'; ++FlavourNameEnd);
+
+      Status = InternalGetFlavourIcon (
+        GuiContext,
+        Context->CustomEntryContext,
+        FlavourNameStart,
+        FlavourNameEnd - FlavourNameStart,
+        IconTypeIndex,
+        UseFlavourIcon,
+        &VolumeEntry->EntryIcon,
+        &VolumeEntry->CustomIcon
+        );
+    } while (EFI_ERROR (Status) && *FlavourNameEnd != '\0');
+
+    if (EFI_ERROR (Status))
+    {
+      SuggestedIcon = NULL;
+
+      switch (Entry->Type) {
+        case OC_BOOT_EXTERNAL_OS:
+          SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
+          break;
+        case OC_BOOT_EXTERNAL_TOOL:
           SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
-        }
-        break;
-      case OC_BOOT_EXTERNAL_TOOL:
-        if (StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_RESET_NVRAM][IconTypeIndex];
-        } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_SHELL][IconTypeIndex];
-        }
+          break;
+      }
 
-        if (SuggestedIcon == NULL || SuggestedIcon->Buffer == NULL) {
-          SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
-        }
-        break;
-      case OC_BOOT_UNKNOWN:
-        SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
-        break;
-      default:
-        DEBUG ((DEBUG_WARN, "OCUI: Entry kind %d unsupported for icon\n", Entry->Type));
-        return EFI_UNSUPPORTED;
+      if (SuggestedIcon == NULL || SuggestedIcon->Buffer == NULL) {
+          SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
+      }
+
+      CopyMem (&VolumeEntry->EntryIcon, SuggestedIcon, sizeof (VolumeEntry->EntryIcon));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCUI: Using flavour icon, custom: %u\n", VolumeEntry->CustomIcon));
     }
-
-    ASSERT (SuggestedIcon != NULL);
-
-    if (SuggestedIcon->Buffer == NULL) {
-      SuggestedIcon = &GuiContext->Icons[ICON_GENERIC_HDD][IconTypeIndex];
-    }
-
-    CopyMem (&VolumeEntry->EntryIcon, SuggestedIcon, sizeof (VolumeEntry->EntryIcon));
   }
 
   VolumeEntry->Hdr.Parent       = &mBootPicker.Hdr.Obj;

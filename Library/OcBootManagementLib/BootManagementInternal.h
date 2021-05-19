@@ -61,6 +61,11 @@ typedef PACKED struct {
 #define SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH  \
   (sizeof (VENDOR_DEVICE_PATH) + SIZE_OF_FILEPATH_DEVICE_PATH)
 
+//
+// Max. supported Apple version string size
+//
+#define OC_APPLE_VERSION_MAX_SIZE (16)
+
 typedef struct {
   EFI_DEVICE_PATH_PROTOCOL       *DevicePath;
   OC_APPLE_DISK_IMAGE_CONTEXT    *DmgContext;
@@ -102,6 +107,13 @@ InternalGetAppleDiskLabel (
   IN  CONST CHAR16                     *LabelFilename
   );
 
+CHAR8 *
+InternalGetContentFlavour (
+  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN  CONST CHAR16                     *BootDirectoryName,
+  IN  CONST CHAR16                     *FlavourFilename
+  );
+
 EFI_STATUS
 InternalGetAppleImage (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
@@ -109,12 +121,6 @@ InternalGetAppleImage (
   IN  CONST CHAR16                     *LabelFilename,
   OUT VOID                             **ImageData,
   OUT UINT32                           *DataSize
-  );
-
-CHAR16 *
-InternalGetAppleRecoveryName (
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *BootDirectoryName
   );
 
 EFI_STATUS
@@ -163,13 +169,15 @@ InternalGetBootOptionPath (
 /**
   Describe boot entry contents by setting fields other than DevicePath.
 
-  @param[in]  BootEntry  Located boot entry.
+  @param[in]      BootContext   Boot context.
+  @param[in,out]  BootEntry     Located boot entry.
 
   @retval EFI_SUCCESS   The entry point is described successfully.
 **/
 EFI_STATUS
 InternalDescribeBootEntry (
-  IN OUT OC_BOOT_ENTRY  *BootEntry
+  IN     OC_BOOT_CONTEXT  *BootContext,
+  IN OUT OC_BOOT_ENTRY    *BootEntry
   );
 
 BOOLEAN
@@ -210,7 +218,7 @@ InternalSystemActionResetNvram (
   @returns  The OpenCore custom boot entry, or NULL.
 **/
 CONST OC_CUSTOM_BOOT_DEVICE_PATH *
-InternetGetOcCustomDevPath (
+InternalGetOcCustomDevPath (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   );
 

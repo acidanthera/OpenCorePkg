@@ -29,6 +29,11 @@
 **/
 #define OC_MAX_VOLUME_LABEL_SIZE 64
 
+/**
+  Maximum safe content flavour size.
+**/
+#define OC_MAX_CONTENT_FLAVOUR_SIZE 64
+
 typedef struct {
   UINT32  PreviousTime;
   UINTN   PreviousIndex;

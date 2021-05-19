@@ -85,8 +85,9 @@ AsciiUefiSlashes (
 {
   CHAR8  *Needle;
 
-  while ((Needle = AsciiStrStr (String, "/")) != NULL) {
-    *Needle = '\\';
+  Needle = String;
+  while ((Needle = AsciiStrStr (Needle, "/")) != NULL) {
+    *Needle++ = '\\';
   }
 }
 
@@ -265,6 +266,39 @@ OcAsciiEndsWith (
     && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
 
+BOOLEAN
+EFIAPI
+OcAsciiStartsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  )
+{
+  CHAR8   First;
+  CHAR8   Second;
+
+  ASSERT (String != NULL);
+  ASSERT (SearchString != NULL);
+
+  while (TRUE) {
+    First = *String++;
+    Second = *SearchString++;
+    if (Second == '\0') {
+      return TRUE;
+    }
+    if (First == '\0') {
+      return FALSE;
+    }
+    if (CaseInsensitiveMatch) {
+      First  = AsciiCharToUpper (First);
+      Second = AsciiCharToUpper (Second);
+    }
+    if (First != Second) {
+      return FALSE;
+    }
+  }
+}
+
 CHAR8 *
 EFIAPI
 OcAsciiStriStr (
@@ -416,4 +450,33 @@ OcAsciiStrToRawGuid (
   Guid->Data2 = SwapBytes16 (Guid->Data2);
   Guid->Data3 = SwapBytes16 (Guid->Data3);
   return EFI_SUCCESS;
+}
+
+VOID
+AsciiFilterString (
+  IN OUT CHAR8    *String,
+  IN     BOOLEAN  SingleLine
+  )
+{
+  while (*String != L'\0') {
+    if ((*String & 0x7F) != *String) {
+      //
+      // Remove all unicode characters.
+      //
+      *String = '_';
+    } else if (SingleLine && (*String == '\r' || *String == '\n')) {
+      //
+      // Stop after printing one line.
+      //
+      *String = '\0';
+      break;
+    } else if (*String < 0x20 || *String == 0x7F) {
+      //
+      // Drop all unprintable spaces but space including tabs.
+      //
+      *String = '_';
+    }
+
+    ++String;
+  }
 }

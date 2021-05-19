@@ -274,8 +274,9 @@ RegisterBootOption (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCB: Registering entry %s (T:%d|F:%d|G:%d|E:%d) - %s\n",
+    "OCB: Registering entry %s [%a] (T:%d|F:%d|G:%d|E:%d) - %s\n",
     BootEntry->Name,
+    BootEntry->Flavour,
     BootEntry->Type,
     BootEntry->IsFolder,
     BootEntry->IsGeneric,
@@ -486,7 +487,7 @@ AddBootEntryOnFileSystem (
   BootEntry->IsGeneric  = IsGeneric;
   BootEntry->IsExternal = RecoveryPart ? FileSystem->RecoveryFs->External : FileSystem->External;
 
-  Status = InternalDescribeBootEntry (BootEntry);
+  Status = InternalDescribeBootEntry (BootContext, BootEntry);
   if (EFI_ERROR (Status)) {
     FreePool (BootEntry);
     if (IsReallocated) {
@@ -521,9 +522,14 @@ AddBootEntryFromCustomEntry (
   IN     OC_PICKER_ENTRY     *CustomEntry
   )
 {
-  OC_BOOT_ENTRY         *BootEntry;
-  CHAR16                *PathName;
-  FILEPATH_DEVICE_PATH  *FilePath;
+  EFI_STATUS                       Status;
+  OC_BOOT_ENTRY                    *BootEntry;
+  CHAR16                           *PathName;
+  FILEPATH_DEVICE_PATH             *FilePath;
+  CHAR8                            *ContentFlavour;
+  CHAR16                           *BootDirectoryName;
+  EFI_HANDLE                       Device;
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *SimpleFileSystem;
 
   if (CustomEntry->Auxiliary && BootContext->PickerContext->HideAuxiliary) {
     return EFI_UNSUPPORTED;
@@ -550,6 +556,14 @@ AddBootEntryFromCustomEntry (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  BootEntry->Flavour = AllocateCopyPool (AsciiStrSize (CustomEntry->Flavour), CustomEntry->Flavour);
+  if (BootEntry->Flavour == NULL) {
+    FreePool (PathName);
+    FreePool (BootEntry->Name);
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   DEBUG ((
     DEBUG_INFO,
     "OCB: Adding custom entry %s (%a) -> %a\n",
@@ -568,6 +582,7 @@ AddBootEntryFromCustomEntry (
     BootEntry->DevicePath = ConvertTextToDevicePath (PathName);
     FreePool (PathName);
     if (BootEntry->DevicePath == NULL) {
+      FreePool (BootEntry->Flavour);
       FreePool (BootEntry->Name);
       FreePool (BootEntry);
       return EFI_OUT_OF_RESOURCES;
@@ -581,6 +596,7 @@ AddBootEntryFromCustomEntry (
         )
       );
     if (FilePath == NULL) {
+      FreePool (BootEntry->Flavour);
       FreePool (BootEntry->Name);
       FreePool (BootEntry->DevicePath);
       FreePool (BootEntry);
@@ -592,10 +608,41 @@ AddBootEntryFromCustomEntry (
       FilePath->PathName
       );
     if (BootEntry->PathName == NULL) {
+      FreePool (BootEntry->Flavour);
       FreePool (BootEntry->Name);
       FreePool (BootEntry->DevicePath);
       FreePool (BootEntry);
       return EFI_OUT_OF_RESOURCES;
+    }
+
+    //
+    // Try to get content flavour from file.
+    //
+    if (AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0) {
+      Status = OcBootPolicyDevicePathToDirPath (
+        BootEntry->DevicePath,
+        &BootDirectoryName,
+        &Device
+        );
+
+      if (!EFI_ERROR (Status)) {
+        Status = gBS->HandleProtocol (
+          Device,
+          &gEfiSimpleFileSystemProtocolGuid,
+          (VOID **) &SimpleFileSystem
+          );
+
+        if (!EFI_ERROR (Status)) {
+          ContentFlavour = InternalGetContentFlavour (SimpleFileSystem, BootDirectoryName, L".contentFlavour");
+          
+          if (ContentFlavour != NULL) {
+            FreePool (BootEntry->Flavour);
+            BootEntry->Flavour = ContentFlavour;
+          }
+        }
+
+        FreePool (BootDirectoryName);
+      }
     }
   }
 
@@ -640,6 +687,8 @@ AddBootEntryFromSystemEntry (
   IN OUT OC_BOOT_CONTEXT        *BootContext,
   IN OUT OC_BOOT_FILESYSTEM     *FileSystem,
   IN     CONST CHAR16           *Name,
+  IN     OC_BOOT_ENTRY_TYPE     Type,
+  IN     CONST CHAR8            *Flavour,
   IN     OC_BOOT_SYSTEM_ACTION  Action
   )
 {
@@ -665,7 +714,14 @@ AddBootEntryFromSystemEntry (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  BootEntry->Type         = OC_BOOT_RESET_NVRAM;
+  BootEntry->Flavour = AllocateCopyPool (AsciiStrSize (Flavour), Flavour);
+  if (BootEntry->Flavour == NULL) {
+    FreePool (BootEntry->Name);
+    FreePool (BootEntry);
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  BootEntry->Type         = Type;
   BootEntry->SystemAction = Action;
 
   RegisterBootOption (
@@ -1194,7 +1250,7 @@ AddBootEntryFromBootOption (
     if (ExpandedDevicePath == NULL && CustomFileSystem != NULL) {
       ASSERT (CustomIndex != NULL);
 
-      CustomDevPath = InternetGetOcCustomDevPath (DevicePath);
+      CustomDevPath = InternalGetOcCustomDevPath (DevicePath);
 
       for (Index = 0; Index < BootContext->PickerContext->AllCustomEntryCount; ++Index) {
         CmpResult = MixedStrCmp (
@@ -1336,6 +1392,11 @@ FreeBootEntry (
     FreePool (BootEntry->LoadOptions);
     BootEntry->LoadOptions     = NULL;
     BootEntry->LoadOptionsSize = 0;
+  }
+
+  if (BootEntry->Flavour != NULL) {
+    FreePool (BootEntry->Flavour);
+    BootEntry->Flavour = NULL;
   }
 
   FreePool (BootEntry);
@@ -1499,6 +1560,8 @@ AddFileSystemEntryForCustom (
       BootContext,
       FileSystem,
       OC_MENU_RESET_NVRAM_ENTRY,
+      OC_BOOT_RESET_NVRAM,
+      OC_FLAVOUR_RESET_NVRAM,
       InternalSystemActionResetNvram
       );
   }
@@ -1762,7 +1825,7 @@ OcScanForBootEntries (
   CustomFileSystem = CreateFileSystemForCustom (BootContext);
 
   //
-  // Delay CustomFileSystem insertion to have custom entries and the end.
+  // Delay CustomFileSystem insertion to have custom entries at the end.
   //
 
   DefaultCustomIndex = MAX_UINT32;

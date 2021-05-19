@@ -59,7 +59,7 @@ STATIC CONST OC_CUSTOM_BOOT_DEVICE_PATH_DECL mOcCustomBootDevPathTemplate = {
 };
 
 CONST OC_CUSTOM_BOOT_DEVICE_PATH *
-InternetGetOcCustomDevPath (
+InternalGetOcCustomDevPath (
   IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
   )
 {
@@ -833,7 +833,7 @@ OcSetDefaultBootEntry (
         FALSE
         );
     } else {
-      CustomDevPath = InternetGetOcCustomDevPath (BootOptionDevicePath);
+      CustomDevPath = InternalGetOcCustomDevPath (BootOptionDevicePath);
       if (CustomDevPath != NULL) {
         MatchedEntry = InternalMatchCustomBootEntryByDevicePath (
           Entry,
