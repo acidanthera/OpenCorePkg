@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed handling multinode device paths in LoadedImage and elsewhere
 - Changed OpenCanopy image directory to support directory prefixes
 - Changed OpenCanopy preferred image set to `Acidanthera\GoldenGate`
+- Removed `<BOOTPATH>.icns` and `<TOOLPATH>.icns` support
 - Added content flavour system allowing custom boot entry icons compatible across icon packs
 - Added automatic flavour detection for macOS boot entries
 
