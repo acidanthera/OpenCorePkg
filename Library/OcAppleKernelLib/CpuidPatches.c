@@ -1023,8 +1023,6 @@ PatchProvideCurrentCpuInfo(
     *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_TSC_OFFSET]) = DivU64x32 (CpuInfo->CPUFrequency, 1000);
     *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_FSB_OFFSET]) = DivU64x32 (CpuInfo->FSBFrequency, 1000);
 
-    DebugPrintHexDump(DEBUG_BULK_INFO, "Bytes ", mProvideCurrentCpuInfoVmTscFsbReplace, sizeof (mProvideCurrentCpuInfoVmTscFsbReplace));
-
     Status = PatcherApplyGenericPatch (
       Patcher,
       &mProvideCurrentCpuInfoVmTscFsbPatch
