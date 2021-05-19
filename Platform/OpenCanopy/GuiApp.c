@@ -155,6 +155,7 @@ LoadImageFileFromStorage (
       return EFI_OUT_OF_RESOURCES;
     }
 
+    UnicodeUefiSlashes (Path);
     Status = EFI_NOT_FOUND;
     if (OcStorageExistsFileUnicode (Storage, Path)) {
       FileData = OcStorageReadFileUnicode (Storage, Path, &FileSize);
@@ -278,6 +279,109 @@ LoadLabelFromStorage (
 }
 
 EFI_STATUS
+InternalGetFlavourIcon (
+  IN  BOOT_PICKER_GUI_CONTEXT       *GuiContext,
+  IN  VOID                          *Context,
+  IN  CHAR8                         *FlavourName,
+  IN  UINTN                         FlavourNameLen,
+  IN  UINT32                        IconTypeIndex,
+  IN  BOOLEAN                       UseFlavourIcon,
+  OUT GUI_IMAGE                     *EntryIcon,
+  OUT BOOLEAN                       *CustomIcon
+  )
+{
+  EFI_STATUS              Status;
+  OC_STORAGE_CONTEXT      *Storage;
+  CHAR16                  Path[OC_STORAGE_SAFE_PATH_MAX];
+  CHAR8                   ImageName[OC_MAX_CONTENT_FLAVOUR_SIZE];
+  UINT8                   *FileData;
+  UINT32                  FileSize;
+  UINTN                   Index;
+
+  Storage  = (OC_STORAGE_CONTEXT *) Context;
+
+  ASSERT (EntryIcon != NULL);
+  ASSERT (CustomIcon != NULL);
+
+  if (FlavourNameLen == 0 ||
+    OcAsciiStrniCmp (FlavourName, OC_FLAVOUR_AUTO, FlavourNameLen) == 0
+    ) {
+    return EFI_UNSUPPORTED;
+  }
+
+  //
+  // Look in preloaded icons
+  //
+  for (Index = ICON_NUM_SYS; Index < ICON_NUM_TOTAL; ++Index) {
+    if (OcAsciiStrniCmp (FlavourName, mIconNames[Index], FlavourNameLen) == 0) {
+      if (GuiContext->Icons[Index][IconTypeIndex].Buffer != NULL) {
+        CopyMem (EntryIcon, &GuiContext->Icons[Index][IconTypeIndex], sizeof (*EntryIcon));
+        *CustomIcon = FALSE;
+        return EFI_SUCCESS;
+      }
+      break;
+    }
+  }
+
+  //
+  // Look for custom icon
+  //
+  if (!UseFlavourIcon) {
+    return EFI_NOT_FOUND;
+  }
+
+  AsciiStrnCpyS (ImageName, OC_MAX_CONTENT_FLAVOUR_SIZE, FlavourName, FlavourNameLen);
+  Status = OcUnicodeSafeSPrint (
+    Path,
+    sizeof (Path),
+    OPEN_CORE_IMAGE_PATH L"%a\\%a%a.icns",
+    GuiContext->Prefix,
+    IconTypeIndex > 0 ? "Ext" : "",
+    ImageName
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCUI: Cannot fit %a\n", ImageName));
+    return Status;
+  }
+
+  UnicodeUefiSlashes (Path);
+  DEBUG ((DEBUG_INFO, "OCUI: Trying flavour icon %s\n", Path));
+
+  Status = EFI_NOT_FOUND;
+  if (OcStorageExistsFileUnicode (Storage, Path)) {
+    FileData = OcStorageReadFileUnicode (Storage, Path, &FileSize);
+    if (FileData != NULL && FileSize > 0) {
+      Status = GuiIcnsToImageIcon (
+        EntryIcon,
+        FileData,
+        FileSize,
+        GuiContext->Scale,
+        BOOT_ENTRY_ICON_DIMENSION,
+        BOOT_ENTRY_ICON_DIMENSION,
+        FALSE
+        );
+    }
+
+    if (FileData != NULL) {
+      FreePool (FileData);
+    }
+
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCUI: Invalid icon file\n"));
+    }
+  }
+
+  if (!EFI_ERROR (Status)) {
+    ASSERT (EntryIcon->Buffer != NULL);
+    *CustomIcon = TRUE;
+    return EFI_SUCCESS;
+  }
+
+  return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
 InternalContextConstruct (
   OUT BOOT_PICKER_GUI_CONTEXT  *Context,
   IN  OC_STORAGE_CONTEXT       *Storage,
@@ -294,7 +398,6 @@ InternalContextConstruct (
   UINT32                             Index;
   UINT32                             ImageWidth;
   UINT32                             ImageHeight;
-  CONST CHAR8                        *Prefix;
   BOOLEAN                            Result;
   BOOLEAN                            AllowLessSize;
 
@@ -330,14 +433,14 @@ InternalContextConstruct (
 
   if (AsciiStrCmp (Picker->PickerVariant, "Auto") == 0) {
     if (Context->BackgroundColor.Raw == APPLE_COLOR_LIGHT_GRAY) {
-      Prefix = "Acidanthera\\Chardonnay";
+      Context->Prefix = "Acidanthera\\Chardonnay";
     } else {
-      Prefix = "Acidanthera\\GoldenGate";
+      Context->Prefix = "Acidanthera\\GoldenGate";
     }
   } else if (AsciiStrCmp (Picker->PickerVariant, "Default") == 0) {
-    Prefix = "Acidanthera\\GoldenGate";
+    Context->Prefix = "Acidanthera\\GoldenGate";
   } else {
-    Prefix = Picker->PickerVariant;
+    Context->Prefix = Picker->PickerVariant;
   }
 
   LoadImageFileFromStorage (
@@ -348,7 +451,7 @@ InternalContextConstruct (
     0,
     0,
     FALSE,
-    Prefix,
+    Context->Prefix,
     FALSE
     );
 
@@ -422,7 +525,7 @@ InternalContextConstruct (
       ImageWidth,
       ImageHeight,
       Index >= ICON_NUM_SYS,
-      Prefix,
+      Context->Prefix,
       AllowLessSize
       );
     if (!EFI_ERROR (Status)) {
@@ -464,7 +567,7 @@ InternalContextConstruct (
     }
 
     if (EFI_ERROR (Status) && Index < ICON_NUM_MANDATORY) {
-      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images for %a\n", Prefix));
+      DEBUG ((DEBUG_WARN, "OCUI: Failed to load images for %a\n", Context->Prefix));
       InternalContextDestruct (Context);
       return EFI_UNSUPPORTED;
     }

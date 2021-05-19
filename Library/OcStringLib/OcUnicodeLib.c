@@ -198,8 +198,9 @@ UnicodeUefiSlashes (
 {
   CHAR16  *Needle;
 
-  while ((Needle = StrStr (String, L"/")) != NULL) {
-    *Needle = L'\\';
+  Needle = String;
+  while ((Needle = StrStr (Needle, L"/")) != NULL) {
+    *Needle++ = L'\\';
   }
 }
 

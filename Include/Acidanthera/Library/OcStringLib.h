@@ -208,6 +208,23 @@ OcAsciiEndsWith (
   IN BOOLEAN          CaseInsensitiveMatch
   );
 
+/** Check if ASCII string starts with another ASCII string.
+
+  @param[in]  String                A pointer to a Null-terminated ASCII string.
+  @param[in]  SearchString          A pointer to a Null-terminated ASCII string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
+
+  @retval  TRUE if String starts with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcAsciiStartsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  );
+
 /**
   Performs a case insensitive comparison of two Null-terminated Unicode strings,
   and returns the difference between the first mismatched Unicode characters.
@@ -527,6 +544,18 @@ UnicodeGetParentDirectory (
 VOID
 UnicodeFilterString (
   IN OUT CHAR16   *String,
+  IN     BOOLEAN  SingleLine
+  );
+
+/**
+  Filter string from unprintable characters.
+
+  @param[in,out]  String      String to filter.
+  @param[in]      SingleLine  Enforce only one line.
+**/
+VOID
+AsciiFilterString (
+  IN OUT CHAR8    *String,
   IN     BOOLEAN  SingleLine
   );
 

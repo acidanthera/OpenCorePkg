@@ -54,6 +54,24 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_MENU_RESTART              L"Restarting"
 
 /**
+  Predefined flavours.
+**/
+#define OC_FLAVOUR_AUTO                 "Auto"
+#define OC_FLAVOUR_RESET_NVRAM          "ResetNVRAM:NVRAMTool"
+#define OC_FLAVOUR_APPLE_OS             "Apple"
+#define OC_FLAVOUR_APPLE_RECOVERY       "AppleRecv:Apple"
+#define OC_FLAVOUR_APPLE_FW             "AppleRecv:Apple"
+#define OC_FLAVOUR_APPLE_TIME_MACHINE   "AppleTM:Apple"
+#define OC_FLAVOUR_WINDOWS              "Windows"
+#define OC_FLAVOUR_OTHER_OS             "Other"
+
+/**
+  Predefined flavour ids.
+**/
+#define OC_FLAVOUR_ID_RESET_NVRAM       "ResetNVRAM"
+#define OC_FLAVOUR_ID_UEFI_SHELL        "UEFIShell"
+
+/**
   Paths allowed to be accessible by the interfaces.
 **/
 #define OPEN_CORE_IMAGE_PATH       L"Resources\\Image\\"
@@ -71,11 +89,12 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_ATTR_USE_POINTER_CONTROL      BIT4
 #define OC_ATTR_SHOW_DEBUG_DISPLAY       BIT5
 #define OC_ATTR_USE_MINIMAL_UI           BIT6
+#define OC_ATTR_USE_FLAVOUR_ICON         BIT7
 #define OC_ATTR_ALL_BITS (\
   OC_ATTR_USE_VOLUME_ICON         | OC_ATTR_USE_DISK_LABEL_FILE | \
   OC_ATTR_USE_GENERIC_LABEL_IMAGE | OC_ATTR_HIDE_THEMED_ICONS   | \
   OC_ATTR_USE_POINTER_CONTROL     | OC_ATTR_SHOW_DEBUG_DISPLAY  | \
-  OC_ATTR_USE_MINIMAL_UI )
+  OC_ATTR_USE_MINIMAL_UI          | OC_ATTR_USE_FLAVOUR_ICON )
 
 /**
   Default timeout for IDLE timeout during menu picker navigation
@@ -99,7 +118,7 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 
 /**
   Operating system boot type.
-  WARNING: This is only for debug purposes.
+  This flags the inferred type, but it is not definitive and should not be relied upon for security.
 **/
 typedef UINT32 OC_BOOT_ENTRY_TYPE;
 
@@ -183,8 +202,12 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   CHAR16                    *PathName;
   //
-  // Heuristical value signalising about booted os.
-  // WARNING: This is only for debug purposes.
+  // Content flavour.
+  //
+  CHAR8                     *Flavour;
+  //
+  // Heuristical value signaling inferred type of booted os.
+  // WARNING: Non-definitive, do not rely on for any security purposes.
   //
   OC_BOOT_ENTRY_TYPE        Type;
   //
@@ -476,6 +499,10 @@ typedef struct {
   // Entry boot arguments.
   //
   CONST CHAR8  *Arguments;
+  //
+  // Content flavour.
+  //
+  CONST CHAR8  *Flavour;
   //
   // Whether this entry is auxiliary.
   //

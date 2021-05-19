@@ -190,14 +190,18 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OcVoiceOverAudioFilemacOS_UpdateFw, FALSE);
   } else if (Entry->Type == OC_BOOT_WINDOWS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileWindows, FALSE);
-  } else if (Entry->Type == OC_BOOT_RESET_NVRAM || StrStr (Entry->Name, OC_MENU_RESET_NVRAM_ENTRY) != NULL) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
-  } else if (StrStr (Entry->Name, OC_MENU_UEFI_SHELL_ENTRY) != NULL) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileUEFI_Shell, FALSE);
   }  else if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOS, FALSE);
+  } else if (Entry->Type == OC_BOOT_RESET_NVRAM) {
+    OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
   } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
-    OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalTool, FALSE);
+    if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
+      OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
+    } else if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_UEFI_SHELL) != NULL) {
+      OcPlayAudioFile (Context, OcVoiceOverAudioFileUEFI_Shell, FALSE);
+    } else {
+      OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalTool, FALSE);
+    }
   } else {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileOtherOS, FALSE);
   }
