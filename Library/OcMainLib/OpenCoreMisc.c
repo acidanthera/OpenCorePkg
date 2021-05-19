@@ -267,45 +267,6 @@ OcToolDescribeEntry (
   HasIcon  = FALSE;
   HasLabel = FALSE;
 
-  if (IconData != NULL && IconDataSize != NULL) {
-    *IconData     = NULL;
-    *IconDataSize = 0;
-
-    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
-      Status = StrCpyS (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
-        );
-    } else {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_TOOL_PATH "%s.icns",
-        ChosenEntry->PathName
-        );
-    }
-    if (!EFI_ERROR (Status)) {
-      if (OcStorageExistsFileUnicode (Context, DescPath)) {
-        *IconData = OcStorageReadFileUnicode (
-          Storage,
-          DescPath,
-          IconDataSize
-          );
-        HasIcon = *IconData != NULL;
-      }
-    } else {
-      DEBUG ((
-        DEBUG_WARN,
-        "OC: Custom label %s%s.icns does not fit path!\n",
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? OPEN_CORE_IMAGE_PATH : OPEN_CORE_TOOL_PATH,
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? L"ResetNVRAM": ChosenEntry->PathName
-        ));
-    }
-  }
-
   if (LabelData != NULL && LabelDataSize != NULL) {
     *LabelData     = NULL;
     *LabelDataSize = 0;
