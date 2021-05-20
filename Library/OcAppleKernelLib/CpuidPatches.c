@@ -1020,8 +1020,8 @@ PatchProvideCurrentCpuInfo(
   // Patch VMM TSC/FSB on 10.8 and above.
   //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_TSC_OFFSET]) = DivU64x32 (CpuInfo->CPUFrequency, 1000);
-    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_FSB_OFFSET]) = DivU64x32 (CpuInfo->FSBFrequency, 1000);
+    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_TSC_OFFSET]) = (UINT32) DivU64x32 (CpuInfo->CPUFrequency, 1000);
+    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_FSB_OFFSET]) = (UINT32) DivU64x32 (CpuInfo->FSBFrequency, 1000);
 
     Status = PatcherApplyGenericPatch (
       Patcher,
