@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed May 19 10:54:39 2021
-%DIF ADD ../Configuration.tex        Wed May 19 10:55:46 2021
+%DIF DEL PreviousConfiguration.tex   Thu May 20 03:32:27 2021
+%DIF ADD ../Configuration.tex        Thu May 20 03:32:27 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2665,7 +2665,23 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \texttt{SetApfsTrimTimeout}\\
+  \DIFaddbegin \texttt{\DIFadd{ProvideCurrentCpuInfo}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Provides current CPU info to the kernel.
+}
+
+  \DIFadd{This quirk currently provides the correct TSC and FSB values to the kernel, as well
+  as disables CPU topology validation.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: These patches currently target Microsoft Hyper-V and may need to be extended for
+  other purposes.
+}
+
+\item
+  \DIFaddend \texttt{SetApfsTrimTimeout}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-1}\\
   \textbf{Requirement}: 10.14 (not required for older)\\
