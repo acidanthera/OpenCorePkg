@@ -23,10 +23,19 @@ In the case of macOS only, a flavour based on the detected OS version is applied
 
 For icon pack authors, the **Apple** icon is recommended, **AppleRecovery** and **AppleTM** are suggested, all others are entirely optional.
 
- - **Apple11:Apple** - macOS Big Sur (`Apple11.icns`)
- - **Apple10_15:Apple** - macOS Catalina (`Apple10_15.icns`, etc.)
- - ...
- - **Apple10_4:Apple** - macOS Tiger
+ - **Apple11:Apple** - Big Sur (`Apple11.icns`)
+ - **Apple10_15:Apple** - Catalina (`Apple10_15.icns`, etc.)
+ - **Apple10_14:Apple** - Mojave
+ - **Apple10_13:Apple** - High Sierra
+ - **Apple10_12:Apple** - Sierra
+ - **Apple10_11:Apple** - El Capitan
+ - **Apple10_10:Apple** - Yosemite
+ - **Apple10_9:Apple** - Mavericks
+ - **Apple10_8:Apple** - Mountain Lion
+ - **Apple10_7:Apple** - Lion
+ - **Apple10_6:Apple** - Snow Leopard
+ - **Apple10_5:Apple** - Leopard
+ - **Apple10_4:Apple** - Tiger
 
 In addition, per-OS Recovery variants and Time Machine variants may be supported by adding `Recv` and `TM` to each element of the flavour as shown below.
 
