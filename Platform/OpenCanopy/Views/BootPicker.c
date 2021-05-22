@@ -1511,13 +1511,10 @@ BootPickerEntriesSet (
     {
       SuggestedIcon = NULL;
 
-      switch (Entry->Type) {
-        case OC_BOOT_EXTERNAL_OS:
+      if (Entry->Type == OC_BOOT_EXTERNAL_OS) {
           SuggestedIcon = &GuiContext->Icons[ICON_OTHER][IconTypeIndex];
-          break;
-        case OC_BOOT_EXTERNAL_TOOL:
+      } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL || (Entry->Type & OC_BOOT_SYSTEM) != 0) {
           SuggestedIcon = &GuiContext->Icons[ICON_TOOL][IconTypeIndex];
-          break;
       }
 
       if (SuggestedIcon == NULL || SuggestedIcon->Buffer == NULL) {
