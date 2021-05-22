@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added content flavour system allowing custom boot entry icons compatible across icon packs
 - Added automatic flavour detection for macOS boot entries
 - Added `ProvideCurrentCpuInfo` quirk to provide correct TSC/FSB for Hyper-V virtual machines
+- Added Hyper-V device path expansion to allow setting default boot volume
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
