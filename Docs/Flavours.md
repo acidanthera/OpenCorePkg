@@ -146,7 +146,7 @@ If providing just one file, name it `NVRAMTool.icns` if it is themed so that it 
 
  - **NVRAMTool** - Any NVRAM-related tool (`NVRAMTool.icns`)
  - **ResetNVRAM:NVRAMTool** - A reset NVRAM tool specifically  (`ResetNVRAM.icns`)
-   - This is the recommened flavour, it is automatically used for the entry created by config setting `AllowNvramReset`, or to use for the `CleanNvram.efi` tool.
+   - This is the recommended flavour, it is automatically used for the entry created by config setting `AllowNvramReset`, or to use for the `CleanNvram.efi` tool.
    - As another example of how flavours work: **ResetNVRAM:NVRAMTool** will look for `ResetNVRAM.icns`, then `NVRAMTool.icns` (and then, by OC default behaviour, `Tool.icns`, then `HardDrive.icns`)
    - _**NB**: Including **ResetNVRAM** anywhere in the flavour triggers picker audio-assist for "Reset NVRAM"_
 
