@@ -6853,12 +6853,20 @@ functioning. Feature highlights:
 
 \item
   \texttt{GopPassThrough}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Disabled}\\
   \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
 
   This option provides the GOP protocol via a UGA-based proxy
-  for firmware that do not implement the protocol.
+  for firmware that do not implement the protocol. The supported values
+  for the option are as follows:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Enabled} --- provide GOP for all UGA protocols.
+    \item \texttt{Apple} --- provide GOP for \texttt{AppleFramebufferInfo}-enabled protocols.
+    \item \texttt{Disabled} --- do not provide GOP.
+  \end{itemize}
 
   \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
 

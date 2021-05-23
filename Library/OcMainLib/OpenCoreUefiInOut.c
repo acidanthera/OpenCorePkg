@@ -184,21 +184,29 @@ OcLoadUefiOutputSupport (
 {
   EFI_STATUS           Status;
   CONST CHAR8          *AsciiRenderer;
+  CONST CHAR8          *GopPassThrough;
   OC_CONSOLE_RENDERER  Renderer;
   UINT32               Width;
   UINT32               Height;
   UINT32               Bpp;
   BOOLEAN              SetMax;
 
-  if (Config->Uefi.Output.GopPassThrough) {
-    Status = OcProvideGopPassThrough ();
-    if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_INFO,
-        "OC: OcProvideGopPassThrough status - %r\n",
-        Status
-        ));
-    }
+  GopPassThrough = OC_BLOB_GET (&Config->Uefi.Output.GopPassThrough);
+  if (AsciiStrCmp (GopPassThrough, "Enabled") == 0) {
+    Status = OcProvideGopPassThrough (TRUE);
+  } else if (AsciiStrCmp (GopPassThrough, "Apple") == 0) {
+    Status = OcProvideGopPassThrough (FALSE);
+  } else {
+    Status = EFI_SUCCESS;
+  }
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: OcProvideGopPassThrough %a status - %r\n",
+      GopPassThrough,
+      Status
+      ));
   }
 
   if (Config->Uefi.Output.ProvideConsoleGop) {

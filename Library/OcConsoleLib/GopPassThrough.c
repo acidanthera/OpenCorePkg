@@ -106,7 +106,7 @@ OcGopDrawBlt (
 
 EFI_STATUS
 OcProvideGopPassThrough (
-  VOID
+  IN BOOLEAN  ForAll
   )
 {
   EFI_STATUS                       Status;
@@ -234,7 +234,7 @@ OcProvideGopPassThrough (
         HandleBuffer[Index],
         Status
         ));
-      if (HasAppleFramebuffer) {
+      if (HasAppleFramebuffer || !ForAll) {
         continue;
       }
     } else {

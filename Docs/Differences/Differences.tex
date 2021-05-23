@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu May 20 03:32:27 2021
-%DIF ADD ../Configuration.tex        Thu May 20 03:32:27 2021
+%DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
+%DIF ADD ../Configuration.tex        Sun May 23 10:10:30 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6969,14 +6969,23 @@ functioning. Feature highlights:
 
 \DIFaddend \item
   \texttt{GopPassThrough}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{Disabled}\DIFaddend }\\
   \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
 
   This option provides the GOP protocol via a UGA-based proxy
-  for firmware that do not implement the protocol.
+  for firmware that do not implement the protocol. \DIFaddbegin \DIFadd{The supported values
+  for the option are as follows:
+}\DIFaddend 
 
-  \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
+  \DIFaddbegin \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Enabled}} \DIFadd{--- provide GOP for all UGA protocols.
+    }\item \texttt{\DIFadd{Apple}} \DIFadd{--- provide GOP for }\texttt{\DIFadd{AppleFramebufferInfo}}\DIFadd{-enabled protocols.
+    }\item \texttt{\DIFadd{Disabled}} \DIFadd{--- do not provide GOP.
+  }\end{itemize}
+
+  \DIFaddend \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
 
 \item
   \texttt{IgnoreTextInGraphics}\\

@@ -187,11 +187,13 @@ OcProvideUgaPassThrough (
 /**
   Provide GOP protocol instances on top of existing UGA instances.
 
+  @param[in]  ForAll  For all instances, otherwises for AppleFramebuffer-enabled only.
+
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
 OcProvideGopPassThrough (
-  VOID
+  IN BOOLEAN  ForAll
   );
 
 /**
