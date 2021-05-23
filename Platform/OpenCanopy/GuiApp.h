@@ -64,6 +64,8 @@ typedef enum {
   LABEL_TOOL,
   LABEL_RESET_NVRAM,
   LABEL_SHELL,
+  LABEL_SIP_IS_ENABLED,
+  LABEL_SIP_IS_DISABLED,
   LABEL_NUM_TOTAL
 } LABEL_TARGET;
 
@@ -180,7 +182,7 @@ InternalGetCursorImage (
 EFI_STATUS
 InternalGetFlavourIcon (
   IN  BOOT_PICKER_GUI_CONTEXT       *GuiContext,
-  IN  VOID                          *Context,
+  IN  OC_STORAGE_CONTEXT            *Storage,
   IN  CHAR8                         *FlavourName,
   IN  UINTN                         FlavourNameLen,
   IN  UINT32                        IconTypeIndex,

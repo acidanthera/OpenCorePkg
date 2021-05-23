@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri May  7 10:26:40 2021
-%DIF ADD ../Configuration.tex        Sun May 23 10:10:30 2021
+%DIF DEL PreviousConfiguration.tex   Sun May 23 18:54:12 2021
+%DIF ADD ../Configuration.tex        Fri May 28 09:21:39 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3317,15 +3317,25 @@ the default boot entry choice will remain changed until the next manual reconfig
     on whether the drive is internal or external. \medskip
 
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
-    rendered titles for boot entries:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME>.lbl} (\texttt{<TOOL\_NAME>.l2x}) file near tool for \texttt{Tools}.
-    \end{itemize}
-    Prerendered labels can be generated via the \texttt{disklabel} utility or the \texttt{bless} command.
-    When disabled or missing text labels, (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
-    are to be rendered instead.
+    \DIFdelbegin \DIFdel{rendered }\DIFdelend \DIFaddbegin \DIFadd{prerendered }\DIFaddend titles for boot entries \DIFdelbegin \DIFdel{:
+    }%DIFDELCMD < \begin{itemize}
+%DIFDELCMD <     \tightlist
+%DIFDELCMD <       \item %%%
+\item %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{from }\DIFaddend \texttt{.disk\_label} (\texttt{.disk\_label\_2x})
+    file \DIFdelbegin \DIFdel{near }\DIFdelend \DIFaddbegin \DIFadd{next to the }\DIFaddend bootloader for all filesystems.
+    \DIFdelbegin %DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\texttt{\DIFdel{<TOOL\_NAME>.lbl}} %DIFAUXCMD
+\DIFdel{(}\texttt{\DIFdel{<TOOL\_NAME>.l2x}}%DIFAUXCMD
+\DIFdel{) file near tool for }\texttt{\DIFdel{Tools}}%DIFAUXCMD
+\DIFdel{.
+    }%DIFDELCMD < \end{itemize}
+%DIFDELCMD <     %%%
+\DIFdelend Prerendered labels can be generated via the \texttt{disklabel} utility or the \texttt{bless} command.
+    When disabled or missing\DIFdelbegin \DIFdel{text labels, }\DIFdelend \DIFaddbegin \DIFadd{, label text in }\DIFaddend (\texttt{.contentDetails}
+    or \texttt{.disk\_label.contentDetails}) \DIFdelbegin \DIFdel{are to be rendered instead}\DIFdelend \DIFaddbegin \DIFadd{will be rendered if present instead, otherwise
+    the entry name itself will be rendered}\DIFaddend .
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. This may however give less detail for
     the actual boot entry.
@@ -3855,8 +3865,36 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: In order to support systems with unresponsive modifiers during preboot
   (which includes \texttt{V1} and \texttt{V2} \texttt{KeySupport} mode on some firmware)
   OpenCore also allows holding the \texttt{=/+} key in order to trigger `set default' mode.
+\DIFaddbegin 
+
+\DIFaddend \item
+  \DIFaddbegin \texttt{\DIFadd{AllowToggleSip}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable
+  entry for disabling and enabling System Integrity Protection in OpenCore picker.
+}
+
+  \DIFadd{This will toggle Apple NVRAM variable }\texttt{\DIFadd{csr-active-config}} \DIFadd{between }\texttt{\DIFadd{0}} \DIFadd{for
+  SIP Enabled and the current macOS default for SIP Disabled (currently }\texttt{\DIFadd{0x6F}}
+  \DIFadd{for Big Sur).
+}
+
+  \emph{\DIFadd{Note1}}\DIFadd{: Using the SIP Disabled value from a newer version of macOS on an older version
+  (e.g. Catalina and below) will report an unknown setting if queried using }\texttt{\DIFadd{csrutil\ status}}\DIFadd{,
+  but will still run correctly and be secure, because new bits are added but old bits
+  are not removed between versions of macOS. (It is possible to configure }\texttt{\DIFadd{CsrUtil.efi}}
+  \DIFadd{as a }\texttt{\DIFadd{TextMode}} \texttt{\DIFadd{Tools}} \DIFadd{entry to configure a different value, e.g. use }\texttt{\DIFadd{toggle\ 0x67}}
+  \DIFadd{in }\texttt{\DIFadd{Arguments}} \DIFadd{to toggle the default SIP Disabled value for macOS Catalina.)
+}
+
+  \emph{\DIFadd{Note2}}\DIFadd{: It is strongly recommended not to make a habit of running macOS with
+  SIP disabled. Use of this boot option may make it easier to quickly disable SIP
+  protection when genuinely needed - it should be re-enabled again afterwards.
+}
+
 \item
-  \texttt{ApECID}\\
+  \DIFaddend \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Apple Enclave Identifier.
@@ -6054,7 +6092,9 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
 & Reset NVRAM alternative bundled as a standalone tool. \\
-\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
+\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{CsrUtil}}}\textbf{\DIFadd{*}}
+& \DIFadd{Simple implementation of SIP-related features of Apple }\texttt{\DIFadd{csrutil}}\DIFadd{. }\\
+\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{*}
@@ -6140,7 +6180,9 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Windows} --- Windows.
   \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
   \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
-  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \DIFaddbegin \texttt{\DIFadd{SIPDisabled}} \DIFadd{--- Toogle SIP tool with SIP disabled.
+  }\item \texttt{\DIFadd{SIPEnabled}} \DIFadd{--- Toogle SIP tool with SIP enabled.
+  }\item \DIFaddend \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 

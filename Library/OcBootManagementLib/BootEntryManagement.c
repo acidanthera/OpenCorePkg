@@ -17,6 +17,8 @@
 #include <Protocol/DevicePath.h>
 #include <Protocol/SimpleFileSystem.h>
 
+#include <IndustryStandard/AppleCsrConfig.h>
+
 #include <Guid/AppleVariable.h>
 #include <Guid/FileInfo.h>
 #include <Guid/GlobalVariable.h>
@@ -677,6 +679,8 @@ AddBootEntryFromCustomEntry (
   @param[in,out] BootContext   Context of filesystems.
   @param[in,out] FileSystem    Filesystem to add custom entry.
   @param[in]     Name          System entry name.
+  @param[in]     Type          System entry type.
+  @param[in]     Flavour       System entry flavour.
   @param[in]     Action        System entry action.
 
   @retval EFI_SUCCESS on success.
@@ -1528,6 +1532,7 @@ AddFileSystemEntryForCustom (
 {
   EFI_STATUS          Status;
   UINTN               Index;
+  UINT32              CsrActiveConfig;
 
   //
   // When there are no custom entries and NVRAM reset is hidden
@@ -1555,7 +1560,21 @@ AddFileSystemEntryForCustom (
       );
   }
 
-  if (BootContext->PickerContext->ShowNvramReset) {
+  if (BootContext->PickerContext->ShowToggleSip) {
+    Status = OcGetSip (&CsrActiveConfig, NULL);
+    if (!EFI_ERROR(Status) || Status == EFI_NOT_FOUND) {
+      Status = AddBootEntryFromSystemEntry (
+        BootContext,
+        FileSystem,
+        OcIsSipEnabled (Status, CsrActiveConfig) ? OC_MENU_SIP_IS_ENABLED : OC_MENU_SIP_IS_DISABLED,
+        OC_BOOT_TOGGLE_SIP,
+        OC_FLAVOUR_TOGGLE_SIP,
+        InternalSystemActionToggleSip
+        );
+    }
+  }
+
+  if (!EFI_ERROR (Status) && BootContext->PickerContext->ShowNvramReset) {
     Status = AddBootEntryFromSystemEntry (
       BootContext,
       FileSystem,

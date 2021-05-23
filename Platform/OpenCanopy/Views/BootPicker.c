@@ -1396,6 +1396,17 @@ BootPickerEntriesSet (
       case OC_BOOT_RESET_NVRAM:
         Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
         break;
+      case OC_BOOT_TOGGLE_SIP:
+        ASSERT (
+          StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0 ||
+          StrCmp (Entry->Name, OC_MENU_SIP_IS_ENABLED) == 0
+          );
+        if (StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0) {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_DISABLED]);
+        } else {
+          Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_SIP_IS_ENABLED]);
+        }
+        break;
       case OC_BOOT_EXTERNAL_TOOL:
         if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
           Status = CopyLabel (&VolumeEntry->Label, &GuiContext->Labels[LABEL_RESET_NVRAM]);
@@ -1497,7 +1508,7 @@ BootPickerEntriesSet (
 
       Status = InternalGetFlavourIcon (
         GuiContext,
-        Context->CustomEntryContext,
+        Context->StorageContext,
         FlavourNameStart,
         FlavourNameEnd - FlavourNameStart,
         IconTypeIndex,

@@ -379,6 +379,39 @@ OcUnicodeEndsWith (
 }
 
 BOOLEAN
+EFIAPI
+OcUnicodeStartsWith (
+  IN CONST CHAR16     *String,
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  )
+{
+  CHAR16  First;
+  CHAR16  Second;
+
+  ASSERT (String != NULL);
+  ASSERT (SearchString != NULL);
+
+  while (TRUE) {
+    First = *String++;
+    Second = *SearchString++;
+    if (Second == '\0') {
+      return TRUE;
+    }
+    if (First == '\0') {
+      return FALSE;
+    }
+    if (CaseInsensitiveMatch) {
+      First  = CharToUpper (First);
+      Second = CharToUpper (Second);
+    }
+    if (First != Second) {
+      return FALSE;
+    }
+  }
+}
+
+BOOLEAN
 HasValidGuidStringPrefix (
   IN CONST CHAR16  *String
   )

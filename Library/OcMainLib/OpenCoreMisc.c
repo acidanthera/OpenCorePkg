@@ -12,6 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <IndustryStandard/AppleCsrConfig.h>
+
 #include <Library/OcMainLib.h>
 
 #include <Guid/AppleVariable.h>
@@ -182,7 +184,7 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcToolLoadEntry (
-  IN  VOID                        *Context,
+  IN  OC_STORAGE_CONTEXT          *Storage,
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
@@ -193,7 +195,6 @@ OcToolLoadEntry (
 {
   EFI_STATUS          Status;
   CHAR16              ToolPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_STORAGE_CONTEXT  *Storage;
 
   Status = OcUnicodeSafeSPrint (
     ToolPath,
@@ -210,8 +211,6 @@ OcToolLoadEntry (
       ));
     return EFI_NOT_FOUND;
   }
-
-  Storage = (OC_STORAGE_CONTEXT *) Context;
 
   *Data = OcStorageReadFileUnicode (
     Storage,
@@ -242,89 +241,6 @@ OcToolLoadEntry (
   }
 
   return EFI_SUCCESS;
-}
-
-STATIC
-EFI_STATUS
-EFIAPI
-OcToolDescribeEntry (
-  IN  VOID                        *Context,
-  IN  OC_BOOT_ENTRY               *ChosenEntry,
-  IN  UINT8                       LabelScale           OPTIONAL,
-  OUT VOID                        **IconData           OPTIONAL,
-  OUT UINT32                      *IconDataSize        OPTIONAL,
-  OUT VOID                        **LabelData          OPTIONAL,
-  OUT UINT32                      *LabelDataSize       OPTIONAL
-  )
-{
-  EFI_STATUS          Status;
-  CHAR16              DescPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_STORAGE_CONTEXT  *Storage;
-  BOOLEAN             HasIcon;
-  BOOLEAN             HasLabel;
-
-  Storage  = (OC_STORAGE_CONTEXT *) Context;
-  HasIcon  = FALSE;
-  HasLabel = FALSE;
-
-  if (LabelData != NULL && LabelDataSize != NULL) {
-    *LabelData     = NULL;
-    *LabelDataSize = 0;
-
-    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_LABEL_PATH "ResetNVRAM.%a",
-        LabelScale == 2 ? "l2x" : "lbl"
-        );
-    } else {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_TOOL_PATH "%s.%a",
-        ChosenEntry->PathName,
-        LabelScale == 2 ? "l2x" : "lbl"
-        );
-    }
-
-    if (!EFI_ERROR (Status)) {
-      if (OcStorageExistsFileUnicode (Context, DescPath)) {
-        *LabelData = OcStorageReadFileUnicode (
-          Storage,
-          DescPath,
-          LabelDataSize
-          );
-        HasLabel = *LabelData != NULL;
-      }
-    } else {
-      DEBUG ((
-        DEBUG_WARN,
-        "OC: Custom label %s%s.%a does not fit path!\n",
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? OPEN_CORE_LABEL_PATH : OPEN_CORE_TOOL_PATH,
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? L"ResetNVRAM" : ChosenEntry->PathName,
-        LabelScale == 2 ? "l2x" : "lbl"
-        ));
-    }
-  }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OC: Got label %d icon %d for type %u - %s\n",
-    HasLabel,
-    HasIcon,
-    ChosenEntry->Type,
-    ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-      ? L"ResetNVRAM" : ChosenEntry->PathName
-    ));
-
-  if (HasIcon || HasLabel) {
-    return EFI_SUCCESS;
-  }
-
-  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -915,9 +831,8 @@ OcMiscBoot (
   Context->StartImage            = StartImage;
   Context->CustomBootGuid        = CustomBootGuid;
   Context->LoaderHandle          = LoadHandle;
-  Context->CustomEntryContext    = Storage;
+  Context->StorageContext        = Storage;
   Context->CustomRead            = OcToolLoadEntry;
-  Context->CustomDescribe        = OcToolDescribeEntry;
   Context->PrivilegeContext      = Privilege;
   Context->RequestPrivilege      = OcShowSimplePasswordRequest;
   Context->VerifyPassword        = OcVerifyPassword;
@@ -991,6 +906,7 @@ OcMiscBoot (
 
   OcLoadPickerHotKeys (Context);
 
+  Context->ShowToggleSip   = Config->Misc.Security.AllowToggleSip;
   Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
   Context->AllowSetDefault = Config->Misc.Security.AllowSetDefault;
   if (!Config->Misc.Security.AllowNvramReset && Context->PickerCommand == OcPickerResetNvram) {

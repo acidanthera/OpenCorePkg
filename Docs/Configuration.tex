@@ -3213,15 +3213,12 @@ the default boot entry choice will remain changed until the next manual reconfig
     on whether the drive is internal or external. \medskip
 
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
-    rendered titles for boot entries:
-    \begin{itemize}
-    \tightlist
-      \item \texttt{.disk\_label} (\texttt{.disk\_label\_2x}) file near bootloader for all filesystems.
-      \item \texttt{<TOOL\_NAME>.lbl} (\texttt{<TOOL\_NAME>.l2x}) file near tool for \texttt{Tools}.
-    \end{itemize}
+    prerendered titles for boot entries from \texttt{.disk\_label} (\texttt{.disk\_label\_2x})
+    file next to the bootloader for all filesystems.
     Prerendered labels can be generated via the \texttt{disklabel} utility or the \texttt{bless} command.
-    When disabled or missing text labels, (\texttt{.contentDetails} or \texttt{.disk\_label.contentDetails})
-    are to be rendered instead.
+    When disabled or missing, label text in (\texttt{.contentDetails}
+    or \texttt{.disk\_label.contentDetails}) will be rendered if present instead, otherwise
+    the entry name itself will be rendered.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. This may however give less detail for
     the actual boot entry.
@@ -3742,6 +3739,29 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: In order to support systems with unresponsive modifiers during preboot
   (which includes \texttt{V1} and \texttt{V2} \texttt{KeySupport} mode on some firmware)
   OpenCore also allows holding the \texttt{=/+} key in order to trigger `set default' mode.
+
+\item
+  \texttt{AllowToggleSip}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable
+  entry for disabling and enabling System Integrity Protection in OpenCore picker.
+
+  This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
+  SIP Enabled and the current macOS default for SIP Disabled (currently \texttt{0x6F}
+  for Big Sur).
+
+  \emph{Note1}: Using the SIP Disabled value from a newer version of macOS on an older version
+  (e.g. Catalina and below) will report an unknown setting if queried using \texttt{csrutil\ status},
+  but will still run correctly and be secure, because new bits are added but old bits
+  are not removed between versions of macOS. (It is possible to configure \texttt{CsrUtil.efi}
+  as a \texttt{TextMode} \texttt{Tools} entry to configure a different value, e.g. use \texttt{toggle\ 0x67}
+  in \texttt{Arguments} to toggle the default SIP Disabled value for macOS Catalina.)
+
+  \emph{Note2}: It is strongly recommended not to make a habit of running macOS with
+  SIP disabled. Use of this boot option may make it easier to quickly disable SIP
+  protection when genuinely needed - it should be re-enabled again afterwards.
+
 \item
   \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
@@ -5941,6 +5961,8 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
 & Reset NVRAM alternative bundled as a standalone tool. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CsrUtil}}\textbf{*}
+& Simple implementation of SIP-related features of Apple \texttt{csrutil}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
@@ -6025,6 +6047,8 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Windows} --- Windows.
   \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
   \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
+  \item \texttt{SIPDisabled} --- Toogle SIP tool with SIP disabled.
+  \item \texttt{SIPEnabled} --- Toogle SIP tool with SIP enabled.
   \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}

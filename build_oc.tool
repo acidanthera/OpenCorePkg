@@ -131,6 +131,7 @@ package() {
       "BootKicker.efi"
       "ChipTune.efi"
       "CleanNvram.efi"
+      "CsrUtil.efi"
       "GopStop.efi"
       "KeyTester.efi"
       "MmapDump.efi"

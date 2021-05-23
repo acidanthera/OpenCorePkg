@@ -213,6 +213,14 @@ InternalSystemActionResetNvram (
   );
 
 /**
+  Toggles SIP.
+**/
+EFI_STATUS
+InternalSystemActionToggleSip (
+  VOID
+  );
+
+/**
   Determines whether DevicePath is an OpenCore custom boot entry.
 
   @returns  The OpenCore custom boot entry, or NULL.

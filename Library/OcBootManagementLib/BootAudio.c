@@ -194,6 +194,16 @@ OcPlayAudioEntry (
     OcPlayAudioFile (Context, OcVoiceOverAudioFileExternalOS, FALSE);
   } else if (Entry->Type == OC_BOOT_RESET_NVRAM) {
     OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);
+  } else if (Entry->Type == OC_BOOT_TOGGLE_SIP) {
+    ASSERT (
+      StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0 ||
+      StrCmp (Entry->Name, OC_MENU_SIP_IS_ENABLED) == 0
+      );
+    if (StrCmp (Entry->Name, OC_MENU_SIP_IS_DISABLED) == 0) {
+      OcPlayAudioFile (Context, OcVoiceOverAudioFileSIPIsDisabled, FALSE);
+    } else {
+      OcPlayAudioFile (Context, OcVoiceOverAudioFileSIPIsEnabled, FALSE);
+    }
   } else if (Entry->Type == OC_BOOT_EXTERNAL_TOOL) {
     if (OcAsciiStriStr (Entry->Flavour, OC_FLAVOUR_ID_RESET_NVRAM) != NULL) {
       OcPlayAudioFile (Context, OcVoiceOverAudioFileResetNVRAM, FALSE);

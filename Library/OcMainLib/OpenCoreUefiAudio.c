@@ -177,6 +177,12 @@ OcAudioGetFilePath (
         case OcVoiceOverAudioFileDiskImage:
           BasePath = "DiskImage";
           break;
+        case OcVoiceOverAudioFileSIPIsDisabled:
+          BasePath = "SIPIsDisabled";
+          break;
+        case OcVoiceOverAudioFileSIPIsEnabled:
+          BasePath = "SIPIsEnabled";
+          break;
         default:
           BasePath = NULL;
           break;

@@ -53,6 +53,20 @@
 #define CSR_ALWAYS_ENFORCED_FLAGS (CSR_ALLOW_DEVICE_CONFIGURATION | CSR_ALLOW_ANY_RECOVERY_OS)
 
 ///
+/// Value as applied by csrutil in latest macOS.
+/// Keep in sync with discovered non-internal Apple value; below is current for Big Sur.
+///
+#define CSR_APPLE_DISABLE_SIP_DEFAULT (CSR_ALLOW_UNTRUSTED_KEXTS | \
+                                       CSR_ALLOW_UNRESTRICTED_FS | \
+                                       CSR_ALLOW_TASK_FOR_PID | \
+                                       CSR_ALLOW_KERNEL_DEBUGGER | \
+                                       CSR_ALLOW_UNRESTRICTED_DTRACE | \
+                                       CSR_ALLOW_UNRESTRICTED_NVRAM )
+
+#define CSR_APPLE_SIP_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
+#define CSR_APPLE_SIP_NVRAM_NV_ATTR    (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE)
+
+///
 /// CSR capabilities that a booter can give to the system.
 ///
 #define CSR_CAPABILITY_UNLIMITED        BIT0

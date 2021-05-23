@@ -44,7 +44,9 @@ mLabelNames[LABEL_NUM_TOTAL] = {
   [LABEL_OTHER]                = "Other",
   [LABEL_TOOL]                 = "Tool",
   [LABEL_RESET_NVRAM]          = "ResetNVRAM",
-  [LABEL_SHELL]                = "Shell"
+  [LABEL_SHELL]                = "Shell",
+  [LABEL_SIP_IS_ENABLED]       = "SIPEnabled",
+  [LABEL_SIP_IS_DISABLED]      = "SIPDisabled"
 };
 
 STATIC
@@ -281,7 +283,7 @@ LoadLabelFromStorage (
 EFI_STATUS
 InternalGetFlavourIcon (
   IN  BOOT_PICKER_GUI_CONTEXT       *GuiContext,
-  IN  VOID                          *Context,
+  IN  OC_STORAGE_CONTEXT            *Storage,
   IN  CHAR8                         *FlavourName,
   IN  UINTN                         FlavourNameLen,
   IN  UINT32                        IconTypeIndex,
@@ -291,14 +293,11 @@ InternalGetFlavourIcon (
   )
 {
   EFI_STATUS              Status;
-  OC_STORAGE_CONTEXT      *Storage;
   CHAR16                  Path[OC_STORAGE_SAFE_PATH_MAX];
   CHAR8                   ImageName[OC_MAX_CONTENT_FLAVOUR_SIZE];
   UINT8                   *FileData;
   UINT32                  FileSize;
   UINTN                   Index;
-
-  Storage  = (OC_STORAGE_CONTEXT *) Context;
 
   ASSERT (EntryIcon != NULL);
   ASSERT (CustomIcon != NULL);

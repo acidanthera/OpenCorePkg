@@ -506,6 +506,23 @@ OcUnicodeEndsWith (
   IN BOOLEAN          CaseInsensitiveMatch
   );
 
+/** Check if Unicode string starts with another Unicode string.
+
+  @param[in]  String                A pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString          A pointer to a Null-terminated Unicode string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
+
+  @retval  TRUE if String starts with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcUnicodeStartsWith (
+  IN CONST CHAR16     *String,
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  );
+
 /**
   Convert path with mixed slashes to UEFI slashes (\\).
 

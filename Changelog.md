@@ -14,6 +14,10 @@ OpenCore Changelog
 - Added Hyper-V device path expansion to allow setting default boot volume
 - Added `Apple` variant of `GopPassThrough` to handle only `AppleFramebufferInfo` handles
 - Fixed further kernel patches not being processed if a patch was skipped due to arch mismatch
+- Added optional Toggle SIP system boot menu option
+- Added `CsrUtil.efi` tool, similar to Apple `csrutil`
+- Removed support for `<TOOLPATH>.lbl`/`.l2x` pre-drawn entry labels
+- Fixed previous text not cleared before console mode tools and entries in OpenCanopy
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe

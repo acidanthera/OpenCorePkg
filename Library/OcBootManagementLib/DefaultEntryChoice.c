@@ -295,7 +295,7 @@ InternalMatchBootEntryByDevicePath (
 
   RootDevicePathSize = ((UINT8 *)UefiRemainingDevicePath - (UINT8 *)UefiDevicePath);
 
-  if (BootEntry->DevicePath == NULL || BootEntry->Type == OC_BOOT_SYSTEM) {
+  if (BootEntry->DevicePath == NULL || (BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
     return FALSE;
   }
 
@@ -1411,7 +1411,7 @@ InternalLoadBootEntry (
     ASSERT (Context->CustomRead != NULL);
 
     Status = Context->CustomRead (
-      Context->CustomEntryContext,
+      Context->StorageContext,
       BootEntry,
       &EntryData,
       &EntryDataSize,

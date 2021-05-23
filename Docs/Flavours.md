@@ -115,6 +115,8 @@ Additional sub-flavours are obviously possible for Android, but none are current
 
 ## Tools
 
+Create an Issue or Pull Request to request additional tool icons. If doing so please provide a clear case, e.g. showing that it affects at least several users.
+
 ### Generic Tool Icon
 
 It is recommended to provide this icon.
@@ -140,17 +142,16 @@ If providing just one file, name it `Shell.icns` if the theming of the icon is g
 
 ### NVRAM Tools
 
-It is recommended to provide _one_ of these files (more is optional, and not normally required).
+It is recommended to either i) only provide `NVRAMTool.icns`, as this will be applied to the Reset NVRAM tool and the Toogle SIP tool, or else ii) provide `ResetNVRAM.icns` and `ToggleSip.icns` separately (in which case `NVRAMTools.icns` is not normally required).
 
-If providing just one file, name it `NVRAMTool.icns` if it is themed so that it could be applied to any generic NVRAM tool. Name it `ResetNVRAM.icns` if the theming is specific to a Reset NVRAM tool.
+If providing `NVRAMTool.icns`, it should be themed so that it could be applied to any generic NVRAM tool.
 
  - **NVRAMTool** - Any NVRAM-related tool (`NVRAMTool.icns`)
  - **ResetNVRAM:NVRAMTool** - A reset NVRAM tool specifically  (`ResetNVRAM.icns`)
    - This is the recommended flavour, it is automatically used for the entry created by config setting `AllowNvramReset`, or to use for the `CleanNvram.efi` tool.
-   - As another example of how flavours work: **ResetNVRAM:NVRAMTool** will look for `ResetNVRAM.icns`, then `NVRAMTool.icns` (and then, by OC default behaviour, `Tool.icns`, then `HardDrive.icns`)
+   - As another example of how flavours work: **ResetNVRAM:NVRAMTool** will look for `ResetNVRAM.icns`, then `NVRAMTool.icns` (and then, by OC default behaviour, `Tool.icns` then `HardDrive.icns`)
    - _**NB**: Including **ResetNVRAM** anywhere in the flavour triggers picker audio-assist for "Reset NVRAM"_
-
-Create an Issue or Pull Request to request additional tool icons. If doing so please provide a clear case, e.g. showing that it affects at least several users.
+ - **ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool specifically  (`ToggleSIP.icns`)
 
 ---
 

@@ -406,21 +406,8 @@ OcGetBootEntryLabelImage (
   *ImageData = NULL;
   *DataLength = 0;
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
-    ASSERT (Context->CustomDescribe != NULL);
-
-    Status = Context->CustomDescribe (
-      Context->CustomEntryContext,
-      BootEntry,
-      Scale,
-      NULL,
-      NULL,
-      ImageData,
-      DataLength
-      );
-
-    DEBUG ((DEBUG_INFO, "OCB: Get custom label %s - %r\n", BootEntry->Name, Status));
-    return Status;
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || (BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
+    return EFI_NOT_FOUND;
   }
 
   ASSERT (BootEntry->DevicePath != NULL);
@@ -478,21 +465,8 @@ OcGetBootEntryIcon (
   *ImageData = NULL;
   *DataLength = 0;
 
-  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || BootEntry->Type == OC_BOOT_RESET_NVRAM) {
-    ASSERT (Context->CustomDescribe != NULL);
-
-    Status = Context->CustomDescribe (
-      Context->CustomEntryContext,
-      BootEntry,
-      0,
-      ImageData,
-      DataLength,
-      NULL,
-      NULL
-      );
-
-    DEBUG ((DEBUG_INFO, "OCB: OcGetBootEntryIcon - %s (tool) - %r\n", BootEntry->Name, Status));
-    return Status;
+  if (BootEntry->Type == OC_BOOT_EXTERNAL_TOOL || (BootEntry->Type & OC_BOOT_SYSTEM) != 0) {
+    return EFI_NOT_FOUND;
   }
 
   ASSERT (BootEntry->DevicePath != NULL);
