@@ -125,7 +125,7 @@ OcKernelApplyPatches (
         Arch,
         Is32Bit ? "i386" : "x86_64"
         ));
-      return;
+      continue;
     }
 
     if (!OcMatchDarwinVersion (DarwinVersion, MinKernel, MaxKernel)) {
