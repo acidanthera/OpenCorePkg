@@ -1645,11 +1645,13 @@ PatchBTFeatureFlags (
 {
   EFI_STATUS Status;
 
-  ASSERT (Patcher != NULL);
-
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
     return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (
