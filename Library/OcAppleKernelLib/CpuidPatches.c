@@ -1029,7 +1029,6 @@ PatchProvideCurrentCpuInfo (
   EFI_STATUS        Status;
 
   UINT8             *Start;
-  UINT8             *Last;
   MACH_SECTION_ANY  *DataSection;
   MACH_SECTION_ANY  *TextSection;
 
@@ -1063,7 +1062,6 @@ PatchProvideCurrentCpuInfo (
   ASSERT (Patcher != NULL);
 
   Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
-  Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
 
   //
   // 10.6 and below has variables in __DATA/__data instead of __DATA/__common
