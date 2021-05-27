@@ -974,7 +974,7 @@ UINT8* PatchMovVar (
     //
     // mov [var], value lower
     //
-    VarAddr32 = (Var - Start) + DataSection->Section32.Address - DataSection->Section32.Offset;
+    VarAddr32 = (UINT32) ((Var - Start) + DataSection->Section32.Address - DataSection->Section32.Offset);
     *Location++ = 0xC7;
     *Location++ = 0x05;
     CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
