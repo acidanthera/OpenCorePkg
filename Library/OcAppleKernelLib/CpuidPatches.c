@@ -929,62 +929,6 @@ PatchKernelCpuId (
 
 STATIC
 UINT8
-mProvideCurrentCpuInfoVmTscFsbFind[] = {
-  // jb XXXX
-  0x72, 0x00,
-  // mov eax, 0x40000010
-  0xB8, 0x10, 0x00, 0x00, 0x40,
-  // xor ebx, ebx
-  0x31, 0xDB,
-  // xor ecx, ecx
-  0x31, 0xC9,
-  // xor edx, edx
-  0x31, 0xD2,
-  // cpuid
-  0x0F, 0xA2
-};
-
-STATIC
-UINT8
-mProvideCurrentCpuInfoVmTscFsbMask[] = {
-  0xFF, 0x00, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
-};
-
-STATIC
-UINT8
-mProvideCurrentCpuInfoVmTscFsbReplace[] = {
-  // xor ecx, ecx
-  0x31, 0xC9,
-  // xor edx, edx
-  0x31, 0xD2,
-  // mov eax, [TSC in kHz]
-  0xB8, 0x00, 0x00, 0x00, 0x00,
-  // mov ebx [FSB in kHz]
-  0xBB, 0x00, 0x00, 0x00, 0x00,
-  // nop
-  0x90
-};
-
-#define PROVIDE_CPU_INFO_TSC_OFFSET   5
-#define PROVIDE_CPU_INFO_FSB_OFFSET   10
-
-STATIC
-PATCHER_GENERIC_PATCH
-mProvideCurrentCpuInfoVmTscFsbPatch = {
-  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoVmTscFsb"),
-  .Base        = "_cpuid_vmm_info",
-  .Find        = mProvideCurrentCpuInfoVmTscFsbFind,
-  .Mask        = mProvideCurrentCpuInfoVmTscFsbMask,
-  .Replace     = mProvideCurrentCpuInfoVmTscFsbReplace,
-  .ReplaceMask = NULL,
-  .Size        = sizeof (mProvideCurrentCpuInfoVmTscFsbFind),
-  .Count       = 1,
-  .Skip        = 0,
-  .Limit       = 0
-};
-
-STATIC
-UINT8
 mProvideCurrentCpuInfoTopologyValidationReplace[] = {
   // ret
   0xC3
@@ -1005,34 +949,228 @@ mProvideCurrentCpuInfoTopologyValidationPatch = {
   .Limit       = 0
 };
 
+STATIC
+UINT8* PatchMovVar (
+  IN OUT  UINT8             *Location,
+  IN      UINT8             *Start,
+  IN      MACH_SECTION_ANY  *DataSection,
+  IN      MACH_SECTION_ANY  *TextSection,
+  IN      BOOLEAN           Is32Bit,
+  IN      UINT8             *Var,
+  IN      UINT64            Value
+  )
+{
+  INT32   Delta;
+  UINT64  LocationAddr;
+  UINT64  VarAddr64;
+  UINT32  VarAddr32;
+  UINT32  ValueLower;
+  UINT32  ValueUpper;
+
+  if (Is32Bit) {
+    ValueLower = (UINT32) Value;
+    ValueUpper = (UINT32) (Value >> 32);
+
+    //
+    // mov [var], value lower
+    //
+    VarAddr32 = (Var - Start) + DataSection->Section32.Address - DataSection->Section32.Offset;
+    *Location++ = 0xC7;
+    *Location++ = 0x05;
+    CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
+    Location += sizeof (VarAddr32);
+    CopyMem (Location, &ValueLower, sizeof (ValueLower));
+    Location += sizeof (ValueLower);
+
+    //
+    // mov [var+4], value upper
+    //
+    VarAddr32 += sizeof (UINT32);
+    *Location++ = 0xC7;
+    *Location++ = 0x05;
+    CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
+    Location += sizeof (VarAddr32);
+    CopyMem (Location, &ValueUpper, sizeof (ValueUpper));
+    Location += sizeof (ValueUpper);
+
+  } else {
+    //
+    // mov rax, value
+    //
+    *Location++ = 0x48;
+    *Location++ = 0xB8;
+    CopyMem (Location, &Value, sizeof (Value));
+    Location += sizeof (Value);
+
+    LocationAddr = (Location - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
+    VarAddr64    = (Var - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
+
+    //
+    // mov [var], rax
+    //
+    Delta = (INT32) (VarAddr64 - (LocationAddr + 7));
+    *Location++ = 0x48;
+    *Location++ = 0x89;
+    *Location++ = 0x05;
+    CopyMem (Location, &Delta, sizeof (Delta));
+    Location += sizeof (Delta);
+  }
+
+  return Location;
+}
+
 EFI_STATUS
-PatchProvideCurrentCpuInfo(
+PatchProvideCurrentCpuInfo (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           KernelVersion
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS        Status;
+
+  UINT8             *Start;
+  UINT8             *Last;
+  MACH_SECTION_ANY  *DataSection;
+  MACH_SECTION_ANY  *TextSection;
+
+  INT32             Delta;
+  UINT64            LocationAddr;
+  UINT64            VarAddr64;
+  //UINT32            VarAddr32;
+
+  UINT8             *TscInitFunc;
+  UINT8             *TmrCvtFunc;
+
+  UINT8             *BusFreq;
+  UINT8             *BusFCvtt2n;
+  UINT8             *BusFCvtn2t;
+  UINT8             *TscFreq;
+  UINT8             *TscFCvtt2n;
+  UINT8             *TscFCvtn2t;
+  UINT8             *TscGranularity;
+  UINT8             *Bus2Tsc;
+
+  UINT8             *TscLocation;
+
+  UINT64            busFreqValue;
+  UINT64            busFCvtt2nValue;
+  UINT64            busFCvtn2tValue;
+  UINT64            tscFreqValue;
+  UINT64            tscFCvtt2nValue;
+  UINT64            tscFCvtn2tValue;
+  UINT64            tscGranularityValue;
 
   ASSERT (Patcher != NULL);
 
-  //
-  // Patch VMM TSC/FSB on 10.8 and above.
-  //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
-    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_TSC_OFFSET]) = (UINT32) DivU64x32 (CpuInfo->CPUFrequency, 1000);
-    *((UINT32*) &mProvideCurrentCpuInfoVmTscFsbReplace[PROVIDE_CPU_INFO_FSB_OFFSET]) = (UINT32) DivU64x32 (CpuInfo->FSBFrequency, 1000);
+  Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
+  Last  = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
 
-    Status = PatcherApplyGenericPatch (
-      Patcher,
-      &mProvideCurrentCpuInfoVmTscFsbPatch
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find VMM TSC/FSB patch - %r\n", Status));
-    }
+  //
+  // 10.6 and below has variables in __DATA/__data instead of __DATA/__common
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, 0)) {
+    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__common");
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping VMM TSC/FSB patch on %u\n", KernelVersion));
+    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__data");
   }
+  TextSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__TEXT", "__text");
+
+  //
+  // Pull required symbols.
+  //
+  Status = EFI_SUCCESS;
+  Status |= PatcherGetSymbolAddress (Patcher, "_tsc_init",        (UINT8 **) &TscInitFunc);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt",          (UINT8 **) &TmrCvtFunc);
+
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFreq",         (UINT8 **) &BusFreq);
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtt2n",      (UINT8 **) &BusFCvtt2n);
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtn2t",      (UINT8 **) &BusFCvtn2t);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFreq",         (UINT8 **) &TscFreq);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtt2n",      (UINT8 **) &TscFCvtt2n);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtn2t",      (UINT8 **) &TscFCvtn2t);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscGranularity",  (UINT8 **) &TscGranularity);
+  Status |= PatcherGetSymbolAddress (Patcher, "_bus2tsc",         (UINT8 **) &Bus2Tsc);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate one or more TSC symbols - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Perform TSC and FSB calculations. This is traditionally done in tsc.c in XNU.
+  //  
+  busFreqValue = CpuInfo->FSBFrequency;
+  busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
+  busFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, busFCvtt2nValue, NULL);
+
+  tscFreqValue = CpuInfo->CPUFrequency;
+  tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
+  tscFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, tscFCvtt2nValue, NULL);
+
+  tscGranularityValue = DivU64x64Remainder (tscFreqValue, busFreqValue, NULL);
+
+  DEBUG ((DEBUG_INFO, "OCAK: BusFreq = %LuHz, BusFCvtt2n = %Lu, BusFCvtn2t = %Lu\n", busFreqValue, busFCvtt2nValue, busFCvtn2tValue));
+  DEBUG ((DEBUG_INFO, "OCAK: TscFreq = %LuHz, TscFCvtt2n = %Lu, TscFCvtn2t = %Lu\n", tscFreqValue, tscFCvtt2nValue, tscFCvtn2tValue));
+
+  //
+  // Patch _tsc_init with above values.
+  //
+  TscLocation = TscInitFunc;
+  
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtt2n, busFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtn2t, busFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFreq, tscFreqValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtt2n, tscFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtn2t, tscFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscGranularity, tscGranularityValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
+
+  if (Patcher->Is32Bit) {
+    // TODO
+  } else {
+    //
+    // mov rdi, FSB freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBF;
+    CopyMem (TscLocation, &busFreqValue, sizeof (busFreqValue));
+    TscLocation += sizeof (busFreqValue);
+
+    //
+    // mov rsi, TSC freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBE;
+    CopyMem (TscLocation, &tscFreqValue, sizeof (tscFreqValue));
+    TscLocation += sizeof (tscFreqValue);
+
+    //
+    // call _tmrCvt
+    //
+    Delta = (INT32) (TmrCvtFunc - (TscLocation + 5));
+    *TscLocation++ = 0xE8;
+    CopyMem (TscLocation, &Delta, sizeof (Delta));
+    TscLocation += sizeof (Delta);
+
+    //
+    // mov [_bus2tsc], rax
+    //
+    LocationAddr = (TscLocation - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
+    VarAddr64    = (Bus2Tsc - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
+    Delta        = (INT32) (VarAddr64 - (LocationAddr + 7));
+
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0x89;
+    *TscLocation++ = 0x05;
+    CopyMem (TscLocation, &Delta, sizeof (Delta));
+    TscLocation += sizeof (Delta);
+  }
+
+  //
+  // ret
+  //
+  *TscLocation++ = 0xC3;
 
   //
   // Disable _x86_validate_topology on 10.13 and above.
