@@ -183,8 +183,6 @@ OcProvideUgaPassThrough (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP - %r\n", Status));
-    FreePool (HandleBuffer);
-
     return Status;
   }
 
