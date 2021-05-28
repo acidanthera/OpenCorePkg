@@ -1522,6 +1522,10 @@ CreateFileSystemForCustom (
   return FileSystem;
 }
 
+//
+// @retval EFI_SUCCESS           One or more entries added.
+// @retval EFI_NOT_FOUND         No entries added.
+//
 STATIC
 EFI_STATUS
 AddFileSystemEntryForCustom (
@@ -1530,21 +1534,13 @@ AddFileSystemEntryForCustom (
   IN     UINT32              PrecreatedCustomIndex
   )
 {
+  EFI_STATUS          ReturnStatus;
   EFI_STATUS          Status;
   UINTN               Index;
   UINT32              CsrActiveConfig;
 
-  //
-  // When there are no custom entries and NVRAM reset is hidden
-  // we have no work to do.
-  //
-  if (BootContext->PickerContext->AllCustomEntryCount == 0
-    && (!BootContext->PickerContext->ShowNvramReset
-      || BootContext->PickerContext->HideAuxiliary)) {
-    return EFI_NOT_FOUND;
-  }
+  ReturnStatus = EFI_NOT_FOUND;
 
-  Status = EFI_NOT_FOUND;
   for (Index = 0; Index < BootContext->PickerContext->AllCustomEntryCount; ++Index) {
     //
     // Skip the custom boot entry that has already been created.
@@ -1553,11 +1549,15 @@ AddFileSystemEntryForCustom (
       continue;
     }
 
-    AddBootEntryFromCustomEntry (
+    Status = AddBootEntryFromCustomEntry (
       BootContext,
       FileSystem,
       &BootContext->PickerContext->CustomEntries[Index]
       );
+
+    if (!EFI_ERROR (Status)) {
+      ReturnStatus = EFI_SUCCESS;
+    }
   }
 
   if (BootContext->PickerContext->ShowToggleSip) {
@@ -1571,10 +1571,14 @@ AddFileSystemEntryForCustom (
         OC_FLAVOUR_TOGGLE_SIP,
         InternalSystemActionToggleSip
         );
+
+      if (!EFI_ERROR (Status)) {
+        ReturnStatus = EFI_SUCCESS;
+      }
     }
   }
 
-  if (!EFI_ERROR (Status) && BootContext->PickerContext->ShowNvramReset) {
+  if (BootContext->PickerContext->ShowNvramReset) {
     Status = AddBootEntryFromSystemEntry (
       BootContext,
       FileSystem,
@@ -1583,9 +1587,13 @@ AddFileSystemEntryForCustom (
       OC_FLAVOUR_RESET_NVRAM,
       InternalSystemActionResetNvram
       );
+      
+    if (!EFI_ERROR (Status)) {
+      ReturnStatus = EFI_SUCCESS;
+    }
   }
 
-  return Status;
+  return ReturnStatus;
 }
 
 STATIC
