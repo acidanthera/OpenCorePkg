@@ -109,7 +109,6 @@ UefiMain (
   CHAR16                                *EndPtr;
   UINTN                                 Argc;
   CHAR16                                **Argv;
-  CHAR16                                **OldArgv;
   UINT32                                CsrConfig;
   UINT32                                Attributes;
 
@@ -120,7 +119,6 @@ UefiMain (
     return Status;
   }
 
-  OldArgv = Argv;
   Status = SplitArguments (&Argc, &Argv);
 
 #ifdef PRINT_ARGUMENTS
@@ -295,7 +293,7 @@ UefiMain (
   }
   Print (L")\n");
 
-  if (OldArgv != Argv) {
+  if (StrCmp (Argv[0], L"Self") == 0) {
     //
     // Pause if detect called as tool
     //
