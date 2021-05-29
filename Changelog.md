@@ -18,6 +18,7 @@ OpenCore Changelog
 - Added `CsrUtil.efi` tool, similar to Apple `csrutil`
 - Removed support for `<TOOLPATH>.lbl`/`.l2x` pre-drawn entry labels
 - Fixed previous text not cleared before console mode tools and entries in OpenCanopy
+- Fixed DEBUG build crashes with `GopPassThrough` and `UgaPassThrough`
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe

@@ -187,8 +187,6 @@ OcProvideGopPassThrough (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with UGA - %r\n", Status));
-    FreePool (HandleBuffer);
-
     return Status;
   }
 
