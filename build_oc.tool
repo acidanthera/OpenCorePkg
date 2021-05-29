@@ -119,13 +119,16 @@ package() {
     done
 
     # copy OpenCore main program.
+    ocflavour="${selfdir}/Library/OcBootManagementLib/.contentFlavour"
     cp "${arch}/OpenCore.efi" "${dstdir}/${arch}/EFI/OC" || exit 1
+    cp "${ocflavour}" "${dstdir}/${arch}/EFI/OC" || exit 1
 
     local suffix="${arch}"
     if [ "${suffix}" = "X64" ]; then
       suffix="x64"
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
+    cp "${ocflavour}" "${dstdir}/${arch}/EFI/BOOT" || exit 1
 
     efiTools=(
       "BootKicker.efi"

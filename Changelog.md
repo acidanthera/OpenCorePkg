@@ -22,6 +22,7 @@ OpenCore Changelog
 - Added flavour for memory testing utilities
 - Updated recommended `memtest86` config in sample `.plist` files
 - Defined bootloader flavours
+- Applied own flavour in OC build
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
