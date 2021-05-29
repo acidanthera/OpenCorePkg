@@ -159,6 +159,14 @@ A list of other known tools which are common enough that some icon pack artists 
 
  - **MemTest** - A system memory testing tool such as that available from [memtest86.com](https://www.memtest86.com/) (`MemTest.icns`)
 
+## Bootloaders
+
+Certain well-known bootloaders have also been assigned a flavour:
+
+ - **Boatloader** - Generic bootloader icon (`Bootloader.icns`)
+ - **Grub:Bootloader** - Icon for the GRUB2 bootloader (`Grub.icns`)
+ - **OpenCore:Bootloader** - OpenCore intentionally does not offer to start instances of itself which have had the OC binary signature applied (i.e. standard release versions), however a) it will show non-signed versions and b) ofc we have to have our own flavour (`OpenCore.icns`)
+
 ---
 
 ## System Boot Entry Icons
