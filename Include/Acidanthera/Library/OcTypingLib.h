@@ -31,6 +31,8 @@
 //
 #define OC_TYPING_BUFFER_SIZE    21
 
+#pragma pack(1)
+
 typedef PACKED struct {
   APPLE_KEY_CODE              AppleKeyCode;
   CHAR16                      UnicodeChar;
@@ -45,6 +47,8 @@ typedef PACKED struct {
   UINTN                       Tail;
   UINT64                      *KeyTimes; // only used in DEBUG builds with OC_TRACE_KEY_TIMES defined
 } OC_TYPING_CONTEXT;
+
+#pragma pack()
 
 /**
   Register typing handler with Apple Event protocol.
