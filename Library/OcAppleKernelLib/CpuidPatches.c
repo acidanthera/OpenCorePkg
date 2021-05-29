@@ -949,6 +949,41 @@ mProvideCurrentCpuInfoTopologyValidationPatch = {
   .Limit       = 0
 };
 
+#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 4
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind[] = {
+  // or rcx, rdx
+  0x48, 0x09, 0xD1,
+  // mov ecx, 0x10001
+  0xB9, 0x01, 0x00, 0x01, 0x00
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace[] = {
+  // or rcx, rdx
+  0x48, 0x09, 0xD1,
+  // mov ecx, core/thread count
+  0xB9, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoZeroMsrThreadCoreCount"),
+  .Base        = "_cpuid_set_info",
+  .Find        = mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
 STATIC
 UINT8* PatchMovVar (
   IN OUT  UINT8             *Location,
@@ -1058,6 +1093,8 @@ PatchProvideCurrentCpuInfo (
   UINT64            tscFCvtt2nValue;
   UINT64            tscFCvtn2tValue;
   UINT64            tscGranularityValue;
+
+  UINT32            msrCoreThreadCount;
 
   ASSERT (Patcher != NULL);
 
@@ -1169,6 +1206,38 @@ PatchProvideCurrentCpuInfo (
   // ret
   //
   *TscLocation++ = 0xC3;
+
+  //
+  // Patch MSR 0x35 fallback value on 10.13 and above.
+  //
+  // This value is used if the MSR 0x35 is read as zero, typically on VMs or AMD processors.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    //
+    // 10.15 and above have two instances that need patching.
+    //
+    if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
+      mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch.Count = 2;
+    }
+
+    msrCoreThreadCount = (CpuInfo->CoreCount << 16) | CpuInfo->ThreadCount;
+
+    CopyMem (
+      &mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace[CURRENT_CPU_INFO_CORE_COUNT_OFFSET],
+      &msrCoreThreadCount,
+      sizeof (msrCoreThreadCount)
+      );
+
+      Status = PatcherApplyGenericPatch (
+        Patcher,
+        &mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU MSR 0x35 default value patch - %r\n", Status));
+      }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU MSR 0x35 default value patch on %u\n", KernelVersion));
+  }
 
   //
   // Disable _x86_validate_topology on 10.13 and above.
