@@ -153,6 +153,12 @@ If providing `NVRAMTool.icns`, it should be themed so that it could be applied t
    - _**NB**: Including **ResetNVRAM** anywhere in the flavour triggers picker audio-assist for "Reset NVRAM"_
  - **ToggleSIP:NVRAMTool** - Icon themed for Toggle SIP tool specifically  (`ToggleSIP.icns`)
 
+### Other Tools
+
+A list of other known tools which are common enough that some icon pack artists may wish to provide a standard icon for them:
+
+ - **MemTest** - A system memory testing tool such as that available from [memtest86.com](https://www.memtest86.com/) (`MemTest.icns`)
+
 ---
 
 ## System Boot Entry Icons
