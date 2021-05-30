@@ -24,6 +24,8 @@ OpenCore Changelog
 - Defined bootloader flavours
 - Applied own flavour in OC build
 - Added CPU topology fixes to `ProvideCurrentCpuInfo` quirk
+- Updated OC default SIP disabled value
+- Documented SIP values which affect macOS updates
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe

@@ -86,11 +86,11 @@ PrintUsage (
   Print (L"    clear\n");
   Print (L"        Clear the existing configuration.\n");
   Print (L"    disable [<csr-value>]\n");
-  Print (L"        Disable the protection on the machine (use default 0x%x or csr value).\n", CSR_APPLE_DISABLE_SIP_DEFAULT);
+  Print (L"        Disable the protection on the machine (use default 0x%x or csr value).\n", OC_CSR_DISABLE_FLAGS);
   Print (L"    enable [<csr-value>]\n");
   Print (L"        Enable the protection on the machine (use 0 or other legal csr value).\n");
   Print (L"    toggle [<csr-value>]\n");
-  Print (L"        Toggle the protection on the machine (use default 0x%x or csr value).\n", CSR_APPLE_DISABLE_SIP_DEFAULT);
+  Print (L"        Toggle the protection on the machine (use default 0x%x or csr value).\n", OC_CSR_DISABLE_FLAGS);
   Print (L"    status\n");
   Print (L"        Display the current configuration.\n");
   Print (L"\n");
@@ -196,7 +196,7 @@ UefiMain (
       // Disable; allow anything except valid enable values
       //
       if (Argc == 2) {
-        CsrConfig = CSR_APPLE_DISABLE_SIP_DEFAULT;
+        CsrConfig = OC_CSR_DISABLE_FLAGS;
       } else {
         if ((Data & ~CSR_ALLOW_APPLE_INTERNAL) == 0) {
           Print (L"Illegal value for %s\n", L"disable");
@@ -240,7 +240,7 @@ UefiMain (
       // Toggle; allow anything except valid enable values
       //
       if (Argc == 2) {
-        CsrConfig = CSR_APPLE_DISABLE_SIP_DEFAULT;
+        CsrConfig = OC_CSR_DISABLE_FLAGS;
       } else {
         if ((Data & ~CSR_ALLOW_APPLE_INTERNAL) == 0) {
           Print (L"Illegal value for %s\n", L"toggle");

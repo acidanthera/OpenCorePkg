@@ -418,7 +418,7 @@ InternalSystemActionToggleSip (
   VOID
   )
 {
-  return OcToggleSip (CSR_APPLE_DISABLE_SIP_DEFAULT);
+  return OcToggleSip (OC_CSR_DISABLE_FLAGS);
 }
 
 VOID
