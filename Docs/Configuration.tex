@@ -3233,8 +3233,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   builds only.
   \item \texttt{0x0040} --- \texttt{OC\_ATTR\_USE\_MINIMAL\_UI}, use minimal UI display, no
   Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
-  \item \texttt{0x0080} --- \texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}, provides flexible boot entry
-  content description, suitable for picking the best media across different content sets:
+  \item \texttt{0x0080} --- \texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}\label{oc-attr-use-flavour-icon},
+  provides flexible boot entry content description, suitable for picking the best media across
+  different content sets:
 
   When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
   and builtin boot picker are chosen by something called content flavour. To determine
@@ -4223,6 +4224,13 @@ rm vault.pub
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Set to \texttt{true} activate this entry.
+
+\item
+  \texttt{Flavour}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Specify the content flavour for this entry.
+  See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
 
 \item
   \texttt{Name}\\
