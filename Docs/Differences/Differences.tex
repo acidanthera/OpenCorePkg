@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun May 23 18:54:12 2021
-%DIF ADD ../Configuration.tex        Fri May 28 09:21:39 2021
+%DIF ADD ../Configuration.tex        Sun May 30 09:32:15 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3350,8 +3350,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   builds only.
   \item \texttt{0x0040} --- \texttt{OC\_ATTR\_USE\_MINIMAL\_UI}, use minimal UI display, no
   Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
-  \DIFaddbegin \item \texttt{\DIFadd{0x0080}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_FLAVOUR\_ICON}}\DIFadd{, provides flexible boot entry
-  content description, suitable for picking the best media across different content sets:
+  \DIFaddbegin \item \texttt{\DIFadd{0x0080}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_FLAVOUR\_ICON}}\label{oc-attr-use-flavour-icon}\DIFadd{,
+  provides flexible boot entry content description, suitable for picking the best media across
+  different content sets:
 }
 
   \DIFadd{When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
@@ -3876,21 +3877,32 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 }
 
   \DIFadd{This will toggle Apple NVRAM variable }\texttt{\DIFadd{csr-active-config}} \DIFadd{between }\texttt{\DIFadd{0}} \DIFadd{for
-  SIP Enabled and the current macOS default for SIP Disabled (currently }\texttt{\DIFadd{0x6F}}
-  \DIFadd{for Big Sur).
+  SIP Enabled and a practical default value for SIP Disabled (currently }\texttt{\DIFadd{0x26F}}\DIFadd{).
 }
 
-  \emph{\DIFadd{Note1}}\DIFadd{: Using the SIP Disabled value from a newer version of macOS on an older version
-  (e.g. Catalina and below) will report an unknown setting if queried using }\texttt{\DIFadd{csrutil\ status}}\DIFadd{,
-  but will still run correctly and be secure, because new bits are added but old bits
-  are not removed between versions of macOS. (It is possible to configure }\texttt{\DIFadd{CsrUtil.efi}}
-  \DIFadd{as a }\texttt{\DIFadd{TextMode}} \texttt{\DIFadd{Tools}} \DIFadd{entry to configure a different value, e.g. use }\texttt{\DIFadd{toggle\ 0x67}}
-  \DIFadd{in }\texttt{\DIFadd{Arguments}} \DIFadd{to toggle the default SIP Disabled value for macOS Catalina.)
-}
-
-  \emph{\DIFadd{Note2}}\DIFadd{: It is strongly recommended not to make a habit of running macOS with
+  \emph{\DIFadd{Note1}}\DIFadd{: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
+}
+
+  \emph{\DIFadd{Note2}}\DIFadd{: OC uses }\texttt{\DIFadd{0x26F}} \DIFadd{even though }\texttt{\DIFadd{csrutil disable}} \DIFadd{on Big Sur
+  sets }\texttt{\DIFadd{0x7F}}\DIFadd{. To explain the choice:
+  }\begin{itemize}
+  \tightlist
+  \item \texttt{\DIFadd{csrutil disable -}{}\DIFadd{-no-internal}} \DIFadd{actually sets }\texttt{\DIFadd{0x6F}}\DIFadd{, and this is
+  preferable because }\texttt{\DIFadd{CSR\_ALLOW\_APPLE\_INTERNAL}} \DIFadd{(}\texttt{\DIFadd{0x10}}\DIFadd{) prevents updates
+  (unless you are running an internal build of macOS).
+  }\item \texttt{\DIFadd{CSR\_ALLOW\_UNAPPROVED\_KEXTS}} \DIFadd{(}\texttt{\DIFadd{0x200}}\DIFadd{) is generally useful, in the case
+  where you do need to have SIP disabled, as it allows installing unsigned kexts without manual
+  approval in System Preferences.
+  }\item \texttt{\DIFadd{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT}} \DIFadd{(}\texttt{\DIFadd{0x800}}\DIFadd{) is not practical as it prevents
+  incremental (non-full) OTA updates.
+  }\end{itemize}
+
+  \emph{\DIFadd{Note3}}\DIFadd{: For any other value which you may need to use, it is possible to
+  configure }\texttt{\DIFadd{CsrUtil.efi}} \DIFadd{as a }\texttt{\DIFadd{TextMode}} \texttt{\DIFadd{Tools}} \DIFadd{entry to configure a
+  different value, e.g. use }\texttt{\DIFadd{toggle\ 0x6F}} \DIFadd{in }\texttt{\DIFadd{Arguments}} \DIFadd{to toggle the
+  SIP disabled value set by default by }\texttt{\DIFadd{csrutil disable -}{}\DIFadd{-no-internal}} \DIFadd{in Big Sur.
 }
 
 \item
@@ -4356,7 +4368,15 @@ rm vault.pub
   \textbf{Description}: Set to \texttt{true} activate this entry.
 
 \item
-  \texttt{Name}\\
+  \DIFaddbegin \texttt{\DIFadd{Flavour}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Specify the content flavour for this entry.
+  See }\hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} \DIFadd{flag for documentation.
+}
+
+\item
+  \DIFaddend \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Human readable entry name displayed in the OpenCore picker.
@@ -4824,8 +4844,13 @@ troubleshooting:
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
+\item \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-data}}
+  \break
+  \DIFadd{Specify sources of kexts which will be approved regardless of SIP }\texttt{\DIFadd{CSR\_ALLOW\_UNAPPROVED\_KEXTS}} \DIFadd{value.}\\
+  \DIFadd{Example contents:}\\
+  \texttt{\DIFadd{<dict><key>kext-allowed-teams</key><array><string>\{DEVELOPER-TEAM-ID\}</string></array></dict>\%00}}
 \item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
+  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break
   Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
   memory and is pointed to by the \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
