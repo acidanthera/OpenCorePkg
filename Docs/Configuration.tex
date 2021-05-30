@@ -4712,6 +4712,11 @@ troubleshooting:
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
+\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-data}
+  \break
+  Specify sources of kexts which will be approved regardless of SIP \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} value.\\
+  Example contents:\\
+  \texttt{<dict><key>kext-allowed-teams</key><array><string>\{DEVELOPER-TEAM-ID\}</string></array></dict>\%00}
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break

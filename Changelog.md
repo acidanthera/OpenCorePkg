@@ -22,10 +22,11 @@ OpenCore Changelog
 - Added flavour for memory testing utilities
 - Updated recommended `memtest86` config in sample `.plist` files
 - Defined bootloader flavours
-- Applied own flavour in OC build
+- Applied own flavour to OC build
 - Added CPU topology fixes to `ProvideCurrentCpuInfo` quirk
 - Updated OC default SIP disabled value
 - Documented SIP values which affect macOS updates
+- Added `csr-data` Apple NVRAM var to docs
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe
