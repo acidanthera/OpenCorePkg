@@ -28,6 +28,7 @@ OpenCore Changelog
 - Documented SIP values which affect macOS updates
 - Added `csr-data` Apple NVRAM var to docs
 - Fixed file alignment causing codesign issues with CLANGPDB images
+- Replaced `AdviseWindows` with `AdviseFeatures` to support APFS
 
 #### v0.6.9
 - Fixed out-of-sync cursor movement rectangle when loading e.g. CrScreenshotDxe

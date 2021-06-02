@@ -368,9 +368,13 @@ OcPlatformUpdateSmbios (
     //
     // Adopt to arbitrary hardware specifics. See description in NVRAM handling code.
     //
-    if (Config->PlatformInfo.Generic.AdviseWindows) {
-      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
-      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+    if (Config->PlatformInfo.Generic.AdviseFeatures) {
+      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS;
+      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS;
     }
 
     //
@@ -531,9 +535,13 @@ OcPlatformUpdateNvram (
     // https://github.com/acidanthera/bugtracker/issues/327
     // https://sourceforge.net/p/cloverefiboot/tickets/435
     //
-    if (Config->PlatformInfo.Generic.AdviseWindows) {
-      ExFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
-      ExFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+    if (Config->PlatformInfo.Generic.AdviseFeatures) {
+      ExFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS;
+      ExFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS;
     }
   }
 

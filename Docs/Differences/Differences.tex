@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun May 23 18:54:12 2021
-%DIF ADD ../Configuration.tex        Sun May 30 09:32:15 2021
+%DIF DEL PreviousConfiguration.tex   Tue May 25 17:24:23 2021
+%DIF ADD ../Configuration.tex        Wed Jun  2 16:39:55 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -5148,10 +5148,10 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   valid values otherwise, which could obstruct the operation of some software.
 
 \item
-  \texttt{AdviseWindows}\\
+  \texttt{\DIFdelbegin \DIFdel{AdviseWindows}\DIFdelend \DIFaddbegin \DIFadd{AdviseFeatures}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Forces Windows support in \texttt{FirmwareFeatures}.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Forces Windows support in }\DIFdelend \DIFaddbegin \DIFadd{Updates }\DIFaddend \texttt{FirmwareFeatures} \DIFaddbegin \DIFadd{with supported bits}\DIFaddend .
 
   Added bits to \texttt{FirmwareFeatures}:
 
@@ -5162,9 +5162,15 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
     \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
     - Without this bit, it is not possible to reboot to Windows installed on
       a drive with an EFI partition that is the first partition on the disk.
-  \end{itemize}
+    \DIFaddbegin \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_APFS}} \DIFadd{(}\texttt{\DIFadd{0x00080000}}\DIFadd{)
+    - Without this bit, it is not possible to install macOS on an APFS disk.
+  }\DIFaddend \end{itemize}
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: On most newer firmwares these bits are already set, the option
+  may be necessary when "upgrading" the firmware with new features.
+}
+
+\DIFaddend \item
   \texttt{MaxBIOSVersion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
