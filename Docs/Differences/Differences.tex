@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jun  4 23:44:14 2021
-%DIF ADD ../Configuration.tex        Fri Jun  4 23:44:14 2021
+%DIF DEL PreviousConfiguration.tex   Tue Jun  8 01:02:27 2021
+%DIF ADD ../Configuration.tex        Tue Jun  8 01:04:08 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (\DIFdelbegin \DIFdel{0.6.9}\DIFdelend \DIFaddbegin \DIFadd{0.7.0}\DIFaddend )
+       Reference Manual (0.7\DIFdelbegin \DIFdel{.0}\DIFdelend \DIFaddbegin \DIFadd{.1}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -2208,10 +2208,10 @@ blocking.
     \item Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
     \texttt{Cpuid1Data}: \texttt{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-    \DIFaddbegin \item \DIFadd{Comet Lake U62 (}\texttt{\DIFadd{0x0A0660}}\DIFadd{) to Comet Lake U42 (}\texttt{\DIFadd{0x0806EC}}\DIFadd{):}\\
-    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
-    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
-  \DIFaddend \end{itemize}
+    \item Comet Lake U62 (\texttt{0x0A0660}) to Comet Lake U42 (\texttt{0x0806EC}):\\
+    \texttt{Cpuid1Data}: \texttt{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
+  \end{itemize}
 
   \emph{Note 4}: Be aware that the following configurations are unsupported by XCPM (at least out of the box):
 
@@ -2665,23 +2665,20 @@ blocking.
   should be used, which is otherwise equivalent to this quirk.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{ProvideCurrentCpuInfo}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.8}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Provides current CPU info to the kernel.
-}
+  \texttt{ProvideCurrentCpuInfo}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.8\\
+  \textbf{Description}: Provides current CPU info to the kernel.
 
-  \DIFadd{This quirk currently provides the correct TSC and FSB values to the kernel, as well
+  This quirk currently provides the correct TSC and FSB values to the kernel, as well
   as disables CPU topology validation.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: These patches currently target Microsoft Hyper-V and may need to be extended for
+  \emph{Note}: These patches currently target Microsoft Hyper-V and may need to be extended for
   other purposes.
-}
 
 \item
-  \DIFaddend \texttt{SetApfsTrimTimeout}\\
+  \texttt{SetApfsTrimTimeout}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{-1}\\
   \textbf{Requirement}: 10.14 (not required for older)\\
@@ -3249,48 +3246,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   \item \texttt{0x0001} --- \texttt{OC\_ATTR\_USE\_VOLUME\_ICON}, provides custom icons
     for boot entries:
 
-    \DIFdelbegin \DIFdel{For }\texttt{\DIFdel{Tools}}%DIFAUXCMD
-\DIFdel{, }\DIFdelend OpenCore will attempt loading a \DIFdelbegin \DIFdel{custom icon and fallback to a default icon on failure:
-    }%DIFDELCMD < \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <     \tightlist
-%DIFDELCMD <       \item %%%
-\item %DIFAUXCMD
-\texttt{\DIFdel{ResetNVRAM}} %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{Resources\textbackslash Image\textbackslash ResetNVRAM.icns}}
-        %DIFAUXCMD
-\DIFdel{--- }\texttt{\DIFdel{ResetNVRAM.icns}} %DIFAUXCMD
-\DIFdel{from icons directory.
-      }%DIFDELCMD < \item %%%
-\item %DIFAUXCMD
-\texttt{\DIFdel{Tools\textbackslash <TOOL\_RELATIVE\_PATH>.icns}}
-        %DIFAUXCMD
-\DIFdel{--- icon near the tool file with appended }\texttt{\DIFdel{.icns}} %DIFAUXCMD
-\DIFdel{extension.
-    }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize} \medskip
-%DIFDELCMD < 
-
-%DIFDELCMD <     %%%
-\DIFdel{For custom boot }\texttt{\DIFdel{Entries}}%DIFAUXCMD
-\DIFdel{, OpenCore will attempt loading a custom icon and fallback
-    to the volume icon or the default icon on failure:
-    }%DIFDELCMD < \begin{itemize}
-\begin{itemize}%DIFAUXCMD
-%DIFDELCMD <     \tightlist
-%DIFDELCMD <       \item %%%
-\item %DIFAUXCMD
-\texttt{\DIFdel{<ENTRY\_PATH>.icns}} %DIFAUXCMD
-\DIFdel{--- icon near the entry file with appended }\texttt{\DIFdel{.icns}} %DIFAUXCMD
-\DIFdel{extension.
-    }
-\end{itemize}%DIFAUXCMD
-%DIFDELCMD < \end{itemize} \medskip
-%DIFDELCMD < 
-
-%DIFDELCMD <     %%%
-\DIFdel{For all other entries, OpenCore will attempt loading a volume icon }\DIFdelend \DIFaddbegin \DIFadd{volume icon }\DIFaddend by searching
+    OpenCore will attempt loading a volume icon by searching
     as follows, and will fallback to the default icon on failure:
     \begin{itemize}
     \tightlist
@@ -3317,25 +3273,12 @@ the default boot entry choice will remain changed until the next manual reconfig
     on whether the drive is internal or external. \medskip
 
   \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, provides custom
-    \DIFdelbegin \DIFdel{rendered }\DIFdelend \DIFaddbegin \DIFadd{prerendered }\DIFaddend titles for boot entries \DIFdelbegin \DIFdel{:
-    }%DIFDELCMD < \begin{itemize}
-%DIFDELCMD <     \tightlist
-%DIFDELCMD <       \item %%%
-\item %DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{from }\DIFaddend \texttt{.disk\_label} (\texttt{.disk\_label\_2x})
-    file \DIFdelbegin \DIFdel{near }\DIFdelend \DIFaddbegin \DIFadd{next to the }\DIFaddend bootloader for all filesystems.
-    \DIFdelbegin %DIFDELCMD < \item %%%
-\item %DIFAUXCMD
-\texttt{\DIFdel{<TOOL\_NAME>.lbl}} %DIFAUXCMD
-\DIFdel{(}\texttt{\DIFdel{<TOOL\_NAME>.l2x}}%DIFAUXCMD
-\DIFdel{) file near tool for }\texttt{\DIFdel{Tools}}%DIFAUXCMD
-\DIFdel{.
-    }%DIFDELCMD < \end{itemize}
-%DIFDELCMD <     %%%
-\DIFdelend Prerendered labels can be generated via the \texttt{disklabel} utility or the \texttt{bless} command.
-    When disabled or missing\DIFdelbegin \DIFdel{text labels, }\DIFdelend \DIFaddbegin \DIFadd{, label text in }\DIFaddend (\texttt{.contentDetails}
-    or \texttt{.disk\_label.contentDetails}) \DIFdelbegin \DIFdel{are to be rendered instead}\DIFdelend \DIFaddbegin \DIFadd{will be rendered if present instead, otherwise
-    the entry name itself will be rendered}\DIFaddend .
+    prerendered titles for boot entries from \texttt{.disk\_label} (\texttt{.disk\_label\_2x})
+    file next to the bootloader for all filesystems.
+    Prerendered labels can be generated via the \texttt{disklabel} utility or the \texttt{bless} command.
+    When disabled or missing, label text in (\texttt{.contentDetails}
+    or \texttt{.disk\_label.contentDetails}) will be rendered if present instead, otherwise
+    the entry name itself will be rendered.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. This may however give less detail for
     the actual boot entry.
@@ -3350,68 +3293,64 @@ the default boot entry choice will remain changed until the next manual reconfig
   builds only.
   \item \texttt{0x0040} --- \texttt{OC\_ATTR\_USE\_MINIMAL\_UI}, use minimal UI display, no
   Shutdown or Restart buttons, affects OpenCanopy and builtin picker.
-  \DIFaddbegin \item \texttt{\DIFadd{0x0080}} \DIFadd{--- }\texttt{\DIFadd{OC\_ATTR\_USE\_FLAVOUR\_ICON}}\label{oc-attr-use-flavour-icon}\DIFadd{,
+  \item \texttt{0x0080} --- \texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}\label{oc-attr-use-flavour-icon},
   provides flexible boot entry content description, suitable for picking the best media across
   different content sets:
-}
 
-  \DIFadd{When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
+  When enabled, the entry icon in OpenCanopy and the audio assist entry sound in OpenCanopy
   and builtin boot picker are chosen by something called content flavour. To determine
   content flavour the following algorithm is used:
-}
 
     \begin{itemize}
     \tightlist
-      \item \DIFadd{For a Tool the value is read from }\texttt{\DIFadd{Flavour}} \DIFadd{field.
-      }\item \DIFadd{For an automatically discovered entry it is read from the }\texttt{\DIFadd{.contentFlavour}}
-      \DIFadd{file next to the bootloader, if present.
-      }\item \DIFadd{For a custom entry it is read from the }\texttt{\DIFadd{.contentFlavour}} \DIFadd{file next to the
-      bootloader if }\texttt{\DIFadd{Flavour}} \DIFadd{is }\texttt{\DIFadd{Auto}}\DIFadd{, otherwise specified via the }\texttt{\DIFadd{Flavour}}
-      \DIFadd{value itself.
-      }\item \DIFadd{If read flavour is }\texttt{\DIFadd{Auto}} \DIFadd{or there is no }\texttt{\DIFadd{.contentFlavour}}\DIFadd{, entry
+      \item For a Tool the value is read from \texttt{Flavour} field.
+      \item For an automatically discovered entry it is read from the \texttt{.contentFlavour}
+      file next to the bootloader, if present.
+      \item For a custom entry it is read from the \texttt{.contentFlavour} file next to the
+      bootloader if \texttt{Flavour} is \texttt{Auto}, otherwise specified via the \texttt{Flavour}
+      value itself.
+      \item If read flavour is \texttt{Auto} or there is no \texttt{.contentFlavour}, entry
       flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).
-    }\DIFaddend \end{itemize}
-    \DIFaddbegin \medskip
-\DIFaddend 
+    \end{itemize}
+    \medskip
 
-  \DIFaddbegin \DIFadd{The Flavour value is a sequence of }\texttt{\DIFadd{:}} \DIFadd{separated names limited to 64 characters of
+  The Flavour value is a sequence of \texttt{:} separated names limited to 64 characters of
   printable 7-bit ASCII. This is designed to support up to approximately five names. Each name
   refers to a flavour, with the first name having the highest priority and the last name having
   the lowest priority. Such a structure allows describing an entry in a more specific way, with
   icons selected flexibly depending on support by the audio-visual pack. A missing audio or icon
   file means the next flavour should be tried, and if all are missing the choice happens based
   on the type of the entry.
-  Example flavour values: }\texttt{\DIFadd{BigSur:Apple}}\DIFadd{, }\texttt{\DIFadd{Windows10:Windows}}\DIFadd{. }\texttt{\DIFadd{OpenShell:UEFIShell:Shell}}\DIFadd{.
-  }\medskip
+  Example flavour values: \texttt{BigSur:Apple}, \texttt{Windows10:Windows}. \texttt{OpenShell:UEFIShell:Shell}.
+  \medskip
 
-  \DIFadd{Using flavours means that you can switch between icon sets easily, with the flavour selecting
-  the best available icons from each set. E.g. specifying icon flavour }\texttt{\DIFadd{Debian:Linux}}
-  \DIFadd{will use the icon }\texttt{\DIFadd{Debian.icns}} \DIFadd{if provided, then will try }\texttt{\DIFadd{Linux.icns}}\DIFadd{, then will
-  fall back to the default for an OS, which is }\texttt{\DIFadd{HardDrive.icns}}\DIFadd{.
-  }\medskip
+  Using flavours means that you can switch between icon sets easily, with the flavour selecting
+  the best available icons from each set. E.g. specifying icon flavour \texttt{Debian:Linux}
+  will use the icon \texttt{Debian.icns} if provided, then will try \texttt{Linux.icns}, then will
+  fall back to the default for an OS, which is \texttt{HardDrive.icns}.
+  \medskip
 
-  \DIFadd{Things to keep in mind:
-}
+  Things to keep in mind:
 
     \begin{itemize}
     \tightlist
-      \DIFaddend \item \DIFaddbegin \DIFadd{For security reasons }\texttt{\DIFadd{Ext<Flavour>.icns}} \DIFadd{and }\texttt{\DIFadd{<Flavour>.icns}} \DIFadd{are both
-      supported, and only }\texttt{\DIFadd{Ext<Flavour>.icns}} \DIFadd{will be used if the entry is on an external drive
-      (followed by default fallback }\texttt{\DIFadd{ExtHardDrive.icns}}\DIFadd{).
-      }\item \DIFadd{Where both apply }\texttt{\DIFadd{.VolumeIcon.icns}} \DIFadd{takes precence over }\texttt{\DIFadd{.contentFlavour}}\DIFadd{.
-      }\item \DIFadd{In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
-      system default boot entry icons (see }\texttt{\DIFadd{Docs/Flavours.md}}\DIFadd{) specified in the }\texttt{\DIFadd{Flavour}}
-      \DIFadd{setting for }\texttt{\DIFadd{Tools}} \DIFadd{or }\texttt{\DIFadd{Entries}} \DIFadd{will continue to apply even when flavour is disabled.
-      Non-system icons will be ignored in this  case. In addition, the flavours }\texttt{\DIFadd{UEFIShell}} \DIFadd{and
-      }\texttt{\DIFadd{NVRAMReset}} \DIFadd{are given special processing, identifying their respective tools to apply correct
+      \item For security reasons \texttt{Ext<Flavour>.icns} and \texttt{<Flavour>.icns} are both
+      supported, and only \texttt{Ext<Flavour>.icns} will be used if the entry is on an external drive
+      (followed by default fallback \texttt{ExtHardDrive.icns}).
+      \item Where both apply \texttt{.VolumeIcon.icns} takes precence over \texttt{.contentFlavour}.
+      \item In order to allow icons and audio assist to work correctly for tools (e.g. for UEFI Shell),
+      system default boot entry icons (see \texttt{Docs/Flavours.md}) specified in the \texttt{Flavour}
+      setting for \texttt{Tools} or \texttt{Entries} will continue to apply even when flavour is disabled.
+      Non-system icons will be ignored in this  case. In addition, the flavours \texttt{UEFIShell} and
+      \texttt{NVRAMReset} are given special processing, identifying their respective tools to apply correct
       audio-assist, default builtin labels, etc.
-      }\item \DIFadd{A list of recommended flavours is provided in }\texttt{\DIFadd{Docs/Flavours.md}}\DIFadd{.
-    }\end{itemize}
+      \item A list of recommended flavours is provided in \texttt{Docs/Flavours.md}.
+    \end{itemize}
     \medskip
   \end{itemize}
 
 \item
-  \DIFaddend \texttt{PickerAudioAssist}\\
+  \texttt{PickerAudioAssist}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable screen reader by default in the OpenCore picker.
@@ -3559,33 +3498,28 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Choose specific icon set to be used for boot management.
 
-  \DIFdelbegin \DIFdel{The following values are supported}\DIFdelend \DIFaddbegin \DIFadd{An icon set is a directory path relative to }\texttt{\DIFadd{Resources\textbackslash Image}}\DIFadd{,
+  An icon set is a directory path relative to \texttt{Resources\textbackslash Image},
   where the icons and an optional manifest are located. It is recommended for
-  the artists to use provide their sets in the }\texttt{\DIFadd{Vendor\textbackslash Set}} \DIFadd{format,
-  e.g. }\texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}}\DIFadd{.
-}
+  the artists to use provide their sets in the \texttt{Vendor\textbackslash Set} format,
+  e.g. \texttt{Acidanthera\textbackslash GoldenGate}.
 
-  \DIFadd{Sample resources provided as a part of
-  }\href{https://github.com/acidanthera/OcBinaryData}{\DIFadd{OcBinaryData repository}}
-  \DIFadd{provide the following icon set}\DIFaddend :
+  Sample resources provided as a part of
+  \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData repository}
+  provide the following icon set:
   \begin{itemize}
     \tightlist
-    \item \texttt{\DIFdelbegin \DIFdel{Auto}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash GoldenGate}\DIFaddend } --- \DIFdelbegin \DIFdel{Automatically select one setof icons based on the }\texttt{\DIFdel{DefaultBackground}}
-  %DIFAUXCMD
-\DIFdel{colour}\DIFdelend \DIFaddbegin \DIFadd{macOS 11 styled icon set}\DIFaddend .
-    \item \texttt{\DIFdelbegin \DIFdel{Default}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash Syrah}\DIFaddend } --- \DIFdelbegin \DIFdel{Normal icon set(without prefix)}\DIFdelend \DIFaddbegin \DIFadd{macOS 10.10 styled icon set}\DIFaddend .
-    \item \texttt{\DIFdelbegin \DIFdel{Old}\DIFdelend \DIFaddbegin \DIFadd{Acidanthera\textbackslash Chardonnay}\DIFaddend } --- \DIFdelbegin \DIFdel{Vintage icon set(}\texttt{\DIFdel{Old}} %DIFAUXCMD
-\DIFdel{filename prefix).
-  }\DIFdelend \DIFaddbegin \DIFadd{macOS 10.4 styled icon set.
-  }\end{itemize}
+    \item \texttt{Acidanthera\textbackslash GoldenGate} --- macOS 11 styled icon set.
+    \item \texttt{Acidanthera\textbackslash Syrah} --- macOS 10.10 styled icon set.
+    \item \texttt{Acidanthera\textbackslash Chardonnay} --- macOS 10.4 styled icon set.
+  \end{itemize}
 
-  \DIFadd{For convenience purposes there also are predefined aliases:
-  }\begin{itemize}
+  For convenience purposes there also are predefined aliases:
+  \begin{itemize}
     \tightlist
-    \DIFaddend \item \texttt{\DIFdelbegin \DIFdel{Modern}\DIFdelend \DIFaddbegin \DIFadd{Auto}\DIFaddend } --- \DIFdelbegin \DIFdel{Nouveau icon set (}\DIFdelend \DIFaddbegin \DIFadd{Automatically select one set of icons based on the }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Modern}\DIFdelend \DIFaddbegin \DIFadd{DefaultBackground}\DIFaddend }
-      \DIFdelbegin \DIFdel{filename prefix)}\DIFdelend \DIFaddbegin \DIFadd{colour: }\texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}} \DIFadd{for Syrah Black and
-      }\texttt{\DIFadd{Acidanthera\textbackslash Chardonnay}} \DIFadd{for Light Gray}\DIFaddend .
-    \item \DIFdelbegin \DIFdel{Other value }\DIFdelend \DIFaddbegin \texttt{\DIFadd{Default}} \DIFaddend --- \DIFdelbegin \DIFdel{Custom icon set if supported by installed resources}\DIFdelend \DIFaddbegin \texttt{\DIFadd{Acidanthera\textbackslash GoldenGate}}\DIFaddend .
+    \item \texttt{Auto} --- Automatically select one set of icons based on the \texttt{DefaultBackground}
+      colour: \texttt{Acidanthera\textbackslash GoldenGate} for Syrah Black and
+      \texttt{Acidanthera\textbackslash Chardonnay} for Light Gray.
+    \item \texttt{Default} --- \texttt{Acidanthera\textbackslash GoldenGate}.
   \end{itemize}
 
 \end{enumerate}
@@ -3793,8 +3727,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{OCA} ---- OcAcpiLib
   \item \texttt{OCBP} --- OcAppleBootPolicyLib
   \item \texttt{OCB} --- OcBootManagementLib
-  \item \DIFaddbegin \texttt{\DIFadd{OCLBT}} \DIFadd{--- OcBlitLib
-  }\item \DIFaddend \texttt{OCCL} --- OcAppleChunkListLib
+  \item \texttt{OCLBT} --- OcBlitLib
+  \item \texttt{OCCL} --- OcAppleChunkListLib
   \item \texttt{OCCPU} --- OcCpuLib
   \item \texttt{OCC} --- OcConsoleLib
   \item \texttt{OCDC} --- OcDriverConnectionLib
@@ -3866,47 +3800,42 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \emph{Note 2}: In order to support systems with unresponsive modifiers during preboot
   (which includes \texttt{V1} and \texttt{V2} \texttt{KeySupport} mode on some firmware)
   OpenCore also allows holding the \texttt{=/+} key in order to trigger `set default' mode.
-\DIFaddbegin 
-
-\DIFaddend \item
-  \DIFaddbegin \texttt{\DIFadd{AllowToggleSip}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable
-  entry for disabling and enabling System Integrity Protection in OpenCore picker.
-}
-
-  \DIFadd{This will toggle Apple NVRAM variable }\texttt{\DIFadd{csr-active-config}} \DIFadd{between }\texttt{\DIFadd{0}} \DIFadd{for
-  SIP Enabled and a practical default value for SIP Disabled (currently }\texttt{\DIFadd{0x26F}}\DIFadd{).
-}
-
-  \emph{\DIFadd{Note1}}\DIFadd{: It is strongly recommended not to make a habit of running macOS with
-  SIP disabled. Use of this boot option may make it easier to quickly disable SIP
-  protection when genuinely needed - it should be re-enabled again afterwards.
-}
-
-  \emph{\DIFadd{Note2}}\DIFadd{: OC uses }\texttt{\DIFadd{0x26F}} \DIFadd{even though }\texttt{\DIFadd{csrutil disable}} \DIFadd{on Big Sur
-  sets }\texttt{\DIFadd{0x7F}}\DIFadd{. To explain the choice:
-  }\begin{itemize}
-  \tightlist
-  \item \texttt{\DIFadd{csrutil disable -}{}\DIFadd{-no-internal}} \DIFadd{actually sets }\texttt{\DIFadd{0x6F}}\DIFadd{, and this is
-  preferable because }\texttt{\DIFadd{CSR\_ALLOW\_APPLE\_INTERNAL}} \DIFadd{(}\texttt{\DIFadd{0x10}}\DIFadd{) prevents updates
-  (unless you are running an internal build of macOS).
-  }\item \texttt{\DIFadd{CSR\_ALLOW\_UNAPPROVED\_KEXTS}} \DIFadd{(}\texttt{\DIFadd{0x200}}\DIFadd{) is generally useful, in the case
-  where you do need to have SIP disabled, as it allows installing unsigned kexts without manual
-  approval in System Preferences.
-  }\item \texttt{\DIFadd{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT}} \DIFadd{(}\texttt{\DIFadd{0x800}}\DIFadd{) is not practical as it prevents
-  incremental (non-full) OTA updates.
-  }\end{itemize}
-
-  \emph{\DIFadd{Note3}}\DIFadd{: For any other value which you may need to use, it is possible to
-  configure }\texttt{\DIFadd{CsrUtil.efi}} \DIFadd{as a }\texttt{\DIFadd{TextMode}} \texttt{\DIFadd{Tools}} \DIFadd{entry to configure a
-  different value, e.g. use }\texttt{\DIFadd{toggle\ 0x6F}} \DIFadd{in }\texttt{\DIFadd{Arguments}} \DIFadd{to toggle the
-  SIP disabled value set by default by }\texttt{\DIFadd{csrutil disable -}{}\DIFadd{-no-internal}} \DIFadd{in Big Sur.
-}
 
 \item
-  \DIFaddend \texttt{ApECID}\\
+  \texttt{AllowToggleSip}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable
+  entry for disabling and enabling System Integrity Protection in OpenCore picker.
+
+  This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
+  SIP Enabled and a practical default value for SIP Disabled (currently \texttt{0x26F}).
+
+  \emph{Note1}: It is strongly recommended not to make a habit of running macOS with
+  SIP disabled. Use of this boot option may make it easier to quickly disable SIP
+  protection when genuinely needed - it should be re-enabled again afterwards.
+
+  \emph{Note2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
+  sets \texttt{0x7F}. To explain the choice:
+  \begin{itemize}
+  \tightlist
+  \item \texttt{csrutil disable -{}-no-internal} actually sets \texttt{0x6F}, and this is
+  preferable because \texttt{CSR\_ALLOW\_APPLE\_INTERNAL} (\texttt{0x10}) prevents updates
+  (unless you are running an internal build of macOS).
+  \item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
+  where you do need to have SIP disabled, as it allows installing unsigned kexts without manual
+  approval in System Preferences.
+  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not practical as it prevents
+  incremental (non-full) OTA updates.
+  \end{itemize}
+
+  \emph{Note3}: For any other value which you may need to use, it is possible to
+  configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
+  different value, e.g. use \texttt{toggle\ 0x6F} in \texttt{Arguments} to toggle the
+  SIP disabled value set by default by \texttt{csrutil disable -{}-no-internal} in Big Sur.
+
+\item
+  \texttt{ApECID}\\
   \textbf{Type}: \texttt{plist\ integer}, 64 bit\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Apple Enclave Identifier.
@@ -4368,15 +4297,14 @@ rm vault.pub
   \textbf{Description}: Set to \texttt{true} activate this entry.
 
 \item
-  \DIFaddbegin \texttt{\DIFadd{Flavour}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Auto}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Specify the content flavour for this entry.
-  See }\hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} \DIFadd{flag for documentation.
-}
+  \texttt{Flavour}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Auto}\\
+  \textbf{Description}: Specify the content flavour for this entry.
+  See \hyperref[oc-attr-use-flavour-icon]{\texttt{OC\_ATTR\_USE\_FLAVOUR\_ICON}} flag for documentation.
 
 \item
-  \DIFaddend \texttt{Name}\\
+  \texttt{Name}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Human readable entry name displayed in the OpenCore picker.
@@ -4669,12 +4597,12 @@ improvements:
   One-byte data defining \texttt{boot.efi} user interface scaling. Should be \textbf{01} for normal
   screens and \textbf{02} for HiDPI screens.
  \item
-  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:ForceDisplayRotationInEFI}}
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:ForceDisplayRotationInEFI}
   \break
-  \DIFadd{32-bit integer defining display rotation. Can be }\textbf{\DIFadd{0}} \DIFadd{for no rotation
-  or any of }\texttt{\DIFadd{90}}\DIFadd{, }\texttt{\DIFadd{180}}\DIFadd{, }\texttt{\DIFadd{270}} \DIFadd{for matching rotation in degrees.
- }\item
-  \DIFaddend \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
+  32-bit integer defining display rotation. Can be \textbf{0} for no rotation
+  or any of \texttt{90}, \texttt{180}, \texttt{270} for matching rotation in degrees.
+ \item
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:DefaultBackgroundColor}
   \break
   Four-byte \texttt{BGRA} data defining \texttt{boot.efi} user interface background colour.
   Standard colours include \textbf{BF BF BF 00} (Light Gray) and \textbf{00 00 00 00}
@@ -4844,13 +4772,13 @@ troubleshooting:
 \item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:bootercfg-once}
   \break
   Booter arguments override removed after first launch. Otherwise equivalent to \texttt{bootercfg}.
-\item \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-data}}
+\item \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-data}
   \break
-  \DIFadd{Specify sources of kexts which will be approved regardless of SIP }\texttt{\DIFadd{CSR\_ALLOW\_UNAPPROVED\_KEXTS}} \DIFadd{value.}\\
-  \DIFadd{Example contents:}\\
-  \texttt{\DIFadd{<dict><key>kext-allowed-teams</key><array><string>\{DEVELOPER-TEAM-ID\}</string></array></dict>\%00}}
+  Specify sources of kexts which will be approved regardless of SIP \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} value.\\
+  Example contents:\\
+  \texttt{<dict><key>kext-allowed-teams</key><array><string>\{DEVELOPER-TEAM-ID\}</string></array></dict>\%00}
 \item
-  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:efiboot-perf-record}
   \break
   Enable performance log saving in \texttt{boot.efi}. Performance log is saved to physical
   memory and is pointed to by the \texttt{efiboot-perf-record-data} and \texttt{efiboot-perf-record-size}
@@ -5148,10 +5076,10 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
   valid values otherwise, which could obstruct the operation of some software.
 
 \item
-  \texttt{\DIFdelbegin \DIFdel{AdviseWindows}\DIFdelend \DIFaddbegin \DIFadd{AdviseFeatures}\DIFaddend }\\
+  \texttt{AdviseFeatures}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: \DIFdelbegin \DIFdel{Forces Windows support in }\DIFdelend \DIFaddbegin \DIFadd{Updates }\DIFaddend \texttt{FirmwareFeatures} \DIFaddbegin \DIFadd{with supported bits}\DIFaddend .
+  \textbf{Description}: Updates \texttt{FirmwareFeatures} with supported bits.
 
   Added bits to \texttt{FirmwareFeatures}:
 
@@ -5162,15 +5090,14 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
     \item \texttt{FW\_FEATURE\_SUPPORTS\_UEFI\_WINDOWS\_BOOT} (\texttt{0x20000000})
     - Without this bit, it is not possible to reboot to Windows installed on
       a drive with an EFI partition that is the first partition on the disk.
-    \DIFaddbegin \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_APFS}} \DIFadd{(}\texttt{\DIFadd{0x00080000}}\DIFadd{)
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
     - Without this bit, it is not possible to install macOS on an APFS disk.
-  }\DIFaddend \end{itemize}
+  \end{itemize}
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: On most newer firmwares these bits are already set, the option
+  \emph{Note}: On most newer firmwares these bits are already set, the option
   may be necessary when "upgrading" the firmware with new features.
-}
 
-\DIFaddend \item
+\item
   \texttt{MaxBIOSVersion}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -6123,9 +6050,9 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Test BeepGen protocol and generate audio signals of different style and length. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CleanNvram}}\textbf{*}
 & Reset NVRAM alternative bundled as a standalone tool. \\
-\DIFaddbegin \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{\DIFadd{CsrUtil}}}\textbf{\DIFadd{*}}
-& \DIFadd{Simple implementation of SIP-related features of Apple }\texttt{\DIFadd{csrutil}}\DIFadd{. }\\
-\DIFaddend \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CsrUtil}}\textbf{*}
+& Simple implementation of SIP-related features of Apple \texttt{csrutil}. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{GopStop}}\textbf{*}
 & Test GraphicsOutput protocol with a
   \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Application/GopStop}{simple scenario}. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{KeyTester}}\textbf{*}
@@ -6164,13 +6091,11 @@ Sample resources (fonts and images) can be found in
 (e.g. \href{https://github.com/blackosx/OpenCanopyIcons}{here} or \href{https://applelife.ru/threads/kastomizacija-opencanopy.2945020/}{there}).
 
 OpenCanopy provides full support for \texttt{PickerAttributes} and offers a configurable
-builtin icon set. The \DIFdelbegin \DIFdel{default }\DIFdelend chosen icon set \DIFdelbegin \DIFdel{depends }\DIFdelend \DIFaddbegin \DIFadd{may depend }\DIFaddend on the \texttt{DefaultBackgroundColor}
-variable value. \DIFdelbegin \DIFdel{For Light Gray }\DIFdelend \DIFaddbegin \DIFadd{Refer to }\DIFaddend \texttt{\DIFdelbegin \DIFdel{Old}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
-\DIFdel{icon set will be used, for other colours ---
-the one without a prefix}\DIFdelend \DIFaddbegin \DIFadd{PickerVariant}} \DIFadd{for more details}\DIFaddend .
+builtin icon set. The chosen icon set may depend on the \texttt{DefaultBackgroundColor}
+variable value. Refer to \texttt{PickerVariant} for more details.
 
-Predefined icons are saved in the \DIFaddbegin \texttt{\DIFadd{PickerVariant}}\DIFadd{-derived subdirectory of the
-}\DIFaddend \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
+Predefined icons are saved in the \texttt{PickerVariant}-derived subdirectory of the
+\texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Image}
 directory. A full list of supported icons (in \texttt{.icns} format) is provided below. When optional icons
 are missing, the closest available icon will be used. External entries will use \texttt{Ext}-prefixed
 icon if available (e.g. \texttt{OldExtHardDrive.icns}).
@@ -6211,9 +6136,9 @@ Full list of labels is provided below. All labels are mandatory.
   \item \texttt{Windows} --- Windows.
   \item \texttt{Other} --- Custom entry (see \texttt{Entries}).
   \item \texttt{ResetNVRAM} --- Reset NVRAM system action or tool.
-  \item \DIFaddbegin \texttt{\DIFadd{SIPDisabled}} \DIFadd{--- Toogle SIP tool with SIP disabled.
-  }\item \texttt{\DIFadd{SIPEnabled}} \DIFadd{--- Toogle SIP tool with SIP enabled.
-  }\item \DIFaddend \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
+  \item \texttt{SIPDisabled} --- Toogle SIP tool with SIP disabled.
+  \item \texttt{SIPEnabled} --- Toogle SIP tool with SIP enabled.
+  \item \texttt{Shell} --- Entry with UEFI Shell name (e.g. \texttt{OpenShell}).
   \item \texttt{Tool} --- Any other tool.
 \end{itemize}
 
@@ -6406,7 +6331,7 @@ functioning. Feature highlights:
   \textbf{Description}: Load APFS drivers for newly connected devices.
 
   Permits APFS USB hot plug which enables loading APFS drivers, both at OpenCore
-  startup and during OpenCore picker \DIFdelbegin \DIFdel{dusplay}\DIFdelend \DIFaddbegin \DIFadd{display}\DIFaddend . Disable if not required.
+  startup and during OpenCore picker display. Disable if not required.
 
 \item
   \texttt{MinDate}\\
@@ -7034,31 +6959,29 @@ functioning. Feature highlights:
   performance or fix rendering issues. However, this option is not recommended unless
   there is an obvious benefit as it may result in issues such as slower scrolling.
 
-  \DIFaddbegin \DIFadd{This renderer fully supports }\texttt{\DIFadd{AppleEg2Info}} \DIFadd{protocol and will provide
+  This renderer fully supports \texttt{AppleEg2Info} protocol and will provide
   screen rotation for all EFI applications. In order to provide seamless rotation
-  compatibility with }\texttt{\DIFadd{EfiBoot}}\DIFadd{, builtin }\texttt{\DIFadd{AppleFramebufferInfo}} \DIFadd{should
+  compatibility with \texttt{EfiBoot}, builtin \texttt{AppleFramebufferInfo} should
   also be used, i.e. it may need to be overridden on Mac EFI.
-}
 
-\DIFaddend \item
+\item
   \texttt{GopPassThrough}\\
-  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{boolean}\DIFdelend \DIFaddbegin \DIFadd{string}\DIFaddend }\\
-  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{false}\DIFdelend \DIFaddbegin \DIFadd{Disabled}\DIFaddend }\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Disabled}\\
   \textbf{Description}: Provide GOP protocol instances on top of UGA protocol instances.
 
   This option provides the GOP protocol via a UGA-based proxy
-  for firmware that do not implement the protocol. \DIFaddbegin \DIFadd{The supported values
+  for firmware that do not implement the protocol. The supported values
   for the option are as follows:
-}\DIFaddend 
 
-  \DIFaddbegin \begin{itemize}
+  \begin{itemize}
     \tightlist
-    \item \texttt{\DIFadd{Enabled}} \DIFadd{--- provide GOP for all UGA protocols.
-    }\item \texttt{\DIFadd{Apple}} \DIFadd{--- provide GOP for }\texttt{\DIFadd{AppleFramebufferInfo}}\DIFadd{-enabled protocols.
-    }\item \texttt{\DIFadd{Disabled}} \DIFadd{--- do not provide GOP.
-  }\end{itemize}
+    \item \texttt{Enabled} --- provide GOP for all UGA protocols.
+    \item \texttt{Apple} --- provide GOP for \texttt{AppleFramebufferInfo}-enabled protocols.
+    \item \texttt{Disabled} --- do not provide GOP.
+  \end{itemize}
 
-  \DIFaddend \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
+  \emph{Note}: This option requires \texttt{ProvideConsoleGop} to be enabled.
 
 \item
   \texttt{IgnoreTextInGraphics}\\
@@ -7176,20 +7099,18 @@ functioning. Feature highlights:
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Replaces the Apple Debug Log protocol with a builtin
-  version\DIFaddbegin \DIFadd{.
-}
+  version.
 
 \item
-  \texttt{\DIFadd{AppleEg2Info}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Replaces the Apple EFI Graphics 2 protocol with a builtin
+  \texttt{AppleEg2Info}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Replaces the Apple EFI Graphics 2 protocol with a builtin
   version.
-}
 
-  \emph{\DIFadd{Note}}\DIFadd{: This protocol allows newer }\texttt{\DIFadd{EfiBoot}} \DIFadd{versions (at least 10.15)
-  to expose screen rotation to macOS. Refer to }\texttt{\DIFadd{ForceDisplayRotationInEFI}}
-  \DIFadd{variable description on how to set screen rotation angle}\DIFaddend .
+  \emph{Note}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
+  to expose screen rotation to macOS. Refer to \texttt{ForceDisplayRotationInEFI}
+  variable description on how to set screen rotation angle.
 
 \item
   \texttt{AppleFramebufferInfo}\\
