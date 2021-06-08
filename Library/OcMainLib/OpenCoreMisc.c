@@ -28,6 +28,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAudioLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcSmbiosLib.h>
@@ -91,6 +92,9 @@ ProduceDebugReport (
   EFI_FILE_PROTOCOL  *Fs;
   EFI_FILE_PROTOCOL  *SysReport;
   EFI_FILE_PROTOCOL  *SubReport;
+  OC_CPU_INFO        CpuInfo;
+
+  OcCpuScanProcessor (&CpuInfo);
 
   if (VolumeHandle != NULL) {
     Fs = LocateRootVolume (VolumeHandle, NULL);
@@ -184,7 +188,7 @@ ProduceDebugReport (
     );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OC: Dumping CPUInfo for report...\n"));
-    Status = OcCpuDump (SubReport);
+    Status = OcCpuDump (&CpuInfo, SubReport);
     SubReport->Close (SubReport);
   }
   DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));

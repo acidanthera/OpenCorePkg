@@ -12,15 +12,27 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include <IndustryStandard/ProcessorInfo.h>
+#include <Library/DebugLib.h>
 #include <Library/OcDeviceMiscLib.h>
 
 EFI_STATUS
 OcCpuDump (
+  IN OC_CPU_INFO        *CpuInfo,
   IN EFI_FILE_PROTOCOL  *Root
   )
 {
+  ASSERT (CpuInfo != NULL);
+  ASSERT (Root != NULL);
+
   //
   // TODO
   //
+  if (CpuInfo->Model >= CPU_MODEL_NEHALEM && CpuInfo->Model != CPU_MODEL_BONNELL) {
+
+  } else {
+    
+  }
+
   return EFI_SUCCESS;
 }
