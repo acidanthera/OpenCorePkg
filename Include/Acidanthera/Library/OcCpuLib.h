@@ -161,18 +161,6 @@ typedef struct {
 } OC_CPU_INFO;
 
 /**
- Detect whether the CPU model is Nehalem or newer.
-
- @param[in]  CpuInfo  A pointer to the cpu info.
-
- @retval TRUE if the CPU model is Nehalem or newer.
-**/
-BOOLEAN
-OcCpuHasNehalemAndNewer (
-  IN   OC_CPU_INFO        *CpuInfo  OPTIONAL
-  );
-
-/**
   Scan the processor and fill the cpu info structure with results.
 
   @param[in] Cpu  A pointer to the cpu info structure to fill with results.

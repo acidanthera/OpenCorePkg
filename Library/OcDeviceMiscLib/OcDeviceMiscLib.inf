@@ -30,7 +30,6 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
-  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gEfiEventExitBootServicesGuid
