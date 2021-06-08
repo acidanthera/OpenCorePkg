@@ -737,11 +737,10 @@ ScanAmdProcessor (
   }
 }
 
-/** Scan the processor and fill the cpu info structure with results
+/**
+  Scan the processor and fill the cpu info structure with results.
 
-  @param[in] Cpu  A pointer to the cpu info structure to fill with results
-
-  @retval EFI_SUCCESS  The scan was completed successfully.
+  @param[in,out] Cpu  A pointer to the cpu info structure to fill with results.
 **/
 VOID
 OcCpuScanProcessor (
