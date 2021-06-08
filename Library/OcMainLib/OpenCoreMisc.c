@@ -29,6 +29,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -173,6 +174,20 @@ ProduceDebugReport (
     SubReport->Close (SubReport);
   }
   DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
+
+  Status = SafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"CPUInfo",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping CPUInfo for report...\n"));
+    Status = OcCpuDump (SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
   Fs->Close (Fs);

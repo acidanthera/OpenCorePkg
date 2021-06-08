@@ -64,6 +64,7 @@
 
 [Sources]
   ActivateHpetSupport.c
+  CpuDump.c
   DirectReset.c
   ForgeUefi.c
   ReleaseUsbOwnership.c

@@ -16,6 +16,7 @@
 #define OC_DEVICE_MISC_LIB_H
 
 #include <Uefi.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 
 /**
@@ -49,6 +50,18 @@ ResetAudioTrafficClass (
 VOID
 ActivateHpetSupport (
   VOID
+  );
+
+/**
+  Dump CPU data to the specified directory.
+
+  @param[in] Root  Directory to write CPU data.
+  
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcCpuDump (
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 /**
