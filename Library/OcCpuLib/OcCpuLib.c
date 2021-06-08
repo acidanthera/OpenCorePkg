@@ -31,6 +31,36 @@
 
 #include "OcCpuInternals.h"
 
+BOOLEAN
+OcCpuHasNehalemAndNewer (
+  IN   OC_CPU_INFO        *CpuInfo  OPTIONAL
+  )
+{
+  CPUID_VERSION_INFO_EAX              Eax;
+  UINT8                               CpuModel;
+
+  if (CpuInfo != NULL) {
+    CpuModel = CpuInfo->Model;
+  } else {
+    //
+    // Assuming Intel machines used on Apple hardware.
+    //
+    AsmCpuid (
+      CPUID_VERSION_INFO,
+      &Eax.Uint32,
+      NULL,
+      NULL,
+      NULL
+      );
+    CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
+  }
+
+  //
+  // Refer to Intel SDM (MSRs in Processors Based on Intel... table).
+  //
+  return CpuModel >= CPU_MODEL_NEHALEM && CpuModel != CPU_MODEL_BONNELL;
+}
+
 STATIC
 EFI_STATUS
 ScanMpServices (
@@ -281,32 +311,11 @@ SetMaxBusRatioAndMaxBusRatioDiv (
 {
   MSR_IA32_PERF_STATUS_REGISTER       PerfStatus;
   MSR_NEHALEM_PLATFORM_INFO_REGISTER  PlatformInfo;
-  CPUID_VERSION_INFO_EAX              Eax;
-  UINT8                               CpuModel;
 
   ASSERT (MaxBusRatio != NULL);
   ASSERT (MaxBusRatioDiv != NULL);
 
-  if (CpuInfo != NULL) {
-    CpuModel = CpuInfo->Model;
-  } else {
-    //
-    // Assuming Intel machines used on Apple hardware.
-    //
-    AsmCpuid (
-      CPUID_VERSION_INFO,
-      &Eax.Uint32,
-      NULL,
-      NULL,
-      NULL
-      );
-    CpuModel = (UINT8) Eax.Bits.Model | (UINT8) (Eax.Bits.ExtendedModelId << 4U);
-  }
-
-  //
-  // Refer to Intel SDM (MSRs in Processors Based on Intel... table).
-  //
-  if (CpuModel >= CPU_MODEL_NEHALEM && CpuModel != CPU_MODEL_BONNELL) {
+  if (OcCpuHasNehalemAndNewer (CpuInfo)) {
     PlatformInfo.Uint64 = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
     *MaxBusRatio        = (UINT8) PlatformInfo.Bits.MaximumNonTurboRatio;
     *MaxBusRatioDiv     = 0;
