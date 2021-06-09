@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.7.1
+- Added `SyncTableIds` quirk to sync modified table OEM identifiers
+
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
 - Improved direct GOP renderer performance for certain cases

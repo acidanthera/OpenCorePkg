@@ -291,6 +291,16 @@ AcpiResetLogoStatus (
   );
 
 /**
+  Sync ACPI table identifiers with SLIC.
+
+  @param[in,out] Context     ACPI library context.
+**/
+VOID
+AcpiSyncTableIds (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  );
+
+/**
   Log and reset FACS hardware signature.
 
   @param[in,out] Context     ACPI library context.

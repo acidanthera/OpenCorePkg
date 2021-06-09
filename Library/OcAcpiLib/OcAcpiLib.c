@@ -1597,6 +1597,66 @@ AcpiResetLogoStatus (
 }
 
 VOID
+AcpiSyncTableIds (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  )
+{
+  EFI_ACPI_DESCRIPTION_HEADER  *Slic;
+  UINT32                       Index;
+
+  Slic = NULL;
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_SOFTWARE_LICENSING_TABLE_SIGNATURE) {
+      Slic = (VOID *)Context->Tables[Index];
+      break;
+    }
+  }
+
+  if (Slic == NULL) {
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table is not found\n"));
+    return;
+  }
+
+  //
+  // SLIC identifiers must match RSDT and FADT, also doing XSDT for newer EFI just in case.
+  // REF: https://bugzilla.redhat.com/show_bug.cgi?id=1248758
+  //
+
+  if (Context->Rsdt != NULL) {
+    CopyMem (&Context->Rsdt->Header.OemId, &Slic->OemId, sizeof (Context->Rsdt->Header.OemId));
+    Context->Rsdt->Header.OemTableId = Slic->OemTableId;
+    Context->Rsdt->Header.Checksum = 0;
+    Context->Rsdt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Rsdt,
+      Context->Rsdt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in RSDT\n"));
+  }
+
+  if (Context->Xsdt != NULL) {
+    CopyMem (&Context->Xsdt->Header.OemId, &Slic->OemId, sizeof (Context->Xsdt->Header.OemId));
+    Context->Xsdt->Header.OemTableId = Slic->OemTableId;
+    Context->Xsdt->Header.Checksum = 0;
+    Context->Xsdt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Xsdt,
+      Context->Xsdt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in XSDT\n"));
+  }
+
+  if (Context->Fadt != NULL) {
+    CopyMem (&Context->Fadt->Header.OemId, &Slic->OemId, sizeof (Context->Fadt->Header.OemId));
+    Context->Fadt->Header.OemTableId = Slic->OemTableId;
+    Context->Fadt->Header.Checksum = 0;
+    Context->Fadt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Fadt,
+      Context->Fadt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in FADT\n"));
+  }
+}
+
+VOID
 AcpiHandleHardwareSignature (
   IN OUT OC_ACPI_CONTEXT  *Context,
   IN     BOOLEAN          Reset
