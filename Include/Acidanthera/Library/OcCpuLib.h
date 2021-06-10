@@ -18,6 +18,8 @@
 #include <Uefi.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/AppleIntelCpuInfo.h>
+#include <Protocol/FrameworkMpService.h>
+#include <Protocol/MpService.h>
 
 /**
   Assumed CPU frequency when it cannot be detected.
@@ -202,7 +204,19 @@ typedef struct {
   //
   BOOLEAN                     CpuHasMsrIa32PerfStatus;
   UINT64                      CpuMsrIa32PerfStatusValue;
+
+  //
+  // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (0xE2)
+  //
+  BOOLEAN                     CpuHasMsrE2;
+  UINT64                      CpuMsrE2Value;
 } OC_CPU_MSR_REPORT;
+
+typedef struct {
+  EFI_MP_SERVICES_PROTOCOL  *MpServices;
+  OC_CPU_MSR_REPORT         *Reports;
+  OC_CPU_INFO               *CpuInfo;
+} OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT;
 
 /**
   Scan the processor and fill the cpu info structure with results.
@@ -224,6 +238,31 @@ VOID
 OcCpuGetMsrReport (
   IN  OC_CPU_INFO        *CpuInfo,
   OUT OC_CPU_MSR_REPORT  *Report
+  );
+
+/**
+ Get the MSR report of a single core on the CPU.
+
+ @param[in,out] Buffer  The pointer to private data buffer.
+ **/
+VOID
+EFIAPI
+OcCpuGetMsrReportPerCore (
+  IN OUT VOID  *Buffer
+  );
+
+/**
+ Get the MSR reports of all cores on the CPU.
+
+ @param[in]   CpuInfo     A pointer to the cpu info.
+ @param[out]  EntryCount  Count of cores on the CPU.
+
+ @return Array of reports of MSR status at each core.
+ **/
+OC_CPU_MSR_REPORT *
+OcCpuGetMsrReports (
+  IN  OC_CPU_INFO        *CpuInfo,
+  OUT UINTN              *EntryCount
   );
 
 /**

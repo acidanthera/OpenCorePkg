@@ -84,65 +84,165 @@ OcMsrDump (
   )
 {
   EFI_STATUS         Status;
-  OC_CPU_MSR_REPORT  Report;
+  OC_CPU_MSR_REPORT  *Reports;
+  UINTN              EntryCount;
+  UINTN              Index;
 
   CHAR8              *FileBuffer;
   UINTN              FileBufferSize;
   CHAR16             TmpFileName[32];
 
   ASSERT (CpuInfo != NULL);
-  ASSERT (Root != NULL);
+  ASSERT (Root    != NULL);
 
   FileBufferSize = SIZE_1KB;
-  FileBuffer     = AllocateZeroPool (FileBufferSize);
+  FileBuffer     = (CHAR8 *) AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  OcCpuGetMsrReport (CpuInfo, &Report);
-
-  //
-  // MSR_PLATFORM_INFO
-  //
-  if (Report.CpuHasMsrPlatformInfo) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: 0x%llX\n", Report.CpuMsrPlatformInfoValue);
-  }
-  //
-  // MSR_TURBO_RATIO_LIMIT
-  //
-  if (Report.CpuHasMsrTurboRatioLimit) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: 0x%llX\n", Report.CpuMsrTurboRatioLimitValue);
-  }
-  //
-  // MSR_PKG_POWER_INFO (TODO: To be confirmed)
-  //
-  if (Report.CpuHasMsrPkgPowerInfo) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PKG_POWER_INFO: 0x%llX\n", Report.CpuMsrPkgPowerInfoValue);
+  Reports = OcCpuGetMsrReports (CpuInfo, &EntryCount);
+  if (Reports == NULL) {
+    return EFI_UNSUPPORTED;
   }
 
-  //
-  // IA32_MISC_ENABLE
-  //
-  if (Report.CpuHasMsrIa32MiscEnable) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "IA32_MISC_ENABLE: 0x%llX\n", Report.CpuMsrIa32MiscEnableValue);
-  }
-  //
-  // MSR_IA32_EXT_CONFIG
-  //
-  if (Report.CpuHasMsrIa32ExtConfig) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: 0x%llX\n", Report.CpuMsrIa32ExtConfigValue);
-  }
-  //
-  // MSR_FSB_FREQ
-  //
-  if (Report.CpuHasMsrFsbFreq) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: 0x%llX\n", Report.CpuMsrFsbFreqValue);
-  }
-  //
-  // MSR_IA32_PERF_STATUS
-  //
-  if (Report.CpuHasMsrIa32PerfStatus) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_PERF_STATUS: 0x%llX\n", Report.CpuMsrIa32PerfStatusValue);
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "CPU BrandString: %a\nMicrocodeRevision: 0x%08X\nVirtualization %d\n",
+    CpuInfo->BrandString,
+    CpuInfo->MicrocodeRevision,
+    CpuInfo->Hypervisor
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "CPUID %08X %08X %08X %08X, ExtSigEcx %08X ExtSigEdx %08X\n",
+    CpuInfo->CpuidVerEax.Uint32,
+    CpuInfo->CpuidVerEbx.Uint32,
+    CpuInfo->CpuidVerEcx.Uint32,
+    CpuInfo->CpuidVerEdx.Uint32,
+    CpuInfo->CpuidExtSigEcx.Uint32,
+    CpuInfo->CpuidExtSigEdx.Uint32
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "Type 0x%02X, Family 0x%02X, Model 0x%02X, ExtModel 0x%02X, ExtFamily 0x%02X, Stepping 0x%02X\n",
+    CpuInfo->Type,
+    CpuInfo->Family,
+    CpuInfo->Model,
+    CpuInfo->ExtModel,
+    CpuInfo->ExtFamily,
+    CpuInfo->Stepping
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "Features 0x%16LX, ExtFeatures 0x%16LX, Signature 0x%08X\n",
+    CpuInfo->Features,
+    CpuInfo->ExtFeatures,
+    CpuInfo->Signature
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "Brand 0x%02X, AppleProcessorType 0x%04X, CstConfigLock %d, CpuGeneration %d\n",
+    CpuInfo->Brand,
+    CpuInfo->AppleProcessorType,
+    CpuInfo->CstConfigLock,
+    CpuInfo->CpuGeneration
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "MaxId 0x%08X, MaxExtId 0x%08X\n",
+    CpuInfo->MaxId,
+    CpuInfo->MaxExtId
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "PackageCount %u, CoreCount %u, ThreadCount %u\n",
+    CpuInfo->PackageCount,
+    CpuInfo->CoreCount,
+    CpuInfo->ThreadCount
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "ExternalClock %u\n",
+    CpuInfo->ExternalClock
+    );
+  PrintBuffer (
+    &FileBuffer,
+    &FileBufferSize,
+    "ARTFrequency %Lu, CPUFrequency %Lu, CPUFrequencyFromTSC %Lu, CPUFrequencyFromART %Lu, TscAdjust %Lu, CPUFrequencyFromApple %Lu, CPUFrequencyFromVMT %Lu, FSBFrequency %Lu\n",
+    CpuInfo->ARTFrequency,
+    CpuInfo->CPUFrequency,
+    CpuInfo->CPUFrequencyFromTSC,
+    CpuInfo->CPUFrequencyFromART,
+    CpuInfo->TscAdjust,
+    CpuInfo->CPUFrequencyFromApple,
+    CpuInfo->CPUFrequencyFromVMT,
+    CpuInfo->FSBFrequency
+    );
+
+  for (Index = 0; Index < EntryCount; ++Index) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d:\n", Index);
+
+    //
+    // MSR_PLATFORM_INFO
+    //
+    if (Reports[Index].CpuHasMsrPlatformInfo) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_PLATFORM_INFO: 0x%llX\n", Index, Reports[Index].CpuMsrPlatformInfoValue);
+    }
+    //
+    // MSR_TURBO_RATIO_LIMIT
+    //
+    if (Reports[Index].CpuHasMsrTurboRatioLimit) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_TURBO_RATIO_LIMIT: 0x%llX\n", Index, Reports[Index].CpuMsrTurboRatioLimitValue);
+    }
+    //
+    // MSR_PKG_POWER_INFO (TODO: To be confirmed)
+    //
+    if (Reports[Index].CpuHasMsrPkgPowerInfo) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_PKG_POWER_INFO: 0x%llX\n", Index, Reports[Index].CpuMsrPkgPowerInfoValue);
+    }
+
+    //
+    // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (0xE2)
+    //
+    if (Reports[Index].CpuHasMsrE2) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (0xE2): 0x%llX\n", Index, Reports[Index].CpuMsrPkgPowerInfoValue);
+    }
+
+    //
+    // IA32_MISC_ENABLE
+    //
+    if (Reports[Index].CpuHasMsrIa32MiscEnable) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d IA32_MISC_ENABLE: 0x%llX\n", Index, Reports[Index].CpuMsrIa32MiscEnableValue);
+    }
+    //
+    // MSR_IA32_EXT_CONFIG
+    //
+    if (Reports[Index].CpuHasMsrIa32ExtConfig) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_IA32_EXT_CONFIG: 0x%llX\n", Index, Reports[Index].CpuMsrIa32ExtConfigValue);
+    }
+    //
+    // MSR_FSB_FREQ
+    //
+    if (Reports[Index].CpuHasMsrFsbFreq) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_FSB_FREQ: 0x%llX\n", Index, Reports[Index].CpuMsrFsbFreqValue);
+    }
+    //
+    // MSR_IA32_PERF_STATUS
+    //
+    if (Reports[Index].CpuHasMsrIa32PerfStatus) {
+      PrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d MSR_IA32_PERF_STATUS: 0x%llX\n", Reports[Index].CpuMsrIa32PerfStatusValue);
+    }
+
+    PrintBuffer (&FileBuffer, &FileBufferSize, "\n");
   }
 
   //
@@ -155,6 +255,8 @@ OcMsrDump (
 
     FreePool (FileBuffer);
   }
+
+  FreePool (Reports);
 
   return EFI_SUCCESS;
 }

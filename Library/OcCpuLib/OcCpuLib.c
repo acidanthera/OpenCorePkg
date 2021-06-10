@@ -22,6 +22,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcCpuLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
 #include <Register/Microcode.h>
@@ -1018,6 +1019,109 @@ OcCpuGetMsrReport (
     Report->CpuHasMsrIa32PerfStatus   = TRUE;
     Report->CpuMsrIa32PerfStatusValue = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
   }
+
+  if (CpuInfo->CpuGeneration >= OcCpuGenerationSandyBridge) {
+    //
+    // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (MSR 0xE2)
+    //
+    Report->CpuHasMsrE2   = TRUE;
+    Report->CpuMsrE2Value = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
+  }
+}
+
+VOID
+EFIAPI
+OcCpuGetMsrReportPerCore (
+  IN OUT VOID  *Buffer
+  )
+{
+  OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT  *Argument;
+  EFI_STATUS                            Status;
+  UINTN                                 CoreIndex;
+
+  Argument = (OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT *) Buffer;
+
+  Status = Argument->MpServices->WhoAmI (
+    Argument->MpServices,
+    &CoreIndex
+    );
+  if (EFI_ERROR (Status)) {
+    return;
+  }
+
+  OcCpuGetMsrReport (Argument->CpuInfo, &Argument->Reports[CoreIndex]);
+}
+
+OC_CPU_MSR_REPORT *
+OcCpuGetMsrReports (
+  IN  OC_CPU_INFO        *CpuInfo,
+  OUT UINTN              *EntryCount
+  )
+{
+  OC_CPU_MSR_REPORT                     *Reports;
+  EFI_STATUS                            Status;
+  EFI_MP_SERVICES_PROTOCOL              *MpServices;
+  UINTN                                 NumberOfProcessors;
+  UINTN                                 NumberOfEnabledProcessors;
+  OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT  Argument;
+
+  ASSERT (CpuInfo    != NULL);
+  ASSERT (EntryCount != NULL);
+
+  MpServices = NULL;
+
+  Status = gBS->LocateProtocol (
+    &gEfiMpServiceProtocolGuid,
+    NULL,
+    (VOID **) &MpServices
+    );
+  if (!EFI_ERROR (Status)) {
+    Status = MpServices->GetNumberOfProcessors (
+      MpServices,
+      &NumberOfProcessors,
+      &NumberOfEnabledProcessors
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get the number of processors - %r, assuming one core\n", Status));
+      NumberOfProcessors = 1;
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCCPU: Failed to find mp services - %r, assuming one core\n", Status));
+    MpServices         = NULL;
+    NumberOfProcessors = 1;
+  }
+
+  Reports = (OC_CPU_MSR_REPORT *) AllocateZeroPool (NumberOfProcessors * sizeof (OC_CPU_MSR_REPORT));
+  if (Reports == NULL) {
+    return NULL;
+  }
+
+  //
+  // Call OcCpuGetMsrReport on the 0th member firstly.
+  //
+  OcCpuGetMsrReport (CpuInfo, &Reports[0]);
+  //
+  // Then call StartupAllAPs to fill in the rest.
+  //
+  if (MpServices != NULL) {
+    Argument.MpServices = MpServices;
+    Argument.Reports    = Reports;
+    Argument.CpuInfo    = CpuInfo;
+
+    Status = MpServices->StartupAllAPs (
+      MpServices,
+      OcCpuGetMsrReportPerCore,
+      TRUE,
+      NULL,
+      5000000,
+      &Argument,
+      NULL
+      );
+  }
+
+  *EntryCount = NumberOfProcessors;
+
+  return Reports;
 }
 
 VOID
