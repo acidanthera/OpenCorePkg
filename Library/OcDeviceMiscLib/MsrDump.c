@@ -12,14 +12,6 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <IndustryStandard/ProcessorInfo.h>
-#include <Register/Intel/ArchitecturalMsr.h>
-#include <Register/Intel/Msr/AtomMsr.h>
-#include <Register/Intel/Msr/CoreMsr.h>
-#include <Register/Intel/Msr/Core2Msr.h>
-#include <Register/Intel/Msr/NehalemMsr.h>
-#include <Register/Intel/Msr/GoldmontMsr.h>
-
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>

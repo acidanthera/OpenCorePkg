@@ -1008,10 +1008,10 @@ OcCpuGetMsrReport (
     Report->CpuMsrIa32ExtConfigValue = AsmReadMsr64 (MSR_IA32_EXT_CONFIG);
 
     //
-    // MSR_FSB_FREQ
+    // MSR_CORE_FSB_FREQ
     //
     Report->CpuHasMsrFsbFreq   = TRUE;
-    Report->CpuMsrFsbFreqValue = AsmReadMsr64 (MSR_FSB_FREQ);
+    Report->CpuMsrFsbFreqValue = AsmReadMsr64 (MSR_CORE_FSB_FREQ);
 
     //
     // MSR_IA32_PERF_STATUS
