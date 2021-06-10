@@ -93,84 +93,65 @@ OcCpuDump (
   ASSERT (CpuInfo != NULL);
   ASSERT (Root != NULL);
 
-  //
-  // The CPU model must be Intel.
-  //
-  if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
-    return EFI_UNSUPPORTED;
-  }
-
   FileBufferSize = SIZE_1KB;
   FileBuffer     = AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
+  OcCpuGetMsrReport (CpuInfo, &Report);
+
   //
-  // Ref: https://github.com/acidanthera/bugtracker/issues/1580
+  // MSR_PLATFORM_INFO
   //
-  if (CpuInfo->Model <= CPU_MODEL_PENRYN) {
-    //
-    // Before Penryn, the following registers are read:
-    // IA32_MISC_ENABLE
-    // MSR_IA32_EXT_CONFIG
-    // MSR_FSB_FREQ
-    // MSR_IA32_PERF_STATUS
-    //
-    OcCpuGetMsrReport (MSR_IA32_MISC_ENABLES, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_MISC_ENABLES: %llX\n");
-    }
-
-    OcCpuGetMsrReport (MSR_IA32_EXT_CONFIG, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: %llX\n");
-    }
-
-    OcCpuGetMsrReport (MSR_FSB_FREQ, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: %llX\n");
-    }
-
-    OcCpuGetMsrReport (MSR_IA32_PERF_STATUS, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_PERF_STATUS: %llX\n");
-    }
-  } else {
-    //
-    // Afterwards, the following registers are read:
-    // MSR_PLATFORM_INFO
-    // MSR_TURBO_RATIO_LIMIT
-    // MSR_PKG_POWER_INFO (To be confirmed)
-    //
-    OcCpuGetMsrReport (MSR_NEHALEM_PLATFORM_INFO, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: %llX\n");
-    }
-
-    //
-    // NOTE: On Haswell-E there are also
-    //       MSR_TURBO_RATIO_LIMIT1 and MSR_TURBO_RATIO_LIMIT2, which represent
-    //       0x1AE and 0x1AF respectively.
-    //
-    OcCpuGetMsrReport (MSR_NEHALEM_TURBO_RATIO_LIMIT, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: %llX\n");
-    }
-
-    OcCpuGetMsrReport (MSR_GOLDMONT_PKG_POWER_INFO, &Report);
-    if (Report.CpuHasMsr) {
-      PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PKG_POWER_INFO: %llX\n");
-    }
+  if (Report.CpuHasMsrPlatformInfo) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: %llX\n", Report.CpuMsrPlatformInfoValue);
+  }
+  //
+  // MSR_TURBO_RATIO_LIMIT
+  //
+  if (Report.CpuHasMsrTurboRatioLimit) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: %llX\n", Report.CpuMsrTurboRatioLimitValue);
+  }
+  //
+  // MSR_PKG_POWER_INFO (TODO: To be confirmed)
+  //
+  if (Report.CpuHasMsrPkgPowerInfo) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PKG_POWER_INFO: %llX\n", Report.CpuMsrPkgPowerInfoValue);
   }
 
   //
-  // Save dumped controller data to file.
+  // IA32_MISC_ENABLE
+  //
+  if (Report.CpuHasMsrIa32MiscEnable) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "IA32_MISC_ENABLE: %llX\n", Report.CpuMsrIa32MiscEnableValue);
+  }
+  //
+  // MSR_IA32_EXT_CONFIG
+  //
+  if (Report.CpuHasMsrIa32ExtConfig) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: %llX\n", Report.CpuMsrIa32ExtConfigValue);
+  }
+  //
+  // MSR_FSB_FREQ
+  //
+  if (Report.CpuHasMsrFsbFreq) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: %llX\n", Report.CpuMsrFsbFreqValue);
+  }
+  //
+  // MSR_IA32_PERF_STATUS
+  //
+  if (Report.CpuHasMsrIa32PerfStatus) {
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_PERF_STATUS: %llX\n", Report.CpuMsrIa32PerfStatusValue);
+  }
+
+  //
+  // Save dumped MSR data to file.
   //
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"MSRStatus.txt");
     Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
-    DEBUG ((DEBUG_INFO, "OCAU: Dumped MSR value - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAU: Dumped MSR data - %r\n", Status));
 
     FreePool (FileBuffer);
   }

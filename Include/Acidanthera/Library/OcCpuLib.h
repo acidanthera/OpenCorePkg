@@ -162,14 +162,46 @@ typedef struct {
 
 typedef struct {
   //
-  // TRUE if the CPU has a specific MSR.
+  // MSR_PLATFORM_INFO
   //
-  BOOLEAN                     CpuHasMsr;
+  BOOLEAN                     CpuHasMsrPlatformInfo;
+  UINT64                      CpuMsrPlatformInfoValue;
 
   //
-  // The value of a specific MSR, if readable.
+  // MSR_TURBO_RATIO_LIMIT
   //
-  UINT64                      CpuMsrValue;
+  BOOLEAN                     CpuHasMsrTurboRatioLimit;
+  UINT64                      CpuMsrTurboRatioLimitValue;
+
+  //
+  // MSR_PKG_POWER_INFO (To be confirmed)
+  //
+  BOOLEAN                     CpuHasMsrPkgPowerInfo;
+  UINT64                      CpuMsrPkgPowerInfoValue;
+
+  //
+  // IA32_MISC_ENABLE
+  //
+  BOOLEAN                     CpuHasMsrIa32MiscEnable;
+  UINT64                      CpuMsrIa32MiscEnableValue;
+
+  //
+  // MSR_IA32_EXT_CONFIG
+  //
+  BOOLEAN                     CpuHasMsrIa32ExtConfig;
+  UINT64                      CpuMsrIa32ExtConfigValue;
+
+  //
+  // MSR_FSB_FREQ
+  //
+  BOOLEAN                     CpuHasMsrFsbFreq;
+  UINT64                      CpuMsrFsbFreqValue;
+
+  //
+  // MSR_IA32_PERF_STATUS
+  //
+  BOOLEAN                     CpuHasMsrIa32PerfStatus;
+  UINT64                      CpuMsrIa32PerfStatusValue;
 } OC_CPU_MSR_REPORT;
 
 /**
@@ -185,12 +217,12 @@ OcCpuScanProcessor (
 /**
   Get the MSR report of the CPU.
 
-  @param[in]   Msr      MSR to be read.
+  @param[in]   CpuInfo  A pointer to the cpu info.
   @param[out]  Report   The report generated based on CpuInfo.
 **/
 VOID
 OcCpuGetMsrReport (
-  IN  UINT32             Msr,
+  IN  OC_CPU_INFO        *CpuInfo,
   OUT OC_CPU_MSR_REPORT  *Report
   );
 

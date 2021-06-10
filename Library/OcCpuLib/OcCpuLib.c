@@ -957,28 +957,66 @@ OcCpuScanProcessor (
     ));
 }
 
-/**
-  Get the MSR report of the CPU.
-
-  @param[in]   Msr      MSR to be read.
-  @param[out]  Report   Generated report.
-**/
 VOID
 OcCpuGetMsrReport (
-  IN  UINT32             Msr,
+  IN  OC_CPU_INFO        *CpuInfo,
   OUT OC_CPU_MSR_REPORT  *Report
   )
 {
-  UINT64  MsrValue;
-
-  ASSERT (Report != NULL);
+  ASSERT (CpuInfo != NULL);
+  ASSERT (Report  != NULL);
 
   ZeroMem (Report, sizeof (*Report));
 
-  MsrValue = AsmReadMsr64 (Msr);
-  if (MsrValue > 0) {
-    Report->CpuHasMsr   = TRUE;
-    Report->CpuMsrValue = MsrValue;
+  //
+  // The CPU model must be Intel.
+  //
+  if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
+    return;
+  }
+
+  if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
+    //
+    // MSR_PLATFORM_INFO
+    //
+    Report->CpuHasMsrPlatformInfo   = TRUE;
+    Report->CpuMsrPlatformInfoValue = AsmReadMsr64 (MSR_NEHALEM_PLATFORM_INFO);
+
+    //
+    // MSR_TURBO_RATIO_LIMIT
+    //
+    Report->CpuHasMsrTurboRatioLimit   = TRUE;
+    Report->CpuMsrTurboRatioLimitValue = AsmReadMsr64 (MSR_NEHALEM_TURBO_RATIO_LIMIT);
+
+    //
+    // MSR_PKG_POWER_INFO (TODO: To be confirmed)
+    //
+    Report->CpuHasMsrPkgPowerInfo   = TRUE;
+    Report->CpuMsrPkgPowerInfoValue = AsmReadMsr64 (MSR_GOLDMONT_PKG_POWER_INFO);
+  } else {
+    //
+    // IA32_MISC_ENABLE
+    //
+    Report->CpuHasMsrIa32MiscEnable   = TRUE;
+    Report->CpuMsrIa32MiscEnableValue = AsmReadMsr64 (MSR_IA32_MISC_ENABLES);
+
+    //
+    // MSR_IA32_EXT_CONFIG
+    //
+    Report->CpuHasMsrIa32ExtConfig   = TRUE;
+    Report->CpuMsrIa32ExtConfigValue = AsmReadMsr64 (MSR_IA32_EXT_CONFIG);
+
+    //
+    // MSR_FSB_FREQ
+    //
+    Report->CpuHasMsrFsbFreq   = TRUE;
+    Report->CpuMsrFsbFreqValue = AsmReadMsr64 (MSR_FSB_FREQ);
+
+    //
+    // MSR_IA32_PERF_STATUS
+    //
+    Report->CpuHasMsrIa32PerfStatus   = TRUE;
+    Report->CpuMsrIa32PerfStatusValue = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
   }
 }
 
