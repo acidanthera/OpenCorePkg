@@ -78,7 +78,7 @@ PrintBuffer (
 }
 
 EFI_STATUS
-OcCpuDump (
+OcMsrDump (
   IN OC_CPU_INFO        *CpuInfo,
   IN EFI_FILE_PROTOCOL  *Root
   )
@@ -151,7 +151,7 @@ OcCpuDump (
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"MSRStatus.txt");
     Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
-    DEBUG ((DEBUG_INFO, "OCAU: Dumped MSR data - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCDM: Dumped MSR data - %r\n", Status));
 
     FreePool (FileBuffer);
   }

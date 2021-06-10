@@ -54,7 +54,7 @@ ActivateHpetSupport (
   );
 
 /**
-  Dump CPU data to the specified directory.
+  Dump CPU MSR data to the specified directory.
 
   @param[in]  CpuInfo  A pointer to the CPU info.
   @param[in]  Root     Directory to write CPU data.
@@ -62,7 +62,7 @@ ActivateHpetSupport (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-OcCpuDump (
+OcMsrDump (
   IN OC_CPU_INFO        *CpuInfo,
   IN EFI_FILE_PROTOCOL  *Root
   );

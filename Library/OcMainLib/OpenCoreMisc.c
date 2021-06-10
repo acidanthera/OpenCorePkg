@@ -182,16 +182,16 @@ ProduceDebugReport (
   Status = SafeFileOpen (
     SysReport,
     &SubReport,
-    L"CPUInfo",
+    L"MSRStatus",
     EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
     EFI_FILE_DIRECTORY
     );
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OC: Dumping CPUInfo for report...\n"));
-    Status = OcCpuDump (&CpuInfo, SubReport);
+    DEBUG ((DEBUG_INFO, "OC: Dumping MSRStatus for report...\n"));
+    Status = OcMsrDump (&CpuInfo, SubReport);
     SubReport->Close (SubReport);
   }
-  DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
+  DEBUG ((DEBUG_INFO, "OC: MSRStatus dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
   Fs->Close (Fs);
