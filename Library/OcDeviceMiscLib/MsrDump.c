@@ -155,7 +155,7 @@ OcMsrDump (
   PrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "PackageCount %u, CoreCount %u, ThreadCount %u\n",
+    "PackageCount %u\nCoreCount %u\nThreadCount %u\n",
     CpuInfo->PackageCount,
     CpuInfo->CoreCount,
     CpuInfo->ThreadCount
@@ -169,7 +169,7 @@ OcMsrDump (
   PrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "ARTFrequency %Lu, CPUFrequency %Lu, CPUFrequencyFromTSC %Lu, CPUFrequencyFromART %Lu, TscAdjust %Lu, CPUFrequencyFromApple %Lu, CPUFrequencyFromVMT %Lu, FSBFrequency %Lu\n",
+    "ARTFrequency %Lu\nCPUFrequency %Lu\nCPUFrequencyFromTSC %Lu\nCPUFrequencyFromART %Lu\nTscAdjust %Lu\nCPUFrequencyFromApple %Lu\nCPUFrequencyFromVMT %Lu\nFSBFrequency %Lu\n",
     CpuInfo->ARTFrequency,
     CpuInfo->CPUFrequency,
     CpuInfo->CPUFrequencyFromTSC,

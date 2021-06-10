@@ -176,7 +176,7 @@ typedef struct {
   UINT64                      CpuMsrTurboRatioLimitValue;
 
   //
-  // MSR_PKG_POWER_INFO (To be confirmed)
+  // MSR_PKG_POWER_INFO (TODO: To be confirmed)
   //
   BOOLEAN                     CpuHasMsrPkgPowerInfo;
   UINT64                      CpuMsrPkgPowerInfoValue;

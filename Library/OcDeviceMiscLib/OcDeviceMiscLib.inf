@@ -65,9 +65,9 @@
 
 [Sources]
   ActivateHpetSupport.c
-  MsrDump.c
   DirectReset.c
   ForgeUefi.c
+  MsrDump.c
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c
   ResetAudioTrafficClass.c
