@@ -190,7 +190,7 @@ OcCpuScanProcessor (
 **/
 VOID
 OcCpuGetMsrReport (
-  IN  UINT64             Msr,
+  IN  UINT32             Msr,
   OUT OC_CPU_MSR_REPORT  *Report
   );
 
