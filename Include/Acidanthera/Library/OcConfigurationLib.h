@@ -84,7 +84,8 @@
   _(BOOLEAN                     , NormalizeHeaders    ,     , FALSE  , ()) \
   _(BOOLEAN                     , RebaseRegions       ,     , FALSE  , ()) \
   _(BOOLEAN                     , ResetHwSig          ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ())
+  _(BOOLEAN                     , ResetLogoStatus     ,     , FALSE  , ()) \
+  _(BOOLEAN                     , SyncTableIds        ,     , FALSE  , ())
   OC_DECLARE (OC_ACPI_QUIRKS)
 
 #define OC_ACPI_CONFIG_FIELDS(_, __) \

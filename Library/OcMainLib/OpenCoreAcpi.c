@@ -241,6 +241,10 @@ OcLoadAcpiSupport (
     AcpiNormalizeHeaders (&Context);
   }
 
+  if (Config->Acpi.Quirks.SyncTableIds) {
+    AcpiSyncTableIds (&Context);
+  }
+
   AcpiApplyContext (&Context);
 
   AcpiFreeContext (&Context);

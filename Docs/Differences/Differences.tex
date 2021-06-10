@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jun  8 01:02:27 2021
-%DIF ADD ../Configuration.tex        Tue Jun  8 01:04:08 2021
+%DIF DEL PreviousConfiguration.tex   Wed Jun  9 16:07:27 2021
+%DIF ADD ../Configuration.tex        Wed Jun  9 16:08:47 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1268,7 +1268,18 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
   status field to \texttt{false}.
 
   This works around firmware that provide a \texttt{BGRT} table but
-  fail to handle screen updates afterwards.
+  fail to handle screen updates afterwards\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{SyncTableIds}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Sync table identifiers with the }\texttt{\DIFadd{SLIC}} \DIFadd{table.
+}
+
+  \DIFadd{This works around patched tables becoming incompatible with the }\texttt{\DIFadd{SLIC}}
+  \DIFadd{table causing licensing issues in older Windows operating systems}\DIFaddend .
 
 \end{enumerate}
 

@@ -1210,6 +1210,15 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
   This works around firmware that provide a \texttt{BGRT} table but
   fail to handle screen updates afterwards.
 
+\item
+  \texttt{SyncTableIds}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sync table identifiers with the \texttt{SLIC} table.
+
+  This works around patched tables becoming incompatible with the \texttt{SLIC}
+  table causing licensing issues in older Windows operating systems.
+
 \end{enumerate}
 
 
