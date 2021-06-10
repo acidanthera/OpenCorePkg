@@ -957,6 +957,31 @@ OcCpuScanProcessor (
     ));
 }
 
+/**
+  Get the MSR report of the CPU.
+
+  @param[in]   Msr      MSR to be read.
+  @param[out]  Report   Generated report.
+**/
+VOID
+OcCpuGetMsrReport (
+  IN  UINT64             Msr,
+  OUT OC_CPU_MSR_REPORT  *Report
+  )
+{
+  UINT64  MsrValue;
+
+  ASSERT (Report != NULL);
+
+  ZeroMem (Report, sizeof (*Report));
+
+  MsrValue = AsmReadMsr64 (Msr);
+  if (MsrValue > 0) {
+    Report->CpuHasMsr   = TRUE;
+    Report->CpuMsrValue = MsrValue;
+  }
+}
+
 VOID
 OcCpuCorrectFlexRatio (
   IN OC_CPU_INFO  *Cpu

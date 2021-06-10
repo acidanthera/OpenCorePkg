@@ -160,6 +160,18 @@ typedef struct {
   UINT64                      FSBFrequency;
 } OC_CPU_INFO;
 
+typedef struct {
+  //
+  // TRUE if the CPU has a specific MSR.
+  //
+  BOOLEAN                     CpuHasMsr;
+
+  //
+  // The value of a specific MSR, if readable.
+  //
+  UINT64                      CpuMsrValue;
+} OC_CPU_MSR_REPORT;
+
 /**
   Scan the processor and fill the cpu info structure with results.
 
@@ -168,6 +180,18 @@ typedef struct {
 VOID
 OcCpuScanProcessor (
   IN OUT OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Get the MSR report of the CPU.
+
+  @param[in]   Msr      MSR to be read.
+  @param[out]  Report   The report generated based on CpuInfo.
+**/
+VOID
+OcCpuGetMsrReport (
+  IN  UINT64             Msr,
+  OUT OC_CPU_MSR_REPORT  *Report
   );
 
 /**
