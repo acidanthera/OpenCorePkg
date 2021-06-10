@@ -105,44 +105,44 @@ OcMsrDump (
   // MSR_PLATFORM_INFO
   //
   if (Report.CpuHasMsrPlatformInfo) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: %llX\n", Report.CpuMsrPlatformInfoValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PLATFORM_INFO: 0x%llX\n", Report.CpuMsrPlatformInfoValue);
   }
   //
   // MSR_TURBO_RATIO_LIMIT
   //
   if (Report.CpuHasMsrTurboRatioLimit) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: %llX\n", Report.CpuMsrTurboRatioLimitValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_TURBO_RATIO_LIMIT: 0x%llX\n", Report.CpuMsrTurboRatioLimitValue);
   }
   //
   // MSR_PKG_POWER_INFO (TODO: To be confirmed)
   //
   if (Report.CpuHasMsrPkgPowerInfo) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PKG_POWER_INFO: %llX\n", Report.CpuMsrPkgPowerInfoValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_PKG_POWER_INFO: 0x%llX\n", Report.CpuMsrPkgPowerInfoValue);
   }
 
   //
   // IA32_MISC_ENABLE
   //
   if (Report.CpuHasMsrIa32MiscEnable) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "IA32_MISC_ENABLE: %llX\n", Report.CpuMsrIa32MiscEnableValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "IA32_MISC_ENABLE: 0x%llX\n", Report.CpuMsrIa32MiscEnableValue);
   }
   //
   // MSR_IA32_EXT_CONFIG
   //
   if (Report.CpuHasMsrIa32ExtConfig) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: %llX\n", Report.CpuMsrIa32ExtConfigValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_EXT_CONFIG: 0x%llX\n", Report.CpuMsrIa32ExtConfigValue);
   }
   //
   // MSR_FSB_FREQ
   //
   if (Report.CpuHasMsrFsbFreq) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: %llX\n", Report.CpuMsrFsbFreqValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_FSB_FREQ: 0x%llX\n", Report.CpuMsrFsbFreqValue);
   }
   //
   // MSR_IA32_PERF_STATUS
   //
   if (Report.CpuHasMsrIa32PerfStatus) {
-    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_PERF_STATUS: %llX\n", Report.CpuMsrIa32PerfStatusValue);
+    PrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_PERF_STATUS: 0x%llX\n", Report.CpuMsrIa32PerfStatusValue);
   }
 
   //
