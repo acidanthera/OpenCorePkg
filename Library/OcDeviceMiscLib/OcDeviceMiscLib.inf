@@ -30,6 +30,7 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
   gEfiEventExitBootServicesGuid
@@ -66,6 +67,7 @@
   ActivateHpetSupport.c
   DirectReset.c
   ForgeUefi.c
+  MsrDump.c
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c
   ResetAudioTrafficClass.c

@@ -24,6 +24,7 @@
 #include <Library/OcFileLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -177,52 +178,6 @@ CHAR8 *mColors[HDA_CONFIG_DEFAULT_COLOR_OTHER + 1] =
 
 STATIC
 VOID
-EFIAPI
-PrintHdaBuffer (
-  IN OUT CHAR8        **AsciiBuffer,
-  IN     UINTN        *AsciiBufferSize,
-  IN     CONST CHAR8  *FormatString,
-  ...
-  )
-{
-  EFI_STATUS  Status;
-  VA_LIST     Marker;
-  CHAR8       Tmp[256];
-  CHAR8       *NewBuffer;
-  UINTN       NewBufferSize;
-
-  if (*AsciiBuffer == NULL) {
-    return;
-  }
-
-  VA_START (Marker, FormatString);
-  AsciiVSPrint (Tmp, sizeof (Tmp), FormatString, Marker);
-  VA_END (Marker);
-
-  Status = AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
-  if (Status == EFI_BUFFER_TOO_SMALL) {
-    if (OcOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
-      return;
-    }
-    NewBuffer = ReallocatePool (*AsciiBufferSize, NewBufferSize, *AsciiBuffer);
-    if (NewBuffer == NULL) {
-      FreePool (*AsciiBuffer);
-
-      *AsciiBuffer     = NULL;
-      *AsciiBufferSize = 0;
-
-      return;
-    }
-
-    *AsciiBuffer      = NewBuffer;
-    *AsciiBufferSize  = NewBufferSize;
-
-    AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
-  }
-}
-
-STATIC
-VOID
 PrintRatesFormats (
   IN OUT CHAR8        **AsciiBuffer,
   IN     UINTN        *AsciiBufferSize,
@@ -233,80 +188,80 @@ PrintRatesFormats (
   //
   // Print sample rates.
   //
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "    rates [0x%X]:", (UINT16) Rates);
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "    rates [0x%X]:", (UINT16) Rates);
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 8000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 8000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_11KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 11025");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 11025");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 16000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 16000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_22KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 22050");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 22050");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 32000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 32000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_44KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 44100");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 44100");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_48KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 48000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 48000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_88KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 88200");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 88200");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_96KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 96000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 96000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_176KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 176400");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 176400");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_192KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 192000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 192000");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_384KHZ) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 384000");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 384000");
   }
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 
   //
   // Print sample bits.
   //
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "    bits [0x%X]:", (UINT16)(Rates >> 16));
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "    bits [0x%X]:", (UINT16)(Rates >> 16));
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_8BIT) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 8");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 8");
   }  
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_16BIT) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 16");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 16");
   }  
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_20BIT) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 20");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 20");
   } 
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_24BIT) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 24");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 24");
   }
   if (Rates & HDA_PARAMETER_SUPPORTED_PCM_SIZE_RATES_32BIT) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 32");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 32");
   }
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 
   //
   // Print sample formats.
   //
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "    formats [0x%X]:", Formats);
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "    formats [0x%X]:", Formats);
   if (Formats & HDA_PARAMETER_SUPPORTED_STREAM_FORMATS_PCM) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " PCM");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " PCM");
   }
   if (Formats & HDA_PARAMETER_SUPPORTED_STREAM_FORMATS_FLOAT32) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " FLOAT32");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " FLOAT32");
   }
   if (Formats & HDA_PARAMETER_SUPPORTED_STREAM_FORMATS_AC3) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " AC3");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " AC3");
   }
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 }
 
 STATIC
@@ -318,7 +273,7 @@ PrintAmpCaps (
   )
 {
   if (AmpCaps != 0) {
-    PrintHdaBuffer (
+    OcAsciiPrintBuffer (
       AsciiBuffer,
       AsciiBufferSize,
       "ofs=0x%2X, nsteps=0x%2X, stepsize=0x%2X, mute=%u\n",
@@ -328,7 +283,7 @@ PrintAmpCaps (
       (AmpCaps & HDA_PARAMETER_AMP_CAPS_MUTE) != 0
       );
   } else {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "N/A\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "N/A\n");
   }
 }
 
@@ -345,7 +300,7 @@ PrintWidget (
   //
   // Node header and widget capabilities.
   //
-  PrintHdaBuffer (
+  OcAsciiPrintBuffer (
     AsciiBuffer,
     AsciiBufferSize,
     "Node 0x%2X (%u) [%a] wcaps 0x%X:",
@@ -356,36 +311,36 @@ PrintWidget (
     );
 
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_STEREO) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Stereo");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Stereo");
   } else {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Mono");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Mono");
   }
 
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_DIGITAL) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Digital");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Digital");
   }
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_IN_AMP) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Amp-In");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Amp-In");
   }
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_OUT_AMP) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Amp-Out");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Amp-Out");
   }
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_L_R_SWAP) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " R/L");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " R/L");
   }
-  PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+  OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 
   //
   // Input amp capabilities and defaults.
   //
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_IN_AMP) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-In caps: ");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-In caps: ");
     PrintAmpCaps (AsciiBuffer, AsciiBufferSize, HdaWidget->AmpInCapabilities);
 
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-In vals:");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-In vals:");
     for (Index = 0; Index < HdaWidget->ConnectionCount; Index++) {
       if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_STEREO) {
-        PrintHdaBuffer (
+        OcAsciiPrintBuffer (
           AsciiBuffer,
           AsciiBufferSize,
           " [0x%2X 0x%2X]",
@@ -393,22 +348,22 @@ PrintWidget (
           HdaWidget->AmpInRightDefaultGainMute[Index]
           );
       } else {
-        PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " [0x%2X]", HdaWidget->AmpInLeftDefaultGainMute[Index]);
+        OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " [0x%2X]", HdaWidget->AmpInLeftDefaultGainMute[Index]);
       }       
     }
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
   }
 
   //
   // Output amp capabilities and defaults.
   //
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_OUT_AMP) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-Out caps: ");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-Out caps: ");
     PrintAmpCaps (AsciiBuffer, AsciiBufferSize, HdaWidget->AmpOutCapabilities);
 
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-Out vals:");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Amp-Out vals:");
     if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_STEREO) {
-      PrintHdaBuffer (
+      OcAsciiPrintBuffer (
         AsciiBuffer,
         AsciiBufferSize,
         " [0x%2X 0x%2X]",
@@ -416,9 +371,9 @@ PrintWidget (
         HdaWidget->AmpOutRightDefaultGainMute
         );
     } else {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " [0x%2X]", HdaWidget->AmpOutLeftDefaultGainMute);
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " [0x%2X]", HdaWidget->AmpOutLeftDefaultGainMute);
     }   
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
   }
 
   //
@@ -427,7 +382,7 @@ PrintWidget (
   if (HDA_PARAMETER_WIDGET_CAPS_TYPE (HdaWidget->Capabilities) == HDA_WIDGET_TYPE_INPUT
     || HDA_PARAMETER_WIDGET_CAPS_TYPE (HdaWidget->Capabilities) == HDA_WIDGET_TYPE_OUTPUT) {
 
-    PrintHdaBuffer (
+    OcAsciiPrintBuffer (
       AsciiBuffer,
       AsciiBufferSize,
       "  Converter: stream=%u, channel=%u\n",
@@ -436,7 +391,7 @@ PrintWidget (
       );
     
     if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_FORMAT_OVERRIDE) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  PCM:\n");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  PCM:\n");
       PrintRatesFormats (AsciiBuffer, AsciiBufferSize, HdaWidget->SupportedPcmRates, HdaWidget->SupportedFormats);
     }
   }
@@ -445,51 +400,51 @@ PrintWidget (
   // Pin complex capabilities and defaults.
   //
   if (HDA_PARAMETER_WIDGET_CAPS_TYPE (HdaWidget->Capabilities) == HDA_WIDGET_TYPE_PIN_COMPLEX) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Pincap 0x%8X:", HdaWidget->PinCapabilities);
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Pincap 0x%8X:", HdaWidget->PinCapabilities);
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_INPUT) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " IN");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " IN");
     }   
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_OUTPUT) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " OUT");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " OUT");
     } 
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_HEADPHONE) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " HP");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " HP");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_EAPD) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " EAPD");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " EAPD");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_TRIGGER) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Trigger");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Trigger");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_PRESENCE) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " Detect");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " Detect");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_HBR) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " HBR");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " HBR");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_HDMI) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " HDMI");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " HDMI");
     }
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_DISPLAYPORT) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " DP");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " DP");
     }
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_EAPD) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  EAPD 0x%X:", HdaWidget->DefaultEapd);
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  EAPD 0x%X:", HdaWidget->DefaultEapd);
       if (HdaWidget->DefaultEapd & HDA_EAPD_BTL_ENABLE_BTL) {
-        PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " BTL");
+        OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " BTL");
       }
       if (HdaWidget->DefaultEapd & HDA_EAPD_BTL_ENABLE_EAPD) {
-        PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " EAPD");
+        OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " EAPD");
       }
       if (HdaWidget->DefaultEapd & HDA_EAPD_BTL_ENABLE_L_R_SWAP) {
-        PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " R/L");
+        OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " R/L");
       }
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
     }
 
-    PrintHdaBuffer (
+    OcAsciiPrintBuffer (
       AsciiBuffer,
       AsciiBufferSize,
       "  Pin Default 0x%8X: [%a] %a at %a %a\n",
@@ -500,7 +455,7 @@ PrintWidget (
       mLocations[HDA_VERB_GET_CONFIGURATION_DEFAULT_LOC (HdaWidget->DefaultConfiguration)]
       );
 
-    PrintHdaBuffer (
+    OcAsciiPrintBuffer (
       AsciiBuffer,
       AsciiBufferSize,
       "    Conn = %a, Color = %a\n",
@@ -508,7 +463,7 @@ PrintWidget (
       mColors[HDA_VERB_GET_CONFIGURATION_DEFAULT_COLOR (HdaWidget->DefaultConfiguration)]
       );
 
-    PrintHdaBuffer (
+    OcAsciiPrintBuffer (
       AsciiBuffer,
       AsciiBufferSize,
       "    DefAssociation = 0x%X, Sequence = 0x%X\n",
@@ -516,31 +471,31 @@ PrintWidget (
       HDA_VERB_GET_CONFIGURATION_DEFAULT_SEQUENCE (HdaWidget->DefaultConfiguration)
       );
 
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "Pin-ctls: 0x%2X:", HdaWidget->DefaultPinControl);
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "Pin-ctls: 0x%2X:", HdaWidget->DefaultPinControl);
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_VREF_EN) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " VREF");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF");
     }
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_IN_EN) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " IN");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " IN");
     }
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_OUT_EN) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " OUT");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " OUT");
     }
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_HP_EN) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " HP");
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " HP");
     }
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
   }
 
   //
   // Connections to other widgets.
   //
   if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_CONN_LIST) {
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "  Connection: %u\n    ", HdaWidget->ConnectionCount);
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "  Connection: %u\n    ", HdaWidget->ConnectionCount);
     for (Index = 0; Index < HdaWidget->ConnectionCount; Index++) {
-      PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, " 0x%2X", HdaWidget->Connections[Index]);
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " 0x%2X", HdaWidget->Connections[Index]);
     }
-    PrintHdaBuffer (AsciiBuffer, AsciiBufferSize, "\n");
+    OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
   }
 }
 
@@ -610,17 +565,17 @@ OcAudioDump (
         DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       }
 
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
       DEBUG ((DEBUG_INFO, "OCAU: Dumping controller at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
       if (DevicePathStr != NULL) {
         FreePool (DevicePathStr);
       }
 
       Status = HdaControllerInfo->GetName (HdaControllerInfo, &Name);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Controller: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Controller: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
 
       Status = HdaControllerInfo->GetVendorId (HdaControllerInfo, &Tmp32A);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
 
       //
       // Save dumped controller data to file.
@@ -684,39 +639,39 @@ OcAudioDump (
         DevicePathStr = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
       }
 
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Device path: %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>");
       DEBUG ((DEBUG_INFO, "OCAU: Dumping codec at %s\n", DevicePathStr != NULL ? DevicePathStr : L"<NULL>"));
       if (DevicePathStr != NULL) {
         FreePool (DevicePathStr);
       }
 
       Status = HdaCodecInfo->GetAddress (HdaCodecInfo, &Tmp8);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Address: 0x%X\n\n", Tmp8);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Address: 0x%X\n\n", Tmp8);
 
       Status = HdaCodecInfo->GetName (HdaCodecInfo, &Name);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Codec: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Codec: %s\n", Status == EFI_SUCCESS ? Name : L"<NULL>");
 
       Status = HdaCodecInfo->GetAudioFuncId (HdaCodecInfo, &Tmp8, &TmpBool);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "AFG Function Id: 0x%X (unsol %u)\n", Tmp8, TmpBool);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "AFG Function Id: 0x%X (unsol %u)\n", Tmp8, TmpBool);
 
       Status = HdaCodecInfo->GetVendorId (HdaCodecInfo, &Tmp32A);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Vendor Id: 0x%X\n", Tmp32A);
 
       Status = HdaCodecInfo->GetRevisionId (HdaCodecInfo, &Tmp32A);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Revision Id: 0x%X\n", Tmp32A);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Revision Id: 0x%X\n", Tmp32A);
 
       Status = HdaCodecInfo->GetDefaultRatesFormats (HdaCodecInfo, &Tmp32A, &Tmp32B);
       if (!EFI_ERROR (Status) && (Tmp32A != 0 || Tmp32B != 0)) {
-        PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM:\n");
+        OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Default PCM:\n");
         PrintRatesFormats (&FileBuffer, &FileBufferSize, Tmp32A, Tmp32B);
       } else {
-        PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default PCM: N/A\n");
+        OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Default PCM: N/A\n");
       }
 
       Status = HdaCodecInfo->GetDefaultAmpCaps (HdaCodecInfo, &Tmp32A, &Tmp32B);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-In caps: ");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Default Amp-In caps: ");
       PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32A : 0);
-      PrintHdaBuffer (&FileBuffer, &FileBufferSize, "Default Amp-Out caps: ");
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "Default Amp-Out caps: ");
       PrintAmpCaps (&FileBuffer, &FileBufferSize, Status == EFI_SUCCESS ? Tmp32B : 0);
 
       //

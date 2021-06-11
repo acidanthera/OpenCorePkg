@@ -16,6 +16,8 @@
 #define OC_DEVICE_MISC_LIB_H
 
 #include <Uefi.h>
+#include <Library/OcCpuLib.h>
+#include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
 
 /**
@@ -49,6 +51,20 @@ ResetAudioTrafficClass (
 VOID
 ActivateHpetSupport (
   VOID
+  );
+
+/**
+  Dump CPU MSR data to the specified directory.
+
+  @param[in]  CpuInfo  A pointer to the CPU info.
+  @param[in]  Root     Directory to write CPU data.
+  
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcMsrDump (
+  IN OC_CPU_INFO        *CpuInfo,
+  IN EFI_FILE_PROTOCOL  *Root
   );
 
 /**

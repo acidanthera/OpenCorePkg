@@ -28,7 +28,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAudioLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
@@ -90,6 +92,9 @@ ProduceDebugReport (
   EFI_FILE_PROTOCOL  *Fs;
   EFI_FILE_PROTOCOL  *SysReport;
   EFI_FILE_PROTOCOL  *SubReport;
+  OC_CPU_INFO        CpuInfo;
+
+  OcCpuScanProcessor (&CpuInfo);
 
   if (VolumeHandle != NULL) {
     Fs = LocateRootVolume (VolumeHandle, NULL);
@@ -173,6 +178,20 @@ ProduceDebugReport (
     SubReport->Close (SubReport);
   }
   DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
+
+  Status = SafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"MSRStatus",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping MSRStatus for report...\n"));
+    Status = OcMsrDump (&CpuInfo, SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: MSRStatus dumping - %r\n", Status));
 
   SysReport->Close (SysReport);
   Fs->Close (Fs);

@@ -18,6 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
@@ -478,5 +479,50 @@ AsciiFilterString (
     }
 
     ++String;
+  }
+}
+
+VOID
+EFIAPI
+OcAsciiPrintBuffer (
+  IN OUT CHAR8        **AsciiBuffer,
+  IN OUT UINTN        *AsciiBufferSize,
+  IN     CONST CHAR8  *FormatString,
+  ...
+  )
+{
+  EFI_STATUS  Status;
+  VA_LIST     Marker;
+  CHAR8       Tmp[256];
+  CHAR8       *NewBuffer;
+  UINTN       NewBufferSize;
+
+  if (*AsciiBuffer == NULL) {
+    return;
+  }
+
+  VA_START (Marker, FormatString);
+  AsciiVSPrint (Tmp, sizeof (Tmp), FormatString, Marker);
+  VA_END (Marker);
+
+  Status = AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
+  if (Status == EFI_BUFFER_TOO_SMALL) {
+    if (OcOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
+      return;
+    }
+    NewBuffer = ReallocatePool (*AsciiBufferSize, NewBufferSize, *AsciiBuffer);
+    if (NewBuffer == NULL) {
+      FreePool (*AsciiBuffer);
+
+      *AsciiBuffer     = NULL;
+      *AsciiBufferSize = 0;
+
+      return;
+    }
+
+    *AsciiBuffer      = NewBuffer;
+    *AsciiBufferSize  = NewBufferSize;
+
+    AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
   }
 }
