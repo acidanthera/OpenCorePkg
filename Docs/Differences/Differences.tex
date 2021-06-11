@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jun  9 16:07:27 2021
-%DIF ADD ../Configuration.tex        Wed Jun  9 16:08:47 2021
+%DIF DEL PreviousConfiguration.tex   Fri Jun 11 16:52:07 2021
+%DIF ADD ../Configuration.tex        Fri Jun 11 17:37:47 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1268,10 +1268,9 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
   status field to \texttt{false}.
 
   This works around firmware that provide a \texttt{BGRT} table but
-  fail to handle screen updates afterwards\DIFaddbegin \DIFadd{.
-}
+  fail to handle screen updates afterwards.
 
-\item
+\DIFaddbegin \item
   \texttt{\DIFadd{SyncTableIds}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
@@ -1279,9 +1278,10 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
 }
 
   \DIFadd{This works around patched tables becoming incompatible with the }\texttt{\DIFadd{SLIC}}
-  \DIFadd{table causing licensing issues in older Windows operating systems}\DIFaddend .
+  \DIFadd{table causing licensing issues in older Windows operating systems.
+}
 
-\end{enumerate}
+\DIFaddend \end{enumerate}
 
 
 \section{Booter}\label{booter}
@@ -2564,9 +2564,15 @@ blocking.
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
-  \emph{Note}: This option is a preferred alternative to deleting \texttt{DMAR}
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: This option is a preferred alternative to deleting \texttt{DMAR}
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
-  VT-d support in other systems in case they need this.
+  VT-d support in other systems in case they need this\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Misconfigured IOMMU in the firmware may result in broken devices 
+  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
+  link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
+  Gigabyte is one of the most common OEMs with these issues}\DIFaddend .
 
 \item
   \texttt{DisableLinkeditJettison}\\
