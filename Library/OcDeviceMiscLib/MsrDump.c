@@ -59,7 +59,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "CPUID %08X %08X %08X %08X, ExtSigEcx %08X ExtSigEdx %08X\n",
+    "CPUID %08X %08X %08X %08X\nExtSigEcx %08X\nExtSigEdx %08X\n",
     CpuInfo->CpuidVerEax.Uint32,
     CpuInfo->CpuidVerEbx.Uint32,
     CpuInfo->CpuidVerEcx.Uint32,
@@ -70,7 +70,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "Type 0x%02X, Family 0x%02X, Model 0x%02X, ExtModel 0x%02X, ExtFamily 0x%02X, Stepping 0x%02X\n",
+    "Type 0x%02X\nFamily 0x%02X\nModel 0x%02X\nExtModel 0x%02X\nExtFamily 0x%02X\nStepping 0x%02X\n",
     CpuInfo->Type,
     CpuInfo->Family,
     CpuInfo->Model,
@@ -81,7 +81,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "Features 0x%16LX, ExtFeatures 0x%16LX, Signature 0x%08X\n",
+    "Features 0x%16LX\nExtFeatures 0x%16LX\nSignature 0x%08X\n",
     CpuInfo->Features,
     CpuInfo->ExtFeatures,
     CpuInfo->Signature
@@ -89,7 +89,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "Brand 0x%02X, AppleProcessorType 0x%04X, CstConfigLock %d, CpuGeneration %d\n",
+    "Brand 0x%02X\nAppleProcessorType 0x%04X\nCstConfigLock %d\nCpuGeneration %d\n",
     CpuInfo->Brand,
     CpuInfo->AppleProcessorType,
     CpuInfo->CstConfigLock,
@@ -98,7 +98,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "MaxId 0x%08X, MaxExtId 0x%08X\n",
+    "MaxId 0x%08X\nMaxExtId 0x%08X\n",
     CpuInfo->MaxId,
     CpuInfo->MaxExtId
     );
@@ -119,7 +119,7 @@ OcMsrDump (
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
-    "ARTFrequency %Lu\nCPUFrequency %Lu\nCPUFrequencyFromTSC %Lu\nCPUFrequencyFromART %Lu\nTscAdjust %Lu\nCPUFrequencyFromApple %Lu\nCPUFrequencyFromVMT %Lu\nFSBFrequency %Lu\n",
+    "ARTFrequency %Lu\nCPUFrequency %Lu\nCPUFrequencyFromTSC %Lu\nCPUFrequencyFromART %Lu\nTscAdjust %Lu\nCPUFrequencyFromApple %Lu\nCPUFrequencyFromVMT %Lu\nFSBFrequency %Lu\n\n",
     CpuInfo->ARTFrequency,
     CpuInfo->CPUFrequency,
     CpuInfo->CPUFrequencyFromTSC,
