@@ -173,9 +173,9 @@ OcAsciiSafeSPrint (
   than PcdMaximumAsciiStringLength ASCII characters, not including the
   Null-terminator, then ASSERT().
 
-  @param[in[in]]  FirstString   A pointer to a Null-terminated ASCII string.
-  @param[in[in]]  SecondString  A pointer to a Null-terminated ASCII string.
-  @param[in[in]]  Length        The maximum number of ASCII characters to compare.
+  @param[in]  FirstString   A pointer to a Null-terminated ASCII string.
+  @param[in]  SecondString  A pointer to a Null-terminated ASCII string.
+  @param[in]  Length        The maximum number of ASCII characters to compare.
 
   @retval ==0    FirstString is identical to SecondString using case
                  insensitive comparisons.
