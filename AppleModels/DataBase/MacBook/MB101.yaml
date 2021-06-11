@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "429.100.7.0.0"
-BIOSLegacyVersion: "MB101.88Z.F000.B00.2102262339"
-BIOSReleaseDate: "02/26/2021"
+BIOSVersion: "429.120.4.0.0"
+BIOSLegacyVersion: "MB101.88Z.F000.B00.2104221908"
+BIOSReleaseDate: "04/22/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBook10,1"
 SystemVersion: "1.0"
@@ -78,17 +78,17 @@ SmcPlatform:
 SmcEPCI: 0xF08009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MB101.88Z.F000.B00.2102262339
+    BIOS ID:      MB101.88Z.F000.B00.2104221908
     Model:        MB101
-    EFI Version:  429.100.7.0.0
-    Built by:     root@bb-g9-pdb130
-    Date:         Fri Feb 26 23:39:58 2021
-    Revision:     429.100.7 (B&I)
+    EFI Version:  429.120.4.0.0
+    Built by:     root@bb-g8-pdb41
+    Date:         Thu Apr 22 19:08:05 2021
+    Revision:     429.120.4 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1205.0.19.59.6
-    UUID:         0FCE8F0D-03D5-3900-8D31-38D823C838E7
-    UUID:         A28F7B01-660D-3D80-985E-C221D9E4C5D9
+    UUID:         A7174463-0AD8-3CD7-B7E5-CF220FD78E1C
+    UUID:         CDA4AFB6-4E3B-31AA-A220-93A08CFCDCAB
 Specifications:
   CPUCodename:
     - "Kaby Lake"
