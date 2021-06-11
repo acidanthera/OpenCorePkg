@@ -420,7 +420,7 @@ OcAsciiStrToRawGuid (
  Write formatted ASCII strings to buffers.
   @param[in,out]  AsciiBuffer      A pointer to the output buffer for the produced Null-terminated
                                    ASCII string.
-  @param[in]      AsciiBufferSize  The size, in bytes, of the output buffer specified by AsciiBuffer.
+  @param[in,out]  AsciiBufferSize  The size, in bytes, of the output buffer specified by AsciiBuffer.
   @param[in]      FormatString     A Null-terminated ASCII format string.
   @param[in]      ...              Variable argument list whose contents are accessed based on the
                                    format string specified by FormatString.
@@ -429,7 +429,7 @@ VOID
 EFIAPI
 OcAsciiPrintBuffer (
   IN OUT CHAR8        **AsciiBuffer,
-  IN     UINTN        *AsciiBufferSize,
+  IN OUT UINTN        *AsciiBufferSize,
   IN     CONST CHAR8  *FormatString,
   ...
   );

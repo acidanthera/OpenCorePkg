@@ -486,7 +486,7 @@ VOID
 EFIAPI
 OcAsciiPrintBuffer (
   IN OUT CHAR8        **AsciiBuffer,
-  IN     UINTN        *AsciiBufferSize,
+  IN OUT UINTN        *AsciiBufferSize,
   IN     CONST CHAR8  *FormatString,
   ...
   )
