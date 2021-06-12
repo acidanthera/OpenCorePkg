@@ -5,7 +5,7 @@ OpenCore Changelog
 - Added CPU Info (MSRs) dumping to `SysReport`
 - Fixed `PowerTimeoutKernelPanic` on macOS 12
 - Fixed transparency click detection on OpenCanopy boot entries
-- Add PCI device info dumping to `SysReport`
+- Added PCI device info dumping to `SysReport`
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
