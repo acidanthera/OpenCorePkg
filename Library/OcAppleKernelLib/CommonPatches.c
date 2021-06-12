@@ -1970,6 +1970,34 @@ mApfsTimeoutPatch = {
   .Limit       = 0
 };
 
+STATIC
+UINT8
+mApfsTimeoutV2Find[] = {
+  0x40, 0x42, 0x0F, 0x00
+};
+
+STATIC
+UINT8
+mApfsTimeoutV2Replace[] = {
+  0x00, 0x02, 0x00, 0x00
+};
+
+
+STATIC
+PATCHER_GENERIC_PATCH
+mApfsTimeoutV2Patch = {
+  .Comment     = DEBUG_POINTER ("ApfsTimeout V2"),
+  .Base        = "_spaceman_scan_free_blocks",
+  .Find        = mApfsTimeoutV2Find,
+  .Mask        = NULL,
+  .Replace     = mApfsTimeoutV2Replace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mApfsTimeoutV2Find),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
 VOID
 PatchSetApfsTimeout (
   IN UINT32  Timeout
@@ -1978,6 +2006,7 @@ PatchSetApfsTimeout (
   // FIXME: This is really ugly, make quirks take a context param.
   DEBUG ((DEBUG_INFO, "OCAK: Registering %u APFS timeout\n", Timeout));
   CopyMem (&mApfsTimeoutReplace[2], &Timeout, sizeof (Timeout));
+  CopyMem (&mApfsTimeoutV2Replace[0], &Timeout, sizeof (Timeout));
 }
 
 STATIC
@@ -1998,11 +2027,20 @@ PatchSetApfsTrimTimeout (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+  if (KernelVersion >= KERNEL_VERSION_MONTEREY_MIN) {
+    Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutV2Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeoutV2 - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeoutV2\n"));
+    }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+    Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+    }
   }
 
   return Status;
