@@ -37,13 +37,6 @@ OcCpuInfoDump (
   ASSERT (CpuInfo != NULL);
   ASSERT (Root    != NULL);
 
-  //
-  // The CPU model must be Intel.
-  //
-  if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
-    return EFI_UNSUPPORTED;
-  }
-
   FileBufferSize = SIZE_1KB;
   FileBuffer     = (CHAR8 *) AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {

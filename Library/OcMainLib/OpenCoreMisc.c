@@ -182,7 +182,7 @@ ProduceDebugReport (
   Status = SafeFileOpen (
     SysReport,
     &SubReport,
-    L"CPUInfo",
+    L"CPU",
     EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
     EFI_FILE_DIRECTORY
     );
