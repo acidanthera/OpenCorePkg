@@ -193,6 +193,20 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
 
+  Status = SafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"PCI",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping PCIInfo for report...\n"));
+    Status = OcPciInfoDump (SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: PCIInfo dumping - %r\n", Status));
+
   SysReport->Close (SysReport);
   Fs->Close (Fs);
 
