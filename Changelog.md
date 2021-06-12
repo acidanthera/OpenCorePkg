@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.7.1
 - Added `SyncTableIds` quirk to sync modified table OEM identifiers
 - Added CPU Info (MSRs) dumping to `SysReport`
+- Updated builtin firmware versions for SMBIOS and the rest
 - Fixed `PowerTimeoutKernelPanic` on macOS 12
 - Fixed transparency click detection on OpenCanopy boot entries
 - Added PCI device info dumping to `SysReport`
