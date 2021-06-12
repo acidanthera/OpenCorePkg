@@ -18,6 +18,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - All strings (fields with plist `String` format) throughout the whole config only accept ASCII printable characters at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
 - Most binary patches must have `Find`, `Replace`, `Mask` (if used), and `ReplaceMask` (if used) identical size set. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
 - `MinKernel` and `MaxKernel` entries should follow conventions specified in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
+- `MinKernel` cannot be a value that is below macOS 10.4 (Darwin version 8).
 - Entries taking file system path only accept `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'`.
 - Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only accept strings in canonic string format.
 - Paths of UEFI Drivers only accept `0-9, A-Z, a-z, '_', '-', '.', and '/'`.
