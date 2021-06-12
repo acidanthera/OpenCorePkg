@@ -38,7 +38,7 @@ OcPciInfoDump (
   EFI_HANDLE                     *HandleBuffer;
   UINTN                          Index;
   EFI_PCI_IO_PROTOCOL            *PciIo;
-  PCI_DEVICE_INDEPENDENT_REGION  PciDeviceInfo;
+  PCI_TYPE00                     PciDevice;
 
   CHAR8                          *FileBuffer;
   UINTN                          FileBufferSize;
@@ -75,14 +75,14 @@ OcPciInfoDump (
     }
 
     //
-    // Read the whole PCI_DEVICE_INDEPENDENT_REGION for each device in 32-bit.
+    // Read the whole PCI device in 32-bit.
     //
     Status = PciIo->Pci.Read (
       PciIo,
       EfiPciIoWidthUint32,
       0,
-      sizeof (PCI_DEVICE_INDEPENDENT_REGION) / sizeof (UINT32),
-      &PciDeviceInfo
+      sizeof (PCI_TYPE00) / sizeof (UINT32),
+      &PciDevice
       );
     if (EFI_ERROR (Status)) {
       continue;
@@ -94,15 +94,32 @@ OcPciInfoDump (
     OcAsciiPrintBuffer (
       &FileBuffer,
       &FileBufferSize,
-      "Device %u:\nVendor ID: 0x%04X, Device ID: 0x%04X, RevisionID: 0x%02X, ClassCode: 0x%02X%02X%02X\n\n",
+      "Device %u:\nVendor ID: 0x%04X, Device ID: 0x%04X, RevisionID: 0x%02X, ClassCode: 0x%02X%02X%02X",
       Index + 1,
-      PciDeviceInfo.VendorId,
-      PciDeviceInfo.DeviceId,
-      PciDeviceInfo.RevisionID,
-      PciDeviceInfo.ClassCode[2],
-      PciDeviceInfo.ClassCode[1],
-      PciDeviceInfo.ClassCode[0]
+      PciDevice.Hdr.VendorId,
+      PciDevice.Hdr.DeviceId,
+      PciDevice.Hdr.RevisionID,
+      PciDevice.Hdr.ClassCode[2],
+      PciDevice.Hdr.ClassCode[1],
+      PciDevice.Hdr.ClassCode[0]
       );
+    //
+    // Dump SubsystemVendorID and SubsystemID if the current device is not a PCI bridge.
+    //
+    if (!IS_PCI_BRIDGE (&PciDevice)) {
+      OcAsciiPrintBuffer (
+        &FileBuffer,
+        &FileBufferSize,
+        ", SubsystemVendorID: 0x%04X, SubsystemID: 0x%04X",
+        PciDevice.Device.SubsystemVendorID,
+        PciDevice.Device.SubsystemID
+        );
+    }
+
+    //
+    // Append newlines.
+    //
+    OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "\n\n");
   }
 
   //
