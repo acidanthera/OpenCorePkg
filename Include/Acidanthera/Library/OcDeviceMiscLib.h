@@ -68,6 +68,18 @@ OcCpuInfoDump (
   );
 
 /**
+  Dump PCI info to the specified directory.
+
+  @param[in]  Root     Directory to write PCI info.
+  
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+OcPciInfoDump (
+  IN EFI_FILE_PROTOCOL  *Root
+  );
+
+/**
   Upgrade UEFI version to 2.x.
 
   @retval EFI_SUCCESS on success.

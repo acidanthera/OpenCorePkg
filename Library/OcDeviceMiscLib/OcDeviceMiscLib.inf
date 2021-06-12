@@ -68,8 +68,9 @@
   CpuInfoDump.c
   DirectReset.c
   ForgeUefi.c
+  HandleParsingMin.c
+  HandleParsingMin.h
+  PciInfoDump.c
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c
   ResetAudioTrafficClass.c
-  HandleParsingMin.c
-  HandleParsingMin.h
