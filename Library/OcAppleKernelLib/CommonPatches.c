@@ -1408,7 +1408,7 @@ mPowerStateTimeoutPanicInlineMask[] = {
 STATIC
 UINT8
 mPowerStateTimeoutPanicInlineReplace[] = {
-  0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Fh ; 'n'
+  0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Eh ; 'n'
   0x75, 0x00,              ///< jnz short fail
   0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
   0x75, 0x00,              ///< jnz short fail
