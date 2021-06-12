@@ -212,9 +212,21 @@ typedef struct {
   UINT64                      CpuMsrE2Value;
 } OC_CPU_MSR_REPORT;
 
+//
+// Wrapped structure to be passed as ProcedureArgument to MpServices->StartupAllAPs ().
+//
 typedef struct {
+  //
+  // Pointer to MP Services.
+  //
   EFI_MP_SERVICES_PROTOCOL  *MpServices;
+  //
+  // Pointer to CPU MSR report list.
+  //
   OC_CPU_MSR_REPORT         *Reports;
+  //
+  // Pointer to the CPU Info.
+  //
   OC_CPU_INFO               *CpuInfo;
 } OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT;
 
@@ -229,7 +241,7 @@ OcCpuScanProcessor (
   );
 
 /**
-  Get the MSR report of the CPU.
+  Get the MSR report of one core on the CPU.
 
   @param[in]   CpuInfo  A pointer to the cpu info.
   @param[out]  Report   The report generated based on CpuInfo.
@@ -241,7 +253,7 @@ OcCpuGetMsrReport (
   );
 
 /**
- Get the MSR report of a single core on the CPU.
+ Get the MSR report of a single core on the CPU. Used as a parameter of MpServices->StartupAllAPs ().
 
  @param[in,out] Buffer  The pointer to private data buffer.
  **/
@@ -255,9 +267,9 @@ OcCpuGetMsrReportPerCore (
  Get the MSR reports of all cores on the CPU.
 
  @param[in]   CpuInfo     A pointer to the cpu info.
- @param[out]  EntryCount  Count of cores on the CPU.
+ @param[out]  EntryCount  Number of CPU cores.
 
- @return Array of reports of MSR status at each core.
+ @return A list of reports of MSR status at each core that must be freed manually, or NULL on failure.
  **/
 OC_CPU_MSR_REPORT *
 OcCpuGetMsrReports (

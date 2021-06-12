@@ -20,7 +20,7 @@
 #include <Library/OcStringLib.h>
 
 EFI_STATUS
-OcMsrDump (
+OcCpuInfoDump (
   IN OC_CPU_INFO        *CpuInfo,
   IN EFI_FILE_PROTOCOL  *Root
   )
@@ -37,17 +37,22 @@ OcMsrDump (
   ASSERT (CpuInfo != NULL);
   ASSERT (Root    != NULL);
 
+  //
+  // The CPU model must be Intel.
+  //
+  if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
+    return EFI_UNSUPPORTED;
+  }
+
   FileBufferSize = SIZE_1KB;
   FileBuffer     = (CHAR8 *) AllocateZeroPool (FileBufferSize);
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Reports = OcCpuGetMsrReports (CpuInfo, &EntryCount);
-  if (Reports == NULL) {
-    return EFI_UNSUPPORTED;
-  }
-
+  //
+  // Firstly, dump basic CPU info.
+  //
   OcAsciiPrintBuffer (
     &FileBuffer,
     &FileBufferSize,
@@ -130,8 +135,16 @@ OcMsrDump (
     CpuInfo->FSBFrequency
     );
 
+  //
+  // Then, get reports of MSR status.
+  //
+  Reports = OcCpuGetMsrReports (CpuInfo, &EntryCount);
+  if (Reports == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+
   for (Index = 0; Index < EntryCount; ++Index) {
-    OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02d:\n", Index);
+    OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "CPU%02u:\n", Index);
 
     //
     // MSR_PLATFORM_INFO
@@ -188,12 +201,12 @@ OcMsrDump (
   }
 
   //
-  // Save dumped MSR data to file.
+  // Save dumped CPU info to file.
   //
   if (FileBuffer != NULL) {
-    UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"MSRStatus.txt");
+    UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"CPUInfo.txt");
     Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
-    DEBUG ((DEBUG_INFO, "OCDM: Dumped MSR data - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCDM: Dumped CPU info - %r\n", Status));
 
     FreePool (FileBuffer);
   }

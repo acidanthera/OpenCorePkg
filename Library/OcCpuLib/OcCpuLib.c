@@ -969,13 +969,6 @@ OcCpuGetMsrReport (
 
   ZeroMem (Report, sizeof (*Report));
 
-  //
-  // The CPU model must be Intel.
-  //
-  if (CpuInfo->Vendor[0] != CPUID_VENDOR_INTEL) {
-    return;
-  }
-
   if (CpuInfo->CpuGeneration >= OcCpuGenerationNehalem) {
     //
     // MSR_PLATFORM_INFO
@@ -1091,6 +1084,11 @@ OcCpuGetMsrReports (
     NumberOfProcessors = 1;
   }
 
+  //
+  // Update number of cores.
+  //
+  *EntryCount = NumberOfProcessors;
+
   Reports = (OC_CPU_MSR_REPORT *) AllocateZeroPool (NumberOfProcessors * sizeof (OC_CPU_MSR_REPORT));
   if (Reports == NULL) {
     return NULL;
@@ -1104,6 +1102,9 @@ OcCpuGetMsrReports (
   // Then call StartupAllAPs to fill in the rest.
   //
   if (MpServices != NULL) {
+    //
+    // Pass data to the wrapped Argument.
+    //
     Argument.MpServices = MpServices;
     Argument.Reports    = Reports;
     Argument.CpuInfo    = CpuInfo;
@@ -1118,8 +1119,6 @@ OcCpuGetMsrReports (
       NULL
       );
   }
-
-  *EntryCount = NumberOfProcessors;
 
   return Reports;
 }
