@@ -1387,6 +1387,49 @@ mPowerStateTimeoutPanicMasterPatch = {
 };
 
 STATIC
+UINT8
+mPowerStateTimeoutPanicInlineFind[] = {
+  0x80, 0x00, 0x01, 0x6F,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0x75, 0x00,              ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,              ///< jnz short fail
+};
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicInlineMask[] = {
+  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0xFF, 0x00,              ///< jnz short fail
+  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0xFF, 0x00,              ///< jnz short fail
+};
+
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicInlineReplace[] = {
+  0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Fh ; 'n'
+  0x75, 0x00,              ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,              ///< jnz short fail
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mPowerStateTimeoutPanicInlinePatch = {
+  .Comment     = DEBUG_POINTER ("PowerStateTimeout"),
+  .Base        = "__ZN9IOService12ackTimerTickEv",
+  .Find        = mPowerStateTimeoutPanicInlineFind,
+  .Mask        = mPowerStateTimeoutPanicInlineMask,
+  .Replace     = mPowerStateTimeoutPanicInlineReplace,
+  .ReplaceMask = mPowerStateTimeoutPanicInlineMask,
+  .Size        = sizeof (mPowerStateTimeoutPanicInlineFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0x1000
+};
+
+STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
   IN OUT PATCHER_CONTEXT    *Patcher,
@@ -1401,6 +1444,14 @@ PatchPowerStateTimeout (
     DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicInlinePatch);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success inline power state\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: No inline power state patch - %r, trying fallback\n", Status));
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicMasterPatch);
   if (EFI_ERROR (Status)) {

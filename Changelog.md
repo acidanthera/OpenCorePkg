@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.7.1
 - Added `SyncTableIds` quirk to sync modified table OEM identifiers
 - Added CPU Info (MSRs) dumping to `SysReport`
+- Fixed `PowerTimeoutKernelPanic` on macOS 12
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
