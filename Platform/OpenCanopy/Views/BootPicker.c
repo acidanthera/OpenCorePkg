@@ -707,17 +707,12 @@ InternalBootPickerEntryPtrEvent (
        || Event->Type == GuiPointerPrimaryUp
        || Event->Type == GuiPointerPrimaryDoubleClick);
 
-  if (OffsetX < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale
-   || OffsetY < BOOT_ENTRY_ICON_SPACE * DrawContext->Scale) {
-    return This;
-  }
-
   Entry = BASE_CR (This, GUI_VOLUME_ENTRY, Hdr.Obj);
 
   IsHit = GuiClickableIsHit (
             &Entry->EntryIcon,
-            OffsetX - BOOT_ENTRY_ICON_SPACE * DrawContext->Scale,
-            OffsetY - BOOT_ENTRY_ICON_SPACE * DrawContext->Scale
+            OffsetX,
+            OffsetY
             );
   if (!IsHit) {
     return This;
