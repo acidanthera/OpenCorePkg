@@ -157,4 +157,5 @@ AppleModelYear:
   - 2015
 CloverSerialNumber: "C02NNHACG3QP"
 MinimumOSVersion: "10.9.4"
-MaximumOSVersion: null
+# FIXME: check
+MaximumOSVersion: "11.7"

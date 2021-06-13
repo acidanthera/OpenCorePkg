@@ -136,4 +136,5 @@ AppleModelYear:
   - 2018
 CloverSerialNumber: "C02Q7HACG8WL"
 MinimumOSVersion: "10.10.3"
-MaximumOSVersion: null
+# FIXME: check
+MaximumOSVersion: "11.7"

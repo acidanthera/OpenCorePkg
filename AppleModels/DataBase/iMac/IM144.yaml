@@ -120,4 +120,5 @@ AppleModelYear:
   - 2015
 CloverSerialNumber: "D25LHACKFY0T"
 MinimumOSVersion: "10.9.3"
-MaximumOSVersion: null
+# FIXME: check
+MaximumOSVersion: "11.7"
