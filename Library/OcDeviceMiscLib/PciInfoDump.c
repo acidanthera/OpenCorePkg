@@ -22,6 +22,7 @@
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/DevicePathLib.h>
 #include <Library/IoLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcDeviceMiscLib.h>
@@ -39,6 +40,8 @@ OcPciInfoDump (
   UINTN                          Index;
   EFI_PCI_IO_PROTOCOL            *PciIo;
   PCI_TYPE00                     PciDevice;
+  EFI_DEVICE_PATH_PROTOCOL       *PciDevicePath;
+  CHAR16                         *TextPciDevicePath;
 
   CHAR8                          *FileBuffer;
   UINTN                          FileBufferSize;
@@ -94,7 +97,7 @@ OcPciInfoDump (
     OcAsciiPrintBuffer (
       &FileBuffer,
       &FileBufferSize,
-      "Device %u:\nVendor ID: 0x%04X, Device ID: 0x%04X, RevisionID: 0x%02X, ClassCode: 0x%02X%02X%02X",
+      "Device %u: Vendor ID: 0x%04X, Device ID: 0x%04X, RevisionID: 0x%02X, ClassCode: 0x%02X%02X%02X",
       Index + 1,
       PciDevice.Hdr.VendorId,
       PciDevice.Hdr.DeviceId,
@@ -115,11 +118,32 @@ OcPciInfoDump (
         PciDevice.Device.SubsystemID
         );
     }
+    //
+    // Also dump device path if possible.
+    //
+    Status = gBS->HandleProtocol (
+      HandleBuffer[Index],
+      &gEfiDevicePathProtocolGuid,
+      (VOID **) &PciDevicePath
+      );
+    if (!EFI_ERROR (Status)) {
+      TextPciDevicePath = ConvertDevicePathToText (PciDevicePath, FALSE, FALSE);
+      if (TextPciDevicePath != NULL) {
+        OcAsciiPrintBuffer (
+          &FileBuffer,
+          &FileBufferSize,
+          ", DevicePath: %s",
+          TextPciDevicePath
+          );
+
+        FreePool (TextPciDevicePath);
+      }
+    }
 
     //
     // Append newlines.
     //
-    OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "\n\n");
+    OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "\n");
   }
 
   //
