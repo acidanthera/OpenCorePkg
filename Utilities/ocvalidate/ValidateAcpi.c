@@ -84,6 +84,14 @@ CheckACPIAdd (
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path has filename suffix other than .aml and .bin!\n", Index));
       ++ErrorCount;
     }
+
+    //
+    // Check the length of path relative to OC directory.
+    //
+    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_ACPI_PATH), AsciiStrSize (Path))) {
+      DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
   }
 
   //

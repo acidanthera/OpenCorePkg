@@ -197,6 +197,22 @@ CheckKernelAdd (
     }
 
     //
+    // Check the length of path relative to OC directory.
+    //
+    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_KEXT_PATH), AsciiStrSize (BundlePath))) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_KEXT_PATH), AsciiStrSize (ExecutablePath))) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_KEXT_PATH), AsciiStrSize (PlistPath))) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+
+    //
     // MinKernel must not be below macOS 10.4 (Darwin version 8).
     //
     if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {

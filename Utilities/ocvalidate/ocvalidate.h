@@ -17,6 +17,7 @@
 #define OC_USER_UTILITIES_OCVALIDATE_H
 
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcMainLib.h>
 
 /**
   OpenCore Configuration checker.

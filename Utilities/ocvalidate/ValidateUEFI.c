@@ -260,6 +260,14 @@ CheckUEFIDrivers (
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
 
+    //
+    // Check the length of path relative to OC directory.
+    //
+    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_UEFI_DRIVER_PATH), AsciiStrSize (Driver))) {
+      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+    
     if (Driver[0] == '#') {
       continue;
     }

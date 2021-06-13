@@ -16,6 +16,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 ### Global Rules
 - All entries must be set once only. Duplication is strictly prohibited.
 - All strings (fields with plist `String` format) throughout the whole config only accept ASCII printable characters at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
+- All the paths relative to OpenCore root must be 128 bytes total including '\0' terminator.
 - Most binary patches must have `Find`, `Replace`, `Mask` (if used), and `ReplaceMask` (if used) identical size set. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
 - `MinKernel` and `MaxKernel` entries should follow conventions specified in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
 - `MinKernel` cannot be a value that is below macOS 10.4 (Darwin version 8).
