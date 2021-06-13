@@ -419,7 +419,8 @@ CheckKernelEmulate (
   Result = DataHasProperMasking (
     UserKernel->Emulate.Cpuid1Data,
     UserKernel->Emulate.Cpuid1Mask,
-    sizeof (UserKernel->Emulate.Cpuid1Data)
+    sizeof (UserKernel->Emulate.Cpuid1Data),
+    sizeof (UserKernel->Emulate.Cpuid1Mask)
     );
 
   if (!Result) {

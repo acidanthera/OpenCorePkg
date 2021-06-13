@@ -314,17 +314,22 @@ BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
-  IN  UINTN        Size
+  IN  UINTN        DataSize,
+  IN  UINTN        MaskSize
   )
 {
   CONST UINT8  *ByteData;
   CONST UINT8  *ByteMask;
   UINTN        Index;
 
-  ByteData = Data;
-  ByteMask = Mask;
+  if (DataSize != MaskSize) {
+    return FALSE;
+  }
 
-  for (Index = 0; Index < Size; ++Index) {
+  ByteData = (CONST UINT8 *) Data;
+  ByteMask = (CONST UINT8 *) Mask;
+
+  for (Index = 0; Index < DataSize; ++Index) {
     //
     // Mask should only be set when corresponding bits on Data are inactive.
     //
@@ -384,7 +389,7 @@ ValidatePatch (
         FindSize
         ));
       ++ErrorCount;
-    } else if (!DataHasProperMasking (Find, Mask, FindSize)) {
+    } else if (!DataHasProperMasking (Find, Mask, FindSize, MaskSize)) {
       //
       // If Mask is set without corresponding bits being active for Find, then error.
       //
@@ -412,7 +417,7 @@ ValidatePatch (
         ReplaceSize
         ));
       ++ErrorCount;
-    } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+    } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize, ReplaceMaskSize)) {
       //
       // If ReplaceMask is set without corresponding bits being active for Replace, then error.
       //
