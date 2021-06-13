@@ -534,6 +534,23 @@ InternalContextConstruct (
           &Context->Icons[Index][ICON_TYPE_BASE],
           &mHighlightPixel
           );
+        if (Index == ICON_SET_DEFAULT) {
+          if (Context->Icons[Index]->Width != Context->Icons[ICON_SELECTOR]->Width) {
+            Status = EFI_UNSUPPORTED;
+            DEBUG ((
+              DEBUG_WARN,
+              "OCUI: %a width %upx != %a width %upx\n",
+              mIconNames[Index],
+              Context->Icons[Index]->Width,
+              mIconNames[ICON_SELECTOR],
+              Context->Icons[ICON_SELECTOR]->Width
+              ));
+            STATIC_ASSERT (
+              ICON_SELECTOR < ICON_SET_DEFAULT,
+              "Selector must be loaded before SetDefault."
+              );
+          }
+        }
       } else if (Index == ICON_GENERIC_HDD
               && Context->Icons[Index][ICON_TYPE_EXTERNAL].Buffer == NULL) {
         //

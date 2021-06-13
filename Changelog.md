@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed transparency click detection on OpenCanopy boot entries
 - Added PCI device info dumping to `SysReport`
 - Fixed `SetApfsTrimTimeout` on macOS 12
+- Documented and added safe fallback for existing requirement for SetDefault width to match Selector width
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
