@@ -989,11 +989,19 @@ OcCpuGetMsrReport (
     Report->CpuHasMsrTurboRatioLimit   = TRUE;
     Report->CpuMsrTurboRatioLimitValue = AsmReadMsr64 (MSR_NEHALEM_TURBO_RATIO_LIMIT);
 
-    //
-    // MSR_PKG_POWER_INFO (TODO: To be confirmed)
-    //
-    Report->CpuHasMsrPkgPowerInfo   = TRUE;
-    Report->CpuMsrPkgPowerInfoValue = AsmReadMsr64 (MSR_GOLDMONT_PKG_POWER_INFO);
+    if (CpuInfo->CpuGeneration >= OcCpuGenerationSandyBridge) {
+      //
+      // MSR_PKG_POWER_INFO (TODO: To be confirmed)
+      //
+      Report->CpuHasMsrPkgPowerInfo   = TRUE;
+      Report->CpuMsrPkgPowerInfoValue = AsmReadMsr64 (MSR_GOLDMONT_PKG_POWER_INFO);
+    
+      //
+      // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (MSR 0xE2)
+      //
+      Report->CpuHasMsrE2   = TRUE;
+      Report->CpuMsrE2Value = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
+    }
   } else {
     //
     // IA32_MISC_ENABLE
@@ -1018,14 +1026,6 @@ OcCpuGetMsrReport (
     //
     Report->CpuHasMsrIa32PerfStatus   = TRUE;
     Report->CpuMsrIa32PerfStatusValue = AsmReadMsr64 (MSR_IA32_PERF_STATUS);
-  }
-
-  if (CpuInfo->CpuGeneration >= OcCpuGenerationSandyBridge) {
-    //
-    // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (MSR 0xE2)
-    //
-    Report->CpuHasMsrE2   = TRUE;
-    Report->CpuMsrE2Value = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
   }
 }
 
