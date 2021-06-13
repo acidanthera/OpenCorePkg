@@ -139,8 +139,7 @@ AsciiGuidIsLegal (
 
   @param[in]  Data                     Data to be checked.
   @param[in]  Mask                     Mask to be applied to Data.
-  @param[in]  DataSize                 Size of Data.
-  @param[in]  MaskSize                 Size of Mask.
+  @param[in]  Size                     Size of Data and Mask.
 
   @retval     TRUE                     If corresponding bits of Mask to Data are active (set to non-zero).
 **/
@@ -148,8 +147,7 @@ BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
-  IN  UINTN        DataSize,
-  IN  UINTN        MaskSize
+  IN  UINTN        Size
   );
 
 /**
