@@ -233,20 +233,6 @@ StringIsDuplicated (
   );
 
 /**
-  Check if the length of path specified in OpenCore Config is safe enough.
-
-  @param[in]  PrefixLength    Length of prefix.
-  @param[in]  FileNameSize    Size of file path, including the '\0' terminator.
-
-  @retval     TRUE            If (PrefixLength + FileNameSize) does not exceed OC_STORAGE_SAFE_PATH_MAX.
-**/
-BOOLEAN
-StoragePathLengthIsSafe (
-  IN  UINTN  PrefixLength,
-  IN  UINTN  FileNameSize
-  );
-
-/**
   Report status of errors in the end of each checker function.
 
   @param[in]  FuncName                 Checker function name. (__func__ in most cases)

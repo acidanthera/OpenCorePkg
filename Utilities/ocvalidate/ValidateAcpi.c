@@ -88,7 +88,7 @@ CheckACPIAdd (
     //
     // Check the length of path relative to OC directory.
     //
-    if (!StoragePathLengthIsSafe (StrLen (OPEN_CORE_ACPI_PATH), AsciiStrSize (Path))) {
+    if (StrLen (OPEN_CORE_ACPI_PATH) + AsciiStrSize (Path) > OC_STORAGE_SAFE_PATH_MAX) {
       DEBUG ((DEBUG_WARN, "ACPI->Add[%u]->Path is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
       ++ErrorCount;
     }

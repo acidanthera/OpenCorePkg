@@ -489,15 +489,6 @@ StringIsDuplicated (
   return FALSE;
 }
 
-BOOLEAN
-StoragePathLengthIsSafe (
-  IN  UINTN  PrefixLength,
-  IN  UINTN  FileNameSize
-  )
-{
-  return (PrefixLength + FileNameSize) <= OC_STORAGE_SAFE_PATH_MAX;
-}
-
 UINT32
 ReportError (
   IN  CONST CHAR8  *FuncName,
