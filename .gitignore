@@ -8,6 +8,7 @@ xcuserdata
 project.xcworkspace
 *.dSYM
 *.linux
+.vscode
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
