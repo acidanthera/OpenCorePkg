@@ -191,6 +191,56 @@ OcStrStrLength (
   return NULL;
 }
 
+CHAR16 *
+EFIAPI
+OcStrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  )
+{
+  ASSERT (StrSize (String) != 0);
+
+  while (*String != '\0') {
+    //
+    // Return immediately when matching first occurrence of Char.
+    //
+    if (*String == Char) {
+      return (CHAR16 *) String;
+    }
+
+    ++String;
+  }
+
+  return NULL;
+}
+
+CHAR16 *
+EFIAPI
+OcStrrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  )
+{
+  CHAR16 *Save;
+
+  ASSERT (StrSize (String) != 0);
+
+  Save = NULL;
+
+  while (*String != '\0') {
+    //
+    // Record the last occurrence of Char.
+    //
+    if (*String == Char) {
+      Save = (CHAR16 *) String;
+    }
+
+    ++String;
+  }
+
+  return Save;
+}
+
 VOID
 UnicodeUefiSlashes (
   IN OUT CHAR16  *String
