@@ -249,6 +249,13 @@ CheckMiscBoot (
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant cannot be empty!\n"));
     ++ErrorCount;
   }
+  //
+  // Check the length of path relative to OC directory.
+  //
+  if (StrLen (OPEN_CORE_IMAGE_PATH) + AsciiStrSize (PickerVariant) > OC_STORAGE_SAFE_PATH_MAX) {
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant is too long (should not exceed %u)!\n", OC_STORAGE_SAFE_PATH_MAX));
+    ++ErrorCount;
+  }
 
   IsPickerAudioAssistEnabled = UserMisc->Boot.PickerAudioAssist;
   IsAudioSupportEnabled      = UserUefi->Audio.AudioSupport;
