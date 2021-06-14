@@ -2711,6 +2711,15 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+\item
+  \texttt{CustomKernel}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use customised kernel cache from ESP partition.
+
+  Unsupported platforms including \texttt{Atom} and \texttt{AMD} require modified versions
+  of XNU kernel in order to boot. This option provides the possibility to using a customised
+  kernel cache which contains such modifications from ESP partition.
 
 \item
   \texttt{FuzzyMatch}\\

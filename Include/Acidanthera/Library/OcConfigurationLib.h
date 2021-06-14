@@ -305,6 +305,7 @@
 #define OC_KERNEL_SCHEME_FIELDS(_, __) \
   _(OC_STRING                   , KernelArch       ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , KernelCache      ,     , OC_STRING_CONSTR ("Auto", _, __), OC_DESTR (OC_STRING)) \
+  _(BOOLEAN                     , CustomKernel     ,     , FALSE  , ()) \
   _(BOOLEAN                     , FuzzyMatch       ,     , FALSE  , ())
   OC_DECLARE (OC_KERNEL_SCHEME)
 
