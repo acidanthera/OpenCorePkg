@@ -450,6 +450,14 @@ mPerfCtrlFind2[] = {
 
 STATIC
 UINT8
+mPerfCtrlFind3[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
+  0x4C, 0x89, 0xF0,             ///< mov rax, r14
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+UINT8
 mPerfCtrlMax[] = {
   0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
   0x31, 0xD2,                   ///< xor edx, edx
@@ -487,7 +495,8 @@ PatchAppleXcpmForceBoost (
       && Current[2] == mPerfCtrlFind1[2]
       && Current[3] == mPerfCtrlFind1[3]) {
       if (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0
-        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0) {
+        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0
+        || CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0) {
         break;
       }
     }
