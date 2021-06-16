@@ -14,6 +14,7 @@
 
 #include <Uefi.h>
 #include <Guid/FileInfo.h>
+#include <Protocol/OcBootstrap.h>
 #include <Protocol/SimpleFileSystem.h>
 
 #include <Library/BaseLib.h>
@@ -276,6 +277,41 @@ FindWritableFileSystem (
 
   FreePool (HandleBuffer);
   return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
+FindWritableOcFileSystem (
+  OUT EFI_FILE_PROTOCOL  **FileSystem
+  )
+{
+  EFI_STATUS             Status;
+  OC_BOOTSTRAP_PROTOCOL  *Bootstrap;
+  EFI_HANDLE             PreferedHandle;
+
+  PreferedHandle = NULL;
+
+  Status = gBS->LocateProtocol (
+    &gOcBootstrapProtocolGuid,
+    NULL,
+    (VOID **) &Bootstrap
+    );
+  if (!EFI_ERROR (Status) && Bootstrap->Revision == OC_BOOTSTRAP_PROTOCOL_REVISION) {
+    PreferedHandle = Bootstrap->GetLoadHandle (Bootstrap);
+  }
+
+  if (PreferedHandle != NULL) {
+    *FileSystem = LocateRootVolume (PreferedHandle, NULL);
+  } else {
+    *FileSystem = NULL;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FileSystem));
+
+  if (*FileSystem == NULL) {
+    return FindWritableFileSystem (FileSystem);
+  }
+
+  return EFI_SUCCESS;
 }
 
 EFI_STATUS
