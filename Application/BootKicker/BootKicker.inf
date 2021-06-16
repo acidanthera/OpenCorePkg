@@ -41,7 +41,6 @@
   gEfiDevicePathProtocolGuid
   gEfiFirmwareVolumeProtocolGuid
   gEfiGraphicsOutputProtocolGuid
-  gOcBootstrapProtocolGuid
 
 [Packages]
   MdePkg/MdePkg.dec
