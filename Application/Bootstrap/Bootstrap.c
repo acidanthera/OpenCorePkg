@@ -126,9 +126,10 @@ LoadOpenCore (
     ImagePath,
     Buffer,
     BufferSize,
+    NULL,
     NULL
     );
-  
+
   DEBUG ((DEBUG_ERROR, "BS: Failed to start OpenCore image - %r\n", Status));
   FreePool (Buffer);
   FreePool (ImagePath);

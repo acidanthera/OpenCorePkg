@@ -39,7 +39,6 @@
 
 [LibraryClasses]
   BaseLib
-  BaseMemoryLib
   HobLib
   IoLib
   UefiLib
