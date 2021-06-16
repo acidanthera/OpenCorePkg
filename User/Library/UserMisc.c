@@ -671,3 +671,12 @@ DevicePathFromHandle (
 {
   return NULL;
 }
+
+EFI_FILE_PROTOCOL *
+LocateRootVolume (
+  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  )
+{
+  return NULL;
+}
