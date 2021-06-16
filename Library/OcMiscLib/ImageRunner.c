@@ -47,11 +47,6 @@ OcLoadAndRunImage (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_ERROR, "OCM: Failed to load image - %r\n", Status));
-    DEBUG ((
-      DEBUG_INFO,
-      "OCM: Failed DevicePath: %S\n\n",
-      ConvertDevicePathToText(DevicePath, FALSE, FALSE)
-      ));
     return Status;
   }
 
