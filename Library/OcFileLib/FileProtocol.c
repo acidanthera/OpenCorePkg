@@ -305,7 +305,7 @@ FindWritableOcFileSystem (
     *FileSystem = NULL;
   }
 
-  DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FileSystem));
+  DEBUG ((DEBUG_INFO, "OCFS: Preferred handle is %p found fs %p\n", PreferedHandle, *FileSystem));
 
   if (*FileSystem == NULL) {
     return FindWritableFileSystem (FileSystem);
