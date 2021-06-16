@@ -485,6 +485,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child { node {Kernels}
+      child { node [optional] {kernel}}
+      child { node [optional] {kernelcache}}
+      child { node [optional] {prelinkedkernel}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
@@ -2715,7 +2723,8 @@ to install and troubleshoot such macOS installations.
   \texttt{CustomKernel}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Use customised kernel cache from ESP partition.
+  \textbf{Description}: Use customised kernel cache from the \texttt{Kernels}
+  directory located at the root of the ESP partition.
 
   Unsupported platforms including \texttt{Atom} and \texttt{AMD} require modified versions
   of XNU kernel in order to boot. This option provides the possibility to using a customised
