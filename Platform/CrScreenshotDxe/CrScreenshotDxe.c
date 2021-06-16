@@ -142,42 +142,6 @@ ShowStatus (
 
 STATIC
 EFI_STATUS
-FindWritableFs (
-  OUT EFI_FILE_PROTOCOL  **FsPtr
-  )
-{
-  EFI_STATUS             Status;
-  OC_BOOTSTRAP_PROTOCOL  *Bootstrap;
-  EFI_HANDLE             PreferedHandle;
-
-  PreferedHandle = NULL;
-
-  Status = gBS->LocateProtocol (
-    &gOcBootstrapProtocolGuid,
-    NULL,
-    (VOID **) &Bootstrap
-    );
-  if (!EFI_ERROR (Status) && Bootstrap->Revision == OC_BOOTSTRAP_PROTOCOL_REVISION) {
-    PreferedHandle = Bootstrap->GetLoadHandle (Bootstrap);
-  }
-
-  if (PreferedHandle != NULL) {
-    *FsPtr = LocateRootVolume (PreferedHandle, NULL);
-  } else {
-    *FsPtr = NULL;
-  }
-
-  DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FsPtr));
-
-  if (*FsPtr == NULL) {
-    return FindWritableFileSystem (FsPtr);
-  }
-
-  return EFI_SUCCESS;
-}
-
-STATIC
-EFI_STATUS
 EFIAPI
 TakeScreenshot (
   IN EFI_KEY_DATA *KeyData
@@ -197,7 +161,7 @@ TakeScreenshot (
   UINTN                         Index;
   UINT8                         Temp;
 
-  Status = FindWritableFs (&Fs);
+  Status = FindWritableOcFileSystem (&Fs);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Can't find writable FS - %r\n", Status));
     ShowStatus (0xFF, 0xFF, 0x00); ///< Yellow

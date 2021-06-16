@@ -332,6 +332,18 @@ FindWritableFileSystem (
   );
 
 /**
+  Find writable filesystem from Bootstrap.
+
+  @param[out]  FileSystem   Pointer to first found writeable file system.
+
+  @retval EFI_SUCCESS on success.
+**/
+EFI_STATUS
+FindWritableOcFileSystem (
+  OUT EFI_FILE_PROTOCOL  **FileSystem
+  );
+
+/**
   Open a file or directory by file system handle and path.
   See OcOpenFileByDevicePath() for more details.
 
