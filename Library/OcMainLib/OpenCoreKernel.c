@@ -39,6 +39,8 @@ STATIC BOOLEAN             mUse32BitKernel;
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
+STATIC EFI_FILE_PROTOCOL   *mCustomKernelDirectory;
+
 STATIC
 VOID
 OcKernelConfigureCapabilities (
@@ -1078,6 +1080,7 @@ OcKernelFileOpen (
   UINT32             NumReservedKexts;
   UINT32             LinkedExpansion;
   UINT32             ReservedFullSize;
+  CHAR16             *NewFileName;
 
   //
   // Prevent access to cache files depending on maximum cache type allowed.
@@ -1136,6 +1139,18 @@ OcKernelFileOpen (
     && Status == EFI_NOT_FOUND
     && OpenMode == EFI_FILE_MODE_READ
     && (StrStr (FileName, L"\\kernelcache") != NULL)) {
+    //
+    // Change the target to the cusutom one if requested CustomKernel.
+    //
+    if (mCustomKernelDirectory != NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
+      This = mCustomKernelDirectory;
+
+      NewFileName = OcStrrChr (FileName, '\\');
+      if (NewFileName != NULL) {
+        FileName = NewFileName;
+      }
+    }
 
     DEBUG ((DEBUG_INFO, "OC: Trying kernelcache fuzzy matching on %s\n", FileName));
 
@@ -1171,6 +1186,18 @@ OcKernelFileOpen (
     && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0
     && OcStriStr (FileName, L".kext\\") == NULL
     && OcStriStr (FileName, L".im4m") == NULL) {
+    //
+    // Change the target to the cusutom one if requested CustomKernel.
+    //
+    if (mCustomKernelDirectory != NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
+      This = mCustomKernelDirectory;
+
+      NewFileName = OcStrrChr (FileName, '\\');
+      if (NewFileName != NULL) {
+        FileName = NewFileName;
+      }
+    }
 
     //
     // Kernel loading for fuzzy kernelcache is performed earlier.
@@ -1441,7 +1468,8 @@ OcLoadKernelSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *Root;
 
   Status = EnableVirtualFs (gBS, OcKernelFileOpen);
 
@@ -1451,6 +1479,30 @@ OcLoadKernelSupport (
     mOcCpuInfo              = CpuInfo;
     mOcDarwinVersion        = 0;
     mOcCachelessInProgress  = FALSE;
+    //
+    // Open customised Kernels if needed.
+    //
+    if (mOcConfiguration->Kernel.Scheme.CustomKernel) {
+      Status = FindWritableOcFileSystem (&Root);
+      if (!EFI_ERROR (Status)) {
+        //
+        // Open Kernels directory.
+        //
+        Status = Root->Open (
+          Root,
+          &mCustomKernelDirectory,
+          L"Kernels",
+          EFI_FILE_MODE_READ,
+          EFI_FILE_DIRECTORY
+          );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "OC: Unable to open Kernels folder for custom kernel - %r, falling back to normal one\n", Status));
+        }
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Unable to find root writable filesystem for custom kernel - %r, falling back to normal one\n", Status));
+      }
+    }
+
     OcImageLoaderRegisterConfigure (OcKernelConfigureCapabilities);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));
