@@ -72,6 +72,7 @@ extern EFI_GUID     gEfiLegacyRegion2ProtocolGuid;
 extern EFI_GUID     gEfiPciRootBridgeIoProtocolGuid;
 extern EFI_GUID     gEfiSmbiosTableGuid;
 
+extern EFI_GUID     gOcBootstrapProtocolGuid;
 extern EFI_GUID     gOcVendorVariableGuid;
 extern EFI_GUID     gOcCustomSmbios3TableGuid;
 extern EFI_GUID     gOcCustomSmbiosTableGuid;
