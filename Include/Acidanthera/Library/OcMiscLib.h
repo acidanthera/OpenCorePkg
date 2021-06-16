@@ -134,17 +134,19 @@ OcGetProtocol (
 /**
   Run and execute image file from buffer.
 
-  @param[in]  DevicePath   Image device path, optional.
-  @param[in]  Buffer       Buffer with image data, optional when DP is given.
-  @param[in]  BufferSize   Image data size in the buffer.
-  @param[out] ImageHandle  Loaded image handle for drivers, optional.
+  @param[in]  DevicePath    Image device path, optional.
+  @param[in]  Buffer        Buffer with image data, optional when DP is given.
+  @param[in]  BufferSize    Image data size in the buffer.
+  @param[out] ImageHandle   Loaded image handle for drivers, optional.
+  @param[out] OptionalData  Data that is passed to the loaded image, optional.
 **/
 EFI_STATUS
 OcLoadAndRunImage (
-  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN   VOID                      *Buffer      OPTIONAL,
+  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath   OPTIONAL,
+  IN   VOID                      *Buffer       OPTIONAL,
   IN   UINTN                     BufferSize,
-  OUT  EFI_HANDLE                *ImageHandle OPTIONAL
+  OUT  EFI_HANDLE                *ImageHandle  OPTIONAL,
+  IN   CHAR16                    *OptionalData OPTIONAL
   );
 
 /**

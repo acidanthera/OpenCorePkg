@@ -13,6 +13,7 @@
 **/
 
 #include <Uefi.h>
+#include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
@@ -22,16 +23,16 @@
 
 EFI_STATUS
 OcLoadAndRunImage (
-  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN   VOID                      *Buffer      OPTIONAL,
+  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath   OPTIONAL,
+  IN   VOID                      *Buffer       OPTIONAL,
   IN   UINTN                     BufferSize,
-  OUT  EFI_HANDLE                *ImageHandle OPTIONAL
+  OUT  EFI_HANDLE                *ImageHandle  OPTIONAL,
+  IN   CHAR16                    *OptionalData OPTIONAL
   )
 {
   EFI_STATUS                 Status;
   EFI_HANDLE                 NewHandle;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-
   //
   // Run OpenCore image
   //
@@ -64,7 +65,6 @@ OcLoadAndRunImage (
       LoadedImage->FilePath,
       DevicePath
       ));
-
     //
     // Some fragile firmware fail to properly set LoadedImage when buffer is provided.
     // REF: https://github.com/acidanthera/bugtracker/issues/712
@@ -90,6 +90,11 @@ OcLoadAndRunImage (
         }
         LoadedImage->FilePath = DuplicateDevicePath (DevicePath);
       }
+    }
+
+    if (OptionalData != NULL) {
+      LoadedImage->LoadOptionsSize = (UINT32) StrSize (OptionalData);
+      LoadedImage->LoadOptions     = AllocateCopyPool (LoadedImage->LoadOptionsSize, OptionalData);
     }
   }
 
