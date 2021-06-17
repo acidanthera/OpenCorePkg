@@ -1498,6 +1498,7 @@ OcLoadKernelSupport (
           );
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_INFO, "OC: Unable to open Kernels folder for custom kernel - %r, falling back to normal one\n", Status));
+          mCustomKernelDirectory = NULL;
         }
       } else {
         DEBUG ((DEBUG_INFO, "OC: Unable to find root writable filesystem for custom kernel - %r, falling back to normal one\n", Status));
