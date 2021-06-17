@@ -1482,6 +1482,7 @@ OcLoadKernelSupport (
     //
     // Open customised Kernels if needed.
     //
+    mCustomKernelDirectory = NULL;
     if (mOcConfiguration->Kernel.Scheme.CustomKernel) {
       Status = FindWritableOcFileSystem (&Root);
       if (!EFI_ERROR (Status)) {
