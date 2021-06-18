@@ -13,6 +13,7 @@ OpenCore bootloader with development SDK.
 - [MacRumors.com](https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814/) in English, legacy Apple hardware
 - [KVM-OpenCore](https://github.com/Leoyzen/KVM-Opencore) in English, KVM configuration
 - [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
+- [pcbeta.com](http://bbs.pcbeta.com/forum.php?gid=86) in chinese
 
 ## Libraries
 
