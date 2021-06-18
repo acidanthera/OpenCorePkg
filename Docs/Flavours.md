@@ -23,6 +23,7 @@ In the case of macOS only, a flavour based on the detected OS version is applied
 
 For icon pack authors, the **Apple** icon is recommended, **AppleRecovery** and **AppleTM** are suggested, all others are entirely optional.
 
+ - **Apple12:Apple** - Monterey (`Apple12.icns`)
  - **Apple11:Apple** - Big Sur (`Apple11.icns`)
  - **Apple10_15:Apple** - Catalina (`Apple10_15.icns`, etc.)
  - **Apple10_14:Apple** - Mojave
@@ -59,6 +60,7 @@ Windows is automatically detected by OpenCore, so the basic `Windows` flavour wi
 **Windows** icon is recommended, all others are optional.
 
  - **Windows** - Microsoft Windows (auto-detected by OC; fallback: **HardDrive**)
+ - **Windows11:Windows** - Microsoft Windows 11 (`Windows11.icns`)
  - **Windows10:Windows** - Microsoft Windows 10 (`Windows10.icns`)
  - **Windows8_1:Windows** - Microsoft Windows 8.1 (`Windows8_1.icns`, etc.)
  - **Windows8:Windows** - Microsoft Windows 8
