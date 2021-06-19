@@ -129,9 +129,9 @@ typedef struct XML_NODE_ XML_NODE;
 //
 XML_DOCUMENT *
 XmlDocumentParse (
-  IN  CHAR8    *Buffer,
-  IN  UINT32   Length,
-  IN  BOOLEAN  WithRefs
+  IN OUT  CHAR8    *Buffer,
+  IN      UINT32   Length,
+  IN      BOOLEAN  WithRefs
   );
 
 //
