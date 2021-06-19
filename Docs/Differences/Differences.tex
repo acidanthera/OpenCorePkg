@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jun 11 16:52:07 2021
-%DIF ADD ../Configuration.tex        Fri Jun 11 17:37:47 2021
+%DIF DEL PreviousConfiguration.tex   Wed Jun  9 01:29:53 2021
+%DIF ADD ../Configuration.tex        Sat Jun 19 12:47:20 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2566,15 +2566,15 @@ blocking.
 
   \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: This option is a preferred alternative to deleting \texttt{DMAR}
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
-  VT-d support in other systems in case they need this\DIFaddbegin \DIFadd{.
-}
+  VT-d support in other systems in case they need this.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Misconfigured IOMMU in the firmware may result in broken devices 
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: Misconfigured IOMMU in the firmware may result in broken devices 
   such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
   link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
-  Gigabyte is one of the most common OEMs with these issues}\DIFaddend .
+  Gigabyte is one of the most common OEMs with these issues.
+}
 
-\item
+\DIFaddend \item
   \texttt{DisableLinkeditJettison}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2605,7 +2605,7 @@ blocking.
   \texttt{ExtendBTFeatureFlags}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8\DIFaddbegin \DIFadd{-11}\DIFaddend \\
   \textbf{Description}: Set \texttt{FeatureFlags} to \texttt{0x0F} for full
   functionality of Bluetooth, including Continuity.
 
@@ -6124,7 +6124,8 @@ scaled accordingly for other levels.
 \tightlist
   \item \texttt{Cursor} --- Mouse cursor (mandatory, up to 144x144).
   \item \texttt{Selected} --- Selected item (mandatory, 144x144).
-  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40).
+  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40\DIFaddbegin \DIFadd{).
+  }\item \texttt{\DIFadd{SetDefault}} \DIFadd{--- Selecting default (mandatory, up to 144x40; must be same width as }\texttt{\DIFadd{Selector}}\DIFaddend ).
   \item \texttt{Left} --- Scrolling left (mandatory, 40x40).
   \item \texttt{Right} --- Scrolling right (mandatory, 40x40).
   \item \texttt{HardDrive} --- Generic OS (mandatory, 128x128).
