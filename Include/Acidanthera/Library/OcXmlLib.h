@@ -319,7 +319,7 @@ PlistKeyValue (
 BOOLEAN
 PlistStringValue (
   IN      XML_NODE  *Node,
-  IN OUT  CHAR8     *Value,
+     OUT  CHAR8     *Value,
   IN OUT  UINT32    *Size
   );
 
@@ -332,7 +332,7 @@ PlistStringValue (
 BOOLEAN
 PlistDataValue (
   IN      XML_NODE  *Node,
-  OUT     UINT8     *Buffer  OPTIONAL,
+  OUT     UINT8     *Buffer,
   IN OUT  UINT32    *Size
   );
 
@@ -369,7 +369,7 @@ PlistIntegerValue (
 BOOLEAN
 PlistMultiDataValue (
   IN      XML_NODE  *Node,
-     OUT  VOID      *Buffer  OPTIONAL,
+     OUT  VOID      *Buffer,
   IN OUT  UINT32    *Size
   );
 
