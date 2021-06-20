@@ -944,3 +944,9 @@
 
   ##  @libraryclass
   BiodIdLib|Include/Apple/Library/BiodIdLib.h
+
+  ##  @libraryclass
+  UefiApplicationEntryPoint|Include/Acidanthera/Library/OcApplicationEntryPoint.h
+
+  ##  @libraryclass
+  UefiDriverEntryPoint|Include/Acidanthera/Library/OcDriverEntryPoint.h

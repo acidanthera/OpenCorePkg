@@ -31,16 +31,12 @@
 [Sources]
   Alignment.c
   BitOverflow.c
-  Canary.c
   Math.c
   NativeOverflow.c
   TripleOverflow.c
   UbsanPrintf.c
   Ubsan.c
   Ubsan.h
-
-[Sources.X64]
-  X64/Canary.nasm
 
 [Packages]
   MdePkg/MdePkg.dec

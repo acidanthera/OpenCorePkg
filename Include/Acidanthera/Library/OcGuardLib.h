@@ -40,16 +40,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_ALIGNAS(Alignment)
 #endif
 
-VOID
-__stack_chk_fail (
-  VOID
-  );
-
-VOID
-InitializeSecurityCookie (
-  VOID
-  );
-
 /**
  Return the result of (Multiplicand * Multiplier / Divisor).
 
