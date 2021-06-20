@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added explicit warn and safe fallback to builtin picker on failure to match the above
 - Added VSCode source level IDE debug config example to debug docs
 - Added other minor debug docs updates
+- Fixed incorrect timeout of built-in picker on IA32
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`

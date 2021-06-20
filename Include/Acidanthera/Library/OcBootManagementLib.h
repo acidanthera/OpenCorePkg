@@ -606,7 +606,7 @@ VOID
 typedef
 UINT64
 (EFIAPI *OC_GET_KEY_WAIT_END_TIME) (
-  IN UINTN    Timeout
+  IN UINT64     Timeout
   );
 
 /**
