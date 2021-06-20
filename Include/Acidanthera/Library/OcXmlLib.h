@@ -146,10 +146,10 @@ XmlDocumentParse (
 //
 CHAR8 *
 XmlDocumentExport (
-  IN   XML_DOCUMENT  *Document,
-  OUT  UINT32        *Length  OPTIONAL,
-  IN   UINT32        Skip,
-  IN   BOOLEAN       PrependPlistInfo
+  IN   CONST XML_DOCUMENT  *Document,
+  OUT  UINT32              *Length  OPTIONAL,
+  IN   UINT32              Skip,
+  IN   BOOLEAN             PrependPlistInfo
   );
 
 //
@@ -168,7 +168,7 @@ XmlDocumentFree (
 //
 XML_NODE *
 XmlDocumentRoot (
-  IN  XML_DOCUMENT  *Document
+  IN  CONST XML_DOCUMENT  *Document
   );
 
 //
@@ -176,7 +176,7 @@ XmlDocumentRoot (
 //
 CONST CHAR8 *
 XmlNodeName (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   );
 
 //
@@ -184,7 +184,7 @@ XmlNodeName (
 //
 CONST CHAR8 *
 XmlNodeContent (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   );
 
 //
@@ -205,7 +205,7 @@ XmlNodeChangeContent (
 //
 UINT32
 XmlNodeChildren (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   );
 
 //
@@ -213,8 +213,8 @@ XmlNodeChildren (
 //
 XML_NODE *
 XmlNodeChild (
-  IN  XML_NODE  *Node,
-  IN  UINT32    Child
+  IN  CONST XML_NODE  *Node,
+  IN  UINT32          Child
   );
 
 //
@@ -269,7 +269,7 @@ XmlNodePrepend (
 //
 XML_NODE *
 PlistDocumentRoot (
-  IN  XML_DOCUMENT  *Document
+  IN  CONST XML_DOCUMENT  *Document
   );
 
 //
@@ -283,7 +283,7 @@ PlistDocumentRoot (
 //
 XML_NODE *
 PlistNodeCast (
-  IN  XML_NODE         *Node,
+  IN  CONST XML_NODE   *Node,
   IN  PLIST_NODE_TYPE  Type
   );
 
@@ -292,7 +292,7 @@ PlistNodeCast (
 //
 UINT32
 PlistDictChildren (
-  IN  XML_NODE     *Node
+  IN  CONST XML_NODE  *Node
   );
 
 //
@@ -300,9 +300,9 @@ PlistDictChildren (
 //
 XML_NODE *
 PlistDictChild (
-  IN   XML_NODE     *Node,
-  IN   UINT32       Child,
-  OUT  XML_NODE     **Value OPTIONAL
+  IN   CONST XML_NODE  *Node,
+  IN   UINT32          Child,
+  OUT  XML_NODE        **Value OPTIONAL
   );
 
 //
@@ -310,7 +310,7 @@ PlistDictChild (
 //
 CONST CHAR8 *
 PlistKeyValue (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   );
 
 //
@@ -318,9 +318,9 @@ PlistKeyValue (
 //
 BOOLEAN
 PlistStringValue (
-  IN      XML_NODE  *Node,
-     OUT  CHAR8     *Value,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+     OUT  CHAR8           *Value,
+  IN OUT  UINT32          *Size
   );
 
 //
@@ -331,9 +331,9 @@ PlistStringValue (
 //
 BOOLEAN
 PlistDataValue (
-  IN      XML_NODE  *Node,
-  OUT     UINT8     *Buffer,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+  OUT     UINT8           *Buffer,
+  IN OUT  UINT32          *Size
   );
 
 //
@@ -341,8 +341,8 @@ PlistDataValue (
 //
 BOOLEAN
 PlistBooleanValue (
-  IN   XML_NODE  *Node,
-  OUT  BOOLEAN   *Value
+  IN   CONST XML_NODE  *Node,
+  OUT  BOOLEAN         *Value
   );
 
 //
@@ -350,10 +350,10 @@ PlistBooleanValue (
 //
 BOOLEAN
 PlistIntegerValue (
-  IN   XML_NODE  *Node,
-  OUT  VOID      *Value,
-  IN   UINT32    Size,
-  IN   BOOLEAN   Hex
+  IN   CONST XML_NODE  *Node,
+  OUT  VOID            *Value,
+  IN   UINT32          Size,
+  IN   BOOLEAN         Hex
   );
 
 //
@@ -368,9 +368,9 @@ PlistIntegerValue (
 //
 BOOLEAN
 PlistMultiDataValue (
-  IN      XML_NODE  *Node,
-     OUT  VOID      *Buffer,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+     OUT  VOID            *Buffer,
+  IN OUT  UINT32          *Size
   );
 
 //
@@ -378,8 +378,8 @@ PlistMultiDataValue (
 //
 BOOLEAN
 PlistStringSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   );
 
 //
@@ -387,8 +387,8 @@ PlistStringSize (
 //
 BOOLEAN
 PlistDataSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   );
 
 //
@@ -396,8 +396,8 @@ PlistDataSize (
 //
 BOOLEAN
 PlistMultiDataSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   );
 
 #endif // OC_XML_LIB_H

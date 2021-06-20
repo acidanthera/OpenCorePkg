@@ -179,23 +179,23 @@ XmlParseAttributeNumber (
 STATIC
 XML_NODE *
 XmlNodeCreate (
-  IN  CONST CHAR8    *Name,
-  IN  CONST CHAR8    *Attributes,
-  IN  CONST CHAR8    *Content,
-  IN  XML_NODE       *Real,
-  IN  XML_NODE_LIST  *Children
+  IN  CONST CHAR8          *Name,
+  IN  CONST CHAR8          *Attributes,
+  IN  CONST CHAR8          *Content,
+  IN  CONST XML_NODE       *Real,
+  IN  CONST XML_NODE_LIST  *Children
   )
 {
   XML_NODE  *Node;
 
-  Node = AllocatePool (sizeof (XML_NODE));
+  Node = (XML_NODE *) AllocatePool (sizeof (XML_NODE));
 
   if (Node != NULL) {
-    Node->Name       = Name;
-    Node->Attributes = Attributes;
-    Node->Content    = Content;
-    Node->Real       = Real;
-    Node->Children   = Children;
+    Node->Name       = (CHAR8 *) Name;
+    Node->Attributes = (CHAR8 *) Attributes;
+    Node->Content    = (CHAR8 *) Content;
+    Node->Real       = (XML_NODE *) Real;
+    Node->Children   = (XML_NODE_LIST *) Children;
   }
 
   return Node;
@@ -207,15 +207,17 @@ XmlNodeCreate (
 STATIC
 BOOLEAN
 XmlNodeChildPush (
-  IN OUT  XML_NODE  *Node,
-  IN      XML_NODE  *Child
+  IN OUT  XML_NODE        *Node,
+  IN      CONST XML_NODE  *Child
   )
 {
   UINT32         NodeCount;
   UINT32         AllocCount;
   XML_NODE_LIST  *NewList;
 
-  NodeCount = 0;
+  ASSERT (Node != NULL);
+
+  NodeCount  = 0;
   AllocCount = 1;
 
   //
@@ -226,7 +228,7 @@ XmlNodeChildPush (
     AllocCount = Node->Children->AllocCount;
 
     if (NodeCount < XML_PARSER_NODE_COUNT && AllocCount > NodeCount) {
-      Node->Children->NodeList[NodeCount] = Child;
+      Node->Children->NodeList[NodeCount] = (XML_NODE *) Child;
       Node->Children->NodeCount++;
       return TRUE;
     }
@@ -266,7 +268,7 @@ XmlNodeChildPush (
     FreePool (Node->Children);
   }
 
-  NewList->NodeList[NodeCount] = Child;
+  NewList->NodeList[NodeCount] = (XML_NODE *) Child;
   Node->Children = NewList;
 
   return TRUE;
@@ -282,6 +284,8 @@ XmlPushReference (
 {
   XML_NODE   **NewReferences;
   UINT32     NewRefAllocCount;
+
+  ASSERT (References != NULL);
 
   if (ReferenceNumber >= XML_PARSER_MAX_REFERENCE_COUNT) {
     return FALSE;
@@ -321,8 +325,8 @@ XmlPushReference (
 STATIC
 XML_NODE *
 XmlNodeReal (
-  IN  XML_REFLIST  *References,
-  IN  CONST CHAR8  *Attributes
+  IN  CONST XML_REFLIST  *References,
+  IN  CONST CHAR8        *Attributes
   )
 {
   BOOLEAN      HasArgument;
@@ -357,6 +361,8 @@ XmlNodeFree (
 {
   UINT32  Index;
 
+  ASSERT (Node != NULL);
+
   if (Node->Children != NULL) {
     for (Index = 0; Index < Node->Children->NodeCount; ++Index) {
       XmlNodeFree (Node->Children->NodeList[Index]);
@@ -373,6 +379,8 @@ XmlFreeRefs (
   IN OUT  XML_REFLIST  *References
   )
 {
+  ASSERT (References != NULL);
+
   if (References->RefList != NULL) {
     FreePool (References->RefList);
     References->RefList = NULL;
@@ -397,7 +405,7 @@ XmlFreeRefs (
 //
 VOID
 XmlParserError (
-  IN  XML_PARSER         *Parser,
+  IN  CONST XML_PARSER   *Parser,
   IN  XML_PARSER_OFFSET  Offset,
   IN  CONST CHAR8        *Message
   )
@@ -458,8 +466,8 @@ XmlParserError (
 STATIC
 CHAR8
 XmlParserPeek (
-  IN  XML_PARSER  *Parser,
-  IN  UINT32      N
+  IN  CONST XML_PARSER  *Parser,
+  IN  UINT32            N
   )
 {
   UINT32  Position;
@@ -484,6 +492,8 @@ XmlParserConsume (
   IN      UINT32      N
   )
 {
+  ASSERT (Parser != NULL);
+
 #ifdef XML_PARSER_VERBOSE
   CHAR8   *Consumed;
   CHAR8   *MessageBuffer;
@@ -535,6 +545,8 @@ XmlSkipWhitespace (
   IN OUT  XML_PARSER  *Parser
   )
 {
+  ASSERT (Parser != NULL);
+
   XML_PARSER_INFO (Parser, "whitespace");
 
   while (Parser->Position < Parser->Length
@@ -563,6 +575,9 @@ XmlParseTagEnd (
   UINT32  AttributeStart;
   UINT32  Length = 0;
   UINT32  NameLength = 0;
+
+  ASSERT (Parser     != NULL);
+  ASSERT (Attributes != NULL);
 
   XML_PARSER_INFO (Parser, "tag_end");
 
@@ -658,6 +673,9 @@ XmlParseTagOpen (
   CHAR8   Current;
   CHAR8   Next;
   BOOLEAN IsComment;
+
+  ASSERT (Parser     != NULL);
+  ASSERT (Attributes != NULL);
 
   XML_PARSER_INFO (Parser, "tag_open");
 
@@ -769,6 +787,8 @@ XmlParseTagClose (
   IN      BOOLEAN     Unprefixed
   )
 {
+  ASSERT (Parser != NULL);
+
   XML_PARSER_INFO (Parser, "tag_close");
   XmlSkipWhitespace (Parser);
 
@@ -825,6 +845,8 @@ XmlParseContent (
   UINTN  Start;
   UINTN  Length;
   CHAR8  Current;
+
+  ASSERT (Parser != NULL);
 
   XML_PARSER_INFO(Parser, "content");
 
@@ -889,6 +911,10 @@ XmlBufferAppend (
   CHAR8   *NewBuffer;
   UINT32  NewSize;
 
+  ASSERT (Buffer      != NULL);
+  ASSERT (AllocSize   != NULL);
+  ASSERT (CurrentSize != NULL);
+
   NewSize = *AllocSize;
 
   if (NewSize - *CurrentSize <= DataLength) {
@@ -920,15 +946,19 @@ XmlBufferAppend (
 STATIC
 VOID
 XmlNodeExportRecursive (
-  IN      XML_NODE  *Node,
-  IN OUT  CHAR8     **Buffer,
-  IN OUT  UINT32    *AllocSize,
-  IN OUT  UINT32    *CurrentSize,
-  IN      UINT32    Skip
+  IN      CONST XML_NODE  *Node,
+  IN OUT  CHAR8           **Buffer,
+  IN OUT  UINT32          *AllocSize,
+  IN OUT  UINT32          *CurrentSize,
+  IN      UINT32          Skip
   )
 {
   UINT32  Index;
   UINT32  NameLength;
+
+  ASSERT (Buffer      != NULL);
+  ASSERT (AllocSize   != NULL);
+  ASSERT (CurrentSize != NULL);
 
   if (Skip != 0) {
     if (Node->Children != NULL) {
@@ -988,7 +1018,7 @@ STATIC
 XML_NODE *
 XmlParseNode (
   IN OUT  XML_PARSER   *Parser,
-  IN      XML_REFLIST  *References
+  IN OUT  XML_REFLIST  *References
   )
 {
   CONST CHAR8  *TagOpen;
@@ -1001,6 +1031,8 @@ XmlParseNode (
   BOOLEAN      SelfClosing;
   BOOLEAN      Unprefixed;
   BOOLEAN      HasChildren;
+
+  ASSERT (Parser != NULL);
 
   XML_PARSER_INFO (Parser, "node");
 
@@ -1155,6 +1187,8 @@ XmlDocumentParse (
   XML_REFLIST   References;
   XML_PARSER    Parser;
 
+  ASSERT (Buffer != NULL);
+
   //
   // Initialize parser.
   //
@@ -1202,10 +1236,10 @@ XmlDocumentParse (
 
 CHAR8 *
 XmlDocumentExport (
-  IN   XML_DOCUMENT  *Document,
-  OUT  UINT32        *Length  OPTIONAL,
-  IN   UINT32        Skip,
-  IN   BOOLEAN       PrependPlistInfo
+  IN   CONST XML_DOCUMENT  *Document,
+  OUT  UINT32              *Length  OPTIONAL,
+  IN   UINT32              Skip,
+  IN   BOOLEAN             PrependPlistInfo
   )
 {
   CHAR8   *Buffer;
@@ -1270,6 +1304,8 @@ XmlDocumentFree (
   IN OUT  XML_DOCUMENT  *Document
   )
 {
+  ASSERT (Document != NULL);
+
   XmlNodeFree (Document->Root);
   XmlFreeRefs (&Document->References);
   FreePool (Document);
@@ -1277,7 +1313,7 @@ XmlDocumentFree (
 
 XML_NODE *
 XmlDocumentRoot (
-  IN  XML_DOCUMENT  *Document
+  IN  CONST XML_DOCUMENT  *Document
   )
 {
   return Document->Root;
@@ -1285,7 +1321,7 @@ XmlDocumentRoot (
 
 CONST CHAR8 *
 XmlNodeName (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   )
 {
   return Node->Name;
@@ -1293,7 +1329,7 @@ XmlNodeName (
 
 CONST CHAR8 *
 XmlNodeContent (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   )
 {
   return Node->Real != NULL ? Node->Real->Content : Node->Content;
@@ -1305,6 +1341,8 @@ XmlNodeChangeContent (
   IN      CONST CHAR8  *Content
   )
 {
+  ASSERT (Node != NULL);
+
   if (Node->Real != NULL) {
     Node->Real->Content = Content;
   }
@@ -1313,7 +1351,7 @@ XmlNodeChangeContent (
 
 UINT32
 XmlNodeChildren (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   )
 {
   return Node->Children ? Node->Children->NodeCount : 0;
@@ -1321,8 +1359,8 @@ XmlNodeChildren (
 
 XML_NODE *
 XmlNodeChild (
-  IN  XML_NODE  *Node,
-  IN  UINT32    Child
+  IN  CONST XML_NODE  *Node,
+  IN  UINT32          Child
   )
 {
   return Node->Children->NodeList[Child];
@@ -1340,6 +1378,8 @@ XmlEasyChild (
   XML_NODE  *Next;
   XML_NODE  *Child;
   UINT32    Index;
+
+  ASSERT (Node != NULL);
 
   VA_START (Arguments, ChildName);
 
@@ -1383,6 +1423,7 @@ XmlEasyChild (
     //
     ChildName = VA_ARG (Arguments, CONST CHAR8*);
   }
+
   VA_END (Arguments);
 
   //
@@ -1400,6 +1441,8 @@ XmlNodeAppend (
   )
 {
   XML_NODE  *NewNode;
+
+  ASSERT (Node != NULL);
 
   NewNode = XmlNodeCreate (Name, Attributes, Content, NULL, NULL);
   if (NewNode == NULL) {
@@ -1424,6 +1467,8 @@ XmlNodePrepend (
 {
   XML_NODE  *NewNode;
 
+  ASSERT (Node != NULL);
+
   NewNode = XmlNodeAppend (Node, Name, Attributes, Content);
   if (NewNode == NULL) {
     return NULL;
@@ -1437,10 +1482,12 @@ XmlNodePrepend (
 
 XML_NODE *
 PlistDocumentRoot (
-  IN  XML_DOCUMENT  *Document
+  IN  CONST XML_DOCUMENT  *Document
   )
 {
   XML_NODE  *Node;
+
+  ASSERT (Document != NULL);
 
   Node = Document->Root;
 
@@ -1459,14 +1506,14 @@ PlistDocumentRoot (
 
 XML_NODE *
 PlistNodeCast (
-  IN  XML_NODE         *Node,
+  IN  CONST XML_NODE   *Node,
   IN  PLIST_NODE_TYPE  Type
   )
 {
   UINT32  ChildrenNum;
 
   if (Node == NULL || Type == PLIST_NODE_TYPE_ANY) {
-    return Node;
+    return NULL;
   }
 
   if (AsciiStrCmp (XmlNodeName (Node), PlistNodeTypes[Type]) != 0) {
@@ -1504,12 +1551,12 @@ PlistNodeCast (
       break;
   }
 
-  return Node;
+  return (XML_NODE *) Node;
 }
 
 UINT32
 PlistDictChildren (
-  IN  XML_NODE     *Node
+  IN  CONST XML_NODE  *Node
   )
 {
   return XmlNodeChildren (Node) / 2;
@@ -1517,9 +1564,9 @@ PlistDictChildren (
 
 XML_NODE *
 PlistDictChild (
-  IN   XML_NODE     *Node,
-  IN   UINT32       Child,
-  OUT  XML_NODE     **Value OPTIONAL
+  IN   CONST XML_NODE  *Node,
+  IN   UINT32          Child,
+  OUT  XML_NODE        **Value OPTIONAL
   )
 {
   Child *= 2;
@@ -1533,7 +1580,7 @@ PlistDictChild (
 
 CONST CHAR8 *
 PlistKeyValue (
-  IN  XML_NODE  *Node
+  IN  CONST XML_NODE  *Node
   )
 {
  if (PlistNodeCast (Node, PLIST_NODE_TYPE_KEY) == NULL) {
@@ -1545,13 +1592,16 @@ PlistKeyValue (
 
 BOOLEAN
 PlistStringValue (
-  IN      XML_NODE  *Node,
-     OUT  CHAR8     *Value,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+     OUT  CHAR8           *Value,
+  IN OUT  UINT32          *Size
   )
 {
   CONST CHAR8  *Content;
   UINTN        Length;
+
+  ASSERT (Value != NULL);
+  ASSERT (Size  != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_STRING) == NULL) {
     return FALSE;
@@ -1575,14 +1625,17 @@ PlistStringValue (
 
 BOOLEAN
 PlistDataValue (
-  IN      XML_NODE  *Node,
-  OUT     UINT8     *Buffer,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+  OUT     UINT8           *Buffer,
+  IN OUT  UINT32          *Size
   )
 {
   CONST CHAR8    *Content;
   UINTN          Length;
   EFI_STATUS     Result;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (Size   != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) == NULL) {
     return FALSE;
@@ -1608,8 +1661,8 @@ PlistDataValue (
 
 BOOLEAN
 PlistBooleanValue (
-  IN   XML_NODE  *Node,
-  OUT  BOOLEAN   *Value
+  IN   CONST XML_NODE  *Node,
+  OUT  BOOLEAN         *Value
   )
 {
   ASSERT (Value != NULL);
@@ -1629,15 +1682,17 @@ PlistBooleanValue (
 
 BOOLEAN
 PlistIntegerValue (
-  IN   XML_NODE  *Node,
-  OUT  VOID      *Value,
-  IN   UINT32    Size,
-  IN   BOOLEAN   Hex
+  IN   CONST XML_NODE  *Node,
+  OUT  VOID            *Value,
+  IN   UINT32          Size,
+  IN   BOOLEAN         Hex
   )
 {
   UINT64       Temp;
   CONST CHAR8  *TempStr;
   BOOLEAN      Negate;
+
+  ASSERT (Value != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_INTEGER) == NULL) {
     return FALSE;
@@ -1692,14 +1747,17 @@ PlistIntegerValue (
 
 BOOLEAN
 PlistMultiDataValue (
-  IN      XML_NODE  *Node,
-     OUT  VOID      *Buffer,
-  IN OUT  UINT32    *Size
+  IN      CONST XML_NODE  *Node,
+     OUT  VOID            *Buffer,
+  IN OUT  UINT32          *Size
   )
 {
   CONST CHAR8    *Content;
   UINTN          Length;
   EFI_STATUS     Result;
+
+  ASSERT (Buffer != NULL);
+  ASSERT (Size   != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) != NULL) {
     Content = XmlNodeContent (Node);
@@ -1758,11 +1816,13 @@ PlistMultiDataValue (
 
 BOOLEAN
 PlistStringSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   )
 {
   CONST CHAR8  *Content;
+
+  ASSERT (Size != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_STRING) == NULL) {
     return FALSE;
@@ -1780,11 +1840,13 @@ PlistStringSize (
 
 BOOLEAN
 PlistDataSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   )
 {
   CONST CHAR8  *Content;
+
+  ASSERT (Size != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) == NULL) {
     return FALSE;
@@ -1802,11 +1864,13 @@ PlistDataSize (
 
 BOOLEAN
 PlistMultiDataSize (
-  IN   XML_NODE  *Node,
-  OUT  UINT32    *Size
+  IN   CONST XML_NODE  *Node,
+  OUT  UINT32          *Size
   )
 {
   CONST CHAR8  *Content;
+
+  ASSERT (Size != NULL);
 
   if (PlistNodeCast (Node, PLIST_NODE_TYPE_DATA) != NULL) {
     Content = XmlNodeContent (Node);
