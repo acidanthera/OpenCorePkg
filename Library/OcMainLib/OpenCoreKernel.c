@@ -1081,6 +1081,7 @@ OcKernelFileOpen (
   UINT32             LinkedExpansion;
   UINT32             ReservedFullSize;
   CHAR16             *NewFileName;
+  EFI_FILE_PROTOCOL  *EspNewHandle;
 
   //
   // Prevent access to cache files depending on maximum cache type allowed.
@@ -1146,9 +1147,19 @@ OcKernelFileOpen (
       DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
       This = mCustomKernelDirectory;
 
+      DEBUG ((DEBUG_INFO, "OC: Original FileName: %s\n", FileName));
       NewFileName = OcStrrChr (FileName, '\\');
       if (NewFileName != NULL) {
         FileName = NewFileName;
+        DEBUG ((DEBUG_INFO, "OC: FileName after redirection: %s\n", FileName));
+
+        Status = SafeFileOpen (This, &EspNewHandle, FileName, OpenMode, Attributes);
+        if (!EFI_ERROR (Status)) {
+          if (NewHandle != NULL) {
+            (*NewHandle)->Close (*NewHandle);
+          }
+          *NewHandle = EspNewHandle;
+        }
       }
     }
 
@@ -1193,11 +1204,22 @@ OcKernelFileOpen (
       DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
       This = mCustomKernelDirectory;
 
+      DEBUG ((DEBUG_INFO, "OC: Original FileName: %s\n", FileName));
       NewFileName = OcStrrChr (FileName, '\\');
       if (NewFileName != NULL) {
         FileName = NewFileName;
+        DEBUG ((DEBUG_INFO, "OC: FileName after redirection: %s\n", FileName));
+
+        Status = SafeFileOpen (This, &EspNewHandle, FileName, OpenMode, Attributes);
+        if (!EFI_ERROR (Status)) {
+          if (NewHandle != NULL) {
+            (*NewHandle)->Close (*NewHandle);
+          }
+          *NewHandle = EspNewHandle;
+        }
       }
     }
+
 
     //
     // Kernel loading for fuzzy kernelcache is performed earlier.
@@ -1218,7 +1240,7 @@ OcKernelFileOpen (
         );
 
       if (Status == EFI_NOT_FOUND) {
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
         *NewHandle = NULL;
 
         return Status;
@@ -1237,7 +1259,7 @@ OcKernelFileOpen (
         DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
 
         FreePool (Kernel);
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
         *NewHandle = NULL;
 
         return EFI_NOT_FOUND;
@@ -1275,7 +1297,7 @@ OcKernelFileOpen (
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
 
-      (*NewHandle)->Close(*NewHandle);
+      (*NewHandle)->Close (*NewHandle);
 
       //
       // Virtualise newly created kernel.
@@ -1307,7 +1329,7 @@ OcKernelFileOpen (
     //
     if (MaxCacheTypeAllowed == CacheTypeCacheless) {
       DEBUG ((DEBUG_INFO, "OC: Blocking mkext due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
-      (*NewHandle)->Close(*NewHandle);
+      (*NewHandle)->Close (*NewHandle);
       *NewHandle = NULL;
 
       return EFI_NOT_FOUND;
@@ -1364,7 +1386,7 @@ OcKernelFileOpen (
           ZeroMem (&ModificationTime, sizeof (ModificationTime));
         }
 
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
 
         //
         // Virtualise newly created mkext.
