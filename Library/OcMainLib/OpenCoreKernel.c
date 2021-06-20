@@ -1220,7 +1220,6 @@ OcKernelFileOpen (
       }
     }
 
-
     //
     // Kernel loading for fuzzy kernelcache is performed earlier.
     //
