@@ -1035,10 +1035,11 @@ XmlParseNode (
 
   XML_PARSER_INFO (Parser, "node");
 
-  Attributes  = NULL;
-  SelfClosing = FALSE;
-  Unprefixed  = FALSE;
-  IsReference = FALSE;
+  Attributes      = NULL;
+  SelfClosing     = FALSE;
+  Unprefixed      = FALSE;
+  IsReference     = FALSE;
+  ReferenceNumber = 0;
 
   //
   // Parse open tag.
