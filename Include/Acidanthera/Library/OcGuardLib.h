@@ -40,8 +40,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_ALIGNAS(Alignment)
 #endif
 
-UINT64 __security_cookie;
-
 VOID
 __stack_chk_fail (
   VOID

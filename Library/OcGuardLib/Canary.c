@@ -16,8 +16,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Library/OcRngLib.h>
-#include <Library/DebugLib.h>
 #include <Library/OcGuardLib.h>
 
 //
@@ -25,6 +23,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // generated, e.g. with rdrand. For now this code is only written to help debugging
 // stack corruptions.
 //
+GLOBAL_REMOVE_IF_UNREFERENCED UINT64 __security_cookie;
+
 VOID
 __security_check_cookie (
   IN UINTN  Value
@@ -38,30 +38,4 @@ __security_check_cookie (
     {
     }
   }
-}
-
-VOID
-__stack_chk_fail (
-  VOID
-  )
-{
-  volatile UINTN  Index;
-
-  DEBUG ((DEBUG_ERROR, "Error: Stack overflow detected!\n"));
-
-  Index = 0;
-  while (Index == 0)
-  {
-  }
-}
-
-VOID
-InitializeSecurityCookie (
-  VOID
-  )
-{
-    UINT64 RandomValue = 0;
-    OcRngLibConstructor();
-    GetRandomNumber64(&RandomValue);
-    __security_cookie = RandomValue;
 }

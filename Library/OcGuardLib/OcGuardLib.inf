@@ -39,6 +39,9 @@
   Ubsan.c
   Ubsan.h
 
+[Sources.X64]
+  X64/Canary.nasm
+
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
@@ -46,8 +49,6 @@
 [LibraryClasses]
   BaseLib
   UefiLib
-  OcRngLib
-  DebugLib
 
 [BuildOptions]
   XCODE:DEBUG_*_*_CC_FLAGS   = -fno-stack-protector
