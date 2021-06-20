@@ -46,6 +46,8 @@
 [LibraryClasses]
   BaseLib
   UefiLib
+  OcRngLib
+  DebugLib
 
 [BuildOptions]
   XCODE:DEBUG_*_*_CC_FLAGS   = -fno-stack-protector

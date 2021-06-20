@@ -16,13 +16,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <Library/OcRngLib.h>
+#include <Library/DebugLib.h>
+#include <Library/OcGuardLib.h>
+
 //
 // TODO: For the cookie to work for security needs, the value is to be runtime
 // generated, e.g. with rdrand. For now this code is only written to help debugging
 // stack corruptions.
 //
-UINT64 __security_cookie = 0x9C7D6B4580C0BC9ULL;
-
 VOID
 __security_check_cookie (
   IN UINTN  Value
@@ -36,4 +38,30 @@ __security_check_cookie (
     {
     }
   }
+}
+
+VOID
+__stack_chk_fail (
+  VOID
+  )
+{
+  volatile UINTN  Index;
+
+  DEBUG ((DEBUG_ERROR, "Error: Stack overflow detected!\n"));
+
+  Index = 0;
+  while (Index == 0)
+  {
+  }
+}
+
+VOID
+InitializeSecurityCookie (
+  VOID
+  )
+{
+    UINT64 RandomValue = 0;
+    OcRngLibConstructor();
+    GetRandomNumber64(&RandomValue);
+    __security_cookie = RandomValue;
 }
