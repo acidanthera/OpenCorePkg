@@ -40,6 +40,7 @@ STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
 
 STATIC EFI_FILE_PROTOCOL   *mCustomKernelDirectory;
+STATIC BOOLEAN             mCustomKernelDirectoryInProgress;
 
 STATIC
 VOID
@@ -1083,6 +1084,11 @@ OcKernelFileOpen (
   CHAR16             *NewFileName;
   EFI_FILE_PROTOCOL  *EspNewHandle;
 
+  if (mCustomKernelDirectoryInProgress) {
+    DEBUG ((DEBUG_INFO, "OC: Skipping OpenFile hooking on ESP Kernels directory\n"));
+    return SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
+  }
+
   //
   // Prevent access to cache files depending on maximum cache type allowed.
   //
@@ -1141,25 +1147,28 @@ OcKernelFileOpen (
     && OpenMode == EFI_FILE_MODE_READ
     && (StrStr (FileName, L"\\kernelcache") != NULL)) {
     //
-    // Change the target to the cusutom one if requested CustomKernel.
+    // Change the target to the custom one if requested CustomKernel.
     //
     if (mCustomKernelDirectory != NULL) {
       DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
-      This = mCustomKernelDirectory;
+      NewFileName = OcStrrChr (FileName, L'\\');
+      if (NewFileName == NULL) {
+        NewFileName = FileName;
+      }
 
-      DEBUG ((DEBUG_INFO, "OC: Original FileName: %s\n", FileName));
-      NewFileName = OcStrrChr (FileName, '\\');
-      if (NewFileName != NULL) {
-        FileName = NewFileName;
-        DEBUG ((DEBUG_INFO, "OC: FileName after redirection: %s\n", FileName));
+      DEBUG ((DEBUG_INFO, "OC: Filename after redirection: %s\n", NewFileName));
 
-        Status = SafeFileOpen (This, &EspNewHandle, FileName, OpenMode, Attributes);
-        if (!EFI_ERROR (Status)) {
-          if (NewHandle != NULL) {
-            (*NewHandle)->Close (*NewHandle);
-          }
-          *NewHandle = EspNewHandle;
+      mCustomKernelDirectoryInProgress = TRUE;
+      Status = SafeFileOpen (mCustomKernelDirectory, &EspNewHandle, NewFileName, OpenMode, Attributes);
+      mCustomKernelDirectoryInProgress = FALSE;
+      if (!EFI_ERROR (Status)) {
+        if (*NewHandle != NULL) {
+          (*NewHandle)->Close (*NewHandle);
         }
+
+        This = mCustomKernelDirectory;
+        *NewHandle = EspNewHandle;
+        FileName = NewFileName;
       }
     }
 
@@ -1198,25 +1207,28 @@ OcKernelFileOpen (
     && OcStriStr (FileName, L".kext\\") == NULL
     && OcStriStr (FileName, L".im4m") == NULL) {
     //
-    // Change the target to the cusutom one if requested CustomKernel.
+    // Change the target to the custom one if requested CustomKernel.
     //
     if (mCustomKernelDirectory != NULL) {
       DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
-      This = mCustomKernelDirectory;
+      NewFileName = OcStrrChr (FileName, L'\\');
+      if (NewFileName == NULL) {
+        NewFileName = FileName;
+      }
 
-      DEBUG ((DEBUG_INFO, "OC: Original FileName: %s\n", FileName));
-      NewFileName = OcStrrChr (FileName, '\\');
-      if (NewFileName != NULL) {
-        FileName = NewFileName;
-        DEBUG ((DEBUG_INFO, "OC: FileName after redirection: %s\n", FileName));
+      DEBUG ((DEBUG_INFO, "OC: Filename after redirection: %s\n", NewFileName));
 
-        Status = SafeFileOpen (This, &EspNewHandle, FileName, OpenMode, Attributes);
-        if (!EFI_ERROR (Status)) {
-          if (NewHandle != NULL) {
-            (*NewHandle)->Close (*NewHandle);
-          }
-          *NewHandle = EspNewHandle;
+      mCustomKernelDirectoryInProgress = TRUE;
+      Status = SafeFileOpen (mCustomKernelDirectory, &EspNewHandle, NewFileName, OpenMode, Attributes);
+      mCustomKernelDirectoryInProgress = FALSE;
+      if (!EFI_ERROR (Status)) {
+        if (*NewHandle != NULL) {
+          (*NewHandle)->Close (*NewHandle);
         }
+
+        This = mCustomKernelDirectory;
+        *NewHandle = EspNewHandle;
+        FileName = NewFileName;
       }
     }
 
@@ -1495,11 +1507,12 @@ OcLoadKernelSupport (
   Status = EnableVirtualFs (gBS, OcKernelFileOpen);
 
   if (!EFI_ERROR (Status)) {
-    mOcStorage              = Storage;
-    mOcConfiguration        = Config;
-    mOcCpuInfo              = CpuInfo;
-    mOcDarwinVersion        = 0;
-    mOcCachelessInProgress  = FALSE;
+    mOcStorage                        = Storage;
+    mOcConfiguration                  = Config;
+    mOcCpuInfo                        = CpuInfo;
+    mOcDarwinVersion                  = 0;
+    mOcCachelessInProgress            = FALSE;
+    mCustomKernelDirectoryInProgress  = FALSE;
     //
     // Open customised Kernels if needed.
     //
