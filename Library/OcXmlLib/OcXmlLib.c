@@ -47,9 +47,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 
-//
-// Minimal extra allocation size during export.
-//
+/**
+  Minimal extra allocation size during export.
+**/
 #define XML_EXPORT_MIN_ALLOCATION_SIZE 4096
 
 #define XML_PLIST_HEADER  "<?xml version=\"1.0\" encoding=\"UTF-8\"?><!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\">"
@@ -60,10 +60,10 @@ struct XML_PARSER_;
 typedef struct XML_NODE_LIST_ XML_NODE_LIST;
 typedef struct XML_PARSER_ XML_PARSER;
 
-//
-// An XML_NODE will always contain a tag name and possibly a list of
-// children or text content.
-//
+/**
+  An XML_NODE will always contain a tag name and possibly a list of
+  children or text content.
+**/
 struct XML_NODE_ {
   CONST CHAR8    *Name;
   CONST CHAR8    *Attributes;
@@ -84,9 +84,9 @@ typedef struct {
   XML_NODE      **RefList;
 } XML_REFLIST;
 
-//
-// An XML_DOCUMENT simply contains the root node and the underlying buffer.
-//
+/**
+  An XML_DOCUMENT simply contains the root node and the underlying buffer.
+**/
 struct XML_DOCUMENT_ {
   struct {
     CHAR8       *Buffer;
@@ -97,9 +97,9 @@ struct XML_DOCUMENT_ {
   XML_REFLIST   References;
 };
 
-//
-// Parser context.
-//
+/**
+  Parser context.
+**/
 struct XML_PARSER_ {
   CHAR8  *Buffer;
   UINT32 Position;
@@ -107,18 +107,18 @@ struct XML_PARSER_ {
   UINT32 Level;
 };
 
-//
-// Character offsets.
-//
+/**
+  Character offsets.
+**/
 typedef enum XML_PARSER_OFFSET_ {
   NO_CHARACTER        = -1,
   CURRENT_CHARACTER   = 0,
   NEXT_CHARACTER      = 1,
 } XML_PARSER_OFFSET;
 
-//
-// Plist node types.
-//
+/**
+  Plist node types.
+**/
 CONST CHAR8 *
 PlistNodeTypes[PLIST_NODE_TYPE_MAX] = {
   NULL,
@@ -133,7 +133,6 @@ PlistNodeTypes[PLIST_NODE_TYPE_MAX] = {
   "real",
   "integer"
 };
-
 
 STATIC
 BOOLEAN
@@ -180,8 +179,8 @@ STATIC
 XML_NODE *
 XmlNodeCreate (
   IN  CONST CHAR8          *Name,
-  IN  CONST CHAR8          *Attributes,
-  IN  CONST CHAR8          *Content,
+  IN  CONST CHAR8          *Attributes  OPTIONAL,
+  IN  CONST CHAR8          *Content     OPTIONAL,
   IN  CONST XML_NODE       *Real,
   IN  CONST XML_NODE_LIST  *Children
   )
@@ -1421,7 +1420,7 @@ XmlEasyChild (
     //
     // Find name of next child.
     //
-    ChildName = VA_ARG (Arguments, CONST CHAR8*);
+    ChildName = VA_ARG (Arguments, CONST CHAR8 *);
   }
 
   VA_END (Arguments);
@@ -1436,8 +1435,8 @@ XML_NODE *
 XmlNodeAppend (
   IN OUT  XML_NODE     *Node,
   IN      CONST CHAR8  *Name,
-  IN      CONST CHAR8  *Attributes,
-  IN      CONST CHAR8  *Content
+  IN      CONST CHAR8  *Attributes  OPTIONAL,
+  IN      CONST CHAR8  *Content     OPTIONAL
   )
 {
   XML_NODE  *NewNode;
@@ -1632,7 +1631,7 @@ PlistDataValue (
 {
   CONST CHAR8    *Content;
   UINTN          Length;
-  EFI_STATUS     Result;
+  EFI_STATUS     Status;
 
   ASSERT (Buffer != NULL);
   ASSERT (Size   != NULL);
@@ -1648,9 +1647,9 @@ PlistDataValue (
   }
 
   Length = *Size;
-  Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+  Status = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-  if (!EFI_ERROR (Result) && (UINT32) Length == Length) {
+  if (!EFI_ERROR (Status) && (UINT32) Length == Length) {
     *Size = (UINT32) Length;
     return TRUE;
   }
@@ -1754,7 +1753,7 @@ PlistMultiDataValue (
 {
   CONST CHAR8    *Content;
   UINTN          Length;
-  EFI_STATUS     Result;
+  EFI_STATUS     Status;
 
   ASSERT (Buffer != NULL);
   ASSERT (Size   != NULL);
@@ -1764,9 +1763,9 @@ PlistMultiDataValue (
     if (Content != NULL) {
 
       Length = *Size;
-      Result = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
+      Status = Base64Decode (Content, AsciiStrLen (Content), Buffer, &Length);
 
-      if (!EFI_ERROR (Result) && (UINT32) Length == Length) {
+      if (!EFI_ERROR (Status) && (UINT32) Length == Length) {
         *Size = (UINT32) Length;
       } else {
         return FALSE;
@@ -1830,7 +1829,7 @@ PlistStringSize (
 
   Content = XmlNodeContent (Node);
   if (Content != NULL) {
-    *Size = (UINT32) AsciiStrLen (Content) + 1;
+    *Size = (UINT32) AsciiStrSize (Content);
     return TRUE;
   }
 
