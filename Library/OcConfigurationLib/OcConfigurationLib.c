@@ -371,6 +371,7 @@ mKernelQuirksSchema[] = {
 STATIC
 OC_SCHEMA
 mKernelSchemeSchema[] = {
+  OC_SCHEMA_BOOLEAN_IN ("CustomKernel",       OC_GLOBAL_CONFIG, Kernel.Scheme.CustomKernel),
   OC_SCHEMA_BOOLEAN_IN ("FuzzyMatch",         OC_GLOBAL_CONFIG, Kernel.Scheme.FuzzyMatch),
   OC_SCHEMA_STRING_IN  ("KernelArch",         OC_GLOBAL_CONFIG, Kernel.Scheme.KernelArch),
   OC_SCHEMA_STRING_IN  ("KernelCache",        OC_GLOBAL_CONFIG, Kernel.Scheme.KernelCache),
