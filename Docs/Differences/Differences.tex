@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jun  9 01:29:53 2021
-%DIF ADD ../Configuration.tex        Sat Jun 19 12:47:20 2021
+%DIF ADD ../Configuration.tex        Mon Jun 21 08:16:18 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -708,9 +708,10 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
-approach could be \href{https://www.sublimetext.com}{Sublime Text} with
-\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to the UDK root:
+approach could be \DIFaddbegin \DIFadd{using }\href{https://microsoft.github.io/language-server-protocol}{\DIFadd{Language Server Protocols}}\DIFadd{. For example, }\DIFaddend \href{https://www.sublimetext.com}{Sublime Text} with
+\DIFdelbegin %DIFDELCMD < \href{https://niosus.github.io/EasyClangComplete}{%%%
+\DIFdel{EasyClangComplete}\DIFdelend \DIFaddbegin \href{https://lsp.sublimetext.io}{\DIFadd{LSP for Sublime Text}\DIFaddend } plugin.
+Add \texttt{\DIFdelbegin \DIFdel{.clang}\DIFdelend \DIFaddbegin \DIFadd{compile}\DIFaddend \_\DIFdelbegin \DIFdel{complete}\DIFdelend \DIFaddbegin \DIFadd{flags.txt}\DIFaddend } file with similar content to the UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -749,7 +750,10 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
 
-\textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{/UefiPackages}} \DIFadd{in the sample file denotes an absolute path.
+}
+
+\DIFaddend \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
 (see the \hyperref[miscdebugprops]{Debug Properties} section below) and warn users
 if the version listed is unsupported or prerelease. The OpenCore configuration may change

@@ -648,9 +648,9 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
-approach could be \href{https://www.sublimetext.com}{Sublime Text} with
-\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to the UDK root:
+approach could be using \href{https://microsoft.github.io/language-server-protocol}{Language Server Protocols}. For example, \href{https://www.sublimetext.com}{Sublime Text} with
+\href{https://lsp.sublimetext.io}{LSP for Sublime Text} plugin.
+Add \texttt{compile\_flags.txt} file with similar content to the UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -688,6 +688,8 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DOC_TARGET_NOOPT=1
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
+
+\emph{Note}: \texttt{/UefiPackages} in the sample file denotes an absolute path.
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
