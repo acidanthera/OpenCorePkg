@@ -1155,21 +1155,10 @@ OcKernelFileOpen (
       if (NewFileName == NULL) {
         NewFileName = FileName;
       }
-
       DEBUG ((DEBUG_INFO, "OC: Filename after redirection: %s\n", NewFileName));
 
-      mCustomKernelDirectoryInProgress = TRUE;
-      Status = SafeFileOpen (mCustomKernelDirectory, &EspNewHandle, NewFileName, OpenMode, Attributes);
-      mCustomKernelDirectoryInProgress = FALSE;
-      if (!EFI_ERROR (Status)) {
-        if (*NewHandle != NULL) {
-          (*NewHandle)->Close (*NewHandle);
-        }
-
-        This = mCustomKernelDirectory;
-        *NewHandle = EspNewHandle;
-        FileName = NewFileName;
-      }
+      This     = mCustomKernelDirectory;
+      FileName = NewFileName;
     }
 
     DEBUG ((DEBUG_INFO, "OC: Trying kernelcache fuzzy matching on %s\n", FileName));
@@ -1222,9 +1211,7 @@ OcKernelFileOpen (
       Status = SafeFileOpen (mCustomKernelDirectory, &EspNewHandle, NewFileName, OpenMode, Attributes);
       mCustomKernelDirectoryInProgress = FALSE;
       if (!EFI_ERROR (Status)) {
-        if (*NewHandle != NULL) {
-          (*NewHandle)->Close (*NewHandle);
-        }
+        (*NewHandle)->Close (*NewHandle);
 
         This = mCustomKernelDirectory;
         *NewHandle = EspNewHandle;
