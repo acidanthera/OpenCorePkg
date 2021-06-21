@@ -1004,7 +1004,7 @@ OcCpuGetMsrReport (
     }
   } else if (CpuInfo->CpuGeneration >= OcCpuGenerationPrePenryn) {
     //
-    // IA32_MISC_ENABLE
+    // MSR_IA32_MISC_ENABLE
     //
     Report->CpuHasMsrIa32MiscEnable   = TRUE;
     Report->CpuMsrIa32MiscEnableValue = AsmReadMsr64 (MSR_IA32_MISC_ENABLES);
