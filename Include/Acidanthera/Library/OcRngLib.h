@@ -56,37 +56,4 @@ GetPseudoRandomNumber64 (
   VOID
   );
 
-/**
-  The constructor function checks whether or not RDRAND instruction is supported
-  by the host hardware.
-
-  The constructor function checks whether or not RDRAND instruction is supported.
-  It will ASSERT() if RDRAND instruction is not supported.
-  It will always return EFI_SUCCESS.
-
-  @retval EFI_SUCCESS   The constructor always returns EFI_SUCCESS.
-**/
-EFI_STATUS
-EFIAPI
-OcRngLibConstructor (
-  VOID
-  );
-
-/**
-  Generates a 64-bit random number.
-
-  if Rand is NULL, then ASSERT().
-
-  @param[out] Rand     Buffer pointer to store the 64-bit random value.
-
-  @retval TRUE         Random number generated successfully.
-  @retval FALSE        Failed to generate the random number.
-
-**/
-BOOLEAN
-EFIAPI
-GetRandomNumber64 (
-  OUT     UINT64                    *Rand
-  );
-
 #endif // OC_RNG_LIB_H
