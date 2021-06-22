@@ -12,18 +12,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Protocol/LoadedImage.h>
 
-#include <Library/OcDriverEntryPoint.h>
+#include <Library/UefiDriverEntryPoint.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-
-GLOBAL_REMOVE_IF_UNREFERENCED UINT64 __security_cookie;
-
-VOID
-EFIAPI
-InitializeSecurityCookie (
-  VOID
-  );
 
 /**
   Unloads an image from memory.
@@ -93,15 +85,13 @@ _DriverUnloadHandler (
 **/
 EFI_STATUS
 EFIAPI
-_ModuleEntryPoint (
+_ModuleEntryPointReal (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_STATUS                 Status;
   EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage;
-
-  InitializeSecurityCookie ();
 
   if (_gUefiDriverRevision != 0) {
     //

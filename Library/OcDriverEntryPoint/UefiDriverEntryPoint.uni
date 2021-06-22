@@ -13,4 +13,3 @@
 #string STR_MODULE_ABSTRACT             #language en-US "Module entry point library for UEFI driver, DXE driver and SMM driver"
 
 #string STR_MODULE_DESCRIPTION          #language en-US "Module entry point library for UEFI driver, DXE driver and SMM driver."
-

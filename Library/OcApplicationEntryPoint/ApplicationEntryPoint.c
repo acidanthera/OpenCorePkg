@@ -7,18 +7,10 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 **/
 
 #include <Uefi.h>
-#include <Library/OcApplicationEntryPoint.h>
+#include <Library/UefiApplicationEntryPoint.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
-
-GLOBAL_REMOVE_IF_UNREFERENCED UINT64 __security_cookie;
-
-VOID
-EFIAPI
-InitializeSecurityCookie (
-  VOID
-  );
 
 /**
   Entry point to UEFI Application.
@@ -39,14 +31,12 @@ InitializeSecurityCookie (
 **/
 EFI_STATUS
 EFIAPI
-_ModuleEntryPoint (
+_ModuleEntryPointReal (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
   EFI_STATUS                 Status;
-
-  InitializeSecurityCookie ();
 
   if (_gUefiDriverRevision != 0) {
     //

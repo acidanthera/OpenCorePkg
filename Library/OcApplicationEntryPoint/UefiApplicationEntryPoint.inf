@@ -15,7 +15,7 @@
   FILE_GUID                      = F2C556D6-C7FA-4930-8F04-5953D9E7A98B
   MODULE_TYPE                    = UEFI_APPLICATION
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcApplicationEntryPoint|UEFI_APPLICATION
+  LIBRARY_CLASS                  = UefiApplicationEntryPoint|UEFI_APPLICATION
 
 #
 #  VALID_ARCHITECTURES           = IA32 X64 EBC

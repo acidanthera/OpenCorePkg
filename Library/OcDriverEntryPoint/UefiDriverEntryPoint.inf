@@ -15,7 +15,7 @@
   FILE_GUID                      = 4F74BFAF-C4B4-4B0F-8437-6BD7ACC84B58
   MODULE_TYPE                    = UEFI_DRIVER
   VERSION_STRING                 = 1.0
-  LIBRARY_CLASS                  = OcDriverEntryPoint|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER SMM_CORE DXE_SMM_DRIVER
+  LIBRARY_CLASS                  = UefiDriverEntryPoint|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER SMM_CORE DXE_SMM_DRIVER
 
 #
 # The following information is for reference only and not required by the build tools.
