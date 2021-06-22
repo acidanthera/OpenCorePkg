@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Jun  9 01:29:53 2021
-%DIF ADD ../Configuration.tex        Mon Jun 21 08:16:18 2021
+%DIF ADD ../Configuration.tex        Tue Jun 22 10:04:02 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -468,7 +468,92 @@ should not be relied on.
 \subsection{Directory Structure}\label{directory-structure}
 
 \begin{center}
-\begin{tikzpicture}[%
+\DIFdelbegin %DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.6) and
+%DIFDELCMD <   two children at (0.5,-0.6) and (0.5,-1.2)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {ESP}
+%DIFDELCMD <     child { node {EFI}
+%DIFDELCMD <       child { node {BOOT}
+%DIFDELCMD <         child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {OC}
+%DIFDELCMD <         child { node {ACPI}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Drivers}
+%DIFDELCMD <           child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <           child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Kexts}
+%DIFDELCMD <           child { node [optional] {MyKext.kext}}
+%DIFDELCMD <           child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [optional] {Resources}
+%DIFDELCMD <           child { node [optional] {Audio}}
+%DIFDELCMD <           child { node [optional] {Font}}
+%DIFDELCMD <           child { node [optional] {Image}}
+%DIFDELCMD <           child { node [optional] {Label}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node  {Tools}
+%DIFDELCMD <           child { node [optional] {Tool.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <         child { node {config.plist}}
+%DIFDELCMD <         child { node [optional] {vault.plist}}
+%DIFDELCMD <         child { node [optional] {vault.sig}}
+%DIFDELCMD <       }
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node [optional] {boot}}
+%DIFDELCMD <     child { node [optional] {nvram.plist}}
+%DIFDELCMD <     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <     child { node [optional] {SysReport}}
+%DIFDELCMD <   ;
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.6) and
   two children at (0.5,-0.6) and (0.5,-1.2)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
@@ -545,6 +630,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child { node {Kernels}
+      child { node [optional] {kernel}}
+      child { node [optional] {kernelcache}}
+      child { node [optional] {prelinkedkernel}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
@@ -552,7 +645,7 @@ should not be relied on.
     child { node [optional] {SysReport}}
   ;
 \end{tikzpicture}
-\break
+\DIFaddend \break
 \label{fig:DS}
 Figure 1. Directory Structure
 \end{center}
@@ -2778,8 +2871,20 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{CustomKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use customised kernel cache from the }\texttt{\DIFadd{Kernels}}
+  \DIFadd{directory located at the root of the ESP partition.
+}\DIFaddend 
 
-\item
+  \DIFaddbegin \DIFadd{Unsupported platforms including }\texttt{\DIFadd{Atom}} \DIFadd{and }\texttt{\DIFadd{AMD}} \DIFadd{require modified versions
+  of XNU kernel in order to boot. This option provides the possibility to using a customised
+  kernel cache which contains such modifications from ESP partition.
+}
+
+\DIFaddend \item
   \texttt{FuzzyMatch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
