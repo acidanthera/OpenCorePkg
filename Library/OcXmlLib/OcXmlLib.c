@@ -228,7 +228,7 @@ XmlNodeChildPush (
 
     if (NodeCount < XML_PARSER_NODE_COUNT && AllocCount > NodeCount) {
       Node->Children->NodeList[NodeCount] = (XML_NODE *) Child;
-      Node->Children->NodeCount++;
+      ++Node->Children->NodeCount;
       return TRUE;
     }
   }
@@ -425,10 +425,10 @@ XmlParserError (
     }
 
     for (Position = 0; Position <= Character; ++Position) {
-      Column++;
+      ++Column;
 
       if ('\n' == Parser->Buffer[Position]) {
-        Row++;
+        ++Row;
         Column = 0;
       }
     }
@@ -550,7 +550,7 @@ XmlSkipWhitespace (
 
   while (Parser->Position < Parser->Length
     && IsAsciiSpace (Parser->Buffer[Parser->Position])) {
-    Parser->Position++;
+    ++Parser->Position;
   }
 }
 
@@ -601,7 +601,7 @@ XmlParseTagEnd (
     }
 
     XmlParserConsume (Parser, 1);
-    Length++;
+    ++Length;
 
     Current = XmlParserPeek (Parser, CURRENT_CHARACTER);
   }
@@ -614,8 +614,8 @@ XmlParseTagEnd (
       *Attributes = &Parser->Buffer[Start + NameLength];
       AttributeStart = NameLength;
       while (AttributeStart < Length && IsAsciiSpace (**Attributes)) {
-        (*Attributes)++;
-        AttributeStart++;
+        ++*Attributes;
+        ++AttributeStart;
       }
       Parser->Buffer[Start + Length] = '\0';
     }
@@ -867,7 +867,7 @@ XmlParseContent (
       break;
     } else {
       XmlParserConsume (Parser, 1);
-      Length++;
+      ++Length;
     }
   }
 
@@ -883,7 +883,7 @@ XmlParseContent (
   // Ignore tailing whitespace.
   //
   while ((Length > 0) && IsAsciiSpace (Parser->Buffer[Start + Length - 1])) {
-    Length--;
+    --Length;
   }
 
   //
@@ -1097,7 +1097,7 @@ XmlParseNode (
   // Otherwise children are to be expected.
   //
   } else {
-    Parser->Level++;
+    ++Parser->Level;
 
     if (Parser->Level > XML_PARSER_NEST_LEVEL) {
       XML_PARSER_ERROR (Parser, NO_CHARACTER, "XmlParseNode::level overflow");
@@ -1135,7 +1135,7 @@ XmlParseNode (
       HasChildren = TRUE;
     }
 
-    Parser->Level--;
+    --Parser->Level;
 
     if (!HasChildren && References != NULL && Attributes != NULL) {
       IsReference = XmlParseAttributeNumber (
