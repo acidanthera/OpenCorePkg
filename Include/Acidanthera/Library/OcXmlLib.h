@@ -53,7 +53,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #endif
 
 /**
-  Maximum child node count
+  Maximum child node count.
   XML_PARSER_NODE_COUNT*2 is required to fit into INT32.
 **/
 #ifndef XML_PARSER_NODE_COUNT

@@ -566,7 +566,7 @@ CONST CHAR8 *
 XmlParseTagEnd (
   IN OUT  XML_PARSER   *Parser,
      OUT  BOOLEAN      *SelfClosing  OPTIONAL,
-     OUT  CONST CHAR8  **Attributes
+     OUT  CONST CHAR8  **Attributes  OPTIONAL
   )
 {
   CHAR8   Current;
@@ -575,8 +575,7 @@ XmlParseTagEnd (
   UINT32  Length = 0;
   UINT32  NameLength = 0;
 
-  ASSERT (Parser     != NULL);
-  ASSERT (Attributes != NULL);
+  ASSERT (Parser != NULL);
 
   XML_PARSER_INFO (Parser, "tag_end");
 
@@ -821,7 +820,7 @@ XmlParseTagClose (
   //
   // Consume tag name.
   //
-  return XmlParseTagEnd(Parser, NULL, NULL);
+  return XmlParseTagEnd (Parser, NULL, NULL);
 }
 
 //
