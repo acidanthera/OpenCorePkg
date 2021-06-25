@@ -60,6 +60,7 @@ Windows is automatically detected by OpenCore, so the basic `Windows` flavour wi
 **Windows** icon is recommended, all others are optional.
 
  - **Windows** - Microsoft Windows (auto-detected by OC; fallback: **HardDrive**)
+ - **Windows11:Windows** - Microsoft Windows 11 (`Windows11.icns`)
  - **Windows10:Windows** - Microsoft Windows 10 (`Windows10.icns`)
  - **Windows8_1:Windows** - Microsoft Windows 8.1 (`Windows8_1.icns`, etc.)
  - **Windows8:Windows** - Microsoft Windows 8
