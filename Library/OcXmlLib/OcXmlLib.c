@@ -134,6 +134,16 @@ PlistNodeTypes[PLIST_NODE_TYPE_MAX] = {
   "integer"
 };
 
+/**
+  Parse the attribute number.
+
+  @param[in]   Attributes      XML attributes.
+  @param[in]   Argument        Name of the XML argument.
+  @param[in]   ArgumentLength  Length of the XML argument.
+  @param[out]  ArgumentValue   The parsed XML argument value.
+
+  @retval  TRUE on successful parsing.
+**/
 STATIC
 BOOLEAN
 XmlParseAttributeNumber (
@@ -172,42 +182,55 @@ XmlParseAttributeNumber (
   return TRUE;
 }
 
-//
-// Allocates the node with contents.
-//
+/**
+  Create a new XML node.
+
+  @param[in]  Name        Name of the new node.
+  @param[in]  Attributes  Attributes of the new node. Optional.
+  @param[in]  Content     Content of the new node. Optional.
+  @param[in]  Real        Pointer to the acual content when a reference exists.
+  @param[in]  Children    Pointer to the children of the node.
+
+  @return  The created XML node.
+**/
 STATIC
 XML_NODE *
 XmlNodeCreate (
   IN  CONST CHAR8          *Name,
   IN  CONST CHAR8          *Attributes  OPTIONAL,
   IN  CONST CHAR8          *Content     OPTIONAL,
-  IN  CONST XML_NODE       *Real,
-  IN  CONST XML_NODE_LIST  *Children
+  IN  XML_NODE             *Real,
+  IN  XML_NODE_LIST        *Children
   )
 {
   XML_NODE  *Node;
 
-  Node = (XML_NODE *) AllocatePool (sizeof (XML_NODE));
+  Node = AllocatePool (sizeof (XML_NODE));
 
   if (Node != NULL) {
-    Node->Name       = (CHAR8 *) Name;
-    Node->Attributes = (CHAR8 *) Attributes;
-    Node->Content    = (CHAR8 *) Content;
-    Node->Real       = (XML_NODE *) Real;
-    Node->Children   = (XML_NODE_LIST *) Children;
+    Node->Name       = Name;
+    Node->Attributes = Attributes;
+    Node->Content    = Content;
+    Node->Real       = Real;
+    Node->Children   = Children;
   }
 
   return Node;
 }
 
-//
-// Adds child nodes to node.
-//
+/**
+  Add a child node to the node given.
+
+  @param[in,out]  Node   Pointer to the XML node to which the child will be added.
+  @param[in]      Child  Pointer to the child XML node.
+
+  @retval  TRUE on successful adding.
+**/
 STATIC
 BOOLEAN
 XmlNodeChildPush (
-  IN OUT  XML_NODE        *Node,
-  IN      CONST XML_NODE  *Child
+  IN OUT  XML_NODE  *Node,
+  IN      XML_NODE  *Child
   )
 {
   UINT32         NodeCount;
@@ -227,7 +250,7 @@ XmlNodeChildPush (
     AllocCount = Node->Children->AllocCount;
 
     if (NodeCount < XML_PARSER_NODE_COUNT && AllocCount > NodeCount) {
-      Node->Children->NodeList[NodeCount] = (XML_NODE *) Child;
+      Node->Children->NodeList[NodeCount] = Child;
       ++Node->Children->NodeCount;
       return TRUE;
     }
@@ -267,12 +290,13 @@ XmlNodeChildPush (
     FreePool (Node->Children);
   }
 
-  NewList->NodeList[NodeCount] = (XML_NODE *) Child;
+  NewList->NodeList[NodeCount] = Child;
   Node->Children = NewList;
 
   return TRUE;
 }
 
+// TODO
 STATIC
 BOOLEAN
 XmlPushReference (
@@ -613,7 +637,7 @@ XmlParseTagEnd (
       *Attributes = &Parser->Buffer[Start + NameLength];
       AttributeStart = NameLength;
       while (AttributeStart < Length && IsAsciiSpace (**Attributes)) {
-        ++*Attributes;
+        ++(*Attributes);
         ++AttributeStart;
       }
       Parser->Buffer[Start + Length] = '\0';
@@ -1505,14 +1529,14 @@ PlistDocumentRoot (
 
 XML_NODE *
 PlistNodeCast (
-  IN  CONST XML_NODE   *Node,
+  IN  XML_NODE         *Node  OPTIONAL,
   IN  PLIST_NODE_TYPE  Type
   )
 {
   UINT32  ChildrenNum;
 
   if (Node == NULL || Type == PLIST_NODE_TYPE_ANY) {
-    return NULL;
+    return Node;
   }
 
   if (AsciiStrCmp (XmlNodeName (Node), PlistNodeTypes[Type]) != 0) {
@@ -1579,7 +1603,7 @@ PlistDictChild (
 
 CONST CHAR8 *
 PlistKeyValue (
-  IN  CONST XML_NODE  *Node
+  IN  XML_NODE  *Node
   )
 {
  if (PlistNodeCast (Node, PLIST_NODE_TYPE_KEY) == NULL) {
@@ -1591,9 +1615,9 @@ PlistKeyValue (
 
 BOOLEAN
 PlistStringValue (
-  IN      CONST XML_NODE  *Node,
-     OUT  CHAR8           *Value,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+     OUT  CHAR8     *Value,
+  IN OUT  UINT32    *Size
   )
 {
   CONST CHAR8  *Content;
@@ -1624,9 +1648,9 @@ PlistStringValue (
 
 BOOLEAN
 PlistDataValue (
-  IN      CONST XML_NODE  *Node,
-  OUT     UINT8           *Buffer,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+  OUT     UINT8     *Buffer,
+  IN OUT  UINT32    *Size
   )
 {
   CONST CHAR8    *Content;
@@ -1660,8 +1684,8 @@ PlistDataValue (
 
 BOOLEAN
 PlistBooleanValue (
-  IN   CONST XML_NODE  *Node,
-  OUT  BOOLEAN         *Value
+  IN   XML_NODE  *Node,
+  OUT  BOOLEAN   *Value
   )
 {
   ASSERT (Value != NULL);
@@ -1681,10 +1705,10 @@ PlistBooleanValue (
 
 BOOLEAN
 PlistIntegerValue (
-  IN   CONST XML_NODE  *Node,
-  OUT  VOID            *Value,
-  IN   UINT32          Size,
-  IN   BOOLEAN         Hex
+  IN   XML_NODE  *Node,
+  OUT  VOID      *Value,
+  IN   UINT32    Size,
+  IN   BOOLEAN   Hex
   )
 {
   UINT64       Temp;
@@ -1746,9 +1770,9 @@ PlistIntegerValue (
 
 BOOLEAN
 PlistMultiDataValue (
-  IN      CONST XML_NODE  *Node,
-     OUT  VOID            *Buffer,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+     OUT  VOID      *Buffer,
+  IN OUT  UINT32    *Size
   )
 {
   CONST CHAR8    *Content;
@@ -1815,8 +1839,8 @@ PlistMultiDataValue (
 
 BOOLEAN
 PlistStringSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   )
 {
   CONST CHAR8  *Content;
@@ -1839,8 +1863,8 @@ PlistStringSize (
 
 BOOLEAN
 PlistDataSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   )
 {
   CONST CHAR8  *Content;
@@ -1863,8 +1887,8 @@ PlistDataSize (
 
 BOOLEAN
 PlistMultiDataSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   )
 {
   CONST CHAR8  *Content;

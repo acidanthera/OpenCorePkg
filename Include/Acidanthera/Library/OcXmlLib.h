@@ -319,13 +319,16 @@ PlistDocumentRoot (
   Guarantees that arrays and dicts have valid amount of children, while others have 0.
   Guarantees that keys have names and integers have values.
 
+  @param[in]  Node  A pointer to the XML node. Optional.
+  @param[in]  Type  Plist node type to be casted to.
+
   @return Node if it is not NULL and represents passed Type or NULL.
 
   @warning It is not guaranteed that Node has valid data, for data or integer types.
 **/
 XML_NODE *
 PlistNodeCast (
-  IN  CONST XML_NODE   *Node,
+  IN  XML_NODE         *Node  OPTIONAL,
   IN  PLIST_NODE_TYPE  Type
   );
 
@@ -366,7 +369,7 @@ PlistDictChild (
 **/
 CONST CHAR8 *
 PlistKeyValue (
-  IN  CONST XML_NODE  *Node
+  IN  XML_NODE  *Node
   );
 
 /**
@@ -380,9 +383,9 @@ PlistKeyValue (
 **/
 BOOLEAN
 PlistStringValue (
-  IN      CONST XML_NODE  *Node,
-     OUT  CHAR8           *Value,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+     OUT  CHAR8     *Value,
+  IN OUT  UINT32    *Size
   );
 
 /**
@@ -396,9 +399,9 @@ PlistStringValue (
 **/
 BOOLEAN
 PlistDataValue (
-  IN      CONST XML_NODE  *Node,
-  OUT     UINT8           *Buffer,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+  OUT     UINT8     *Buffer,
+  IN OUT  UINT32    *Size
   );
 
 /**
@@ -411,8 +414,8 @@ PlistDataValue (
 **/
 BOOLEAN
 PlistBooleanValue (
-  IN   CONST XML_NODE  *Node,
-  OUT  BOOLEAN         *Value
+  IN   XML_NODE  *Node,
+  OUT  BOOLEAN   *Value
   );
 
 /**
@@ -427,10 +430,10 @@ PlistBooleanValue (
 **/
 BOOLEAN
 PlistIntegerValue (
-  IN   CONST XML_NODE  *Node,
-  OUT  VOID            *Value,
-  IN   UINT32          Size,
-  IN   BOOLEAN         Hex
+  IN   XML_NODE  *Node,
+  OUT  VOID      *Value,
+  IN   UINT32    Size,
+  IN   BOOLEAN   Hex
   );
 
 /**
@@ -450,9 +453,9 @@ PlistIntegerValue (
 **/
 BOOLEAN
 PlistMultiDataValue (
-  IN      CONST XML_NODE  *Node,
-     OUT  VOID            *Buffer,
-  IN OUT  UINT32          *Size
+  IN      XML_NODE  *Node,
+     OUT  VOID      *Buffer,
+  IN OUT  UINT32    *Size
   );
 
 /**
@@ -465,8 +468,8 @@ PlistMultiDataValue (
 **/
 BOOLEAN
 PlistStringSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   );
 
 /**
@@ -479,8 +482,8 @@ PlistStringSize (
 **/
 BOOLEAN
 PlistDataSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   );
 
 /**
@@ -496,8 +499,8 @@ PlistDataSize (
 **/
 BOOLEAN
 PlistMultiDataSize (
-  IN   CONST XML_NODE  *Node,
-  OUT  UINT32          *Size
+  IN   XML_NODE  *Node,
+  OUT  UINT32    *Size
   );
 
 #endif // OC_XML_LIB_H
