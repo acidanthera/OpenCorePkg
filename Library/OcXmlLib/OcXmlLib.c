@@ -1603,7 +1603,7 @@ PlistDictChild (
 
 CONST CHAR8 *
 PlistKeyValue (
-  IN  XML_NODE  *Node
+  IN  XML_NODE  *Node  OPTIONAL
   )
 {
  if (PlistNodeCast (Node, PLIST_NODE_TYPE_KEY) == NULL) {
@@ -1615,7 +1615,7 @@ PlistKeyValue (
 
 BOOLEAN
 PlistStringValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node   OPTIONAL,
      OUT  CHAR8     *Value,
   IN OUT  UINT32    *Size
   )
@@ -1648,7 +1648,7 @@ PlistStringValue (
 
 BOOLEAN
 PlistDataValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node    OPTIONAL,
   OUT     UINT8     *Buffer,
   IN OUT  UINT32    *Size
   )
@@ -1684,7 +1684,7 @@ PlistDataValue (
 
 BOOLEAN
 PlistBooleanValue (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node   OPTIONAL,
   OUT  BOOLEAN   *Value
   )
 {
@@ -1705,7 +1705,7 @@ PlistBooleanValue (
 
 BOOLEAN
 PlistIntegerValue (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node   OPTIONAL,
   OUT  VOID      *Value,
   IN   UINT32    Size,
   IN   BOOLEAN   Hex
@@ -1770,7 +1770,7 @@ PlistIntegerValue (
 
 BOOLEAN
 PlistMultiDataValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node    OPTIONAL,
      OUT  VOID      *Buffer,
   IN OUT  UINT32    *Size
   )
@@ -1839,7 +1839,7 @@ PlistMultiDataValue (
 
 BOOLEAN
 PlistStringSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   )
 {
@@ -1863,7 +1863,7 @@ PlistStringSize (
 
 BOOLEAN
 PlistDataSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   )
 {
@@ -1887,7 +1887,7 @@ PlistDataSize (
 
 BOOLEAN
 PlistMultiDataSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   )
 {

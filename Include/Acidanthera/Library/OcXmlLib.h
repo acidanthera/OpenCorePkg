@@ -363,19 +363,19 @@ PlistDictChild (
 /**
   Get the value of a plist key.
 
-  @param[in]   Node   A pointer to the XML node.
+  @param[in]   Node   A pointer to the XML node. Optional.
 
   @return Key value for valid type or NULL.
 **/
 CONST CHAR8 *
 PlistKeyValue (
-  IN  XML_NODE  *Node
+  IN  XML_NODE  *Node  OPTIONAL
   );
 
 /**
   Get the value of a plist string.
 
-  @param[in]      Node   A pointer to the XML node.
+  @param[in]      Node   A pointer to the XML node. Optional.
   @param[out]     Value  Value of plist string.
   @param[in,out]  Size   Size of Value, including the '\0' terminator.
 
@@ -383,7 +383,7 @@ PlistKeyValue (
 **/
 BOOLEAN
 PlistStringValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node   OPTIONAL,
      OUT  CHAR8     *Value,
   IN OUT  UINT32    *Size
   );
@@ -391,7 +391,7 @@ PlistStringValue (
 /**
   Decode data content for valid type or set *Size to 0.
 
-  @param[in]      Node    A pointer to the XML node.
+  @param[in]      Node    A pointer to the XML node. Optional.
   @param[out]     Buffer  Buffer of plist data.
   @param[in,out]  Size    Size of Buffer.
 
@@ -399,7 +399,7 @@ PlistStringValue (
 **/
 BOOLEAN
 PlistDataValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node    OPTIONAL,
   OUT     UINT8     *Buffer,
   IN OUT  UINT32    *Size
   );
@@ -407,21 +407,21 @@ PlistDataValue (
 /**
   Get the value of a plist boolean.
 
-  @param[in]      Node   A pointer to the XML node.
+  @param[in]      Node   A pointer to the XML node. Optional.
   @param[out]     Value  Value of plist boolean.
 
   @return TRUE if Node can be casted to PLIST_NODE_TYPE_TRUE or PLIST_NODE_TYPE_FALSE.
 **/
 BOOLEAN
 PlistBooleanValue (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node   OPTIONAL,
   OUT  BOOLEAN   *Value
   );
 
 /**
   Get the value of a plist integer.
 
-  @param[in]   Node   A pointer to the XML node.
+  @param[in]   Node   A pointer to the XML node. Optional.
   @param[out]  Value  Value of plist integer.
   @param[in]   Size   Size of Value to be casted to (UINT8, UINT16, UINT32, or UINT64).
   @param[in]   Hex    TRUE to interpret the value as hexadecimal values, decimal otherwise.   
@@ -430,7 +430,7 @@ PlistBooleanValue (
 **/
 BOOLEAN
 PlistIntegerValue (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node   OPTIONAL,
   OUT  VOID      *Value,
   IN   UINT32    Size,
   IN   BOOLEAN   Hex
@@ -442,7 +442,7 @@ PlistIntegerValue (
   Valid type for MultiData is DATA itself, STRING, INTEGER,
   or BOOLEAN (as 1 byte with 1 or 0 value).
 
-  @param[in]      Node    A pointer to the XML node.
+  @param[in]      Node    A pointer to the XML node. Optional.
   @param[out]     Buffer  Buffer of plist MultiData.
   @param[in,out]  Size    Size of Buffer.
 
@@ -453,7 +453,7 @@ PlistIntegerValue (
 **/
 BOOLEAN
 PlistMultiDataValue (
-  IN      XML_NODE  *Node,
+  IN      XML_NODE  *Node    OPTIONAL,
      OUT  VOID      *Buffer,
   IN OUT  UINT32    *Size
   );
@@ -461,28 +461,28 @@ PlistMultiDataValue (
 /**
   Get size of a plist string, including the '\0' terminator.
 
-  @param[in]      Node   A pointer to the XML node.
+  @param[in]      Node   A pointer to the XML node. Optional.
   @param[out]     Size   Size of string.
 
   @return TRUE if Node can be casted to PLIST_NODE_TYPE_STRING.
 **/
 BOOLEAN
 PlistStringSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   );
 
 /**
   Get size of a plist data.
 
-  @param[in]      Node   A pointer to the XML node.
+  @param[in]      Node   A pointer to the XML node. Optional.
   @param[out]     Size   Size of data.
 
   @return TRUE if Node can be casted to PLIST_NODE_TYPE_DATA.
 **/
 BOOLEAN
 PlistDataSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   );
 
@@ -492,14 +492,14 @@ PlistDataSize (
   Valid type for MultiData is DATA itself, STRING, INTEGER,
   or BOOLEAN (as 1 byte with 1 or 0 value).
 
-  @param[in]      Node   A pointer to the XML node.
+  @param[in]      Node   A pointer to the XML node. Optional.
   @param[out]     Size   Size of MultiData.
 
   @return TRUE if Node can be casted to any of the aforementioned types.
 **/
 BOOLEAN
 PlistMultiDataSize (
-  IN   XML_NODE  *Node,
+  IN   XML_NODE  *Node  OPTIONAL,
   OUT  UINT32    *Size
   );
 
