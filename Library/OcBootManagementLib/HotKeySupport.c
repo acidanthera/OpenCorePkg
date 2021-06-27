@@ -548,14 +548,14 @@ STATIC
 UINT64
 EFIAPI
 WaitForPickerKeyInfoGetEndTime (
-  IN UINTN    Timeout
+  IN UINT64     Timeout
   )
 {
   if (Timeout == 0) {
     return 0ULL;
   }
 
-  return GetTimeInNanoSecond (GetPerformanceCounter ()) + Timeout * 1000000u;
+  return GetTimeInNanoSecond (GetPerformanceCounter ()) + Timeout * 1000000ULL;
 }
 
 STATIC

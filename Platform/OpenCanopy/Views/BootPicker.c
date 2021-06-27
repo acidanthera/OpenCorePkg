@@ -412,26 +412,30 @@ InternalBootPickerKeyEvent (
   BaseY = mBootPickerContainer.Obj.OffsetY + mBootPicker.Hdr.Obj.OffsetY;
 
   if (KeyEvent->OcKeyCode == OC_INPUT_RIGHT) {
-    InternalBootPickerChangeEntry (
-      Picker,
-      DrawContext,
-      BaseX,
-      BaseY,
-      mBootPicker.SelectedIndex + 1 < mBootPicker.Hdr.Obj.NumChildren
-        ? mBootPicker.SelectedIndex + 1
-        : 0
-      );
+    if (mBootPicker.Hdr.Obj.NumChildren > 1) {
+      InternalBootPickerChangeEntry (
+        Picker,
+        DrawContext,
+        BaseX,
+        BaseY,
+        mBootPicker.SelectedIndex + 1 < mBootPicker.Hdr.Obj.NumChildren
+          ? mBootPicker.SelectedIndex + 1
+          : 0
+        );
+    }
   } else if (KeyEvent->OcKeyCode == OC_INPUT_LEFT) {
     ASSERT (mBootPicker.Hdr.Obj.NumChildren > 0);
-    InternalBootPickerChangeEntry (
-      Picker,
-      DrawContext,
-      BaseX,
-      BaseY,
-      mBootPicker.SelectedIndex > 0
-        ? mBootPicker.SelectedIndex - 1
-        : mBootPicker.Hdr.Obj.NumChildren - 1
-      );
+    if (mBootPicker.Hdr.Obj.NumChildren > 1) {
+      InternalBootPickerChangeEntry (
+        Picker,
+        DrawContext,
+        BaseX,
+        BaseY,
+        mBootPicker.SelectedIndex > 0
+          ? mBootPicker.SelectedIndex - 1
+          : mBootPicker.Hdr.Obj.NumChildren - 1
+        );
+    }
   } else if (KeyEvent->OcKeyCode == OC_INPUT_CONTINUE) {
     if (mBootPicker.Hdr.Obj.NumChildren > 0) {
       SelectedEntry = InternalGetVolumeEntry (mBootPicker.SelectedIndex);

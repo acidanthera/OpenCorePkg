@@ -485,6 +485,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child { node {Kernels}
+      child { node [optional] {kernel}}
+      child { node [optional] {kernelcache}}
+      child { node [optional] {prelinkedkernel}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
@@ -648,9 +656,9 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
-approach could be \href{https://www.sublimetext.com}{Sublime Text} with
-\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to the UDK root:
+approach could be using \href{https://microsoft.github.io/language-server-protocol}{Language Server Protocols}. For example, \href{https://www.sublimetext.com}{Sublime Text} with
+\href{https://lsp.sublimetext.io}{LSP for Sublime Text} plugin.
+Add \texttt{compile\_flags.txt} file with similar content to the UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -688,6 +696,8 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DOC_TARGET_NOOPT=1
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
+
+\emph{Note}: \texttt{/UefiPackages} in the sample file denotes an absolute path.
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
@@ -2542,7 +2552,7 @@ blocking.
   \texttt{ExtendBTFeatureFlags}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8-11\\
   \textbf{Description}: Set \texttt{FeatureFlags} to \texttt{0x0F} for full
   functionality of Bluetooth, including Continuity.
 
@@ -2711,6 +2721,16 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+\item
+  \texttt{CustomKernel}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use customised kernel cache from the \texttt{Kernels}
+  directory located at the root of the ESP partition.
+
+  Unsupported platforms including \texttt{Atom} and \texttt{AMD} require modified versions
+  of XNU kernel in order to boot. This option provides the possibility to using a customised
+  kernel cache which contains such modifications from ESP partition.
 
 \item
   \texttt{FuzzyMatch}\\

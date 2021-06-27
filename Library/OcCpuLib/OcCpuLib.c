@@ -1002,9 +1002,9 @@ OcCpuGetMsrReport (
       Report->CpuHasMsrE2   = TRUE;
       Report->CpuMsrE2Value = AsmReadMsr64 (MSR_BROADWELL_PKG_CST_CONFIG_CONTROL);
     }
-  } else {
+  } else if (CpuInfo->CpuGeneration >= OcCpuGenerationPrePenryn) {
     //
-    // IA32_MISC_ENABLE
+    // MSR_IA32_MISC_ENABLE
     //
     Report->CpuHasMsrIa32MiscEnable   = TRUE;
     Report->CpuMsrIa32MiscEnableValue = AsmReadMsr64 (MSR_IA32_MISC_ENABLES);

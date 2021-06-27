@@ -486,6 +486,44 @@ OcStrStrLength (
   );
 
 /**
+  Returns a pointer to the first occurrence of Char
+  in a Null-terminated Unicode string.
+
+  If String is NULL, then ASSERT().
+
+  @param[in]  String          The pointer to a Null-terminated Unicode string.
+  @param[in]  Char            Character to be located.
+
+  @return                     A pointer to the first occurrence of Char in String.
+  @retval NULL                If Char cannot be found in String.
+**/
+CHAR16 *
+EFIAPI
+OcStrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  );
+
+/**
+  Returns a pointer to the last occurrence of Char
+  in a Null-terminated Unicode string.
+
+  If String is NULL, then ASSERT().
+
+  @param[in]  String          The pointer to a Null-terminated Unicode string.
+  @param[in]  Char            Character to be located.
+
+  @return                     A pointer to the last occurrence of Char in String.
+  @retval NULL                If Char cannot be found in String.
+**/
+CHAR16 *
+EFIAPI
+OcStrrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  );
+
+/**
   Alternative to UnicodeSPrint, which checks that the buffer can contain all the characters.
 
   @param[out]  StartOfBuffer    A pointer to the output buffer for the produced Null-terminated

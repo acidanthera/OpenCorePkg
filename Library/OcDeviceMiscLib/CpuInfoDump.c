@@ -166,10 +166,10 @@ OcCpuInfoDump (
     }
 
     //
-    // IA32_MISC_ENABLE
+    // MSR_IA32_MISC_ENABLE
     //
     if (Reports[Index].CpuHasMsrIa32MiscEnable) {
-      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "IA32_MISC_ENABLE: 0x%llX\n", Reports[Index].CpuMsrIa32MiscEnableValue);
+      OcAsciiPrintBuffer (&FileBuffer, &FileBufferSize, "MSR_IA32_MISC_ENABLE: 0x%llX\n", Reports[Index].CpuMsrIa32MiscEnableValue);
     }
     //
     // MSR_IA32_EXT_CONFIG

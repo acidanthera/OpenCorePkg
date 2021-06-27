@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Jun 11 16:52:07 2021
-%DIF ADD ../Configuration.tex        Fri Jun 11 17:37:47 2021
+%DIF DEL PreviousConfiguration.tex   Wed Jun  9 01:29:53 2021
+%DIF ADD ../Configuration.tex        Tue Jun 22 10:04:02 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -468,7 +468,92 @@ should not be relied on.
 \subsection{Directory Structure}\label{directory-structure}
 
 \begin{center}
-\begin{tikzpicture}[%
+\DIFdelbegin %DIFDELCMD < \begin{tikzpicture}[%
+%DIFDELCMD <   grow via three points={one child at (0.5,-0.6) and
+%DIFDELCMD <   two children at (0.5,-0.6) and (0.5,-1.2)},
+%DIFDELCMD <   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
+%DIFDELCMD <   \node {ESP}
+%DIFDELCMD <     child { node {EFI}
+%DIFDELCMD <       child { node {BOOT}
+%DIFDELCMD <         child { node [selected] {BOOTx64.efi}}
+%DIFDELCMD <       }
+%DIFDELCMD <       child [missing] {}
+%DIFDELCMD <       child { node {OC}
+%DIFDELCMD <         child { node {ACPI}
+%DIFDELCMD <           child { node [optional] {DSDT.aml}}
+%DIFDELCMD <           child { node [optional] {SSDT-1.aml}}
+%DIFDELCMD <           child { node [optional] {MYTABLE.aml}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Drivers}
+%DIFDELCMD <           child { node [optional] {MyDriver.efi}}
+%DIFDELCMD <           child { node [optional] {OtherDriver.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node {Kexts}
+%DIFDELCMD <           child { node [optional] {MyKext.kext}}
+%DIFDELCMD <           child { node [optional] {OtherKext.kext}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [optional] {Resources}
+%DIFDELCMD <           child { node [optional] {Audio}}
+%DIFDELCMD <           child { node [optional] {Font}}
+%DIFDELCMD <           child { node [optional] {Image}}
+%DIFDELCMD <           child { node [optional] {Label}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node  {Tools}
+%DIFDELCMD <           child { node [optional] {Tool.efi}}
+%DIFDELCMD <         }
+%DIFDELCMD <         child [missing] {}
+%DIFDELCMD <         child { node [selected] {OpenCore.efi}}
+%DIFDELCMD <         child { node {config.plist}}
+%DIFDELCMD <         child { node [optional] {vault.plist}}
+%DIFDELCMD <         child { node [optional] {vault.sig}}
+%DIFDELCMD <       }
+%DIFDELCMD <     }
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child [missing] {}
+%DIFDELCMD <     child { node [optional] {boot}}
+%DIFDELCMD <     child { node [optional] {nvram.plist}}
+%DIFDELCMD <     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <     child { node [optional] {panic-YYYY-MM-DD-HHMMSS.txt}}
+%DIFDELCMD <     child { node [optional] {SysReport}}
+%DIFDELCMD <   ;
+%DIFDELCMD < \end{tikzpicture}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \begin{tikzpicture}[%
   grow via three points={one child at (0.5,-0.6) and
   two children at (0.5,-0.6) and (0.5,-1.2)},
   edge from parent path={(\tikzparentnode.south) |- (\tikzchildnode.west)}]
@@ -545,6 +630,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child { node {Kernels}
+      child { node [optional] {kernel}}
+      child { node [optional] {kernelcache}}
+      child { node [optional] {prelinkedkernel}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
@@ -552,7 +645,7 @@ should not be relied on.
     child { node [optional] {SysReport}}
   ;
 \end{tikzpicture}
-\break
+\DIFaddend \break
 \label{fig:DS}
 Figure 1. Directory Structure
 \end{center}
@@ -708,9 +801,10 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
-approach could be \href{https://www.sublimetext.com}{Sublime Text} with
-\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to the UDK root:
+approach could be \DIFaddbegin \DIFadd{using }\href{https://microsoft.github.io/language-server-protocol}{\DIFadd{Language Server Protocols}}\DIFadd{. For example, }\DIFaddend \href{https://www.sublimetext.com}{Sublime Text} with
+\DIFdelbegin %DIFDELCMD < \href{https://niosus.github.io/EasyClangComplete}{%%%
+\DIFdel{EasyClangComplete}\DIFdelend \DIFaddbegin \href{https://lsp.sublimetext.io}{\DIFadd{LSP for Sublime Text}\DIFaddend } plugin.
+Add \texttt{\DIFdelbegin \DIFdel{.clang}\DIFdelend \DIFaddbegin \DIFadd{compile}\DIFaddend \_\DIFdelbegin \DIFdel{complete}\DIFdelend \DIFaddbegin \DIFadd{flags.txt}\DIFaddend } file with similar content to the UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -749,7 +843,10 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
 
-\textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: }\texttt{\DIFadd{/UefiPackages}} \DIFadd{in the sample file denotes an absolute path.
+}
+
+\DIFaddend \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
 (see the \hyperref[miscdebugprops]{Debug Properties} section below) and warn users
 if the version listed is unsupported or prerelease. The OpenCore configuration may change
@@ -2566,15 +2663,15 @@ blocking.
 
   \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: This option is a preferred alternative to deleting \texttt{DMAR}
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
-  VT-d support in other systems in case they need this\DIFaddbegin \DIFadd{.
-}
+  VT-d support in other systems in case they need this.
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Misconfigured IOMMU in the firmware may result in broken devices 
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: Misconfigured IOMMU in the firmware may result in broken devices 
   such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
   link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
-  Gigabyte is one of the most common OEMs with these issues}\DIFaddend .
+  Gigabyte is one of the most common OEMs with these issues.
+}
 
-\item
+\DIFaddend \item
   \texttt{DisableLinkeditJettison}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2605,7 +2702,7 @@ blocking.
   \texttt{ExtendBTFeatureFlags}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8\DIFaddbegin \DIFadd{-11}\DIFaddend \\
   \textbf{Description}: Set \texttt{FeatureFlags} to \texttt{0x0F} for full
   functionality of Bluetooth, including Continuity.
 
@@ -2774,8 +2871,20 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{CustomKernel}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Use customised kernel cache from the }\texttt{\DIFadd{Kernels}}
+  \DIFadd{directory located at the root of the ESP partition.
+}\DIFaddend 
 
-\item
+  \DIFaddbegin \DIFadd{Unsupported platforms including }\texttt{\DIFadd{Atom}} \DIFadd{and }\texttt{\DIFadd{AMD}} \DIFadd{require modified versions
+  of XNU kernel in order to boot. This option provides the possibility to using a customised
+  kernel cache which contains such modifications from ESP partition.
+}
+
+\DIFaddend \item
   \texttt{FuzzyMatch}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -6124,7 +6233,8 @@ scaled accordingly for other levels.
 \tightlist
   \item \texttt{Cursor} --- Mouse cursor (mandatory, up to 144x144).
   \item \texttt{Selected} --- Selected item (mandatory, 144x144).
-  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40).
+  \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40\DIFaddbegin \DIFadd{).
+  }\item \texttt{\DIFadd{SetDefault}} \DIFadd{--- Selecting default (mandatory, up to 144x40; must be same width as }\texttt{\DIFadd{Selector}}\DIFaddend ).
   \item \texttt{Left} --- Scrolling left (mandatory, 40x40).
   \item \texttt{Right} --- Scrolling right (mandatory, 40x40).
   \item \texttt{HardDrive} --- Generic OS (mandatory, 128x128).
