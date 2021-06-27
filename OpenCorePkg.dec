@@ -742,6 +742,7 @@
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderForceLoadDebug|FALSE|BOOLEAN|0x00000604
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderTolerantLoad|TRUE|BOOLEAN|0x00000605
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportDebug|FALSE|BOOLEAN|0x00000606
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|FALSE|BOOLEAN|0x00000607
 
 [LibraryClasses]
   ##  @libraryclass

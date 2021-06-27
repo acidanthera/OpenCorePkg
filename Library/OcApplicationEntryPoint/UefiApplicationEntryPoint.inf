@@ -18,14 +18,20 @@
   LIBRARY_CLASS                  = UefiApplicationEntryPoint|UEFI_APPLICATION
 
 #
-#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
   ApplicationEntryPoint.c
 
+[Sources.Ia32]
+  Ia32/Canary.nasm
+
 [Sources.X64]
   X64/Canary.nasm
+
+[Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
+  CanaryDummy.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -35,3 +41,8 @@
   UefiBootServicesTableLib
   DebugLib
   BaseLib
+  PcdLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES

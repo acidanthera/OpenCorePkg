@@ -9,7 +9,7 @@
 ; THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 ; WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 ;
-BITS 64
+BITS 32
 
 extern ASM_PFX(FixedPcdGet8)
 extern _ModuleEntryPointReal
@@ -18,7 +18,7 @@ section .data
 align 8
 global __security_cookie
 __security_cookie:
-  dq 0
+  dd 0
 
 section .text
 #  BIT4 - Enable BreakPoint as ASSERT. (MdePkg.dec)
@@ -51,10 +51,6 @@ __stack_chk_fail:
 align 8
 global _ModuleEntryPoint
 _ModuleEntryPoint:
-  ; Save ImageHandle and *SystemTable.
-  mov r8, rcx
-  mov r9, rdx
-
 %if ASM_PFX(FixedPcdGet8(PcdCanaryAllowRdtscFallback))
     mov eax, 1          ; Feature Information
     cpuid               ; result in EAX, EBX, ECX, EDX
@@ -62,22 +58,17 @@ _ModuleEntryPoint:
     cmp ecx, 040000000H ; check RDRAND feature flag
     jne noRdRand
   retry:
-    rdrand rdx
+    rdrand edx
     jae retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
     jmp done
   noRdRand:
     rdtsc               ; Read time-stamp counter into EDX:EAX.
-    shld rdx, rdx, 32
-    or rdx, rax
   done:
 %else
   again:
-    rdrand rdx
+    rdrand edx
     jae again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
 %endif
 
-  mov [rel __security_cookie], rdx
-  ; Restore ImageHandle and *SystemTable.
-  mov rcx, r8
-  mov rdx, r9
+  mov [rel __security_cookie], edx
   jmp _ModuleEntryPointReal

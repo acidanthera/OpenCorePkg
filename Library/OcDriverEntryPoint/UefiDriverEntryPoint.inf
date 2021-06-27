@@ -20,14 +20,20 @@
 #
 # The following information is for reference only and not required by the build tools.
 #
-#  VALID_ARCHITECTURES           = IA32 X64 EBC
+#  VALID_ARCHITECTURES           = IA32 X64
 #
 
 [Sources]
   DriverEntryPoint.c
 
+[Sources.Ia32]
+  Ia32/Canary.nasm
+
 [Sources.X64]
   X64/Canary.nasm
+
+[Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
+  CanaryDummy.c
 
 [Packages]
   MdePkg/MdePkg.dec
@@ -37,9 +43,14 @@
   UefiBootServicesTableLib
   DebugLib
   BaseLib
+  PcdLib
 
 [Protocols]
   gEfiLoadedImageProtocolGuid                   ## SOMETIMES_CONSUMES
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES
 
 #
 # For UEFI drivers, these architectural protocols defined in PI 1.0 spec need
