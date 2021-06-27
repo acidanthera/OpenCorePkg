@@ -6049,7 +6049,11 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
-across all cores and change such hidden options on selected platforms.
+across all cores and change such hidden options on selected platforms. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{TpmInfo}}\textbf{*}
+& Check Intel PTT (Platform Trust Technology) capability on the platform,
+which allows using fTPM 2.0 if enabled. The tool does not check whether fTPM 2.0
+is actually enabled.
 \end{tabular}
 
 \subsection{OpenCanopy}\label{ueficanopy}

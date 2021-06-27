@@ -140,6 +140,7 @@ package() {
       "MmapDump.efi"
       "ResetSystem.efi"
       "RtcRw.efi"
+      "TpmInfo.efi"
       "OpenControl.efi"
       "ControlMsrE2.efi"
       )

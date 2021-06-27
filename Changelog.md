@@ -16,6 +16,7 @@ OpenCore Changelog
 - Added support for custom kernels on ESP partition
 - Fixed DEBUG ASSERT on pressing change entry keys with single boot entry in OpenCanopy
 - Added recommended `Apple12` and `Windows11` flavours
+- Added `TpmInfo` tool to DEBUG TPM status
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
