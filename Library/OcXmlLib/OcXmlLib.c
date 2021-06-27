@@ -345,6 +345,7 @@ XmlPushReference (
   return TRUE;
 }
 
+// TODO
 STATIC
 XML_NODE *
 XmlNodeReal (
@@ -373,9 +374,11 @@ XmlNodeReal (
   return References->RefList[Number];
 }
 
-//
-// Frees the resources allocated by the node.
-//
+/**
+  Free the resources allocated by the node.
+
+  @param[in,out]  Node  A pointer to the XML node to be freed.
+**/
 STATIC
 VOID
 XmlNodeFree (
@@ -396,6 +399,11 @@ XmlNodeFree (
   FreePool (Node);
 }
 
+/**
+  Free the XML references.
+
+  @param[in,out]  References  A pointer to the XML references to be freed.
+**/
 STATIC
 VOID
 XmlFreeRefs (
@@ -410,9 +418,9 @@ XmlFreeRefs (
   }
 }
 
-//
-// Echos the parsers call stack for debugging purposes.
-//
+/**
+  Echo the parsers call stack for debugging purposes.
+**/
 #ifdef XML_PARSER_VERBOSE
 #define XML_PARSER_INFO(Parser, Message) \
   DEBUG ((DEBUG_VERBOSE, "OCXML: XML_PARSER_INFO %a\n", Message));
@@ -423,9 +431,13 @@ XmlFreeRefs (
 #define XML_PARSER_TAG(Parser, Tag) do {} while (0)
 #endif
 
-//
-// Echos an error regarding the parser's source to the console.
-//
+/**
+  Echo an error regarding the parser's source to the console.
+
+  @param[in]  Parser   A pointer to the XML parser.
+  @param[in]  Offset   Offset of the XML parser.
+  @param[in]  Message  Message to be displayed
+**/
 VOID
 XmlParserError (
   IN  CONST XML_PARSER   *Parser,
@@ -459,19 +471,26 @@ XmlParserError (
   }
 
   if (NO_CHARACTER != Offset) {
-    DEBUG ((DEBUG_INFO, "OCXML: XmlParserError at %u:%u (is %c): %a\n",
-      Row + 1, Column, Parser->Buffer[Character], Message
+    DEBUG ((
+      DEBUG_INFO, "OCXML: XmlParserError at %u:%u (is %c): %a\n",
+      Row + 1,
+      Column,
+      Parser->Buffer[Character],
+      Message
       ));
   } else {
-    DEBUG ((DEBUG_INFO, "OCXML: XmlParserError at %u:%u: %a\n",
-      Row + 1, Column, Message
+    DEBUG ((
+      DEBUG_INFO, "OCXML: XmlParserError at %u:%u: %a\n",
+      Row + 1,
+      Column,
+      Message
       ));
   }
 }
 
-//
-// Conditionally enable error printing.
-//
+/**
+  Conditionally enable error printing.
+**/
 #ifdef XML_PRINT_ERRORS
 #define XML_PARSER_ERROR(Parser, Offset, Message) \
   XmlParserError (Parser, Offset, Message)
@@ -482,10 +501,14 @@ XmlParserError (
 #define XML_USAGE_ERROR(X) do {} while (0)
 #endif
 
-//
-// Returns the n-th not-whitespace byte in parser and 0 if such a byte does not
-// exist.
-//
+/**
+  Return the N-th not-whitespace byte in parser or 0 if such a byte does not exist.
+
+  @param[in]  Parser  A pointer to the XML parser.
+  @param[in]  N       The N-th index.
+
+  @return The N-th not-whitespace byte or 0.
+**/
 STATIC
 CHAR8
 XmlParserPeek (
@@ -504,10 +527,13 @@ XmlParserPeek (
 }
 
 
-//
-// Moves the parser's position n bytes. If the new position would be out of
-// bounds, it will be converted to the bounds itself.
-//
+/**
+  Move the parser's position n bytes. If the new position would be out of
+  bounds, it will be converted to the bounds itself.
+
+  @param[in,out]  Parser  A pointer to the XML parser.
+  @param[in]      N       The N-th index.
+**/
 STATIC
 VOID
 XmlParserConsume (
@@ -559,9 +585,11 @@ XmlParserConsume (
   }
 }
 
-//
-// Skips to the next non-whitespace character.
-//
+/**
+  Skip to the next non-whitespace character.
+
+  @param[in,out]  Parser  A pointer to the XML parser.
+**/
 STATIC
 VOID
 XmlSkipWhitespace (
