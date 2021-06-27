@@ -1997,41 +1997,21 @@ BootPickerViewLateInitialize (
   IN     UINT8                    DefaultIndex
   )
 {
-  UINT32                 Index;
-  INT64                  ScrollOffset;
   CONST GUI_VOLUME_ENTRY *BootEntry;
 
   ASSERT (DefaultIndex < mBootPicker.Hdr.Obj.NumChildren);
 
-  ScrollOffset = InternelBootPickerScrollSelected ();
-  //
-  // If ScrollOffset is non-0, the selected entry will be aligned left- or
-  // right-most. The view holds a discrete amount of entries, so cut-offs are
-  // impossible.
-  //
-  if (ScrollOffset == 0) {
-    //
-    // Find the first entry that is fully visible.
-    //
-    for (Index = 0; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
-      //
-      // Move the first partially visible boot entry to the very left to prevent
-      // cut-off entries. This only applies when entries overflow.
-      //
-      BootEntry = InternalGetVolumeEntry (Index);
-      if (mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX >= 0) {
-        //
-        // Move the cut-off entry on-screen.
-        //
-        ScrollOffset = -ScrollOffset;
-        break;
-      }
+  mBootPicker.SelectedIndex = DefaultIndex;
 
-      ScrollOffset = mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX;
-    }
+  //
+  // If more entries than screen width, firstly align left-most entry
+  // then scroll from there as needed to bring default entry on screen
+  //
+  if (mBootPicker.Hdr.Obj.OffsetX < 0) {
+    mBootPicker.Hdr.Obj.OffsetX = 0;
+    mBootPicker.Hdr.Obj.OffsetX = InternelBootPickerScrollSelected ();
   }
 
-  mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
   //
   // If the scroll buttons are hidden, the intro animation will update them
   // implicitly.

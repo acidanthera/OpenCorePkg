@@ -17,6 +17,7 @@ OpenCore Changelog
 - Fixed DEBUG ASSERT on pressing change entry keys with single boot entry in OpenCanopy
 - Added recommended `Apple12` and `Windows11` flavours
 - Added `TpmInfo` tool to DEBUG TPM status
+- Fixed incorrect OpenCanopy initial display when default entry beyond right of screen
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
