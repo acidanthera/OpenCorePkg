@@ -606,13 +606,19 @@ XmlSkipWhitespace (
   }
 }
 
-//
-// Parses the name out of the an XML tag's ending.
-//
-// ---( Example )---
-// tag_name>
-// ---
-//
+/**
+  Parse the name out of the an XML tag's ending.
+
+  ---( Example )---
+  tag_name>
+  ---
+
+  @param[in,out]  Parser       A pointer to the XML parser.
+  @param[out]     SelfClosing  TRUE to indicate self-closing. Optional.
+  @param[out]     Attributes   Exported XML attributes. Optional.
+
+  @return The XML tag in the end.
+**/
 STATIC
 CONST CHAR8 *
 XmlParseTagEnd (
@@ -705,13 +711,19 @@ XmlParseTagEnd (
   return &Parser->Buffer[Start];
 }
 
-//
-// Parses an opening XML tag without attributes.
-//
-// ---( Example )---
-// <tag_name>
-// ---
-//
+/**
+  Parse an opening XML tag without attributes.
+
+  ---( Example )---
+  <tag_name>
+  ---
+
+  @param[in,out]  Parser       A pointer to the XML parser.
+  @param[out]     SelfClosing  TRUE to indicate self-closing. Optional.
+  @param[out]     Attributes   Exported XML attributes. Optional.
+
+  @return The parsed opening XML tag.
+**/
 STATIC
 CONST CHAR8 *
 XmlParseTagOpen (
@@ -720,9 +732,9 @@ XmlParseTagOpen (
      OUT  CONST CHAR8  **Attributes
   )
 {
-  CHAR8   Current;
-  CHAR8   Next;
-  BOOLEAN IsComment;
+  CHAR8    Current;
+  CHAR8    Next;
+  BOOLEAN  IsComment;
 
   ASSERT (Parser     != NULL);
   ASSERT (Attributes != NULL);
@@ -767,8 +779,8 @@ XmlParseTagOpen (
     IsComment = FALSE;
     if (Current == '!') {
       //
-      // Consume one more byte to check the two '-'.
-      // Now "<!--" is guaranteed.
+      // Consume one more byte to check the two `-'.
+      // Now `<!--' is guaranteed.
       //
       XmlParserConsume (Parser, 1);
       Current   = XmlParserPeek (Parser, CURRENT_CHARACTER);
@@ -789,13 +801,13 @@ XmlParseTagOpen (
     while (Parser->Position < Parser->Length) {
       if (IsComment) {
         //
-        // Scan "-->" for comments and break if matched.
+        // Scan `-->' for comments and break if matched.
         //
         if (XmlParserPeek (Parser, CURRENT_CHARACTER) == '-'
             && XmlParserPeek (Parser, NEXT_CHARACTER) == '-'
             && XmlParserPeek (Parser, 2) == '>') {
           //
-          // "-->" should all be consumed, which takes 3 bytes.
+          // `-->' should all be consumed, which takes 3 bytes.
           //
           XmlParserConsume (Parser, 3);
           break;
@@ -823,13 +835,18 @@ XmlParseTagOpen (
   return XmlParseTagEnd (Parser, SelfClosing, Attributes);
 }
 
-//
-// Parses an closing XML tag without attributes.
-//
-// ---( Example )---
-// </tag_name>
-// ---
-//
+/**
+  Parses an closing XML tag without attributes.
+
+  ---( Example )---
+  </tag_name>
+  ---
+
+  @param[in,out]  Parser      A pointer to the XML parser.
+  @param[in]      Unprefixed  TRUE to parse without the starting `<'.
+
+  @return The parsed closing XML tag.
+**/
 STATIC
 CONST CHAR8 *
 XmlParseTagClose (
@@ -875,17 +892,21 @@ XmlParseTagClose (
   return XmlParseTagEnd (Parser, NULL, NULL);
 }
 
-//
-// Parses a tag's content.
-//
-// ---( Example )---
-//     this is
-//   a
-//       tag {} content
-// ---
-//
-// @warning CDATA etc. is _not_ and will never be supported
-//
+/**
+  Parse a tag's content.
+
+  ---( Example )---
+      this is
+    a
+        tag {} content
+  ---
+
+  @warning CDATA etc. is _not_ and will never be supported
+
+  @param[in,out]  Parser  A pointer to the XML parser.
+
+  @return The parsed content of the tag.
+**/
 STATIC
 CONST CHAR8 *
 XmlParseContent (
@@ -948,6 +969,7 @@ XmlParseContent (
 //
 // Prints to growing buffer always preserving one byte extra.
 //
+// TODO
 STATIC
 VOID
 XmlBufferAppend (
