@@ -31,13 +31,13 @@ align 8
 global __stack_chk_fail
 __stack_chk_fail:
 %if DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED
-    int 3
-    ret
+  int 3
+  ret
 %else
-  back:
-    cli
-    hlt
-    jmp back
+back:
+  cli
+  hlt
+  jmp back
 %endif
 
 ; #######################################################################
@@ -52,22 +52,22 @@ align 8
 global _ModuleEntryPoint
 _ModuleEntryPoint:
 %if ASM_PFX(FixedPcdGet8(PcdCanaryAllowRdtscFallback))
-    mov eax, 1          ; Feature Information
-    cpuid               ; result in EAX, EBX, ECX, EDX
-    and ecx, 040000000H
-    cmp ecx, 040000000H ; check RDRAND feature flag
-    jne noRdRand
-  retry:
-    rdrand edx
-    jae retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
-    jmp done
-  noRdRand:
-    rdtsc               ; Read time-stamp counter into EDX:EAX.
-  done:
+  mov eax, 1          ; Feature Information
+  cpuid               ; result in EAX, EBX, ECX, EDX
+  and ecx, 040000000H
+  cmp ecx, 040000000H ; check RDRAND feature flag
+  jne noRdRand
+retry:
+  rdrand edx
+  jae retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
+  jmp done
+noRdRand:
+  rdtsc               ; Read time-stamp counter into EDX:EAX.
+done:
 %else
-  again:
-    rdrand edx
-    jae again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
+again:
+  rdrand edx
+  jae again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
 %endif
 
   mov [rel __security_cookie], edx

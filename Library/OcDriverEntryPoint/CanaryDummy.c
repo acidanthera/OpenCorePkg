@@ -30,6 +30,13 @@
 **/
 EFI_STATUS
 EFIAPI
+_ModuleEntryPointReal (
+  IN EFI_HANDLE        ImageHandle,
+  IN EFI_SYSTEM_TABLE  *SystemTable
+  );
+  
+EFI_STATUS
+EFIAPI
 _ModuleEntryPoint (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
