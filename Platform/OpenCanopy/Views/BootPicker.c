@@ -1156,7 +1156,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelectorButton = {
   0
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerSelectorContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerSelectorContainerChildren[] = {
   &mBootPickerSelectorBackground,
   &mBootPickerSelectorButton.Hdr
 };
@@ -1168,13 +1168,13 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerSelectorContainer = {
     NULL,
     GuiObjDelegatePtrEvent,
     NULL,
-    ARRAY_SIZE (mBootPickerSelectorContainerChilds),
-    mBootPickerSelectorContainerChilds
+    ARRAY_SIZE (mBootPickerSelectorContainerChildren),
+    mBootPickerSelectorContainerChildren
   },
   &mBootPickerContainer.Obj
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerContainerChildren[] = {
   &mBootPickerSelectorContainer,
   &mBootPicker.Hdr
 };
@@ -1186,8 +1186,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
     NULL,
     GuiObjDelegatePtrEvent,
     NULL,
-    ARRAY_SIZE (mBootPickerContainerChilds),
-    mBootPickerContainerChilds
+    ARRAY_SIZE (mBootPickerContainerChildren),
+    mBootPickerContainerChildren
   },
   NULL
 };
@@ -1255,7 +1255,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerVersionLabel = {
   NULL
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerViewChildren[] = {
   &mBootPickerContainer,
   &mCommonActionButtonsContainer,
   &mBootPickerLeftScroll.Hdr,
@@ -1263,7 +1263,7 @@ STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
   &mBootPickerVersionLabel
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerViewChildrenMinimal[] = {
   &mBootPickerContainer,
   &mBootPickerLeftScroll.Hdr,
   &mBootPickerRightScroll.Hdr,
@@ -1273,8 +1273,8 @@ STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
-  ARRAY_SIZE (mBootPickerViewChilds),
-  mBootPickerViewChilds,
+  ARRAY_SIZE (mBootPickerViewChildren),
+  mBootPickerViewChildren,
   InternalBootPickerViewKeyEvent,
   InternalGetCursorImage,
   InternalBootPickerExitLoop,
@@ -1285,8 +1285,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContextMinimal = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
-  ARRAY_SIZE (mBootPickerViewChildsMinimal),
-  mBootPickerViewChildsMinimal,
+  ARRAY_SIZE (mBootPickerViewChildrenMinimal),
+  mBootPickerViewChildrenMinimal,
   InternalBootPickerViewKeyEvent,
   InternalGetCursorImage,
   InternalBootPickerExitLoop,

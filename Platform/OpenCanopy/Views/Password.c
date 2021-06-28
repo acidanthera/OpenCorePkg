@@ -571,13 +571,13 @@ InternalPasswordExitLoop (
   return FALSE;
 }
 
-STATIC GUI_OBJ_CHILD *mPasswordViewChilds[] = {
+STATIC GUI_OBJ_CHILD *mPasswordViewChildren[] = {
   &mPasswordLock,
   &mPasswordBoxContainer,
   &mCommonActionButtonsContainer
 };
 
-STATIC GUI_OBJ_CHILD *mPasswordViewChildsMinimal[] = {
+STATIC GUI_OBJ_CHILD *mPasswordViewChildrenMinimal[] = {
   &mPasswordLock,
   &mPasswordBoxContainer
 };
@@ -585,8 +585,8 @@ STATIC GUI_OBJ_CHILD *mPasswordViewChildsMinimal[] = {
 STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
-  ARRAY_SIZE (mPasswordViewChilds),
-  mPasswordViewChilds,
+  ARRAY_SIZE (mPasswordViewChildren),
+  mPasswordViewChildren,
   InternalPasswordViewKeyEvent,
   InternalGetCursorImage,
   InternalPasswordExitLoop,
@@ -597,8 +597,8 @@ STATIC GUI_VIEW_CONTEXT mPasswordViewContext = {
 STATIC GUI_VIEW_CONTEXT mPasswordViewContextMinimal = {
   InternalCommonViewDraw,
   InternalPasswordViewPtrEvent,
-  ARRAY_SIZE (mPasswordViewChildsMinimal),
-  mPasswordViewChildsMinimal,
+  ARRAY_SIZE (mPasswordViewChildrenMinimal),
+  mPasswordViewChildrenMinimal,
   InternalPasswordViewKeyEvent,
   InternalGetCursorImage,
   InternalPasswordExitLoop,
@@ -654,7 +654,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mPasswordEnter = {
   0
 };
 
-STATIC GUI_OBJ_CHILD *mPasswordBoxContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mPasswordBoxContainerChildren[] = {
   &mPasswordBox.Hdr,
   &mPasswordEnter.Hdr
 };
@@ -666,8 +666,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mPasswordBoxContainer = {
     InternalPasswordBoxKeyEvent,
     GuiObjDelegatePtrEvent,
     InternalPasswordBoxFocus,
-    ARRAY_SIZE (mPasswordBoxContainerChilds),
-    mPasswordBoxContainerChilds
+    ARRAY_SIZE (mPasswordBoxContainerChildren),
+    mPasswordBoxContainerChildren
   },
   NULL
 };
