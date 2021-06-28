@@ -9,22 +9,31 @@
   THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
-#include <Library/UefiApplicationEntryPoint.h>
+#include <Library/UefiDriverEntryPoint.h>
 
 /**
-  Entry point to UEFI Application.
+  The entry point of PE/COFF Image for a DXE Driver, DXE Runtime Driver, DXE SMM
+  Driver, or UEFI Driver.
 
-  This function is the entry point for a UEFI Application. This function must call
-  ProcessLibraryConstructorList(), ProcessModuleEntryPointList(), and ProcessLibraryDestructorList().
-  The return value from ProcessModuleEntryPointList() is returned.
-  If _gUefiDriverRevision is not zero and SystemTable->Hdr.Revision is less than _gUefiDriverRevison,
-  then return EFI_INCOMPATIBLE_VERSION.
+  This function is the entry point for a DXE Driver, DXE Runtime Driver, DXE SMM Driver,
+  or UEFI Driver.  This function must call ProcessLibraryConstructorList() and
+  ProcessModuleEntryPointList(). If the return status from ProcessModuleEntryPointList()
+  is an error status, then ProcessLibraryDestructorList() must be called. The return
+  value from ProcessModuleEntryPointList() is returned. If _gDriverUnloadImageCount
+  is greater than zero, then an unload handler must be registered for this image
+  and the unload handler must invoke ProcessModuleUnloadList().
+  If _gUefiDriverRevision is not zero and SystemTable->Hdr.Revision is less than
+  _gUefiDriverRevison, then return EFI_INCOMPATIBLE_VERSION.
 
-  @param  ImageHandle                The image handle of the UEFI Application.
-  @param  SystemTable                A pointer to the EFI System Table.
 
-  @retval  EFI_SUCCESS               The UEFI Application exited normally.
-  @retval  EFI_INCOMPATIBLE_VERSION  _gUefiDriverRevision is greater than SystemTable->Hdr.Revision.
+  @param  ImageHandle  The image handle of the DXE Driver, DXE Runtime Driver,
+                       DXE SMM Driver, or UEFI Driver.
+  @param  SystemTable  A pointer to the EFI System Table.
+
+  @retval  EFI_SUCCESS               The DXE Driver, DXE Runtime Driver, DXE SMM
+                                     Driver, or UEFI Driver exited normally.
+  @retval  EFI_INCOMPATIBLE_VERSION  _gUefiDriverRevision is greater than
+                                    SystemTable->Hdr.Revision.
   @retval  Other                     Return value from ProcessModuleEntryPointList().
 
 **/
@@ -34,7 +43,7 @@ _ModuleEntryPointReal (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
-  
+
 EFI_STATUS
 EFIAPI
 _ModuleEntryPoint (
@@ -42,5 +51,5 @@ _ModuleEntryPoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  return _ModuleEntryPointReal(ImageHandle, SystemTable);
+  return _ModuleEntryPointReal (ImageHandle, SystemTable);
 }

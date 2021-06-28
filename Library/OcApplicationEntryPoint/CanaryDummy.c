@@ -34,7 +34,7 @@ _ModuleEntryPointReal (
   IN EFI_HANDLE        ImageHandle,
   IN EFI_SYSTEM_TABLE  *SystemTable
   );
-  
+
 EFI_STATUS
 EFIAPI
 _ModuleEntryPoint (
@@ -42,5 +42,5 @@ _ModuleEntryPoint (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  return _ModuleEntryPointReal(ImageHandle, SystemTable);
+  return _ModuleEntryPointReal (ImageHandle, SystemTable);
 }

@@ -21,7 +21,7 @@ __security_cookie:
   dd 0
 
 section .text
-#  BIT4 - Enable BreakPoint as ASSERT. (MdePkg.dec)
+;  BIT4 - Enable BreakPoint as ASSERT. (MdePkg.dec)
 %define DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED ((ASM_PFX(FixedPcdGet8(PcdDebugPropertyMask)) & 0x10) != 0)
 
 ; #######################################################################
