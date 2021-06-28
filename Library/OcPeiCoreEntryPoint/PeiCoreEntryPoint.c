@@ -15,6 +15,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/PeiCoreEntryPoint.h>
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
+#include <Library/PcdLib.h>
 
 /**
   The entry point of PE/COFF Image for the PEI Core.

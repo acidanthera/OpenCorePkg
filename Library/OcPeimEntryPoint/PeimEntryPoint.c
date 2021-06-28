@@ -12,6 +12,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Library/PeimEntryPoint.h>
 #include <Library/DebugLib.h>
+#include <Library/PcdLib.h>
 
 /**
   The entry point of PE/COFF Image for a PEIM.

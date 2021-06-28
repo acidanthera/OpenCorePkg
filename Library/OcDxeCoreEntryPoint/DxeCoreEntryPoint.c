@@ -13,6 +13,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 #include <Library/DxeCoreEntryPoint.h>
 #include <Library/DebugLib.h>
 #include <Library/BaseLib.h>
+#include <Library/PcdLib.h>
 
 //
 // Cache copy of HobList pointer.
