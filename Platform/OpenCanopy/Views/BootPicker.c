@@ -229,7 +229,12 @@ InternelBootPickerScrollSelected (
   INT64                  EntryOffsetX;
   UINT32                 EntryWidth;
 
-  if (mBootPicker.Hdr.Obj.NumChildren == 1) {
+  ASSERT (mBootPicker.SelectedIndex < mBootPicker.Hdr.Obj.NumChildren);
+
+  //
+  // No scroll required if nothing off screen
+  //
+  if (mBootPicker.Hdr.Obj.Width <= mBootPickerContainer.Obj.Width) {
     return 0;
   }
   //
