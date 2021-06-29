@@ -16,8 +16,8 @@ extern ASM_PFX(_ModuleEntryPointReal)
 
 section .data
 align 8
-global __security_cookie
-__security_cookie:
+global ASM_PFX(__security_cookie)
+ASM_PFX(__security_cookie):
   dd 0
 
 section .text
@@ -28,8 +28,8 @@ section .text
 ; VOID __stack_chk_fail (VOID)
 ; #######################################################################
 align 8
-global __stack_chk_fail
-__stack_chk_fail:
+global ASM_PFX(__stack_chk_fail)
+ASM_PFX(__stack_chk_fail):
 %if DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED
   int 3
   ret
@@ -39,6 +39,20 @@ back:
   hlt
   jmp back
 %endif
+
+; #######################################################################
+; VOID
+; __security_check_cookie (
+;   IN UINTN  Value
+;   )
+; #######################################################################
+align 8
+global ASM_PFX(__security_check_cookie)
+ASM_PFX(__security_check_cookie):
+  mov  eax, dword [rel ASM_PFX(__security_cookie)]
+  test eax, ecx
+  jnz  ASM_PFX(__stack_chk_fail)
+  ret
 
 ; #######################################################################
 ; VOID
@@ -70,5 +84,5 @@ again:
   jae again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
 %endif
 
-  mov [rel __security_cookie], edx
+  mov [rel ASM_PFX(__security_cookie)], edx
   jmp ASM_PFX(_ModuleEntryPointReal)
