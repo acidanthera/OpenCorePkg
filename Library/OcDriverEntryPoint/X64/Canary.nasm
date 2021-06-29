@@ -11,7 +11,7 @@
 ;
 BITS 64
 
-extern ASM_PFX(FixedPcdGet8)
+#include <AutoGen.h>
 extern _ModuleEntryPointReal
 
 section .data
@@ -22,7 +22,7 @@ __security_cookie:
 
 section .text
 ;  BIT4 - Enable BreakPoint as ASSERT. (MdePkg.dec)
-%define DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED ((ASM_PFX(FixedPcdGet8(PcdDebugPropertyMask)) & 0x10) != 0)
+%define DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED ((FixedPcdGet8(PcdDebugPropertyMask) & 0x10) != 0)
 
 ; #######################################################################
 ; VOID __stack_chk_fail (VOID)
@@ -55,7 +55,7 @@ _ModuleEntryPoint:
   mov r8, rcx
   mov r9, rdx
 
-%if ASM_PFX(FixedPcdGet8(PcdCanaryAllowRdtscFallback))
+%if FixedPcdGet8(PcdCanaryAllowRdtscFallback)
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
   and ecx, 040000000H
