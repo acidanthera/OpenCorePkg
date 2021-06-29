@@ -12,7 +12,7 @@
 BITS 32
 
 #include <AutoGen.h>
-extern _ModuleEntryPointReal
+extern ASM_PFX(_ModuleEntryPointReal)
 
 section .data
 align 8
@@ -49,8 +49,8 @@ back:
 ;   )
 ; #######################################################################
 align 8
-global _ModuleEntryPoint
-_ModuleEntryPoint:
+global ASM_PFX(_ModuleEntryPoint)
+ASM_PFX(_ModuleEntryPoint):
 %if FixedPcdGet8(PcdCanaryAllowRdtscFallback)
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
@@ -71,4 +71,4 @@ again:
 %endif
 
   mov [rel __security_cookie], edx
-  jmp _ModuleEntryPointReal
+  jmp ASM_PFX(_ModuleEntryPointReal)

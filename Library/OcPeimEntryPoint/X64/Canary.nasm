@@ -12,7 +12,7 @@
 BITS 64
 
 #include <AutoGen.h>
-extern _ModuleEntryPointReal
+extern ASM_PFX(_ModuleEntryPointReal)
 
 section .data
 align 8
@@ -49,8 +49,8 @@ back:
 ;   )
 ; #######################################################################
 align 8
-global _ModuleEntryPoint
-_ModuleEntryPoint:
+global ASM_PFX(_ModuleEntryPoint)
+ASM_PFX(_ModuleEntryPoint):
   ; Save FileHandle and **PeiServices.
   mov r8, rcx
   mov r9, rdx
@@ -80,4 +80,4 @@ again:
   ; Restore FileHandle and **PeiServices.
   mov rcx, r8
   mov rdx, r9
-  jmp _ModuleEntryPointReal
+  jmp ASM_PFX(_ModuleEntryPointReal)
