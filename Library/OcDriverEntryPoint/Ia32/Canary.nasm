@@ -49,6 +49,7 @@ back:
 align 8
 global ASM_PFX(__security_check_cookie)
 ASM_PFX(__security_check_cookie):
+  mov  ecx, [esp+4] ; get UINTN Value
   mov  eax, dword [rel ASM_PFX(__security_cookie)]
   test eax, ecx
   jnz  ASM_PFX(__stack_chk_fail)
