@@ -20,6 +20,10 @@ global ASM_PFX(__security_cookie)
 ASM_PFX(__security_cookie):
   dd 0
 
+global ASM_PFX(__stack_chk_guard)
+ASM_PFX(__stack_chk_guard):
+  dd 0
+
 section .text
 ;  BIT4 - Enable BreakPoint as ASSERT. (MdePkg.dec)
 %define DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED ((FixedPcdGet8(PcdDebugPropertyMask) & 0x10) != 0)
@@ -86,4 +90,5 @@ again:
 %endif
 
   mov [rel ASM_PFX(__security_cookie)], edx
+  mov [rel ASM_PFX(__stack_chk_guard)], edx
   jmp ASM_PFX(_ModuleEntryPointReal)
