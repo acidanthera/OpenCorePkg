@@ -246,5 +246,5 @@
   GCC:RELEASE_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1 -DMDEPKG_NDEBUG -Wno-unused-but-set-variable
 
   # Emit extra code to check for buffer overflows.
-  GCC:*_*_*_CC_FLAGS = -fstack-protector-strong
-  CLANGPDB:*_*_*_CC_FLAGS = -fstack-protector-strong
+  GCC:*_*_*_CC_FLAGS      = -fstack-protector-strong
+  CLANGPDB:*_*_*_CC_FLAGS = -fstack-protector-strong -D OC_TARGET_RELEASE=1

@@ -338,5 +338,5 @@
   CLANGPDB:*_*_*_DLINK_FLAGS = /ALIGN:4096 /FILEALIGN:512
 
   # Emit extra code to check for buffer overflows.
-  GCC:*_*_*_CC_FLAGS = -fstack-protector-strong
+  GCC:*_*_*_CC_FLAGS      = -fstack-protector-strong
   CLANGPDB:*_*_*_CC_FLAGS = -fstack-protector-strong
