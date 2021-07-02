@@ -949,7 +949,8 @@ mProvideCurrentCpuInfoTopologyValidationPatch = {
   .Limit       = 0
 };
 
-#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 4
+// Offset of value in below patch.
+#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 1
 
 STATIC
 UINT8
