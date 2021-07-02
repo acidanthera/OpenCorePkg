@@ -18,6 +18,7 @@ OpenCore Changelog
 - Added recommended `Apple12` and `Windows11` flavours
 - Added `TpmInfo` tool to DEBUG TPM status
 - Fixed incorrect OpenCanopy initial display when default entry beyond right of screen
+- Fixed `ProvideCurrentCpuInfo` MSR patch on macOS 12
 
 #### v0.7.0
 - Fixed NVRAM reset on firmware with write-protected `BootOptionSupport`
