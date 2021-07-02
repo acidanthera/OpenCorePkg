@@ -38,10 +38,10 @@ ASM_PFX(__stack_chk_fail):
   int 3
   ret
 %else
-back:
+.back:
   cli
   hlt
-  jmp back
+  jmp .back
 %endif
 
 ; #######################################################################
@@ -72,20 +72,19 @@ ASM_PFX(_ModuleEntryPoint):
 %if FixedPcdGet8(PcdCanaryAllowRdtscFallback)
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
-  and ecx, 040000000H
-  cmp ecx, 040000000H ; check RDRAND feature flag
-  jne noRdRand
-retry:
+  bt ecx, 30          ; check RDRAND feature flag
+  jae .noRdRand       ; CF = 0
+.retry:
   rdrand edx
-  jae retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
-  jmp done
-noRdRand:
+  jae .retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
+  jmp .done
+.noRdRand:
   rdtsc               ; Read time-stamp counter into EDX:EAX.
-done:
+.done:
 %else
-again:
+.again:
   rdrand edx
-  jae again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
+  jae .again           ; RDRAND bad data (CF = 0), retry until (CF = 1).
 %endif
 
   mov [rel ASM_PFX(__security_cookie)], edx
