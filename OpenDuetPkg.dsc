@@ -245,6 +245,3 @@
   GCC:NOOPT_*_*_CC_FLAGS     = -D OC_TARGET_RELEASE=1 -Wno-unused-but-set-variable -fstack-protector-strong
   GCC:DEBUG_*_*_CC_FLAGS     = -D OC_TARGET_RELEASE=1 -DMDEPKG_NDEBUG -Wno-unused-but-set-variable -fstack-protector-strong
   GCC:RELEASE_*_*_CC_FLAGS   = -D OC_TARGET_RELEASE=1 -DMDEPKG_NDEBUG -Wno-unused-but-set-variable -fstack-protector-strong
-
-  # Emit extra code to check for buffer overflows.
-  CLANGPDB:*_*_*_CC_FLAGS = -fstack-protector-strong -D OC_TARGET_RELEASE=1
