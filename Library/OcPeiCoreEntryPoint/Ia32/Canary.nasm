@@ -18,8 +18,6 @@ section .data
 align 8
 global ASM_PFX(__security_cookie)
 ASM_PFX(__security_cookie):
-  dd 0
-
 global ASM_PFX(__stack_chk_guard)
 ASM_PFX(__stack_chk_guard):
   dd 0
@@ -89,5 +87,4 @@ ASM_PFX(_ModuleEntryPoint):
 %endif
 
   mov [rel ASM_PFX(__security_cookie)], edx
-  mov [rel ASM_PFX(__stack_chk_guard)], edx
   jmp ASM_PFX(_ModuleEntryPointReal)

@@ -18,8 +18,6 @@ section .data
 align 8
 global ASM_PFX(__security_cookie)
 ASM_PFX(__security_cookie):
-  dq 0
-
 global ASM_PFX(__stack_chk_guard)
 ASM_PFX(__stack_chk_guard):
   dq 0
@@ -92,7 +90,6 @@ ASM_PFX(_ModuleEntryPoint):
 %endif
 
   mov [rel ASM_PFX(__security_cookie)], rdx
-  mov [rel ASM_PFX(__stack_chk_guard)], rdx
   ; Restore *HobStart.
   mov rcx, r8
   jmp ASM_PFX(_ModuleEntryPointReal)
