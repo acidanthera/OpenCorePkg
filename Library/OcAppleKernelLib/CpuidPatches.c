@@ -949,13 +949,12 @@ mProvideCurrentCpuInfoTopologyValidationPatch = {
   .Limit       = 0
 };
 
-#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 4
+// Offset of value in below patch.
+#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 1
 
 STATIC
 UINT8
 mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind[] = {
-  // or rcx, rdx
-  0x48, 0x09, 0xD1,
   // mov ecx, 0x10001
   0xB9, 0x01, 0x00, 0x01, 0x00
 };
@@ -963,8 +962,6 @@ mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind[] = {
 STATIC
 UINT8
 mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace[] = {
-  // or rcx, rdx
-  0x48, 0x09, 0xD1,
   // mov ecx, core/thread count
   0xB9, 0x00, 0x00, 0x00, 0x00
 };

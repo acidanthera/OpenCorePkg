@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.1)
+       Reference Manual (0.7.2)
 
        \vspace{0.2in}
 
@@ -3785,11 +3785,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
   SIP Enabled and a practical default value for SIP Disabled (currently \texttt{0x26F}).
 
-  \emph{Note1}: It is strongly recommended not to make a habit of running macOS with
+  \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
+  \emph{Note 2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
   sets \texttt{0x7F}. To explain the choice:
   \begin{itemize}
   \tightlist
@@ -6049,7 +6049,11 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
-across all cores and change such hidden options on selected platforms.
+across all cores and change such hidden options on selected platforms. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{TpmInfo}}\textbf{*}
+& Check Intel PTT (Platform Trust Technology) capability on the platform,
+which allows using fTPM 2.0 if enabled. The tool does not check whether fTPM 2.0
+is actually enabled.
 \end{tabular}
 
 \subsection{OpenCanopy}\label{ueficanopy}
@@ -7083,9 +7087,13 @@ functioning. Feature highlights:
   \textbf{Description}: Replaces the Apple EFI Graphics 2 protocol with a builtin
   version.
 
-  \emph{Note}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
+  \emph{Note 1}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
   to expose screen rotation to macOS. Refer to \texttt{ForceDisplayRotationInEFI}
   variable description on how to set screen rotation angle.
+
+  \emph{Note 2}: On systems without native
+  support for \texttt{ForceDisplayRotationInEFI}, \texttt{DirectGopRendering=true}
+  is also required for this setting to have a visible effect.
 
 \item
   \texttt{AppleFramebufferInfo}\\

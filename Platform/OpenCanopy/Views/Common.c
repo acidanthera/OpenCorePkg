@@ -540,7 +540,7 @@ InternalCommonRestartPtrEvent (
 
 extern GUI_OBJ_CHILD mCommonFocus;
 
-STATIC GUI_OBJ_CHILD *mCommonActionButtonsContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mCommonActionButtonsContainerChildren[] = {
   &mCommonRestart.Hdr,
   &mCommonShutDown.Hdr,
   &mCommonFocus
@@ -554,9 +554,9 @@ InternalCommonActionButtonFocus (
   )
 {
   if (!Focus) {
-    mCommonActionButtonsContainer.Obj.NumChildren = ARRAY_SIZE (mCommonActionButtonsContainerChilds) - 1;
+    mCommonActionButtonsContainer.Obj.NumChildren = ARRAY_SIZE (mCommonActionButtonsContainerChildren) - 1;
   } else {
-    mCommonActionButtonsContainer.Obj.NumChildren = ARRAY_SIZE (mCommonActionButtonsContainerChilds);
+    mCommonActionButtonsContainer.Obj.NumChildren = ARRAY_SIZE (mCommonActionButtonsContainerChildren);
 
     GuiRequestDrawCrop (
       DrawContext,
@@ -642,8 +642,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mCommonActionButtonsContainer = {
     NULL,
     GuiObjDelegatePtrEvent,
     NULL,
-    ARRAY_SIZE (mCommonActionButtonsContainerChilds) - 1,
-    mCommonActionButtonsContainerChilds
+    ARRAY_SIZE (mCommonActionButtonsContainerChildren) - 1,
+    mCommonActionButtonsContainerChildren
   },
   NULL
 };

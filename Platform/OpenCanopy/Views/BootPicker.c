@@ -229,7 +229,12 @@ InternelBootPickerScrollSelected (
   INT64                  EntryOffsetX;
   UINT32                 EntryWidth;
 
-  if (mBootPicker.Hdr.Obj.NumChildren == 1) {
+  ASSERT (mBootPicker.SelectedIndex < mBootPicker.Hdr.Obj.NumChildren);
+
+  //
+  // No scroll required if nothing off screen
+  //
+  if (mBootPicker.Hdr.Obj.Width <= mBootPickerContainer.Obj.Width) {
     return 0;
   }
   //
@@ -1151,7 +1156,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CLICKABLE mBootPickerSelectorButton = {
   0
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerSelectorContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerSelectorContainerChildren[] = {
   &mBootPickerSelectorBackground,
   &mBootPickerSelectorButton.Hdr
 };
@@ -1163,13 +1168,13 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerSelectorContainer = {
     NULL,
     GuiObjDelegatePtrEvent,
     NULL,
-    ARRAY_SIZE (mBootPickerSelectorContainerChilds),
-    mBootPickerSelectorContainerChilds
+    ARRAY_SIZE (mBootPickerSelectorContainerChildren),
+    mBootPickerSelectorContainerChildren
   },
   &mBootPickerContainer.Obj
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerContainerChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerContainerChildren[] = {
   &mBootPickerSelectorContainer,
   &mBootPicker.Hdr
 };
@@ -1181,8 +1186,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerContainer = {
     NULL,
     GuiObjDelegatePtrEvent,
     NULL,
-    ARRAY_SIZE (mBootPickerContainerChilds),
-    mBootPickerContainerChilds
+    ARRAY_SIZE (mBootPickerContainerChildren),
+    mBootPickerContainerChildren
   },
   NULL
 };
@@ -1250,7 +1255,7 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_OBJ_CHILD mBootPickerVersionLabel = {
   NULL
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerViewChildren[] = {
   &mBootPickerContainer,
   &mCommonActionButtonsContainer,
   &mBootPickerLeftScroll.Hdr,
@@ -1258,7 +1263,7 @@ STATIC GUI_OBJ_CHILD *mBootPickerViewChilds[] = {
   &mBootPickerVersionLabel
 };
 
-STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
+STATIC GUI_OBJ_CHILD *mBootPickerViewChildrenMinimal[] = {
   &mBootPickerContainer,
   &mBootPickerLeftScroll.Hdr,
   &mBootPickerRightScroll.Hdr,
@@ -1268,8 +1273,8 @@ STATIC GUI_OBJ_CHILD *mBootPickerViewChildsMinimal[] = {
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
-  ARRAY_SIZE (mBootPickerViewChilds),
-  mBootPickerViewChilds,
+  ARRAY_SIZE (mBootPickerViewChildren),
+  mBootPickerViewChildren,
   InternalBootPickerViewKeyEvent,
   InternalGetCursorImage,
   InternalBootPickerExitLoop,
@@ -1280,8 +1285,8 @@ GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContext = {
 GLOBAL_REMOVE_IF_UNREFERENCED GUI_VIEW_CONTEXT mBootPickerViewContextMinimal = {
   InternalCommonViewDraw,
   InternalCommonViewPtrEvent,
-  ARRAY_SIZE (mBootPickerViewChildsMinimal),
-  mBootPickerViewChildsMinimal,
+  ARRAY_SIZE (mBootPickerViewChildrenMinimal),
+  mBootPickerViewChildrenMinimal,
   InternalBootPickerViewKeyEvent,
   InternalGetCursorImage,
   InternalBootPickerExitLoop,
@@ -1997,41 +2002,21 @@ BootPickerViewLateInitialize (
   IN     UINT8                    DefaultIndex
   )
 {
-  UINT32                 Index;
-  INT64                  ScrollOffset;
   CONST GUI_VOLUME_ENTRY *BootEntry;
 
   ASSERT (DefaultIndex < mBootPicker.Hdr.Obj.NumChildren);
 
-  ScrollOffset = InternelBootPickerScrollSelected ();
-  //
-  // If ScrollOffset is non-0, the selected entry will be aligned left- or
-  // right-most. The view holds a discrete amount of entries, so cut-offs are
-  // impossible.
-  //
-  if (ScrollOffset == 0) {
-    //
-    // Find the first entry that is fully visible.
-    //
-    for (Index = 0; Index < mBootPicker.Hdr.Obj.NumChildren; ++Index) {
-      //
-      // Move the first partially visible boot entry to the very left to prevent
-      // cut-off entries. This only applies when entries overflow.
-      //
-      BootEntry = InternalGetVolumeEntry (Index);
-      if (mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX >= 0) {
-        //
-        // Move the cut-off entry on-screen.
-        //
-        ScrollOffset = -ScrollOffset;
-        break;
-      }
+  mBootPicker.SelectedIndex = DefaultIndex;
 
-      ScrollOffset = mBootPicker.Hdr.Obj.OffsetX + BootEntry->Hdr.Obj.OffsetX;
-    }
+  //
+  // If more entries than screen width, firstly align left-most entry
+  // then scroll from there as needed to bring default entry on screen
+  //
+  if (mBootPicker.Hdr.Obj.OffsetX < 0) {
+    mBootPicker.Hdr.Obj.OffsetX = 0;
+    mBootPicker.Hdr.Obj.OffsetX = InternelBootPickerScrollSelected ();
   }
 
-  mBootPicker.Hdr.Obj.OffsetX += ScrollOffset;
   //
   // If the scroll buttons are hidden, the intro animation will update them
   // implicitly.

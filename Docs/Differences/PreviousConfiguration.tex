@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.0)
+       Reference Manual (0.7.1)
 
        \vspace{0.2in}
 
@@ -485,6 +485,14 @@ should not be relied on.
     child [missing] {}
     child [missing] {}
     child [missing] {}
+    child { node {Kernels}
+      child { node [optional] {kernel}}
+      child { node [optional] {kernelcache}}
+      child { node [optional] {prelinkedkernel}}
+    }
+    child [missing] {}
+    child [missing] {}
+    child [missing] {}
     child { node [optional] {boot}}
     child { node [optional] {nvram.plist}}
     child { node [optional] {opencore-YYYY-MM-DD-HHMMSS.txt}}
@@ -648,9 +656,9 @@ build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
-approach could be \href{https://www.sublimetext.com}{Sublime Text} with
-\href{https://niosus.github.io/EasyClangComplete}{EasyClangComplete} plugin.
-Add \texttt{.clang\_complete} file with similar content to the UDK root:
+approach could be using \href{https://microsoft.github.io/language-server-protocol}{Language Server Protocols}. For example, \href{https://www.sublimetext.com}{Sublime Text} with
+\href{https://lsp.sublimetext.io}{LSP for Sublime Text} plugin.
+Add \texttt{compile\_flags.txt} file with similar content to the UDK root:
 
 \begin{lstlisting}[caption=ECC Configuration, label=eccfile, style=ocbash]
 -I/UefiPackages/MdePkg
@@ -688,6 +696,8 @@ Add \texttt{.clang\_complete} file with similar content to the UDK root:
 -DOC_TARGET_NOOPT=1
 -DNO_MSABI_VA_FUNCS=1
 \end{lstlisting}
+
+\emph{Note}: \texttt{/UefiPackages} in the sample file denotes an absolute path.
 
 \textbf{Warning}: Tool developers modifying \texttt{config.plist} or any other OpenCore
 files must ensure that their tools check the \texttt{opencore-version} NVRAM variable
@@ -1209,6 +1219,15 @@ patching or the padding of \texttt{NOP} to the remaining area could be considere
 
   This works around firmware that provide a \texttt{BGRT} table but
   fail to handle screen updates afterwards.
+
+\item
+  \texttt{SyncTableIds}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Sync table identifiers with the \texttt{SLIC} table.
+
+  This works around patched tables becoming incompatible with the \texttt{SLIC}
+  table causing licensing issues in older Windows operating systems.
 
 \end{enumerate}
 
@@ -2493,9 +2512,14 @@ blocking.
   \textbf{Description}: Disables \texttt{IOMapper} support in XNU (VT-d),
   which may conflict with the firmware implementation.
 
-  \emph{Note}: This option is a preferred alternative to deleting \texttt{DMAR}
+  \emph{Note 1}: This option is a preferred alternative to deleting \texttt{DMAR}
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
   VT-d support in other systems in case they need this.
+
+  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices 
+  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
+  link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
+  Gigabyte is one of the most common OEMs with these issues.
 
 \item
   \texttt{DisableLinkeditJettison}\\
@@ -2528,7 +2552,7 @@ blocking.
   \texttt{ExtendBTFeatureFlags}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8-11\\
   \textbf{Description}: Set \texttt{FeatureFlags} to \texttt{0x0F} for full
   functionality of Bluetooth, including Continuity.
 
@@ -2697,6 +2721,16 @@ Refer to the \hyperref[legacyapple]{Legacy Apple OS} section for details on how
 to install and troubleshoot such macOS installations.
 
 \begin{enumerate}
+\item
+  \texttt{CustomKernel}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Use customised kernel cache from the \texttt{Kernels}
+  directory located at the root of the ESP partition.
+
+  Unsupported platforms including \texttt{Atom} and \texttt{AMD} require modified versions
+  of XNU kernel in order to boot. This option provides the possibility to using a customised
+  kernel cache which contains such modifications from ESP partition.
 
 \item
   \texttt{FuzzyMatch}\\
@@ -3751,11 +3785,11 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
   SIP Enabled and a practical default value for SIP Disabled (currently \texttt{0x26F}).
 
-  \emph{Note1}: It is strongly recommended not to make a habit of running macOS with
+  \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
+  \emph{Note 2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
   sets \texttt{0x7F}. To explain the choice:
   \begin{itemize}
   \tightlist
@@ -6015,7 +6049,11 @@ Some of the known tools are listed below (builtin tools are marked with \textbf{
 & Utility to read and write RTC (CMOS) memory. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{ControlMsrE2}}\textbf{*}
 & Check \texttt{CFG Lock} (MSR \texttt{0xE2} write protection) consistency
-across all cores and change such hidden options on selected platforms.
+across all cores and change such hidden options on selected platforms. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{TpmInfo}}\textbf{*}
+& Check Intel PTT (Platform Trust Technology) capability on the platform,
+which allows using fTPM 2.0 if enabled. The tool does not check whether fTPM 2.0
+is actually enabled.
 \end{tabular}
 
 \subsection{OpenCanopy}\label{ueficanopy}
@@ -6048,6 +6086,7 @@ scaled accordingly for other levels.
   \item \texttt{Cursor} --- Mouse cursor (mandatory, up to 144x144).
   \item \texttt{Selected} --- Selected item (mandatory, 144x144).
   \item \texttt{Selector} --- Selecting item (mandatory, up to 144x40).
+  \item \texttt{SetDefault} --- Selecting default (mandatory, up to 144x40; must be same width as \texttt{Selector}).
   \item \texttt{Left} --- Scrolling left (mandatory, 40x40).
   \item \texttt{Right} --- Scrolling right (mandatory, 40x40).
   \item \texttt{HardDrive} --- Generic OS (mandatory, 128x128).
@@ -7048,9 +7087,13 @@ functioning. Feature highlights:
   \textbf{Description}: Replaces the Apple EFI Graphics 2 protocol with a builtin
   version.
 
-  \emph{Note}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
+  \emph{Note 1}: This protocol allows newer \texttt{EfiBoot} versions (at least 10.15)
   to expose screen rotation to macOS. Refer to \texttt{ForceDisplayRotationInEFI}
   variable description on how to set screen rotation angle.
+
+  \emph{Note 2}: On systems without native
+  support for \texttt{ForceDisplayRotationInEFI}, \texttt{DirectGopRendering=true}
+  is also required for this setting to have a visible effect.
 
 \item
   \texttt{AppleFramebufferInfo}\\
