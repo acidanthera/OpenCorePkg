@@ -296,7 +296,15 @@ XmlNodeChildPush (
   return TRUE;
 }
 
-// TODO
+/**
+  Store XML reference.
+
+  @param[in,out]  References       A pointer to the list of XML references.
+  @param[in]      Node             A pointer to the XML node.
+  @param[in]      ReferenceNumber  Number of reference.
+
+  @retval  TRUE if the XML reference was successfully pushed.
+**/
 STATIC
 BOOLEAN
 XmlPushReference (
@@ -345,7 +353,14 @@ XmlPushReference (
   return TRUE;
 }
 
-// TODO
+/**
+  Get real value from a node referencing another.
+
+  @param[in]  References  A pointer to the XML references.
+  @param[in]  Attributes  XML attributes.
+
+  @return  The real XML node from the one referencing it.
+**/
 STATIC
 XML_NODE *
 XmlNodeReal (
@@ -836,7 +851,7 @@ XmlParseTagOpen (
 }
 
 /**
-  Parses an closing XML tag without attributes.
+  Parse an closing XML tag without attributes.
 
   ---( Example )---
   </tag_name>
@@ -966,10 +981,15 @@ XmlParseContent (
   return &Parser->Buffer[Start];
 }
 
-//
-// Prints to growing buffer always preserving one byte extra.
-//
-// TODO
+/**
+  Print to growing buffer always preserving one byte extra.
+
+  @param[in,out]  Buffer       A pointer to the buffer holding contents.
+  @param[in,out]  AllocSize    Size of Buffer to be allocated.
+  @param[in,out]  CurrentSize  Current size of Buffer before appending.
+  @param[in]      Data         Data to be appended.
+  @param[in]      DataLength   Length of Data.
+**/
 STATIC
 VOID
 XmlBufferAppend (
@@ -1012,9 +1032,15 @@ XmlBufferAppend (
   *CurrentSize += DataLength;
 }
 
-//
-// Prints node to growing buffer always preserving one byte extra.
-//
+/**
+  Print node to growing buffer always preserving one byte extra.
+
+  @param[in]      Node         A pointer to the XML node.
+  @param[in,out]  Buffer       A pointer to the buffer holding contents exported.
+  @param[in,out]  AllocSize    Size of Buffer to be allocated.
+  @param[in,out]  CurrentSize  Current size of Buffer.
+  @param[in]      Skip         Levels of XML contents to be skipped.
+**/
 STATIC
 VOID
 XmlNodeExportRecursive (
@@ -1049,7 +1075,7 @@ XmlNodeExportRecursive (
 
   if (Node->Attributes != NULL) {
     XmlBufferAppend (Buffer, AllocSize, CurrentSize, " ", L_STR_LEN (" "));
-    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Attributes, (UINT32)AsciiStrLen (Node->Attributes));
+    XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Attributes, (UINT32) AsciiStrLen (Node->Attributes));
   }
 
   if (Node->Children != NULL || Node->Content != NULL) {
@@ -1060,7 +1086,7 @@ XmlNodeExportRecursive (
         XmlNodeExportRecursive (Node->Children->NodeList[Index], Buffer, AllocSize, CurrentSize, 0);
       }
     } else {
-      XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, (UINT32)AsciiStrLen (Node->Content));
+      XmlBufferAppend (Buffer, AllocSize, CurrentSize, Node->Content, (UINT32) AsciiStrLen (Node->Content));
     }
 
     XmlBufferAppend (Buffer, AllocSize, CurrentSize, "</", L_STR_LEN ("</"));
@@ -1071,21 +1097,26 @@ XmlNodeExportRecursive (
   }
 }
 
-//
-// Parses an XML fragment node.
-//
-// ---( Example without children )---
-// <Node>Text</Node>
-// ---
-//
-// ---( Example with children )---
-// <Parent>
-//     <Child>Text</Child>
-//     <Child>Text</Child>
-//     <Test>Content</Test>
-// </Parent>
-// ---
-//
+/**
+  Parse an XML fragment node.
+
+  ---( Example without children )---
+  <Node>Text</Node>
+  ---
+
+  ---( Example with children )---
+  <Parent>
+      <Child>Text</Child>
+      <Child>Text</Child>
+      <Test>Content</Test>
+  </Parent>
+  ---
+
+  @param[in,out]  Parser      A pointer to the XML parser.
+  @param[in,out]  References  A pointer to the XML references.
+
+  @return  The parsed XML node.
+**/
 STATIC
 XML_NODE *
 XmlParseNode (
