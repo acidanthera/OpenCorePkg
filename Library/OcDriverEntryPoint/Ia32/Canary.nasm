@@ -43,6 +43,14 @@ ASM_PFX(__stack_chk_fail):
 %endif
 
 ; #######################################################################
+; VOID __GSHandlerCheck (VOID)
+; #######################################################################
+align 8
+global ASM_PFX(__GSHandlerCheck)
+ASM_PFX(__GSHandlerCheck):
+  jmp  ASM_PFX(__stack_chk_fail)
+
+; #######################################################################
 ; VOID
 ; __security_check_cookie (
 ;   IN UINTN  Value
