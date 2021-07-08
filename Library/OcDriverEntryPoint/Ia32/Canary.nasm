@@ -74,6 +74,24 @@ ASM_PFX(__security_check_cookie):
   ret
 
 ; #######################################################################
+; void __fastcall __security_check_cookie(UINTN cookie)
+;
+; The first two DWORD or smaller arguments that are found in the argument list
+; from left to right are passed in ECX and EDX registers.
+; All other arguments are passed on the stack from right to left.
+;
+; At sign (@) is prefixed to names.
+; An at sign followed by the number of bytes (in decimal) in the parameter list is suffixed to names.
+; #######################################################################
+align 8
+global @__security_check_cookie@4
+@__security_check_cookie@4:
+  mov  eax, dword [rel ASM_PFX(__security_cookie)]
+  cmp  eax, ecx  ; UINTN cookie is already in ECX
+  jnz  ASM_PFX(__stack_chk_fail)
+  ret
+
+; #######################################################################
 ; EFI_STATUS
 ; EFIAPI
 ; _ModuleEntryPoint (
