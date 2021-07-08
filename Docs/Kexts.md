@@ -94,10 +94,9 @@ Kexts
 | [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.0.0 (10.6) | — |
 | [RestrictEvents.kext](https://github.com/acidanthera/RestrictEvents) | 12.0.0 (10.8) | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | 12.0.0 (10.8) | — |
-| [NightShiftEnabler.kext](https://github.com/cdf/NightShiftEnabler) | 16.0.0 (10.12) | — |
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — |
 | [TOSMotionSensor.kext](https://github.com/jslegendre/TOSMotionSensor) | — | — |
-| [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | 19.0.0 (10.15) | — |
+| [FeatureUnlock.kext](https://github.com/acidanthera/FeatureUnlock) | — | — |
 | [MacHyperVSupport.kext](https://github.com/acidanthera/MacHyperVSupport) | 10.0.0 (10.6) | — |
 
 More complete list with legacy kexts is hosted [here](https://docs.google.com/spreadsheets/d/15S-ocrkm_VTUJpKxNII-YUyQFd5VYdjbe0DHlZVCQyM). Full Lilu plugin list with legacy kexts is hosted [here](https://github.com/acidanthera/Lilu/blob/master/KnownPlugins.md). For developers only.   
