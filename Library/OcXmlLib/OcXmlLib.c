@@ -158,6 +158,10 @@ XmlParseAttributeNumber (
   UINTN        Number;
   CHAR8        NumberStr[16];
 
+  ASSERT (Attributes    != NULL);
+  ASSERT (Argument      != NULL);
+  ASSERT (ArgumentValue != NULL);
+
   //
   // FIXME: This may give false positives.
   //
@@ -188,8 +192,8 @@ XmlParseAttributeNumber (
   @param[in]  Name        Name of the new node.
   @param[in]  Attributes  Attributes of the new node. Optional.
   @param[in]  Content     Content of the new node. Optional.
-  @param[in]  Real        Pointer to the acual content when a reference exists.
-  @param[in]  Children    Pointer to the children of the node.
+  @param[in]  Real        Pointer to the acual content when a reference exists. Optional.
+  @param[in]  Children    Pointer to the children of the node. Optional.
 
   @return  The created XML node.
 **/
@@ -199,11 +203,13 @@ XmlNodeCreate (
   IN  CONST CHAR8          *Name,
   IN  CONST CHAR8          *Attributes  OPTIONAL,
   IN  CONST CHAR8          *Content     OPTIONAL,
-  IN  XML_NODE             *Real,
-  IN  XML_NODE_LIST        *Children
+  IN  XML_NODE             *Real        OPTIONAL,
+  IN  XML_NODE_LIST        *Children    OPTIONAL
   )
 {
   XML_NODE  *Node;
+
+  ASSERT (Name != NULL);
 
   Node = AllocatePool (sizeof (XML_NODE));
 
@@ -237,7 +243,8 @@ XmlNodeChildPush (
   UINT32         AllocCount;
   XML_NODE_LIST  *NewList;
 
-  ASSERT (Node != NULL);
+  ASSERT (Node  != NULL);
+  ASSERT (Child != NULL);
 
   NodeCount  = 0;
   AllocCount = 1;
@@ -317,6 +324,7 @@ XmlPushReference (
   UINT32     NewRefAllocCount;
 
   ASSERT (References != NULL);
+  ASSERT (Node       != NULL);
 
   if (ReferenceNumber >= XML_PARSER_MAX_REFERENCE_COUNT) {
     return FALSE;
@@ -356,16 +364,16 @@ XmlPushReference (
 /**
   Get real value from a node referencing another.
 
-  @param[in]  References  A pointer to the XML references.
-  @param[in]  Attributes  XML attributes.
+  @param[in]  References  A pointer to the XML references. Optional.
+  @param[in]  Attributes  XML attributes. Optional.
 
   @return  The real XML node from the one referencing it.
 **/
 STATIC
 XML_NODE *
 XmlNodeReal (
-  IN  CONST XML_REFLIST  *References,
-  IN  CONST CHAR8        *Attributes
+  IN  CONST XML_REFLIST  *References  OPTIONAL,
+  IN  CONST CHAR8        *Attributes  OPTIONAL
   )
 {
   BOOLEAN      HasArgument;
@@ -465,6 +473,9 @@ XmlParserError (
   UINT32  Row;
   UINT32  Column;
 
+  ASSERT (Parser  != NULL);
+  ASSERT (Message != NULL);
+
   Character = 0;
   Row       = 0;
   Column    = 0;
@@ -532,6 +543,8 @@ XmlParserPeek (
   )
 {
   UINT32  Position;
+
+  ASSERT (Parser != NULL);
 
   if (!OcOverflowAddU32 (Parser->Position, N, &Position)
     && Position < Parser->Length) {
@@ -1006,6 +1019,7 @@ XmlBufferAppend (
   ASSERT (Buffer      != NULL);
   ASSERT (AllocSize   != NULL);
   ASSERT (CurrentSize != NULL);
+  ASSERT (Data        != NULL);
 
   NewSize = *AllocSize;
 
@@ -1054,6 +1068,7 @@ XmlNodeExportRecursive (
   UINT32  Index;
   UINT32  NameLength;
 
+  ASSERT (Node        != NULL);
   ASSERT (Buffer      != NULL);
   ASSERT (AllocSize   != NULL);
   ASSERT (CurrentSize != NULL);
@@ -1113,7 +1128,7 @@ XmlNodeExportRecursive (
   ---
 
   @param[in,out]  Parser      A pointer to the XML parser.
-  @param[in,out]  References  A pointer to the XML references.
+  @param[in,out]  References  A pointer to the XML references. Optional.
 
   @return  The parsed XML node.
 **/
@@ -1121,7 +1136,7 @@ STATIC
 XML_NODE *
 XmlParseNode (
   IN OUT  XML_PARSER   *Parser,
-  IN OUT  XML_REFLIST  *References
+  IN OUT  XML_REFLIST  *References  OPTIONAL
   )
 {
   CONST CHAR8  *TagOpen;
@@ -1352,6 +1367,8 @@ XmlDocumentExport (
   UINT32  CurrentSize;
   UINT32  NewSize;
 
+  ASSERT (Document != NULL);
+
   AllocSize = Document->Buffer.Length + 1;
   Buffer    = AllocatePool (AllocSize);
   if (Buffer == NULL) {
@@ -1420,6 +1437,8 @@ XmlDocumentRoot (
   IN  CONST XML_DOCUMENT  *Document
   )
 {
+  ASSERT (Document != NULL);
+
   return Document->Root;
 }
 
@@ -1428,6 +1447,8 @@ XmlNodeName (
   IN  CONST XML_NODE  *Node
   )
 {
+  ASSERT (Node != NULL);
+
   return Node->Name;
 }
 
@@ -1436,6 +1457,8 @@ XmlNodeContent (
   IN  CONST XML_NODE  *Node
   )
 {
+  ASSERT (Node != NULL);
+
   return Node->Real != NULL ? Node->Real->Content : Node->Content;
 }
 
@@ -1445,7 +1468,8 @@ XmlNodeChangeContent (
   IN      CONST CHAR8  *Content
   )
 {
-  ASSERT (Node != NULL);
+  ASSERT (Node    != NULL);
+  ASSERT (Content != NULL);
 
   if (Node->Real != NULL) {
     Node->Real->Content = Content;
@@ -1458,6 +1482,8 @@ XmlNodeChildren (
   IN  CONST XML_NODE  *Node
   )
 {
+  ASSERT (Node != NULL);
+
   return Node->Children ? Node->Children->NodeCount : 0;
 }
 
@@ -1467,6 +1493,8 @@ XmlNodeChild (
   IN  UINT32          Child
   )
 {
+  ASSERT (Node != NULL);
+
   return Node->Children->NodeList[Child];
 }
 
@@ -1483,7 +1511,8 @@ XmlEasyChild (
   XML_NODE  *Child;
   UINT32    Index;
 
-  ASSERT (Node != NULL);
+  ASSERT (Node      != NULL);
+  ASSERT (ChildName != NULL);
 
   VA_START (Arguments, ChildName);
 
@@ -1547,6 +1576,7 @@ XmlNodeAppend (
   XML_NODE  *NewNode;
 
   ASSERT (Node != NULL);
+  ASSERT (Name != NULL);
 
   NewNode = XmlNodeCreate (Name, Attributes, Content, NULL, NULL);
   if (NewNode == NULL) {
@@ -1571,7 +1601,10 @@ XmlNodePrepend (
 {
   XML_NODE  *NewNode;
 
-  ASSERT (Node != NULL);
+  ASSERT (Node       != NULL);
+  ASSERT (Name       != NULL);
+  ASSERT (Attributes != NULL);
+  ASSERT (Content    != NULL);
 
   NewNode = XmlNodeAppend (Node, Name, Attributes, Content);
   if (NewNode == NULL) {
@@ -1663,6 +1696,8 @@ PlistDictChildren (
   IN  CONST XML_NODE  *Node
   )
 {
+  ASSERT (Node != NULL);
+
   return XmlNodeChildren (Node) / 2;
 }
 
@@ -1673,6 +1708,8 @@ PlistDictChild (
   OUT  XML_NODE        **Value OPTIONAL
   )
 {
+  ASSERT (Node != NULL);
+
   Child *= 2;
 
   if (Value != NULL) {
