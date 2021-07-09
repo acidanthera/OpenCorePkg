@@ -54,12 +54,14 @@
   X64/Paging.c
   X64/VirtualMemory.h
   X64/Canary.nasm
+  X64/GS.nasm          | MSFT
 
 [Sources.Ia32]
   Ia32/EnterDxeCore.c
   Ia32/Paging.c
   Ia32/VirtualMemory.h
   Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
 
 [Pcd]
   gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES

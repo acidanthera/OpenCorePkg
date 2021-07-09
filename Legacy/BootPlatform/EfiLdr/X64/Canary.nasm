@@ -39,24 +39,8 @@ ASM_PFX(__stack_chk_fail):
 .back:
   cli
   hlt
-  jmp .back
+  jmp short .back
 %endif
-
-; #######################################################################
-; VOID __GSHandlerCheck (VOID)
-; #######################################################################
-align 8
-global ASM_PFX(__GSHandlerCheck)
-ASM_PFX(__GSHandlerCheck):
-  jmp  ASM_PFX(__stack_chk_fail)
-
-; #######################################################################
-; VOID __report_rangecheckfailure (VOID)
-; #######################################################################
-align 8
-global ASM_PFX(__report_rangecheckfailure)
-ASM_PFX(__report_rangecheckfailure):
-  jmp  ASM_PFX(__stack_chk_fail)
 
 ; #######################################################################
 ; VOID
@@ -93,7 +77,7 @@ ASM_PFX(_ModuleEntryPoint):
 .retry:
   rdrand rdx
   jae .retry           ; RDRAND bad data (CF = 0), retry until (CF = 1).
-  jmp .done
+  jmp short .done
 .noRdRand:
   rdtsc               ; Read time-stamp counter into EDX:EAX.
   shld rdx, rdx, 32

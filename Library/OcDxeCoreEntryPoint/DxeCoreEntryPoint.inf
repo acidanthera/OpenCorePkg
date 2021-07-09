@@ -27,9 +27,11 @@
 
 [Sources.Ia32]
   Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
 
 [Sources.X64]
   X64/Canary.nasm
+  X64/GS.nasm          | MSFT
 
 [Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
   CanaryDummy.c

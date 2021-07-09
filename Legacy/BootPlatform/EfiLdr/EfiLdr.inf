@@ -48,9 +48,11 @@
 
 [Sources.IA32]
   Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
 
 [Sources.X64]
   X64/Canary.nasm
+  X64/GS.nasm          | MSFT
 
 [Guids]
   gTianoCustomDecompressGuid
