@@ -17,6 +17,8 @@ BITS 32
 extern ASM_PFX(__stack_chk_fail)
 extern ASM_PFX(__security_cookie)
 
+section .text
+
 ; #######################################################################
 ; VOID __GSHandlerCheck (VOID)
 ; #######################################################################
