@@ -1254,7 +1254,7 @@ OcKernelFileOpen (
         && ((MaxCacheTypeAllowed == CacheTypeNone && mOcDarwinVersion <= KERNEL_VERSION_LEOPARD_MAX)
         || (MaxCacheTypeAllowed == CacheTypeMkext && mOcDarwinVersion <= KERNEL_VERSION_SNOW_LEOPARD_MAX)
         || (MaxCacheTypeAllowed == CacheTypeCacheless && mOcDarwinVersion <= KERNEL_VERSION_MAVERICKS_MAX))) {
-        DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
+        DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%a: %s\n", ForceCacheType, FileName));
 
         FreePool (Kernel);
         (*NewHandle)->Close (*NewHandle);
@@ -1326,7 +1326,7 @@ OcKernelFileOpen (
     // Disable mkext booting if forcing cacheless.
     //
     if (MaxCacheTypeAllowed == CacheTypeCacheless) {
-      DEBUG ((DEBUG_INFO, "OC: Blocking mkext due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
+      DEBUG ((DEBUG_INFO, "OC: Blocking mkext due to ForceKernelCache=%a: %s\n", ForceCacheType, FileName));
       (*NewHandle)->Close (*NewHandle);
       *NewHandle = NULL;
 
