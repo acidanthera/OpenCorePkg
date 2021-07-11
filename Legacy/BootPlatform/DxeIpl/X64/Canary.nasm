@@ -43,20 +43,6 @@ ASM_PFX(__stack_chk_fail):
 %endif
 
 ; #######################################################################
-; VOID
-; __security_check_cookie (
-;   IN UINTN  Value
-;   )
-; #######################################################################
-align 8
-global ASM_PFX(__security_check_cookie)
-ASM_PFX(__security_check_cookie):
-  mov  rax, qword [rel ASM_PFX(__security_cookie)]
-  cmp  rax, rcx
-  jnz  ASM_PFX(__stack_chk_fail)
-  ret
-
-; #######################################################################
 ; EFI_STATUS
 ; EFIAPI
 ; _ModuleEntryPoint (
