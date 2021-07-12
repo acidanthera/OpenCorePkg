@@ -270,6 +270,7 @@ if [ "$ARCHS" = "" ]; then
   export ARCHS
 fi
 SELFPKG=OpenCorePkg
+RTARGETS=(DEBUG RELEASE NOOPT)
 NO_ARCHIVES=0
 
 export SELFPKG
