@@ -33,7 +33,6 @@
 [Sources.X64]
   X64/Canary.nasm
   X64/GS.nasm          | MSFT
-  X64/Cookie.nasm      | XCODE
 
 [Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
   CanaryDummy.c

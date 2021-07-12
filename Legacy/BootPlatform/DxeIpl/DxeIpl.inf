@@ -55,7 +55,6 @@
   X64/VirtualMemory.h
   X64/Canary.nasm
   X64/GS.nasm          | MSFT
-  X64/Cookie.nasm      | XCODE
 
 [Sources.Ia32]
   Ia32/EnterDxeCore.c
