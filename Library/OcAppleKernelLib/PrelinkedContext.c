@@ -616,7 +616,7 @@ PrelinkedInjectPrepare (
     } else {
        DEBUG ((
         DEBUG_INFO,
-        "OCAK:Leaving unchanged %a-bit prelink size %X due to %LX plist\n",
+        "OCAK: Leaving unchanged %a-bit prelink size %X due to %LX plist\n",
         Context->Is32Bit ? "32" : "64",
         Context->PrelinkedSize,
         SegmentEndOffset
@@ -672,7 +672,7 @@ PrelinkedInjectPrepare (
       } else {
          DEBUG ((
           DEBUG_INFO,
-          "OCAK:Leaving unchanged %a-bit prelink size %X due to %LX state\n",
+          "OCAK: Leaving unchanged %a-bit prelink size %X due to %LX state\n",
           Context->Is32Bit ? "32" : "64",
           Context->PrelinkedSize,
           SegmentEndOffset
