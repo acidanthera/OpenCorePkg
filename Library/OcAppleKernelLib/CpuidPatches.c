@@ -981,6 +981,48 @@ mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
   .Limit       = 0
 };
 
+// Offset of value in below patch.
+#define CORE_COUNT_OFFSET 1
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoCoreCountFind[] = {
+  0x44, 0x89, 0xE8, 0xC1, 0xE8, 0x1A
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoCoreCountMask[] = {
+  0xFF, 0xFF, 0xFD, 0xFF, 0xFD, 0xFF
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoCoreCountReplace[] = {
+  0xB8, 0x00, 0x00, 0x00, 0x00, 0x90
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoCoreCountV2Replace[] = {
+  0xBA, 0x00, 0x00, 0x00, 0x00, 0x90
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoCoreCountPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoCoreCountPatch"),
+  .Base        = NULL,
+  .Find        = mProvideCurrentCpuInfoCoreCountFind,
+  .Mask        = mProvideCurrentCpuInfoCoreCountMask,
+  .Replace     = mProvideCurrentCpuInfoCoreCountReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoCoreCountFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
 STATIC
 UINT8* PatchMovVar (
   IN OUT  UINT8             *Location,
@@ -1092,6 +1134,7 @@ PatchProvideCurrentCpuInfo (
   UINT64            tscGranularityValue;
 
   UINT32            msrCoreThreadCount;
+  UINT32            CoreCount;
 
   ASSERT (Patcher != NULL);
 
@@ -1235,6 +1278,31 @@ PatchProvideCurrentCpuInfo (
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU MSR 0x35 default value patch on %u\n", KernelVersion));
   }
+  
+  //
+  //CoreCount patch
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
+      CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
+      &mProvideCurrentCpuInfoCoreCountV2Replace,
+      sizeof (mProvideCurrentCpuInfoCoreCountV2Replace)
+      );
+  }
+    CoreCount = (UINT16) (CpuInfo->CoreCount - 1);
+
+    CopyMem (
+      &mProvideCurrentCpuInfoCoreCountReplace[CORE_COUNT_OFFSET],
+      &CoreCount,
+      sizeof (CoreCount)
+      );
+
+      Status = PatcherApplyGenericPatch (
+        Patcher,
+        &mProvideCurrentCpuInfoCoreCountPatch
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to find cpuid_cores_per_package default value patch - %r\n", Status));
+      }
 
   //
   // Disable _x86_validate_topology on 10.13 and above.
