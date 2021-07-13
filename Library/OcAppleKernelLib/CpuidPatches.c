@@ -987,6 +987,7 @@ mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountFind[] = {
+    // mov eax/edx, core count - 1
   0x44, 0x89, 0xE8, 0xC1, 0xE8, 0x1A
 };
 
@@ -999,12 +1000,14 @@ mProvideCurrentCpuInfoCoreCountMask[] = {
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountReplace[] = {
+    // mov eax, core count - 1, nop
   0xB8, 0x00, 0x00, 0x00, 0x00, 0x90
 };
 
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountV2Replace[] = {
+    // mov edx, core count - 1, nop
   0xBA, 0x00, 0x00, 0x00, 0x00, 0x90
 };
 
