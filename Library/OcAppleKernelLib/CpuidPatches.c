@@ -987,8 +987,10 @@ mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountFind[] = {
-    // mov eax/edx, core count - 1
-  0x44, 0x89, 0xE8, 0xC1, 0xE8, 0x1A
+    // mov eax/edx, r13d
+  0x44, 0x89, 0xE8,
+    // shr eax/edx, 0x1a
+  0xC1, 0xE8, 0x1A
 };
 
 STATIC
