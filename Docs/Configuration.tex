@@ -6485,6 +6485,30 @@ functioning. Feature highlights:
   \end{itemize}
 
   \item
+  \texttt{GraphicsInputMirroring}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}:
+  Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
+  on the basic console input stream.
+
+  With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
+  
+  On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
+  which use non-Apple key input methods.
+  
+  The recommended setting on all hardware is \texttt{true}.
+
+  \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
+  after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
+  
+  \begin{itemize}
+  \tightlist
+  \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
+  \item \texttt{false} --- Prevent key input mirroring to non-Apple protocols when in graphics mode.
+  \end{itemize}
+
+  \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
@@ -7093,7 +7117,7 @@ functioning. Feature highlights:
 
   \emph{Note 2}: On systems without native
   support for \texttt{ForceDisplayRotationInEFI}, \texttt{DirectGopRendering=true}
-  is also required for this setting to have a visible effect.
+  is also required for this setting to have an effect.
 
 \item
   \texttt{AppleFramebufferInfo}\\

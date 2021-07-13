@@ -365,6 +365,7 @@ OcReinstallProtocols (
     Config->Uefi.AppleInput.CustomDelays,
     Config->Uefi.AppleInput.KeyInitialDelay,
     Config->Uefi.AppleInput.KeySubsequentDelay,
+    Config->Uefi.AppleInput.GraphicsInputMirroring,
     Config->Uefi.AppleInput.PointerSpeedDiv,
     Config->Uefi.AppleInput.PointerSpeedMul
     ) == NULL

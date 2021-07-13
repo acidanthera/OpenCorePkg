@@ -154,12 +154,13 @@ EventInputKeyFromAppleKeyCode (
   IN  BOOLEAN         Shifted
   );
 
-// InternalSetKeyDelays
+// InternalSetKeyBehaviour
 VOID
-InternalSetKeyDelays (
+InternalSetKeyBehaviour (
   IN  BOOLEAN         CustomDelays,
   IN  UINT16          KeyInitialDelay,
-  IN  UINT16          KeySubsequentDelay
+  IN  UINT16          KeySubsequentDelay,
+  IN  BOOLEAN         GraphicsInputMirroring
   );
 
 VOID
