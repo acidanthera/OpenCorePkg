@@ -48,7 +48,6 @@ ASM_PFX(__report_rangecheckfailure):
 align 8
 global @__security_check_cookie@4
 @__security_check_cookie@4:
-  mov  eax, dword [rel ASM_PFX(__security_cookie)]
-  cmp  eax, ecx  ; UINTN cookie is already in ECX
+  cmp  dword [rel ASM_PFX(__security_cookie)], ecx  ; UINTN cookie is already in ECX
   jnz  ASM_PFX(__stack_chk_fail)
   ret

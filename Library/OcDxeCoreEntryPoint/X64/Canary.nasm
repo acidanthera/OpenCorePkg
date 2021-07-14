@@ -51,8 +51,7 @@ ASM_PFX(__stack_chk_fail):
 align 8
 global ASM_PFX(__security_check_cookie)
 ASM_PFX(__security_check_cookie):
-  mov  rax, qword [rel ASM_PFX(__security_cookie)]
-  cmp  rax, rcx
+  cmp  qword [rel ASM_PFX(__security_cookie)], rcx
   jnz  ASM_PFX(__stack_chk_fail)
   ret
 
