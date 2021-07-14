@@ -1,5 +1,6 @@
+---
 diff --git a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c b/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
-index 57602828fe..1514afd5db 100644
+index 5760282..1514afd 100644
 --- a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
 +++ b/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
 @@ -157,7 +157,9 @@ HiiAddPackages (
@@ -12,3 +13,4 @@ index 57602828fe..1514afd5db 100644
 +    Length += (Tmp - sizeof (UINT32));
    }
    VA_END (Args);
+--
