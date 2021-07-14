@@ -1,4 +1,3 @@
----
 diff --git a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c b/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
 index 5760282..1514afd 100644
 --- a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
@@ -13,4 +12,5 @@ index 5760282..1514afd 100644
 +    Length += (Tmp - sizeof (UINT32));
    }
    VA_END (Args);
---
+
+ //
