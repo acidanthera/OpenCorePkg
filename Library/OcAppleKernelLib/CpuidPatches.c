@@ -987,41 +987,70 @@ mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountFind[] = {
-    // mov eax/edx, r13d
-  0x44, 0x89, 0xE8,
-    // shr eax/edx, 0x1a
-  0xC1, 0xE8, 0x1A
+  // shr eax/edx, 0x1a
+  0xC1, 0xE8, 0x1A, 0x00, 0x00, 0x00
 };
 
 STATIC
 UINT8
 mProvideCurrentCpuInfoCoreCountMask[] = {
-  0xFF, 0xFF, 0xFD, 0xFF, 0xFD, 0xFF
+  0xFF, 0xFD, 0xFF, 0x00, 0x00, 0x00
 };
 
 STATIC
 UINT8
+// Snow Leopard to Mojave
 mProvideCurrentCpuInfoCoreCountReplace[] = {
-    // mov eax, core count - 1, nop
-  0xB8, 0x00, 0x00, 0x00, 0x00, 0x90
+  // mov eax, CoreCount,
+  0xB8, 0x00, 0x00, 0x00, 0x00,
+  // filler
+  0x00
 };
 
 STATIC
 UINT8
-mProvideCurrentCpuInfoCoreCountV2Replace[] = {
-    // mov edx, core count - 1, nop
-  0xBA, 0x00, 0x00, 0x00, 0x00, 0x90
+// Snow Leopard to Big Sur
+mProvideCurrentCpuInfoCoreCountReplaceMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00
 };
+
+STATIC
+UINT8
+// Catalina to Big Sur
+mProvideCurrentCpuInfoCoreCountV2Replace[] = {
+  // mov edx, CoreCount,
+  0xBA, 0x00, 0x00, 0x00, 0x00,
+  // filler
+  0x00
+};
+
+STATIC
+UINT8
+// Monterey
+mProvideCurrentCpuInfoCoreCountV3Replace[] = {
+  // mov edx, CoreCount,
+  0xBA, 0x00, 0x00, 0x00, 0x00
+  // nop
+  0x90
+};
+
+STATIC
+UINT8
+// Monterey
+mProvideCurrentCpuInfoCoreCountV3ReplaceMask[] = {
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
+};
+
 
 STATIC
 PATCHER_GENERIC_PATCH
 mProvideCurrentCpuInfoCoreCountPatch = {
   .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoCoreCountPatch"),
-  .Base        = NULL,
+  .Base        = "_cpuid_set_info",
   .Find        = mProvideCurrentCpuInfoCoreCountFind,
   .Mask        = mProvideCurrentCpuInfoCoreCountMask,
   .Replace     = mProvideCurrentCpuInfoCoreCountReplace,
-  .ReplaceMask = NULL,
+  .ReplaceMask = mProvideCurrentCpuInfoCoreCountReplaceMask,
   .Size        = sizeof (mProvideCurrentCpuInfoCoreCountFind),
   .Count       = 1,
   .Skip        = 0,
@@ -1285,21 +1314,28 @@ PatchProvideCurrentCpuInfo (
   }
   
   //
-  //CoreCount patch
+  // CoreCount patch
   //
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
-      CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
-      &mProvideCurrentCpuInfoCoreCountV2Replace,
-      sizeof (mProvideCurrentCpuInfoCoreCountV2Replace)
+        CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
+        &mProvideCurrentCpuInfoCoreCountV2Replace,
+        sizeof (mProvideCurrentCpuInfoCoreCountV2Replace)
       );
   }
-    CoreCount = (UINT16) (CpuInfo->CoreCount - 1);
-
-    CopyMem (
-      &mProvideCurrentCpuInfoCoreCountReplace[CORE_COUNT_OFFSET],
-      &CoreCount,
-      sizeof (CoreCount)
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
+        CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
+        &mProvideCurrentCpuInfoCoreCountV3Replace,
+        sizeof (mProvideCurrentCpuInfoCoreCountV3Replace)
       );
+      mProvideCurrentCpuInfoCoreCountPatch.ReplaceMask = mProvideCurrentCpuInfoCoreCountV3ReplaceMask;
+  }
+    CoreCount = (UINT16) (CpuInfo->CoreCount);
+
+      CopyMem (
+        &mProvideCurrentCpuInfoCoreCountReplace[CORE_COUNT_OFFSET],
+        &CoreCount,
+        sizeof (CoreCount)
+        );
 
       Status = PatcherApplyGenericPatch (
         Patcher,
