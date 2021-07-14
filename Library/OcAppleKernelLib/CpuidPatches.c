@@ -1029,7 +1029,7 @@ UINT8
 // Monterey
 mProvideCurrentCpuInfoCoreCountV3Replace[] = {
   // mov edx, CoreCount,
-  0xBA, 0x00, 0x00, 0x00, 0x00
+  0xBA, 0x00, 0x00, 0x00, 0x00,
   // nop
   0x90
 };
@@ -1316,7 +1316,7 @@ PatchProvideCurrentCpuInfo (
   //
   // CoreCount patch
   //
-  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
         CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
         &mProvideCurrentCpuInfoCoreCountV2Replace,
         sizeof (mProvideCurrentCpuInfoCoreCountV2Replace)
