@@ -1,0 +1,14 @@
+diff --git a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c b/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
+index 57602828fe..1514afd5db 100644
+--- a/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
++++ b/MdeModulePkg/Library/UefiHiiLib/HiiLib.c
+@@ -157,7 +157,9 @@ HiiAddPackages (
+   // Calculate the length of all the packages in the variable argument list
+   //
+   for (Length = 0, VA_START (Args, DeviceHandle); (Package = VA_ARG (Args, UINT32 *)) != NULL; ) {
+-    Length += (ReadUnaligned32 (Package) - sizeof (UINT32));
++    UINT32 Tmp = ReadUnaligned32 (Package);
++    ASSERT (Tmp >= sizeof (UINT32));
++    Length += (Tmp - sizeof (UINT32));
+   }
+   VA_END (Args);
