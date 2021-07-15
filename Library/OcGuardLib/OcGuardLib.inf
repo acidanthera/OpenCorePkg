@@ -31,7 +31,6 @@
 [Sources]
   Alignment.c
   BitOverflow.c
-  Canary.c
   Math.c
   NativeOverflow.c
   TripleOverflow.c

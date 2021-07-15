@@ -1,13 +1,13 @@
 ## @file
-# 
+#
 # Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
-# This program and the accompanying materials                          
-# are licensed and made available under the terms and conditions of the BSD License         
-# which accompanies this distribution.  The full text of the license may be found at        
-# http://opensource.org/licenses/bsd-license.php                                            
-#                                                                                           
-# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
 #  Module Name:
 #    EfiLdr.inf
@@ -27,6 +27,7 @@
   OpenCorePkg/OpenDuetPkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   BaseLib
@@ -45,8 +46,20 @@
   Support.c
   LzmaDecompress.h
 
+[Sources.IA32]
+  Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
+
+[Sources.X64]
+  X64/Canary.nasm
+  X64/GS.nasm          | MSFT
+
 [Guids]
   gTianoCustomDecompressGuid
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES
 
 [BuildOptions]
   MSFT:*_*_*_DLINK_FLAGS = /BASE:0x10000

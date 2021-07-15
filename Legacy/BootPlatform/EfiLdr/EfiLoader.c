@@ -1,13 +1,13 @@
 /*++
 
 Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
-This program and the accompanying materials                          
-are licensed and made available under the terms and conditions of the BSD License         
-which accompanies this distribution.  The full text of the license may be found at        
-http://opensource.org/licenses/bsd-license.php                                            
-                                                                                          
-THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+This program and the accompanying materials
+are licensed and made available under the terms and conditions of the BSD License
+which accompanies this distribution.  The full text of the license may be found at
+http://opensource.org/licenses/bsd-license.php
+
+THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 Module Name:
   EfiLoader.c
@@ -41,7 +41,7 @@ EfiLoader (
   UINT32    BiosMemoryMapBaseAddress
   )
 {
-  BIOS_MEMORY_MAP       *BiosMemoryMap;    
+  BIOS_MEMORY_MAP       *BiosMemoryMap;
   EFILDR_IMAGE          *EFILDRImage;
   EFI_MEMORY_DESCRIPTOR EfiMemoryDescriptor[EFI_MAX_MEMORY_DESCRIPTORS];
   EFI_STATUS            Status;
@@ -83,21 +83,21 @@ EfiLoader (
   Status = LzmaUefiDecompressGetInfo (
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
              EFILDRImage->Length,
-             &DestinationSize, 
+             &DestinationSize,
              &ScratchSize
              );
 
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to get decompress information for BFV!\n");
   }
-  
+
   Status =  LzmaUefiDecompress (
     (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
     EFILDRImage->Length,
-    (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS, 
+    (VOID *)(UINTN)EFI_DECOMPRESSED_BUFFER_ADDRESS,
     (VOID *)(UINTN)((EFI_DECOMPRESSED_BUFFER_ADDRESS + DestinationSize + 0x1000) & 0xfffff000)
     );
-  
+
 
   if (EFI_ERROR (Status)) {
     SystemHang ("Failed to decompress BFV!\n");
@@ -114,7 +114,7 @@ EfiLoader (
   //
   // Point to the 2nd image (DxeIpl)
   //
-    
+
   EFILDRImage -= 2;
 
   //
@@ -123,7 +123,7 @@ EfiLoader (
   Status = LzmaUefiDecompressGetInfo (
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
              EFILDRImage->Length,
-             &DestinationSize, 
+             &DestinationSize,
              &ScratchSize
              );
   if (EFI_ERROR (Status)) {
@@ -141,12 +141,12 @@ EfiLoader (
   }
 
   //
-  // Load and relocate the EFI PE/COFF Firmware Image 
+  // Load and relocate the EFI PE/COFF Firmware Image
   //
   Status = EfiLdrPeCoffLoadPeImage (
-             (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS), 
-             &DxeIplImage, 
-             &NumberOfMemoryMapEntries, 
+             (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS),
+             &DxeIplImage,
+             &NumberOfMemoryMapEntries,
              EfiMemoryDescriptor
              );
   if (EFI_ERROR (Status)) {
@@ -165,7 +165,7 @@ EfiLoader (
 
              (VOID *)(UINTN)(EFILDR_HEADER_ADDRESS + EFILDRImage->Offset),
              EFILDRImage->Length,
-             &DestinationSize, 
+             &DestinationSize,
              &ScratchSize
              );
   if (EFI_ERROR (Status)) {
@@ -183,12 +183,12 @@ EfiLoader (
   }
 
   //
-  // Load and relocate the EFI PE/COFF Firmware Image 
+  // Load and relocate the EFI PE/COFF Firmware Image
   //
   Status = EfiLdrPeCoffLoadPeImage (
-             (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS), 
-             &DxeCoreImage, 
-             &NumberOfMemoryMapEntries, 
+             (VOID *)(UINTN)(EFI_DECOMPRESSED_BUFFER_ADDRESS),
+             &DxeCoreImage,
+             &NumberOfMemoryMapEntries,
              EfiMemoryDescriptor
              );
   if (EFI_ERROR (Status)) {
@@ -224,11 +224,10 @@ EfiLoader (
 
 EFI_STATUS
 EFIAPI
-_ModuleEntryPoint (
+_ModuleEntryPointReal (
   UINT32    BiosMemoryMapBaseAddress
   )
 {
   EfiLoader(BiosMemoryMapBaseAddress);
   return EFI_SUCCESS;
 }
-

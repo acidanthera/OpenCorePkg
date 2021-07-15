@@ -743,6 +743,12 @@
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderTolerantLoad|TRUE|BOOLEAN|0x00000605
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportDebug|FALSE|BOOLEAN|0x00000606
 
+  ## Indicates, whether usage of TSC instead of RNG is allowed.<BR><BR>
+  ##   TRUE  - TSC is allowed.<BR>
+  ##   FALSE - TSC is NOT allowed.<BR>
+  ## @Prompt Allow usage of TSC, when RNG is not available.
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|FALSE|BOOLEAN|0x00000607
+
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Acidanthera/Library/OcAcpiLib.h

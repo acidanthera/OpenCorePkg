@@ -1,13 +1,13 @@
 ## @file
-# 
+#
 # Copyright (c) 2006 - 2011, Intel Corporation. All rights reserved.<BR>
-# This program and the accompanying materials                          
-# are licensed and made available under the terms and conditions of the BSD License         
-# which accompanies this distribution.  The full text of the license may be found at        
-# http://opensource.org/licenses/bsd-license.php                                            
-#                                                                                           
-# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,                     
-# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.             
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #
 #  Module Name:
 #    DxeIpl.inf
@@ -27,6 +27,7 @@
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenDuetPkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   BaseLib
@@ -47,16 +48,24 @@
   LegacyTable.h
   HobGeneration.c
   HobGeneration.h
-  
+
 [Sources.x64]
   X64/EnterDxeCore.c
   X64/Paging.c
   X64/VirtualMemory.h
+  X64/Canary.nasm
+  X64/GS.nasm          | MSFT
 
 [Sources.Ia32]
   Ia32/EnterDxeCore.c
   Ia32/Paging.c
   Ia32/VirtualMemory.h
- 
+  Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES
+
 [Depex]
   TRUE
