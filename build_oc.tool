@@ -149,7 +149,6 @@ package() {
 
     # Special case: OpenShell.efi
     cp "${arch}/Shell.efi" "${dstdir}/${arch}/EFI/OC/Tools/OpenShell.efi" || exit 1
-    cp -r "${arch}/ShellPkg/Application/Shell" "${dstdir}/${arch}/EFI/OC/Tools/ShellPkg" || exit 1
 
     efiDrivers=(
       "HiiDatabase.efi"
@@ -271,7 +270,6 @@ if [ "$ARCHS" = "" ]; then
   export ARCHS
 fi
 SELFPKG=OpenCorePkg
-RTARGETS=(DEBUG RELEASE NOOPT)
 NO_ARCHIVES=0
 
 export SELFPKG
