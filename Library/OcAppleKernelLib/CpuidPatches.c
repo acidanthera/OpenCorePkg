@@ -999,7 +999,7 @@ mProvideCurrentCpuInfoCoreCountMask[] = {
 
 STATIC
 UINT8
-// Snow Leopard to Mojave
+// High Sierra to Mojave
 mProvideCurrentCpuInfoCoreCountReplace[] = {
   // mov eax, CoreCount,
   0xB8, 0x00, 0x00, 0x00, 0x00,
@@ -1009,7 +1009,7 @@ mProvideCurrentCpuInfoCoreCountReplace[] = {
 
 STATIC
 UINT8
-// Snow Leopard to Big Sur
+// High Sierra to Big Sur
 mProvideCurrentCpuInfoCoreCountReplaceMask[] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0x00
 };
@@ -1017,7 +1017,7 @@ mProvideCurrentCpuInfoCoreCountReplaceMask[] = {
 STATIC
 UINT8
 // Catalina to Big Sur
-mProvideCurrentCpuInfoCoreCountV2Replace[] = {
+mProvideCurrentCpuInfoCoreCountCatalinaMinReplace[] = {
   // mov edx, CoreCount,
   0xBA, 0x00, 0x00, 0x00, 0x00,
   // filler
@@ -1027,7 +1027,7 @@ mProvideCurrentCpuInfoCoreCountV2Replace[] = {
 STATIC
 UINT8
 // Monterey
-mProvideCurrentCpuInfoCoreCountV3Replace[] = {
+mProvideCurrentCpuInfoCoreCountMontereyMinReplace[] = {
   // mov edx, CoreCount,
   0xBA, 0x00, 0x00, 0x00, 0x00,
   // nop
@@ -1037,7 +1037,7 @@ mProvideCurrentCpuInfoCoreCountV3Replace[] = {
 STATIC
 UINT8
 // Monterey
-mProvideCurrentCpuInfoCoreCountV3ReplaceMask[] = {
+mProvideCurrentCpuInfoCoreCountMontereyMinReplaceMask[] = {
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF
 };
 
@@ -1316,26 +1316,27 @@ PatchProvideCurrentCpuInfo (
   //
   // CoreCount patch
   //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
-        CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
-        &mProvideCurrentCpuInfoCoreCountV2Replace,
-        sizeof (mProvideCurrentCpuInfoCoreCountV2Replace)
+    CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
+      &mProvideCurrentCpuInfoCoreCountCatalinaMinReplace,
+      sizeof (mProvideCurrentCpuInfoCoreCountCatalinaMinReplace)
       );
   }
   if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MONTEREY_MIN, 0)) {
-        CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
-        &mProvideCurrentCpuInfoCoreCountV3Replace,
-        sizeof (mProvideCurrentCpuInfoCoreCountV3Replace)
+    CopyMem ( &mProvideCurrentCpuInfoCoreCountReplace,
+      &mProvideCurrentCpuInfoCoreCountMontereyMinReplace,
+      sizeof (mProvideCurrentCpuInfoCoreCountMontereyMinReplace)
       );
-      mProvideCurrentCpuInfoCoreCountPatch.ReplaceMask = mProvideCurrentCpuInfoCoreCountV3ReplaceMask;
+      mProvideCurrentCpuInfoCoreCountPatch.ReplaceMask = mProvideCurrentCpuInfoCoreCountMontereyMinReplaceMask;
   }
     CoreCount = (UINT16) (CpuInfo->CoreCount);
 
-      CopyMem (
-        &mProvideCurrentCpuInfoCoreCountReplace[CORE_COUNT_OFFSET],
-        &CoreCount,
-        sizeof (CoreCount)
-        );
+    CopyMem (
+      &mProvideCurrentCpuInfoCoreCountReplace[CORE_COUNT_OFFSET],
+      &CoreCount,
+      sizeof (CoreCount)
+      );
 
       Status = PatcherApplyGenericPatch (
         Patcher,
@@ -1344,6 +1345,9 @@ PatchProvideCurrentCpuInfo (
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCAK: Failed to find cpuid_cores_per_package default value patch - %r\n", Status));
       }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping cpuid_cores_per_package patch on %u\n", KernelVersion));
+  }
 
   //
   // Disable _x86_validate_topology on 10.13 and above.
