@@ -209,8 +209,14 @@ typedef struct {
   ///
   /// Codec address.
   ///
-  UINT8                     Address;
+  UINT32                    Address;
 } EFI_HDA_IO_DEVICE_PATH;
+
+STATIC_ASSERT (
+  sizeof(EFI_HDA_IO_DEVICE_PATH)
+  == sizeof(EFI_DEVICE_PATH_PROTOCOL) + sizeof (EFI_GUID) + sizeof (UINT32),
+  "Unexpected EFI_HDA_IO_DEVICE_PATH size"
+  );
 
 extern EFI_GUID gEfiHdaIoDevicePathGuid;
 
