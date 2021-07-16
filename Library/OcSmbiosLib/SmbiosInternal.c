@@ -310,7 +310,7 @@ SmbiosInitialiseStruct (
 
   Status = SmbiosExtendTable (Table, MinLength);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "OCSMB: Failed to extend SMBIOS for table %u - %r", Type, Status));
+    DEBUG ((DEBUG_WARN, "OCSMB: Failed to extend SMBIOS for table %u - %r\n", Type, Status));
     return Status;
   }
 

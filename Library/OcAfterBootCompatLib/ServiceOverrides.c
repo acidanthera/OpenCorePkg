@@ -405,7 +405,7 @@ ApplyBooterPatches (
     (VOID **)&LoadedImage
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCABC: Failed to handle LoadedImage protocol - %r", Status));
+    DEBUG ((DEBUG_ERROR, "OCABC: Failed to handle LoadedImage protocol - %r\n", Status));
     return;
   }
 
