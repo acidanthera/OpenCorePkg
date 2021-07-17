@@ -4160,7 +4160,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- Recent available model, currently set to \texttt{j137}.
+  \item \texttt{Default} --- Recent available model, currently set to \texttt{x86legacy}.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4180,6 +4180,10 @@ rm vault.pub
   \item \texttt{j185f} --- \texttt{iMac20,2 (August 2020). Minimum macOS 10.15.6 (19G2005)}
   \item \texttt{x86legacy} --- \texttt{Macs without T2 chip and VMs. Minimum macOS 11.0.1 (20B29)}
   \end{itemize}
+
+  \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
+  Starting with macOS 12 \texttt{x86legacy} is the only Apple Secure Boot model compatible
+  with software update on hardware without T2 chips.
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
   Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,

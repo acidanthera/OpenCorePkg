@@ -42,7 +42,7 @@ typedef struct OC_SB_MODEL_DESC_ {
 
 STATIC CHAR8 mCryptoDigestMethod[16] = "sha2-384";
 STATIC DERImg4Environment mEnvInfo;
-STATIC CONST CHAR8 *mModelDefault = "j137";
+STATIC CONST CHAR8 *mModelDefault = "x86legacy";
 ///
 /// List of model mapping to board identifiers.
 /// Alphabetically sorted (!), for release order refer to the documentation.
