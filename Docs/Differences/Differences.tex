@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Jul 13 10:00:32 2021
-%DIF ADD ../Configuration.tex        Sat Jul 17 23:16:11 2021
+%DIF ADD ../Configuration.tex        Sat Jul 17 23:24:52 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6396,8 +6396,9 @@ functioning. Feature highlights:
     \tightlist
     \item \texttt{0} --- require the default supported release date of APFS
     in OpenCore. The default release date will increase with time and thus
-    this setting is recommended. Currently set to 2018/06/21.
-    \item \texttt{-1} --- permit any release date to load (strongly discouraged).
+    this setting is recommended. Currently set to \DIFdelbegin \DIFdel{2018}\DIFdelend \DIFaddbegin \DIFadd{2021}\DIFaddend /\DIFdelbegin \DIFdel{06}\DIFdelend \DIFaddbegin \DIFadd{01}\DIFaddend /\DIFdelbegin \DIFdel{21.
+    }\DIFdelend \DIFaddbegin \DIFadd{01.
+    }\DIFaddend \item \texttt{-1} --- permit any release date to load (strongly discouraged).
     \item Other --- use custom minimal APFS release date, e.g. \texttt{20200401}
     for 2020/04/01. APFS release dates can be found in OpenCore boot log
     and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
@@ -6419,8 +6420,9 @@ functioning. Feature highlights:
     \tightlist
     \item \texttt{0} --- require the default supported version of APFS
     in OpenCore. The default version will increase with time and thus
-    this setting is recommended. Currently set to the latest point release
-    from High Sierra from App Store (\texttt{748077008000000}).
+    this setting is recommended. Currently set to \DIFdelbegin \DIFdel{the latest point release
+    from High Sierra from App Store (}\DIFdelend \DIFaddbegin \DIFadd{allow macOS Big Sur and newer
+    (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{748077008000000}\DIFdelend \DIFaddbegin \DIFadd{1600000000000000}\DIFaddend }).
     \item \texttt{-1} --- permit any version to load (strongly discouraged).
     \item Other --- use custom minimal APFS version, e.g. \texttt{1412101001000000}
     from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
