@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "427.0.0.0.0"
-BIOSLegacyVersion: "MBA71.88Z.F000.B00.2102232134"
-BIOSReleaseDate: "02/23/2021"
+BIOSVersion: "427.140.8.0.0"
+BIOSLegacyVersion: "MBA71.88Z.F000.B00.2106131820"
+BIOSReleaseDate: "06/13/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir7,1"
 SystemVersion: "1.0"
@@ -64,10 +64,10 @@ SmcEPCI: 0x7B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA71
-    EFI Version:  427.0.0.0.0
-    Built by:     root@bb-g8-pdb16
-    Date:         Tue Feb 23 21:34:12 PST 2021
-    Revision:     427 (B&I)
+    EFI Version:  427.140.8.0.0
+    Built by:     root@bb-g8-pdb151
+    Date:         Sun Jun 13 18:20:54 PDT 2021
+    Revision:     427.140.8 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     clang-1205.0.19.59.6

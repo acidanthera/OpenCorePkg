@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "429.120.4.0.0"
-BIOSLegacyVersion: "MBP133.88Z.F000.B00.2104221901"
-BIOSReleaseDate: "04/22/2021"
+BIOSVersion: "429.140.8.0.0"
+BIOSLegacyVersion: "MBP133.88Z.F000.B00.2106131759"
+BIOSReleaseDate: "06/13/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro13,3"
 SystemVersion: "1.0"
@@ -66,17 +66,17 @@ SmcPlatform:
 SmcEPCI: 0xF04009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP133.88Z.F000.B00.2104221901
+    BIOS ID:      MBP133.88Z.F000.B00.2106131759
     Model:        MBP133
-    EFI Version:  429.120.4.0.0
-    Built by:     root@bb-g9-pdb66
-    Date:         Thu Apr 22 19:01:59 2021
-    Revision:     429.120.4 (B&I)
+    EFI Version:  429.140.8.0.0
+    Built by:     root@bb-g8-pdb151
+    Date:         Sun Jun 13 17:59:34 2021
+    Revision:     429.140.8 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1205.0.19.59.6
-    UUID:         5FCEE680-64BA-355F-8942-3D1019F157C5
-    UUID:         CDA4AFB6-4E3B-31AA-A220-93A08CFCDCAB
+    UUID:         598912BF-7DD0-3991-9238-2617B0BD26D9
+    UUID:         DE083ED9-11CA-3164-BFD7-F80E9BC0C457
 Specifications:
   CPUCodename:
     - "Skylake"

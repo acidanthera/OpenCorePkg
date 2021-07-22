@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1715.0.26.0.0"
-BIOSLegacyVersion: "MBP161.88Z.F000.B00.2105212342"
-BIOSReleaseDate: "05/21/2021"
+BIOSVersion: "1715.0.57.0.0"
+BIOSLegacyVersion: "MBP161.88Z.F000.B00.2107050239"
+BIOSReleaseDate: "07/05/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro16,1"
 SystemVersion: "1.0"
@@ -49,17 +49,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP161.88Z.F000.B00.2105212342
+    BIOS ID:      MBP161.88Z.F000.B00.2107050239
     Model:        MBP161
-    EFI Version:  1715.0.26.0.0
-    Built by:     root@bb-g8-pdb108
-    Date:         Fri May 21 23:42:55 2021
-    Revision:     1715.0.26 (B&I)
+    EFI Version:  1715.0.57.0.0
+    Built by:     root@bb-g8-pdb105
+    Date:         Mon Jul  5 02:39:28 2021
+    Revision:     1715.0.57 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1300.0.19.1
+    Compiler:     clang-1300.0.25.1
     UUID:         48552C00-2B24-3552-A50B-AA0C358EA164
-    UUID:         FEB725AB-DD9A-306C-9353-A6FE3D93D223
+    UUID:         4471733A-4D3C-38E7-A612-894371ACDBB9
 Specifications:
   CPUCodename:
     - "Coffee Lake"

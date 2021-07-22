@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed unintialised memory access in AudioDxe causing audio playback failure
 - Changed `Default` Apple Secure Boot model to `x86legacy` for better security and compatibility
 - Increased default APFS `MinDate` and `MinVersion` to macOS Big Sur for better security
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.7.1
 - Added `SyncTableIds` quirk to sync modified table OEM identifiers
