@@ -26,15 +26,13 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
     External(RMCF.FBTP, IntObj)
     External(_SB.PCI0.GFX0, DeviceObj)
     
+  If (_OSI ("Darwin")) {
     Scope (_SB.PCI0.GFX0)
     {
-        If (_OSI ("Darwin")) {
-            OperationRegion (RMP3, PCI_Config, Zero, 0x14)
-        }
-    }
+    OperationRegion (RMP3, PCI_Config, Zero, 0x14)
 
     // For backlight control
-    Device(_SB.PCI0.GFX0.PNLF)
+    Device(PNLF)
     {
      // Name(_ADR, Zero)
         Name(_HID, EisaId("APP0002"))
@@ -48,18 +46,8 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
         // 19: CoffeeLake 0xffff
         // 99: Other (requires custom profile using WhateverGreen.kext via DeviceProperties applbkl-name and applbkl-data)
         Name(_UID, 0)
-        Method (_STA, 0, NotSerialized)  // _STA: Status
-        {
-            If (_OSI ("Darwin"))
-            {
-                Return (0x0B)
-            }
-            Else
-            {
-                Return (Zero)
-            }
-        }
-
+        Name (_STA, 0x0B)
+        
         Field(^RMP3, AnyAcc, NoLock, Preserve)
         {
             Offset(0x02), GDID,16,
@@ -268,4 +256,5 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
             Else { _UID = 99 }
         }
     }
+  }
 }
