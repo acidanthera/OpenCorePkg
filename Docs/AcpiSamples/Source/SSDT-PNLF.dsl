@@ -255,6 +255,7 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
             ElseIf (Local2 == COFFEELAKE_PWMMAX) { _UID = 19 }
             Else { _UID = 99 }
         }
+      }
     }
   }
 }
