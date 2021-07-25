@@ -115,7 +115,7 @@ package() {
       )
     for efiOCBM in "${efiOCBMs[@]}"; do
       dd if="${bootsig}" \
-         of="${arch}/${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
+         of="${arch}/${efiOCBM}" seek=64 bs=1 count=56 conv=notrunc || exit 1
     done
 
     # copy OpenCore main program.
