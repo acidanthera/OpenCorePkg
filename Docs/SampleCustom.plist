@@ -116,14 +116,6 @@
 				<key>Enabled</key>
 				<false/>
 				<key>Path</key>
-				<string>SSDT-PNLFCFL.aml</string>
-			</dict>
-			<dict>
-				<key>Comment</key>
-				<string>Read the comment in dsl sample</string>
-				<key>Enabled</key>
-				<false/>
-				<key>Path</key>
 				<string>SSDT-RTC0-RANGE.aml</string>
 			</dict>
 			<dict>
