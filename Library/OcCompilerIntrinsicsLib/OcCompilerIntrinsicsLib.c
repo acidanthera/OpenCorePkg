@@ -34,21 +34,8 @@ __udivdi3 (
 
 #endif
 
-#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
-
-#if defined(MDE_CPU_IA32)
 typedef UINTN size_t;
-#endif
 
-void *
-memset (
-  void   *Buffer,
-  int    Value,
-  size_t Length
-  );
-
-#pragma intrinsic(memset)
-#pragma function(memset)
 void *
 memset (
   void   *Buffer,
@@ -63,6 +50,8 @@ memset (
 
   return Buffer;
 }
+
+#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
 
 void *
 memcpy (
