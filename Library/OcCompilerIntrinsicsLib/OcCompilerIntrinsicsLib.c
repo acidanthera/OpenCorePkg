@@ -51,17 +51,6 @@ memset (
   return Buffer;
 }
 
-#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
-
-void *
-memcpy (
-  void         *DestinationBuffer,
-  const void   *SourceBuffer,
-  size_t       Length
-  );
-
-#pragma intrinsic(memcpy)
-#pragma function(memcpy)
 void *
 memcpy (
   void         *DestinationBuffer,
@@ -77,5 +66,3 @@ memcpy (
 
   return DestinationBuffer;
 }
-
-#endif

@@ -213,6 +213,8 @@
   OpenCorePkg/Legacy/BootPlatform/LegacyRegion2Dxe/LegacyRegion2Dxe.inf
   OpenCorePkg/Legacy/BootPlatform/BiosVideo/BiosVideo.inf
 
+  OpenCorePkg/Library/OcCompilerIntrinsicsLib/OcCompilerIntrinsicsLib.inf
+
 [PcdsFeatureFlag]
   gEfiMdeModulePkgTokenSpaceGuid.PcdSupportHiiImageProtocol|FALSE
   gEfiMdeModulePkgTokenSpaceGuid.PcdHiiOsRuntimeSupport|FALSE
