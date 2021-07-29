@@ -36,6 +36,17 @@ __udivdi3 (
 
 typedef UINTN size_t;
 
+#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
+void *
+memset (
+  void   *Buffer,
+  int    Value,
+  size_t Length
+  );
+
+#pragma intrinsic(memset)
+#pragma function(memset)
+#endif
 void *
 memset (
   void   *Buffer,
@@ -51,6 +62,17 @@ memset (
   return Buffer;
 }
 
+#if defined(_MSC_EXTENSIONS) && !defined(__clang__) && !defined(__GNUC__)
+void *
+memcpy (
+  void         *DestinationBuffer,
+  const void   *SourceBuffer,
+  size_t       Length
+  );
+
+#pragma intrinsic(memcpy)
+#pragma function(memcpy)
+#endif
 void *
 memcpy (
   void         *DestinationBuffer,
