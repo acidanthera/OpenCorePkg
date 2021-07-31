@@ -68,10 +68,10 @@ Kexts
 | [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | — |
 | [FakeSMC.kext](https://github.com/CloverHackyColor/FakeSMC3_with_plugins) | 10.0.0 (10.6) | — |
 | [FakeSMC-32.kext](https://github.com/khronokernel/Legacy-Kexts/blob/master/32Bit-only/Zip/FakeSMC-32.kext.zip?raw=true) | 8.0.0 (10.4) | 11.9.9 (10.7) |
-| [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — |
+| [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | — |
 | [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) Not tested | — |
 | [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) Not tested | — |
-| [SMCBatteryManager.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — |
+| [SMCBatteryManager.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | — |
 | [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) Not tested | — |
 | [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) Not tested | — |
 
@@ -92,7 +92,7 @@ Kexts
 | [AppleIntelInfo.kext](https://github.com/headkaze/AppleIntelInfo) | — | — |
 | [DebugEnhancer.kext](https://github.com/acidanthera/DebugEnhancer) | 12.0.0 (10.8) | — |
 | [HibernationFixup.kext](https://github.com/acidanthera/HibernationFixup) | 14.0.0 (10.10) | — |
-| [Lilu.kext](https://github.com/acidanthera/Lilu) | 10.0.0 (10.6) | — |
+| [Lilu.kext](https://github.com/acidanthera/Lilu) | 8.0.0 (10.4) | — |
 | [RestrictEvents.kext](https://github.com/acidanthera/RestrictEvents) | 12.0.0 (10.8) | — |
 | [RTCMemoryFixup.kext](https://github.com/lvs1974/RTCMemoryFixup) | 12.0.0 (10.8) | — |
 | [WebCamera.kext](https://www.applelife.ru/threads/asus-x550vc-i-asus-x550cc.41752/page-130#post-593586) | — | — |
