@@ -69,6 +69,9 @@ Specifications:
     - "Radeon Pro W5700X"
     - "Radeon Pro Vega II"
     - "Radeon Pro Vega II Duo"
+    - "Radeon Pro W6800X"
+    - "Radeon Pro W6900X"
+    - "Radeon Pro W6800X Duo"
   RAM:
     - "32GB DDR4 ECC"
   SystemReportName:
