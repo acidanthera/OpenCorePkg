@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jul 13 10:00:32 2021
-%DIF ADD ../Configuration.tex        Sat Jul 17 23:24:52 2021
+%DIF DEL PreviousConfiguration.tex   Tue Aug  3 23:11:22 2021
+%DIF ADD ../Configuration.tex        Tue Aug  3 23:13:31 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7\DIFdelbegin \DIFdel{.1}\DIFdelend \DIFaddbegin \DIFadd{.2}\DIFaddend )
+       Reference Manual (0.7\DIFdelbegin \DIFdel{.2}\DIFdelend \DIFaddbegin \DIFadd{.3}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -3899,13 +3899,10 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   after loading to macOS DMG recovery. Mount the system volume partition,
   unless it has already been mounted, and execute the following command:
 
-\DIFmodbegin
-\begin{lstlisting}[label=blesspersona, style=ocbash,alsolanguage=DIFcode]
-%DIF < bless bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
-%DIF > bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
+\begin{lstlisting}[label=blesspersona, style=ocbash]
+bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
-\DIFmodend
 
   On macOS versions before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot
@@ -4223,7 +4220,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- Recent available model, currently set to \texttt{\DIFdelbegin \DIFdel{j137}\DIFdelend \DIFaddbegin \DIFadd{x86legacy}\DIFaddend }.
+  \item \texttt{Default} --- Recent available model, currently set to \texttt{x86legacy}.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4244,12 +4241,11 @@ rm vault.pub
   \item \texttt{x86legacy} --- \texttt{Macs without T2 chip and VMs. Minimum macOS 11.0.1 (20B29)}
   \end{itemize}
 
-  \DIFaddbegin \emph{\DIFadd{Warning}}\DIFadd{: Not all }\DIFaddend Apple Secure Boot \DIFaddbegin \DIFadd{models are supported on all hardware configurations.
-  Starting with macOS 12 }\texttt{\DIFadd{x86legacy}} \DIFadd{is the only Apple Secure Boot model compatible
+  \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
+  Starting with macOS 12 \texttt{x86legacy} is the only Apple Secure Boot model compatible
   with software update on hardware without T2 chips.
-}
 
-  \DIFadd{Apple Secure Boot }\DIFaddend appeared in macOS 10.13 on models with T2 chips.
+  Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
   Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
   Apple Secure Boot can be used with any SMBIOS with and without T2.
   Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
@@ -6396,9 +6392,8 @@ functioning. Feature highlights:
     \tightlist
     \item \texttt{0} --- require the default supported release date of APFS
     in OpenCore. The default release date will increase with time and thus
-    this setting is recommended. Currently set to \DIFdelbegin \DIFdel{2018}\DIFdelend \DIFaddbegin \DIFadd{2021}\DIFaddend /\DIFdelbegin \DIFdel{06}\DIFdelend \DIFaddbegin \DIFadd{01}\DIFaddend /\DIFdelbegin \DIFdel{21.
-    }\DIFdelend \DIFaddbegin \DIFadd{01.
-    }\DIFaddend \item \texttt{-1} --- permit any release date to load (strongly discouraged).
+    this setting is recommended. Currently set to 2021/01/01.
+    \item \texttt{-1} --- permit any release date to load (strongly discouraged).
     \item Other --- use custom minimal APFS release date, e.g. \texttt{20200401}
     for 2020/04/01. APFS release dates can be found in OpenCore boot log
     and \href{https://github.com/acidanthera/OpenCorePkg/blob/master/Include/Acidanthera/Library/OcApfsLib.h}{\texttt{OcApfsLib}}.
@@ -6420,9 +6415,8 @@ functioning. Feature highlights:
     \tightlist
     \item \texttt{0} --- require the default supported version of APFS
     in OpenCore. The default version will increase with time and thus
-    this setting is recommended. Currently set to \DIFdelbegin \DIFdel{the latest point release
-    from High Sierra from App Store (}\DIFdelend \DIFaddbegin \DIFadd{allow macOS Big Sur and newer
-    (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{748077008000000}\DIFdelend \DIFaddbegin \DIFadd{1600000000000000}\DIFaddend }).
+    this setting is recommended. Currently set to allow macOS Big Sur and newer
+    (\texttt{1600000000000000}).
     \item \texttt{-1} --- permit any version to load (strongly discouraged).
     \item Other --- use custom minimal APFS version, e.g. \texttt{1412101001000000}
     from macOS Catalina 10.15.4. APFS versions can be found in OpenCore boot log
@@ -6555,36 +6549,31 @@ functioning. Feature highlights:
   \end{itemize}
 
   \item
-  \DIFaddbegin \texttt{\DIFadd{GraphicsInputMirroring}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{:
+  \texttt{GraphicsInputMirroring}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}:
   Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
   on the basic console input stream.
-}
 
-  \DIFadd{With the default setting of }\texttt{\DIFadd{false}}\DIFadd{, OC's builtin implementation of AppleEvent replicates this behaviour.
-  }
+  With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
 
-  \DIFadd{On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
+  On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
   which use non-Apple key input methods.
-  }
 
-  \DIFadd{The recommended setting on all hardware is }\texttt{\DIFadd{true}}\DIFadd{.
-}
+  The recommended setting on all hardware is \texttt{true}.
 
-  \emph{\DIFadd{Note}}\DIFadd{: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
+  \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
   after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
-  }
 
   \begin{itemize}
   \tightlist
-  \item \texttt{\DIFadd{true}} \DIFadd{--- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
-  }\item \texttt{\DIFadd{false}} \DIFadd{--- Prevent key input mirroring to non-Apple protocols when in graphics mode.
-  }\end{itemize}
+  \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
+  \item \texttt{false} --- Prevent key input mirroring to non-Apple protocols when in graphics mode.
+  \end{itemize}
 
   \item
-  \DIFaddend \texttt{PointerSpeedDiv}\\
+  \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
   \textbf{Description}: Configure pointer speed divisor in OpenCore implementation
@@ -7192,7 +7181,7 @@ functioning. Feature highlights:
 
   \emph{Note 2}: On systems without native
   support for \texttt{ForceDisplayRotationInEFI}, \texttt{DirectGopRendering=true}
-  is also required for this setting to have \DIFdelbegin \DIFdel{a visible }\DIFdelend \DIFaddbegin \DIFadd{an }\DIFaddend effect.
+  is also required for this setting to have an effect.
 
 \item
   \texttt{AppleFramebufferInfo}\\
