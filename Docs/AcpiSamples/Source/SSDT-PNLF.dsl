@@ -183,29 +183,6 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
                     }, MEQ, Local0, MTR, 0, 0))
                     {
                         if (Ones == Local2) { Local2 = COFFEELAKE_PWMMAX }
-                        INI1(Local4)
-                        // change/scale only if different than current...
-                        Local1 = ^LEVX
-                        If (!Local1) { Local1 = Local2 }
-                        If (!(8 & Local4) && Local2 != Local1)
-                        {
-                            // set new backlight PWMMax but retain current backlight level by scaling
-                            Local0 = (^LEVD * Local2) / Local1
-                            //REVIEW: wait for vblank before setting new PWM config
-                            //For (Local7 = ^P0BL, ^P0BL == Local7, ) { }
-                            If (Local2 > Local1)
-                            {
-                                // PWMMax is getting larger... store new PWMMax first
-                                ^LEVX = Local2
-                                ^LEVD = Local0
-                            }
-                            Else
-                            {
-                                // otherwise, store new brightness level, followed by new PWMMax
-                                ^LEVD = Local0
-                                ^LEVX = Local2
-                            }
-                        }
                     }
                     // otherwise must be Haswell/Broadwell/Skylake/KabyLake/KabyLake-R (FBTYPE_HSWPLUS)
                     Else
