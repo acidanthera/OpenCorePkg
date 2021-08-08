@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.7.3
+- Improved SSDT-PNLF compatibility with CFL+ graphics
+
 #### v0.7.2
 - Fixed OSBundleLibraries/OSBundleLibaries64 handling
 - Added `GraphicsInputMirroring` to fix lost keystrokes in some non-Apple graphical UEFI apps
