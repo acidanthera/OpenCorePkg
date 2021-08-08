@@ -9,6 +9,7 @@ project.xcworkspace
 *.dSYM
 *.linux
 .vscode
+.idea
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
