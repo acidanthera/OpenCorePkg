@@ -7,7 +7,7 @@ Kexts
 | [AtherosE2200Ethernet.kext](https://github.com/Mieze/AtherosE2200Ethernet) | — | — | — |
 | [AtherosL1cEthernet.kext](https://github.com/al3xtjames/AtherosL1cEthernet) | — | — | — |
 | [IntelMausi.kext](https://github.com/acidanthera/IntelMausi) | 13.0.0 (10.9) | — | — |
-| [IntelSnowMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.0.0 (10.6) | — | Not tested |
+| [IntelSnowMausi.kext](https://github.com/acidanthera/IntelMausi) | 10.0.0 (10.6) | 12.0.0 (10.8) | Not tested |
 | [IntelMausiEthernet.kext](https://github.com/Mieze/IntelMausiEthernet) | — | — | — |
 | [NullEthernetInjector.kext](https://github.com/RehabMan/OS-X-Null-Ethernet) | — | — | — |
 | [RealtekR1000SL.kext](https://github.com/SergeySlice/RealtekLANv3) | — | — | — |
@@ -68,11 +68,11 @@ Kexts
 | [CpuTscSync.kext](https://github.com/acidanthera/CpuTscSync) | 12.0.0 (10.8) | — | — |
 | [FakeSMC-32.kext](https://github.com/khronokernel/Legacy-Kexts/blob/master/32Bit-only/Zip/FakeSMC-32.kext.zip?raw=true) | 8.0.0 (10.4) | 11.9.9 (10.7) | For VMs with EFI64 |
 | [VirtualSMC.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | — | — |
-| [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested |
-| [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested |
+| [SMCLightSensor.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
+| [SMCSuperIO.kext](https://github.com/acidanthera/VirtualSMC) | 10.0.0 (10.6) | — | Not tested 10.6 and 10.7 |
 | [SMCBatteryManager.kext](https://github.com/acidanthera/VirtualSMC) | 8.0.0 (10.4) | — | — |
-| [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) | — | Not tested |
-| [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) | — | Not tested |
+| [SMCProcessor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) | — | Not tested 10.7 |
+| [SMCDellSensor.kext](https://github.com/acidanthera/VirtualSMC) | 11.0.0 (10.7) | — | Not tested 10.7 |
 
 | USB and other ports | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |---------------------|-----------------------|-----------------------|------|
