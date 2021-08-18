@@ -569,10 +569,16 @@ typedef enum {
 **/
 
 ///
-/// Drivers is a sorted array of strings containing driver paths.
+/// Drivers is an ordered array of drivers to load.
 ///
+#define OC_UEFI_DRIVER_ENTRY_FIELDS(_, __) \
+  _(OC_STRING                   , Path               ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) ) \
+  _(BOOLEAN                     , Enabled            ,     , FALSE                                           , ())                    \
+  _(OC_STRING                   , Arguments          ,     , OC_STRING_CONSTR ("", _, __)                    , OC_DESTR (OC_STRING) )
+  OC_DECLARE (OC_UEFI_DRIVER_ENTRY)
+
 #define OC_UEFI_DRIVER_ARRAY_FIELDS(_, __) \
-  OC_ARRAY (OC_STRING, _, __)
+  OC_ARRAY (OC_UEFI_DRIVER_ENTRY, _, __)
   OC_DECLARE (OC_UEFI_DRIVER_ARRAY)
 
 ///

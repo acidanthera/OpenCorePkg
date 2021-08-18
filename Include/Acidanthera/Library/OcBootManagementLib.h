@@ -12,6 +12,7 @@
 #include <IndustryStandard/AppleHid.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcAppleKeyMapLib.h>
+#include <Library/OcFlexArrayLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcStorageLib.h>
 #include <Library/OcTypingLib.h>
@@ -22,6 +23,10 @@
 
 #if defined(OC_TARGET_DEBUG) || defined(OC_TARGET_NOOPT)
 //#define BUILTIN_DEMONSTRATE_TYPING
+#endif
+
+#if !defined(OC_TRACE_PARSE_VARS)
+#define OC_TRACE_PARSE_VARS DEBUG_VERBOSE
 #endif
 
 /**
@@ -180,7 +185,7 @@ EFI_STATUS
 
 /**
   Discovered boot entry.
-  Note, inner resources must be freed with OcResetBootEntry.
+  Note, inner resources must be freed with FreeBootEntry.
 **/
 typedef struct OC_BOOT_ENTRY_ {
   //
@@ -196,6 +201,10 @@ typedef struct OC_BOOT_ENTRY_ {
   // Action to perform on execution. Only valid for system entries.
   //
   OC_BOOT_SYSTEM_ACTION     SystemAction;
+  //
+  // Id under which to save entry as default.
+  //
+  CHAR16                    *Id;
   //
   // Obtained human visible name.
   //
@@ -235,6 +244,10 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   IsCustom;
   //
+  // Set when entry was created by OC_BOOT_ENTRY_PROTOCOL.
+  //
+  BOOLEAN                   IsBootEntryProtocol;
+  //
   // Should make this option default boot option.
   //
   BOOLEAN                   SetDefault;
@@ -247,6 +260,11 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   BOOLEAN                   ExposeDevicePath;
   //
+  // Partition UUID of entry device.
+  // Set for boot entry protocol boot entries only.
+  //
+  EFI_GUID                  UniquePartitionGUID;
+  //
   // Load option data (usually "boot args") size.
   //
   UINT32                    LoadOptionsSize;
@@ -255,6 +273,24 @@ typedef struct OC_BOOT_ENTRY_ {
   //
   VOID                      *LoadOptions;
 } OC_BOOT_ENTRY;
+
+/**
+  Parsed load option or shell variable.
+**/
+typedef struct OC_PARSED_VAR_ASCII_ {
+  CHAR8     *Name;
+  CHAR8     *Value;
+} OC_PARSED_VAR_ASCII;
+
+typedef struct OC_PARSED_VAR_UNICODE_ {
+  CHAR16    *Name;
+  CHAR16    *Value;
+} OC_PARSED_VAR_UNICODE;
+
+typedef union OC_PARSED_VAR_ {
+  OC_PARSED_VAR_ASCII     Ascii;
+  OC_PARSED_VAR_UNICODE   Unicode;
+} OC_PARSED_VAR;
 
 /**
   Boot filesystem containing boot entries.
@@ -356,9 +392,21 @@ typedef struct OC_BOOT_CONTEXT_ {
 #define OC_SCAN_ALLOW_FS_NTFS            BIT11
 
 /**
-  Allow scanning EXT filesystems (e.g. EXT4).
+  Allow scanning Linux Root filesystems.
+  https://systemd.io/DISCOVERABLE_PARTITIONS/
 **/
-#define OC_SCAN_ALLOW_FS_EXT             BIT12
+#define OC_SCAN_ALLOW_FS_LINUX_ROOT      BIT12
+
+/**
+  Allow scanning Linux Data filesystems.
+  https://systemd.io/DISCOVERABLE_PARTITIONS/
+**/
+#define OC_SCAN_ALLOW_FS_LINUX_DATA      BIT13
+
+/**
+  Allow scanning XBOOTLDR filesystems.
+**/
+#define OC_SCAN_ALLOW_FS_XBOOTLDR        BIT14
 
 /**
   Allow scanning SATA devices.
@@ -416,11 +464,12 @@ typedef struct OC_BOOT_CONTEXT_ {
   OC_SCAN_ALLOW_DEVICE_PCI)
 
 /**
-  All device bits used by OC_SCAN_DEVICE_LOCK.
+  All file system bits used by OC_SCAN_DEVICE_LOCK.
 **/
 #define OC_SCAN_FILE_SYSTEM_BITS ( \
-  OC_SCAN_ALLOW_FS_APFS | OC_SCAN_ALLOW_FS_HFS | OC_SCAN_ALLOW_FS_ESP | \
-  OC_SCAN_ALLOW_FS_NTFS | OC_SCAN_ALLOW_FS_EXT)
+  OC_SCAN_ALLOW_FS_APFS       | OC_SCAN_ALLOW_FS_HFS        | OC_SCAN_ALLOW_FS_ESP | \
+  OC_SCAN_ALLOW_FS_NTFS       | OC_SCAN_ALLOW_FS_LINUX_ROOT | \
+  OC_SCAN_ALLOW_FS_LINUX_DATA | OC_SCAN_ALLOW_FS_XBOOTLDR )
 
 /**
   By default allow booting from APFS from internal drives.
@@ -473,14 +522,23 @@ EFI_STATUS
 
 /**
   Custom picker entry.
+  Note that OpenLinuxBoot OC_BOOT_ENTRY_PROTOCOL_REVISION needs incrementing
+  when this structure is updated.
 **/
 typedef struct {
+  //
+  // Used by OC_BOOT_ENTRY_PROTOCOL to reidentify entry.
+  // Multiple entries may share an id - allows e.g. newest version
+  // of Linux install to automatically become selected default.
+  //
+  CONST CHAR8  *Id;
   //
   // Entry name.
   //
   CONST CHAR8  *Name;
   //
-  // Entry path.
+  // Absolute device path to file for user custom entries,
+  // file path relative to device root for boot entry protocol.
   //
   CONST CHAR8  *Path;
   //
@@ -1378,6 +1436,18 @@ typedef struct OC_BOOT_ARGUMENTS_ {
   EFI_SYSTEM_TABLE  *SystemTable;
 } OC_BOOT_ARGUMENTS;
 
+///
+/// Boot services does not zero LoadOptions and LoadOptionsSize of a
+/// loaded image by default. Applying a limit to accepted LoadOptionsSize
+/// is intended to spot this and make it less likely to cause a segmentation
+/// fault if a newer driver (using LoadOptions) is called by an older version
+/// of OC (or anything else) which leaves these uninitialised.
+/// However the 'uninitialised' (?) value in LoadOptionsSize seems to be small
+/// but not zero, therefore unfortunately this approach - while not harmful - is
+/// not helping to detect this situation.
+///
+#define MAX_LOAD_OPTIONS_SIZE SIZE_4KB
+
 /**
   Parse macOS kernel into unified boot arguments structure.
 
@@ -1745,6 +1815,191 @@ OcImageLoaderLoad (
   IN  VOID                     *SourceBuffer OPTIONAL,
   IN  UINTN                    SourceSize,
   OUT EFI_HANDLE               *ImageHandle
+  );
+
+/**
+  Parse loaded image protocol load options.
+
+  Assumes CHAR_NULL terminated Unicode string of space separated options,
+  each of form {name} or {name}={value}. Double quotes can be used round {value} to
+  include spaces, and '\' can be used within quoted or unquoted values to escape any
+  character (including space and '"').
+
+  NB Var names and values are left as pointers to within the original raw LoadOptions
+  string, which may be modified during processing.
+
+  @param[in]   LoadedImage        Loaded image handle.
+  @param[out]  ParsedVars         Parsed load options if successful, NULL otherwise.
+                                  Caller may free after use with OcFlexArrayFree
+                                  if required.
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_NOT_FOUND           Missing or empty load options.
+  @retval EFI_OUT_OF_RESOURCES    Out of memory.
+  @retval EFI_INVALID_PARAMETER   Invalid load options detected.
+**/
+EFI_STATUS
+OcParseLoadOptions (
+  IN     CONST EFI_LOADED_IMAGE_PROTOCOL  *LoadedImage,
+     OUT       OC_FLEX_ARRAY              **ParsedVars
+  );
+
+/**
+  Parse Unix-style var file or string. Parses a couple of useful ASCII
+  GRUB config files (multi-line, name=var, with optinal comments) and
+  defines a standard format for Unicode UEFI LoadOptions.
+
+  Assumes CHAR_NULL terminated Unicode string of space separated options,
+  each of form {name} or {name}={value}. Double quotes can be used round {value} to
+  include spaces, and '\' can be used within quoted or unquoted values to escape any
+  character (including space and '"').
+  Comments (if any) run from '#' to end of same line.
+
+  NB Var names and values are left as pointers to within the raw string, which may
+  be modified during processing.
+
+  @param[in]   StrVars            Raw var string.
+  @param[out]  ParsedVars         Parsed variables if successful, NULL otherwise.
+                                  Caller may free after use with OcFlexArrayFree
+                                  if required.
+  @param[in]   IsUnicode          Are option names and values Unicode or ASCII?
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_NOT_FOUND           Missing or empty load options.
+  @retval EFI_OUT_OF_RESOURCES    Out of memory.
+  @retval EFI_INVALID_PARAMETER   Invalid load options detected.
+**/
+EFI_STATUS
+OcParseVars (
+  IN           VOID                       *StrVars,
+     OUT       OC_FLEX_ARRAY              **ParsedVars,
+  IN     CONST BOOLEAN                    IsUnicode
+  );
+
+/**
+  Get string value of parsed var or load option.
+  Returned value is in same format as raw options.
+  Return value points directly into original raw option memory,
+  so may need to be copied if it is to be retained, and must not
+  be freed directly.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   StrValue           Option value if successful, not modified otherwise;
+                                  note that NULL is returned if option exists with no value.
+                                  Caller must not attempt to free this memory.
+  @param[in]   IsUnicode          Are option names and values Unicode or ASCII?
+
+  @retval TRUE                    Option exists.
+  @retval FALSE                   Option not found.
+**/
+BOOLEAN
+OcParsedVarsGetStr (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST VOID               *Name,
+     OUT       VOID               **StrValue,
+  IN     CONST BOOLEAN            IsUnicode
+  );
+
+/**
+  Get string value of parsed var or load option.
+  Return value points directly into original raw option memory,
+  so may need to be copied if it is to be retained, and must not
+  be freed directly.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   StrValue           Option value if successful, not modified otherwise;
+                                  note that NULL is returned if option exists with no value.
+                                  Caller must not attempt to free this memory.
+
+  @retval TRUE                    Option exists.
+  @retval FALSE                   Option not found.
+**/
+BOOLEAN
+OcParsedVarsGetUnicodeStr (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST CHAR16             *Name,
+     OUT       CHAR16             **StrValue
+  );
+
+/**
+  Get ASCII string value of parsed var or load option.
+  Return value points directly into original raw option memory,
+  so may need to be copied if it is to be retained, and must not
+  be freed directly.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   StrValue           Option value if successful, not modified otherwise;
+                                  note that NULL is returned if option exists with no value.
+                                  Caller must not attempt to free this memory.
+
+  @retval TRUE                    Option exists.
+  @retval FALSE                   Option not found.
+**/
+BOOLEAN
+OcParsedVarsGetAsciiStr (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST CHAR8              *Name,
+     OUT       CHAR8              **StrValue
+  );
+
+/**
+  Get presence or absence of parsed shell var or load option.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   IsUnicode          Are option names and values Unicode or ASCII?
+
+  @retval TRUE                    Option exists (with or without a value).
+  @retval FALSE                   Option not found.
+**/
+BOOLEAN
+OcHasParsedVar (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST VOID               *Name,
+  IN     CONST BOOLEAN            IsUnicode
+  );
+
+/**
+  Get integer value of parsed shell var or load option (parses hex and decimal representations).
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   Value              Option value if successful, not modified otherwise.
+  @param[in]   IsUnicode          Are option names and values Unicode or ASCII?
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_NOT_FOUND           Option not found, or has no value.
+  @retval other                   Error encountered when parsing option as int.
+**/
+EFI_STATUS
+OcParsedVarsGetInt (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST VOID               *Name,
+     OUT       UINTN              *Value,
+  IN     CONST BOOLEAN            IsUnicode
+  );
+
+/**
+  Get guid value of parsed shell var or load option.
+
+  @param[in]   ParsedVars         Parsed variables.
+  @param[in]   Name               Option name.
+  @param[in]   Value              Option value if successful, not modified otherwise.
+  @param[in]   IsUnicode          Are option names and values Unicode or ASCII?
+
+  @retval EFI_SUCCESS             Success.
+  @retval EFI_NOT_FOUND           Option not found, or has no value.
+  @retval other                   Error encountered when parsing option as guid.
+**/
+EFI_STATUS
+OcParsedVarsGetGuid (
+  IN     CONST OC_FLEX_ARRAY      *ParsedVars,
+  IN     CONST VOID               *Name,
+     OUT       EFI_GUID           *Value,
+  IN     CONST BOOLEAN            IsUnicode
   );
 
 #endif // OC_BOOT_MANAGEMENT_LIB_H

@@ -526,3 +526,20 @@ OcAsciiPrintBuffer (
     AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
   }
 }
+
+CHAR8 *
+OcAsciiToLower (
+  CHAR8 *Str
+  )
+{
+  UINTN Index;
+
+  ASSERT (Str != NULL);
+
+  for (Index = 0; Str[Index] != '\0'; ++Index) {
+    if (Str[Index] >= 'A' && Str[Index] <= 'Z') {
+      Str[Index] -= ('A' - 'a');
+    }
+  }
+  return Str;
+}

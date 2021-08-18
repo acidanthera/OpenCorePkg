@@ -203,21 +203,27 @@ AsciiPropertyIsLegal (
 
 BOOLEAN
 AsciiUefiDriverIsLegal (
-  IN  CONST CHAR8  *Driver
+  IN  CONST CHAR8  *Driver,
+  IN  CONST UINTN  DriverIndex
   )
 {
   UINTN  Index;
   UINTN  DriverLength;
 
-  //
-  // If an EFI driver does not contain .efi suffix,
-  // then it must be illegal.
-  //
-  if (!OcAsciiEndsWith (Driver, ".efi", TRUE)) {
+  DriverLength = AsciiStrLen (Driver);
+  if (DriverLength == 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path value is missing!\n", DriverIndex));
     return FALSE;
   }
 
-  DriverLength = AsciiStrLen (Driver);
+  //
+  // If an EFI driver does not have .efi suffix,
+  // then it must be illegal.
+  //
+  if (!OcAsciiEndsWith (Driver, ".efi", TRUE)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path does not end with \"%a\"!\n", DriverIndex, ".efi"));
+    return FALSE;
+  }
 
   for (Index = 0; Index < DriverLength; ++Index) {
     //
@@ -235,6 +241,7 @@ AsciiUefiDriverIsLegal (
     //
     // Disallowed characters matched.
     //
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path contains illegal character!\n", DriverIndex));
     return FALSE;
   }
 

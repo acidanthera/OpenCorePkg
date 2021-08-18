@@ -116,11 +116,11 @@ OcGetVolumeLabel (
 */
 EFI_STATUS
 OcSafeFileOpen (
-  IN  EFI_FILE_PROTOCOL       *Protocol,
-  OUT EFI_FILE_PROTOCOL       **NewHandle,
-  IN  CONST CHAR16            *FileName,
-  IN  UINT64                  OpenMode,
-  IN  UINT64                  Attributes
+  IN     CONST EFI_FILE_PROTOCOL  *Protocol,
+     OUT       EFI_FILE_PROTOCOL  **NewHandle,
+  IN     CONST CHAR16             *FileName,
+  IN     CONST UINT64             OpenMode,
+  IN     CONST UINT64             Attributes
   );
 
 /**
@@ -137,10 +137,10 @@ OcSafeFileOpen (
 **/
 VOID *
 OcReadFile (
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize OPTIONAL,
-  IN  UINT32                           MaxFileSize OPTIONAL
+  IN     CONST EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN     CONST CHAR16                           *FilePath,
+     OUT       UINT32                           *FileSize OPTIONAL,
+  IN     CONST UINT32                           MaxFileSize OPTIONAL
   );
 
 /**
@@ -148,19 +148,19 @@ OcReadFile (
   Null termination does not affect the returned file size.
   Depending on the implementation 0 byte files may return null.
 
-  @param[in]  RootFile     A pointer to the file protocol of the directory.
-  @param[in]  FilePath     The full path to the file on the device.
-  @param[out] FileSize     The size of the file read (optional).
-  @param[in]  MaxFileSize  Upper file size bound (optional).
+  @param[in]  RootDirectory A pointer to the file protocol of the directory.
+  @param[in]  FilePath      The full path to the file on the device.
+  @param[out] FileSize      The size of the file read (optional).
+  @param[in]  MaxFileSize   Upper file size bound (optional).
 
   @retval A pointer to a buffer containing file read or NULL.
 **/
 VOID *
-OcReadFileFromFile (
-  IN  EFI_FILE_PROTOCOL   *RootFile,
-  IN  CONST CHAR16        *FilePath,
-  OUT UINT32              *FileSize OPTIONAL,
-  IN  UINT32              MaxFileSize OPTIONAL
+OcReadFileFromDirectory (
+  IN      CONST EFI_FILE_PROTOCOL   *RootDirectory,
+  IN      CONST CHAR16              *FilePath,
+      OUT       UINT32              *FileSize   OPTIONAL,
+  IN            UINT32              MaxFileSize OPTIONAL
   );
 
 /**
@@ -258,6 +258,68 @@ OcGetNewestFileFromDirectory (
   IN     EFI_FILE_PROTOCOL        *Directory,
   IN     CHAR16                   *FileNameStartsWith OPTIONAL,
      OUT EFI_FILE_INFO            **FileInfo
+  );
+
+/**
+  Ensure specified file is directory or file as specified by IsDirectory.
+
+  @param[in]      File                  The file to check.
+  @param[in]      IsDirectory           Require that file is directory.
+
+  @retval EFI_SUCCESS                   File is directory/file as specified.
+  @retval EFI_INVALID_PARAMETER         File is not directory/file as specified.
+**/
+EFI_STATUS
+OcEnsureDirectory (
+  IN     EFI_FILE_PROTOCOL        *File,
+  IN     BOOLEAN                  IsDirectory
+  );
+
+/**
+  Process directory item.
+
+  NB Successful processing must return EFI_SUCCESS or EFI_NOT_FOUND, or further
+  processing will be aborted.
+  
+  Return EFI_NOT_FOUND to continue processing but act if no file found.
+
+  @param[in]      Directory             Parent directory file handle.
+  @param[in]      FileInfo              EFI_FILE_INFO allocated from pool memory,
+                                        will be freed after this call,
+                                        data to preserve must be copied.
+  @param[in]      FileInfoSize          FileInfoSize.
+  @param[in,out]  Context               Optional application-specific context.
+
+  @retval EFI_SUCCESS                   File found and successfully processed.
+  @retval EFI_NOT_FOUND                 (Act as if) no matching file was found.
+  @retval other                         Error processing file (aborts directory scan).
+**/
+typedef
+EFI_STATUS
+(*OC_PROCESS_DIRECTORY_ENTRY) (
+  EFI_FILE_HANDLE   Directory,
+  EFI_FILE_INFO     *FileInfo,
+  UINTN             FileInfoSize,
+  VOID              *Context        OPTIONAL
+  );
+
+/**
+  Scan directory, calling specified procedure for each directory entry.
+
+  @param[in]      Directory             The directory to scan.
+  @param[in]      ProcessEntry          Process entry, called for each directory entry matching filter.
+  @param[in,out]  Context               Optional application-specific context.
+
+  @retval EFI_NOT_FOUND                 Successful processing, no entries matching filter were found.
+  @retval EFI_SUCCESS                   Successful processing, at least one entry matching filter was found.
+  @retval EFI_OUT_OF_RESOURCES          Out of memory.
+  @retval other                         Other error returned by file system or ProcessEntry during processing
+**/
+EFI_STATUS
+OcScanDirectory (
+  IN      EFI_FILE_HANDLE                 Directory,
+  IN      OC_PROCESS_DIRECTORY_ENTRY      ProcessEntry,
+  IN OUT  VOID                            *Context            OPTIONAL
   );
 
 /**

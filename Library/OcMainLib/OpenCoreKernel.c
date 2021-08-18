@@ -331,7 +331,7 @@ OcKernelLoadAndReserveKext (
   UnicodeUefiSlashes (FullPath);
 
   if (IsForced) {
-    Kext->PlistData = OcReadFileFromFile (
+    Kext->PlistData = OcReadFileFromDirectory (
       RootFile,
       FullPath,
       &Kext->PlistDataSize,
@@ -388,7 +388,7 @@ OcKernelLoadAndReserveKext (
     UnicodeUefiSlashes (FullPath);
 
     if (IsForced) {
-      Kext->ImageData = OcReadFileFromFile (
+      Kext->ImageData = OcReadFileFromDirectory (
         RootFile,
         FullPath,
         &Kext->ImageDataSize,

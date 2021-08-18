@@ -435,6 +435,19 @@ OcAsciiPrintBuffer (
   );
 
 /**
+  Convert a null-terminated ASCII string, in-place, to all lowercase.
+  Then return it.
+
+  @param  Str    The null-terminated string to be converted to all lowercase.
+
+  @return        The null-terminated string converted into all lowercase.
+**/
+CHAR8 *
+OcAsciiToLower (
+  CHAR8 *Str
+  );
+
+/**
   Returns the first occurrence of a Null-terminated Unicode sub-string
   in a Null-terminated Unicode string through a case insensitive comparison.
 
@@ -680,6 +693,35 @@ INTN
 MixedStrCmp (
   IN CONST CHAR16  *FirstString,
   IN CONST CHAR8   *SecondString
+  );
+
+/**
+  Function to reverse sort when comparing by Unicode strings using UefiSortLib PerformQuickSort.
+
+  @param[in] Buffer1            The pointer to String to compare (CHAR16**).
+  @param[in] Buffer2            The pointer to second String to compare (CHAR16**).
+
+  @retval 0                     Buffer1 equal to Buffer2.
+  @return < 0                   Buffer1 is less than Buffer2.
+  @return > 0                   Buffer1 is greater than Buffer2.
+**/
+INTN
+EFIAPI
+OcReverseStringCompare (
+  IN  CONST VOID                *Buffer1,
+  IN  CONST VOID                *Buffer2
+  );
+
+/**
+  Determine if a particular character is whitespace.
+
+  @param[in] Ch               The character to check.
+
+  @return  Returns TRUE if Ch is a whitespace character.
+**/
+BOOLEAN
+OcIsSpace (
+  CHAR16    Ch
   );
 
 #endif // OC_STRING_LIB_H

@@ -1,15 +1,6 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2019-2021, vit9696, Goldfish64, mikebeaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include <Uefi.h>
@@ -421,6 +412,30 @@ OcDirectorySeachContextInit (
 }
 
 EFI_STATUS
+OcEnsureDirectory (
+  IN     EFI_FILE_PROTOCOL        *File,
+  IN     BOOLEAN                  IsDirectory
+  )
+{
+  EFI_FILE_INFO     *FileInfo;
+
+  //
+  // Ensure this is a directory/file.
+  //
+  FileInfo = OcGetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
+  if (FileInfo == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+  if (((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) != IsDirectory) {
+    FreePool (FileInfo);
+    return EFI_INVALID_PARAMETER;
+  }
+  FreePool (FileInfo);
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
 OcGetNewestFileFromDirectory (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
   IN     EFI_FILE_PROTOCOL        *Directory,
@@ -445,18 +460,10 @@ OcGetNewestFileFromDirectory (
   LatestIndex = 0;
   LatestEpoch = 0;
 
-  //
-  // Ensure this is a directory.
-  //
-  FileInfoCurrent = OcGetFileInfo (Directory, &gEfiFileInfoGuid, 0, NULL);
-  if (FileInfoCurrent == NULL) {
-    return EFI_INVALID_PARAMETER;
+  Status = OcEnsureDirectory (Directory, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
-  if (!(FileInfoCurrent->Attribute & EFI_FILE_DIRECTORY)) {
-    FreePool (FileInfoCurrent);
-    return EFI_INVALID_PARAMETER;
-  }
-  FreePool (FileInfoCurrent);
 
   //
   // Allocate two FILE_INFO structures.
@@ -563,4 +570,81 @@ OcGetNewestFileFromDirectory (
   Context->PreviousTime   = LatestEpoch;
 
   return EFI_SUCCESS;
+}
+
+//
+// TODO: OcGetNewestFileFromDirectory above and ScanExtensions in CachelessContext.c could be redone using this.
+// TODO: I am unclear exactly what the Apple 32-bit HFS is being described as doing (see also OcGetFileInfo), so
+// have just copied the existing handling.
+//
+EFI_STATUS
+OcScanDirectory (
+  IN      EFI_FILE_HANDLE                 Directory,
+  IN      OC_PROCESS_DIRECTORY_ENTRY      ProcessEntry,
+  IN OUT  VOID                            *Context            OPTIONAL
+  )
+{
+  EFI_STATUS        Status;
+  EFI_STATUS        TempStatus;
+  EFI_FILE_INFO     *FileInfo;
+  UINTN             FileInfoSize;
+
+  ASSERT (Directory != NULL);
+  ASSERT (ProcessEntry != NULL);
+
+  Status = OcEnsureDirectory (Directory, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Allocate FILE_INFO structure.
+  //
+  FileInfo = AllocatePool (SIZE_1KB);
+  if (FileInfo == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = EFI_NOT_FOUND;
+  Directory->SetPosition (Directory, 0);
+
+  do {
+    //
+    // Apple's HFS+ driver does not adhere to the spec and will return zero for
+    // EFI_BUFFER_TOO_SMALL. EFI_FILE_INFO structures larger than 1KB are
+    // unrealistic as the filename is the only variable.
+    //
+    FileInfoSize = SIZE_1KB - sizeof (CHAR16);
+    TempStatus = Directory->Read (Directory, &FileInfoSize, FileInfo);
+    if (EFI_ERROR (TempStatus)) {
+      Status = TempStatus;
+      break;
+    }
+
+    if (FileInfoSize > 0) {
+      TempStatus = ProcessEntry (Directory, FileInfo, FileInfoSize, Context);
+
+      //
+      // Act as if no matching file was found.
+      //
+      if (TempStatus == EFI_NOT_FOUND) {
+        continue;
+      }
+
+      if (EFI_ERROR (TempStatus)) {
+        Status = TempStatus;
+        break;
+      }
+
+      //
+      // At least one file found.
+      //
+      Status = EFI_SUCCESS;
+    }
+  } while (FileInfoSize > 0);
+
+  Directory->SetPosition (Directory, 0);
+  FreePool (FileInfo);
+
+  return Status;
 }

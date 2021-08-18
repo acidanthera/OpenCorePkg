@@ -5,7 +5,6 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
-
 #include <Uefi.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>

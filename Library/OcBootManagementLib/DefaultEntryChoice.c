@@ -1,15 +1,6 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2019-2021, vit9696, mikebeaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include <Uefi.h>
@@ -19,6 +10,7 @@
 #include <Guid/AppleFile.h>
 #include <Guid/AppleVariable.h>
 #include <Guid/GlobalVariable.h>
+#include <Guid/Gpt.h>
 #include <Guid/OcVariable.h>
 
 #include <Protocol/DevicePath.h>
@@ -40,7 +32,7 @@
 #include <Library/UefiRuntimeServicesTableLib.h>
 
 ///
-/// Template for an OpenCore custom boot entry DevicePath node.
+/// Template for OpenCore custom boot entry DevicePath.
 ///
 STATIC CONST OC_CUSTOM_BOOT_DEVICE_PATH_DECL mOcCustomBootDevPathTemplate = {
   {
@@ -51,6 +43,26 @@ STATIC CONST OC_CUSTOM_BOOT_DEVICE_PATH_DECL mOcCustomBootDevPathTemplate = {
     },
     OC_CUSTOM_BOOT_DEVICE_PATH_GUID
   },
+  {
+    MEDIA_DEVICE_PATH,
+    MEDIA_FILEPATH_DP,
+    { SIZE_OF_FILEPATH_DEVICE_PATH, 0 }
+  }
+};
+
+///
+/// Template for Boot Entry Protocol custom boot entry DevicePath.
+///
+STATIC CONST OC_ENTRY_PROTOCOL_DEVICE_PATH_DECL mOcEntryProtocolDevPathTemplate = {
+  {
+    {
+      HARDWARE_DEVICE_PATH,
+      HW_VENDOR_DP,
+      { sizeof (VENDOR_DEVICE_PATH) + sizeof (EFI_GUID), 0 }
+    },
+    OC_ENTRY_PROTOCOL_DEVICE_PATH_GUID
+  },
+  EFI_PART_TYPE_UNUSED_GUID,
   {
     MEDIA_DEVICE_PATH,
     MEDIA_FILEPATH_DP,
@@ -88,6 +100,38 @@ InternalGetOcCustomDevPath (
   }
 
   return CustomDevPath;
+}
+
+CONST OC_ENTRY_PROTOCOL_DEVICE_PATH *
+InternalGetOcEntryProtocolDevPath (
+  IN CONST EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  )
+{
+  UINTN                               DevicePathSize;
+  INTN                                CmpResult;
+  CONST OC_ENTRY_PROTOCOL_DEVICE_PATH *EntryProtocolDevPath;
+
+  DevicePathSize = GetDevicePathSize (DevicePath);
+  if (DevicePathSize < SIZE_OF_OC_ENTRY_PROTOCOL_DEVICE_PATH) {
+    return NULL;
+  }
+
+  CmpResult = CompareMem (
+    DevicePath,
+    &mOcEntryProtocolDevPathTemplate.Header,
+    sizeof (mOcEntryProtocolDevPathTemplate.Header)
+    );
+  if (CmpResult != 0) {
+    return NULL;
+  }
+
+  EntryProtocolDevPath = (CONST OC_ENTRY_PROTOCOL_DEVICE_PATH *) DevicePath;
+  if (EntryProtocolDevPath->EntryName.Header.Type != MEDIA_DEVICE_PATH
+   || EntryProtocolDevPath->EntryName.Header.SubType != MEDIA_FILEPATH_DP) {
+    return NULL;
+  }
+
+  return EntryProtocolDevPath;
 }
 
 EFI_LOAD_OPTION *
@@ -358,11 +402,37 @@ InternalMatchCustomBootEntryByDevicePath (
 {
   INTN CmpResult;
 
-  if (!BootEntry->IsCustom) {
+  if (!BootEntry->IsCustom || BootEntry->IsBootEntryProtocol) {
     return FALSE;
   }
 
   CmpResult = StrCmp (BootEntry->Name, DevicePath->EntryName.PathName);
+  if (CmpResult != 0) {
+    return FALSE;
+  }
+
+  return TRUE;
+}
+
+STATIC
+BOOLEAN
+InternalMatchEntryProtocolEntryByDevicePath (
+  IN OUT OC_BOOT_ENTRY                        *BootEntry,
+  IN     CONST OC_ENTRY_PROTOCOL_DEVICE_PATH  *DevicePath
+  )
+{
+  INTN CmpResult;
+
+  if (!BootEntry->IsCustom || !BootEntry->IsBootEntryProtocol || BootEntry->Id == NULL) {
+    return FALSE;
+  }
+
+  CmpResult = CompareMem (&BootEntry->UniquePartitionGUID, &DevicePath->Partuuid, sizeof (EFI_GUID));
+  if (CmpResult != 0) {
+    return FALSE;
+  }
+
+  CmpResult = StrCmp (BootEntry->Id, DevicePath->EntryName.PathName);
   if (CmpResult != 0) {
     return FALSE;
   }
@@ -735,23 +805,34 @@ OcSetDefaultBootEntry (
   EFI_DEVICE_PATH  *BootOptionRemainingDevicePath;
   EFI_HANDLE       DeviceHandle;
   BOOLEAN          MatchedEntry;
+  BOOLEAN          IsOverflow;
+  BOOLEAN          IsAsciiOptionName;
   EFI_GUID         *BootVariableGuid;
   CHAR16           *BootOrderName;
   CHAR16           *BootVariableName;
+  CHAR16           *LoadOptionId;
+  VOID             *LoadOptionName;
+  CHAR8            *FirstFlavourEnd;
   UINT16           *BootOrder;
   UINT16           *NewBootOrder;
   UINT16           BootTmp;
+  UINT16           EntryIdLength;
   UINTN            BootOrderCount;
   UINTN            BootChosenIndex;
   UINTN            Index;
   UINTN            DevicePathSize;
   UINTN            LoadOptionSize;
+  UINTN            LoadOptionIdSize;
   UINTN            LoadOptionNameSize;
+  UINTN            LoadOptionNameLen;
+  UINTN            CopiedLength;
   EFI_LOAD_OPTION  *LoadOption;
 
-  CONST OC_CUSTOM_BOOT_DEVICE_PATH *CustomDevPath;
-  OC_CUSTOM_BOOT_DEVICE_PATH       *DestCustomDevPath;
-  EFI_DEVICE_PATH_PROTOCOL         *DestCustomEndNode;
+  CONST OC_CUSTOM_BOOT_DEVICE_PATH     *CustomDevPath;
+  CONST OC_ENTRY_PROTOCOL_DEVICE_PATH  *EntryProtocolDevPath;
+  VENDOR_DEVICE_PATH                   *DestCustomDevPath;
+  FILEPATH_DEVICE_PATH                 *DestCustomEntryName;
+  EFI_DEVICE_PATH_PROTOCOL             *DestCustomEndNode;
 
   //
   // Do not allow when prohibited.
@@ -839,6 +920,14 @@ OcSetDefaultBootEntry (
           Entry,
           CustomDevPath
           );
+      } else {
+        EntryProtocolDevPath = InternalGetOcEntryProtocolDevPath (BootOptionDevicePath);
+        if (EntryProtocolDevPath != NULL) {
+          MatchedEntry = InternalMatchEntryProtocolEntryByDevicePath (
+            Entry,
+            EntryProtocolDevPath
+            );
+        }
       }
     }
 
@@ -849,12 +938,61 @@ OcSetDefaultBootEntry (
     //
     // Write to Boot0080
     //
-    LoadOptionNameSize = StrSize (Entry->Name);
+    ASSERT (Entry->Name != NULL);
+    IsAsciiOptionName = FALSE;
+    if (Entry->Id == NULL) {
+      //
+      // Re-use user defined entry name as stored id.
+      //
+      LoadOptionName = Entry->Name;
+      LoadOptionNameSize = StrSize (Entry->Name);
+
+      LoadOptionId = LoadOptionName;
+      LoadOptionIdSize = LoadOptionNameSize;
+    } else {
+      //
+      // Re-use first part of flavour as option name if available, it is more human
+      // readable than entry id, but is not version specific, unlike entry name.
+      //
+      LoadOptionId = Entry->Id;
+      LoadOptionIdSize = StrSize (Entry->Id);
+
+      if (Entry->Flavour != NULL && Entry->Flavour[0] != '\0' && Entry->Flavour[0] != ':') {
+        FirstFlavourEnd = OcAsciiStrChr (Entry->Flavour, ':');
+        if (FirstFlavourEnd != NULL) {
+          LoadOptionNameLen = FirstFlavourEnd - Entry->Flavour;
+        } else {
+          LoadOptionNameLen = AsciiStrLen (Entry->Flavour);
+        }
+        IsAsciiOptionName = TRUE;
+        LoadOptionNameSize = (LoadOptionNameLen + 1) * sizeof (CHAR16) / sizeof (CHAR8);
+        LoadOptionName = Entry->Flavour;
+      } else {
+        LoadOptionName = LoadOptionId;
+        LoadOptionNameSize = LoadOptionIdSize;
+      }
+    }
     
     if (!Entry->IsCustom) {
       DevicePathSize = GetDevicePathSize (Entry->DevicePath);
     } else {
-      DevicePathSize = SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH + LoadOptionNameSize + sizeof (EFI_DEVICE_PATH_PROTOCOL);
+      DevicePathSize = SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH
+        + (Entry->IsBootEntryProtocol ? sizeof (EFI_GUID) : 0)
+        + LoadOptionIdSize
+        + sizeof (EFI_DEVICE_PATH_PROTOCOL);
+
+      if (LoadOptionIdSize > MAX_UINT16) {
+        IsOverflow = TRUE;
+      } else {
+        IsOverflow = OcOverflowAddU16 (SIZE_OF_FILEPATH_DEVICE_PATH, (UINT16)LoadOptionIdSize, &EntryIdLength);
+      }
+      if (IsOverflow) {
+        DEBUG ((DEBUG_ERROR, "OCB: Overflowing option id size (%u)\n", LoadOptionIdSize));
+        if (BootOrder != NULL) {
+          FreePool (BootOrder);
+        }
+        return EFI_INVALID_PARAMETER;
+      }
     }
 
     LoadOptionSize     = sizeof (EFI_LOAD_OPTION) + LoadOptionNameSize + DevicePathSize;
@@ -870,35 +1008,61 @@ OcSetDefaultBootEntry (
 
     LoadOption->Attributes         = LOAD_OPTION_ACTIVE | LOAD_OPTION_CATEGORY_BOOT;
     LoadOption->FilePathListLength = (UINT16) DevicePathSize;
-    CopyMem (LoadOption + 1, Entry->Name, LoadOptionNameSize);
+    if (IsAsciiOptionName) {
+      Status = AsciiStrnToUnicodeStrS (LoadOptionName, LoadOptionNameLen, (CHAR16 *)(LoadOption + 1), LoadOptionNameSize / sizeof (CHAR16), &CopiedLength);
+      ASSERT (!EFI_ERROR (Status));
+      ASSERT (CopiedLength == LoadOptionNameLen);
+    } else {
+      CopyMem (LoadOption + 1, LoadOptionName, LoadOptionNameSize);
+    }
 
     if (!Entry->IsCustom) {
       CopyMem ((UINT8 *) (LoadOption + 1) + LoadOptionNameSize, Entry->DevicePath, DevicePathSize);
     } else {
-      DestCustomDevPath = (OC_CUSTOM_BOOT_DEVICE_PATH *) (
+      DestCustomDevPath = (VENDOR_DEVICE_PATH *) (
         (UINT8 *) (LoadOption + 1) + LoadOptionNameSize
         );
+      if (Entry->IsBootEntryProtocol) {
+        CopyMem (
+          DestCustomDevPath,
+          &mOcEntryProtocolDevPathTemplate,
+          sizeof (mOcEntryProtocolDevPathTemplate)
+          );
+        CopyMem (
+          DestCustomDevPath + 1,
+          &Entry->UniquePartitionGUID,
+          sizeof (EFI_GUID)
+          );
+        DestCustomEntryName = (FILEPATH_DEVICE_PATH *) (
+          (UINT8 *) (DestCustomDevPath + 1) +
+          sizeof (EFI_GUID)
+          );
+      } else {
+        CopyMem (
+          DestCustomDevPath,
+          &mOcCustomBootDevPathTemplate,
+          sizeof (mOcCustomBootDevPathTemplate)
+          );
+        DestCustomEntryName = (FILEPATH_DEVICE_PATH *) (
+          (UINT8 *) (DestCustomDevPath + 1)
+          );
+      }
+
       CopyMem (
-        DestCustomDevPath,
-        &mOcCustomBootDevPathTemplate,
-        sizeof (mOcCustomBootDevPathTemplate)
+        DestCustomEntryName->PathName,
+        LoadOptionId,
+        LoadOptionIdSize
         );
-      CopyMem (
-        DestCustomDevPath->EntryName.PathName,
-        Entry->Name,
-        LoadOptionNameSize
-        );
-      //
-      // FIXME: This may theoretically overflow.
-      //
-      DestCustomDevPath->EntryName.Header.Length[0] += (UINT8) LoadOptionNameSize;
+
+      DestCustomEntryName->Header.Length[0] = (UINT8) EntryIdLength;
+      DestCustomEntryName->Header.Length[1] = (UINT8) (EntryIdLength >> 8);
 
       DestCustomEndNode = (EFI_DEVICE_PATH_PROTOCOL *) (
-        (UINT8 *) DestCustomDevPath + SIZE_OF_OC_CUSTOM_BOOT_DEVICE_PATH + LoadOptionNameSize
+        (UINT8 *) DestCustomEntryName + EntryIdLength
         );
       SetDevicePathEndNode (DestCustomEndNode);
 
-      ASSERT (GetDevicePathSize (&DestCustomDevPath->Hdr.Header) == DevicePathSize);
+      ASSERT (GetDevicePathSize ((EFI_DEVICE_PATH_PROTOCOL *) DestCustomDevPath) == DevicePathSize);
     }
 
     Status = gRT->SetVariable (

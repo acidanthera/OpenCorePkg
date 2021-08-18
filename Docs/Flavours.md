@@ -78,6 +78,7 @@ Please open an Issue or Pull Request if an additional Linux flavour is required.
  - **Linux** - Base icon for Linux (`Linux.icns`)
  - **Arch:Linux** - Arch Linux (`Arch.icns`, etc.)
  - **Astra:Linux** - Astra Linux
+ - **CentOS:Linux** - CentOS
  - **Debian:Linux** - Debian
  - **Deepin:Linux** - Deepin
  - **elementaryOS:Linux** - elementary OS
@@ -90,16 +91,18 @@ Please open an Issue or Pull Request if an additional Linux flavour is required.
  - **Mageia:Linux** - Mageia (fork of former Mandriva)
  - **Manjaro:Linux** - Manjaro
  - **Mint:Linux** - Linux Mint
+ - **openSUSE:Linux** - openSUSE
  - **Oracle:Linux** - Oracle Linux
  - **PopOS:Linux** - Pop!_OS
  - **RHEL:Linux** - Red Hat Enterprise Linux
+ - **Rocky:Linux** - Rocky Linux
  - **Solus:Linux** - Solus
  - **Ubuntu:Linux** - Ubuntu
  - **Lubuntu:Ubuntu:Linux** - Lubuntu (`Lubuntu.icns`, etc.)
  - **UbuntuMATE:Ubuntu:Linux** - Ubuntu MATE
+ - **Void:Linux** - Void Linux
  - **Xubuntu:Ubuntu:Linux** - Xubuntu
  - **Zorin:Linux** - Zorin OS
- - **openSUSE:Linux** - openSUSE
 
 ## Other Operating Systems
 

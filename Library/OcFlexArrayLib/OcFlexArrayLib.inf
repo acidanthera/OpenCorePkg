@@ -1,0 +1,27 @@
+## @file
+#  Component description file for OcFlexArray library.
+#
+#  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OcFlexArrayLib
+  FILE_GUID      = 38906C95-DCBA-491C-9FFA-E0AAFFF88EA0
+  MODULE_TYPE    = BASE
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = OcFlexArrayLib|PEIM DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+# VALID_ARCHITECTURES = IA32 X64
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+
+[LibraryClasses]
+  BaseLib
+
+[Sources]
+  FlexArray.c
+  AsciiStringBuffer.c

@@ -21,6 +21,7 @@
 #include <Library/OcStringLib.h>
 #include <Library/PrintLib.h>
 #include <Library/PcdLib.h>
+#include <Library/SortLib.h>
 
 INTN
 EFIAPI
@@ -502,4 +503,22 @@ MixedStrCmp (
   }
 
   return *FirstString - *SecondString;
+}
+
+INTN
+EFIAPI
+OcReverseStringCompare (
+  IN  CONST VOID                *Buffer1,
+  IN  CONST VOID                *Buffer2
+  )
+{
+  return -StringCompare (Buffer1, Buffer2);
+}
+
+BOOLEAN
+OcIsSpace (
+  CHAR16    Ch
+  )
+{
+  return (Ch == L' ') || (Ch == L'\t') || (Ch == L'\r') || (Ch == L'\n') || (Ch == L'\v')  || (Ch == L'\f');
 }

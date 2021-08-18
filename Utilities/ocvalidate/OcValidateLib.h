@@ -99,13 +99,15 @@ AsciiPropertyIsLegal (
 /**
   Check if a UEFI Driver matches specific conventions.
 
-  @param[in]  Driver                   Driver to be checked.
+  @param[in]  Driver                   Driver path name to be checked.
+  @param[in]  DriverIndex              Index of driver being checked.
 
   @retval     TRUE                     If path of Driver contains .efi suffix, and only contains 0-9, A-Z, a-z, '_', '-', '.', and '/'.
 **/
 BOOLEAN
 AsciiUefiDriverIsLegal (
-  IN  CONST CHAR8  *Driver
+  IN  CONST CHAR8  *Driver,
+  IN  CONST UINTN  DriverIndex
   );
 
 /**

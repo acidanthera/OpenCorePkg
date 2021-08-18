@@ -184,21 +184,22 @@ CheckMiscBoot (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  OC_MISC_CONFIG    *UserMisc;
-  OC_UEFI_CONFIG    *UserUefi;
-  UINT32            ConsoleAttributes;
-  CONST CHAR8       *HibernateMode;
-  UINT32            PickerAttributes;
-  UINT32            Index;
-  CONST CHAR8       *Driver;
-  BOOLEAN           HasOpenCanopyEfiDriver;
-  CONST CHAR8       *PickerMode;
-  CONST CHAR8       *PickerVariant;
-  BOOLEAN           IsPickerAudioAssistEnabled;
-  BOOLEAN           IsAudioSupportEnabled;
-  CONST CHAR8       *LauncherOption;
-  CONST CHAR8       *LauncherPath;
+  UINT32                ErrorCount;
+  OC_MISC_CONFIG        *UserMisc;
+  OC_UEFI_CONFIG        *UserUefi;
+  UINT32                ConsoleAttributes;
+  CONST CHAR8           *HibernateMode;
+  UINT32                PickerAttributes;
+  UINT32                Index;
+  OC_UEFI_DRIVER_ENTRY  *DriverEntry;
+  CONST CHAR8           *Driver;
+  BOOLEAN               HasOpenCanopyEfiDriver;
+  CONST CHAR8           *PickerMode;
+  CONST CHAR8           *PickerVariant;
+  BOOLEAN               IsPickerAudioAssistEnabled;
+  BOOLEAN               IsAudioSupportEnabled;
+  CONST CHAR8           *LauncherOption;
+  CONST CHAR8           *LauncherPath;
 
   ErrorCount        = 0;
   UserMisc          = &Config->Misc;
@@ -221,15 +222,16 @@ CheckMiscBoot (
 
   PickerAttributes  = UserMisc->Boot.PickerAttributes;
   if ((PickerAttributes & ~OC_ATTR_ALL_BITS) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes is has unknown bits set!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes has unknown bits set!\n"));
     ++ErrorCount;
   }
 
   HasOpenCanopyEfiDriver = FALSE;
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+    DriverEntry = UserUefi->Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
-    if (AsciiStrCmp (Driver, "OpenCanopy.efi") == 0) {
+    if (DriverEntry->Enabled && AsciiStrCmp (Driver, "OpenCanopy.efi") == 0) {
       HasOpenCanopyEfiDriver = TRUE;
     }
   }

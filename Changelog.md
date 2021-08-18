@@ -6,6 +6,11 @@ OpenCore Changelog
 - Added pattern-based automatic variable initialisation for better security
 - Updated underlying EDK II package to edk2-stable202108
 - Updated Apple Secure Boot variables for `x86legacy`
+- Update Linux variants in Flavours.md
+- Implement Boot Entry Protocol, allowing plug-in boot entry drivers
+- Add StringBuffer and FlexArray libraries
+- Update Drivers to support arguments (requires config.plist update, see samples)
+- Add OpenLinuxBoot driver: OC-native Linux autodetect and boot without chaining via GRUB
 
 #### v0.7.2
 - Fixed OSBundleLibraries/OSBundleLibaries64 handling

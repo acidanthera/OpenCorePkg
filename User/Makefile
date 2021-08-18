@@ -136,7 +136,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o
+	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
@@ -201,6 +201,7 @@ ifneq ($(STANDALONE),1)
 				$(UDK_PATH)/MdePkg/Library/BasePciExpressLib:$\
 				$(UDK_PATH)/MdePkg/Library/UefiDevicePathLib:$\
 				$(UDK_PATH)/MdeModulePkg/Library/BaseBmpSupportLib:$\
+				$(UDK_PATH)/MdeModulePkg/Library/UefiSortLib:$\
 				$(UDK_PATH)/UefiCpuPkg/Library/MtrrLib:$\
 				$(OC_USER)/Library/OcGuardLib:$\
 				$(OC_USER)/Library/OcSerializeLib:$\

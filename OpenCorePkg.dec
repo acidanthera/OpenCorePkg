@@ -504,6 +504,9 @@
   ## Include/Acidanthera/Protocol/OcForceResolution.h
   gOcForceResolutionProtocolGuid             = { 0xBC7EC589, 0x2390, 0x4DA3, { 0x80, 0x25, 0x77, 0xDA, 0xD3, 0x4F, 0x36, 0x09 }}
 
+  ## Include/Acidanthera/Protocol/OcBootEntry.h
+  gOcBootEntryProtocolGuid                   = { 0x8604716E, 0xADD4, 0x45B4, { 0x84, 0x95, 0x08, 0xE3, 0x6D, 0x49, 0x7F, 0x4F }}
+
   ##  Include/AMI/Protocol/AmiPointer.h
   gAmiEfiPointerProtocolGuid                 = { 0x15A10CE7, 0xEAB5, 0x43BF, { 0x90, 0x42, 0x74, 0x43, 0x2E, 0x69, 0x63, 0x77 }}
 
@@ -848,6 +851,9 @@
 
   ##  @libraryclass
   OcFirmwareVolumeLib|Include/Acidanthera/Library/OcFirmwareVolumeLib.h
+
+  ##  @libraryclass
+  OcFlexArrayLib|Include/Acidanthera/Library/OcFlexArrayLib.h
 
   ##  @libraryclass
   OcGuardLib|Include/Acidanthera/Library/OcGuardLib.h

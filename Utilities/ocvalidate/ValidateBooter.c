@@ -140,18 +140,19 @@ CheckBooterQuirks (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  OC_BOOTER_CONFIG  *UserBooter;
-  OC_UEFI_CONFIG    *UserUefi;
-  CONST CHAR8       *Driver;
-  UINT8             MaxSlide;
-  BOOLEAN           IsAllowRelocationBlockEnabled;
-  BOOLEAN           IsProvideCustomSlideEnabled;
-  BOOLEAN           IsEnableSafeModeSlideEnabled;
-  BOOLEAN           IsDisableVariableWriteEnabled;
-  BOOLEAN           IsEnableWriteUnprotectorEnabled;
-  BOOLEAN           HasOpenRuntimeEfiDriver;
+  UINT32                ErrorCount;
+  UINT32                Index;
+  OC_BOOTER_CONFIG      *UserBooter;
+  OC_UEFI_CONFIG        *UserUefi;
+  OC_UEFI_DRIVER_ENTRY  *DriverEntry;
+  CONST CHAR8           *Driver;
+  UINT8                 MaxSlide;
+  BOOLEAN               IsAllowRelocationBlockEnabled;
+  BOOLEAN               IsProvideCustomSlideEnabled;
+  BOOLEAN               IsEnableSafeModeSlideEnabled;
+  BOOLEAN               IsDisableVariableWriteEnabled;
+  BOOLEAN               IsEnableWriteUnprotectorEnabled;
+  BOOLEAN               HasOpenRuntimeEfiDriver;
 
   ErrorCount                      = 0;
   UserBooter                      = &Config->Booter;
@@ -165,13 +166,14 @@ CheckBooterQuirks (
   MaxSlide                        = UserBooter->Quirks.ProvideMaxSlide;
 
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+    DriverEntry = UserUefi->Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
     // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.
     //
 
-    if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
+    if (DriverEntry->Enabled && AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
   }

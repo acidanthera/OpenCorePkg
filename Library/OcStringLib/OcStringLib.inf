@@ -37,9 +37,11 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
 
 [LibraryClasses]
   BaseLib
   BaseMemoryLib
   MemoryAllocationLib
   PrintLib
+  SortLib

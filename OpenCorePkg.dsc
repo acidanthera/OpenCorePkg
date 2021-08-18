@@ -87,6 +87,7 @@
   OcFileLib|OpenCorePkg/Library/OcFileLib/OcFileLib.inf
   OcFirmwarePasswordLib|OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OcFirmwareVolumeLib|OpenCorePkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
+  OcFlexArrayLib|OpenCorePkg/Library/OcFlexArrayLib/OcFlexArrayLib.inf
   OcGuardLib|OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
   OcHashServicesLib|OpenCorePkg/Library/OcHashServicesLib/OcHashServicesLib.inf
   OcHdaDevicesLib|OpenCorePkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
@@ -229,6 +230,7 @@
   OpenCorePkg/Library/OcFileLib/OcFileLib.inf
   OpenCorePkg/Library/OcFirmwarePasswordLib/OcFirmwarePasswordLib.inf
   OpenCorePkg/Library/OcFirmwareVolumeLib/OcFirmwareVolumeLib.inf
+  OpenCorePkg/Library/OcFlexArrayLib/OcFlexArrayLib.inf
   OpenCorePkg/Library/OcGuardLib/OcGuardLib.inf
   OpenCorePkg/Library/OcHashServicesLib/OcHashServicesLib.inf
   OpenCorePkg/Library/OcHdaDevicesLib/OcHdaDevicesLib.inf
@@ -259,6 +261,7 @@
   OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OpenCorePkg/Platform/CrScreenshotDxe/CrScreenshotDxe.inf
   OpenCorePkg/Platform/OpenCanopy/OpenCanopy.inf
+  OpenCorePkg/Platform/OpenLinuxBoot/OpenLinuxBoot.inf
   OpenCorePkg/Platform/OpenPartitionDxe/PartitionDxe.inf
   OpenCorePkg/Platform/OpenRuntime/OpenRuntime.inf
   OpenCorePkg/Platform/OpenUsbKbDxe/UsbKbDxe.inf

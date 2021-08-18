@@ -192,6 +192,7 @@ EFI_GUID mMsftRecoveryPartitionTypeGuid = {
 /**
   Linux partitions.
   https://en.wikipedia.org/wiki/GUID_Partition_Table#Partition_type_GUIDs
+  https://systemd.io/DISCOVERABLE_PARTITIONS/
 **/
 EFI_GUID mLinuxRootX86PartitionTypeGuid = {
   0x44479540, 0xF297, 0x41B2, {0x9A, 0xF7, 0xD1, 0x31, 0xD5, 0xF0, 0x45, 0x8A}
@@ -199,6 +200,18 @@ EFI_GUID mLinuxRootX86PartitionTypeGuid = {
 
 EFI_GUID mLinuxRootX8664PartitionTypeGuid = {
   0x4F68BCE3, 0xE8CD, 0x4DB1, {0x96, 0xE7, 0xFB, 0xCA, 0xF9, 0x84, 0xB7, 0x09}
+};
+
+EFI_GUID mLinuxFileSystemPartitionTypeGuid = {
+  0x0FC63DAF, 0x8483, 0x4772, { 0x8E, 0x79, 0x3D, 0x69, 0xD8, 0x47, 0x7D, 0xE4 }
+};
+
+/**
+  Extended Boot Loader Partition (XBOOTLDR).
+  https://systemd.io/BOOT_LOADER_SPECIFICATION/
+**/
+EFI_GUID mXBootLdrPartitionTypeGuid = {
+  0xBC13C2FF, 0x59E6, 0x4262, { 0xA3, 0x52, 0xB2, 0x75, 0xFD, 0x6F, 0x71, 0x72 }
 };
 
 UINT32
@@ -223,6 +236,10 @@ OcGetFileSystemPolicyType (
     return OC_SCAN_ALLOW_FS_ESP;
   }
 
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mXBootLdrPartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_XBOOTLDR;
+  }
+
   //
   // Unsure whether these two should be separate, likely not.
   //
@@ -237,7 +254,11 @@ OcGetFileSystemPolicyType (
 
   if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX86PartitionTypeGuid)
     || CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxRootX8664PartitionTypeGuid)) {
-    return OC_SCAN_ALLOW_FS_EXT;
+    return OC_SCAN_ALLOW_FS_LINUX_ROOT;
+  }
+
+  if (CompareGuid (&PartitionEntry->PartitionTypeGUID, &mLinuxFileSystemPartitionTypeGuid)) {
+    return OC_SCAN_ALLOW_FS_LINUX_DATA;
   }
 
   return 0;

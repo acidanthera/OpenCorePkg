@@ -231,6 +231,7 @@ CheckUEFIDrivers (
   UINT32                       ErrorCount;
   OC_UEFI_CONFIG               *UserUefi;
   UINT32                       Index;
+  OC_UEFI_DRIVER_ENTRY         *DriverEntry;
   CONST CHAR8                  *Driver;
   BOOLEAN                      HasOpenRuntimeEfiDriver;
   BOOLEAN                      HasOpenUsbKbDxeEfiDriver;
@@ -258,7 +259,8 @@ CheckUEFIDrivers (
   HasAudioDxeEfiDriver         = FALSE;
   IndexAudioDxeEfiDriver       = 0;
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+    DriverEntry = UserUefi->Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
     // Check the length of path relative to OC directory.
@@ -268,16 +270,15 @@ CheckUEFIDrivers (
       ++ErrorCount;
     }
     
-    if (Driver[0] == '#') {
-      continue;
-    }
-
     //
     // Sanitise strings.
     //
-    if (!AsciiUefiDriverIsLegal (Driver)) {
-      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] contains illegal character!\n", Index));
+    if (!AsciiUefiDriverIsLegal (Driver, Index)) {
       ++ErrorCount;
+      continue;
+    }
+
+    if (!DriverEntry->Enabled) {
       continue;
     }
 
