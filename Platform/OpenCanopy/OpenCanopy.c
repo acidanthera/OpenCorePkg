@@ -639,26 +639,34 @@ GuiOverlayPointer (
   //
 
   BaseX = (INT64) PointerPos.Pos.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
-  MaxWidth = DrawContext->Screen.Width;
   if (BaseX < 0) {
     ImageOffsetX = (UINT32) -BaseX;
     DrawBaseX    = 0;
   } else {
     ImageOffsetX = 0;
     DrawBaseX    = (UINT32) BaseX;
-    MaxWidth    -= DrawBaseX;
   }
 
+  //
+  // MaxWidth/Height are for subsequent GuiDrawToBuffer, but also for
+  // saved PointerOldDraw size below; so we replicate out here clipping
+  // which is done inside GuiDrawToBuffer, in order to only redraw the
+  // minimum required.
+  // BaseX/Y may be negative but will then add, and will not overflow
+  // when within valid bounds.
+  //
+  MaxWidth = MIN (CursorImage->Width - ImageOffsetX, (UINT32) (DrawContext->Screen.Width - BaseX));
+
   BaseY = (INT64) PointerPos.Pos.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
-  MaxHeight = DrawContext->Screen.Height;
   if (BaseY < 0) {
     ImageOffsetY = (UINT32) -BaseY;
     DrawBaseY    = 0;
   } else {
     ImageOffsetY = 0;
     DrawBaseY    = (UINT32) BaseY;
-    MaxHeight   -= DrawBaseY;
   }
+
+  MaxHeight = MIN (CursorImage->Height - ImageOffsetY, (UINT32) (DrawContext->Screen.Height - BaseY));
 
   GuiDrawToBuffer (
     CursorImage,
