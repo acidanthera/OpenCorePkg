@@ -137,11 +137,11 @@ EFI_STATUS
   );
 
 /**
-  Retrive file contents callback.
+  Retrieve file contents callback.
 
   @param[in,out]  Context      Externally specified context.
   @param[in]      File         File identifier, see APPLE_VOICE_OVER_AUDIO_FILE.
-  @paran[in]      LanguageCode Language code for the file.
+  @param[in]      LanguageCode Language code for the file.
   @param[out]     Buffer       Pointer to buffer.
   @param[out]     BufferSize   Pointer to buffer size.
   @param[out]     Frequency    Decoded PCM frequency.
