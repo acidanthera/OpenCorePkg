@@ -2,6 +2,8 @@ OpenCore Changelog
 ==================
 #### v0.7.3
 - Improved SSDT-PNLF compatibility with CFL+ graphics
+- Fixed OpenCanopy performance loss due to redrawing introduced in 0.6.9
+- Added pattern-based automatic variable initialisation for better security
 
 #### v0.7.2
 - Fixed OSBundleLibraries/OSBundleLibaries64 handling
