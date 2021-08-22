@@ -24,10 +24,10 @@ DefinitionBlock("", "SSDT", 2, "ACDT", "PNLF", 0)
     External(RMCF.LEVW, IntObj)
     External(RMCF.GRAN, IntObj)
     External(RMCF.FBTP, IntObj)
-    External(_SB_.PCI0.GFX0, DeviceObj)
+    External(_SB_.PCI0.PEG0.PEGP, DeviceObj)
     
     If (_OSI ("Darwin")) {
-        Scope (\_SB.PCI0.GFX0)
+        Scope (\_SB.PCI0.PEG0.PEGP)
         {
             OperationRegion (RMP3, PCI_Config, Zero, 0x14)
 
