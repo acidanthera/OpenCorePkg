@@ -582,7 +582,7 @@ OcAudioDump (
       //
       if (FileBuffer != NULL) {
         UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Controller%u.txt", Index);
-        Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+        Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
         DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA controller %u info result - %r\n", Index, Status));
 
         FreePool (FileBuffer);
@@ -687,7 +687,7 @@ OcAudioDump (
       //
       if (FileBuffer != NULL) {
         UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"Codec%u.txt", Index);
-        Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+        Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
         DEBUG ((DEBUG_INFO, "OCAU: Dumped HDA codec %u info result - %r\n", Index, Status));
 
         FreePool (FileBuffer);

@@ -161,7 +161,7 @@ TakeScreenshot (
   UINTN                         Index;
   UINT8                         Temp;
 
-  Status = FindWritableOcFileSystem (&Fs);
+  Status = OcFindWritableOcFileSystem (&Fs);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Can't find writable FS - %r\n", Status));
     ShowStatus (0xFF, 0xFF, 0x00); ///< Yellow
@@ -285,7 +285,7 @@ TakeScreenshot (
   //
   // Write PNG image into the file.
   //
-  Status = SetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
+  Status = OcSetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
   gBS->FreePool (PngFile);
   Fs->Close (Fs);
   if (EFI_ERROR (Status)) {

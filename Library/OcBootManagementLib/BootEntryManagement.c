@@ -158,7 +158,7 @@ ExpandShortFormBootPath (
     //
     // Retrieve file info to determine potentially bootable state.
     //
-    FileInfo = GetFileInfo (
+    FileInfo = OcGetFileInfo (
       File,
       &gEfiFileInfoGuid,
       sizeof (EFI_FILE_INFO),
@@ -233,7 +233,7 @@ IsOpenCoreBootloader (
     return FALSE;
   }
 
-  Status = GetFileData (
+  Status = OcGetFileData (
     File,
     OpenCoreMagicOffset,
     sizeof (FileReadMagic),

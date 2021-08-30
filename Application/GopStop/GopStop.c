@@ -439,7 +439,7 @@ UefiMain (
       (UINT32) Date.Second
       );
 
-    SetFileData (NULL, Filename, FinalReport, (UINT32) AsciiStrLen (FinalReport));
+    OcSetFileData (NULL, Filename, FinalReport, (UINT32) AsciiStrLen (FinalReport));
 
     FreePool (FinalReport);
   } else {

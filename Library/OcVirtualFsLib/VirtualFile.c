@@ -59,7 +59,7 @@ VirtualFileOpen (
   }
 
   if (Data->OriginalProtocol != NULL) {
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       Data->OriginalProtocol,
       NewHandle,
       FileName,

@@ -97,20 +97,20 @@ ProduceDebugReport (
   OcCpuScanProcessor (&CpuInfo);
 
   if (VolumeHandle != NULL) {
-    Fs = LocateRootVolume (VolumeHandle, NULL);
+    Fs = OcLocateRootVolume (VolumeHandle, NULL);
   } else {
     Fs = NULL;
   }
 
   if (Fs == NULL) {
-    Status = FindWritableFileSystem (&Fs);
+    Status = OcFindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OC: No usable filesystem for report - %r\n", Status));
       return EFI_NOT_FOUND;
     }
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -124,7 +124,7 @@ ProduceDebugReport (
     return EFI_ALREADY_STARTED;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -137,7 +137,7 @@ ProduceDebugReport (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"ACPI",
@@ -151,7 +151,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"SMBIOS",
@@ -165,7 +165,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: SMBIOS dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"Audio",
@@ -179,7 +179,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"CPU",
@@ -193,7 +193,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"PCI",
@@ -313,7 +313,7 @@ SavePanicLog (
       &RootFs
       );
     if (!EFI_ERROR (Status)) {
-      Status = SetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
+      Status = OcSetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
       RootFs->Close (RootFs);
     }
 
@@ -629,7 +629,7 @@ OcMiscMiddleInit (
         (VOID **) &FileSystem
         );
       if (!EFI_ERROR (Status)) {
-        LauncherData = ReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
+        LauncherData = OcReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
         if (LauncherData != NULL) {
           Sha1 (Signature, LauncherData, LauncherSize);
           DEBUG ((

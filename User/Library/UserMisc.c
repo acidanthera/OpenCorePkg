@@ -673,7 +673,7 @@ DevicePathFromHandle (
 }
 
 EFI_FILE_PROTOCOL *
-LocateRootVolume (
+OcLocateRootVolume (
   IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
   )

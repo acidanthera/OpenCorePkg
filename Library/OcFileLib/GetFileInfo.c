@@ -30,7 +30,7 @@
 #include <Library/OcGuardLib.h>
 
 VOID *
-GetFileInfo (
+OcGetFileInfo (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  EFI_GUID           *InformationType,
   IN  UINTN              MinFileInfoSize,

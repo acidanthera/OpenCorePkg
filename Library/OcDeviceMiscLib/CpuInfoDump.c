@@ -198,7 +198,7 @@ OcCpuInfoDump (
   //
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"CPUInfo.txt");
-    Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
     DEBUG ((DEBUG_INFO, "OCDM: Dumped CPU info - %r\n", Status));
 
     FreePool (FileBuffer);

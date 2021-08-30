@@ -396,7 +396,7 @@ OcRunFirmwareApplication (
 
   DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to find %g...\n", ApplicationGuid));
 
-  Dp = CreateFvFileDevicePath (ApplicationGuid);
+  Dp = OcCreateFvFileDevicePath (ApplicationGuid);
   if (Dp != NULL) {
     DEBUG ((DEBUG_INFO, "OCB: run fw app attempting to load %g...\n", ApplicationGuid));
     NewHandle = NULL;

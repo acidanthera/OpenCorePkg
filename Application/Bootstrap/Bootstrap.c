@@ -69,7 +69,7 @@ LoadOpenCore (
         RootPathLength = PrefixPathSize / sizeof (CHAR16) - 1;
         LoaderPath[RootPathLength] = '\\';
         CopyMem (&LoaderPath[RootPathLength + 1], OPEN_CORE_APP_PATH, L_STR_SIZE (OPEN_CORE_APP_PATH));
-        Buffer = ReadFile (FileSystem, LoaderPath, &BufferSize, BASE_16MB);
+        Buffer = OcReadFile (FileSystem, LoaderPath, &BufferSize, BASE_16MB);
         DEBUG ((DEBUG_INFO, "BS: Startup path - %s (%p)\n", LoaderPath, Buffer));
 
         if (Buffer != NULL) {
@@ -96,7 +96,7 @@ LoadOpenCore (
       OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH
       ));
 
-    Buffer = ReadFile (
+    Buffer = OcReadFile (
       FileSystem,
       OPEN_CORE_ROOT_PATH L"\\" OPEN_CORE_APP_PATH,
       &BufferSize,
@@ -173,7 +173,7 @@ UefiMain (
   //
   // Obtain the file system device path
   //
-  FileSystem = LocateFileSystem (
+  FileSystem = OcLocateFileSystem (
     LoadedImage->DeviceHandle,
     LoadedImage->FilePath
     );

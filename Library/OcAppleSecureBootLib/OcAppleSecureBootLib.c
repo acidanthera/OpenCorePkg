@@ -262,12 +262,12 @@ InternalReadFile (
   ASSERT (FilePath != NULL);
   ASSERT (FileSize != NULL);
 
-  Status = SafeFileOpen (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
+  Status = OcSafeFileOpen (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  Status = GetFileSize (FileHandle, &FileReadSize);
+  Status = OcGetFileSize (FileHandle, &FileReadSize);
   if (EFI_ERROR (Status)) {
     FileHandle->Close (FileHandle);
     return NULL;
@@ -279,7 +279,7 @@ InternalReadFile (
     return NULL;
   }
 
-  Status = GetFileData (
+  Status = OcGetFileData (
              FileHandle,
              0,
              FileReadSize,

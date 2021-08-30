@@ -26,7 +26,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
-LocateFileSystem (
+OcLocateFileSystem (
   IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
   )
@@ -77,7 +77,7 @@ LocateFileSystem (
 }
 
 EFI_FILE_PROTOCOL *
-LocateRootVolume (
+OcLocateRootVolume (
   IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
   )
@@ -86,7 +86,7 @@ LocateRootVolume (
   EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem;
   EFI_FILE_PROTOCOL                *RootVolume;
 
-  FileSystem = LocateFileSystem (DeviceHandle, FilePath);
+  FileSystem = OcLocateFileSystem (DeviceHandle, FilePath);
   if (FileSystem == NULL) {
     return NULL;
   }
@@ -100,7 +100,7 @@ LocateRootVolume (
 }
 
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
-LocateFileSystemByGuid (
+OcLocateFileSystemByGuid (
   IN CONST GUID  *Guid
   )
 {
