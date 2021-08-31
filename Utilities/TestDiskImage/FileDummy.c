@@ -22,7 +22,7 @@ OcGetCurrentMemoryMap (
 }
 
 EFI_STATUS
-GetFileSize (
+OcGetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   )

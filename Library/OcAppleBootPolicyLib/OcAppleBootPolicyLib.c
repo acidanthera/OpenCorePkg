@@ -156,7 +156,7 @@ InternalFileExists (
   EFI_STATUS      Status;
   EFI_FILE_HANDLE FileHandle;
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Root,
     &FileHandle,
     FileName,
@@ -185,7 +185,7 @@ InternalGetApfsSpecialFileInfo (
   }
 
   if (VolumeInfo != NULL) {
-    *VolumeInfo = GetFileInfo (
+    *VolumeInfo = OcGetFileInfo (
       Root,
       &gAppleApfsVolumeInfoGuid,
       sizeof (**VolumeInfo),
@@ -208,7 +208,7 @@ InternalGetApfsSpecialFileInfo (
   }
 
   if (ContainerInfo != NULL) {
-    *ContainerInfo = GetFileInfo (
+    *ContainerInfo = OcGetFileInfo (
       Root,
       &gAppleApfsContainerInfoGuid,
       sizeof (**ContainerInfo),
@@ -244,7 +244,7 @@ InternalGetBooterFromBlessedSystemFilePath (
 {
   UINTN  FilePathSize;
 
-  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+  *FilePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
                 Root,
                 &gAppleBlessedSystemFileInfoGuid,
                 sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -292,7 +292,7 @@ InternalGetBooterFromBlessedSystemFolderPath (
 
   Status = EFI_NOT_FOUND;
 
-  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) GetFileInfo (
+  DevicePath = (EFI_DEVICE_PATH_PROTOCOL *) OcGetFileInfo (
                   Root,
                   &gAppleBlessedSystemFolderInfoGuid,
                   sizeof (EFI_DEVICE_PATH_PROTOCOL),
@@ -504,7 +504,7 @@ InternalGetBooterFromApfsVolumePredefinedPathList (
   EFI_FILE_PROTOCOL *VolumeDirectoryHandle;
   EFI_FILE_INFO     *VolumeDirectoryInfo;
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     PrebootRoot,
     &VolumeDirectoryHandle,
     VolumeDirectoryName,
@@ -519,7 +519,7 @@ InternalGetBooterFromApfsVolumePredefinedPathList (
     DEBUG ((DEBUG_BULK_INFO, "OCBP: Found partition %s on preboot\n", VolumeDirectoryName));
   }
 
-  VolumeDirectoryInfo = GetFileInfo (
+  VolumeDirectoryInfo = OcGetFileInfo (
                           VolumeDirectoryHandle,
                           &gEfiFileInfoGuid,
                           sizeof (*VolumeDirectoryInfo),
@@ -1325,7 +1325,7 @@ OcBootPolicyGetApfsRecoveryFilePath (
       PathName
       );
 
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       *Root,
       &NewHandle,
       FullPathBuffer,
@@ -1339,7 +1339,7 @@ OcBootPolicyGetApfsRecoveryFilePath (
       continue;
     }
 
-    FileInfo = GetFileInfo (
+    FileInfo = OcGetFileInfo (
                  NewHandle,
                  &gEfiFileInfoGuid,
                  sizeof (*FileInfo),
@@ -1577,7 +1577,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
           &VolumeInfo[Index3].VolumeGuid
           );
 
-        Status = SafeFileOpen (
+        Status = OcSafeFileOpen (
           Root,
           &NewHandle,
           VolumePathName,
@@ -1589,7 +1589,7 @@ OcBootPolicyGetAllApfsRecoveryFilePath (
           continue;
         }
 
-        FileInfo = GetFileInfo (
+        FileInfo = OcGetFileInfo (
                      NewHandle,
                      &gEfiFileInfoGuid,
                      sizeof (*FileInfo),

@@ -93,7 +93,7 @@ KernelGetFileData (
 
     while (RemainingSize > 0) {
       ChunkSize = MIN (RemainingSize, Size);
-      Status = GetFileData (
+      Status = OcGetFileData (
         File,
         mKernelDigestPosition,
         ChunkSize,
@@ -109,7 +109,7 @@ KernelGetFileData (
     }
   }
 
-  Status = GetFileData (
+  Status = OcGetFileData (
     File,
     Position,
     Size,
@@ -151,7 +151,7 @@ ParseFatArchitecture (
   EFI_STATUS        Status;
   UINT32            FileSize;
 
-  Status = GetFileSize (File, &FileSize);
+  Status = OcGetFileSize (File, &FileSize);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -341,7 +341,7 @@ ReadAppleKernelImage (
           //
           // Figure out size for a non fat image.
           //
-          Status = GetFileSize (File, KernelSize);
+          Status = OcGetFileSize (File, KernelSize);
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "OCAK: Kernel size cannot be determined - %r\n", Status));
             return EFI_OUT_OF_RESOURCES;
@@ -465,7 +465,7 @@ ReadAppleKernel (
   *Is32Bit = Arch == KernelArch32;
 
   if (mNeedKernelDigest) {
-    Status = GetFileSize (File, &FullSize);
+    Status = OcGetFileSize (File, &FullSize);
     if (EFI_ERROR (Status)) {
       mNeedKernelDigest = FALSE;
       FreePool (*Kernel);
@@ -533,7 +533,7 @@ ReadAppleMkext (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  Status = GetFileData (File, 0, TmpMkextSize, TmpMkext);
+  Status = OcGetFileData (File, 0, TmpMkextSize, TmpMkext);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
     return Status;
@@ -554,7 +554,7 @@ ReadAppleMkext (
   if (TmpMkext == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  Status = GetFileData (File, Offset, TmpMkextSize, TmpMkext);
+  Status = OcGetFileData (File, Offset, TmpMkextSize, TmpMkext);
   if (EFI_ERROR (Status)) {
     FreePool (TmpMkext);
     return Status;

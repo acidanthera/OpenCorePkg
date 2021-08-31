@@ -369,7 +369,7 @@ InternalLoadDmg (
     return NULL;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     DmgDir,
     &DmgFile,
     DmgFileInfo->FileName,
@@ -389,7 +389,7 @@ InternalLoadDmg (
     return NULL;
   }
 
-  Status = GetFileSize (DmgFile, &DmgFileSize);
+  Status = OcGetFileSize (DmgFile, &DmgFileSize);
   if (EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_INFO,
@@ -431,7 +431,7 @@ InternalLoadDmg (
                         DmgFileNameLen
                         );
   if (ChunklistFileInfo != NULL) {
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       DmgDir,
       &ChunklistFile,
       ChunklistFileInfo->FileName,
@@ -439,14 +439,14 @@ InternalLoadDmg (
       0
       );
     if (!EFI_ERROR (Status)) {
-      Status = GetFileSize (ChunklistFile, &ChunklistFileSize);
+      Status = OcGetFileSize (ChunklistFile, &ChunklistFileSize);
       if (Status == EFI_SUCCESS) {
         ChunklistBuffer = AllocatePool (ChunklistFileSize);
 
         if (ChunklistBuffer == NULL) {
           ChunklistFileSize = 0;
         } else {
-          Status = GetFileData (ChunklistFile, 0, ChunklistFileSize, ChunklistBuffer);
+          Status = OcGetFileData (ChunklistFile, 0, ChunklistFileSize, ChunklistBuffer);
           if (EFI_ERROR (Status)) {
             FreePool (ChunklistBuffer);
             ChunklistBuffer   = NULL;

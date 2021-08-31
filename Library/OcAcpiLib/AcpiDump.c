@@ -41,7 +41,7 @@ AcpiDumpTable (
 {
   CHAR16  TempName[16];
   UnicodeSPrint (TempName, sizeof (TempName), L"%a.aml", Name);
-  return SetFileData (Root, TempName, Data, (UINT32) Size);
+  return OcSetFileData (Root, TempName, Data, (UINT32) Size);
 }
 
 STATIC
@@ -78,7 +78,7 @@ AcpiGetTableName (
   for (Index = 0; Index < 256; ++Index) {
     UnicodeSPrint (TempName, sizeof (TempName), L"%a-%u.aml", Name, (UINT32) (Index + 1));
 
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       Root,
       &TmpFile,
       TempName,

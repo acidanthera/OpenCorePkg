@@ -289,7 +289,7 @@ OcLogAddEntry  (
     //
     if ((OcLog->Options & OC_LOG_FILE) != 0 && OcLog->FileSystem != NULL) {
       if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
-        SetFileData (
+        OcSetFileData (
           OcLog->FileSystem,
           OcLog->FilePath,
           Private->AsciiBuffer,
@@ -448,14 +448,14 @@ OcConfigureLogProtocol (
         Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
         if (EFI_ERROR (Status)) {
           LogRoot = NULL;
-        } else if (!IsWritableFileSystem (LogRoot)) {
+        } else if (!OcIsWritableFileSystem (LogRoot)) {
           LogRoot->Close (LogRoot);
           LogRoot = NULL;
         }
       }
 
       if (LogRoot == NULL) {
-        Status = FindWritableFileSystem (&LogRoot);
+        Status = OcFindWritableFileSystem (&LogRoot);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_ERROR, "OCL: There is no place to write log file to - %r\n", Status));
           LogRoot = NULL;
@@ -537,7 +537,7 @@ OcConfigureLogProtocol (
   if (LogRoot != NULL) {
     if (!EFI_ERROR (Status)) {
       if (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0) {
-        SetFileData (
+        OcSetFileData (
           LogRoot,
           LogPath,
           OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,

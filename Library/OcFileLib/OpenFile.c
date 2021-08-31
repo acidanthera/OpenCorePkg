@@ -26,7 +26,7 @@
 #include <Protocol/SimpleFileSystem.h>
 
 EFI_STATUS
-SafeFileOpen (
+OcSafeFileOpen (
   IN  EFI_FILE_PROTOCOL       *Protocol,
   OUT EFI_FILE_PROTOCOL       **NewHandle,
   IN  CONST CHAR16            *FileName,
@@ -162,7 +162,7 @@ OcOpenFileByRemainingDevicePath (
     //
     // Open or create the file corresponding to the next pathname fragment.
     //
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       LastFile,
       &NextFile,
       PathName,

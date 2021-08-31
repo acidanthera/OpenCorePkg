@@ -48,7 +48,7 @@ typedef struct {
   @retval  simple file system protocol or NULL.
 **/
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
-LocateFileSystem (
+OcLocateFileSystem (
   IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
   );
@@ -62,7 +62,7 @@ LocateFileSystem (
   @retval  opened file protocol or NULL.
 **/
 EFI_FILE_PROTOCOL *
-LocateRootVolume (
+OcLocateRootVolume (
   IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
   IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
   );
@@ -75,7 +75,7 @@ LocateRootVolume (
   @retval  simple file system protocol or NULL.
 **/
 EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *
-LocateFileSystemByGuid (
+OcLocateFileSystemByGuid (
   IN CONST GUID  *Guid
   );
 
@@ -87,7 +87,7 @@ LocateFileSystemByGuid (
   @retval A pointer to the NULL terminated unicode volume label.
 **/
 CHAR16 *
-GetVolumeLabel (
+OcGetVolumeLabel (
   IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
   );
 
@@ -115,7 +115,7 @@ GetVolumeLabel (
   @retval EFI_SUCCESS for successfully opened file.
 */
 EFI_STATUS
-SafeFileOpen (
+OcSafeFileOpen (
   IN  EFI_FILE_PROTOCOL       *Protocol,
   OUT EFI_FILE_PROTOCOL       **NewHandle,
   IN  CONST CHAR16            *FileName,
@@ -136,7 +136,7 @@ SafeFileOpen (
   @retval A pointer to a buffer containing file read or NULL.
 **/
 VOID *
-ReadFile (
+OcReadFile (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
   OUT UINT32                           *FileSize OPTIONAL,
@@ -156,7 +156,7 @@ ReadFile (
   @retval A pointer to a buffer containing file read or NULL.
 **/
 VOID *
-ReadFileFromFile (
+OcReadFileFromFile (
   IN  EFI_FILE_PROTOCOL   *RootFile,
   IN  CONST CHAR16        *FilePath,
   OUT UINT32              *FileSize OPTIONAL,
@@ -173,7 +173,7 @@ ReadFileFromFile (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-ReadFileSize (
+OcReadFileSize (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
   OUT UINT32                           *Size
@@ -190,7 +190,7 @@ ReadFileSize (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetFileData (
+OcGetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -209,7 +209,7 @@ GetFileData (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-SetFileData (
+OcSetFileData (
   IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
   IN CONST CHAR16       *FileName,
   IN CONST VOID         *Buffer,
@@ -226,7 +226,7 @@ SetFileData (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-AllocateCopyFileData (
+OcAllocateCopyFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT8              **Buffer,
   OUT UINT32             *BufferSize
@@ -238,7 +238,7 @@ AllocateCopyFileData (
   @param[in,out]  Context     A pointer to the DIRECTORY_SEARCH_CONTEXT.
 **/
 VOID
-DirectorySeachContextInit (
+OcDirectorySeachContextInit (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context
   );
 
@@ -253,7 +253,7 @@ DirectorySeachContextInit (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetNewestFileFromDirectory (
+OcGetNewestFileFromDirectory (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
   IN     EFI_FILE_PROTOCOL        *Directory,
   IN     CHAR16                   *FileNameStartsWith OPTIONAL,
@@ -271,7 +271,7 @@ GetNewestFileFromDirectory (
   @retval read file info or NULL.
 **/
 VOID *
-GetFileInfo (
+OcGetFileInfo (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  EFI_GUID           *InformationType,
   IN  UINTN              MinFileInfoSize,
@@ -287,7 +287,7 @@ GetFileInfo (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetFileSize (
+OcGetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   );
@@ -301,7 +301,7 @@ GetFileSize (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-GetFileModificationTime (
+OcGetFileModificationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   );
@@ -315,7 +315,7 @@ GetFileModificationTime (
   @retval TRUE on success.
 **/
 BOOLEAN
-IsWritableFileSystem (
+OcIsWritableFileSystem (
   IN EFI_FILE_PROTOCOL  *Fs
   );
 
@@ -327,7 +327,7 @@ IsWritableFileSystem (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-FindWritableFileSystem (
+OcFindWritableFileSystem (
   IN OUT EFI_FILE_PROTOCOL  **WritableFs
   );
 
@@ -339,7 +339,7 @@ FindWritableFileSystem (
   @retval EFI_SUCCESS on success.
 **/
 EFI_STATUS
-FindWritableOcFileSystem (
+OcFindWritableOcFileSystem (
   OUT EFI_FILE_PROTOCOL  **FileSystem
   );
 
@@ -508,7 +508,7 @@ OcGetGptPartitionEntry (
   @retval NULL on failure (e.g. when a file is not present).
 **/
 EFI_DEVICE_PATH_PROTOCOL *
-CreateFvFileDevicePath (
+OcCreateFvFileDevicePath (
   IN EFI_GUID  *FileGuid
   );
 
@@ -523,7 +523,7 @@ CreateFvFileDevicePath (
   @retval NULL on failure (e.g. when a file is not present).
 **/
 VOID *
-ReadFvFileSection (
+OcReadFvFileSection (
   IN  EFI_GUID          *FileGuid,
   IN  UINT8             SectionType,
   OUT UINT32            *FileSize

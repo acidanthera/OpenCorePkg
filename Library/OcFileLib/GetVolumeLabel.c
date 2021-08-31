@@ -32,7 +32,7 @@
 #include <Library/UefiLib.h>
 
 CHAR16 *
-GetVolumeLabel (
+OcGetVolumeLabel (
   IN     EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem
   )
 {
@@ -54,7 +54,7 @@ GetVolumeLabel (
     return NULL;
   }
 
-  VolumeInfo = GetFileInfo (
+  VolumeInfo = OcGetFileInfo (
     Volume,
     &gEfiFileSystemVolumeLabelInfoIdGuid,
     sizeof (EFI_FILE_SYSTEM_VOLUME_LABEL),

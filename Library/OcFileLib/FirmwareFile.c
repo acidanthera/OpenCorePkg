@@ -160,7 +160,7 @@ GetFvFileData (
 }
 
 EFI_DEVICE_PATH_PROTOCOL *
-CreateFvFileDevicePath (
+OcCreateFvFileDevicePath (
   IN EFI_GUID  *FileGuid
   )
 {
@@ -183,7 +183,7 @@ CreateFvFileDevicePath (
 }
 
 VOID *
-ReadFvFileSection (
+OcReadFvFileSection (
   IN  EFI_GUID          *FileGuid,
   IN  UINT8             SectionType,
   OUT UINT32            *FileSize

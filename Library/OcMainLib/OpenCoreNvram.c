@@ -283,7 +283,7 @@ OcLoadLegacyNvram (
 
   Schema = &Config->Nvram.Legacy;
 
-  FileBuffer = ReadFile (FileSystem, OPEN_CORE_NVRAM_PATH, &FileSize, BASE_1MB);
+  FileBuffer = OcReadFile (FileSystem, OPEN_CORE_NVRAM_PATH, &FileSize, BASE_1MB);
   if (FileBuffer == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Invalid nvram data\n"));
     return;

@@ -74,7 +74,7 @@ int main (int argc, char** argv)
     DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));
     return -1;
   }
-  
+
   Result = GuiGetLabel (&Label, &Context, L"Time Machine HD", sizeof ("Time Machine HD") - 1, FALSE);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: label failed\n"));

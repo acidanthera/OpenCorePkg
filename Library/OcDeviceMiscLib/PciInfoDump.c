@@ -150,7 +150,7 @@ OcPciInfoDump (
   //
   if (FileBuffer != NULL) {
     UnicodeSPrint (TmpFileName, sizeof (TmpFileName), L"PCIInfo.txt");
-    Status = SetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
+    Status = OcSetFileData (Root, TmpFileName, FileBuffer, (UINT32) AsciiStrLen (FileBuffer));
     DEBUG ((DEBUG_INFO, "OCDM: Dumped PCI info - %r\n", Status));
 
     FreePool (FileBuffer);
