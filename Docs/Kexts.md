@@ -44,7 +44,7 @@ Kexts
 | Video and audio | MinKernel (Min macOS) | MaxKernel (Max macOS) | Note |
 |-----------------|-----------------------|-----------------------|------|
 | [AppleALC.kext](https://github.com/acidanthera/AppleALC) | 8.0.0 (10.4) | — | — |
-| [AppleALCU.kext](https://github.com/acidanthera/AppleALC) | 10.0.0 (10.6) | — | — |
+| [AppleALCU.kext](https://github.com/acidanthera/AppleALC) | 8.0.0 (10.4) | — | — |
 | [EMUUSBAudio.kext](https://github.com/Wouter1/EMU-driver) | — | — | — |
 | [kXAudioDriver.kext](https://github.com/kxproject/kx-audio-driver) | — | — | — |
 | [Nvidia CUDA drivers](https://www.nvidia.com/object/mac-driver-archive.html) | 10.0.0 (10.6) | 17.9.9 (10.13) | — |
