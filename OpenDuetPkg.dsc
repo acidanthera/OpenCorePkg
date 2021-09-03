@@ -27,6 +27,8 @@
   SKUID_IDENTIFIER               = DEFAULT
   FLASH_DEFINITION               = OpenCorePkg/OpenDuetPkg.fdf
 
+!include MdePkg/MdeLibs.dsc.inc
+
 [LibraryClasses]
   #
   # Entry point

@@ -650,7 +650,7 @@ git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git submodule update --init --recommend-shallow
 git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
-source edksetup.sh
+. ./edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}

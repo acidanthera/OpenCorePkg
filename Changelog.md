@@ -15,6 +15,7 @@ OpenCore Changelog
 - Updated builtin firmware versions for SMBIOS and the rest
 - Improved SSDT-PNLF compatibility with Windows and newer graphics
 - Fixed CLANGPDB OpenCore builds by shortening OC magic
+- Updated underlying EDK II package to edk2-stable202108
 
 #### v0.7.1
 - Added `SyncTableIds` quirk to sync modified table OEM identifiers

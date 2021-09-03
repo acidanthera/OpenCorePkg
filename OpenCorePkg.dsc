@@ -23,6 +23,8 @@
   SKUID_IDENTIFIER        = DEFAULT
   DSC_SPECIFICATION       = 0x00010006
 
+!include MdePkg/MdeLibs.dsc.inc
+
 [LibraryClasses]
   BaseLib|MdePkg/Library/BaseLib/BaseLib.inf
   # We cannot use BaseMemoryLibOptDxe since it uses SSE instructions,
