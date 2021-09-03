@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Aug  3 23:11:22 2021
-%DIF ADD ../Configuration.tex        Tue Aug  3 23:13:31 2021
+%DIF DEL PreviousConfiguration.tex   Fri Sep  3 03:11:13 2021
+%DIF ADD ../Configuration.tex        Fri Sep  3 04:10:49 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -705,15 +705,18 @@ users should also install \href{https://www.nasm.us}{NASM} and
 The latest Xcode version is recommended for use despite the toolchain name.
 An example command sequence is as follows:
 
-\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[caption=Compilation Commands, label=compile, style=ocbash,alsolanguage=DIFcode]
 git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git submodule update --init --recommend-shallow
 git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
-source edksetup.sh
+%DIF < source edksetup.sh
+%DIF > . ./edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
+\DIFmodend
 
 For IDE usage Xcode projects are available in the root of the repositories. Another
 approach could be using \href{https://microsoft.github.io/language-server-protocol}{Language Server Protocols}. For example, \href{https://www.sublimetext.com}{Sublime Text} with
@@ -3903,6 +3906,12 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
+\DIFaddbegin 
+
+  \DIFadd{On macOS 11 and newer the dedicated }\texttt{\DIFadd{x86legacy}} \DIFadd{model always uses
+  }\texttt{\DIFadd{ApECID}}\DIFadd{. When this configuration setting is left as }\texttt{\DIFadd{0}}
+  \DIFadd{first 8 bytes of }\texttt{\DIFadd{system-id}} \DIFadd{variable are used instead.
+}\DIFaddend 
 
   On macOS versions before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot

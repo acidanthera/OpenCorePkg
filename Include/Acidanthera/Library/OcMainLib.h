@@ -178,6 +178,18 @@ OcLoadNvramSupport (
   );
 
 /**
+  Obtain Legacy Secure Boot ECID (system-id).
+
+  @param[in]  Config   Configuration.
+  @param[out] ApECID   Legacy Secure Boot ECID.
+**/
+VOID
+OcGetLegacySecureBootECID (
+  IN  OC_GLOBAL_CONFIG    *Config,
+  OUT UINT64              *ApECID
+  );
+
+/**
   Load platform compatibility support like DataHub or SMBIOS.
 
   @param[in]  Config    OpenCore configuration.

@@ -849,6 +849,70 @@ OcLoadPlatformSupport (
   }
 }
 
+VOID
+OcGetLegacySecureBootECID (
+  IN  OC_GLOBAL_CONFIG    *Config,
+  OUT UINT64              *ApECID
+  )
+{
+  EFI_STATUS             Status;
+  OC_SMBIOS_TABLE        SmbiosTable;
+  EFI_GUID               Uuid;
+
+  ASSERT (Config != NULL);
+  ASSERT (ApECID != NULL);
+
+  ZeroMem (&Uuid, sizeof (Uuid));
+
+  //
+  // TODO: Cache platform IDs for both interfaces: OcGetSystemId and OcLoadPlatformSupport,
+  // as currently this duplicates the code above.
+  //
+  if (Config->PlatformInfo.Automatic) {
+    if (AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0) {
+
+      Status = OcSmbiosTablePrepare (&SmbiosTable);
+      if (!EFI_ERROR (Status)) {
+        OcSmbiosExtractOemInfo (
+          &SmbiosTable,
+          mCurrentSmbiosProductName,
+          NULL,
+          &Uuid,
+          NULL,
+          NULL,
+          Config->PlatformInfo.UseRawUuidEncoding,
+          FALSE
+          );
+        OcSmbiosTableFree (&SmbiosTable);
+      }
+
+      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from SMBIOS - %r\n", &Uuid, Status));
+    } else {
+      Status = OcAsciiStrToRawGuid (
+        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+        &Uuid
+        );
+      if (EFI_ERROR (Status)) {
+        ZeroMem (&Uuid, sizeof (Uuid));
+      }
+      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from auto config - %r\n", &Uuid, Status));
+    }
+  } else {
+    Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&Uuid, sizeof (Uuid));
+    }
+    DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from manual config - %r\n", &Uuid, Status));
+  }
+
+  if (IsZeroGuid (&Uuid)) {
+    DEBUG ((DEBUG_ERROR, "OC: Grabbed zero system-id for SB, this is not allowed\n"));
+    CpuDeadLoop ();
+  }
+
+  CopyMem (ApECID, &Uuid, sizeof (*ApECID));
+}
+
 BOOLEAN
 OcPlatformIs64BitSupported (
   IN UINT32     KernelVersion

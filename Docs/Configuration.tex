@@ -3844,6 +3844,10 @@ bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
 
+  On macOS 11 and newer the dedicated \texttt{x86legacy} model always uses
+  \texttt{ApECID}. When this configuration setting is left as \texttt{0}
+  first 8 bytes of \texttt{system-id} variable are used instead.
+
   On macOS versions before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot
   may not work as expected. When reinstalling the operating system, the macOS Installer
