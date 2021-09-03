@@ -858,6 +858,7 @@ OcGetLegacySecureBootECID (
   EFI_STATUS             Status;
   OC_SMBIOS_TABLE        SmbiosTable;
   EFI_GUID               Uuid;
+  UINTN                  ReadSize;
 
   ASSERT (Config != NULL);
   ASSERT (ApECID != NULL);
@@ -897,12 +898,27 @@ OcGetLegacySecureBootECID (
       }
       DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from auto config - %r\n", &Uuid, Status));
     }
-  } else {
+  } else if (Config->PlatformInfo.UpdateNvram) {
     Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
     if (EFI_ERROR (Status)) {
       ZeroMem (&Uuid, sizeof (Uuid));
     }
     DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from manual config - %r\n", &Uuid, Status));
+  }
+
+  if (IsZeroGuid (&Uuid)) {
+    ReadSize = sizeof (Uuid);
+    Status = gRT->GetVariable (
+      L"system-id",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &ReadSize,
+      &Uuid
+      );
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&Uuid, sizeof (Uuid));
+    }
+    DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g direct from NVRAM - %r\n", &Uuid, Status));
   }
 
   if (IsZeroGuid (&Uuid)) {
