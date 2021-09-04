@@ -82,6 +82,13 @@ STATIC TAB_FOCUS mFocusListMinimal[] = {
 #endif
 };
 
+//
+// Clamp menu entries for 80 column screen using ellipses to avoid wrapping to next line.
+// TODO: (?) Update to actual text mode width, 80 is the guaranteed minimum.
+//
+#define MENU_PREFIX_LENGTH             (5)
+#define SAFE_ENTRY_LENGTH              (80 - MENU_PREFIX_LENGTH - 1)
+
 #define OC_KB_DBG_MAX_COLUMN           80
 #define OC_KB_DBG_DELTA_SAMPLE_COLUMN  0 //40
 
@@ -395,6 +402,15 @@ OcShowSimpleBootMenu (
 
   if (Count != MIN (Count, OC_INPUT_MAX)) {
     DEBUG ((DEBUG_WARN, "OCB: Cannot display all entries in the menu!\n"));
+  }
+
+  //
+  // Fix overlong menu entries.
+  //
+  for (Index = 0; Index < Count; Index++) {
+    if (StrLen (BootEntries[Index]->Name) > SAFE_ENTRY_LENGTH) {
+      StrCpyS (&BootEntries[Index]->Name[SAFE_ENTRY_LENGTH - L_STR_LEN (L"...")], L_STR_SIZE (L"..."), L"...");
+    }
   }
 
   OcConsoleControlSetMode (EfiConsoleControlScreenText);
