@@ -218,9 +218,9 @@ OcGetLinuxBootEntries (
   DEBUG ((
     DEBUG_INFO,
     "LNX: TypeGUID: %g (%a) PARTUUID: %g\n",
-    PartitionEntry->PartitionTypeGUID,
+    PartitionEntry == NULL ? &gEfiPartTypeUnusedGuid : &PartitionEntry->PartitionTypeGUID,
     gFileSystemType,
-    PartitionEntry->UniquePartitionGUID
+    &gPartuuid
     ));
 
   //

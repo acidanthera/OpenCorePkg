@@ -198,6 +198,7 @@ InternalExpandGrubVars (
   LastPos = 0;
   InVar   = FALSE;
   Status  = EFI_SUCCESS;
+  Retake  = FALSE;
 
   //
   // These simple checks for what counts as a var to replace (including
