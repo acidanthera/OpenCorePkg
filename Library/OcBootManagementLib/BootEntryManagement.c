@@ -1375,15 +1375,12 @@ AddBootEntryFromBootOption (
 
             //
             // Search for ID on matching device only.
-            // Note that on, e.g., OVMF, every single device has partition UUID 00000000-0000-0000-0000000000000000,
-            // therefore the first matching entry protocol ID on *any* filesystem will match.
+            // Note that on, e.g., OVMF, devices do not have this info, therefore
+            // the first matching entry protocol ID on any filesystem will match.
             //
             PartitionEntry = OcGetGptPartitionEntry (FileSystem->Handle);
-            if (PartitionEntry == NULL) {
-              continue;
-            }
             if (CompareMem (
-              &PartitionEntry->UniquePartitionGUID,
+              PartitionEntry == NULL ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
               &EntryProtocolDevPath->Partuuid,
               sizeof (EFI_GUID)) == 0) {
               Status = AddEntriesFromBootEntryProtocol (
@@ -1396,7 +1393,11 @@ AddBootEntryFromBootOption (
                 );
               if (!EFI_ERROR (Status)) {
                 if (EntryProtocolPartuuid != NULL) {
-                  *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
+                  if (PartitionEntry == NULL) {
+                    *EntryProtocolPartuuid = gEfiPartTypeUnusedGuid;
+                  } else {
+                    *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
+                  }
                 }
                 if (EntryProtocolId != NULL) {
                   *EntryProtocolId = AllocateCopyPool (StrSize (EntryProtocolDevPath->EntryName.PathName), EntryProtocolDevPath->EntryName.PathName);
@@ -2035,18 +2036,20 @@ OcScanForBootEntries (
     // to normal blessed files.
     //
     PartitionEntry = OcGetGptPartitionEntry (FileSystem->Handle);
-    if (PartitionEntry != NULL) {
-      AddEntriesFromBootEntryProtocol (
-        BootContext,
-        FileSystem,
-        EntryProtocolHandles,
-        EntryProtocolHandleCount,
-        CompareMem (&DefaultEntryProtocolPartuuid, &PartitionEntry->UniquePartitionGUID, sizeof (EFI_GUID)) == 0 ?
-          DefaultEntryProtocolId :
-          NULL,
-        FALSE
-        );
-    }
+    AddEntriesFromBootEntryProtocol (
+      BootContext,
+      FileSystem,
+      EntryProtocolHandles,
+      EntryProtocolHandleCount,
+      CompareMem (
+        &DefaultEntryProtocolPartuuid,
+        PartitionEntry == NULL ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
+        sizeof (EFI_GUID)
+        ) == 0 ?
+        DefaultEntryProtocolId :
+        NULL,
+      FALSE
+      );
 
     //
     // Record predefined recoveries.
