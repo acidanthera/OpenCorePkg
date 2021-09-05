@@ -869,44 +869,46 @@ OcGetLegacySecureBootECID (
   // TODO: Cache platform IDs for both interfaces: OcGetSystemId and OcLoadPlatformSupport,
   // as currently this duplicates the code above.
   //
-  if (Config->PlatformInfo.Automatic) {
-    if (AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0) {
+  if (Config->PlatformInfo.UpdateNvram) {
+    if (Config->PlatformInfo.Automatic) {
+      if (AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0) {
 
-      Status = OcSmbiosTablePrepare (&SmbiosTable);
-      if (!EFI_ERROR (Status)) {
-        OcSmbiosExtractOemInfo (
-          &SmbiosTable,
-          mCurrentSmbiosProductName,
-          NULL,
-          &Uuid,
-          NULL,
-          NULL,
-          Config->PlatformInfo.UseRawUuidEncoding,
-          FALSE
+        Status = OcSmbiosTablePrepare (&SmbiosTable);
+        if (!EFI_ERROR (Status)) {
+          OcSmbiosExtractOemInfo (
+            &SmbiosTable,
+            mCurrentSmbiosProductName,
+            NULL,
+            &Uuid,
+            NULL,
+            NULL,
+            Config->PlatformInfo.UseRawUuidEncoding,
+            FALSE
+            );
+          OcSmbiosTableFree (&SmbiosTable);
+        }
+
+        DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from SMBIOS - %r\n", &Uuid, Status));
+      } else {
+        Status = OcAsciiStrToRawGuid (
+          OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+          &Uuid
           );
-        OcSmbiosTableFree (&SmbiosTable);
+        if (EFI_ERROR (Status)) {
+          ZeroMem (&Uuid, sizeof (Uuid));
+        }
+        DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from auto config - %r\n", &Uuid, Status));
       }
-
-      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from SMBIOS - %r\n", &Uuid, Status));
     } else {
-      Status = OcAsciiStrToRawGuid (
-        OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
-        &Uuid
-        );
+      Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
       if (EFI_ERROR (Status)) {
         ZeroMem (&Uuid, sizeof (Uuid));
       }
-      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from auto config - %r\n", &Uuid, Status));
+      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from manual config - %r\n", &Uuid, Status));
     }
-  } else if (Config->PlatformInfo.UpdateNvram) {
-    Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
-    if (EFI_ERROR (Status)) {
-      ZeroMem (&Uuid, sizeof (Uuid));
-    }
-    DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from manual config - %r\n", &Uuid, Status));
   }
 
-  if (IsZeroGuid (&Uuid)) {
+  if (!Config->PlatformInfo.UpdateNvram || IsZeroGuid (&Uuid)) {
     ReadSize = sizeof (Uuid);
     Status = gRT->GetVariable (
       L"system-id",
