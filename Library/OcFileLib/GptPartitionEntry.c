@@ -409,7 +409,7 @@ OcGetDiskPartitions (
     (VOID **) &PartEntries
     );
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCPI: Located cached partition entries\n"));
+    DEBUG ((DEBUG_VERBOSE, "OCPI: Located cached partition entries\n"));
     return PartEntries;
   }
 
@@ -561,7 +561,7 @@ OcGetGptPartitionEntry (
                   (VOID **)&PartEntry
                   );
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCPI: Located cached partition entry\n"));
+    DEBUG ((DEBUG_VERBOSE, "OCPI: Located cached partition entry\n"));
     return PartEntry;
   }
   //
