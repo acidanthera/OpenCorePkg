@@ -30,6 +30,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -316,7 +317,10 @@ OcLogAddEntry  (
         if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
           Attributes |= EFI_VARIABLE_NON_VOLATILE;
         }
-
+        //
+        // Do not use OcSetSystemVariable() as persistence is configured by the
+        // user.
+        //
         Status = gRT->SetVariable (
           OC_LOG_VARIABLE_NAME,
           &gOcVendorVariableGuid,

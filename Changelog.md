@@ -12,6 +12,7 @@ OpenCore Changelog
 - Updated Drivers to support arguments (requires config.plist update, see samples)
 - Added OpenLinuxBoot driver: OC-native Linux autodetect and boot without chaining via GRUB
 - Fixed overlong boot entry names breaking text flow in builtin menu
+- Added `ForceOcWriteFlash` UEFI quirk to enable writing OC system variables
 
 #### v0.7.2
 - Fixed OSBundleLibraries/OSBundleLibaries64 handling

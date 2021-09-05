@@ -48,6 +48,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -826,9 +827,8 @@ OcLoadUefiSupport (
   //
   // Inform platform support whether we want Boot#### routing or not.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable (
     OC_BOOT_REDIRECT_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
     &Config->Uefi.Quirks.RequestBootVarRouting

@@ -30,6 +30,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -2343,9 +2344,8 @@ OcSmbiosExtractOemInfo (
 
   if (UseVariableStorage) {
     if (SmProductName != NULL) {
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_PRODUCT_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmProductName),
         (VOID *) SmProductName
@@ -2356,9 +2356,8 @@ OcSmbiosExtractOemInfo (
     }
 
     if (SmManufacturer != NULL && SmBoard != NULL) {
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_VENDOR_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmManufacturer),
         (VOID *) SmManufacturer
@@ -2367,9 +2366,8 @@ OcSmbiosExtractOemInfo (
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board manufacturer - %r\n", Status));
       }
 
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_BOARD_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmBoard),
         (VOID *) SmBoard

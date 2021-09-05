@@ -185,6 +185,10 @@ ifneq ($(STANDALONE),1)
 	# OcAppleKernelLib targets.
 	#
 	OBJS    += KernelVersion.o
+	#
+	# OcVariableLib targets.
+	#
+	OBJS    += OcVariableLib.o
 
 	#
 	# Add source searchpath for transparent compilation.
@@ -215,7 +219,8 @@ ifneq ($(STANDALONE),1)
 				$(OC_USER)/Library/OcCpuLib:$\
 				$(OC_USER)/Library/OcCpuLib/Ia32:$\
 				$(OC_USER)/Library/OcMiscLib:$\
-				$(OC_USER)/Library/OcAppleKernelLib
+				$(OC_USER)/Library/OcAppleKernelLib:$\
+				$(OC_USER)/Library/OcVariableLib
 endif
 
 #

@@ -7515,6 +7515,21 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
 
 \item
+  \texttt{ForceOcWriteFlash}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enables writing to flash memory for all OpenCore system variables.
+
+  \emph{Note}: This value should be disabled on most types of firmware but is
+  left configurable to account for firmware that may have issues with volatile
+  variable storage overflows or similar. Boot issues across multiple OSes can be
+  observed on e.g. Lenovo Thinkpad T430 and T530 without this quirk. Apple
+  variables related to Secure Boot and hibernation are exempt from this for
+  security reasons. Furthermore, some OpenCore variables are exempt for
+  different reasons, such as the boot log due to an available user option, and
+  the TSC frequency due to timing issues.
+
+\item
   \texttt{ForgeUefiSupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

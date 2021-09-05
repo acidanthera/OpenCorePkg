@@ -33,6 +33,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -64,9 +65,8 @@ OcStoreLoadPath (
     AsciiSPrint (OutPath, sizeof (OutPath), "Unknown");
   }
 
-  Status = gRT->SetVariable (
+  Status = OcSetSystemVariable (
     OC_LOG_VARIABLE_PATH,
-    &gOcVendorVariableGuid,
     OPEN_CORE_NVRAM_ATTR,
     AsciiStrSize (OutPath),
     OutPath
@@ -429,6 +429,8 @@ OcMiscEarlyInit (
     return EFI_UNSUPPORTED; ///< Should be unreachable.
   }
 
+  OcVariableInit (Config->Uefi.Quirks.ForceOcWriteFlash);
+
   AsciiVault = OC_BLOB_GET (&Config->Misc.Security.Vault);
   if (AsciiStrCmp (AsciiVault, "Secure") == 0) {
     Vault = OcsVaultSecure;
@@ -653,9 +655,8 @@ OcMiscMiddleInit (
   //
   // Inform about boot protection.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable (
     OC_BOOT_PROTECT_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (BootProtectFlag),
     &BootProtectFlag
@@ -976,9 +977,8 @@ OcMiscUefiQuirksLoaded (
   //
   // Inform drivers about our scan policy.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable(
     OC_SCAN_POLICY_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Misc.Security.ScanPolicy),
     &Config->Misc.Security.ScanPolicy

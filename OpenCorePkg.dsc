@@ -119,6 +119,7 @@
   OcXmlLib|OpenCorePkg/Library/OcXmlLib/OcXmlLib.inf
   OcPeCoffExtLib|OpenCorePkg/Library/OcPeCoffExtLib/OcPeCoffExtLib.inf
   OcPeCoffLib|OpenCorePkg/Library/OcPeCoffLib/OcPeCoffLib.inf
+  OcVariableLib|OpenCorePkg/Library/OcVariableLib/OcVariableLib.inf
   PcdLib|MdePkg/Library/BasePcdLibNull/BasePcdLibNull.inf
   PciCf8Lib|MdePkg/Library/BasePciCf8Lib/BasePciCf8Lib.inf
   PciLib|MdePkg/Library/BasePciLibCf8/BasePciLibCf8.inf

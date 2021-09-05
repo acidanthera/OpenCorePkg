@@ -30,6 +30,7 @@
 #include <Library/PciLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
@@ -217,6 +218,10 @@ InternalCalculateTSCFromPMTimer (
     // Set the variable if not present and valid.
     //
     if (TSCFrequency != 0 && Status == EFI_NOT_FOUND) {
+      //
+      // Do not use OcSetSystemVariable() as this may be called by a
+      // constructor.
+      //
       gRT->SetVariable (
         OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
         &gOcVendorVariableGuid,
