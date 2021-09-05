@@ -1152,9 +1152,10 @@ AddBootEntryFromBootOption (
   BOOLEAN                    IsRoot;
   EFI_LOAD_OPTION            *LoadOption;
   UINTN                      LoadOptionSize;
-  LIST_ENTRY                 *Link;
   UINT32                     Index;
   INTN                       CmpResult;
+  UINTN                      NoHandles;
+  EFI_HANDLE                 *Handles;
 
   CONST EFI_PARTITION_ENTRY            *PartitionEntry;
   CONST OC_CUSTOM_BOOT_DEVICE_PATH     *CustomDevPath;
@@ -1367,47 +1368,59 @@ AddBootEntryFromBootOption (
         EntryProtocolDevPath = InternalGetOcEntryProtocolDevPath (DevicePath);
 
         if (EntryProtocolDevPath != NULL) {
-          for (
-            Link = GetFirstNode (&BootContext->FileSystems);
-            !IsNull (&BootContext->FileSystems, Link);
-            Link = GetNextNode (&BootContext->FileSystems, Link)) {
-            FileSystem = BASE_CR (Link, OC_BOOT_FILESYSTEM, Link);
+          //
+          // Search for ID on matching device only.
+          // Note that on, e.g., OVMF, devices do not have PartitionEntry, therefore
+          // the first matching entry protocol ID on any filesystem will match.
+          //
+          NoHandles = 0;
+          Status = gBS->LocateHandleBuffer (
+            ByProtocol,
+            &gEfiSimpleFileSystemProtocolGuid,
+            NULL,
+            &NoHandles,
+            &Handles
+            );
 
-            //
-            // Search for ID on matching device only.
-            // Note that on, e.g., OVMF, devices do not have this info, therefore
-            // the first matching entry protocol ID on any filesystem will match.
-            //
-            PartitionEntry = OcGetGptPartitionEntry (FileSystem->Handle);
-            if (CompareMem (
-              PartitionEntry == NULL ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
-              &EntryProtocolDevPath->Partuuid,
-              sizeof (EFI_GUID)) == 0) {
-              Status = AddEntriesFromBootEntryProtocol (
-                BootContext,
-                FileSystem,
-                EntryProtocolHandles,
-                EntryProtocolHandleCount,
-                EntryProtocolDevPath->EntryName.PathName,
-                TRUE
-                );
-              if (!EFI_ERROR (Status)) {
-                if (EntryProtocolPartuuid != NULL) {
-                  if (PartitionEntry == NULL) {
-                    *EntryProtocolPartuuid = gEfiPartTypeUnusedGuid;
-                  } else {
-                    *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
+          if (!EFI_ERROR (Status)) {
+            for (Index = 0; Index < NoHandles; ++Index) {
+              PartitionEntry = OcGetGptPartitionEntry (Handles[Index]);
+              
+              if (CompareMem (
+                (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
+                &EntryProtocolDevPath->Partuuid,
+                sizeof (EFI_GUID)) == 0) {
+                FileSystem = InternalFileSystemForHandle (BootContext, Handles[Index], TRUE, NULL);
+
+                Status = AddEntriesFromBootEntryProtocol (
+                  BootContext,
+                  FileSystem,
+                  EntryProtocolHandles,
+                  EntryProtocolHandleCount,
+                  EntryProtocolDevPath->EntryName.PathName,
+                  TRUE
+                  );
+
+                if (!EFI_ERROR (Status)) {
+                  if (EntryProtocolPartuuid != NULL) {
+                    if (PartitionEntry == NULL) {
+                      *EntryProtocolPartuuid = gEfiPartTypeUnusedGuid;
+                    } else {
+                      *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
+                    }
                   }
+                  if (EntryProtocolId != NULL) {
+                    *EntryProtocolId = AllocateCopyPool (StrSize (EntryProtocolDevPath->EntryName.PathName), EntryProtocolDevPath->EntryName.PathName);
+                    //
+                    // If NULL allocated, just continue as if we had not matched.
+                    //
+                  }
+                  break;
                 }
-                if (EntryProtocolId != NULL) {
-                  *EntryProtocolId = AllocateCopyPool (StrSize (EntryProtocolDevPath->EntryName.PathName), EntryProtocolDevPath->EntryName.PathName);
-                  //
-                  // If NULL allocated, just continue as if we had not matched.
-                  //
-                }
-                break;
               }
             }
+
+            FreePool (Handles);
           }
         }
       }
@@ -2043,7 +2056,7 @@ OcScanForBootEntries (
       EntryProtocolHandleCount,
       CompareMem (
         &DefaultEntryProtocolPartuuid,
-        PartitionEntry == NULL ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
+        (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
         sizeof (EFI_GUID)
         ) == 0 ?
         DefaultEntryProtocolId :
@@ -2128,7 +2141,7 @@ OcScanForDefaultBootEntry (
     return NULL;
   }
 
-  DEBUG ((DEBUG_INFO, "OCB: Looking up for default entry\n"));
+  DEBUG ((DEBUG_INFO, "OCB: Looking for default entry\n"));
 
   //
   // Locate loaded boot entry protocol drivers.
@@ -2184,7 +2197,7 @@ OcScanForDefaultBootEntry (
   }
 
   //
-  // Obtain filesystems and try processing the remainings.
+  // Obtain filesystems and try processing those remaining.
   //
   NoHandles = 0;
   Status = gBS->LocateHandleBuffer (
