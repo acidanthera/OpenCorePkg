@@ -600,8 +600,9 @@ GenerateEntriesForVmlinuzFiles (
   return EFI_SUCCESS;
 }
 
+STATIC
 EFI_STATUS
-AutodetectLinux (
+InternalAutodetectLinux (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
@@ -689,5 +690,23 @@ AutodetectLinux (
   }
 
   VmlinuzDirectory->Close (VmlinuzDirectory);
+  return Status;
+}
+
+EFI_STATUS
+AutodetectLinux (
+  IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  OUT  OC_PICKER_ENTRY          **Entries,
+  OUT  UINTN                    *NumEntries
+  )
+{
+  EFI_STATUS                      Status;
+
+  Status = InternalAutodetectLinux (RootDirectory, Entries, NumEntries);
+  
+  if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
+    DEBUG ((DEBUG_WARN, "LNX: AutodetectLinux - %r\n", Status));
+  }
+
   return Status;
 }

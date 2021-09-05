@@ -22,9 +22,20 @@
 
 #include <Protocol/OcBootEntry.h>
 
-#define LOADER_ENTRIES_DIR    L"\\loader\\entries"
-#define GRUB2_GRUB_CFG        L"\\grub2\\grub.cfg"
-#define GRUB2_GRUBENV         L"\\grub2\\grubenv"
+//
+// Required where the BTRFS subvolume is /boot, as this looks like a
+// normal directory within EFI. Note that scanning / and then /boot
+// is how blscfg behaves by default too.
+//
+#define ADDITIONAL_SCAN_DIR   L"boot"
+
+//
+// No leading slash so they can be relative to root or
+// additional scan dir.
+//
+#define LOADER_ENTRIES_DIR    L"loader\\entries"
+#define GRUB2_GRUB_CFG        L"grub2\\grub.cfg"
+#define GRUB2_GRUBENV         L"grub2\\grubenv"
 #define GRUB2_GRUBENV_SIZE    SIZE_1KB
 
 #define BLSPEC_SUFFIX_CONF    L".conf"
@@ -664,8 +675,9 @@ ProcessLoaderEntry (
   return EFI_SUCCESS;
 }
 
+STATIC
 EFI_STATUS
-ScanLoaderEntries (
+InternalScanLoaderEntries (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
@@ -764,6 +776,41 @@ ScanLoaderEntries (
 
   EntriesDirectory->Close (EntriesDirectory);
 
+  return Status;
+}
+
+EFI_STATUS
+ScanLoaderEntries (
+  IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  OUT  OC_PICKER_ENTRY          **Entries,
+  OUT  UINTN                    *NumEntries
+  )
+{
+  EFI_STATUS                      Status;
+  EFI_STATUS                      TempStatus;
+  EFI_FILE_PROTOCOL               *AdditionalScanDirectory;
+
+  Status = InternalScanLoaderEntries (RootDirectory, Entries, NumEntries);
+  if (!EFI_ERROR (Status)) {
+    return Status;
+  }
+  if (Status != EFI_NOT_FOUND) {
+    DEBUG ((DEBUG_WARN, "LNX: ScanLoaderEntries @root - %r\n", Status));
+  }
+
+  TempStatus = OcSafeFileOpen (RootDirectory, &AdditionalScanDirectory, ADDITIONAL_SCAN_DIR, EFI_FILE_MODE_READ, 0);
+  if (EFI_ERROR (TempStatus)) {
+    return Status;
+  }
+
+  Status = InternalScanLoaderEntries (AdditionalScanDirectory, Entries, NumEntries);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "LNX: ScanLoaderEntries @%s - %r\n", ADDITIONAL_SCAN_DIR, Status));
+    return Status;
+  }
+  if (Status != EFI_NOT_FOUND) {
+    DEBUG ((DEBUG_WARN, "LNX: ScanLoaderEntries @%s - %r\n", ADDITIONAL_SCAN_DIR, Status));
+  }
   return Status;
 }
 

@@ -238,10 +238,6 @@ OcGetLinuxBootEntries (
   // are only unusable files in there.
   //
   if (EFI_ERROR (Status)) {
-    if (Status != EFI_NOT_FOUND) {
-      DEBUG ((DEBUG_WARN, "LNX: ScanLoaderEntries - %r\n", Status));
-    }
-    
     //
     // Auto-detect vmlinuz and initrd files on own root filesystem (Debian-like).
     //
@@ -251,10 +247,6 @@ OcGetLinuxBootEntries (
         Entries,
         NumEntries
         );
-
-      if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
-        DEBUG ((DEBUG_WARN, "LNX: AutodetectLinux - %r\n", Status));
-      }
     }
   }
 
