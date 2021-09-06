@@ -1389,8 +1389,12 @@ AddBootEntryFromBootOption (
               if (CompareMem (
                 (PartitionEntry == NULL) ? &gEfiPartTypeUnusedGuid : &PartitionEntry->UniquePartitionGUID,
                 &EntryProtocolDevPath->Partuuid,
-                sizeof (EFI_GUID)) == 0) {
+                sizeof (EFI_GUID)) == 0
+                ) {
                 FileSystem = InternalFileSystemForHandle (BootContext, Handles[Index], TRUE, NULL);
+                if (FileSystem == NULL) {
+                  continue;
+                }
 
                 Status = AddEntriesFromBootEntryProtocol (
                   BootContext,
@@ -1409,12 +1413,14 @@ AddBootEntryFromBootOption (
                       *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
                     }
                   }
+
                   if (EntryProtocolId != NULL) {
                     *EntryProtocolId = AllocateCopyPool (StrSize (EntryProtocolDevPath->EntryName.PathName), EntryProtocolDevPath->EntryName.PathName);
                     //
                     // If NULL allocated, just continue as if we had not matched.
                     //
                   }
+
                   break;
                 }
               }
