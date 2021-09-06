@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Aug 19 17:51:20 2021
-%DIF ADD ../Configuration.tex        Sat Sep  4 15:05:00 2021
+%DIF DEL PreviousConfiguration.tex   Fri Sep  3 03:11:13 2021
+%DIF ADD ../Configuration.tex        Tue Sep  7 00:33:51 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6947,12 +6947,11 @@ options may be specified in }\texttt{\DIFadd{UEFI/Drivers/Arguments}}\DIFadd{:
       RawVolume &= MIN(\frac{SystemAudioVolume * VolumeAmplifier}{100}, 100)
   \end{align*}
   \emph{Note}: the transformation used in macOS is not linear, but it is very close
-  and this nuance is thus ignored\DIFaddbegin \DIFadd{.
-}
+  and this nuance is thus ignored.
 
 \end{enumerate}
 
-\subsection{\DIFadd{Drivers Properties}}\label{uefidriversprops}
+\DIFaddbegin \subsection{\DIFadd{Drivers Properties}}\label{uefidriversprops}
 
 \begin{enumerate}
 
@@ -6976,12 +6975,13 @@ options may be specified in }\texttt{\DIFadd{UEFI/Drivers/Arguments}}\DIFadd{:
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Some OC plugins accept optional additional arguments
-  which may be specified as a string here}\DIFaddend .
+  which may be specified as a string here.
+}
 
 \end{enumerate}
 
 
-\subsection{Input Properties}\label{uefiinputprops}
+\DIFaddend \subsection{Input Properties}\label{uefiinputprops}
 
 \begin{enumerate}
 
@@ -7598,7 +7598,25 @@ options may be specified in }\texttt{\DIFadd{UEFI/Drivers/Arguments}}\DIFadd{:
   on some APTIO IV firmware (ASUS Z87-Pro) particularly when using FileVault 2.
   It appears that for some reason, they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
   which results in the SATA controller being inaccessible from macOS. A better approach is required
-  and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
+  and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed\DIFaddbegin \DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{ForceOcWriteFlash}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enables writing to flash memory for all OpenCore system variables.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This value should be disabled on most types of firmware but is
+  left configurable to account for firmware that may have issues with volatile
+  variable storage overflows or similar. Boot issues across multiple OSes can be
+  observed on e.g. Lenovo Thinkpad T430 and T530 without this quirk. Apple
+  variables related to Secure Boot and hibernation are exempt from this for
+  security reasons. Furthermore, some OpenCore variables are exempt for
+  different reasons, such as the boot log due to an available user option, and
+  the TSC frequency due to timing issues. When toggling this option, a NVRAM
+  reset may be required to ensure full functionality}\DIFaddend .
 
 \item
   \texttt{ForgeUefiSupport}\\
