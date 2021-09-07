@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.2)
+       Reference Manual (0.7.3)
 
        \vspace{0.2in}
 
@@ -650,7 +650,7 @@ git clone --depth=1 https://github.com/acidanthera/audk UDK
 cd UDK
 git submodule update --init --recommend-shallow
 git clone --depth=1 https://github.com/acidanthera/OpenCorePkg
-source edksetup.sh
+. ./edksetup.sh
 make -C BaseTools
 build -a X64 -b RELEASE -t XCODE5 -p OpenCorePkg/OpenCorePkg.dsc
 \end{lstlisting}
@@ -3682,6 +3682,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{GSTT} --- GoptStop
   \item \texttt{HDA} --- AudioDxe
   \item \texttt{KKT} --- KeyTester
+  \item \texttt{LNX} --- OpenLinuxBoot
   \item \texttt{MMDD} --- MmapDump
   \item \texttt{OCPAVP} --- PavpProvision
   \item \texttt{OCRST} --- ResetSystem
@@ -3843,6 +3844,10 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
 bless --folder "/Volumes/Macintosh HD/System/Library/CoreServices" \
   --bootefi --personalize
 \end{lstlisting}
+
+  On macOS 11 and newer the dedicated \texttt{x86legacy} model always uses
+  \texttt{ApECID}. When this configuration setting is left as \texttt{0}
+  first 8 bytes of \texttt{system-id} variable are used instead.
 
   On macOS versions before macOS 11, which introduced a dedicated \texttt{x86legacy}
   model for models without the T2 chip, personalised Apple Secure Boot
@@ -4102,8 +4107,13 @@ rm vault.pub
     of EFI System Partition file system.
     \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_NTFS}, allows scanning
     of NTFS (Msft Basic Data) file system.
-    \item \texttt{0x00001000} (bit \texttt{12}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_EXT}, allows scanning
-    of EXT (Linux Root) file system.
+    \item \texttt{0x00001000} (bit \texttt{12}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_LINUX\_ROOT}, allows
+    scanning of Linux Root file systems.
+    \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_LINUX\_DATA}, allows
+    scanning of Linux Data file systems.
+    \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{OC\_SCAN\_ALLOW\_FS\_XBOOTLDR}, allows
+    scanning the Extended Boot Loader Partition as defined by the
+    \href{https://systemd.io/BOOT\_LOADER\_SPECIFICATION/}{Boot Loader Specification}.
     \item \texttt{0x00010000} (bit \texttt{16}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SATA}, allow
     scanning SATA devices.
     \item \texttt{0x00020000} (bit \texttt{17}) --- \texttt{OC\_SCAN\_ALLOW\_DEVICE\_SASEX}, allow
@@ -5912,11 +5922,14 @@ Depending on the firmware, a different set of drivers may be required.
 Loading an incompatible driver may lead the system to unbootable state or
 even cause permanent firmware damage. Some of the known drivers are listed below:
 
-\begin{tabular}{p{1.3in}p{5.55in}}
+\begin{longtable}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
 & HDA audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
+& Open source BTRFS file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
+  from a file system which is now quite commonly used with Linux. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
@@ -5926,6 +5939,9 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & Proprietary ExFAT file system driver for Bootcamp support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{ExFatDxeLegacy} driver should be
   used due to the lack of \texttt{RDRAND} instruction support. \\
+\href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}}
+& Open source EXT4 file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
+  from the file system most commonly used with Linux. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{HfsPlus}}
 & Recommended. Proprietary HFS file system driver with bless support commonly found in Apple
   firmware. For Sandy Bridge and earlier CPUs, the \texttt{HfsPlusLegacy} driver should be
@@ -5948,6 +5964,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & \hyperref[ueficanopy]{OpenCore plugin} implementing graphical interface. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenRuntime}}\textbf{*}
 & \hyperref[uefiruntime]{OpenCore plugin} implementing \texttt{OC\_FIRMWARE\_RUNTIME} protocol. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenLinuxBoot}}\textbf{*}
+& \hyperref[uefilinux]{OpenCore plugin} implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}
+  to allow direct detection and booting of Linux distributiuons from OpenCore, without
+  chainloading via GRUB. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{OpenUsbKbDxe}}\textbf{*}
 & USB keyboard driver adding support for \texttt{AppleKeyMapAggregator} protocols
   on top of a custom USB keyboard driver implementation. This is an alternative to
@@ -5978,7 +5998,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 & XHCI USB controller support driver from \texttt{MdeModulePkg}. This driver is
   included in most types of firmware starting with the Sandy Bridge generation. For earlier firmware
   or legacy systems, it may be used to support external USB 3.0 PCI cards.
-\end{tabular}
+\end{longtable}
 
 Driver marked with \textbf{*} are bundled with OpenCore.
 To compile the drivers from UDK (EDK II) the same command used for
@@ -6154,6 +6174,178 @@ functioning. Feature highlights:
   mapping (e.g. \texttt{EnableWriteUnprotector}).
 \end{itemize}
 
+\subsection{OpenLinuxBoot}\label{uefilinux}
+
+\texttt{OpenLinuxBoot} is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
+It detects and boots Linux distros which are installed according to the
+\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification}
+or to the closely related (but not identical, see next paragraph)
+\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}.
+In effect this means Linux distributions where the available boot options are found in
+\texttt{\{ESP\}/loader/entries/*.conf} files (for instance \texttt{/boot/efi/loader/entries/*.conf})
+or in \texttt{\{boot\}/loader/entries/*.conf} files (for instance \texttt{/boot/loader/entries/*.conf}).
+The former layout -- pure Boot Loader Specification, using kernel files on the EFI System Partition or
+Extended Boot Loader Partition  -- is specific to systemd-boot, the latter
+layout with kernel files typically on the partition which will be mounted as \texttt{/boot}
+applies to most Fedora-related distros including Fedora itself, RHEL and variants.
+
+BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
+in its \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
+In order to correctly handle this, \texttt{OpenLinuxBoot} extracts all variables from
+\texttt{\{boot\}/grub2/grubenv} and any unconditionally set variables from \texttt{\{boot\}/grub2/grub.cfg}.
+This has proved sufficient in practice to extract the required variables seen so far in distros which use this
+GRUB-specific feature.
+
+For distributions which do not use either of the above schemes, \texttt{OpenLinuxBoot} will autodetect and
+boot \texttt{\{boot\}/vmlinuz*} kernel files directly, after linking these automatically -- based on the
+kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files, and after
+searching in \texttt{/etc/default/grub} for kernel boot options and \texttt{/etc/os-release} for the
+distro name.
+This layout applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
+
+The method of starting the kernel relies on it being compiled with EFISTUB, however this applies
+to almost all modern distros, particularly those which use systemd. Most modern distros
+use systemd as their system manager (even though at the same time most do \emph{not} use systemd-boot as
+their bootloader).
+
+The latest kernel version of a given install is always shown in the boot menu. Additional versions,
+recovery versions, etc. are added as auxiliary boot entries, so depending on OpenCore's
+\texttt{HideAuxiliary} setting may not be shown until the space key is pressed.
+
+\emph{Note 1}: \texttt{OpenLinuxBoot} requires filesystem drivers that may not be available in
+firmware such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
+Drivers tested in basic scenarios can be downloaded from \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData}.
+Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
+tamper-resistance testing, therefore have may carry potential security or data-loss risks.
+
+Most Linux distributions keep their boot files on the EXT4 file system even when the distribution's
+main filesystem is something else such as BTRFS, therefore a suitable UEFI EXT4 file system
+driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
+A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
+will be required in a somewhat less standard setup where the boot files are on a BTRFS partition,
+e.g. as by default in openSUSE.
+
+Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
+on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
+filesystem driver - but it is not widely used except in Arch Linux.
+
+\emph{Note 2}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
+does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
+therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
+the boot menu.
+
+The default parameter values should work well, but if you need to parameterise this driver the following
+options may be specified in \texttt{UEFI/Drivers/Arguments}:
+
+\begin{itemize}
+  \tightlist
+	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} are set. \medskip
+      
+	Available flags are: \medskip
+      
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{LINUX\_BOOT\_SCAN\_ESP},
+    Allows scanning for entries on EFI System Partition.
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{LINUX\_BOOT\_SCAN\_XBOOTLDR},
+    Allows scanning for entries on Extended Boot Loader Partition.
+	  \item \texttt{0x00000004} (bit \texttt{2}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_ROOT},
+	  Allows scanning for entries on Linux Root filesystems.
+	  \item \texttt{0x00000008} (bit \texttt{3}) --- \texttt{LINUX\_BOOT\_SCAN\_LINUX\_DATA},
+	  Allows scanning for entries on Linux Data filesystems.
+	  \item \texttt{0x00000080} (bit \texttt{7}) --- \texttt{LINUX\_BOOT\_SCAN\_OTHER},
+	  Allows scanning for entries on file systems not matched by any of the above. \medskip
+      
+	  The following notes apply to all of the above options: \medskip
+      
+	  \emph{Note 1}: Apple filesystems APFS and HFS are never scanned.
+    \medskip
+      
+	  \emph{Note 2}: Regardless of the above flags, a file system must first be
+	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
+    \texttt{OpenLinuxBoot} or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
+    \medskip
+      
+	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
+    in both \texttt{OpenLinuxBoot} flags and \texttt{Misc/Security/ScanPolicy} in order to be sure
+    to detect all valid Linux installs.
+    \medskip
+
+	  \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{LINUX\_BOOT\_ALLOW\_AUTODETECT},
+	  If set allows autodetecting and linking \texttt{vmlinuz*} and \texttt{init*} ramdisk files
+	  when \texttt{loader/entries} files are not found.
+	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
+	  When a Linux entry generated by \texttt{OpenLinuxBoot} is selected as the default boot entry
+    in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
+	  
+	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
+    of Linux. Linux boot options are always sorted highest kernel version first, so this means that
+    the latest kernel version of the same install always shows as the default, with this option set. \medskip
+	  
+	  \emph{Note}: This option is recommended on all systems. \medskip
+      
+	  \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
+	  This option applies to autodetected Linux only (i.e. to Debian-style distrubutions, not to BLSpec and
+    Fedora-style distributions with \texttt{/loader/entries/*.conf} files).
+    Some distrubtions run a filesystem check on loading which requires the root
+    filesystem to initially be mounted read-only via the \texttt{ro} kernel option. Set this bit to add this
+    option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
+    remount as read-write) on distros which do not require it. To specify this option for specific
+    distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
+	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
+	  Adds a human readable file system type, followed by the first eight characters of the
+	  partition's unique partition uuid, to each generated entry name. Can help with debugging
+	  the origin of entries generated by the driver when there are multiple Linux installs on
+	  one system.
+  \end{itemize} \medskip
+
+	Flag values can be specified in hexadecimal beginning with \texttt{0x} or in decimal,
+  e.g. \texttt{flags=0x80} or \texttt{flags=128}. \medskip
+
+	\item \texttt{partuuidopts:\{partuuid\}[+]="\{options\}"} - Default: not set. \medskip
+
+  Allows specifying kernel options for a given partition only. If specified with \texttt{+=} then
+  these are used in addition to autodetected options, if specified with \texttt{=} they are used instead.
+  Used for autodetected Linux only. Values specified here are never used for entries created from
+  \texttt{/loader/entries/*.conf} files.
+  \medskip
+
+  \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
+  seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
+  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is NOT the same for
+  Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
+    
+	Typically you should not need this option in the latter case, but in case you do, to find out the unique
+  partition uuid to use, look for \texttt{LNX:} entries in the OpenCore debug	log file. Alternatively, and
+  for more advanced scenarios, you may wish to examine how your drives are mounted using the
+  Linux \texttt{mount} command, and then find out the partuuid of relevant mounted drives by examining the
+  output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
+
+	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
+  for autodetected Linux only. The value here is never used for entries created from
+  \texttt{/loader/entries/*.conf} files. \texttt{partuuidopts} may be more suitable where there are multiple
+  distros, but \texttt{autoopts} with no PARTUUID required is more convenient for just one distro.
+  If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
+  with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
+  a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
+  (check \texttt{cat /proc/cmdline} when booted via your existing bootloader) on Ubuntu and related distros,
+  in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
+  showing before the distro splash screen.
+  \medskip
+  
+  Users may wish to compare their Linux boot options (shown with \texttt{cat /proc/cmdline}) seen when booting via
+  \texttt{OpenLinuxBoot} and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
+  systemd-boot or EXTLINUX). Expect the options generated by \texttt{OpenLinuxBoot} not to
+  contain a \texttt{BOOT\_IMAGE=...} value where GRUB options do, and to contain an
+  \texttt{initrd=...} value where the GRUB options do not, since GRUB hands over ramdisks in a different way.
+  All remaining parameters should match, however -- perhaps excluding less important graphics handover options,
+  such as in the Ubuntu example given in \texttt{autoopts}.
+  \texttt{OpenLinuxBoot} will not start a distro unless it can find some configured options to use, therefore in
+  the hopefully unlikely case where no auto-detectable options are available, the user will need to specify the correct options
+  with \texttt{partuuidopts} or \texttt{autoopts} before the distro will boot. Examine the OpenCore debug log
+  for \texttt{LNX:} entries containing further information about what was found.
+\end{itemize}
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -6224,12 +6416,11 @@ functioning. Feature highlights:
 
 \item
   \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory.
-
-  To be filled with string filenames meant to be loaded as UEFI drivers.
+  directory using the settings specified in the 
+  \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
   \texttt{Input}\\
@@ -6676,6 +6867,33 @@ functioning. Feature highlights:
   and this nuance is thus ignored.
 
 \end{enumerate}
+
+\subsection{Drivers Properties}\label{uefidriversprops}
+
+\begin{enumerate}
+
+\item
+  \texttt{Path}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Path of file to be loaded as a UEFI driver
+  from \texttt{OC/Drivers} directory.
+
+\item
+  \texttt{Enabled}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: If \texttt{false} this driver entry will be ignored.
+
+\item
+  \texttt{Arguments}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Some OC plugins accept optional additional arguments
+  which may be specified as a string here.
+
+\end{enumerate}
+
 
 \subsection{Input Properties}\label{uefiinputprops}
 
@@ -7295,6 +7513,22 @@ functioning. Feature highlights:
   It appears that for some reason, they execute code in parallel to \texttt{EXIT\_BOOT\_SERVICES},
   which results in the SATA controller being inaccessible from macOS. A better approach is required
   and Acidanthera is open to suggestions. Expect 3 to 5 seconds to be adequate when this quirk is needed.
+
+\item
+  \texttt{ForceOcWriteFlash}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enables writing to flash memory for all OpenCore system variables.
+
+  \emph{Note}: This value should be disabled on most types of firmware but is
+  left configurable to account for firmware that may have issues with volatile
+  variable storage overflows or similar. Boot issues across multiple OSes can be
+  observed on e.g. Lenovo Thinkpad T430 and T530 without this quirk. Apple
+  variables related to Secure Boot and hibernation are exempt from this for
+  security reasons. Furthermore, some OpenCore variables are exempt for
+  different reasons, such as the boot log due to an available user option, and
+  the TSC frequency due to timing issues. When toggling this option, a NVRAM
+  reset may be required to ensure full functionality.
 
 \item
   \texttt{ForgeUefiSupport}\\
