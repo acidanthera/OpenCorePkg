@@ -596,21 +596,18 @@ the \hyperref[miscsecurityprops]{Security Properties} section of this document.
 The \texttt{OC\ config} file, as with any property list file, can be edited with
 any text editor, such as nano or vim. However, specialised software
 may provide a better experience. On macOS, the preferred GUI application is
-\href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
-cross-platform and open-source alternative, the
-\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
-utilised.
+\href{https://developer.apple.com/xcode}{Xcode}. The
+\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor
+is a lightweight, cross-platform and open-source alternative.
 
-It is strongly advised not to use any software that is aware of the internal
-configration structure as it constantly gets out of date and will cause
-incorrect configuration to be generated. If it is a must desprite the
-warning one should make sure to only use stable versions of OpenCore
-with explicit support for the particular version in the app. The choice
-of open-source implementations with transparent binary generation
-is encouraged (e.g. \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}),
-since other tools may contain malware. Remember that a configuration
-made for a different hardware setup shall never be used on another hardware
-setup.
+It is strongly recommended to avoid configuration creation tools that are aware of the
+internal configuration structure as this may result in invalid configurations (since the
+structure gets constantly updated). If such tools are to be used despite this warning,
+ensure that only stable versions of OpenCore explicitly supported by such tools are used.
+In such cases, the use of open-source implementations with transparent binary generation
+(such as \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}) is encouraged, given
+that other tools may contain malware. In addition, configurations created for a specific
+hardware setup should never be used on different hardware setups.
 
 For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
@@ -2516,9 +2513,9 @@ blocking.
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
   VT-d support in other systems in case they need this.
 
-  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices 
-  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
-  link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
+  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices
+  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up
+  link-down state infinitely and a Wi-Fi adapter may fail to discover networks.
   Gigabyte is one of the most common OEMs with these issues.
 
 \item
@@ -3803,7 +3800,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not practical as it prevents
   incremental (non-full) OTA updates.
   \end{itemize}
- 
+
   \emph{Note3}: For any other value which you may need to use, it is possible to
   configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
   different value, e.g. use \texttt{toggle\ 0x6F} in \texttt{Arguments} to toggle the
@@ -6240,9 +6237,9 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \begin{itemize}
   \tightlist
 	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} are set. \medskip
-      
+
 	Available flags are: \medskip
-      
+
   \begin{itemize}
   \tightlist
     \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{LINUX\_BOOT\_SCAN\_ESP},
@@ -6255,17 +6252,17 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 	  Allows scanning for entries on Linux Data filesystems.
 	  \item \texttt{0x00000080} (bit \texttt{7}) --- \texttt{LINUX\_BOOT\_SCAN\_OTHER},
 	  Allows scanning for entries on file systems not matched by any of the above. \medskip
-      
+
 	  The following notes apply to all of the above options: \medskip
-      
+
 	  \emph{Note 1}: Apple filesystems APFS and HFS are never scanned.
     \medskip
-      
+
 	  \emph{Note 2}: Regardless of the above flags, a file system must first be
 	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
     \texttt{OpenLinuxBoot} or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
     \medskip
-      
+
 	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
     in both \texttt{OpenLinuxBoot} flags and \texttt{Misc/Security/ScanPolicy} in order to be sure
     to detect all valid Linux installs.
@@ -6277,13 +6274,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
 	  When a Linux entry generated by \texttt{OpenLinuxBoot} is selected as the default boot entry
     in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
-	  
+
 	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
     of Linux. Linux boot options are always sorted highest kernel version first, so this means that
     the latest kernel version of the same install always shows as the default, with this option set. \medskip
-	  
+
 	  \emph{Note}: This option is recommended on all systems. \medskip
-      
+
 	  \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
 	  This option applies to autodetected Linux only (i.e. to Debian-style distrubutions, not to BLSpec and
     Fedora-style distributions with \texttt{/loader/entries/*.conf} files).
@@ -6314,7 +6311,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
   \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is NOT the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
-    
+
 	Typically you should not need this option in the latter case, but in case you do, to find out the unique
   partition uuid to use, look for \texttt{LNX:} entries in the OpenCore debug	log file. Alternatively, and
   for more advanced scenarios, you may wish to examine how your drives are mounted using the
@@ -6332,7 +6329,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip
-  
+
   Users may wish to compare their Linux boot options (shown with \texttt{cat /proc/cmdline}) seen when booting via
   \texttt{OpenLinuxBoot} and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
   systemd-boot or EXTLINUX). Expect the options generated by \texttt{OpenLinuxBoot} not to
@@ -6419,7 +6416,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory using the settings specified in the 
+  directory using the settings specified in the
   \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
@@ -6688,15 +6685,15 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   on the basic console input stream.
 
   With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
-  
+
   On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
   which use non-Apple key input methods.
-  
+
   The recommended setting on all hardware is \texttt{true}.
 
   \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
   after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
-  
+
   \begin{itemize}
   \tightlist
   \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
