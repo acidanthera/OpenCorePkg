@@ -1629,10 +1629,11 @@ InternalLoadBootEntry (
     if (!EFI_ERROR (OptionalStatus)) {
       DEBUG ((
         DEBUG_INFO,
-        "OCB: Matching <%a> args on type %u %p\n",
+        "OCB: Matching <%a>/%p[%u] args on type %u\n",
         Context->AppleBootArgs,
-        BootEntry->Type,
-        BootEntry->LoadOptions
+        BootEntry->LoadOptions,
+        BootEntry->LoadOptionsSize,
+        BootEntry->Type
         ));
 
       LoadedImage->LoadOptionsSize = 0;
@@ -1644,6 +1645,9 @@ InternalLoadBootEntry (
         Args    = BootEntry->LoadOptions;
       }
 
+      //
+      // This only correctly passes on args which are a NUL terminated ASCII string.
+      //
       if (Args != NULL && Args[0] != '\0') {
         OcAppendArgumentsToLoadedImage (
           LoadedImage,
@@ -1651,6 +1655,11 @@ InternalLoadBootEntry (
           1,
           TRUE
           );
+        DEBUG ((
+          DEBUG_INFO,
+          "OCB: Args <%s>\n",
+          LoadedImage->LoadOptions
+          ));
       }
 
       if (BootEntry->Type == OC_BOOT_EXTERNAL_OS || BootEntry->Type == OC_BOOT_EXTERNAL_TOOL) {

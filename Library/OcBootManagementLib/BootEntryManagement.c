@@ -722,9 +722,9 @@ InternalAddBootEntryFromCustomEntry (
   if (IsBootEntryProtocol) {
     PartitionEntry = OcGetGptPartitionEntry (FileSystem->Handle);
     if (PartitionEntry == NULL) {
-      BootEntry->UniquePartitionGUID = gEfiPartTypeUnusedGuid;
+      CopyGuid (&BootEntry->UniquePartitionGUID, &gEfiPartTypeUnusedGuid);
     } else {
-      BootEntry->UniquePartitionGUID = PartitionEntry->UniquePartitionGUID;
+      CopyGuid (&BootEntry->UniquePartitionGUID, &PartitionEntry->UniquePartitionGUID);
     }
   }
 
@@ -1408,9 +1408,9 @@ AddBootEntryFromBootOption (
                 if (!EFI_ERROR (Status)) {
                   if (EntryProtocolPartuuid != NULL) {
                     if (PartitionEntry == NULL) {
-                      *EntryProtocolPartuuid = gEfiPartTypeUnusedGuid;
+                      CopyGuid (EntryProtocolPartuuid, &gEfiPartTypeUnusedGuid);
                     } else {
-                      *EntryProtocolPartuuid = PartitionEntry->UniquePartitionGUID;
+                      CopyGuid (EntryProtocolPartuuid, &PartitionEntry->UniquePartitionGUID);
                     }
                   }
 

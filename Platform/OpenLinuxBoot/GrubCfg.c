@@ -47,10 +47,10 @@ typedef enum GRUB_VAR_STATE_ {
 #define VAR_FLAGS_BRACE     BIT0
 #define VAR_FLAGS_NUMERIC   BIT1
 
-#define SHIFT_TOKEN(offset) { \
+#define SHIFT_TOKEN(offset) do { \
   CopyMem (*Token + (offset), *Token, &Content[*Pos] - *Token); \
   *Token += (offset); \
-}
+} while (0)
 
 STATIC
 EFI_STATUS

@@ -270,7 +270,7 @@ OcGetNewestFileFromDirectory (
   @retval EFI_INVALID_PARAMETER         File is not directory/file as specified.
 **/
 EFI_STATUS
-OcEnsureDirectory (
+OcEnsureDirectoryFile (
   IN     EFI_FILE_PROTOCOL        *File,
   IN     BOOLEAN                  IsDirectory
   );

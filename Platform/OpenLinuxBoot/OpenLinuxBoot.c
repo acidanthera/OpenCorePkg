@@ -21,11 +21,11 @@
 
 #include <Protocol/OcBootEntry.h>
 
-UINTN gLinuxBootFlags = LINUX_BOOT_ALL & ~LINUX_BOOT_ADD_DEBUG_INFO;
+UINTN gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE);
 
 OC_PICKER_CONTEXT *gPickerContext;
 OC_FLEX_ARRAY     *gParsedLoadOptions;
-OC_FLEX_ARRAY     *gNamedLoaderEntries;
+OC_FLEX_ARRAY     *gLoaderEntries;
 EFI_GUID          gPartuuid;
 CHAR8             *gFileSystemType;
 
@@ -170,13 +170,13 @@ OcGetLinuxBootEntries (
       Status = EFI_NOT_FOUND;
     }
   } else if ((FileSystemPolicy & OC_SCAN_ALLOW_FS_LINUX_ROOT) != 0) {
-    gFileSystemType = "ROOT";
+    gFileSystemType = "LNX-R";
     if ((gLinuxBootFlags & LINUX_BOOT_SCAN_LINUX_ROOT) == 0) {
       DEBUG ((DEBUG_INFO, "LNX: %a - requested not to scan\n", gFileSystemType));
       Status = EFI_NOT_FOUND;
     }
   } else if ((FileSystemPolicy & OC_SCAN_ALLOW_FS_LINUX_DATA) != 0) {
-    gFileSystemType = "DATA";
+    gFileSystemType = "LNX-D";
     if ((gLinuxBootFlags & LINUX_BOOT_SCAN_LINUX_DATA) == 0) {
       DEBUG ((DEBUG_INFO, "LNX: %a - requested not to scan\n", gFileSystemType));
       Status = EFI_NOT_FOUND;
@@ -207,9 +207,9 @@ OcGetLinuxBootEntries (
   //
   PartitionEntry = OcGetGptPartitionEntry (Device);
   if (PartitionEntry == NULL) {
-    gPartuuid = gEfiPartTypeUnusedGuid;
+    CopyGuid (&gPartuuid, &gEfiPartTypeUnusedGuid);
   } else {
-    gPartuuid = PartitionEntry->UniquePartitionGUID;
+    CopyGuid (&gPartuuid, &PartitionEntry->UniquePartitionGUID);
   }
 
   //
@@ -226,7 +226,7 @@ OcGetLinuxBootEntries (
   //
   // Scan for boot loader spec & blscfg entries (Fedora-like).
   //
-  Status = ScanLoaderEntries (
+  Status = InternalScanLoaderEntries (
     RootDirectory,
     Entries,
     NumEntries
@@ -248,10 +248,6 @@ OcGetLinuxBootEntries (
         NumEntries
         );
     }
-  }
-
-  if (Status == EFI_NOT_FOUND) {
-    DEBUG ((DEBUG_INFO, "LNX: Nothing found\n"));
   }
 
   RootDirectory->Close (RootDirectory);

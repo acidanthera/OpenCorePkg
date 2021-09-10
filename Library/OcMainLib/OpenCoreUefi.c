@@ -185,18 +185,15 @@ OcLoadDrivers (
       continue;
     }
 
+    //
+    // OC before driver arguments did not zero these and Boot Services does
+    // not, so old OC calling new driver which takes args will likely crash.
+    //
+    ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptionsSize  = 0;
+    ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptions      = NULL;
+
     if (DriverArguments != NULL && DriverArguments[0] != '\0') {
       OcAppendArgumentsToLoadedImage (ImageHandle, &DriverArguments, 1, TRUE);
-    } else {
-      //
-      // These are not zeroed by boot services image loader, which means new drivers
-      // expecting load options loaded with old OC may crash horribly, instead
-      // of just seeing no options. Annoyingly the value in LoadOptions is non-randome
-      // and lowish, therefore setting an upper limit on option size, to attempt to
-      // reject unitialized values, does not help.
-      //
-      ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptionsSize  = 0;
-      ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptions      = NULL;
     }
 
     Status = gBS->StartImage (

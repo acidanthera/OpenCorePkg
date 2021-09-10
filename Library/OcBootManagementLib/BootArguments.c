@@ -34,11 +34,11 @@ typedef enum PARSE_VARS_STATE_ {
 //
 // Shift from token start to current position forwards by offset characters.
 //
-#define SHIFT_TOKEN(pos, token, offset) { \
+#define SHIFT_TOKEN(pos, token, offset) do { \
   CopyMem ((UINT8 *)(token) + (offset), (token), (UINT8 *)(pos) - (UINT8 *)(token)); \
   (token) = (UINT8 *)(token) + (offset); \
   (pos)   = (UINT8 *)(token) + (offset); \
-}
+} while (0)
 
 VOID
 OcParseBootArgs (

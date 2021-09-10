@@ -151,7 +151,7 @@ OcFlexArrayFree (
 
   if (*FlexArray != NULL) {
     if ((*FlexArray)->Items != NULL) {
-      if ((*FlexArray)->FreeItem) {
+      if ((*FlexArray)->FreeItem != NULL) {
         for (Index = 0; Index < (*FlexArray)->Count; Index++) {
           (*FlexArray)->FreeItem (OcFlexArrayItemAt (*FlexArray, Index));
         }
@@ -161,6 +161,23 @@ OcFlexArrayFree (
     FreePool (*FlexArray);
     *FlexArray = NULL;
   }
+}
+
+VOID
+OcFlexArrayDiscardItem (
+  IN OUT       OC_FLEX_ARRAY       *FlexArray,
+  IN     CONST BOOLEAN             FreeItem
+  )
+{
+  ASSERT (FlexArray != NULL);
+  ASSERT (FlexArray->Items != NULL);
+  ASSERT (FlexArray->Count > 0);
+
+  if (FreeItem && FlexArray->FreeItem != NULL) {
+    FlexArray->FreeItem (OcFlexArrayItemAt (FlexArray, FlexArray->Count - 1));
+  }
+  
+  --FlexArray->Count;
 }
 
 VOID

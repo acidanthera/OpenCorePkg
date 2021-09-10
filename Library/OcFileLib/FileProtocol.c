@@ -412,7 +412,7 @@ OcDirectorySeachContextInit (
 }
 
 EFI_STATUS
-OcEnsureDirectory (
+OcEnsureDirectoryFile (
   IN     EFI_FILE_PROTOCOL        *File,
   IN     BOOLEAN                  IsDirectory
   )
@@ -460,7 +460,7 @@ OcGetNewestFileFromDirectory (
   LatestIndex = 0;
   LatestEpoch = 0;
 
-  Status = OcEnsureDirectory (Directory, TRUE);
+  Status = OcEnsureDirectoryFile (Directory, TRUE);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -592,7 +592,7 @@ OcScanDirectory (
   ASSERT (Directory != NULL);
   ASSERT (ProcessEntry != NULL);
 
-  Status = OcEnsureDirectory (Directory, TRUE);
+  Status = OcEnsureDirectoryFile (Directory, TRUE);
   if (EFI_ERROR (Status)) {
     return Status;
   }

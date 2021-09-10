@@ -84,6 +84,9 @@ ProcessVmlinuzFile (
     return EFI_NOT_FOUND;
   }
 
+  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Found %s...\n", FileInfo->FileName ));
+
   if (VmlinuzFile == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -129,7 +132,7 @@ CreateRootPartuuid (
   UINTN           Length;
   UINTN           NumPrinted;
 
-  Length = L_STR_LEN ("root=PARTUUID=") + OC_EFI_GUID_STR_LEN;
+  Length = L_STR_LEN ("root=PARTUUID=") + GUID_STRING_LENGTH;
 
   *Dest = AllocatePool (Length + 1);
   if (*Dest == NULL) {
@@ -174,7 +177,8 @@ AutodetectTitle (
     }
 
     if (Found) {
-      DEBUG ((DEBUG_INFO, "LNX: Found distro %a\n", mPrettyName));
+      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Found distro %a\n", mPrettyName));
     } else {
       DEBUG ((DEBUG_WARN, "LNX: Neither %a nor %a found in %s\n", "PRETTY_NAME", "NAME", OS_RELEASE_FILE));
     }
@@ -201,7 +205,8 @@ LoadEtcFiles (
   if (Contents == NULL) {
     DEBUG ((DEBUG_WARN, "LNX: %s not found\n", OS_RELEASE_FILE));
   } else {
-    DEBUG ((DEBUG_INFO, "LNX: Reading %s\n", OS_RELEASE_FILE));
+    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Reading %s\n", OS_RELEASE_FILE));
     Status = OcParseVars (Contents, &mEtcOsReleaseOptions, FALSE);
     if (EFI_ERROR (Status)) {
       FreePool (Contents);
@@ -223,7 +228,8 @@ LoadEtcFiles (
   if (Contents == NULL) {
     DEBUG ((DEBUG_WARN, "LNX: %s not found (bootloader is not GRUB?)\n", GRUB_DEFAULT_FILE));
   } else {
-    DEBUG ((DEBUG_INFO, "LNX: Reading %s\n", GRUB_DEFAULT_FILE));
+    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Reading %s\n", GRUB_DEFAULT_FILE));
     Status = OcParseVars (Contents, &mEtcDefaultGrubOptions, FALSE);
     if (EFI_ERROR (Status)) {
       FreePool (Contents);
@@ -465,7 +471,6 @@ GenerateEntriesForVmlinuzFiles (
   UINTN                           InitrdIndex;
   UINTN                           ShortestMatch;
   UINTN                           DirectoryPathLength;
-  NAMED_LOADER_ENTRY              *NamedEntry;
   LOADER_ENTRY                    *Entry;
   VMLINUZ_FILE                    *VmlinuzFile;
   VMLINUZ_FILE                    *InitrdFile;
@@ -481,8 +486,7 @@ GenerateEntriesForVmlinuzFiles (
 
     IsRescue = FALSE;
     if (OcUnicodeStartsWith (VmlinuzFile->Version, L"0", FALSE)
-      || StrStr (VmlinuzFile->Version, L"rescue") != NULL
-      || StrStr (VmlinuzFile->Version, L"recovery") != NULL) {
+      || StrStr (VmlinuzFile->Version, L"rescue") != NULL) {
       //
       // We might have to scan /boot/grb/grub.cfg as grub os-prober does if
       // we want to find rescue version options, or we need to find a way
@@ -524,28 +528,11 @@ GenerateEntriesForVmlinuzFiles (
     }
 
     //
-    // Version.
+    // Id and version from filename.
     //
-    Entry->Version = AllocateCopyPool (
-      VmlinuzFile->StrLen - (VmlinuzFile->Version - VmlinuzFile->FileName) + 1,
-      &Entry->Linux[VmlinuzFile->Version - VmlinuzFile->FileName + DirectoryPathLength + 1]
-      );
-    if (Entry->Version == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-
-    //
-    // FileName & Id.
-    //
-    NamedEntry = InternalCreateNamedLoaderEntry (Entry, VmlinuzFile->FileName);
-    if (NamedEntry == NULL) {
-      InternalFreeLoaderEntry (&Entry);
-      return EFI_OUT_OF_RESOURCES;
-    } else {
-      //
-      // Named entry filename - do not free twice.
-      //
-      VmlinuzFile->FileName = NULL;
+    Status = InternalIdVersionFromFileName (Entry, VmlinuzFile->FileName);
+    if (EFI_ERROR (Status)) {
+      return Status;
     }
 
     //
@@ -561,9 +548,10 @@ GenerateEntriesForVmlinuzFiles (
     //
     if (InitrdMatch == NULL) {
       //
-      // No need for WARN, where initrd was required user will see clear (and safe) warning from Linux kernel.
+      // Note that where initrd was required user will see clear (and safe, i.e. will
+      // not just boot incorrectly) warning from Linux kernel as well.
       //
-      DEBUG ((DEBUG_INFO, "LNX: No matching initrd/initramfs file found for %a\n", Entry->Linux));
+      DEBUG ((DEBUG_WARN, "LNX: No matching initrd/initramfs file found for %a\n", Entry->Linux));
     } else {
       Option = OcFlexArrayAddItem (Entry->Initrds);
       if (Option == NULL) {
@@ -630,7 +618,7 @@ InternalAutodetectLinux (
 
   Status = OcSafeFileOpen (RootDirectory, &RootFsFile, ROOT_FS_FILE, EFI_FILE_MODE_READ, 0);
   if (!EFI_ERROR (Status)) {
-    Status = OcEnsureDirectory (RootFsFile, FALSE);
+    Status = OcEnsureDirectoryFile (RootFsFile, FALSE);
     RootFsFile->Close (RootFsFile);
   }
   if (EFI_ERROR (Status)) {
@@ -659,8 +647,8 @@ InternalAutodetectLinux (
   }
 
   if (!EFI_ERROR (Status)) {
-    gNamedLoaderEntries = OcFlexArrayInit (sizeof (NAMED_LOADER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM) InternalFreeNamedLoaderEntry);
-    if (gNamedLoaderEntries == NULL) {
+    gLoaderEntries = OcFlexArrayInit (sizeof (LOADER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM) InternalFreeLoaderEntry);
+    if (gLoaderEntries == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     } else {
       Status = LoadEtcFiles (RootDirectory);
@@ -671,14 +659,14 @@ InternalAutodetectLinux (
     }
 
     if (!EFI_ERROR (Status)) {
-      Status = InternalConvertNamedLoaderEntriesToBootEntries (
+      Status = InternalConvertLoaderEntriesToBootEntries (
         RootDirectory,
         Entries,
         NumEntries
       );
     }
 
-    OcFlexArrayFree (&gNamedLoaderEntries);
+    OcFlexArrayFree (&gLoaderEntries);
   }
 
   if (mVmlinuzFiles != NULL) {
@@ -704,9 +692,10 @@ AutodetectLinux (
 
   Status = InternalAutodetectLinux (RootDirectory, Entries, NumEntries);
   
-  if (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) {
-    DEBUG ((DEBUG_WARN, "LNX: AutodetectLinux - %r\n", Status));
-  }
+  DEBUG ((
+    (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) ? DEBUG_WARN : DEBUG_INFO,
+    "LNX: AutodetectLinux - %r\n",
+    Status));
 
   return Status;
 }

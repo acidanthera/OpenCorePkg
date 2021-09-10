@@ -71,6 +71,18 @@ OcFlexArrayAddItem (
   );
 
 /**
+  Discard last item on flex array, optionally calling item free method.
+
+  @param[in,out]  FlexArray     Flex array to modify.
+  @param[in]      FreeItem      Whether to call item free method.
+**/
+VOID
+OcFlexArrayDiscardItem (
+  IN OUT       OC_FLEX_ARRAY       *FlexArray,
+  IN     CONST BOOLEAN             FreeItem
+  );
+
+/**
   Insert new item at position in flex array, resizing array if necessary. New item memory is zeroed.
 
   @param[in,out]  FlexArray     Flex array to modify.
@@ -258,6 +270,6 @@ struct OC_STRING_BUFFER_ {
   CHAR8                           *String;
   UINTN                           StringLength;
   UINTN                           BufferSize;
-  };
+};
 
 #endif // OC_FLEX_ARRAY_LIB_H

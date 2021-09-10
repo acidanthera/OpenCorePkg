@@ -42,3 +42,4 @@
   GrubVars.c
   LoaderEntry.c
   OpenLinuxBoot.c
+  VersionCompare.c

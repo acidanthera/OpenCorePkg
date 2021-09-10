@@ -29,11 +29,6 @@
 **/
 #define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
 
-/**
-  Character length of EFI_GUID string representation.
-**/
-#define OC_EFI_GUID_STR_LEN (sizeof (EFI_GUID) * 2 + 4)
-
 BOOLEAN
 FindPattern (
   IN CONST UINT8   *Pattern,

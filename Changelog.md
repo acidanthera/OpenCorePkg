@@ -1,5 +1,9 @@
 OpenCore Changelog
 ==================
+#### v0.7.4
+- Fixed Linux kernel sort order
+- Added Linux boot optional log detail
+
 #### v0.7.3
 - Improved SSDT-PNLF compatibility with CFL+ graphics
 - Fixed OpenCanopy performance loss due to redrawing introduced in 0.6.9
