@@ -1244,10 +1244,10 @@
 		<dict>
 			<key>AdviseFeatures</key>
 			<false/>
-			<key>MaxBIOSVersion</key>
-			<false/>
 			<key>MLB</key>
 			<string></string>
+			<key>MaxBIOSVersion</key>
+			<false/>
 			<key>ProcessorType</key>
 			<integer>0</integer>
 			<key>ROM</key>
@@ -1869,9 +1869,9 @@
 			<true/>
 			<key>ExitBootServicesDelay</key>
 			<integer>0</integer>
-			<key>ForgeUefiSupport</key>
-			<false/>
 			<key>ForceOcWriteFlash</key>
+			<false/>
+			<key>ForgeUefiSupport</key>
 			<false/>
 			<key>IgnoreInvalidFlexRatio</key>
 			<false/>
