@@ -576,6 +576,13 @@ ScanIntelProcessor (
     //
     Cpu->CoreCount   = 0;
     Cpu->ThreadCount = 0;
+  } else if (Cpu->CpuGeneration == OcCpuGenerationPrePenryn
+    && Cpu->MaxId < CPUID_CACHE_PARAMS) {
+    //
+    // Legacy Pentium 4, e.g. 541.
+    // REF: https://github.com/acidanthera/bugtracker/issues/1783
+    //
+    Cpu->CoreCount   = 1;
   } else {
     Msr = AsmReadMsr64 (MSR_CORE_THREAD_COUNT);
     Cpu->CoreCount   = (UINT16)BitFieldRead64 (Msr, 16, 31);
