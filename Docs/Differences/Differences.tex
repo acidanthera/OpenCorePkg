@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Sep  7 21:42:57 2021
-%DIF ADD ../Configuration.tex        Tue Sep  7 21:45:23 2021
+%DIF DEL PreviousConfiguration.tex   Sat Sep 11 00:38:52 2021
+%DIF ADD ../Configuration.tex        Mon Sep 13 16:54:52 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -656,21 +656,27 @@ the \hyperref[miscsecurityprops]{Security Properties} section of this document.
 The \texttt{OC\ config} file, as with any property list file, can be edited with
 any text editor, such as nano or vim. However, specialised software
 may provide a better experience. On macOS, the preferred GUI application is
-\href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
-cross-platform and open-source alternative, the
-\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
-utilised.
+\href{https://developer.apple.com/xcode}{Xcode}. \DIFdelbegin \DIFdel{For a lightweight}\DIFdelend \DIFaddbegin \DIFadd{The
+}\href{https://github.com/corpnewt/ProperTree}{\DIFadd{ProperTree}} \DIFadd{editor
+is a lightweight, }\DIFaddend cross-platform and open-source alternative\DIFdelbegin \DIFdel{, the
+}\href{https://github.com/corpnewt/ProperTree}{\DIFdel{ProperTree}} %DIFAUXCMD
+\DIFdel{editor can be
+utilised}\DIFdelend .
 
-It is strongly advised not to use any software that is aware of the internal
-configration structure as it constantly gets out of date and will cause
+It is strongly \DIFdelbegin \DIFdel{advised not to use any software that is }\DIFdelend \DIFaddbegin \DIFadd{recommended to avoid configuration creation tools that are }\DIFaddend aware of the
+internal \DIFdelbegin \DIFdel{configration structure as it constantly gets out of date and will cause
 incorrect configuration to be generated. If it is a must desprite the
-warning one should make sure to only use stable versions of OpenCore
-with explicit support for the particular version in the app. The choice
-of open-source implementations with transparent binary generation
-is encouraged (e.g. \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}),
-since other tools may contain malware. Remember that a configuration
-made for a different hardware setup shall never be used on another hardware
-setup.
+warning one should make sure to only use }\DIFdelend \DIFaddbegin \DIFadd{configuration structure as this may result in invalid configurations (since the
+structure gets constantly updated). If such tools are to be used despite this warning,
+ensure that only }\DIFaddend stable versions of OpenCore \DIFdelbegin \DIFdel{with explicit support for the particular version in the app.
+The choice
+}\DIFdelend \DIFaddbegin \DIFadd{explicitly supported by such tools are used.
+In such cases, the use }\DIFaddend of open-source implementations with transparent binary generation
+\DIFdelbegin \DIFdel{is encouraged (e.g. }\DIFdelend \DIFaddbegin \DIFadd{(such as }\DIFaddend \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}) \DIFdelbegin \DIFdel{,
+since }\DIFdelend \DIFaddbegin \DIFadd{is encouraged, given
+that }\DIFaddend other tools may contain malware. \DIFdelbegin \DIFdel{Remember that a configuration
+made for a different hardware setup shall }\DIFdelend \DIFaddbegin \DIFadd{In addition, configurations created for a specific
+hardware setup should }\DIFaddend never be used on \DIFdelbegin \DIFdel{another hardware setup}\DIFdelend \DIFaddbegin \DIFadd{different hardware setups}\DIFaddend .
 
 For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
@@ -2576,9 +2582,9 @@ blocking.
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
   VT-d support in other systems in case they need this.
 
-  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices 
-  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
-  link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
+  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices
+  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up
+  link-down state infinitely and a Wi-Fi adapter may fail to discover networks.
   Gigabyte is one of the most common OEMs with these issues.
 
 \item
@@ -6351,7 +6357,10 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     filesystem to initially be mounted read-only via the \texttt{ro} kernel option. Set this bit to add this
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
-    distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
+    distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag\DIFaddbegin \DIFadd{.
+	  }\item \texttt{\DIFadd{0x00004000}} \DIFadd{(bit }\texttt{\DIFadd{14}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}}\DIFadd{,
+	  Add additional debug log info about files encountered and autodetect options added while scanning for
+    Linux boot entries}\DIFaddend .
 	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
 	  Adds a human readable file system type, followed by the first eight characters of the
 	  partition's unique partition uuid, to each generated entry name. Can help with debugging
@@ -6479,7 +6488,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory using the settings specified in the 
+  directory using the settings specified in the
   \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
