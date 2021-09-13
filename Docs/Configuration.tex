@@ -6290,7 +6290,8 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
 	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
-	  Add additional debug log info about files encountered while scanning for Linux boot entries.
+	  Add additional debug log info about files encountered and autodetect options added while scanning for
+    Linux boot entries.
 	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
 	  Adds a human readable file system type, followed by the first eight characters of the
 	  partition's unique partition uuid, to each generated entry name. Can help with debugging

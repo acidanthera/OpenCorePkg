@@ -10,10 +10,6 @@
 #define OC_TRACE_GRUB_VARS DEBUG_VERBOSE
 #endif
 
-#if !defined(OC_TRACE_KERNEL_OPTS)
-#define OC_TRACE_KERNEL_OPTS DEBUG_VERBOSE
-#endif
-
 #include <Uefi.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>

@@ -327,10 +327,14 @@ AutodetectBootOptions (
   OC_PARSED_VAR     *Option;
   EFI_GUID          Guid;
   CHAR8             *AsciiStrValue;
+  CHAR8             *GrubVarName;
+  CHAR8             **NewOption;
   BOOLEAN           Found;
+  BOOLEAN           PlusOpts;
 
   if ((gLinuxBootFlags & LINUX_BOOT_ADD_RO) != 0) {
-    DEBUG ((OC_TRACE_KERNEL_OPTS, "LNX: Adding \"ro\"\n"));
+    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Adding \"ro\"\n"));
     Status = AddOption (Options, "ro", FALSE);
   }
 
@@ -360,24 +364,64 @@ AutodetectBootOptions (
       }
       
       if (CompareMem (&gPartuuid, &Guid, sizeof (EFI_GUID)) != 0) {
-        DEBUG ((OC_TRACE_KERNEL_OPTS, "LNX: No match %g != %g\n", &gPartuuid, &Guid));
+        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: No match partuuidopts:%g != %g\n", &Guid, &gPartuuid));
       } else {
-        DEBUG ((OC_TRACE_KERNEL_OPTS, "LNX: Using partuuidopts=\"%s\"\n", Option->Unicode.Value));
+        PlusOpts = OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE);
+
+        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Using partuuidopts%a=\"%s\"\n",
+          PlusOpts ? "+" : "",
+          Option->Unicode.Value));
 
         Status = AddOption (Options, Option->Unicode.Value, TRUE);
         if (EFI_ERROR (Status)) {
           return Status;
         }
 
-        //
-        // partuuidopts:{partuuid}+="...": use user options in addition to detected options.
-        //
-        if (!OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE)) {
+        if (!PlusOpts) {
           return EFI_SUCCESS;
         }
 
         Found = TRUE;
       }
+    }
+  }
+
+  //
+  // Use global defaults, if user has defined any.
+  //
+  for (Index = 0; Index < gParsedLoadOptions->Count; Index++) {
+    Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
+    //
+    // Don't use autoopts if partition specific partuuidopts already found.
+    //
+    if (!Found && StrCmp (Option->Unicode.Name, L"autoopts") == 0) {
+      if (Option->Unicode.Value == NULL) {
+        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
+        continue;
+      }
+
+      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Using %s=\"%s\"\n", Option->Unicode.Name, Option->Unicode.Value));
+
+      Status = AddOption (Options, Option->Unicode.Value, TRUE);
+      return Status;
+    } else if (StrCmp (Option->Unicode.Name, L"autoopts+") == 0) {
+      if (Option->Unicode.Value == NULL) {
+        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
+        continue;
+      }
+
+      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Using %s=\"%s\"\n", Option->Unicode.Name, Option->Unicode.Value));
+
+      Status = AddOption (Options, Option->Unicode.Value, TRUE);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
+
+      Found = TRUE;
     }
   }
 
@@ -393,21 +437,32 @@ AutodetectBootOptions (
     // normally stored here, but are generated in the depths of grub scripts.
     //
     for (Index = 0; Index < (IsRescue ? 1u : 2u); Index++) {
+      if (Index == 0) {
+        GrubVarName = "GRUB_CMDLINE_LINUX";
+      } else {
+        GrubVarName = "GRUB_CMDLINE_LINUX_DEFAULT";
+      }
       if (OcParsedVarsGetAsciiStr (
         mEtcDefaultGrubOptions,
-        Index == 0 ? "GRUB_CMDLINE_LINUX" : "GRUB_CMDLINE_LINUX_DEFAULT",
+        GrubVarName,
         &AsciiStrValue
         ) &&
         AsciiStrValue != NULL) {
 
+        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Using %a=\"%a\"\n", GrubVarName, AsciiStrValue));
+
         //
-        // Insert these after "ro" but before "partuuidopts+".
+        // Insert these after "ro" but any user specified opts.
         //
         if (AsciiStrValue[0] != '\0') {
           Status = InsertOption (InsertIndex, Options, AsciiStrValue, FALSE);
           if (EFI_ERROR (Status)) {
             return Status;
           }
+          //
+          // Must not bump this if empty option.
+          //
           InsertIndex++;
         }
 
@@ -421,34 +476,6 @@ AutodetectBootOptions (
   }
 
   //
-  // Use global defaults, if user has defined any.
-  //
-  for (Index = 0; Index < gParsedLoadOptions->Count; Index++) {
-    Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
-    if (!Found && StrCmp (Option->Unicode.Name, L"autoopts") == 0) {
-      if (Option->Unicode.Value == NULL) {
-        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
-        continue;
-      }
-
-      Status = AddOption (Options, Option->Unicode.Value, TRUE);
-      return Status;
-    } else if (StrCmp (Option->Unicode.Name, L"autoopts+") == 0) {
-      if (Option->Unicode.Value == NULL) {
-        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
-        continue;
-      }
-
-      Status = AddOption (Options, Option->Unicode.Value, TRUE);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
-
-      Found = TRUE;
-    }
-  }
-
-  //
   // It might be valid to have no options except "ro", but at least empty
   // string "GRUB_CMDLINE_LINUX" needs to be present in that case or we stop.
   //
@@ -457,7 +484,19 @@ AutodetectBootOptions (
     return EFI_INVALID_PARAMETER;
   }
 
-  return EFI_SUCCESS;
+  //
+  // Insert root=PARTUUID=... option if we get to here.
+  //
+  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Creating \"root=PARTUUID=%g\"\n", gPartuuid));
+
+  NewOption = OcFlexArrayInsertItem (Options, 0);
+  if (NewOption == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+  
+  Status = CreateRootPartuuid (NewOption);
+  return Status;
 }
 
 STATIC
@@ -564,20 +603,7 @@ GenerateEntriesForVmlinuzFiles (
     }
 
     //
-    // root=PARTUUID=... option.
-    //
-    Option = OcFlexArrayAddItem (Entry->Options);
-    if (Option == NULL) {
-      return EFI_OUT_OF_RESOURCES;
-    }
-    
-    Status = CreateRootPartuuid (Option);
-    if (EFI_ERROR (Status)) {
-      return Status;
-    }
-
-    //
-    // Remaining options.
+    // Add all options.
     //
     Status = AutodetectBootOptions (IsRescue, Entry->Options);
     if (EFI_ERROR (Status)) {
