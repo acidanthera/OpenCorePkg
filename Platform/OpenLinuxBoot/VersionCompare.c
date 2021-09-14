@@ -50,7 +50,7 @@ BoundedAsciiStrCmp (
 
 STATIC
 VOID
-GetNextFragement (
+GetNextFragment (
   IN     CONST CHAR8    **Pos,
      OUT CONST CHAR8    **FragmentStart,
      OUT CONST CHAR8    **FragmentEnd,
@@ -170,8 +170,8 @@ DoVersionCompare (
   Pos2 = Version2;
 
   while (TRUE) {
-    GetNextFragement (&Pos1, &FragmentStart1, &FragmentEnd1, &IsAlphaFragment1, &IsSectionBreak1, &SectionChar1);
-    GetNextFragement (&Pos2, &FragmentStart2, &FragmentEnd2, &IsAlphaFragment2, &IsSectionBreak2, &SectionChar2);
+    GetNextFragment (&Pos1, &FragmentStart1, &FragmentEnd1, &IsAlphaFragment1, &IsSectionBreak1, &SectionChar1);
+    GetNextFragment (&Pos2, &FragmentStart2, &FragmentEnd2, &IsAlphaFragment2, &IsSectionBreak2, &SectionChar2);
 
     if (IsSectionBreak1 != IsSectionBreak2) {
       return IsSectionBreak2 ? +1 : -1;
