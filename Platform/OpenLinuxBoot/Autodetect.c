@@ -41,11 +41,19 @@ OC_FLEX_ARRAY
 
 STATIC
 CHAR8
+*mEtcOsReleaseFileContents;
+
+STATIC
+CHAR8
 *mPrettyName;
 
 STATIC
 OC_FLEX_ARRAY
 *mEtcDefaultGrubOptions;
+
+STATIC
+CHAR8
+*mEtcDefaultGrubFileContents;
 
 STATIC
 EFI_STATUS
@@ -155,10 +163,8 @@ AutodetectTitle (
   )
 {
   UINTN             Index;
-  CHAR8             *AsciiStrValue;
   BOOLEAN           Found;
 
-  mPrettyName = NULL;
   if (mEtcOsReleaseOptions != NULL) {
     //
     // If neither are present, default title gets set later to "Linux".
@@ -168,10 +174,9 @@ AutodetectTitle (
       if (OcParsedVarsGetAsciiStr (
         mEtcOsReleaseOptions,
         Index == 0 ? "PRETTY_NAME" : "NAME",
-        &AsciiStrValue
+        &mPrettyName
         ) &&
-        AsciiStrValue != NULL) {
-        mPrettyName = AsciiStrValue;
+        mPrettyName != NULL) {
         Found = TRUE;
         break;
       }
@@ -193,24 +198,28 @@ LoadEtcFiles (
   )
 {
   EFI_STATUS        Status;
-  CHAR8             *Contents;
 
   Status = EFI_SUCCESS;
 
-  mEtcOsReleaseOptions = NULL;
+  mEtcOsReleaseOptions        = NULL;
+  mEtcDefaultGrubOptions      = NULL;
+  mEtcOsReleaseFileContents   = NULL;
+  mEtcDefaultGrubFileContents = NULL;
+  mPrettyName                 = NULL;
 
   //
   // Load distro name from /etc/os-release.
   //
-  Contents = OcReadFileFromDirectory (RootDirectory, OS_RELEASE_FILE, NULL, 0);
-  if (Contents == NULL) {
+  mEtcOsReleaseFileContents = OcReadFileFromDirectory (RootDirectory, OS_RELEASE_FILE, NULL, 0);
+  if (mEtcOsReleaseFileContents == NULL) {
     DEBUG ((DEBUG_WARN, "LNX: %s not found\n", OS_RELEASE_FILE));
   } else {
     DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
       "LNX: Reading %s\n", OS_RELEASE_FILE));
-    Status = OcParseVars (Contents, &mEtcOsReleaseOptions, FALSE);
+    Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, FALSE);
     if (EFI_ERROR (Status)) {
-      FreePool (Contents);
+      FreePool (mEtcOsReleaseFileContents);
+      mEtcOsReleaseFileContents = NULL;
       DEBUG ((DEBUG_WARN, "LNX: Cannot parse %s - %r\n", OS_RELEASE_FILE, Status));
       return Status;
     }
@@ -225,15 +234,16 @@ LoadEtcFiles (
   //
   // Load kernel options from /etc/default/grub.
   //
-  Contents   = OcReadFileFromDirectory (RootDirectory, GRUB_DEFAULT_FILE, NULL, 0);
-  if (Contents == NULL) {
+  mEtcDefaultGrubFileContents   = OcReadFileFromDirectory (RootDirectory, GRUB_DEFAULT_FILE, NULL, 0);
+  if (mEtcDefaultGrubFileContents == NULL) {
     DEBUG ((DEBUG_WARN, "LNX: %s not found (bootloader is not GRUB?)\n", GRUB_DEFAULT_FILE));
   } else {
     DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
       "LNX: Reading %s\n", GRUB_DEFAULT_FILE));
-    Status = OcParseVars (Contents, &mEtcDefaultGrubOptions, FALSE);
+    Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, FALSE);
     if (EFI_ERROR (Status)) {
-      FreePool (Contents);
+      FreePool (mEtcDefaultGrubFileContents);
+      mEtcDefaultGrubFileContents = NULL;
       DEBUG ((DEBUG_WARN, "LNX: Cannot parse %s - %r\n", GRUB_DEFAULT_FILE, Status));
       return Status;
     }
@@ -248,8 +258,20 @@ FreeEtcFiles (
   VOID
   )
 {
+  //
+  // If non-null, refers to string inside mEtcOsReleaseFileContents
+  //
+  mPrettyName = NULL;
+
   OcFlexArrayFree (&mEtcOsReleaseOptions);
+  if (mEtcOsReleaseFileContents != NULL) {
+    FreePool (mEtcOsReleaseFileContents);
+  }
+
   OcFlexArrayFree (&mEtcDefaultGrubOptions);
+  if (mEtcDefaultGrubFileContents != NULL) {
+    FreePool (mEtcDefaultGrubFileContents);
+  }
 }
 
 STATIC
@@ -482,13 +504,21 @@ AutodetectBootOptions (
   }
 
   //
-  // Insert "root=PARTUUID=..." option, followed by "ro" if requested, only if we get to here.
+  // Basic attached drives on OVMF appear as MBR, so it can be more convenient when
+  // debugging e.g. save and load default entry to allow entries with incorrect
+  // (i.e. specifies no drive) root= on NOOPT debugging build.
   //
+//#if !defined(OC_TARGET_NOOPT)
   if (CompareGuid (&gPartuuid, &gEfiPartTypeUnusedGuid)) {
     Status = EFI_UNSUPPORTED;
     DEBUG ((DEBUG_WARN, "LNX: Cannot autodetect root on MBR partition - %r\n", Status));
     return Status;
   }
+//#endif
+
+  //
+  // Insert "root=PARTUUID=..." option, followed by "ro" if requested, only if we get to here.
+  //
   DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
     "LNX: Creating \"root=PARTUUID=%g\"\n", gPartuuid));
 
@@ -592,9 +622,11 @@ GenerateEntriesForVmlinuzFiles (
     //
     // Use title from os-release file.
     //
-    Entry->Title = AllocateCopyPool (AsciiStrSize (mPrettyName), mPrettyName);
-    if (Entry->Title == NULL) {
-      return EFI_OUT_OF_RESOURCES;
+    if (mPrettyName != NULL) {
+      Entry->Title = AllocateCopyPool (AsciiStrSize (mPrettyName), mPrettyName);
+      if (Entry->Title == NULL) {
+        return EFI_OUT_OF_RESOURCES;
+      }
     }
 
     //
