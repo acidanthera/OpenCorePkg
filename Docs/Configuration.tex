@@ -1766,7 +1766,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures.
+  \emph{Note}: The need for this quirk is indicated by early boot failures (e.g. halts at
+  black screen), particularly in early boot of the Linux kernel.
   Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
@@ -6215,21 +6216,30 @@ Drivers tested in basic scenarios can be downloaded from \href{https://github.co
 Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
 tamper-resistance testing, therefore have may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on the EXT4 file system even when the distribution's
-main filesystem is something else such as BTRFS, therefore a suitable UEFI EXT4 file system
+Most Linux distributions keep their boot files on an EXT4 partition even when the distribution's
+root filesystem is something else, such as BTRFS, therefore only an EXT4
 driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
 A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in a somewhat less standard setup where the boot files are on a BTRFS partition,
-e.g. as by default in openSUSE.
+will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
+partition, e.g. as is currently done by default in openSUSE.
 
 Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
 on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
 filesystem driver - but it is not widely used except in Arch Linux.
 
-\emph{Note 2}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
+\emph{Note 2}: \texttt{OpenLinuxBoot} does not attempt to read and interpret the layout of Linux
+installation media (which can be highly variable). Installation media should be booted directly either from
+the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
+then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
+which the machine's own bootloader will refuse to boot.
+
+\emph{Note 3}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
 does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
 therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
 the boot menu.
+
+\emph{Note 4}: Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
+failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
 
 The default parameter values should work well, but if you need to parameterise this driver the following
 options may be specified in \texttt{UEFI/Drivers/Arguments}:
