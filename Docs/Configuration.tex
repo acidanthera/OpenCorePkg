@@ -1299,6 +1299,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
@@ -3012,6 +3013,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{BlessOverride}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add custom scanning paths through the bless model.
 
   To be filled with \texttt{plist\ string} entries containing
@@ -3032,6 +3034,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Entries}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add boot entries to OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
@@ -3046,6 +3049,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
@@ -6426,11 +6430,12 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \item
   \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory using the settings specified in the
-  \hyperref[uefidriversprops]{Drivers Properties} section below.
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers} directory.
+
+  To be filled with \texttt{plist\ dict} values, describing each driver.
+  Refer to the \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
   \texttt{Input}\\
@@ -6465,6 +6470,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions

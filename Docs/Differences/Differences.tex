@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Sep 19 11:55:10 2021
-%DIF ADD ../Configuration.tex        Sun Sep 19 12:23:06 2021
+%DIF DEL PreviousConfiguration.tex   Sun Sep 19 11:04:31 2021
+%DIF ADD ../Configuration.tex        Sun Sep 19 18:07:47 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1368,7 +1368,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
+  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \DIFaddend \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
   Refer to the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below for details.
@@ -3082,7 +3083,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{BlessOverride}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Add custom scanning paths through the bless model.
+  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \DIFaddend \textbf{Description}: Add custom scanning paths through the bless model.
 
   To be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders such as
@@ -3102,7 +3104,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Entries}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Add boot entries to OpenCore picker.
+  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \DIFaddend \textbf{Description}: Add boot entries to OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
@@ -3116,7 +3119,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: Add tool entries to the OpenCore picker.
+  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \DIFaddend \textbf{Description}: Add tool entries to the OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
@@ -6499,11 +6503,14 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \item
   \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory using the settings specified in the
-  \hyperref[uefidriversprops]{Drivers Properties} section below.
+  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{dict}\DIFdelend \DIFaddbegin \DIFadd{array}\DIFaddend }\\
+  \textbf{Failsafe}: \DIFdelbegin \DIFdel{None}\DIFdelend \DIFaddbegin \DIFadd{Empty}\DIFaddend \\
+  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers} directory\DIFdelbegin \DIFdel{using the settings specified in the 
+  }\DIFdelend \DIFaddbegin \DIFadd{.
+}
+
+  \DIFadd{To be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each driver.
+  Refer to the }\DIFaddend \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
   \texttt{Input}\\
@@ -6538,7 +6545,8 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
+  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \DIFaddend \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
