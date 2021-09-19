@@ -1306,6 +1306,8 @@
 		<key>Drivers</key>
 		<array>
 			<dict>
+				<key>Comment</key>
+				<string>HFS+ Driver</string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1314,6 +1316,8 @@
 				<string>HfsPlus.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1322,6 +1326,8 @@
 				<string>OpenRuntime.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1330,6 +1336,8 @@
 				<string>OpenCanopy.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1338,6 +1346,8 @@
 				<string>AudioDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1346,6 +1356,8 @@
 				<string>OpenPartitionDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1354,6 +1366,8 @@
 				<string>OpenUsbKbDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1362,6 +1376,8 @@
 				<string>UsbMouseDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1370,6 +1386,8 @@
 				<string>Ps2KeyboardDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1380,12 +1398,16 @@
 			<dict>
 				<key>Arguments</key>
 				<string></string>
+				<key>Comment</key>
+				<string></string>
 				<key>Enabled</key>
 				<false/>
 				<key>Path</key>
 				<string>HiiDatabase.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1394,6 +1416,8 @@
 				<string>NvmExpressDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1402,6 +1426,8 @@
 				<string>XhciDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1410,6 +1436,8 @@
 				<string>ExFatDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1418,6 +1446,8 @@
 				<string>CrScreenshotDxe.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>
@@ -1426,6 +1456,8 @@
 				<string>ext4_x64.efi</string>
 			</dict>
 			<dict>
+				<key>Comment</key>
+				<string></string>
 				<key>Arguments</key>
 				<string></string>
 				<key>Enabled</key>

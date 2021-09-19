@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Sep 11 00:38:52 2021
-%DIF ADD ../Configuration.tex        Mon Sep 13 16:54:52 2021
+%DIF DEL PreviousConfiguration.tex   Sun Sep 19 11:55:10 2021
+%DIF ADD ../Configuration.tex        Sun Sep 19 12:23:06 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1835,8 +1835,10 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures.
-  Only firmware released after 2017 is typically affected.
+  \emph{Note}: The need for this quirk is indicated by early boot failures \DIFdelbegin \DIFdel{.
+  }\DIFdelend \DIFaddbegin \DIFadd{(e.g. halts at
+  black screen), particularly in early boot of the Linux kernel.
+  }\DIFaddend Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
 
@@ -6284,23 +6286,35 @@ Drivers tested in basic scenarios can be downloaded from \href{https://github.co
 Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
 tamper-resistance testing, therefore have may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on the EXT4 file system even when the distribution's
-main filesystem is something else such as BTRFS, therefore a suitable UEFI EXT4 file system
-driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
+Most Linux distributions keep their boot files on \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{an }\DIFaddend EXT4 \DIFdelbegin \DIFdel{file system }\DIFdelend \DIFaddbegin \DIFadd{partition }\DIFaddend even when the distribution's
+\DIFdelbegin \DIFdel{main }\DIFdelend \DIFaddbegin \DIFadd{root }\DIFaddend filesystem is something else\DIFaddbegin \DIFadd{, }\DIFaddend such as BTRFS, therefore \DIFdelbegin \DIFdel{a suitable UEFI }\DIFdelend \DIFaddbegin \DIFadd{only an }\DIFaddend EXT4
+\DIFdelbegin \DIFdel{file system
+}\DIFdelend driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
 A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in a somewhat less standard setup where the boot files are on a BTRFS partition,
-e.g. as by default in openSUSE.
+will be required in \DIFdelbegin \DIFdel{a }\DIFdelend \DIFaddbegin \DIFadd{the currently }\DIFaddend somewhat less standard \DIFdelbegin \DIFdel{setup }\DIFdelend \DIFaddbegin \DIFadd{situation }\DIFaddend where the boot files are on a BTRFS
+partition, e.g. as \DIFaddbegin \DIFadd{is currently done }\DIFaddend by default in openSUSE.
 
 Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
 on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
 filesystem driver - but it is not widely used except in Arch Linux.
 
-\emph{Note 2}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
+\emph{Note 2}: \DIFaddbegin \texttt{\DIFadd{OpenLinuxBoot}} \DIFadd{does not attempt to read and interpret the layout of Linux
+installation media (which can be highly variable). Installation media should be booted directly either from
+the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
+then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
+which the machine's own bootloader will refuse to boot.
+}
+
+\emph{\DIFadd{Note 3}}\DIFadd{: }\DIFaddend systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
 does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
 therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
 the boot menu.
 
-The default parameter values should work well, but if you need to parameterise this driver the following
+\DIFaddbegin \emph{\DIFadd{Note 4}}\DIFadd{: Be aware of the }\texttt{\DIFadd{SyncRuntimePermissions}} \DIFadd{quirk, which may need to be set to avoid early boot
+failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
+}
+
+\DIFaddend The default parameter values should work well, but if you need to parameterise this driver the following
 options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
@@ -6357,11 +6371,11 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     filesystem to initially be mounted read-only via the \texttt{ro} kernel option. Set this bit to add this
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
-    distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag\DIFaddbegin \DIFadd{.
-	  }\item \texttt{\DIFadd{0x00004000}} \DIFadd{(bit }\texttt{\DIFadd{14}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}}\DIFadd{,
+    distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
+	  \item \DIFaddbegin \texttt{\DIFadd{0x00004000}} \DIFadd{(bit }\texttt{\DIFadd{14}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}}\DIFadd{,
 	  Add additional debug log info about files encountered and autodetect options added while scanning for
-    Linux boot entries}\DIFaddend .
-	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
+    Linux boot entries.
+	  }\item \DIFaddend \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
 	  Adds a human readable file system type, followed by the first eight characters of the
 	  partition's unique partition uuid, to each generated entry name. Can help with debugging
 	  the origin of entries generated by the driver when there are multiple Linux installs on
@@ -6940,6 +6954,15 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \subsection{Drivers Properties}\label{uefidriversprops}
 
 \begin{enumerate}
+\DIFaddbegin 
+
+\item
+  \texttt{\DIFadd{Comment}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  reference for the entry. Whether this value is used is implementation defined.
+  }\DIFaddend 
 
 \item
   \texttt{Path}\\

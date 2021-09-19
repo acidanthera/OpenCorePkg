@@ -34,15 +34,15 @@ UEFIDriverHasDuplication (
   IN  CONST VOID  *SecondaryDriver
   )
 {
-  CONST OC_STRING           *UEFIPrimaryDriver;
-  CONST OC_STRING           *UEFISecondaryDriver;
-  CONST CHAR8               *UEFIDriverPrimaryString;
-  CONST CHAR8               *UEFIDriverSecondaryString;
+  CONST OC_UEFI_DRIVER_ENTRY  *UEFIPrimaryDriver;
+  CONST OC_UEFI_DRIVER_ENTRY  *UEFISecondaryDriver;
+  CONST CHAR8                 *UEFIDriverPrimaryString;
+  CONST CHAR8                 *UEFIDriverSecondaryString;
 
-  UEFIPrimaryDriver         = *(CONST OC_STRING **) PrimaryDriver;
-  UEFISecondaryDriver       = *(CONST OC_STRING **) SecondaryDriver;
-  UEFIDriverPrimaryString   = OC_BLOB_GET (UEFIPrimaryDriver);
-  UEFIDriverSecondaryString = OC_BLOB_GET (UEFISecondaryDriver);
+  UEFIPrimaryDriver         = *(CONST OC_UEFI_DRIVER_ENTRY **) PrimaryDriver;
+  UEFISecondaryDriver       = *(CONST OC_UEFI_DRIVER_ENTRY **) SecondaryDriver;
+  UEFIDriverPrimaryString   = OC_BLOB_GET (&UEFIPrimaryDriver->Path);
+  UEFIDriverSecondaryString = OC_BLOB_GET (&UEFISecondaryDriver->Path);
 
   return StringIsDuplicated ("UEFI->Drivers", UEFIDriverPrimaryString, UEFIDriverSecondaryString);
 }
@@ -232,6 +232,7 @@ CheckUEFIDrivers (
   OC_UEFI_CONFIG               *UserUefi;
   UINT32                       Index;
   OC_UEFI_DRIVER_ENTRY         *DriverEntry;
+  CONST CHAR8                  *Comment;
   CONST CHAR8                  *Driver;
   BOOLEAN                      HasOpenRuntimeEfiDriver;
   BOOLEAN                      HasOpenUsbKbDxeEfiDriver;
@@ -260,6 +261,7 @@ CheckUEFIDrivers (
   IndexAudioDxeEfiDriver       = 0;
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
     DriverEntry = UserUefi->Drivers.Values[Index];
+    Comment     = OC_BLOB_GET (&DriverEntry->Comment);
     Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
@@ -273,6 +275,10 @@ CheckUEFIDrivers (
     //
     // Sanitise strings.
     //
+    if (!AsciiCommentIsLegal (Comment)) {
+      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u]->Comment contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
     if (!AsciiUefiDriverIsLegal (Driver, Index)) {
       ++ErrorCount;
       continue;
