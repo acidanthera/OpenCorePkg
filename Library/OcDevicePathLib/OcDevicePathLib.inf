@@ -45,6 +45,7 @@
   DevicePathLib
   MemoryAllocationLib
   OcFileLib
+  OcStringLib
   UefiBootServicesTableLib
 
 [Guids]
@@ -54,5 +55,6 @@
   gEfiDevicePathToTextProtocolGuid
   gEfiSimpleFileSystemProtocolGuid
   gEfiBlockIoProtocolGuid
+  gEfiPciIoProtocolGuid
   gEfiUsbIoProtocolGuid
   gEfiLoadFileProtocolGuid
