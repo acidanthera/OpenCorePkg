@@ -252,7 +252,7 @@ RsaVerifySigHashFromProcessed (
   }
 
   if (SignatureSize != ModulusSize) {
-    DEBUG ((DEBUG_INFO, "OCCR: Signature length does not match key length"));
+    DEBUG ((DEBUG_INFO, "OCCR: Signature length does not match key length\n"));
     return FALSE;
   }
 

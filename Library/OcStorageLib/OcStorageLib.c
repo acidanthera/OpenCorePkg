@@ -161,7 +161,7 @@ OcStorageInitializeVault (
     OC_STORAGE_VAULT_DESTRUCT (&Context->Vault, sizeof (Context->Vault));
     DEBUG ((
       DEBUG_ERROR,
-      "OCST: Unsupported vault data verion %u vs %u\n",
+      "OCST: Unsupported vault data version %u vs %u\n",
       Context->Vault.Version,
       OC_STORAGE_VAULT_VERSION
       ));
