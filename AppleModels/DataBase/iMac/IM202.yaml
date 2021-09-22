@@ -32,9 +32,9 @@ FirmwareFeatures: 0xFD8FF576
 # FIXME:
 FirmwareFeaturesMask: 0xFFDFFF7F
 # FIXME:
-ExtendedFirmwareFeatures: 0x00000000FD8FF576
+ExtendedFirmwareFeatures: 0x00000008FD8FF576
 # FIXME:
-ExtendedFirmwareFeaturesMask: 0x00000000FFDFFF7F
+ExtendedFirmwareFeaturesMask: 0x00000008FFDFFF7F
 MemoryFormFactor: 0x9
 # FIXME: Correct this one
 ProcessorType:

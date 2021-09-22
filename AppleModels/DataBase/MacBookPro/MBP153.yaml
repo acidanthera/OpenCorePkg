@@ -31,9 +31,9 @@ FirmwareFeatures: 0xFD8FF426
 # FIXME: check
 FirmwareFeaturesMask: 0xFF9FFF3F
 # FIXME: check
-ExtendedFirmwareFeatures: 0x00000000FD8FF426
+ExtendedFirmwareFeatures: 0x00000008FD8FF426
 # FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF9FFF3F
+ExtendedFirmwareFeaturesMask: 0x00000008FF9FFF3F
 MemoryFormFactor: 0xD
 # FIXME: Correct this one
 ProcessorType:

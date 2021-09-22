@@ -30,9 +30,9 @@ FirmwareFeatures: 0xFC0FE137
 # FIXME: check
 FirmwareFeaturesMask: 0xFF1FFF3F
 # FIXME: check
-ExtendedFirmwareFeatures: 0x00000000FC0FE137
+ExtendedFirmwareFeatures: 0x00000008FC0FE137
 # FIXME: check
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+ExtendedFirmwareFeaturesMask: 0x00000008FF1FFF3F
 MemoryFormFactor: 0x9
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:

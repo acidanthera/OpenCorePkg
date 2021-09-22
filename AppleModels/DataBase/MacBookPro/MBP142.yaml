@@ -27,8 +27,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x1A
 FirmwareFeatures: 0xFF0FF57E
 FirmwareFeaturesMask: 0xFF1FFF7F
-ExtendedFirmwareFeatures: 0x00000000FF0FF57E
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
+ExtendedFirmwareFeatures: 0x00000008FF0FF57E
+ExtendedFirmwareFeaturesMask: 0x00000008FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:

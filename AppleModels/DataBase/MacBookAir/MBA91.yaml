@@ -23,8 +23,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x3A
 FirmwareFeatures: 0xFFAFF06E
 FirmwareFeaturesMask: 0xFFFFFF7F
-ExtendedFirmwareFeatures: 0x00000000FFAFF06E
-ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
+ExtendedFirmwareFeatures: 0x00000008FFAFF06E
+ExtendedFirmwareFeaturesMask: 0x00000008FFFFFF7F
 MemoryFormFactor: 0xD
 ProcessorType:
   - 0x070B

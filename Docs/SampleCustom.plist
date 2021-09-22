@@ -1243,7 +1243,7 @@
 		<key>Generic</key>
 		<dict>
 			<key>AdviseFeatures</key>
-			<true/>
+			<false/>
 			<key>MLB</key>
 			<string></string>
 			<key>MaxBIOSVersion</key>
@@ -1504,9 +1504,9 @@
 			<key>BID</key>
 			<string>Mac-AA95B1DDAB278B95</string>
 			<key>FirmwareFeatures</key>
-			<data>dvWP/QAAAAA=</data>
+			<data>dvWP/QgAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
-			<data>f//f/wAAAAA=</data>
+			<data>f//f/wgAAAA=</data>
 			<key>MLB</key>
 			<string>M0000000000000001</string>
 			<key>ROM</key>
@@ -1549,9 +1549,9 @@
 			<key>ChassisVersion</key>
 			<string>Mac-AA95B1DDAB278B95</string>
 			<key>FirmwareFeatures</key>
-			<data>dvWP/QAAAAA=</data>
+			<data>dvWP/QgAAAA=</data>
 			<key>FirmwareFeaturesMask</key>
-			<data>f//f/wAAAAA=</data>
+			<data>f//f/wgAAAA=</data>
 			<key>PlatformFeature</key>
 			<integer>32</integer>
 			<key>ProcessorType</key>
