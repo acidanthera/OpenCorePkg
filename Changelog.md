@@ -5,6 +5,7 @@ OpenCore Changelog
 - Added Linux detection optional log detail
 - Fixed CPU core count detection for more legacy CPUs
 - Added ability to fully override autodetect Linux boot options
+- Added large BaseSystem support in `AdviseFeatures`
 
 #### v0.7.3
 - Improved SSDT-PNLF compatibility with CFL+ graphics

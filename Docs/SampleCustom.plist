@@ -1243,7 +1243,7 @@
 		<key>Generic</key>
 		<dict>
 			<key>AdviseFeatures</key>
-			<false/>
+			<true/>
 			<key>MLB</key>
 			<string></string>
 			<key>MaxBIOSVersion</key>

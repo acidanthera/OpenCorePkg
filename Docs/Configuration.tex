@@ -5083,6 +5083,9 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
       a drive with an EFI partition that is the first partition on the disk.
     \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
     - Without this bit, it is not possible to install macOS on an APFS disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM} (\texttt{0x800000000})
+    - Without this bit, it is not possible to install macOS versions with large
+      BaseSystem images, such as macOS 12.
   \end{itemize}
 
   \emph{Note}: On most newer firmwares these bits are already set, the option

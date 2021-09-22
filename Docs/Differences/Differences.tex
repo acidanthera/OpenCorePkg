@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Sep 19 11:04:31 2021
-%DIF ADD ../Configuration.tex        Sun Sep 19 18:07:47 2021
+%DIF DEL PreviousConfiguration.tex   Sun Sep 12 01:31:15 2021
+%DIF ADD ../Configuration.tex        Wed Sep 22 18:46:43 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4136,10 +4136,14 @@ rm vault.pub
   can be found in the \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
-  \emph{Note 2}: \texttt{vault.plist} and \texttt{vault.sig} are used regardless of
-  this option when \texttt{vault.plist} is present or a public key is embedded into
-  \texttt{OpenCore.efi}. Setting this option will only ensure configuration sanity,
-  and abort the boot process otherwise.
+  \emph{Note 2}:  \DIFdelbegin \texttt{\DIFdel{vault.plist}} %DIFAUXCMD
+\DIFdel{and }\texttt{\DIFdel{vault.sig}} %DIFAUXCMD
+\DIFdel{are used regardless }\DIFdelend \DIFaddbegin \DIFadd{Regardless }\DIFaddend of this option\DIFdelbegin \DIFdel{when }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend \texttt{vault.plist} is \DIFdelbegin \DIFdel{present or }\DIFdelend \DIFaddbegin \DIFadd{always used when
+  present, and both }\texttt{\DIFadd{vault.plist}} \DIFadd{and }\texttt{\DIFadd{vault.sig}} \DIFadd{are used and required
+  when }\DIFaddend a public key is embedded into \texttt{OpenCore.efi}\DIFdelbegin \DIFdel{. Setting this option will only ensure configuration sanity, and }\DIFdelend \DIFaddbegin \DIFadd{, and errors will }\DIFaddend abort the
+  boot process \DIFdelbegin \DIFdel{otherwise. }\DIFdelend \DIFaddbegin \DIFadd{in either case. Setting this option allows OpenCore to warn the user if
+  the configuration is not as required to achieve an expected higher security level.
+}\DIFaddend 
 
 \item
   \texttt{ScanPolicy}\\
@@ -5152,7 +5156,10 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
       a drive with an EFI partition that is the first partition on the disk.
     \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
     - Without this bit, it is not possible to install macOS on an APFS disk.
-  \end{itemize}
+    \DIFaddbegin \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM}} \DIFadd{(}\texttt{\DIFadd{0x800000000}}\DIFadd{)
+    - Without this bit, it is not possible to install macOS versions with large
+      BaseSystem images, such as macOS 12.
+  }\DIFaddend \end{itemize}
 
   \emph{Note}: On most newer firmwares these bits are already set, the option
   may be necessary when "upgrading" the firmware with new features.
