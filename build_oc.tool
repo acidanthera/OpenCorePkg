@@ -197,6 +197,7 @@ package() {
     "CreateVault"
     "macrecovery"
     "kpdescribe"
+    "ShimToSig"
     )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" "${dstdir}/Utilities"/ || exit 1

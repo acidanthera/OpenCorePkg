@@ -7,6 +7,7 @@ OpenCore Changelog
 - Added ability to fully override autodetect Linux boot options
 - Added large BaseSystem support in `AdviseFeatures`
 - Updated builtin firmware versions for SMBIOS and the rest
+- Added tool to extract vendor secure boot certificate from GRUB shim file
 
 #### v0.7.3
 - Improved SSDT-PNLF compatibility with CFL+ graphics
