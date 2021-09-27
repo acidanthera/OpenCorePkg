@@ -24,7 +24,7 @@
 
 [LibraryClasses]
   OcBootManagementLib
-  OcDebugLogLib
+  DebugLib
   OcFileLib
   OcFlexArrayLib
   SortLib

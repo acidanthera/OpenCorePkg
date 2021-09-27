@@ -31,9 +31,9 @@
 
 [LibraryClasses]
   BaseLib
+  DebugLib
   UefiLib
   UefiBootServicesTableLib
   MemoryAllocationLib
-  OcDebugLogLib
   OcMiscLib
   TimerLib
