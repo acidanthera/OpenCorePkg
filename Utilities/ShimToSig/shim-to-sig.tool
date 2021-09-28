@@ -63,7 +63,7 @@ if [ $? -ne 0 ]; then
     sig-list-to-certs "$certfile" "${certsdir}/vendor" 1>/dev/null
 
     if [ $? -ne 0 ]; then
-        echo >&2 "ERROR: vendor_authorized contents cannot be processed as cert file or dbx."
+        echo >&2 "ERROR: vendor_authorized contents cannot be processed as cert file or sig list."
 
         rm -rf "$certsdir"
         rm "$certfile"
