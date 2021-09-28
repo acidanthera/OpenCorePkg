@@ -100,7 +100,7 @@ if [ $? -ne 0 ]; then
 fi
 
 # outfile name from cert CN
-certname=$(openssl x509 -noout -subject -inform der -in "$certfile" | sed 's/^subject=.*CN *= *//' | sed 's/[,\/].*//' | sed 's/ *//g') || { rm "$certfile"; exit 1; }
+certname=$(openssl x509 -noout -subject -inform der -in "$certfile" | sed 's/^subject=.*CN *=[ \"]*//' | sed 's/[,\/].*//' | sed 's/ *//g') || { rm "$certfile"; exit 1; }
 outfile="${certname}.pem"
 
 openssl x509 -inform der -in "$certfile" -out "$outfile" || { rm "$certfile"; exit 1; }
