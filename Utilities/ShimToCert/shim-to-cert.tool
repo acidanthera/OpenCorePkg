@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# shim-to-sig.tool - Extract OEM public key signature from GRUB shim file.
+# shim-to-cert.tool - Extract OEM signing certificate public key (and full db, dbx if present) from GRUB shim file.
 #
 # Copyright (c) 2021, Michael Beaton. All rights reserved.<BR>
 # SPDX-License-Identifier: BSD-3-Clause
