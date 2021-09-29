@@ -258,6 +258,14 @@ typedef enum {
 #define APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME L"RecoveryBootInitiator"
 
 ///
+/// Bridge OS hardware model variable used to propagate to IODT bridge-model
+/// by EfiBoot. Read by hw.target sysctl, used by SoftwareUpdateCoreSupport.
+/// Uppercase ASCII string with \0 terminator (e.g. J137AP).
+/// gAppleVendorVariableGuid
+///
+#define APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME L"BridgeOSHardwareModel"
+
+///
 /// A global variable storing the GUID of the APPLE_VENDOR EFI variable scope.
 ///
 extern EFI_GUID gAppleVendorVariableGuid;

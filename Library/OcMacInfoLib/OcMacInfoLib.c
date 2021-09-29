@@ -149,6 +149,8 @@ GetMacInfo (
   if (InternalEntry->PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
     MacInfo->Smbios.PlatformFeature      = &InternalEntry->PlatformFeature;
   }
+
+  MacInfo->BridgeModel = InternalEntry->BridgeModel;
 }
 
 BOOLEAN

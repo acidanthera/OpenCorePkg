@@ -94,18 +94,22 @@ typedef struct MAC_INFO_DATA_OEM_ {
 } MAC_INFO_DATA_OEM;
 
 typedef struct MAC_INFO_DATA_ {
-  //
-  // DataHub data.
-  //
+  ///
+  /// DataHub data.
+  ///
   MAC_INFO_DATA_DATAHUB DataHub;
-  //
-  // SMBIOS data.
-  //
+  ///
+  /// SMBIOS data.
+  ///
   MAC_INFO_DATA_SMBIOS  Smbios;
-  //
-  // Serial data.
-  //
+  ///
+  /// Serial data.
+  ///
   MAC_INFO_DATA_OEM     Oem;
+  ///
+  /// Bridge model data.
+  ///
+  CONST CHAR8           *BridgeModel;
 } MAC_INFO_DATA;
 
 /**

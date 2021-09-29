@@ -42,6 +42,7 @@ typedef struct {
   CONST CHAR8 * CONST ChassisAssetTag;
   CONST UINT64        FirmwareFeatures;
   CONST UINT64        FirmwareFeaturesMask;
+  CONST CHAR8 * CONST BridgeModel;
 } MAC_INFO_INTERNAL_ENTRY;
 
 //

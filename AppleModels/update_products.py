@@ -92,7 +92,7 @@ def num_to_base34(num):
 
 def load_products(path='Products.zjson'):
   try:
-    with open(path, 'r') as fh:
+    with open(path, 'rb') as fh:
       if path.endswith('.zjson'):
         db = json.loads(zlib.decompress(fh.read()))
       elif path.endswith('.json'):
