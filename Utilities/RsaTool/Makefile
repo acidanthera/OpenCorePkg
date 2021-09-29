@@ -9,6 +9,6 @@ PRODUCT    = $(PROJECT)$(SUFFIX)
 OBJS       = $(PROJECT).o
 include ../../User/Makefile
 
-CFLAGS  += -I/usr/local/opt/openssl/include -I/opt/local/include
+CFLAGS  += -I/usr/local/opt/openssl/include -I/opt/local/include -Wno-deprecated-declarations
 LDFLAGS += -L/usr/local/opt/openssl/lib -L/opt/local/lib
 LDLIBS  += -lcrypto
