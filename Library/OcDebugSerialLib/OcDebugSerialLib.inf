@@ -1,7 +1,9 @@
 ## @file
 #
-#  Debug Library with empty functions.
+#  Instance of Debug Library based on Serial Port Library.
+#  It uses Print Library to produce formatted output strings to seiral port device.
 #
+#  Copyright (c) 2006 - 2018, Intel Corporation. All rights reserved.<BR>
 #  Copyright (C) 2020, Goldfish64. All rights reserved.<BR>
 #
 # This program and the accompanying materials

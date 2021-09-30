@@ -1,4 +1,5 @@
 /** @file
+  Copyright (c) 2006 - 2019, Intel Corporation. All rights reserved.
   Copyright (C) 2021, ISP RAS. All rights reserved.
 
   All rights reserved.
