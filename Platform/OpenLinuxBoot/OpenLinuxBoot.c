@@ -270,9 +270,20 @@ UefiMain (
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS        Status;
+  EFI_STATUS                        Status;
+  EFI_LOADED_IMAGE_PROTOCOL         *LoadedImage;
 
-  Status = OcParseLoadOptions (ImageHandle, &gParsedLoadOptions);
+  Status = gBS->HandleProtocol (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **) &LoadedImage
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = OcParseLoadOptions (LoadedImage, &gParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
     OcParsedVarsGetInt (gParsedLoadOptions, L"flags", &gLinuxBootFlags, TRUE);
   } else if (Status != EFI_NOT_FOUND) {

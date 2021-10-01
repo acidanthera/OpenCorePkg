@@ -89,19 +89,20 @@ OcLoadDrivers (
   OUT EFI_HANDLE          **DriversToConnect  OPTIONAL
   )
 {
-  EFI_STATUS            Status;
-  VOID                  *Driver;
-  UINT32                DriverSize;
-  UINT32                Index;
-  CHAR16                DriverPath[OC_STORAGE_SAFE_PATH_MAX];
-  EFI_HANDLE            ImageHandle;
-  EFI_HANDLE            *DriversToConnectIterator;
-  VOID                  *DriverBinding;
-  BOOLEAN               SkipDriver;
-  OC_UEFI_DRIVER_ENTRY  *DriverEntry;
-  CONST CHAR8           *DriverComment;
-  CHAR8                 *DriverFileName;
-  CONST CHAR8           *DriverArguments;
+  EFI_STATUS                  Status;
+  VOID                        *Driver;
+  UINT32                      DriverSize;
+  UINT32                      Index;
+  CHAR16                      DriverPath[OC_STORAGE_SAFE_PATH_MAX];
+  EFI_HANDLE                  ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  EFI_HANDLE                  *DriversToConnectIterator;
+  VOID                        *DriverBinding;
+  BOOLEAN                     SkipDriver;
+  OC_UEFI_DRIVER_ENTRY        *DriverEntry;
+  CONST CHAR8                 *DriverComment;
+  CHAR8                       *DriverFileName;
+  CONST CHAR8                 *DriverArguments;
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -188,15 +189,36 @@ OcLoadDrivers (
       continue;
     }
 
-    //
-    // OC before driver arguments did not zero these and Boot Services does
-    // not, so old OC calling new driver which takes args will likely crash.
-    //
-    ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptionsSize  = 0;
-    ((EFI_LOADED_IMAGE_PROTOCOL *)ImageHandle)->LoadOptions      = NULL;
-
     if (DriverArguments != NULL && DriverArguments[0] != '\0') {
-      OcAppendArgumentsToLoadedImage (ImageHandle, &DriverArguments, 1, TRUE);
+      Status = gBS->HandleProtocol (
+        ImageHandle,
+        &gEfiLoadedImageProtocolGuid,
+        (VOID **) &LoadedImage
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OC: Failed to locate loaded image for driver %a at %u - %r!\n",
+          DriverFileName,
+          Index,
+          Status
+          ));
+        gBS->UnloadImage (ImageHandle);
+        FreePool (Driver);
+        continue;
+      }
+      if (!OcAppendArgumentsToLoadedImage (LoadedImage, &DriverArguments, 1, TRUE)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OC: Unable to apply arguments to driver %a at %u - %r!\n",
+          DriverFileName,
+          Index,
+          Status
+          ));
+        gBS->UnloadImage (ImageHandle);
+        FreePool (Driver);
+        continue;
+      }
     }
 
     Status = gBS->StartImage (
