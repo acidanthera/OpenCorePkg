@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Sep 12 01:31:15 2021
-%DIF ADD ../Configuration.tex        Sun Oct  3 09:32:34 2021
+%DIF ADD ../Configuration.tex        Sun Oct  3 16:07:47 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4035,6 +4035,9 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 \begin{lstlisting}[label=nvramver, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
+  \DIFaddbegin \DIFadd{If the OpenCore version is not exposed the variable will contain
+  }\texttt{\DIFadd{UNK-000-0000-00-00}} \DIFadd{sequence.
+}\DIFaddend 
 
   To obtain OEM information, use the following commands in macOS:
 \begin{lstlisting}[label=nvramoem, style=ocbash]

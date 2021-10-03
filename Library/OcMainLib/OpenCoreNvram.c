@@ -93,6 +93,13 @@ OcReportVersion (
       AsciiStrLen (Version),
       (VOID *) Version
       );
+  } else {
+    OcSetSystemVariable (
+      OC_VERSION_VARIABLE_NAME,
+      OPEN_CORE_NVRAM_ATTR,
+      L_STR_LEN ("UNK-000-0000-00-00"),
+      "UNK-000-0000-00-00"
+      );
   }
 }
 
