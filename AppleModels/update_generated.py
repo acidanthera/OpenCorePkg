@@ -140,7 +140,7 @@ def export_db_macinfolib(db, path, year=0):
 
       sb_model = info.get('AppleModelId')
       if sb_model:
-        sb_model = '"{}"'.format(sb_model)
+        sb_model = '"{}"'.format(sb_model.lower())
       else:
         sb_model = 'NULL'
 

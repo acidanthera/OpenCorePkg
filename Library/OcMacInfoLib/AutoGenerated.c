@@ -599,7 +599,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF42EULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J140K",
+  .SecureBootModel = "j140k",
  },
  {
   .SystemProductName = "MacBookAir8,2",
@@ -624,7 +624,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF42EULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J140A",
+  .SecureBootModel = "j140a",
  },
  {
   .SystemProductName = "MacBookAir9,1",
@@ -649,7 +649,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FFAFF06EULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J230K",
+  .SecureBootModel = "j230k",
  },
  {
   .SystemProductName = "MacBookPro1,1",
@@ -1074,7 +1074,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF426ULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J680",
+  .SecureBootModel = "j680",
  },
  {
   .SystemProductName = "MacBookPro15,2",
@@ -1099,7 +1099,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF426ULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J132",
+  .SecureBootModel = "j132",
  },
  {
   .SystemProductName = "MacBookPro15,3",
@@ -1124,7 +1124,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF426ULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J780",
+  .SecureBootModel = "j780",
  },
  {
   .SystemProductName = "MacBookPro15,4",
@@ -1149,7 +1149,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF426ULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J213",
+  .SecureBootModel = "j213",
  },
  {
   .SystemProductName = "MacBookPro16,1",
@@ -1174,7 +1174,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FDAFF066ULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J152F",
+  .SecureBootModel = "j152f",
  },
  {
   .SystemProductName = "MacBookPro16,2",
@@ -1199,7 +1199,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FFAFF06EULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J214K",
+  .SecureBootModel = "j214k",
  },
  {
   .SystemProductName = "MacBookPro16,3",
@@ -1224,7 +1224,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FDAFF066ULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J223",
+  .SecureBootModel = "j223",
  },
  {
   .SystemProductName = "MacBookPro16,4",
@@ -1249,7 +1249,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FDAFF066ULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J215",
+  .SecureBootModel = "j215",
  },
  {
   .SystemProductName = "MacBookPro2,1",
@@ -1849,7 +1849,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FDAFF066ULL,
   .FirmwareFeaturesMask = 0x8FFFFFF7FULL,
-  .SecureBootModel = "J160",
+  .SecureBootModel = "j160",
  },
  {
   .SystemProductName = "Macmini1,1",
@@ -2124,7 +2124,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF466ULL,
   .FirmwareFeaturesMask = 0x8FFDFFF7FULL,
-  .SecureBootModel = "J174",
+  .SecureBootModel = "j174",
  },
  {
   .SystemProductName = "Xserve1,1",
@@ -2774,7 +2774,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF576ULL,
   .FirmwareFeaturesMask = 0x8FFDFFF7FULL,
-  .SecureBootModel = "J185",
+  .SecureBootModel = "j185",
  },
  {
   .SystemProductName = "iMac20,2",
@@ -2799,7 +2799,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF576ULL,
   .FirmwareFeaturesMask = 0x8FFDFFF7FULL,
-  .SecureBootModel = "J185F",
+  .SecureBootModel = "j185f",
  },
  {
   .SystemProductName = "iMac4,1",
@@ -3024,7 +3024,7 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .ChassisAssetTag = "",
   .FirmwareFeatures = 0x8FD8FF53EULL,
   .FirmwareFeaturesMask = 0x8FF9FFF3FULL,
-  .SecureBootModel = "J137",
+  .SecureBootModel = "j137",
  },
 };
 CONST UINTN gMacInfoModelCount = ARRAY_SIZE (gMacInfoModels);
