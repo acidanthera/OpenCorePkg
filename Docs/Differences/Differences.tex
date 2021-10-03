@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Sep 12 01:31:15 2021
-%DIF ADD ../Configuration.tex        Wed Sep 22 18:46:43 2021
+%DIF ADD ../Configuration.tex        Sun Oct  3 07:48:42 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4606,7 +4606,13 @@ improvements:
 \begin{itemize}
 \tightlist
 \item
-  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
+  \DIFaddbegin \texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:BridgeOSHardwareModel}}
+  \break
+  \DIFadd{Bridge OS hardware model variable used to propagate to IODT bridge-model
+  by }\texttt{\DIFadd{EfiBoot}}\DIFadd{. Read by }\texttt{\DIFadd{hw.target sysctl}}\DIFadd{, used by
+  SoftwareUpdateCoreSupport.
+}\item
+  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
   32-bit System Integrity Protection bitmask. Declared in XNU source code in
   \href{https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/csr.h.auto.html}{csr.h}.
