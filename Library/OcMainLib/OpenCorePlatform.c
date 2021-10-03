@@ -935,6 +935,60 @@ OcGetLegacySecureBootECID (
   CopyMem (ApECID, &Uuid, sizeof (*ApECID));
 }
 
+CONST CHAR8 *
+OcGetDefaultSecureBootModel (
+  IN  OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS        Status;
+  CONST CHAR8       *Model;
+  CONST CHAR8       *Board;
+  CONST CHAR8       *SbModel;
+  OC_SMBIOS_TABLE   SmbiosTable;
+
+  //
+  // For automatic setups it is direct DB retrieval.
+  //
+  if (Config->PlatformInfo.Automatic) {
+    Model   = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName);
+    SbModel = GetSecureBootModel (Model);
+    DEBUG ((DEBUG_INFO, "OC: Automatic SB model %a from model %a\n", SbModel, Model));
+    return SbModel;
+  }
+
+  //
+  // For manual setups only use the SMBIOS board identifier.
+  //
+  Board = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct);
+  if (Config->PlatformInfo.UpdateSmbios && Board[0] != '\0') {
+    SbModel = GetSecureBootModelFromBoardId (Board);
+    DEBUG ((DEBUG_INFO, "OC: Manual SB model %a from board %a\n", SbModel, Board));
+    return SbModel;
+  }
+
+  //
+  // For Mac setups without spoofing use SMBIOS.
+  //
+  Status = OcSmbiosTablePrepare (&SmbiosTable);
+  if (!EFI_ERROR (Status)) {
+    OcSmbiosExtractOemInfo (
+      &SmbiosTable,
+      mCurrentSmbiosProductName,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      Config->PlatformInfo.UseRawUuidEncoding,
+      FALSE
+      );
+    OcSmbiosTableFree (&SmbiosTable);
+  }
+
+  SbModel = GetSecureBootModel (mCurrentSmbiosProductName);
+  DEBUG ((DEBUG_INFO, "OC: OEM SB model %a from model %a\n", SbModel, mCurrentSmbiosProductName));
+  return SbModel;
+}
+
 BOOLEAN
 OcPlatformIs64BitSupported (
   IN UINT32     KernelVersion

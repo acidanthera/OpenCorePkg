@@ -106,15 +106,11 @@ typedef struct MAC_INFO_DATA_ {
   /// Serial data.
   ///
   MAC_INFO_DATA_OEM     Oem;
-  ///
-  /// Bridge model data.
-  ///
-  CONST CHAR8           *BridgeModel;
 } MAC_INFO_DATA;
 
 /**
   Obtain Mac info based on product name.
-  When exact match is not possible, any sane data may be returned.
+  When exact match is not possible, sane fallback will be returned.
 
   @param[in]  ProductName  Product to get information for.
   @param[out] MacInfo      Information data to fill.
@@ -123,6 +119,34 @@ VOID
 GetMacInfo (
   IN  CONST CHAR8    *ProductName,
   OUT MAC_INFO_DATA  *MacInfo
+  );
+
+/**
+  Obtain Mac secure boot model based on product name.
+  When exact match is not possible, sane fallback will be returned.
+
+  @param[in]  ProductName  Product to get information for.
+
+  @retval "x86legacy" For models that do not support secure boot.
+  @return Secure boot model name.
+**/
+CONST CHAR8 *
+GetSecureBootModel (
+  IN CONST CHAR8   *ProductName
+  );
+
+/**
+  Obtain Mac secure boot model based on board id.
+  When exact match is not possible, sane fallback will be returned.
+
+  @param[in]  BoardId  Board identifer to get information for.
+
+  @retval "x86legacy" For models that do not support secure boot.
+  @return Secure boot model name.
+**/
+CONST CHAR8 *
+GetSecureBootModelFromBoardId (
+  IN CONST CHAR8   *BoardId
   );
 
 /**

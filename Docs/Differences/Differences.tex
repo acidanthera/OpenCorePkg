@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Sun Sep 12 01:31:15 2021
-%DIF ADD ../Configuration.tex        Sun Oct  3 07:48:42 2021
+%DIF ADD ../Configuration.tex        Sun Oct  3 09:32:34 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4246,7 +4246,8 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- Recent available model, currently set to \texttt{x86legacy}.
+  \item \texttt{Default} --- \DIFdelbegin \DIFdel{Recent available model , currently set to }\texttt{\DIFdel{x86legacy}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{Matching model for current SMBIOS}\DIFaddend .
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4268,13 +4269,22 @@ rm vault.pub
   \end{itemize}
 
   \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
-  Starting with macOS 12 \texttt{x86legacy} is the only Apple Secure Boot model compatible
+\DIFdelbegin \DIFdel{Starting with macOS 12 }\texttt{\DIFdel{x86legacy}} %DIFAUXCMD
+\DIFdel{is the only Apple Secure Boot model compatible
   with software update on hardware without T2 chips.
+}\DIFdelend 
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
-  Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
-  Apple Secure Boot can be used with any SMBIOS with and without T2.
-  Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
+  \DIFdelbegin \DIFdel{Since }\DIFdelend \DIFaddbegin \DIFadd{Prior to macOS 12 }\DIFaddend \texttt{PlatformInfo} and \texttt{SecureBootModel} \DIFdelbegin \DIFdel{are independent,
+  }\DIFdelend \DIFaddbegin \DIFadd{were independent,
+  allowing }\DIFaddend Apple Secure Boot can be used with any SMBIOS with and without T2.
+  \DIFaddbegin \DIFadd{Starting with macOS 12 }\texttt{\DIFadd{SecureBootModel}} \DIFadd{must match the SMBIOS Mac model.
+  }\texttt{\DIFadd{Default}} \DIFadd{model derives the model based on SMBIOS board identifier, either
+  set automatically via the }\texttt{\DIFadd{Generic}} \DIFadd{section or set manually via the }\texttt{\DIFadd{SMBIOS}} \DIFadd{section.
+  If there is no board identifier override the model will be derived heuristically from OEM SMBIOS.
+}
+
+  \DIFaddend Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
   is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to

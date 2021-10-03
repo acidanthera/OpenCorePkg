@@ -4173,7 +4173,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- Recent available model, currently set to \texttt{x86legacy}.
+  \item \texttt{Default} --- Matching model for current SMBIOS.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4195,12 +4195,15 @@ rm vault.pub
   \end{itemize}
 
   \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
-  Starting with macOS 12 \texttt{x86legacy} is the only Apple Secure Boot model compatible
-  with software update on hardware without T2 chips.
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
-  Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
-  Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Prior to macOS 12 \texttt{PlatformInfo} and \texttt{SecureBootModel} were independent,
+  allowing Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Starting with macOS 12 \texttt{SecureBootModel} must match the SMBIOS Mac model.
+  \texttt{Default} model derives the model based on SMBIOS board identifier, either
+  set automatically via the \texttt{Generic} section or set manually via the \texttt{SMBIOS} section.
+  If there is no board identifier override the model will be derived heuristically from OEM SMBIOS.
+
   Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
   is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}

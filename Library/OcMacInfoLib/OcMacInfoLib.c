@@ -149,8 +149,52 @@ GetMacInfo (
   if (InternalEntry->PlatformFeature != MAC_INFO_PLATFORM_FEATURE_MISSING) {
     MacInfo->Smbios.PlatformFeature      = &InternalEntry->PlatformFeature;
   }
+}
 
-  MacInfo->BridgeModel = InternalEntry->BridgeModel;
+CONST CHAR8 *
+GetSecureBootModel (
+  IN CONST CHAR8   *ProductName
+  )
+{
+  CONST MAC_INFO_INTERNAL_ENTRY  *InternalEntry;
+
+  InternalEntry = LookupInternalEntry (ProductName);
+  if (InternalEntry == NULL) {
+    //
+    // Fallback to default model if given ProductName is not found.
+    //
+    InternalEntry = &gMacInfoModels[gMacInfoDefaultModel];
+  }
+
+  if (InternalEntry->SecureBootModel == NULL) {
+    return "x86legacy";
+  }
+
+  return InternalEntry->SecureBootModel;
+}
+
+CONST CHAR8 *
+GetSecureBootModelFromBoardId (
+  IN CONST CHAR8   *BoardId
+  )
+{
+  UINTN        Index;
+
+  for (Index = 0; Index < gMacInfoModelCount; ++Index) {
+    if (AsciiStrCmp (gMacInfoModels[Index].BoardProduct, BoardId) == 0) {
+      if (gMacInfoModels[Index].SecureBootModel != NULL) {
+        return gMacInfoModels[Index].SecureBootModel;
+      }
+
+      break;
+    }
+  }
+
+  //
+  // Note, this will not match some models with multiple board-id values,
+  // but from what we know these models do not support SB anyway.
+  //
+  return "x86legacy";
 }
 
 BOOLEAN

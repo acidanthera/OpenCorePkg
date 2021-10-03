@@ -190,6 +190,17 @@ OcGetLegacySecureBootECID (
   );
 
 /**
+  Obtain default Secure Boot hardware model.
+
+  @param[in]  Config   Configuration.
+  @return Apple Secure Boot model.
+**/
+CONST CHAR8 *
+OcGetDefaultSecureBootModel (
+  IN  OC_GLOBAL_CONFIG    *Config
+  );
+
+/**
   Load platform compatibility support like DataHub or SMBIOS.
 
   @param[in]  Config    OpenCore configuration.

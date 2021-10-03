@@ -450,13 +450,17 @@ OcLoadAppleSecureBoot (
   UINT8                       SecureBootPolicy;
 
   SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
+  if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DEFAULT) == 0 || SecureBootModel[0] == '\0') {
+    SecureBootModel = OcGetDefaultSecureBootModel (Config);
+  }
+
   RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
 
   if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DISABLED) == 0) {
     SecureBootPolicy = AppleImg4SbModeDisabled;
   } else if (Config->Misc.Security.ApECID != 0
     && (RealSecureBootModel == NULL
-      || AsciiStrCmp (RealSecureBootModel, "x86legacy") != 0)) {
+      || AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) != 0)) {
     //
     // Note, for x86legacy it is always medium policy.
     //
@@ -494,7 +498,7 @@ OcLoadAppleSecureBoot (
     // This is what Apple does at least.
     // I believe no ECID is invalid for macOS 12.
     //
-    if (AsciiStrCmp (RealSecureBootModel, "x86legacy") == 0
+    if (AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) == 0
       && Config->Misc.Security.ApECID == 0) {
       DEBUG ((DEBUG_INFO, "OC: Discovered x86legacy with zero ECID, using system-id\n"));
       OcGetLegacySecureBootECID (Config, &Config->Misc.Security.ApECID);
