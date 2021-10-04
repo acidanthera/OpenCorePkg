@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.3)
+       Reference Manual (0.7.4)
 
        \vspace{0.2in}
 
@@ -596,21 +596,18 @@ the \hyperref[miscsecurityprops]{Security Properties} section of this document.
 The \texttt{OC\ config} file, as with any property list file, can be edited with
 any text editor, such as nano or vim. However, specialised software
 may provide a better experience. On macOS, the preferred GUI application is
-\href{https://developer.apple.com/xcode}{Xcode}. For a lightweight
-cross-platform and open-source alternative, the
-\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor can be
-utilised.
+\href{https://developer.apple.com/xcode}{Xcode}. The
+\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor
+is a lightweight, cross-platform and open-source alternative.
 
-It is strongly advised not to use any software that is aware of the internal
-configration structure as it constantly gets out of date and will cause
-incorrect configuration to be generated. If it is a must desprite the
-warning one should make sure to only use stable versions of OpenCore
-with explicit support for the particular version in the app. The choice
-of open-source implementations with transparent binary generation
-is encouraged (e.g. \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}),
-since other tools may contain malware. Remember that a configuration
-made for a different hardware setup shall never be used on another hardware
-setup.
+It is strongly recommended to avoid configuration creation tools that are aware of the
+internal configuration structure as this may result in invalid configurations (since the
+structure gets constantly updated). If such tools are to be used despite this warning,
+ensure that only stable versions of OpenCore explicitly supported by such tools are used.
+In such cases, the use of open-source implementations with transparent binary generation
+(such as \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}) is encouraged, given
+that other tools may contain malware. In addition, configurations created for a specific
+hardware setup should never be used on different hardware setups.
 
 For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
@@ -1302,6 +1299,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
@@ -1769,7 +1767,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures.
+  \emph{Note}: The need for this quirk is indicated by early boot failures (e.g. halts at
+  black screen), particularly in early boot of the Linux kernel.
   Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
@@ -2516,9 +2515,9 @@ blocking.
   ACPI table and disabling VT-d in firmware preferences, which does not obstruct
   VT-d support in other systems in case they need this.
 
-  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices 
-  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up 
-  link-down state infinitely and a Wi-Fi adapter may fail to discover networks. 
+  \emph{Note 2}: Misconfigured IOMMU in the firmware may result in broken devices
+  such as ethernet or Wi-Fi adapters. For instance, an ethernet adapter may cycle in link-up
+  link-down state infinitely and a Wi-Fi adapter may fail to discover networks.
   Gigabyte is one of the most common OEMs with these issues.
 
 \item
@@ -3014,6 +3013,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{BlessOverride}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add custom scanning paths through the bless model.
 
   To be filled with \texttt{plist\ string} entries containing
@@ -3034,6 +3034,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Entries}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add boot entries to OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
@@ -3048,6 +3049,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: Add tool entries to the OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
@@ -3803,7 +3805,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not practical as it prevents
   incremental (non-full) OTA updates.
   \end{itemize}
- 
+
   \emph{Note3}: For any other value which you may need to use, it is possible to
   configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
   different value, e.g. use \texttt{toggle\ 0x6F} in \texttt{Arguments} to toggle the
@@ -3963,6 +3965,8 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 \begin{lstlisting}[label=nvramver, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
+  If the OpenCore version is not exposed the variable will contain
+  \texttt{UNK-000-0000-00-00} sequence.
 
   To obtain OEM information, use the following commands in macOS:
 \begin{lstlisting}[label=nvramoem, style=ocbash]
@@ -4064,10 +4068,11 @@ rm vault.pub
   can be found in the \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
-  \emph{Note 2}: \texttt{vault.plist} and \texttt{vault.sig} are used regardless of
-  this option when \texttt{vault.plist} is present or a public key is embedded into
-  \texttt{OpenCore.efi}. Setting this option will only ensure configuration sanity,
-  and abort the boot process otherwise.
+  \emph{Note 2}:  Regardless of this option, \texttt{vault.plist} is always used when
+  present, and both \texttt{vault.plist} and \texttt{vault.sig} are used and required
+  when a public key is embedded into \texttt{OpenCore.efi}, and errors will abort the
+  boot process in either case. Setting this option allows OpenCore to warn the user if
+  the configuration is not as required to achieve an expected higher security level.
 
 \item
   \texttt{ScanPolicy}\\
@@ -4170,7 +4175,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- Recent available model, currently set to \texttt{x86legacy}.
+  \item \texttt{Default} --- Matching model for current SMBIOS.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4192,12 +4197,15 @@ rm vault.pub
   \end{itemize}
 
   \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
-  Starting with macOS 12 \texttt{x86legacy} is the only Apple Secure Boot model compatible
-  with software update on hardware without T2 chips.
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
-  Since \texttt{PlatformInfo} and \texttt{SecureBootModel} are independent,
-  Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Prior to macOS 12 \texttt{PlatformInfo} and \texttt{SecureBootModel} were independent,
+  allowing Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Starting with macOS 12 \texttt{SecureBootModel} must match the SMBIOS Mac model.
+  \texttt{Default} model derives the model based on SMBIOS board identifier, either
+  set automatically via the \texttt{Generic} section or set manually via the \texttt{SMBIOS} section.
+  If there is no board identifier override the model will be derived heuristically from OEM SMBIOS.
+
   Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
   is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
@@ -4529,6 +4537,12 @@ improvements:
 
 \begin{itemize}
 \tightlist
+\item
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:BridgeOSHardwareModel}
+  \break
+  Bridge OS hardware model variable used to propagate to IODT bridge-model
+  by \texttt{EfiBoot}. Read by \texttt{hw.target sysctl}, used by
+  SoftwareUpdateCoreSupport.
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
@@ -5080,6 +5094,9 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
       a drive with an EFI partition that is the first partition on the disk.
     \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
     - Without this bit, it is not possible to install macOS on an APFS disk.
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM} (\texttt{0x800000000})
+    - Without this bit, it is not possible to install macOS versions with large
+      BaseSystem images, such as macOS 12.
   \end{itemize}
 
   \emph{Note}: On most newer firmwares these bits are already set, the option
@@ -6218,21 +6235,30 @@ Drivers tested in basic scenarios can be downloaded from \href{https://github.co
 Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
 tamper-resistance testing, therefore have may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on the EXT4 file system even when the distribution's
-main filesystem is something else such as BTRFS, therefore a suitable UEFI EXT4 file system
+Most Linux distributions keep their boot files on an EXT4 partition even when the distribution's
+root filesystem is something else, such as BTRFS, therefore only an EXT4
 driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
 A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in a somewhat less standard setup where the boot files are on a BTRFS partition,
-e.g. as by default in openSUSE.
+will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
+partition, e.g. as is currently done by default in openSUSE.
 
 Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
 on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
 filesystem driver - but it is not widely used except in Arch Linux.
 
-\emph{Note 2}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
+\emph{Note 2}: \texttt{OpenLinuxBoot} does not attempt to read and interpret the layout of Linux
+installation media (which can be highly variable). Installation media should be booted directly either from
+the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
+then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
+which the machine's own bootloader will refuse to boot.
+
+\emph{Note 3}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
 does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
 therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
 the boot menu.
+
+\emph{Note 4}: Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
+failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
 
 The default parameter values should work well, but if you need to parameterise this driver the following
 options may be specified in \texttt{UEFI/Drivers/Arguments}:
@@ -6240,9 +6266,9 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \begin{itemize}
   \tightlist
 	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} are set. \medskip
-      
+
 	Available flags are: \medskip
-      
+
   \begin{itemize}
   \tightlist
     \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{LINUX\_BOOT\_SCAN\_ESP},
@@ -6255,17 +6281,17 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 	  Allows scanning for entries on Linux Data filesystems.
 	  \item \texttt{0x00000080} (bit \texttt{7}) --- \texttt{LINUX\_BOOT\_SCAN\_OTHER},
 	  Allows scanning for entries on file systems not matched by any of the above. \medskip
-      
+
 	  The following notes apply to all of the above options: \medskip
-      
+
 	  \emph{Note 1}: Apple filesystems APFS and HFS are never scanned.
     \medskip
-      
+
 	  \emph{Note 2}: Regardless of the above flags, a file system must first be
 	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
     \texttt{OpenLinuxBoot} or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
     \medskip
-      
+
 	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
     in both \texttt{OpenLinuxBoot} flags and \texttt{Misc/Security/ScanPolicy} in order to be sure
     to detect all valid Linux installs.
@@ -6277,13 +6303,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
 	  When a Linux entry generated by \texttt{OpenLinuxBoot} is selected as the default boot entry
     in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
-	  
+
 	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
     of Linux. Linux boot options are always sorted highest kernel version first, so this means that
     the latest kernel version of the same install always shows as the default, with this option set. \medskip
-	  
+
 	  \emph{Note}: This option is recommended on all systems. \medskip
-      
+
 	  \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
 	  This option applies to autodetected Linux only (i.e. to Debian-style distrubutions, not to BLSpec and
     Fedora-style distributions with \texttt{/loader/entries/*.conf} files).
@@ -6292,6 +6318,9 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
+	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
+	  Add additional debug log info about files encountered and autodetect options added while scanning for
+    Linux boot entries.
 	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
 	  Adds a human readable file system type, followed by the first eight characters of the
 	  partition's unique partition uuid, to each generated entry name. Can help with debugging
@@ -6314,7 +6343,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
   \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is NOT the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
-    
+
 	Typically you should not need this option in the latter case, but in case you do, to find out the unique
   partition uuid to use, look for \texttt{LNX:} entries in the OpenCore debug	log file. Alternatively, and
   for more advanced scenarios, you may wish to examine how your drives are mounted using the
@@ -6332,7 +6361,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip
-  
+
   Users may wish to compare their Linux boot options (shown with \texttt{cat /proc/cmdline}) seen when booting via
   \texttt{OpenLinuxBoot} and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
   systemd-boot or EXTLINUX). Expect the options generated by \texttt{OpenLinuxBoot} not to
@@ -6416,11 +6445,12 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \item
   \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Failsafe}: None\\
-  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers}
-  directory using the settings specified in the 
-  \hyperref[uefidriversprops]{Drivers Properties} section below.
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers} directory.
+
+  To be filled with \texttt{plist\ dict} values, describing each driver.
+  Refer to the \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
   \texttt{Input}\\
@@ -6455,6 +6485,7 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
   \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
@@ -6688,15 +6719,15 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   on the basic console input stream.
 
   With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
-  
+
   On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
   which use non-Apple key input methods.
-  
+
   The recommended setting on all hardware is \texttt{true}.
 
   \emph{Note}: AppleEvent's default behaviour is intended to prevent unwanted queued keystrokes from appearing
   after exiting graphics-based UEFI applications; this issue is already handled separately within OpenCore.
-  
+
   \begin{itemize}
   \tightlist
   \item \texttt{true} --- Allow keyboard input to reach graphics mode apps which are not using Apple input protocols.
@@ -6872,6 +6903,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{enumerate}
 
+\item
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
+  reference for the entry. Whether this value is used is implementation defined.
+  
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\

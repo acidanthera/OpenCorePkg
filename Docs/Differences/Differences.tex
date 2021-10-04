@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Sep 12 01:31:15 2021
-%DIF ADD ../Configuration.tex        Sun Oct  3 16:07:47 2021
+%DIF DEL PreviousConfiguration.tex   Mon Oct  4 22:07:11 2021
+%DIF ADD ../Configuration.tex        Mon Oct  4 22:16:35 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7\DIFdelbegin \DIFdel{.3}\DIFdelend \DIFaddbegin \DIFadd{.4}\DIFaddend )
+       Reference Manual (0.7\DIFdelbegin \DIFdel{.4}\DIFdelend \DIFaddbegin \DIFadd{.5}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -656,27 +656,18 @@ the \hyperref[miscsecurityprops]{Security Properties} section of this document.
 The \texttt{OC\ config} file, as with any property list file, can be edited with
 any text editor, such as nano or vim. However, specialised software
 may provide a better experience. On macOS, the preferred GUI application is
-\href{https://developer.apple.com/xcode}{Xcode}. \DIFdelbegin \DIFdel{For a lightweight}\DIFdelend \DIFaddbegin \DIFadd{The
-}\href{https://github.com/corpnewt/ProperTree}{\DIFadd{ProperTree}} \DIFadd{editor
-is a lightweight, }\DIFaddend cross-platform and open-source alternative\DIFdelbegin \DIFdel{, the
-}\href{https://github.com/corpnewt/ProperTree}{\DIFdel{ProperTree}} %DIFAUXCMD
-\DIFdel{editor can be
-utilised}\DIFdelend .
+\href{https://developer.apple.com/xcode}{Xcode}. The
+\href{https://github.com/corpnewt/ProperTree}{ProperTree} editor
+is a lightweight, cross-platform and open-source alternative.
 
-It is strongly \DIFdelbegin \DIFdel{advised not to use any software that is }\DIFdelend \DIFaddbegin \DIFadd{recommended to avoid configuration creation tools that are }\DIFaddend aware of the
-internal \DIFdelbegin \DIFdel{configration structure as it constantly gets out of date and will cause
-incorrect configuration to be generated. If it is a must desprite the
-warning one should make sure to only use }\DIFdelend \DIFaddbegin \DIFadd{configuration structure as this may result in invalid configurations (since the
+It is strongly recommended to avoid configuration creation tools that are aware of the
+internal configuration structure as this may result in invalid configurations (since the
 structure gets constantly updated). If such tools are to be used despite this warning,
-ensure that only }\DIFaddend stable versions of OpenCore \DIFdelbegin \DIFdel{with explicit support for the particular version in the app.
-The choice
-}\DIFdelend \DIFaddbegin \DIFadd{explicitly supported by such tools are used.
-In such cases, the use }\DIFaddend of open-source implementations with transparent binary generation
-\DIFdelbegin \DIFdel{is encouraged (e.g. }\DIFdelend \DIFaddbegin \DIFadd{(such as }\DIFaddend \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}) \DIFdelbegin \DIFdel{,
-since }\DIFdelend \DIFaddbegin \DIFadd{is encouraged, given
-that }\DIFaddend other tools may contain malware. \DIFdelbegin \DIFdel{Remember that a configuration
-made for a different hardware setup shall }\DIFdelend \DIFaddbegin \DIFadd{In addition, configurations created for a specific
-hardware setup should }\DIFaddend never be used on \DIFdelbegin \DIFdel{another hardware setup}\DIFdelend \DIFaddbegin \DIFadd{different hardware setups}\DIFaddend .
+ensure that only stable versions of OpenCore explicitly supported by such tools are used.
+In such cases, the use of open-source implementations with transparent binary generation
+(such as \href{https://github.com/ic005k/QtOpenCoreConfig}{OCAT}) is encouraged, given
+that other tools may contain malware. In addition, configurations created for a specific
+hardware setup should never be used on different hardware setups.
 
 For BIOS booting, a third-party UEFI environment provider is required and
 \texttt{OpenDuetPkg} is one such UEFI environment provider for legacy systems.
@@ -1368,8 +1359,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 \item
   \texttt{MmioWhitelist}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \DIFaddend \textbf{Description}: To be filled with \texttt{plist\ dict} values,
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing addresses critical for particular firmware functioning when
   \texttt{DevirtualiseMmio} quirk is in use.
   Refer to the \hyperref[booterpropsmmio]{MmioWhitelist Properties} section below for details.
@@ -1836,10 +1827,9 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures \DIFdelbegin \DIFdel{.
-  }\DIFdelend \DIFaddbegin \DIFadd{(e.g. halts at
+  \emph{Note}: The need for this quirk is indicated by early boot failures (e.g. halts at
   black screen), particularly in early boot of the Linux kernel.
-  }\DIFaddend Only firmware released after 2017 is typically affected.
+  Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
 
@@ -3083,8 +3073,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{BlessOverride}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \DIFaddend \textbf{Description}: Add custom scanning paths through the bless model.
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Add custom scanning paths through the bless model.
 
   To be filled with \texttt{plist\ string} entries containing
   absolute UEFI paths to customised bootloaders such as
@@ -3104,8 +3094,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Entries}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \DIFaddend \textbf{Description}: Add boot entries to OpenCore picker.
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Add boot entries to OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
@@ -3119,8 +3109,8 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Tools}\label{misctools}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \DIFaddend \textbf{Description}: Add tool entries to the OpenCore picker.
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Add tool entries to the OpenCore picker.
 
   To be filled with \texttt{plist\ dict} values, describing each load entry.
   Refer to the \hyperref[miscentryprops]{Entry Properties} section below for details.
@@ -4035,9 +4025,8 @@ u=$(nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-path | sed 's/.*GPT,\([^,]*\
 \begin{lstlisting}[label=nvramver, style=ocbash]
 nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:opencore-version
 \end{lstlisting}
-  \DIFaddbegin \DIFadd{If the OpenCore version is not exposed the variable will contain
-  }\texttt{\DIFadd{UNK-000-0000-00-00}} \DIFadd{sequence.
-}\DIFaddend 
+  If the OpenCore version is not exposed the variable will contain
+  \texttt{UNK-000-0000-00-00} sequence.
 
   To obtain OEM information, use the following commands in macOS:
 \begin{lstlisting}[label=nvramoem, style=ocbash]
@@ -4139,14 +4128,11 @@ rm vault.pub
   can be found in the \href{https://habr.com/post/273497/}{Taming UEFI SecureBoot}
   paper (in Russian).
 
-  \emph{Note 2}:  \DIFdelbegin \texttt{\DIFdel{vault.plist}} %DIFAUXCMD
-\DIFdel{and }\texttt{\DIFdel{vault.sig}} %DIFAUXCMD
-\DIFdel{are used regardless }\DIFdelend \DIFaddbegin \DIFadd{Regardless }\DIFaddend of this option\DIFdelbegin \DIFdel{when }\DIFdelend \DIFaddbegin \DIFadd{, }\DIFaddend \texttt{vault.plist} is \DIFdelbegin \DIFdel{present or }\DIFdelend \DIFaddbegin \DIFadd{always used when
-  present, and both }\texttt{\DIFadd{vault.plist}} \DIFadd{and }\texttt{\DIFadd{vault.sig}} \DIFadd{are used and required
-  when }\DIFaddend a public key is embedded into \texttt{OpenCore.efi}\DIFdelbegin \DIFdel{. Setting this option will only ensure configuration sanity, and }\DIFdelend \DIFaddbegin \DIFadd{, and errors will }\DIFaddend abort the
-  boot process \DIFdelbegin \DIFdel{otherwise. }\DIFdelend \DIFaddbegin \DIFadd{in either case. Setting this option allows OpenCore to warn the user if
+  \emph{Note 2}:  Regardless of this option, \texttt{vault.plist} is always used when
+  present, and both \texttt{vault.plist} and \texttt{vault.sig} are used and required
+  when a public key is embedded into \texttt{OpenCore.efi}, and errors will abort the
+  boot process in either case. Setting this option allows OpenCore to warn the user if
   the configuration is not as required to achieve an expected higher security level.
-}\DIFaddend 
 
 \item
   \texttt{ScanPolicy}\\
@@ -4249,8 +4235,7 @@ rm vault.pub
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Default} --- \DIFdelbegin \DIFdel{Recent available model , currently set to }\texttt{\DIFdel{x86legacy}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{Matching model for current SMBIOS}\DIFaddend .
+  \item \texttt{Default} --- Matching model for current SMBIOS.
   \item \texttt{Disabled} --- No model, Secure Boot will be disabled.
   \item \texttt{j137} --- \texttt{iMacPro1,1 (December 2017). Minimum macOS 10.13.2 (17C2111)}
   \item \texttt{j680} --- \texttt{MacBookPro15,1 (July 2018). Minimum macOS 10.13.6 (17G2112)}
@@ -4272,22 +4257,16 @@ rm vault.pub
   \end{itemize}
 
   \emph{Warning}: Not all Apple Secure Boot models are supported on all hardware configurations.
-\DIFdelbegin \DIFdel{Starting with macOS 12 }\texttt{\DIFdel{x86legacy}} %DIFAUXCMD
-\DIFdel{is the only Apple Secure Boot model compatible
-  with software update on hardware without T2 chips.
-}\DIFdelend 
 
   Apple Secure Boot appeared in macOS 10.13 on models with T2 chips.
-  \DIFdelbegin \DIFdel{Since }\DIFdelend \DIFaddbegin \DIFadd{Prior to macOS 12 }\DIFaddend \texttt{PlatformInfo} and \texttt{SecureBootModel} \DIFdelbegin \DIFdel{are independent,
-  }\DIFdelend \DIFaddbegin \DIFadd{were independent,
-  allowing }\DIFaddend Apple Secure Boot can be used with any SMBIOS with and without T2.
-  \DIFaddbegin \DIFadd{Starting with macOS 12 }\texttt{\DIFadd{SecureBootModel}} \DIFadd{must match the SMBIOS Mac model.
-  }\texttt{\DIFadd{Default}} \DIFadd{model derives the model based on SMBIOS board identifier, either
-  set automatically via the }\texttt{\DIFadd{Generic}} \DIFadd{section or set manually via the }\texttt{\DIFadd{SMBIOS}} \DIFadd{section.
+  Prior to macOS 12 \texttt{PlatformInfo} and \texttt{SecureBootModel} were independent,
+  allowing Apple Secure Boot can be used with any SMBIOS with and without T2.
+  Starting with macOS 12 \texttt{SecureBootModel} must match the SMBIOS Mac model.
+  \texttt{Default} model derives the model based on SMBIOS board identifier, either
+  set automatically via the \texttt{Generic} section or set manually via the \texttt{SMBIOS} section.
   If there is no board identifier override the model will be derived heuristically from OEM SMBIOS.
-}
 
-  \DIFaddend Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
+  Setting \texttt{SecureBootModel} to any valid value but \texttt{Disabled}
   is equivalent to
   \href{https://support.apple.com/en-us/HT208330}{\texttt{Medium Security}}
   of Apple Secure Boot. The \texttt{ApECID} value must also be specified to
@@ -4619,13 +4598,13 @@ improvements:
 \begin{itemize}
 \tightlist
 \item
-  \DIFaddbegin \texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:BridgeOSHardwareModel}}
+  \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:BridgeOSHardwareModel}
   \break
-  \DIFadd{Bridge OS hardware model variable used to propagate to IODT bridge-model
-  by }\texttt{\DIFadd{EfiBoot}}\DIFadd{. Read by }\texttt{\DIFadd{hw.target sysctl}}\DIFadd{, used by
+  Bridge OS hardware model variable used to propagate to IODT bridge-model
+  by \texttt{EfiBoot}. Read by \texttt{hw.target sysctl}, used by
   SoftwareUpdateCoreSupport.
-}\item
-  \DIFaddend \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
+\item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:csr-active-config}
   \break
   32-bit System Integrity Protection bitmask. Declared in XNU source code in
   \href{https://opensource.apple.com/source/xnu/xnu-4570.71.2/bsd/sys/csr.h.auto.html}{csr.h}.
@@ -5175,10 +5154,10 @@ from \href{https://github.com/acidanthera/dmidecode/releases}{Acidanthera/dmidec
       a drive with an EFI partition that is the first partition on the disk.
     \item \texttt{FW\_FEATURE\_SUPPORTS\_APFS} (\texttt{0x00080000})
     - Without this bit, it is not possible to install macOS on an APFS disk.
-    \DIFaddbegin \item \texttt{\DIFadd{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM}} \DIFadd{(}\texttt{\DIFadd{0x800000000}}\DIFadd{)
+    \item \texttt{FW\_FEATURE\_SUPPORTS\_LARGE\_BASESYSTEM} (\texttt{0x800000000})
     - Without this bit, it is not possible to install macOS versions with large
       BaseSystem images, such as macOS 12.
-  }\DIFaddend \end{itemize}
+  \end{itemize}
 
   \emph{Note}: On most newer firmwares these bits are already set, the option
   may be necessary when "upgrading" the firmware with new features.
@@ -6316,35 +6295,32 @@ Drivers tested in basic scenarios can be downloaded from \href{https://github.co
 Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
 tamper-resistance testing, therefore have may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on \DIFdelbegin \DIFdel{the }\DIFdelend \DIFaddbegin \DIFadd{an }\DIFaddend EXT4 \DIFdelbegin \DIFdel{file system }\DIFdelend \DIFaddbegin \DIFadd{partition }\DIFaddend even when the distribution's
-\DIFdelbegin \DIFdel{main }\DIFdelend \DIFaddbegin \DIFadd{root }\DIFaddend filesystem is something else\DIFaddbegin \DIFadd{, }\DIFaddend such as BTRFS, therefore \DIFdelbegin \DIFdel{a suitable UEFI }\DIFdelend \DIFaddbegin \DIFadd{only an }\DIFaddend EXT4
-\DIFdelbegin \DIFdel{file system
-}\DIFdelend driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
+Most Linux distributions keep their boot files on an EXT4 partition even when the distribution's
+root filesystem is something else, such as BTRFS, therefore only an EXT4
+driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
 A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in \DIFdelbegin \DIFdel{a }\DIFdelend \DIFaddbegin \DIFadd{the currently }\DIFaddend somewhat less standard \DIFdelbegin \DIFdel{setup }\DIFdelend \DIFaddbegin \DIFadd{situation }\DIFaddend where the boot files are on a BTRFS
-partition, e.g. as \DIFaddbegin \DIFadd{is currently done }\DIFaddend by default in openSUSE.
+will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
+partition, e.g. as is currently done by default in openSUSE.
 
 Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
 on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
 filesystem driver - but it is not widely used except in Arch Linux.
 
-\emph{Note 2}: \DIFaddbegin \texttt{\DIFadd{OpenLinuxBoot}} \DIFadd{does not attempt to read and interpret the layout of Linux
+\emph{Note 2}: \texttt{OpenLinuxBoot} does not attempt to read and interpret the layout of Linux
 installation media (which can be highly variable). Installation media should be booted directly either from
 the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
 then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
 which the machine's own bootloader will refuse to boot.
-}
 
-\emph{\DIFadd{Note 3}}\DIFadd{: }\DIFaddend systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
+\emph{Note 3}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
 does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
 therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
 the boot menu.
 
-\DIFaddbegin \emph{\DIFadd{Note 4}}\DIFadd{: Be aware of the }\texttt{\DIFadd{SyncRuntimePermissions}} \DIFadd{quirk, which may need to be set to avoid early boot
+\emph{Note 4}: Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
 failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
-}
 
-\DIFaddend The default parameter values should work well, but if you need to parameterise this driver the following
+The default parameter values should work well, but if you need to parameterise this driver the following
 options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
@@ -6402,10 +6378,10 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
-	  \item \DIFaddbegin \texttt{\DIFadd{0x00004000}} \DIFadd{(bit }\texttt{\DIFadd{14}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}}\DIFadd{,
+	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
 	  Add additional debug log info about files encountered and autodetect options added while scanning for
     Linux boot entries.
-	  }\item \DIFaddend \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
+	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
 	  Adds a human readable file system type, followed by the first eight characters of the
 	  partition's unique partition uuid, to each generated entry name. Can help with debugging
 	  the origin of entries generated by the driver when there are multiple Linux installs on
@@ -6529,14 +6505,12 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \item
   \texttt{Drivers}\\
-  \textbf{Type}: \texttt{plist\ \DIFdelbegin \DIFdel{dict}\DIFdelend \DIFaddbegin \DIFadd{array}\DIFaddend }\\
-  \textbf{Failsafe}: \DIFdelbegin \DIFdel{None}\DIFdelend \DIFaddbegin \DIFadd{Empty}\DIFaddend \\
-  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers} directory\DIFdelbegin \DIFdel{using the settings specified in the 
-  }\DIFdelend \DIFaddbegin \DIFadd{.
-}
+  \textbf{Type}: \texttt{plist\ array}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Load selected drivers from \texttt{OC/Drivers} directory.
 
-  \DIFadd{To be filled with }\texttt{\DIFadd{plist\ dict}} \DIFadd{values, describing each driver.
-  Refer to the }\DIFaddend \hyperref[uefidriversprops]{Drivers Properties} section below.
+  To be filled with \texttt{plist\ dict} values, describing each driver.
+  Refer to the \hyperref[uefidriversprops]{Drivers Properties} section below.
 
 \item
   \texttt{Input}\\
@@ -6571,8 +6545,8 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \item
   \texttt{ReservedMemory}\\
   \textbf{Type}: \texttt{plist\ array}\\
-  \DIFaddbegin \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \DIFaddend \textbf{Description}: To be filled with \texttt{plist\ dict} values,
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: To be filled with \texttt{plist\ dict} values,
   describing memory areas exclusive to specific firmware and hardware functioning,
   which should not be used by the operating system. Examples of such memory regions
   could be the second 256 MB corrupted by the Intel HD 3000 or an area with faulty RAM.
@@ -6988,15 +6962,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 \subsection{Drivers Properties}\label{uefidriversprops}
 
 \begin{enumerate}
-\DIFaddbegin 
 
 \item
-  \texttt{\DIFadd{Comment}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: Empty}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Arbitrary ASCII string used to provide human readable
+  \texttt{Comment}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: Empty\\
+  \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. Whether this value is used is implementation defined.
-  }\DIFaddend 
 
 \item
   \texttt{Path}\\
