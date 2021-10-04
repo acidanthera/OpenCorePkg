@@ -37,6 +37,7 @@ Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
 *.o
 *.o.tmp
+*.d
 *.exe
 *.gcda
 *.gcno

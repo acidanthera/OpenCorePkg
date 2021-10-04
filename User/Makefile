@@ -238,7 +238,11 @@ OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
 	@$(MKDIR) $(OUT_DIR)
-	$(CC) $(CFLAGS) $< -o $@
+	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
+
+DEP := $(OBJS:%.o=%.d)
+DEP_TEST := $(OBJ:%.o=%.d)
+-include $(DEP) $(DEP_TEST)
 
 all: $(PRODUCT)
 
