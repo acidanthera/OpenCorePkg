@@ -241,8 +241,7 @@ $(OUT_DIR)/%.o: %.c
 	$(CC) -MMD -MT $@ -MF $(OUT_DIR)/$*.d $(CFLAGS) $< -o $@
 
 DEP := $(OBJS:%.o=%.d)
-DEP_TEST := $(OBJ:%.o=%.d)
--include $(DEP) $(DEP_TEST)
+-include $(DEP)
 
 all: $(PRODUCT)
 
