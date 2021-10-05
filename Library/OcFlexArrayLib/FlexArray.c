@@ -55,7 +55,6 @@ InternalFlexArrayAddItem (
       return NULL;
     }
   } else {
-    ASSERT (FlexArray->Count > 0);
     ASSERT (FlexArray->AllocatedCount > 0);
     ASSERT (FlexArray->Count <= FlexArray->AllocatedCount);
     ++(FlexArray->Count);
@@ -194,6 +193,10 @@ OcFlexArrayFreeContainer (
   } else {
     *Items = (*FlexArray)->Items;
     *Count = (*FlexArray)->Count;
+    if (*Count == 0 && *Items != NULL) {
+      FreePool (*Items);
+      *Items = NULL;
+    }
     FreePool (*FlexArray);
     *FlexArray = NULL;
   }
