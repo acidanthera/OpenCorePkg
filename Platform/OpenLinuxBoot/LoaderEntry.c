@@ -570,6 +570,83 @@ InternalIdVersionFromFileName (
   return EFI_SUCCESS;
 }
 
+//
+// We do not need to warn about missing files: OC warns about
+// missing bootable file (vmlinuz) and kernel stops and warns
+// about missing initrd. However, some linuxes (e.g. Endless)
+// make the filepaths specified in an entry relative to /boot,
+// not relative to / as it should be, so we have to check which
+// it is. Only for this reason,  we end up warning here if we
+// can't find it at all.
+//
+STATIC
+EFI_STATUS
+FindLoaderFile (
+  IN     CONST EFI_FILE_HANDLE  Directory,
+  IN     CONST CHAR16           *DirName,
+  IN OUT       CHAR8            **FileName
+  )
+{
+  EFI_STATUS        Status;
+  EFI_FILE_PROTOCOL *File;
+  UINTN             FileNameLen;
+  UINTN             DirNameLen;
+  CHAR16            *Path;
+  UINTN             MaxPathSize;
+
+  ASSERT (DirName != NULL);
+  ASSERT (FileName != NULL);
+  ASSERT (*FileName != NULL);
+
+  FileNameLen = AsciiStrLen (*FileName);
+  DirNameLen = StrLen (DirName);
+
+  //
+  // DirName does not include initial slash
+  //
+  MaxPathSize = (1 + DirNameLen + FileNameLen + 1) * sizeof (CHAR16);
+
+  Path = AllocatePool (MaxPathSize);
+  if (Path == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  UnicodeSPrintAsciiFormat (Path, MaxPathSize, "%a", *FileName);
+  UnicodeUefiSlashes (Path);
+
+  Status = OcSafeFileOpen (Directory, &File, Path, EFI_FILE_MODE_READ, 0);
+  if (!EFI_ERROR (Status)) {
+    File->Close (File);
+    FreePool (Path);
+    return Status;
+  }
+
+  if (DirNameLen <= 1) {
+    DEBUG ((DEBUG_WARN, "LNX: %a not found - %r\n", *FileName, Status));
+    FreePool (Path);
+    return Status;
+  }
+
+  UnicodeSPrintAsciiFormat (Path, MaxPathSize, "%c%s%a", *FileName[0], DirName, *FileName);
+  UnicodeUefiSlashes (Path);
+
+  Status = OcSafeFileOpen (Directory, &File, Path, EFI_FILE_MODE_READ, 0);
+  if (!EFI_ERROR (Status)) {
+    //
+    // Found at 'wrong' location - re-use allocated path
+    //
+    File->Close (File);
+    AsciiSPrint ((CHAR8 *)Path, MaxPathSize, "%c%s%a", *FileName[0], DirName, *FileName);
+    FreePool (*FileName);
+    *FileName = (CHAR8 *)Path;
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((DEBUG_WARN, "LNX: %a not found (searched / and /%s) - %r\n", *FileName, DirName, Status));
+  FreePool (Path);
+  return Status;
+}
+
 STATIC
 EFI_STATUS
 DoProcessLoaderEntry (
@@ -583,22 +660,24 @@ DoProcessLoaderEntry (
   CHAR8                 *Content;
   LOADER_ENTRY          *Entry;
   CHAR16                SaveChar;
+  CHAR16                *DirName;
+  CHAR8                 **Initrd;
+  UINTN                 Index;
 
-  //
-  // Doesn't really matter if we return EFI_SUCCESS or EFI_NOT_FOUND in these initial checks;
-  // anything else will terminate directory processing.
-  //
+  ASSERT (Context != NULL);
+  DirName = Context;
+
   if (FileInfoSize > MAX_LOADER_ENTRY_FILE_INFO_SIZE) {
     SaveChar = FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN];
     FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN] = CHAR_NULL;
     DEBUG ((DEBUG_WARN, "LNX: Entry filename overlong: %s...\n", FileInfo->FileName));
     FileInfo->FileName[MAX_LOADER_ENTRY_NAME_LEN] = SaveChar;
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   if (FileInfo->FileSize > MAX_LOADER_ENTRY_FILE_SIZE) {
     DEBUG ((DEBUG_WARN, "LNX: Entry file size overlong: %s\n", FileInfo->FileName));
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
   }
 
   DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
@@ -624,7 +703,22 @@ DoProcessLoaderEntry (
     DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
       "LNX: No linux line, ignoring\n"));
     OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
-    return EFI_SUCCESS;
+    return EFI_NOT_FOUND;
+  }
+
+  Status = FindLoaderFile (Directory, DirName, &Entry->Linux);
+  if (!EFI_ERROR (Status)) {
+    for (Index = 0; Index < Entry->Initrds->Count; Index++) {
+      Initrd = OcFlexArrayItemAt (Entry->Initrds, Index);
+      Status = FindLoaderFile (Directory, DirName, Initrd);
+      if (EFI_ERROR (Status)) {
+        break;
+      }
+    }
+  }
+  if (EFI_ERROR (Status)) {
+    OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
+    return Status;
   }
 
   if (mIsGrub2) {
@@ -681,6 +775,7 @@ STATIC
 EFI_STATUS
 ScanLoaderEntriesAtDirectory (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  IN   CHAR16                   *DirName,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
   )
@@ -755,10 +850,12 @@ ScanLoaderEntriesAtDirectory (
     if (gLoaderEntries == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     } else {
-      Status = OcScanDirectory (EntriesDirectory, ProcessLoaderEntry, NULL);
+      Status = OcScanDirectory (EntriesDirectory, ProcessLoaderEntry, DirName);
     }
 
     if (!EFI_ERROR (Status)) {
+      ASSERT (gLoaderEntries->Count > 0);
+
       Status = InternalConvertLoaderEntriesToBootEntries (
         RootDirectory,
         Entries,
@@ -794,7 +891,7 @@ DoScanLoaderEntries (
 {
   EFI_STATUS                      Status;
 
-  Status = ScanLoaderEntriesAtDirectory (Directory, Entries, NumEntries);
+  Status = ScanLoaderEntriesAtDirectory (Directory, DirName, Entries, NumEntries);
 
   DEBUG ((
     (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) ? DEBUG_WARN : DEBUG_INFO,
@@ -816,12 +913,15 @@ InternalScanLoaderEntries (
   EFI_STATUS                    Status;
   EFI_FILE_PROTOCOL             *AdditionalScanDirectory;
 
-  Status = OcSafeFileOpen (RootDirectory, &AdditionalScanDirectory, BOOT_DIR, EFI_FILE_MODE_READ, 0);
-  if (!EFI_ERROR (Status)) {
-    Status = DoScanLoaderEntries (AdditionalScanDirectory, BOOT_DIR, Entries, NumEntries);
-  } else {
-    Status = DoScanLoaderEntries (RootDirectory, L"", Entries, NumEntries);
+  Status = DoScanLoaderEntries (RootDirectory, L"", Entries, NumEntries);
+  if (EFI_ERROR (Status)) {
+    Status = OcSafeFileOpen (RootDirectory, &AdditionalScanDirectory, BOOT_DIR, EFI_FILE_MODE_READ, 0);
+    if (!EFI_ERROR (Status)) {
+      Status = DoScanLoaderEntries (AdditionalScanDirectory, BOOT_DIR, Entries, NumEntries);
+      AdditionalScanDirectory->Close (AdditionalScanDirectory);
+    }
   }
+  
   return Status;
 }
 
