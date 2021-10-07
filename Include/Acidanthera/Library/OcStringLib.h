@@ -97,6 +97,16 @@ AsciiUefiSlashes (
   IN OUT CHAR8    *String
   );
 
+/**
+  Convert path with mixed slashes to Unix slashes (/).
+
+  @param[in,out]  String      Path.
+**/
+VOID
+AsciiUnixSlashes (
+  IN OUT CHAR8    *String
+  );
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String  A pointer to the ascii string to convert to unicode.

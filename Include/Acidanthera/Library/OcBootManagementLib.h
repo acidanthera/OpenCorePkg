@@ -1851,9 +1851,9 @@ OcParseLoadOptions (
 
   Assumes CHAR_NULL terminated Unicode string of space separated options,
   each of form {name} or {name}={value}. Double quotes can be used round {value} to
-  include spaces, and '\' can be used within quoted or unquoted values to escape any
-  character (including space and '"').
-  Comments (if any) run from '#' to end of same line.
+  include spaces, and backslash can be used within quoted or unquoted values to escape any
+  character (including space and double quote).
+  Comments (if any) run from hash symbol to end of same line.
 
   NB Var names and values are left as pointers to within the raw string, which may
   be modified during processing.

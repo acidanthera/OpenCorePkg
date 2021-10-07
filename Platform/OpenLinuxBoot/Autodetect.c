@@ -151,6 +151,9 @@ CreateRootPartuuid (
   NumPrinted = AsciiSPrint (*Dest, Length + 1, "%a%g", "root=PARTUUID=", gPartuuid);
   ASSERT (NumPrinted == Length);
 
+  //
+  // Value is case-sensitive and must be lower case.
+  //
   OcAsciiToLower (&(*Dest)[L_STR_LEN ("root=PARTUUID=")]);
 
   return EFI_SUCCESS;
@@ -331,6 +334,24 @@ AddOption (
   return InsertOption (Options->Count, Options, Value, IsUnicode);
 }
 
+EFI_STATUS
+InsertRootOption (
+  IN           OC_FLEX_ARRAY      *Options
+  )
+{
+  CHAR8             **NewOption;
+
+  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Creating \"root=PARTUUID=%g\"\n", gPartuuid));
+
+  NewOption = OcFlexArrayInsertItem (Options, 0);
+  if (NewOption == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  return CreateRootPartuuid (NewOption);
+}
+
 //
 // TODO: Options for rescue versions. Would it be better e.g. just to add "ro" and nothing else?
 // However on some installs (e.g. where modules to load are specified in the kernel opts) this
@@ -351,7 +372,6 @@ AutodetectBootOptions (
   EFI_GUID          Guid;
   CHAR8             *AsciiStrValue;
   CHAR8             *GrubVarName;
-  CHAR8             **NewOption;
   BOOLEAN           FoundOptions;
   BOOLEAN           PlusOpts;
 
@@ -519,21 +539,11 @@ AutodetectBootOptions (
   //
   // Insert "root=PARTUUID=..." option, followed by "ro" if requested, only if we get to here.
   //
-  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-    "LNX: Creating \"root=PARTUUID=%g\"\n", gPartuuid));
-
-  InsertIndex = 0;
-
-  NewOption = OcFlexArrayInsertItem (Options, InsertIndex);
-  if (NewOption == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  ++InsertIndex;
-  
-  Status = CreateRootPartuuid (NewOption);
+  Status = InsertRootOption (Options);
   if (EFI_ERROR (Status)) {
     return Status;
   }
+  InsertIndex = 1;
 
   if ((gLinuxBootFlags & LINUX_BOOT_ADD_RO) != 0) {
     DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
@@ -692,6 +702,9 @@ InternalAutodetectLinux (
   Status = OcSafeFileOpen (RootDirectory, &RootFsFile, ROOT_FS_FILE, EFI_FILE_MODE_READ, 0);
   if (!EFI_ERROR (Status)) {
     Status = OcEnsureDirectoryFile (RootFsFile, FALSE);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", ROOT_FS_FILE, "file", Status));
+    }
     RootFsFile->Close (RootFsFile);
   }
   if (EFI_ERROR (Status)) {

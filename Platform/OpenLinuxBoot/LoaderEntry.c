@@ -23,11 +23,19 @@
 #include <Protocol/OcBootEntry.h>
 
 //
+// Root.
+//
+#define ROOT_DIR    L"\\"
+//
 // Required where the BTRFS subvolume is /boot, as this looks like a
 // normal directory within EFI. Note that scanning / and then /boot
 // is how blscfg behaves by default too.
 //
-#define BOOT_DIR   L"boot"
+#define BOOT_DIR    L"\\boot"
+//
+// Don't add missing root= option unless this directory is present at root.
+//
+#define OSTREE_DIR  L"\\ostree"
 
 //
 // No leading slash so they can be relative to root or
@@ -576,7 +584,7 @@ InternalIdVersionFromFileName (
 // about missing initrd. However, some linuxes (e.g. Endless)
 // make the filepaths specified in an entry relative to /boot,
 // not relative to / as it should be, so we have to check which
-// it is. Only for this reason,  we end up warning here if we
+// it is. Only for this reason, we end up warning here if we
 // can't find it at all.
 //
 STATIC
@@ -601,10 +609,7 @@ FindLoaderFile (
   FileNameLen = AsciiStrLen (*FileName);
   DirNameLen = StrLen (DirName);
 
-  //
-  // DirName does not include initial slash
-  //
-  MaxPathSize = (1 + DirNameLen + FileNameLen + 1) * sizeof (CHAR16);
+  MaxPathSize = (DirNameLen + FileNameLen + 1) * sizeof (CHAR16);
 
   Path = AllocatePool (MaxPathSize);
   if (Path == NULL) {
@@ -627,7 +632,7 @@ FindLoaderFile (
     return Status;
   }
 
-  UnicodeSPrintAsciiFormat (Path, MaxPathSize, "%c%s%a", *FileName[0], DirName, *FileName);
+  UnicodeSPrintAsciiFormat (Path, MaxPathSize, "%s%a", DirName, *FileName);
   UnicodeUefiSlashes (Path);
 
   Status = OcSafeFileOpen (Directory, &File, Path, EFI_FILE_MODE_READ, 0);
@@ -636,15 +641,87 @@ FindLoaderFile (
     // Found at 'wrong' location - re-use allocated path
     //
     File->Close (File);
-    AsciiSPrint ((CHAR8 *)Path, MaxPathSize, "%c%s%a", *FileName[0], DirName, *FileName);
+    AsciiSPrint ((CHAR8 *)Path, MaxPathSize, "%s%a", DirName, *FileName);
+    AsciiUnixSlashes ((CHAR8 *)Path);
     FreePool (*FileName);
     *FileName = (CHAR8 *)Path;
     return EFI_SUCCESS;
   }
 
-  DEBUG ((DEBUG_WARN, "LNX: %a not found (searched / and /%s) - %r\n", *FileName, DirName, Status));
+  DEBUG ((DEBUG_WARN, "LNX: %a not found (searched %s and %s) - %r\n", *FileName, ROOT_DIR, DirName, Status));
   FreePool (Path);
   return Status;
+}
+
+STATIC
+BOOLEAN
+HasRootOption (
+  IN           OC_FLEX_ARRAY      *Options
+  )
+{
+  EFI_STATUS            Status;
+  UINTN                 Index;
+  CHAR8                 **Option;
+  CHAR8                 *OptionCopy;
+  OC_FLEX_ARRAY         *ParsedVars;
+  BOOLEAN               HasRoot;
+
+  ASSERT (Options != NULL);
+
+  //
+  // TRUE on errors: do not attempt to add root.
+  //
+  for (Index = 0; Index < Options->Count; Index++) {
+    Option = OcFlexArrayItemAt (Options, Index);
+    ASSERT (Option != NULL);
+    ASSERT (*Option != NULL);
+
+    OptionCopy = AllocateCopyPool (AsciiStrSize (*Option), *Option);
+    if (OptionCopy == NULL) {
+      return TRUE;
+    }
+
+    Status = OcParseVars (OptionCopy, &ParsedVars, FALSE);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "LNX: Error parsing Options[%u]=<%a> - %r\n", Index, *Option, Status));
+      FreePool (OptionCopy);
+      return TRUE;
+    }
+
+    HasRoot = OcHasParsedVar (ParsedVars, "root", FALSE);
+
+    FreePool (ParsedVars);
+    FreePool (OptionCopy);
+
+    if (HasRoot) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+STATIC
+BOOLEAN
+HasOstreeDir (
+  EFI_FILE_HANDLE   Directory
+  )
+{
+  EFI_STATUS            Status;
+  EFI_FILE_PROTOCOL     *OstreeFile;
+
+  Status = OcSafeFileOpen (Directory, &OstreeFile, OSTREE_DIR, EFI_FILE_MODE_READ, 0);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  Status = OcEnsureDirectoryFile (OstreeFile, TRUE);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", OSTREE_DIR, "directory", Status));
+  }
+  OstreeFile->Close (OstreeFile);
+
+  return !EFI_ERROR(Status);
 }
 
 STATIC
@@ -726,6 +803,24 @@ DoProcessLoaderEntry (
     if (EFI_ERROR (Status)) {
       OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
       return Status;
+    }
+  }
+
+  //
+  // Need to understand other reasons to apply this fix (if any),
+  // so not automatically applying unless we recognise the layout.
+  //
+  if ((gLinuxBootFlags & LINUX_BOOT_ALLOW_CONF_AUTO_ROOT) != 0
+    && !HasRootOption (Entry->Options)) {
+    if (!HasOstreeDir (Directory)) {
+      DEBUG ((DEBUG_WARN, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "not ", "not "));
+    } else {
+      DEBUG ((DEBUG_WARN, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "", ""));
+      Status = InsertRootOption (Entry->Options);
+      if (EFI_ERROR (Status)) {
+        OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
+        return Status;
+      }
     }
   }
 
@@ -895,7 +990,7 @@ DoScanLoaderEntries (
 
   DEBUG ((
     (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) ? DEBUG_WARN : DEBUG_INFO,
-    "LNX: ScanLoaderEntries /%s - %r\n",
+    "LNX: ScanLoaderEntries %s - %r\n",
     DirName,
     Status
     ));
@@ -913,7 +1008,7 @@ InternalScanLoaderEntries (
   EFI_STATUS                    Status;
   EFI_FILE_PROTOCOL             *AdditionalScanDirectory;
 
-  Status = DoScanLoaderEntries (RootDirectory, L"", Entries, NumEntries);
+  Status = DoScanLoaderEntries (RootDirectory, ROOT_DIR, Entries, NumEntries);
   if (EFI_ERROR (Status)) {
     Status = OcSafeFileOpen (RootDirectory, &AdditionalScanDirectory, BOOT_DIR, EFI_FILE_MODE_READ, 0);
     if (!EFI_ERROR (Status)) {

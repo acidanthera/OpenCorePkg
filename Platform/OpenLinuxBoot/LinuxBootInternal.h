@@ -59,9 +59,13 @@
 */
 #define LINUX_BOOT_ADD_RO               BIT10
 /*
-  Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
+  TODO: Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
 */
 //#define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT11
+/*
+  Add root= option if missing in loader/entries *.conf options.
+*/
+#define LINUX_BOOT_ALLOW_CONF_AUTO_ROOT BIT13
 /*
   Add some additional log info.
 */
@@ -81,6 +85,7 @@
   LINUX_BOOT_ALLOW_AUTODETECT     | \
   LINUX_BOOT_USE_LATEST           | \
   LINUX_BOOT_ADD_RO               | \
+  LINUX_BOOT_ALLOW_CONF_AUTO_ROOT | \
   LINUX_BOOT_LOG_VERBOSE          | \
   LINUX_BOOT_ADD_DEBUG_INFO       \
   )
@@ -326,6 +331,14 @@ AutodetectLinux (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
+  );
+
+/*
+  Insert root=PARTUUID=... option.
+*/
+EFI_STATUS
+InsertRootOption (
+  IN           OC_FLEX_ARRAY      *Options
   );
 
 /*

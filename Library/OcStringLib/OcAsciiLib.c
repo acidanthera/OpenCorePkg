@@ -92,6 +92,19 @@ AsciiUefiSlashes (
   }
 }
 
+VOID
+AsciiUnixSlashes (
+  IN OUT CHAR8    *String
+  )
+{
+  CHAR8  *Needle;
+
+  Needle = String;
+  while ((Needle = AsciiStrStr (Needle, "\\")) != NULL) {
+    *Needle++ = '/';
+  }
+}
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String1  A pointer to the ascii string to convert to unicode.

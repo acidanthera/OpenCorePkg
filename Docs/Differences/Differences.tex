@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Oct  4 22:07:11 2021
-%DIF ADD ../Configuration.tex        Mon Oct  4 22:16:35 2021
+%DIF DEL PreviousConfiguration.tex   Tue Oct  5 08:40:27 2021
+%DIF ADD ../Configuration.tex        Fri Oct  8 00:09:48 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6253,79 +6253,163 @@ functioning. Feature highlights:
 
 \subsection{OpenLinuxBoot}\label{uefilinux}
 
-\texttt{OpenLinuxBoot} is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
-It detects and boots Linux distros which are installed according to the
-\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification}
-or to the closely related (but not identical, see next paragraph)
-\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}.
+\DIFdelbegin \texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot }\DIFaddend is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
+It \DIFdelbegin \DIFdel{detects and boots Linux distros which are installed according to the
+}\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{\DIFdel{Boot Loader Specification}}
+%DIFAUXCMD
+\DIFdel{or to the closely related (but not identical, see next paragraph)
+}\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{\DIFdel{systemd BootLoaderSpecByDefault}}%DIFAUXCMD
+\DIFdel{.
 In effect this means Linux distributions where the available boot options are found in
-\texttt{\{ESP\}/loader/entries/*.conf} files (for instance \texttt{/boot/efi/loader/entries/*.conf})
-or in \texttt{\{boot\}/loader/entries/*.conf} files (for instance \texttt{/boot/loader/entries/*.conf}).
+}\texttt{\DIFdel{\{ESP\}/loader/entries/*.conf}} %DIFAUXCMD
+\DIFdel{files (for instance }\texttt{\DIFdel{/boot/efi/loader/entries/*.conf}}%DIFAUXCMD
+\DIFdel{)
+or in }\texttt{\DIFdel{\{boot\}/loader/entries/*.conf}} %DIFAUXCMD
+\DIFdel{files (for instance }\texttt{\DIFdel{/boot/loader/entries/*.conf}}%DIFAUXCMD
+\DIFdel{).
 The former layout -- pure Boot Loader Specification, using kernel files on the EFI System Partition or
 Extended Boot Loader Partition  -- is specific to systemd-boot, the latter
-layout with kernel files typically on the partition which will be mounted as \texttt{/boot}
-applies to most Fedora-related distros including Fedora itself, RHEL and variants.
+layout with kernel files typically on the partition which will be mounted as }\texttt{\DIFdel{/boot}}
+%DIFAUXCMD
+\DIFdel{applies to most Fedora-related distros including Fedora itself, RHEL and variants.}\DIFdelend \DIFaddbegin \DIFadd{aims to automatically detect and boot most Linux distros without additional configuration.
+}\DIFaddend 
 
-BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
-in its \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
-In order to correctly handle this, \texttt{OpenLinuxBoot} extracts all variables from
-\texttt{\{boot\}/grub2/grubenv} and any unconditionally set variables from \texttt{\{boot\}/grub2/grub.cfg}.
-This has proved sufficient in practice to extract the required variables seen so far in distros which use this
+\DIFdelbegin \DIFdel{BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
+in its }\DIFdelend \DIFaddbegin \DIFadd{Usage is as follows:
+}
+
+\begin{itemize}
+\tightlist
+  \item \DIFadd{Install Linux as normal, e.g.~by booting from an }\DIFaddend \texttt{\DIFdelbegin \DIFdel{*}\DIFdelend .\DIFdelbegin \DIFdel{conf}\DIFdelend \DIFaddbegin \DIFadd{iso}\DIFaddend } \DIFdelbegin \DIFdel{files }\DIFdelend \DIFaddbegin \DIFadd{image burnt to a removable
+  USB drive }\DIFaddend -- \DIFdelbegin \DIFdel{and this is used in practice in certain distros such as CentOS.
+In order to correctly handle this , }\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot is not involved in this stage.
+  }\item \DIFadd{Add }\DIFaddend \texttt{OpenLinuxBoot\DIFdelbegin %DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{extracts all variables from
+}\texttt{\DIFdel{\{boot\}/grub2/grubenv}} %DIFAUXCMD
+\DIFdel{and any unconditionally set variables from }\DIFdelend \DIFaddbegin \DIFadd{.efi}} \DIFadd{and also typically (see below) }\DIFaddend \texttt{\DIFdelbegin \DIFdel{\{boot\}/grub2/grub}\DIFdelend \DIFaddbegin \DIFadd{ext4\_x64}\DIFaddend .\DIFdelbegin \DIFdel{cfg}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{.
+  This has proved sufficient in practice to extract the required
+  variables seen so far in distros which use this
 GRUB-specific feature.
+  }\DIFdelend \DIFaddbegin \DIFadd{efi}} \DIFadd{to your }\texttt{\DIFadd{config.plist}}
+  \texttt{\DIFadd{Drivers}} \DIFadd{section.
+  }\item \DIFadd{Make sure }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{and }\texttt{\DIFadd{LauncherOption}} \DIFadd{are enabled in }\texttt{\DIFadd{config.plist}}\DIFadd{;
+  it is also recommended to enable }\texttt{\DIFadd{HideAuxiliary}} \DIFadd{in order to hide older Linux kernels except when required
+  (they are added as auxiliary entries and so may then be shown by pressing the }\texttt{\DIFadd{Spacebar}} \DIFadd{key in the OpenCore boot menu).
+  }\item \DIFadd{Reboot into OpenCore: the installed Linux distribution should just appear and boot directly from OpenCore
+  when selected, which it does without chainloading via GRUB.
+}\end{itemize}
+\DIFaddend 
 
-For distributions which do not use either of the above schemes, \texttt{OpenLinuxBoot} will autodetect and
-boot \texttt{\{boot\}/vmlinuz*} kernel files directly, after linking these automatically -- based on the
-kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files, and after
-searching in \texttt{/etc/default/grub} for kernel boot options and \texttt{/etc/os-release} for the
+\DIFdelbegin \DIFdel{For distributions which do not use either of the above schemes, }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdel{will autodetect and boot }\texttt{\DIFdel{\{boot\}/vmlinuz*}} %DIFAUXCMD
+\DIFdel{kernel files directly , after linking these automatically -- based on the kernel version in the filename -- to their associated }\texttt{\DIFdel{\{boot\}/init*}} %DIFAUXCMD
+\DIFdel{ramdisk files, and after
+searching in }\texttt{\DIFdel{/etc/default/grub}} %DIFAUXCMD
+\DIFdel{for kernel boot options and }\texttt{\DIFdel{/etc/os-release}} %DIFAUXCMD
+\DIFdel{for the
 distro name.
-This layout applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
+This layout applies to most Debian-related distros, including Debian itself, Ubuntu and variants. }\DIFdelend \DIFaddbegin \DIFadd{If OpenCore has already been manually set up to boot Linux, e.g. via }\texttt{\DIFadd{BlessOverride}} \DIFadd{or via }\texttt{\DIFadd{Entries}} \DIFadd{then
+then these settings may be removed so that the Linux distribution is not displayed twice in the boot menu.
+}\DIFaddend 
 
-The method of starting the kernel relies on it being compiled with EFISTUB, however this applies
-to almost all modern distros, particularly those which use systemd. Most modern distros
-use systemd as their system manager (even though at the same time most do \emph{not} use systemd-boot as
-their bootloader).
+\DIFdelbegin \DIFdel{The method of starting the kernel relies on it being compiled with EFISTUB, however this applies
+to
+almost all modern distros, particularly those which usesystemd. Most modern distros
+use systemd as their system manager (even though at the same time most do }\emph{\DIFdel{not}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{It is recommended to install Linux with its default bootloader, even though this will not be actively used
+when booting via OpenLinuxBoot. This is because OpenLinuxBoot has to detect the correct kernel options to
+}\DIFaddend use\DIFdelbegin \DIFdel{systemd-boot as
+their bootloader). }%DIFDELCMD < 
 
-The latest kernel version of a given install is always shown in the boot menu. Additional versions,
+%DIFDELCMD < %%%
+\DIFdel{The latest kernel version of a given install is always shown in the boot menu. Additional versions,
 recovery versions, etc. are added as auxiliary boot entries, so depending on OpenCore's
-\texttt{HideAuxiliary} setting may not be shown until the space key is pressed.
+}\texttt{\DIFdel{HideAuxiliary}} %DIFAUXCMD
+\DIFdel{setting may not be shown until the space key is pressed}\DIFdelend \DIFaddbegin \DIFadd{, and does so by looking in files left by the default bootloader}\DIFaddend . \DIFaddbegin \DIFadd{If no bootloader was installed (or
+these options cannot be found) booting is still possible, but the correct boot options must be manually
+specified before OpenLinuxBoot will attempt to start the distro.
+}\DIFaddend 
 
-\emph{Note 1}: \texttt{OpenLinuxBoot} requires filesystem drivers that may not be available in
-firmware such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
+\DIFdelbegin \emph{\DIFdel{Note 1}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot typically }\DIFaddend requires filesystem drivers that \DIFdelbegin \DIFdel{may not be }\DIFdelend \DIFaddbegin \DIFadd{are not }\DIFaddend available in
+firmware\DIFaddbegin \DIFadd{, }\DIFaddend such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
 Drivers tested in basic scenarios can be downloaded from \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData}.
-Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
-tamper-resistance testing, therefore have may carry potential security or data-loss risks.
+Be aware that these drivers are \DIFdelbegin \DIFdel{neither }\DIFdelend \DIFaddbegin \DIFadd{not }\DIFaddend tested for reliability in all scenarious, nor \DIFdelbegin \DIFdel{underwent any
+}\DIFdelend \DIFaddbegin \DIFadd{did they undergo
+}\DIFaddend tamper-resistance testing, therefore \DIFdelbegin \DIFdel{have }\DIFdelend \DIFaddbegin \DIFadd{they }\DIFaddend may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on an EXT4 partition even when the distribution's
+Most Linux \DIFdelbegin \DIFdel{distributions keep their boot files on an EXT4 partition even when the distribution's
 root filesystem is something else, such as BTRFS, therefore only an EXT4
-driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
-A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
-partition, e.g. as is currently done by default in openSUSE.
+driver such as }\DIFdelend \DIFaddbegin \DIFadd{distros require the }\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} \DIFdelbegin \DIFdel{is normally required.
+A BTRFS driversuch as }\DIFdelend \DIFaddbegin \DIFadd{driver,
+a few may require the }\DIFaddend \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}} \DIFdelbegin \DIFdel{will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
+partition,
+e.g. as is currently done by default in openSUSE.
+}%DIFDELCMD < 
 
-Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
-on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
-filesystem driver - but it is not widely used except in Arch Linux.
+%DIFDELCMD < %%%
+\DIFdel{Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
+on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional filesystem driver- but it is not widely used except in Arch Linux.
+}%DIFDELCMD < 
 
-\emph{Note 2}: \texttt{OpenLinuxBoot} does not attempt to read and interpret the layout of Linux
+%DIFDELCMD < %%%
+\emph{\DIFdel{Note 2}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdel{does not attempt to read and interpret the layout of Linux
 installation media (which can be highly variable). Installation media should be booted directly either from
 the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
 then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
-which the machine's own bootloader will refuse to boot.
+which the machine's own bootloader will refuse to boot. }%DIFDELCMD < 
 
-\emph{Note 3}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
-does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
-therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
-the boot menu.
+%DIFDELCMD < %%%
+\emph{\DIFdel{Note 3}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{driver, and a few
+may require no additional file system driver}\DIFaddend : \DIFdelbegin \DIFdel{systemd-boot users (probably almost exclusively Arch Linux users) should be aware that }\texttt{\DIFdel{OpenLinuxBoot}}
+%DIFAUXCMD
+\DIFdel{does not support the systemd-boot--specific }\href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{\DIFdel{Boot Loader Interface}}%DIFAUXCMD
+\DIFdel{;
+therefore use }\texttt{\DIFdel{efibootmgr}} %DIFAUXCMD
+\DIFdel{rather than }\texttt{\DIFdel{bootctl}} %DIFAUXCMD
+\DIFdel{for any low-level Linux command line interaction with
+the boot menu}\DIFdelend \DIFaddbegin \DIFadd{it depends on the filesystem of the boot partition of the installed
+distro, and on what filesystems are already supported by the system's firmware. LVM is not currently
+supported - this is because it is not believed that there is currently a stand-alone UEFI LVM filesystem driver}\DIFaddend .
 
-\emph{Note 4}: Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
-failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
+\DIFdelbegin \emph{\DIFdel{Note 4}}%DIFAUXCMD
+\DIFdel{: }\DIFdelend Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
+failure (\DIFdelbegin \DIFdel{i.e. halts with }\DIFdelend \DIFaddbegin \DIFadd{typically halting with a }\DIFaddend black screen) of the Linux kernel\DIFaddbegin \DIFadd{, }\DIFaddend due to a firmware bug of some
+firmware released after 2017. \DIFaddbegin \DIFadd{When present and not mitigated by this quirk, this affects booting
+via OpenCore with or without OpenLinuxBoot.
+}\DIFaddend 
 
-The default parameter values should work well, but if you need to parameterise this driver the following
-options may be specified in \texttt{UEFI/Drivers/Arguments}:
+\DIFaddbegin \DIFadd{After installing OpenLinuxBoot, it is recommended to compare the Linux boot options (shown with }\texttt{\DIFadd{cat /proc/cmdline}}\DIFadd{)
+seen when booting via OpenLinuxBoot and via the distro's original bootloader. If the default bootloader
+is GRUB, expect the options generated by OpenLinuxBoot not to
+contain a }\texttt{\DIFadd{BOOT\_IMAGE=...}} \DIFadd{value where the GRUB options do, and to contain an
+}\texttt{\DIFadd{initrd=...}} \DIFadd{value while the GRUB options do not.
+All remaining options should match (option order does not matter) -- perhaps excluding less important graphics
+handover options (such as in the Ubuntu example given in }\texttt{\DIFadd{autoopts}} \DIFadd{below). If they do not, it is recommended
+to manually add the missing options, e.g. with }\texttt{\DIFadd{patruuidopts:\{partuuid\}+=\{opts\}}} \DIFadd{to target a specific
+distro (or just with }\texttt{\DIFadd{autoopts+=}{\DIFadd{opts}}}\DIFadd{, which applies to all installed distros, if only one distro is in use).
+}
+
+\DIFadd{If using OpenLinuxBoot with Secure Boot, users may wish to use the }\texttt{\DIFadd{shim-to-cert.tool}} \DIFadd{included in OpenCore
+utilities, which can be used to extract the required public key to validate a distro's kernels directly, rather
+than via shim. For non-GRUB distros, the required public key must be found by user research.
+}
+
+\subsubsection{\DIFadd{Configuration}}
+
+\DIFaddend The default parameter values should work well \DIFaddbegin \DIFadd{with no changes under most circumstances}\DIFaddend , but if \DIFdelbegin \DIFdel{you need to parameterise this driver }\DIFdelend \DIFaddbegin \DIFadd{required }\DIFaddend the following
+options \DIFaddbegin \DIFadd{for the driver }\DIFaddend may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} are set. \medskip
+	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} \DIFaddbegin \DIFadd{and
+  }\texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}} \DIFaddend are set. \medskip
 
 	Available flags are: \medskip
 
@@ -6349,19 +6433,22 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 	  \emph{Note 2}: Regardless of the above flags, a file system must first be
 	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
-    \texttt{OpenLinuxBoot} or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
+    \DIFdelbegin \texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot }\DIFaddend or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
     \medskip
 
 	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
-    in both \texttt{OpenLinuxBoot} flags and \texttt{Misc/Security/ScanPolicy} in order to be sure
-    to detect all valid Linux installs.
+    in both \DIFdelbegin \texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot }\DIFaddend flags and \texttt{Misc/Security/ScanPolicy} in order to be sure to detect
+    all valid Linux installs\DIFaddbegin \DIFadd{, since Linux boot filesystems are very often marked as }\texttt{\DIFadd{LINUX\_DATA}}\DIFaddend .
     \medskip
 
 	  \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{LINUX\_BOOT\_ALLOW\_AUTODETECT},
 	  If set allows autodetecting and linking \texttt{vmlinuz*} and \texttt{init*} ramdisk files
 	  when \texttt{loader/entries} files are not found.
 	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
-	  When a Linux entry generated by \texttt{OpenLinuxBoot} is selected as the default boot entry
+	  When a Linux entry generated by \DIFdelbegin \texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot }\DIFaddend is selected as the default boot entry
     in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
 
 	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
@@ -6378,7 +6465,14 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
-	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
+    \DIFaddbegin 
+
+	  \DIFaddend \item \DIFaddbegin \texttt{\DIFadd{0x00002000}} \DIFadd{(bit }\texttt{\DIFadd{13}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT}}\DIFadd{,
+	  In some instances of }\texttt{\DIFadd{BootLoaderSpecByDefault}} \DIFadd{in combination with }\texttt{\DIFadd{ostree}}\DIFadd{, the
+    }\texttt{\DIFadd{/loader/entries/*.conf}} \DIFadd{files do not specify a required }\texttt{\DIFadd{root=...}} \DIFadd{kernel
+    option -- it is added by GRUB. If this bit is set and this situation is detected, then
+    automatically add this option. (Required for example by Endless OS.)
+	  }\item \DIFaddend \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
 	  Add additional debug log info about files encountered and autodetect options added while scanning for
     Linux boot entries.
 	  \item \texttt{0x00008000} (bit \texttt{15}) --- \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO},
@@ -6401,13 +6495,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
   \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
-  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is NOT the same for
+  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is \DIFdelbegin \DIFdel{NOT }\DIFdelend \DIFaddbegin \DIFadd{not }\DIFaddend the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
 
-	Typically you should not need this option in the latter case, but in case you do, to find out the unique
-  partition uuid to use, look for \texttt{LNX:} entries in the OpenCore debug	log file. Alternatively, and
-  for more advanced scenarios, you may wish to examine how your drives are mounted using the
-  Linux \texttt{mount} command, and then find out the partuuid of relevant mounted drives by examining the
+	Typically \DIFdelbegin \DIFdel{you should not need this option }\DIFdelend \DIFaddbegin \DIFadd{this option should not be needed }\DIFaddend in the latter case, but in case \DIFdelbegin \DIFdel{you do}\DIFdelend \DIFaddbegin \DIFadd{it is}\DIFaddend , to find out the unique
+  partition uuid to use \DIFdelbegin \DIFdel{, }\DIFdelend look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+  for more advanced scenarios, \DIFdelbegin \DIFdel{you may wish }\DIFdelend \DIFaddbegin \DIFadd{it is possible }\DIFaddend to examine how \DIFdelbegin \DIFdel{your drives }\DIFdelend \DIFaddbegin \DIFadd{the distro's partitions }\DIFaddend are mounted using the
+  Linux \texttt{mount} command, and then find out the partuuid of relevant mounted \DIFdelbegin \DIFdel{drives }\DIFdelend \DIFaddbegin \DIFadd{partitions }\DIFaddend by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
 	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
@@ -6421,19 +6515,66 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip
+\DIFaddbegin \end{itemize}
+\DIFaddend 
 
-  Users may wish to compare their Linux boot options (shown with \texttt{cat /proc/cmdline}) seen when booting via
-  \texttt{OpenLinuxBoot} and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
-  systemd-boot or EXTLINUX). Expect the options generated by \texttt{OpenLinuxBoot} not to
-  contain a \texttt{BOOT\_IMAGE=...} value where GRUB options do, and to contain an
-  \texttt{initrd=...} value where the GRUB options do not, since GRUB hands over ramdisks in a different way.
-  All remaining parameters should match, however -- perhaps excluding less important graphics handover options,
-  such as in the Ubuntu example given in \texttt{autoopts}.
-  \texttt{OpenLinuxBoot} will not start a distro unless it can find some configured options to use, therefore in
-  the hopefully unlikely case where no auto-detectable options are available, the user will need to specify the correct options
-  with \texttt{partuuidopts} or \texttt{autoopts} before the distro will boot. Examine the OpenCore debug log
-  for \texttt{LNX:} entries containing further information about what was found.
-\end{itemize}
+\DIFdelbegin \DIFdel{Users may wish to compare their Linux boot options (shown with }\texttt{\DIFdel{cat /proc/cmdline}}%DIFAUXCMD
+\DIFdel{) seen when booting via
+  }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdel{and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
+  systemd-boot or EXTLINUX). Expect the options generated by }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdel{not to contain a }\texttt{\DIFdel{BOOT\_IMAGE=...}} %DIFAUXCMD
+\DIFdel{value where GRUB options do, and to contain an
+  }\texttt{\DIFdel{initrd=...}} %DIFAUXCMD
+\DIFdel{value where the GRUB options do not , since GRUB hands over ramdisks in a different way. All remaining parameters should match, however }\DIFdelend \DIFaddbegin \subsubsection{\DIFadd{Additional information}}
+
+\DIFadd{OpenLinuxBoot can detect the }\texttt{\DIFadd{loader/entries/*.conf}} \DIFadd{files created according to the 
+}\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{\DIFadd{Boot Loader Specification}} \DIFadd{or the closely related
+}\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{\DIFadd{systemd BootLoaderSpecByDefault}}\DIFadd{. The
+former is specific to systemd-boot and is used by Arch Linux, the latter applies to most Fedora-related distros
+including Fedora itself, RHEL and variants.
+}
+
+\DIFadd{Where the above files are not present, OpenLinuxBoot can autodetect and
+boot }\texttt{\DIFadd{\{boot\}/vmlinuz*}} \DIFadd{kernel files directly. It links these automatically }\DIFaddend -- \DIFdelbegin \DIFdel{perhaps excluding less important graphics handover options,
+  such as in the Ubuntu example given in }\DIFdelend \DIFaddbegin \DIFadd{based on the
+kernel version in the filename -- to their associated }\texttt{\DIFadd{\{boot\}/init*}} \DIFadd{ramdisk files.
+This applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
+}
+
+\DIFadd{When autodetecting, OpenLinuxBoot looks in }\DIFaddend \texttt{\DIFdelbegin \DIFdel{autoopts}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{.
+}\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
+\DIFdel{will not start a distro unless it can find some configured options to use, therefore in the hopefully unlikely case where no auto-detectable options are available, }\DIFdelend \DIFaddbegin \DIFadd{/etc/default/grub}} \DIFadd{for kernel boot options and
+}\texttt{\DIFadd{/etc/os-release}} \DIFadd{for the distro name.
+}
+
+\DIFadd{BootLoaderSpecByDefault (but not pure Boot Loader Specification) can expand GRUB variables
+in the }\texttt{\DIFadd{*.conf}} \DIFadd{files -- and this is used in practice in certain distros such as CentOS.
+In order to handle this correctly, when this situation is detected OpenLinuxBoot extracts all variables from
+}\texttt{\DIFadd{\{boot\}/grub2/grubenv}} \DIFadd{and also any unconditionally set variables from
+}\texttt{\DIFadd{\{boot\}/grub2/grub.cfg}}\DIFadd{, and then expands these where required in }\texttt{\DIFadd{*.conf}} \DIFadd{file entries.
+}
+
+\DIFadd{The only currently supported method of starting Linux kernels relies on their being compiled with EFISTUB.
+This applies to almost all modern distros, particularly those which use systemd. Note that most modern
+distros use systemd as their system manager, even though most do not use systemd-boot as
+their bootloader.
+}
+
+\DIFadd{systemd-boot users (probably almost exclusively Arch Linux users) should be aware that OpenLinuxBoot
+does not support the systemd-boot--specific }\href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{\DIFadd{Boot Loader Interface}}\DIFadd{;
+therefore }\texttt{\DIFadd{efibootmgr}} \DIFadd{rather than }\texttt{\DIFadd{bootctl}} \DIFadd{must be used for any low-level Linux command line interaction
+with }\DIFaddend the \DIFdelbegin \DIFdel{user will need to specify the correct options
+  with }\texttt{\DIFdel{partuuidopts}} %DIFAUXCMD
+\DIFdel{or }\texttt{\DIFdel{autoopts}} %DIFAUXCMD
+\DIFdel{before the distro will boot . Examine the OpenCore debug log
+  for }\texttt{\DIFdel{LNX:}} %DIFAUXCMD
+\DIFdel{entries containing further information about what was found.
+}%DIFDELCMD < \end{itemize}
+%DIFDELCMD < %%%
+\DIFdelend \DIFaddbegin \DIFadd{boot menu.
+}\DIFaddend 
 
 \subsection{Properties}\label{uefiprops}
 
