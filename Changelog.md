@@ -3,6 +3,7 @@ OpenCore Changelog
 #### v0.7.5
 - Revised OpenLinuxBoot documentation
 - Supported Linux ostree boot layout
+- Fixed external drive icons for Boot Entry Protocol
 
 #### v0.7.4
 - Fixed Linux kernel sort order
