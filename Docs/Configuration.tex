@@ -6200,13 +6200,12 @@ Usage is as follows:
 
 \begin{itemize}
 \tightlist
-  \item Install Linux as normal, e.g.~by booting from an \texttt{.iso} image burnt to a removable
-  USB drive -- OpenLinuxBoot is not involved in this stage.
-  \item Add \texttt{OpenLinuxBoot.efi} and also typically (see below) \texttt{ext4\_x64.efi} to your \texttt{config.plist}
+  \item Add \texttt{OpenLinuxBoot.efi} and also typically (see below) \texttt{ext4\_x64.efi} to the \texttt{config.plist}
   \texttt{Drivers} section.
   \item Make sure \texttt{RequestBootVarRouting} and \texttt{LauncherOption} are enabled in \texttt{config.plist};
   it is also recommended to enable \texttt{HideAuxiliary} in order to hide older Linux kernels except when required
   (they are added as auxiliary entries and so may then be shown by pressing the \texttt{Spacebar} key in the OpenCore boot menu).
+  \item Install Linux as normal if this has not been done earlier -- OpenLinuxBoot is not involved in this stage.
   \item Reboot into OpenCore: the installed Linux distribution should just appear and boot directly from OpenCore
   when selected, which it does without chainloading via GRUB.
 \end{itemize}
@@ -6357,7 +6356,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
   with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
   a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
-  (check \texttt{cat /proc/cmdline} when booted via your existing bootloader) on Ubuntu and related distros,
+  (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip

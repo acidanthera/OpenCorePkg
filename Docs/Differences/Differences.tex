@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Oct  5 08:40:27 2021
-%DIF ADD ../Configuration.tex        Fri Oct  8 00:09:48 2021
+%DIF ADD ../Configuration.tex        Fri Oct  8 11:05:42 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6258,45 +6258,42 @@ functioning. Feature highlights:
 It \DIFdelbegin \DIFdel{detects and boots Linux distros which are installed according to the
 }\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{\DIFdel{Boot Loader Specification}}
 %DIFAUXCMD
-\DIFdel{or to the closely related (but not identical, see next paragraph)
-}\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{\DIFdel{systemd BootLoaderSpecByDefault}}%DIFAUXCMD
+\DIFdel{or to the closely related (but not identical, see next paragraph) }\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{\DIFdel{systemd BootLoaderSpecByDefault}}%DIFAUXCMD
 \DIFdel{.
-In effect this means Linux distributions where the available boot options are found in
-}\texttt{\DIFdel{\{ESP\}/loader/entries/*.conf}} %DIFAUXCMD
-\DIFdel{files (for instance }\texttt{\DIFdel{/boot/efi/loader/entries/*.conf}}%DIFAUXCMD
+In effect this means Linux distributions where the available boot options are found in }\DIFdelend \DIFaddbegin \DIFadd{aims to automatically detect and boot most Linux distros without additional configuration.
+}
+
+\DIFadd{Usage is as follows:
+}
+
+\begin{itemize}
+\tightlist
+  \item \DIFadd{Add }\texttt{\DIFadd{OpenLinuxBoot.efi}} \DIFadd{and also typically (see below) }\texttt{\DIFadd{ext4\_x64.efi}} \DIFadd{to the }\texttt{\DIFadd{config.plist}}
+  \texttt{\DIFadd{Drivers}} \DIFadd{section.
+  }\item \DIFadd{Make sure }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{and }\texttt{\DIFadd{LauncherOption}} \DIFadd{are enabled in }\DIFaddend \texttt{\DIFdelbegin \DIFdel{\{ESP\}/loader/entries/*}\DIFdelend \DIFaddbegin \DIFadd{config}\DIFaddend .\DIFdelbegin \DIFdel{conf}\DIFdelend \DIFaddbegin \DIFadd{plist}\DIFaddend }\DIFdelbegin \DIFdel{files (for instance }\texttt{\DIFdel{/boot/efi/loader/entries/*.conf}}%DIFAUXCMD
 \DIFdel{)
 or in }\texttt{\DIFdel{\{boot\}/loader/entries/*.conf}} %DIFAUXCMD
 \DIFdel{files (for instance }\texttt{\DIFdel{/boot/loader/entries/*.conf}}%DIFAUXCMD
 \DIFdel{).
 The former layout -- pure Boot Loader Specification, using kernel files on the EFI System Partition or
 Extended Boot Loader Partition  -- is specific to systemd-boot, the latter
-layout with kernel files typically on the partition which will be mounted as }\texttt{\DIFdel{/boot}}
-%DIFAUXCMD
-\DIFdel{applies to most Fedora-related distros including Fedora itself, RHEL and variants.}\DIFdelend \DIFaddbegin \DIFadd{aims to automatically detect and boot most Linux distros without additional configuration.
-}\DIFaddend 
+layout with kernel files typically on the partition which will be mounted as }\DIFdelend \DIFaddbegin \DIFadd{;
+  it is also recommended to enable }\DIFaddend \texttt{\DIFdelbegin \DIFdel{/boot}\DIFdelend \DIFaddbegin \DIFadd{HideAuxiliary}\DIFaddend } \DIFdelbegin \DIFdel{applies to most Fedora-related distros including Fedora itself, RHEL and variants.
+}%DIFDELCMD < 
 
-\DIFdelbegin \DIFdel{BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
-in its }\DIFdelend \DIFaddbegin \DIFadd{Usage is as follows:
-}
-
-\begin{itemize}
-\tightlist
-  \item \DIFadd{Install Linux as normal, e.g.~by booting from an }\DIFaddend \texttt{\DIFdelbegin \DIFdel{*}\DIFdelend .\DIFdelbegin \DIFdel{conf}\DIFdelend \DIFaddbegin \DIFadd{iso}\DIFaddend } \DIFdelbegin \DIFdel{files }\DIFdelend \DIFaddbegin \DIFadd{image burnt to a removable
-  USB drive }\DIFaddend -- \DIFdelbegin \DIFdel{and this is used in practice in certain distros such as CentOS.
-In order to correctly handle this , }\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot is not involved in this stage.
-  }\item \DIFadd{Add }\DIFaddend \texttt{OpenLinuxBoot\DIFdelbegin %DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+%DIFDELCMD < %%%
+\DIFdel{BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
+in its }\texttt{\DIFdel{*.conf}} %DIFAUXCMD
+\DIFdel{files }\DIFdelend \DIFaddbegin \DIFadd{in order to hide older Linux kernels except when required
+  (they are added as auxiliary entries and so may then be shown by pressing the }\texttt{\DIFadd{Spacebar}} \DIFadd{key in the OpenCore boot menu).
+  }\item \DIFadd{Install Linux as normal if this has not been done earlier }\DIFaddend -- \DIFdelbegin \DIFdel{and this is used in practice in certain distros such as CentOS.
+  In order to correctly handle this , }\texttt{\DIFdel{OpenLinuxBoot}} %DIFAUXCMD
 \DIFdel{extracts all variables from
 }\texttt{\DIFdel{\{boot\}/grub2/grubenv}} %DIFAUXCMD
-\DIFdel{and any unconditionally set variables from }\DIFdelend \DIFaddbegin \DIFadd{.efi}} \DIFadd{and also typically (see below) }\DIFaddend \texttt{\DIFdelbegin \DIFdel{\{boot\}/grub2/grub}\DIFdelend \DIFaddbegin \DIFadd{ext4\_x64}\DIFaddend .\DIFdelbegin \DIFdel{cfg}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{and any unconditionally set variables from }\texttt{\DIFdel{\{boot\}/grub2/grub.cfg}}%DIFAUXCMD
 \DIFdel{.
-  This has proved sufficient in practice to extract the required
-  variables seen so far in distros which use this
-GRUB-specific feature.
-  }\DIFdelend \DIFaddbegin \DIFadd{efi}} \DIFadd{to your }\texttt{\DIFadd{config.plist}}
-  \texttt{\DIFadd{Drivers}} \DIFadd{section.
-  }\item \DIFadd{Make sure }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{and }\texttt{\DIFadd{LauncherOption}} \DIFadd{are enabled in }\texttt{\DIFadd{config.plist}}\DIFadd{;
-  it is also recommended to enable }\texttt{\DIFadd{HideAuxiliary}} \DIFadd{in order to hide older Linux kernels except when required
-  (they are added as auxiliary entries and so may then be shown by pressing the }\texttt{\DIFadd{Spacebar}} \DIFadd{key in the OpenCore boot menu).
+This has proved sufficient in practice to extract the required variables seen so far in distros which use this GRUB-specific feature.
+  }\DIFdelend \DIFaddbegin \DIFadd{OpenLinuxBoot is not involved in this stage.
   }\item \DIFadd{Reboot into OpenCore: the installed Linux distribution should just appear and boot directly from OpenCore
   when selected, which it does without chainloading via GRUB.
 }\end{itemize}
@@ -6392,8 +6389,8 @@ contain a }\texttt{\DIFadd{BOOT\_IMAGE=...}} \DIFadd{value where the GRUB option
 }\texttt{\DIFadd{initrd=...}} \DIFadd{value while the GRUB options do not.
 All remaining options should match (option order does not matter) -- perhaps excluding less important graphics
 handover options (such as in the Ubuntu example given in }\texttt{\DIFadd{autoopts}} \DIFadd{below). If they do not, it is recommended
-to manually add the missing options, e.g. with }\texttt{\DIFadd{patruuidopts:\{partuuid\}+=\{opts\}}} \DIFadd{to target a specific
-distro (or just with }\texttt{\DIFadd{autoopts+=}{\DIFadd{opts}}}\DIFadd{, which applies to all installed distros, if only one distro is in use).
+to manually add the missing options, e.g. with }\texttt{\DIFadd{partuuidopts:\{partuuid\}+=\{opts\}}} \DIFadd{to target a specific
+distro (or just with }\texttt{\DIFadd{autoopts+=\{opts\}}}\DIFadd{, which applies to all installed distros, if only one distro is in use).
 }
 
 \DIFadd{If using OpenLinuxBoot with Secure Boot, users may wish to use the }\texttt{\DIFadd{shim-to-cert.tool}} \DIFadd{included in OpenCore
@@ -6511,7 +6508,7 @@ options \DIFaddbegin \DIFadd{for the driver }\DIFaddend may be specified in \tex
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
   with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
   a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
-  (check \texttt{cat /proc/cmdline} when booted via your existing bootloader) on Ubuntu and related distros,
+  (check \texttt{cat /proc/cmdline} when booted via \DIFdelbegin \DIFdel{your existing }\DIFdelend \DIFaddbegin \DIFadd{the distro's default }\DIFaddend bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip
