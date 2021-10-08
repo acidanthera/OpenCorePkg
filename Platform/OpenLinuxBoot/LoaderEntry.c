@@ -815,7 +815,7 @@ DoProcessLoaderEntry (
     if (!HasOstreeDir (Directory)) {
       DEBUG ((DEBUG_WARN, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "not ", "not "));
     } else {
-      DEBUG ((DEBUG_WARN, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "", ""));
+      DEBUG ((DEBUG_INFO, "LNX: Missing root option, %s %afound - %afixing\n", OSTREE_DIR, "", ""));
       Status = InsertRootOption (Entry->Options);
       if (EFI_ERROR (Status)) {
         OcFlexArrayDiscardItem (gLoaderEntries, TRUE);
