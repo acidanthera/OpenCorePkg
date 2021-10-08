@@ -593,6 +593,8 @@ InternalAddBootEntryFromCustomEntry (
     return EFI_OUT_OF_RESOURCES;
   }
 
+  BootEntry->IsExternal = FileSystem->External;
+
   if (CustomEntry->Id != NULL) {
     BootEntry->Id = AsciiStrCopyToUnicode (CustomEntry->Id, 0);
     if (BootEntry->Id == NULL) {
