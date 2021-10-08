@@ -6244,8 +6244,8 @@ contain a \texttt{BOOT\_IMAGE=...} value where the GRUB options do, and to conta
 \texttt{initrd=...} value while the GRUB options do not.
 All remaining options should match (option order does not matter) -- perhaps excluding less important graphics
 handover options (such as in the Ubuntu example given in \texttt{autoopts} below). If they do not, it is recommended
-to manually add the missing options, e.g. with \texttt{patruuidopts:\{partuuid\}+=\{opts\}} to target a specific
-distro (or just with \texttt{autoopts+={opts}}, which applies to all installed distros, if only one distro is in use).
+to manually add the missing options, e.g. with \texttt{partuuidopts:\{partuuid\}+=\{opts\}} to target a specific
+distro (or just with \texttt{autoopts+=\{opts\}}, which applies to all installed distros, if only one distro is in use).
 
 If using OpenLinuxBoot with Secure Boot, users may wish to use the \texttt{shim-to-cert.tool} included in OpenCore
 utilities, which can be used to extract the required public key to validate a distro's kernels directly, rather
