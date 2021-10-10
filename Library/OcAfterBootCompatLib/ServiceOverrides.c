@@ -26,6 +26,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcOSInfoLib.h>
@@ -823,6 +824,11 @@ OcStartImage (
       AppleLoadedImage,
       BootCompat->ServicePtrs.GetMemoryMap
       );
+
+    if (BootCompat->Settings.ResizeAppleGpuBars >= 0
+      && BootCompat->Settings.ResizeAppleGpuBars < PciBarTotal) {
+      ResizeGpuBars (BootCompat->Settings.ResizeAppleGpuBars, FALSE);
+    }
   } else if (BootCompat->Settings.SignalAppleOS) {
     Status = gBS->LocateProtocol (
       &gEfiOSInfoProtocolGuid,

@@ -75,3 +75,4 @@
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c
   ResetAudioTrafficClass.c
+  SetResizableBar.c

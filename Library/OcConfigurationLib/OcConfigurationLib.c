@@ -195,6 +195,7 @@ mBooterQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ProvideCustomSlide",     OC_GLOBAL_CONFIG, Booter.Quirks.ProvideCustomSlide),
   OC_SCHEMA_INTEGER_IN ("ProvideMaxSlide",        OC_GLOBAL_CONFIG, Booter.Quirks.ProvideMaxSlide),
   OC_SCHEMA_BOOLEAN_IN ("RebuildAppleMemoryMap",  OC_GLOBAL_CONFIG, Booter.Quirks.RebuildAppleMemoryMap),
+  OC_SCHEMA_INTEGER_IN ("ResizeAppleGpuBars",     OC_GLOBAL_CONFIG, Booter.Quirks.ResizeAppleGpuBars),
   OC_SCHEMA_BOOLEAN_IN ("SetupVirtualMap",        OC_GLOBAL_CONFIG, Booter.Quirks.SetupVirtualMap),
   OC_SCHEMA_BOOLEAN_IN ("SignalAppleOS",          OC_GLOBAL_CONFIG, Booter.Quirks.SignalAppleOS),
   OC_SCHEMA_BOOLEAN_IN ("SyncRuntimePermissions", OC_GLOBAL_CONFIG, Booter.Quirks.SyncRuntimePermissions),
@@ -692,6 +693,7 @@ mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ReleaseUsbOwnership",      OC_GLOBAL_CONFIG, Uefi.Quirks.ReleaseUsbOwnership),
   OC_SCHEMA_BOOLEAN_IN ("ReloadOptionRoms",         OC_GLOBAL_CONFIG, Uefi.Quirks.ReloadOptionRoms),
   OC_SCHEMA_BOOLEAN_IN ("RequestBootVarRouting",    OC_GLOBAL_CONFIG, Uefi.Quirks.RequestBootVarRouting),
+  OC_SCHEMA_INTEGER_IN ("ResizeGpuBars",            OC_GLOBAL_CONFIG, Uefi.Quirks.ResizeGpuBars),
   OC_SCHEMA_INTEGER_IN ("TscSyncTimeout",           OC_GLOBAL_CONFIG, Uefi.Quirks.TscSyncTimeout),
   OC_SCHEMA_BOOLEAN_IN ("UnblockFsConnect",         OC_GLOBAL_CONFIG, Uefi.Quirks.UnblockFsConnect)
 };

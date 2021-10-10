@@ -637,6 +637,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProvideMaxSlide        = Config->Booter.Quirks.ProvideMaxSlide;
   AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
   AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
+  AbcSettings.ResizeAppleGpuBars     = Config->Booter.Quirks.ResizeAppleGpuBars;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
   AbcSettings.SyncRuntimePermissions = Config->Booter.Quirks.SyncRuntimePermissions;
@@ -879,6 +880,12 @@ OcLoadUefiSupport (
   if (Config->Uefi.Quirks.EnableVectorAcceleration) {
     AvxEnabled = TryEnableAvx ();
     DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AvxEnabled));
+  }
+
+  if (Config->Uefi.Quirks.ResizeGpuBars >= 0
+    && Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal) {
+    DEBUG ((DEBUG_INFO, "OC: Increasing GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
+    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE);
   }
 
   OcMiscUefiQuirksLoaded (Config);

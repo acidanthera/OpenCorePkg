@@ -76,30 +76,6 @@
 #define TCSEL_CLASS_MASK 0x7U
 
 /**
-  Valid PCI BAR sizes for PCI 2.0, modern PCI permit up to 8EB.
-**/
-#define PCI_BAR_1MB     0U
-#define PCI_BAR_2MB     1U
-#define PCI_BAR_4MB     2U
-#define PCI_BAR_8MB     3U
-#define PCI_BAR_16MB    4U
-#define PCI_BAR_32MB    4U
-#define PCI_BAR_64MB    5U
-#define PCI_BAR_128MB   6U
-#define PCI_BAR_256MB   7U
-#define PCI_BAR_512MB   8U
-#define PCI_BAR_1GB     9U ///< Maximum for macOS IOPCIFamily.
-#define PCI_BAR_2GB    10U
-#define PCI_BAR_4GB    11U
-#define PCI_BAR_8GB    12U
-#define PCI_BAR_16GB   14U
-#define PCI_BAR_32GB   15U
-#define PCI_BAR_64GB   16U
-#define PCI_BAR_128GB  17U
-#define PCI_BAR_256GB  18U
-#define PCI_BAR_512GB  19U
-
-/**
   When the bit of Capabilities Set, it indicates that the Function supports
   operating with the BAR sized to (2^Bit) MB. Example:
   - Bit 0 is set: supports operating with the BAR sized to 1 MB
@@ -111,20 +87,25 @@
 #define PCI_BAR_CAP_4MB     BIT2
 #define PCI_BAR_CAP_8MB     BIT3
 #define PCI_BAR_CAP_16MB    BIT4
-#define PCI_BAR_CAP_32MB    BIT4
-#define PCI_BAR_CAP_64MB    BIT5
-#define PCI_BAR_CAP_128MB   BIT6
-#define PCI_BAR_CAP_256MB   BIT7
-#define PCI_BAR_CAP_512MB   BIT8
-#define PCI_BAR_CAP_1GB     BIT9
-#define PCI_BAR_CAP_2GB    BIT10
-#define PCI_BAR_CAP_4GB    BIT11
-#define PCI_BAR_CAP_8GB    BIT12
+#define PCI_BAR_CAP_32MB    BIT5
+#define PCI_BAR_CAP_64MB    BIT6
+#define PCI_BAR_CAP_128MB   BIT7
+#define PCI_BAR_CAP_256MB   BIT8
+#define PCI_BAR_CAP_512MB   BIT9
+#define PCI_BAR_CAP_1GB    BIT10
+#define PCI_BAR_CAP_2GB    BIT11
+#define PCI_BAR_CAP_4GB    BIT12
+#define PCI_BAR_CAP_8GB    BIT13
 #define PCI_BAR_CAP_16GB   BIT14
 #define PCI_BAR_CAP_32GB   BIT15
 #define PCI_BAR_CAP_64GB   BIT16
 #define PCI_BAR_CAP_128GB  BIT17
 #define PCI_BAR_CAP_256GB  BIT18
 #define PCI_BAR_CAP_512GB  BIT19
+
+/**
+  Capability limit mask from BarSize (e.g. PciBar1MB).
+**/
+#define PCI_BAR_CAP_LIMIT(BarSize) ((1U << ((BarSize) + 1)) - 1)
 
 #endif // PCI_EXT_INTERNAL_H

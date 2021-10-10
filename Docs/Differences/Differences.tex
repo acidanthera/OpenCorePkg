@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Oct  5 08:40:27 2021
-%DIF ADD ../Configuration.tex        Fri Oct  8 11:05:42 2021
+%DIF DEL PreviousConfiguration.tex   Mon Oct 11 00:01:52 2021
+%DIF ADD ../Configuration.tex        Mon Oct 11 04:50:40 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1786,7 +1786,25 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   reasons that are as yet unclear.
 
 \item
-  \texttt{SetupVirtualMap}\\
+  \DIFaddbegin \texttt{\DIFadd{ResizeAppleGpuBars}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Reduce GPU PCI BAR sizes for compatibility with macOS.
+}
+
+  \DIFadd{This quirk reduces GPU PCI BAR sizes for Apple macOS up to the specified
+  value or lower if it is unsupported. The specified value follows PCI Resizable
+  BAR spec. Use }\texttt{\DIFadd{0}} \DIFadd{for 1 MB, }\texttt{\DIFadd{1}} \DIFadd{for 2 MB, }\texttt{\DIFadd{2}}
+  \DIFadd{for 4 MB, and so on up to }\texttt{\DIFadd{19}} \DIFadd{for 512 GB. Apple macOS supports
+  1 GB maximum, which is }\texttt{\DIFadd{10}}\DIFadd{. Use }\texttt{\DIFadd{-1}} \DIFadd{to disable this quirk.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: See }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{quirk for general GPU PCI BAR
+  size configuration and more details about the technology.
+}
+
+\item
+  \DIFaddend \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Setup virtual memory at \texttt{SetVirtualAddresses}.
@@ -2644,9 +2662,13 @@ blocking.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.10\\
-  \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
+  \textbf{Description}: \DIFdelbegin \DIFdel{Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs}\DIFdelend \DIFaddbegin \DIFadd{Allows IOPCIFamily to boot with 2 GB PCI BARs}\DIFaddend .
 
-  \emph{Note}: This option should be avoided whenever possible. A need for this option
+  \DIFaddbegin \DIFadd{Normally macOS restricts PCI BARs to 1 GB. Enabling this option
+  (still) does not let macOS actually use PCI devices with larger BARs.
+}
+
+  \DIFaddend \emph{Note}: This option should be avoided whenever possible. A need for this option
   indicates misconfigured or defective firmware.
 
 \item
@@ -7830,6 +7852,52 @@ with }\DIFaddend the \DIFdelbegin \DIFdel{user will need to specify the correct 
   \item Potentially incompatible boot entries, such as macOS entries, are not deleted
   or corrupted in any way.
   \end{itemize}
+\DIFaddbegin 
+
+\item
+  \texttt{\DIFadd{ResizeGpuBars}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure GPU PCI BAR sizes.
+}
+
+  \DIFadd{This quirk sets GPU PCI BAR sizes as specified or chooses
+  the largest available below the }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{value.
+  The specified value follows PCI Resizable BAR spec.
+  Use }\texttt{\DIFadd{0}} \DIFadd{for 1 MB, }\texttt{\DIFadd{1}} \DIFadd{for 2 MB, }\texttt{\DIFadd{2}}
+  \DIFadd{for 4 MB, and so on up to }\texttt{\DIFadd{19}} \DIFadd{for 512 GB.
+}
+
+  \DIFadd{Resizable BAR technology allows to ease PCI device programming by mapping
+  a configurable memory region, BAR, into CPU address space (e.g. VRAM to RAM)
+  as opposed to a fixed memory region. This technology is necessary, because
+  one cannot map the largest memory region by default, for the reasons of backwards
+  compatibility with older hardware not supporting 64-bit BARs. Consequentially
+  devices of the last decade use BARs up to 256 MB by default (4 remaining bits are used
+  by other data) but generally allow resizing them to both smaller and larger
+  powers of two (e.g. from 1 MB up to VRAM size).
+}
+
+  \DIFadd{Operating systems targeting x86 platforms generally do not control PCI address space,
+  letting UEFI firmware decide on the BAR addresses and sizes. This illicit practice
+  resulted in Resizable BAR technology being unused up until 2020 despite being
+  standardised in 2008 and becoming widely available in the hardware soon after.
+}
+
+  \DIFadd{Modern UEFI firmware allow the use of Resizable BAR technology but generally
+  restrict the configurable options to failsafe default (}\texttt{\DIFadd{OFF}}\DIFadd{)
+  and maximum available (}\texttt{\DIFadd{ON}}\DIFadd{). This quirk allows to fine-tune this
+  value for testing and development purposes.
+}
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: This quirk shall not be used to workaround macOS limitation
+  to address BARs over 1 GB. }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{should be used instead.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: While this quirk can increase GPU PCI BAR sizes, this will not
+  work on most firmware as is, because the quirk does not relocate BARs in memory,
+  and they will likely overlap. Contributions to improve this feature are welcome.
+}\DIFaddend 
 
 \item
   \texttt{TscSyncTimeout}\\
