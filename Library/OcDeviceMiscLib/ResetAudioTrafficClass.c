@@ -24,6 +24,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDeviceMiscLib.h>
 
+#include "PciExtInternal.h"
+
 VOID
 ResetAudioTrafficClass (
   VOID
@@ -74,8 +76,8 @@ ResetAudioTrafficClass (
 
     ClassCode >>= 16U; ///< Drop revision and minor codes.
     if (ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_AUDIO)
-      || ClassCode == (PCI_CLASS_MEDIA << 8 | 0x3 /* PCI_CLASS_MEDIA_HDA */)) {
-      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+      || ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_HDA)) {
+      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, PCI_MEDIA_TCSEL_OFFSET, 1, &TrafficClass);
       if (EFI_ERROR (Status)) {
         continue;
       }
@@ -93,9 +95,9 @@ ResetAudioTrafficClass (
       // This is required for AppleHDA to output audio on some machines.
       // See Intel I/O Controller Hub 9 (ICH9) Family Datasheet for more details.
       //
-      if ((TrafficClass & 0x7U) != 0) {
-        TrafficClass &= ~0x7U;
-        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint8, 0x44 /* TCSEL */, 1, &TrafficClass);
+      if ((TrafficClass & TCSEL_CLASS_MASK) != 0) {
+        TrafficClass &= ~TCSEL_CLASS_MASK;
+        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint8, PCI_MEDIA_TCSEL_OFFSET, 1, &TrafficClass);
       }
     }
   }

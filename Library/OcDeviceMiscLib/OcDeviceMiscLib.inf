@@ -70,6 +70,7 @@
   ForgeUefi.c
   HandleParsingMin.c
   HandleParsingMin.h
+  PciExtInternal.h
   PciInfoDump.c
   ReleaseUsbOwnership.c
   ReloadOptionRoms.c

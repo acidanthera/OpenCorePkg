@@ -24,18 +24,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDeviceMiscLib.h>
 
-#define XHC_HCCPARAMS_OFFSET      0x10
-#define XHC_NEXT_CAPABILITY_MASK  0xFF00
-#define XHC_CAPABILITY_ID_MASK    0xFF
-#define XHC_USBCMD_OFFSET         0x0    ///< USB Command Register Offset
-#define XHC_USBSTS_OFFSET         0x4    ///< USB Status Register Offset
-#define XHC_POLL_DELAY            1000
-
-#define EHC_BAR_INDEX             0x0
-#define EHC_HCCPARAMS_OFFSET      0x8
-#define EHC_USBCMD_OFFSET         0x0    ///< USB Command Register Offset
-#define EHC_USBSTS_OFFSET         0x4    ///< USB Status Register Offset
-#define EHC_USBINT_OFFSET         0x8    ///< USB Interrupt Enable Register
+#include "PciExtInternal.h"
 
 /**
   Release XHCI USB controllers ownership.
