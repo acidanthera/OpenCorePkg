@@ -4,6 +4,7 @@ OpenCore Changelog
 - Revised OpenLinuxBoot documentation
 - Supported Linux ostree boot layout
 - Fixed external drive icons for Boot Entry Protocol
+- Added GPU Resize BAR quirks to reduce BARs on per-OS basis
 
 #### v0.7.4
 - Fixed Linux kernel sort order
