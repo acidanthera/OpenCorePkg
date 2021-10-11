@@ -213,7 +213,15 @@ SetResizableBarOnDevice (
       NewCapabilities &= PCI_BAR_CAP_LIMIT (Entries[Index].ResizableBarControl.Bits.BarSize);
     }
 
-    Bit = HighBitSet64 (NewCapabilities);
+    //
+    // If requested BAR size is too low, choose the lowest available BAR size.
+    //
+    if (NewCapabilities == 0
+      && Entries[Index].ResizableBarControl.Bits.BarSize > Size) {
+      Bit = LowBitSet64 (Capabilities);
+    } else {
+      Bit = HighBitSet64 (NewCapabilities);
+    }
 
     DEBUG ((
       DEBUG_INFO,

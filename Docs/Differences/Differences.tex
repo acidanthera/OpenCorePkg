@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Oct 11 00:01:52 2021
-%DIF ADD ../Configuration.tex        Mon Oct 11 04:50:40 2021
+%DIF ADD ../Configuration.tex        Tue Oct 12 02:10:19 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1797,6 +1797,23 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   BAR spec. Use }\texttt{\DIFadd{0}} \DIFadd{for 1 MB, }\texttt{\DIFadd{1}} \DIFadd{for 2 MB, }\texttt{\DIFadd{2}}
   \DIFadd{for 4 MB, and so on up to }\texttt{\DIFadd{19}} \DIFadd{for 512 GB. Apple macOS supports
   1 GB maximum, which is }\texttt{\DIFadd{10}}\DIFadd{. Use }\texttt{\DIFadd{-1}} \DIFadd{to disable this quirk.
+}
+
+  \DIFadd{Consider a GPU with 2 BARs:
+  }\begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{BAR0}} \DIFadd{supports sizes from 256 MB to 8 GB. Its value is 4 GB.
+    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+  }\end{itemize}
+
+  \emph{\DIFadd{Example 1}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 1 GB will change
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.
+  }\\
+  \emph{\DIFadd{Example 2}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 1 MB will change
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 MB.
+  }\\
+  \emph{\DIFadd{Example 3}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 16 GB will make no
+  changes.
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: See }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{quirk for general GPU PCI BAR
@@ -7888,6 +7905,23 @@ with }\DIFaddend the \DIFdelbegin \DIFdel{user will need to specify the correct 
   restrict the configurable options to failsafe default (}\texttt{\DIFadd{OFF}}\DIFadd{)
   and maximum available (}\texttt{\DIFadd{ON}}\DIFadd{). This quirk allows to fine-tune this
   value for testing and development purposes.
+}
+
+  \DIFadd{Consider a GPU with 2 BARs:
+  }\begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{BAR0}} \DIFadd{supports sizes from 256 MB to 8 GB. Its value is 4 GB.
+    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+  }\end{itemize}
+
+  \emph{\DIFadd{Example 1}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 1 GB will change
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.
+  }\\
+  \emph{\DIFadd{Example 2}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 1 MB will change
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 MB.
+  }\\
+  \emph{\DIFadd{Example 3}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 16 GB will change
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 8 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.
 }
 
   \emph{\DIFadd{Note 1}}\DIFadd{: This quirk shall not be used to workaround macOS limitation
