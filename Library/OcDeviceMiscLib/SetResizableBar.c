@@ -217,7 +217,7 @@ SetResizableBarOnDevice (
     // If requested BAR size is too low, choose the lowest available BAR size.
     //
     if (NewCapabilities == 0
-      && Entries[Index].ResizableBarControl.Bits.BarSize > Size) {
+      && Entries[Index].ResizableBarControl.Bits.BarSize > (UINT32) Size) {
       Bit = LowBitSet64 (Capabilities);
     } else {
       Bit = HighBitSet64 (NewCapabilities);
