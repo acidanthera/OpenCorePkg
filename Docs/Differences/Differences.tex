@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Oct 11 00:01:52 2021
-%DIF ADD ../Configuration.tex        Tue Oct 12 02:10:19 2021
+%DIF ADD ../Configuration.tex        Tue Oct 12 17:14:12 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1803,21 +1803,26 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   }\begin{itemize}
     \tightlist
     \item \texttt{\DIFadd{BAR0}} \DIFadd{supports sizes from 256 MB to 8 GB. Its value is 4 GB.
-    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 2 MB to 256 MB. Its value is 256 MB.
   }\end{itemize}
 
   \emph{\DIFadd{Example 1}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 1 GB will change
   }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.
   }\\
   \emph{\DIFadd{Example 2}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 1 MB will change
-  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 MB.
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 2 MB.
   }\\
   \emph{\DIFadd{Example 3}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeAppleGpuBars}} \DIFadd{to 16 GB will make no
   changes.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: See }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{quirk for general GPU PCI BAR
+  \emph{\DIFadd{Note 1}}\DIFadd{: See }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{quirk for general GPU PCI BAR
   size configuration and more details about the technology.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Certain GPU drivers do not support non-standard BAR sizes,
+  causing sleep wake issues, for this reason for macOS it is recommended
+  to use minimal supported BAR sizes, i.e. specify }\texttt{\DIFadd{0}} \DIFadd{(1 MB).
 }
 
 \item
@@ -7911,14 +7916,14 @@ with }\DIFaddend the \DIFdelbegin \DIFdel{user will need to specify the correct 
   }\begin{itemize}
     \tightlist
     \item \texttt{\DIFadd{BAR0}} \DIFadd{supports sizes from 256 MB to 8 GB. Its value is 4 GB.
-    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+    }\item \texttt{\DIFadd{BAR1}} \DIFadd{supports sizes from 2 MB to 256 MB. Its value is 256 MB.
   }\end{itemize}
 
   \emph{\DIFadd{Example 1}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 1 GB will change
   }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.
   }\\
   \emph{\DIFadd{Example 2}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 1 MB will change
-  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 1 MB.
+  }\texttt{\DIFadd{BAR0}} \DIFadd{to 256 MB and }\texttt{\DIFadd{BAR0}} \DIFadd{to 2 MB.
   }\\
   \emph{\DIFadd{Example 3}}\DIFadd{: Setting }\texttt{\DIFadd{ResizeGpuBars}} \DIFadd{to 16 GB will change
   }\texttt{\DIFadd{BAR0}} \DIFadd{to 8 GB and leave }\texttt{\DIFadd{BAR1}} \DIFadd{unchanged.

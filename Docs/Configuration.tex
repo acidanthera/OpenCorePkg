@@ -1741,20 +1741,24 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \begin{itemize}
     \tightlist
     \item \texttt{BAR0} supports sizes from 256 MB to 8 GB. Its value is 4 GB.
-    \item \texttt{BAR1} supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+    \item \texttt{BAR1} supports sizes from 2 MB to 256 MB. Its value is 256 MB.
   \end{itemize}
 
   \emph{Example 1}: Setting \texttt{ResizeAppleGpuBars} to 1 GB will change
   \texttt{BAR0} to 1 GB and leave \texttt{BAR1} unchanged.
   \\
   \emph{Example 2}: Setting \texttt{ResizeAppleGpuBars} to 1 MB will change
-  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 1 MB.
+  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 2 MB.
   \\
   \emph{Example 3}: Setting \texttt{ResizeAppleGpuBars} to 16 GB will make no
   changes.
 
-  \emph{Note}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
+  \emph{Note 1}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
   size configuration and more details about the technology.
+
+  \emph{Note 2}: Certain GPU drivers do not support non-standard BAR sizes,
+  causing sleep wake issues, for this reason for macOS it is recommended
+  to use minimal supported BAR sizes, i.e. specify \texttt{0} (1 MB).
 
 \item
   \texttt{SetupVirtualMap}\\
@@ -7721,14 +7725,14 @@ with the boot menu.
   \begin{itemize}
     \tightlist
     \item \texttt{BAR0} supports sizes from 256 MB to 8 GB. Its value is 4 GB.
-    \item \texttt{BAR1} supports sizes from 1 MB to 256 MB. Its value is 256 MB.
+    \item \texttt{BAR1} supports sizes from 2 MB to 256 MB. Its value is 256 MB.
   \end{itemize}
 
   \emph{Example 1}: Setting \texttt{ResizeGpuBars} to 1 GB will change
   \texttt{BAR0} to 1 GB and leave \texttt{BAR1} unchanged.
   \\
   \emph{Example 2}: Setting \texttt{ResizeGpuBars} to 1 MB will change
-  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 1 MB.
+  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 2 MB.
   \\
   \emph{Example 3}: Setting \texttt{ResizeGpuBars} to 16 GB will change
   \texttt{BAR0} to 8 GB and leave \texttt{BAR1} unchanged.
