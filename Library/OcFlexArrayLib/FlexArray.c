@@ -29,7 +29,28 @@ OcFlexArrayInit (
     FlexArray->ItemSize = ItemSize;
     FlexArray->FreeItem = FreeItem;
   }
+
+  DEBUG ((OC_TRACE_FLEX, "FLEX: Init %p %u\n", FlexArray, ItemSize));
+
   return FlexArray;
+}
+
+STATIC
+VOID *
+InternalFlexArrayItemAt (
+  IN     CONST OC_FLEX_ARRAY                *FlexArray,
+  IN     CONST UINTN                        Index
+  )
+{
+  VOID *Item;
+
+  ASSERT (FlexArray != NULL);
+  ASSERT (Index < FlexArray->Count);
+  ASSERT (FlexArray->Items != NULL);
+
+  Item = ((UINT8 *) FlexArray->Items) + Index * FlexArray->ItemSize;
+
+  return Item;
 }
 
 STATIC
@@ -71,7 +92,7 @@ InternalFlexArrayAddItem (
     }
   }
 
-  Item = OcFlexArrayItemAt (FlexArray, FlexArray->Count - 1);
+  Item = InternalFlexArrayItemAt (FlexArray, FlexArray->Count - 1);
 
   return Item;
 }
@@ -90,6 +111,8 @@ OcFlexArrayAddItem (
   if (Item != NULL) {
     ZeroMem (Item, FlexArray->ItemSize);
   }
+
+  DEBUG ((OC_TRACE_FLEX, "FLEX: Add %p %p\n", FlexArray, Item));
 
   return Item;
 }
@@ -116,11 +139,13 @@ OcFlexArrayInsertItem (
     return Item;
   }
 
-  Item = OcFlexArrayItemAt (FlexArray, InsertIndex);
-  Dest = OcFlexArrayItemAt (FlexArray, InsertIndex + 1);
+  Item = InternalFlexArrayItemAt (FlexArray, InsertIndex);
+  Dest = InternalFlexArrayItemAt (FlexArray, InsertIndex + 1);
   CopyMem (Dest, Item, (FlexArray->Count - InsertIndex) * FlexArray->ItemSize);
 
   ZeroMem (Item, FlexArray->ItemSize);
+
+  DEBUG ((OC_TRACE_FLEX, "FLEX: Insert %p %p\n", FlexArray, Item));
 
   return Item;
 }
@@ -131,12 +156,20 @@ OcFlexArrayItemAt (
   IN     CONST UINTN                        Index
   )
 {
-  if (Index >= FlexArray->Count || FlexArray->Items == NULL) {
-    ASSERT (FALSE);
-    return NULL;
-  }
-  
-  return ((UINT8 *) FlexArray->Items) + Index * FlexArray->ItemSize;
+  VOID *Item;
+
+  //
+  // Repeat these checks here and in internal ItemAt for easier debugging if they fail.
+  //
+  ASSERT (FlexArray != NULL);
+  ASSERT (Index < FlexArray->Count);
+  ASSERT (FlexArray->Items != NULL);
+
+  Item = InternalFlexArrayItemAt (FlexArray, Index);
+
+  DEBUG ((OC_TRACE_FLEX, "FLEX: At %p %p\n", FlexArray, Item));
+
+  return Item;
 }
 
 VOID 
@@ -146,13 +179,15 @@ OcFlexArrayFree (
 {
   UINTN Index;
 
+  DEBUG ((OC_TRACE_FLEX, "FLEX: Free %p\n", FlexArray));
+
   ASSERT (FlexArray != NULL);
 
   if (*FlexArray != NULL) {
     if ((*FlexArray)->Items != NULL) {
       if ((*FlexArray)->FreeItem != NULL) {
         for (Index = 0; Index < (*FlexArray)->Count; Index++) {
-          (*FlexArray)->FreeItem (OcFlexArrayItemAt (*FlexArray, Index));
+          (*FlexArray)->FreeItem (InternalFlexArrayItemAt (*FlexArray, Index));
         }
       }
       FreePool ((*FlexArray)->Items);
@@ -168,12 +203,14 @@ OcFlexArrayDiscardItem (
   IN     CONST BOOLEAN             FreeItem
   )
 {
+  DEBUG ((OC_TRACE_FLEX, "FLEX: Discard %p %u\n", FlexArray, FreeItem));
+
   ASSERT (FlexArray != NULL);
   ASSERT (FlexArray->Items != NULL);
   ASSERT (FlexArray->Count > 0);
 
   if (FreeItem && FlexArray->FreeItem != NULL) {
-    FlexArray->FreeItem (OcFlexArrayItemAt (FlexArray, FlexArray->Count - 1));
+    FlexArray->FreeItem (InternalFlexArrayItemAt (FlexArray, FlexArray->Count - 1));
   }
   
   --FlexArray->Count;
@@ -186,6 +223,8 @@ OcFlexArrayFreeContainer (
   IN           UINTN                        *Count
   )
 {
+  DEBUG ((OC_TRACE_FLEX, "FLEX: FreeContainer %p\n", FlexArray));
+
   if (FlexArray == NULL || *FlexArray == NULL) {
     ASSERT (FALSE);
     *Items = NULL;

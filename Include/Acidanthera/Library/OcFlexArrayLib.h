@@ -6,6 +6,10 @@
 #ifndef OC_FLEX_ARRAY_LIB_H
 #define OC_FLEX_ARRAY_LIB_H
 
+#if !defined(OC_TRACE_FLEX)
+#define OC_TRACE_FLEX DEBUG_VERBOSE
+#endif
+
 #include <Uefi.h>
 #include <Library/OcStringLib.h>
 #include <Protocol/ApplePlatformInfoDatabase.h>
