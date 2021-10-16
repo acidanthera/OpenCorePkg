@@ -368,12 +368,18 @@ AutodetectBootOptions (
   EFI_STATUS        Status;
   UINTN             Index;
   UINTN             InsertIndex;
+  UINTN             OptionCount;
   OC_PARSED_VAR     *Option;
   EFI_GUID          Guid;
   CHAR8             *AsciiStrValue;
   CHAR8             *GrubVarName;
   BOOLEAN           FoundOptions;
   BOOLEAN           PlusOpts;
+
+  OptionCount = 0;
+  if (gParsedLoadOptions != NULL) {
+    OptionCount = gParsedLoadOptions->Count;
+  }
 
   FoundOptions = FALSE;
 
@@ -382,7 +388,7 @@ AutodetectBootOptions (
   // Remember that although args are ASCII in the OC config file, they are
   // Unicode by the time they get passed as UEFI LoadOptions.
   //
-  for (Index = 0; Index < gParsedLoadOptions->Count; Index++) {
+  for (Index = 0; Index < OptionCount; Index++) {
     Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
     //
     // partuuidopts:{partuuid}[+]="...": user options for specified partuuid.
@@ -427,7 +433,7 @@ AutodetectBootOptions (
   //
   // Use global defaults, if user has defined any.
   //
-  for (Index = 0; Index < gParsedLoadOptions->Count; Index++) {
+  for (Index = 0; Index < OptionCount; Index++) {
     Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
     //
     // Don't use autoopts if partition specific partuuidopts already found.
@@ -462,6 +468,7 @@ AutodetectBootOptions (
   }
 
   //
+  // Code only reaches here and below if has been nothing or only += options above.
   // Use options from GRUB default location.
   //
   if (mEtcDefaultGrubOptions != NULL) {
@@ -514,8 +521,8 @@ AutodetectBootOptions (
   }
 
   //
-  // It might be valid to have no options except "ro", but at least empty
-  // (not missing) user specified options, or GRUB_CMDLINE_LINUX_... needs
+  // It might be valid to have no options for some kernels or distros, but at least
+  // empty (not missing) user specified options or GRUB_CMDLINE_LINUX[_DEFAULT] needs
   // to be present in that case or we stop.
   //
   if (!FoundOptions) {
@@ -524,9 +531,9 @@ AutodetectBootOptions (
   }
 
   //
-  // Basic attached drives on OVMF appear as MBR, so it can be more convenient when
-  // debugging e.g. save and load default entry to allow entries with incorrect
-  // (i.e. specifies no drive) root= on NOOPT debugging build.
+  // Standard attached drives on OVMF appear as MBR, so it can be convenient when
+  // debugging to allow entries with incorrect (i.e. specifies no/every drive)
+  // root=... on NOOPT debugging build.
   //
 //#if !defined(OC_TARGET_NOOPT)
   if (CompareGuid (&gPartuuid, &gEfiPartTypeUnusedGuid)) {
