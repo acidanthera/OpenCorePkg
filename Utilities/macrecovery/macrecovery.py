@@ -90,8 +90,8 @@ assert ChunkListHeader.size == 0x24
 Chunk = struct.Struct('<I32s')
 assert Chunk.size == 0x24
 
-def verify_chunklist(cnkname):
-    with open(cnkname, 'rb') as f:
+def verify_chunklist(cnkpath):
+    with open(cnkpath, 'rb') as f:
         hash_ctx = hashlib.sha256()
         data = f.read(ChunkListHeader.size)
         hash_ctx.update(data)
@@ -220,12 +220,12 @@ def save_image(url, sess, filename='', dir=''):
 
   return os.path.join(dir, os.path.basename(filename))
 
-def verify_image(dmgname, cnkname):
+def verify_image(dmgpath, cnkpath):
   print('Verifying image with chunklist...')
 
-  with open (dmgname, 'rb') as dmgf:
+  with open (dmgpath, 'rb') as dmgf:
     cnkcount = 0
-    for cnksize, cnkhash in verify_chunklist(cnkname):
+    for cnksize, cnkhash in verify_chunklist(cnkpath):
       cnkcount += 1
       print('\rChunk {} ({} bytes)'.format(cnkcount, cnksize), end='')
       cnk = dmgf.read(cnksize)
@@ -272,10 +272,10 @@ def action_download(args):
     print(info)
   print('Downloading ' + info[INFO_PRODUCT] + '...')
   dmgname = '' if args.basename == '' else args.basename + '.dmg'
-  dmgname = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
+  dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
   cnkname = '' if args.basename == '' else args.basename + '.chunklist'
-  cnkname = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
-  verify_image(dmgname, cnkname)
+  cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
+  verify_image(dmgpath, cnkpath)
   return 0
 
 def action_selfcheck(args):
