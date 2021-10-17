@@ -218,7 +218,7 @@ def save_image(url, sess, filename='', dir=''):
       sys.stdout.flush()
     print('\rDownload complete!')
 
-  return os.path.basename(filename)
+  return os.path.join(dir, os.path.basename(filename))
 
 def verify_image(dmgname, cnkname):
   print('Verifying image with chunklist...')
