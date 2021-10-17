@@ -12,6 +12,7 @@ import argparse
 import datetime
 import hashlib
 import json
+import linecache
 import os
 import random
 import struct
@@ -275,8 +276,20 @@ def action_download(args):
   dmgpath = save_image(info[INFO_IMAGE_LINK], info[INFO_IMAGE_SESS], dmgname, args.outdir)
   cnkname = '' if args.basename == '' else args.basename + '.chunklist'
   cnkpath = save_image(info[INFO_SIGN_LINK], info[INFO_SIGN_SESS], cnkname, args.outdir)
-  verify_image(dmgpath, cnkpath)
-  return 0
+  try:
+    verify_image(dmgpath, cnkpath)
+    return 0
+  except Exception as err:
+    if isinstance(err, AssertionError) and str(err)=='':
+      try:
+        tb = err.__traceback__
+        while tb.tb_next:
+          tb = tb.tb_next
+        err = linecache.getline(tb.tb_frame.f_code.co_filename, tb.tb_lineno, tb.tb_frame.f_globals).strip()
+      except:
+        err = "Invalid chunklist"
+    print('\rImage verification failed. ({})'.format(err))
+    return 1
 
 def action_selfcheck(args):
   """
