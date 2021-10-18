@@ -9,6 +9,7 @@ Copyright (c) 2019, vit9696
 from __future__ import print_function
 
 import argparse
+import binascii
 import datetime
 import hashlib
 import json
@@ -82,6 +83,11 @@ def mlb_from_eeee(eeee):
 
   return '00000000000' + eeee + '00'
 
+def int_from_unsigned_bytes(bytes, byteorder):
+  if byteorder == 'little': bytes = bytes[::-1]
+  encoded = binascii.hexlify(bytes)
+  return int(encoded, 16)
+
 # zhangyoufu https://gist.github.com/MCJack123/943eaca762730ca4b7ae460b731b68e7#gistcomment-3061078 2021-10-08
 Apple_EFI_ROM_public_key_1 = 0xC3E748CAD9CD384329E10E25A91E43E1A762FF529ADE578C935BDDF9B13F2179D4855E6FC89E9E29CA12517D17DFA1EDCE0BEBF0EA7B461FFE61D94E2BDF72C196F89ACD3536B644064014DAE25A15DB6BB0852ECBD120916318D1CCDEA3C84C92ED743FC176D0BACA920D3FCF3158AFF731F88CE0623182A8ED67E650515F75745909F07D415F55FC15A35654D118C55A462D37A3ACDA08612F3F3F6571761EFCCBCC299AEE99B3A4FD6212CCFFF5EF37A2C334E871191F7E1C31960E010A54E86FA3F62E6D6905E1CD57732410A3EB0C6B4DEFDABE9F59BF1618758C751CD56CEF851D1C0EAA1C558E37AC108DA9089863D20E2E7E4BF475EC66FE6B3EFDCF
 
@@ -114,8 +120,8 @@ def verify_chunklist(cnkpath):
         if signature_method == 1:
             data = f.read(256)
             assert len(data) == 256
-            signature = int.from_bytes(data, 'little')
-            plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int.from_bytes(digest, 'big')
+            signature = int_from_unsigned_bytes(data, 'little')
+            plaintext = 0x1ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff003031300d0609608648016503040201050004200000000000000000000000000000000000000000000000000000000000000000 | int_from_unsigned_bytes(digest, 'big')
             assert pow(signature, 0x10001, Apple_EFI_ROM_public_key_1) == plaintext
         elif signature_method == 2:
             data = f.read(32)
@@ -229,6 +235,7 @@ def verify_image(dmgpath, cnkpath):
     for cnksize, cnkhash in verify_chunklist(cnkpath):
       cnkcount += 1
       print('\rChunk {} ({} bytes)'.format(cnkcount, cnksize), end='')
+      sys.stdout.flush()
       cnk = dmgf.read(cnksize)
       if len(cnk) != cnksize:
         raise RuntimeError('Invalid chunk {} size: expected {}, read {}'.format(cnkcount, cnksize, len(cnk)))
@@ -282,7 +289,7 @@ def action_download(args):
   except Exception as err:
     if isinstance(err, AssertionError) and str(err)=='':
       try:
-        tb = err.__traceback__
+        tb = sys.exc_info()[2]
         while tb.tb_next:
           tb = tb.tb_next
         err = linecache.getline(tb.tb_frame.f_code.co_filename, tb.tb_lineno, tb.tb_frame.f_globals).strip()
