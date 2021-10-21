@@ -5,6 +5,7 @@ OpenCore Changelog
 - Supported Linux ostree boot layout
 - Fixed external drive icons for Boot Entry Protocol
 - Added GPU Resize BAR quirks to reduce BARs on per-OS basis
+- Added DMG signature check during download, thx @jspraul and @zhangyoufu
 
 #### v0.7.4
 - Fixed Linux kernel sort order
