@@ -102,7 +102,10 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install nasm uuid-dev iasl clang-13 llvm-13-dev doxygen texlive texlive-latex-extra
+          sudo apt-get install nasm uuid-dev iasl doxygen texlive texlive-latex-extra
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 13
           echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
 
       - name: CI Bootstrap
