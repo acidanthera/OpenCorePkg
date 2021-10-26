@@ -140,6 +140,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2009
   - 2010
-CloverSerialNumber: "W8908HAC2QP"
 MinimumOSVersion: "10.5.7"
 MaximumOSVersion: "10.11.6"

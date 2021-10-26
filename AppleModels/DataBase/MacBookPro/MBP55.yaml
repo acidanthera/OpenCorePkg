@@ -125,6 +125,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2009
   - 2010
-CloverSerialNumber: "W8951HAC66E"
 MinimumOSVersion: "10.5.7"
 MaximumOSVersion: "10.11.6"

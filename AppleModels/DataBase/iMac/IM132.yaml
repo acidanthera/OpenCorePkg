@@ -157,6 +157,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2012
   - 2013
-CloverSerialNumber: "C02JB041DNCW"
 MinimumOSVersion: "10.8.2"
 MaximumOSVersion: "10.15.7"

@@ -119,6 +119,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2006
   - 2007
-CloverSerialNumber: "W8827B4CW0L"
 MinimumOSVersion: "10.4.8"
 MaximumOSVersion: "10.7.5"

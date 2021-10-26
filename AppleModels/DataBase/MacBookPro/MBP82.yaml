@@ -346,6 +346,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2011
   - 2012
-CloverSerialNumber: "C02HL0FGDF8X"
 MinimumOSVersion: "10.7.2"
 MaximumOSVersion: "10.13.6"

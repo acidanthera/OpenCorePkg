@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1715.40.12.0.0"
-BIOSLegacyVersion: "MBP153.88Z.F000.B00.2109052150"
-BIOSReleaseDate: "09/05/2021"
+BIOSVersion: "1715.40.15.0.0"
+BIOSLegacyVersion: "MBP153.88Z.F000.B00.2110032011"
+BIOSReleaseDate: "10/03/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro15,3"
 SystemVersion: "1.0"
@@ -55,17 +55,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MBP153.88Z.F000.B00.2109052150
+    BIOS ID:      MBP153.88Z.F000.B00.2110032011
     Model:        MBP153
-    EFI Version:  1715.40.12.0.0
+    EFI Version:  1715.40.15.0.0
     Built by:     root@bb-g8-pdb34
-    Date:         Sun Sep  5 21:50:41 2021
-    Revision:     1715.40.12 (B&I)
+    Date:         Sun Oct  3 20:11:16 2021
+    Revision:     1715.40.15 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1300.0.29.1
-    UUID:         A59580BF-37FC-3774-9E56-1A03107D9C10
-    UUID:         778A5A4F-80DB-3DD3-A1DA-53FB063BE3C2
+    UUID:         BBB858E4-942C-332B-98BA-21FC42BD2902
+    UUID:         63AB3533-5DF2-3F03-8300-38AC300BA305
 Specifications:
   CPUCodename:
     - "Coffee Lake"

@@ -142,6 +142,5 @@ AppleBoardCode:
 # Note, first year is used by macserial
 AppleModelYear:
   - 2006
-CloverSerialNumber: "4H625HACVTH"
 MinimumOSVersion: "10.4.6"
 MaximumOSVersion: "10.6.8"

@@ -163,6 +163,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2007
   - 2008
-CloverSerialNumber: "W8841OHZX91"
 MinimumOSVersion: "10.4.9"
 MaximumOSVersion: "10.11.6"

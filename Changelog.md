@@ -6,6 +6,7 @@ OpenCore Changelog
 - Fixed external drive icons for Boot Entry Protocol
 - Added GPU Resize BAR quirks to reduce BARs on per-OS basis
 - Added DMG signature check during download, thx @jspraul and @zhangyoufu
+- Updated builtin firmware versions for SMBIOS and the rest
 
 #### v0.7.4
 - Fixed Linux kernel sort order

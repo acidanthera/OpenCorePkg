@@ -136,6 +136,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2008
   - 2009
-CloverSerialNumber: "QP849HACZE7"
 MinimumOSVersion: "10.5.2"
 MaximumOSVersion: "10.11.6"
