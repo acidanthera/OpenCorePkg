@@ -847,8 +847,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0xD,
   .PlatformFeature = 0x2,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xEB0FF577ULL,
-  .FirmwareFeaturesMask = 0xFF1FFF7FULL,
+  .FirmwareFeatures = 0x8EB0FF577ULL,
+  .FirmwareFeaturesMask = 0x8FF1FFF7FULL,
   .SecureBootModel = NULL,
  },
  {
@@ -872,8 +872,8 @@ CONST MAC_INFO_INTERNAL_ENTRY gMacInfoModels[] = {
   .MemoryFormFactor = 0xD,
   .PlatformFeature = 0x2,
   .ChassisAssetTag = "",
-  .FirmwareFeatures = 0xEB0FF577ULL,
-  .FirmwareFeaturesMask = 0xFF1FFF7FULL,
+  .FirmwareFeatures = 0x8EB0FF577ULL,
+  .FirmwareFeaturesMask = 0x8FF1FFF7FULL,
   .SecureBootModel = NULL,
  },
  {

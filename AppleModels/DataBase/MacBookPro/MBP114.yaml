@@ -26,8 +26,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x2
 FirmwareFeatures: 0xEB0FF577
 FirmwareFeaturesMask: 0xFF1FFF7F
-ExtendedFirmwareFeatures: 0x00000000EB0FF577
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
+ExtendedFirmwareFeatures: 0x00000008EB0FF577
+ExtendedFirmwareFeaturesMask: 0x00000008FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
@@ -136,4 +136,4 @@ AppleModelYear:
   - 2018
 CloverSerialNumber: "C02Q7HACG8WL"
 MinimumOSVersion: "10.10.3"
-MaximumOSVersion: "11.6.1"
+MaximumOSVersion: null
