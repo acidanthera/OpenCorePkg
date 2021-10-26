@@ -12,7 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include "ProcessorBind.h"
+#include <Base.h>
+
 #include <Library/OcMainLib.h>
 
 #include <Library/BaseLib.h>
