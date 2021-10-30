@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "422.0.0.0.0"
-BIOSLegacyVersion: "MBA51.88Z.F000.B00.2106041717"
-BIOSReleaseDate: "06/04/2021"
+BIOSVersion: "424.0.0.0.0"
+BIOSLegacyVersion: "MBA51.88Z.F000.B00.2109131659"
+BIOSReleaseDate: "09/13/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookAir5,2"
 SystemVersion: "1.0"
@@ -66,10 +66,10 @@ SmcEPCI: 0x07B006
 OEMStrings: |-
   Apple ROM Version
     Model:        MBA51
-    EFI Version:  422.0.0.0.0
+    EFI Version:  424.0.0.0.0
     Built by:     root@xapp134
-    Date:         Fri Jun  4 17:17:24 PDT 2021
-    Revision:     422 (B&I)
+    Date:         Mon Sep 13 16:59:47 PDT 2021
+    Revision:     424 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 12.0.0 (clang-1200.0.30.3)
