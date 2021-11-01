@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Oct 11 00:01:52 2021
-%DIF ADD ../Configuration.tex        Tue Oct 12 17:14:12 2021
+%DIF ADD ../Configuration.tex        Mon Nov  1 06:24:16 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1867,9 +1867,9 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures (e.g. halts at
-  black screen), particularly in early boot of the Linux kernel.
-  Only firmware released after 2017 is typically affected.
+  \emph{Note}: The need for this quirk is indicated by early boot failures (\DIFdelbegin \DIFdel{e.g. halts }\DIFdelend \DIFaddbegin \DIFadd{note: includes halt }\DIFaddend at black
+  screen \DIFdelbegin \DIFdel{), particularly in }\DIFdelend \DIFaddbegin \DIFadd{as well as more obvious crash). Particularly likely to affect }\DIFaddend early boot of \DIFdelbegin \DIFdel{the Linux kernel}\DIFdelend \DIFaddbegin \DIFadd{Windows or Linux (but
+  not always both) on affected systems}\DIFaddend . Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
 
