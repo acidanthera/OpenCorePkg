@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Mon Oct 11 00:01:52 2021
-%DIF ADD ../Configuration.tex        Mon Nov  1 06:24:16 2021
+%DIF ADD ../Configuration.tex        Mon Nov  1 14:42:38 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1628,7 +1628,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Permit write access to UEFI runtime services code.
 
-  This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
+  This option bypasses \texttt{\DIFdelbegin \DIFdel{R\^X}\DIFdelend \DIFaddbegin \DIFadd{W\^{}X}\DIFaddend } permissions in code pages of UEFI runtime
   services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
   protocol implemented in \texttt{OpenRuntime.efi}.
