@@ -759,9 +759,7 @@ GuiFlushScreen (
       DrawContext->Screen.Opacity
       );
   }
-  //
-  // Raise the TPL to not interrupt timing or flushing.
-  //
+
   EndTsc   = AsmReadTsc ();
   DeltaTsc = EndTsc - mStartTsc;
   if (DeltaTsc < mDeltaTscTarget) {
