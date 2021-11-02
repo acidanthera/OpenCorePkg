@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.4)
+       Reference Manual (0.7.5)
 
        \vspace{0.2in}
 
@@ -1568,7 +1568,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Permit write access to UEFI runtime services code.
 
-  This option bypasses \texttt{R\^X} permissions in code pages of UEFI runtime
+  This option bypasses \texttt{W\^{}X} permissions in code pages of UEFI runtime
   services by removing write protection (\texttt{WP}) bit from \texttt{CR0}
   register during their execution. This quirk requires \texttt{OC\_FIRMWARE\_RUNTIME}
   protocol implemented in \texttt{OpenRuntime.efi}.
@@ -1726,6 +1726,41 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   reasons that are as yet unclear.
 
 \item
+  \texttt{ResizeAppleGpuBars}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Reduce GPU PCI BAR sizes for compatibility with macOS.
+
+  This quirk reduces GPU PCI BAR sizes for Apple macOS up to the specified
+  value or lower if it is unsupported. The specified value follows PCI Resizable
+  BAR spec. Use \texttt{0} for 1 MB, \texttt{1} for 2 MB, \texttt{2}
+  for 4 MB, and so on up to \texttt{19} for 512 GB. Apple macOS supports
+  1 GB maximum, which is \texttt{10}. Use \texttt{-1} to disable this quirk.
+
+  Consider a GPU with 2 BARs:
+  \begin{itemize}
+    \tightlist
+    \item \texttt{BAR0} supports sizes from 256 MB to 8 GB. Its value is 4 GB.
+    \item \texttt{BAR1} supports sizes from 2 MB to 256 MB. Its value is 256 MB.
+  \end{itemize}
+
+  \emph{Example 1}: Setting \texttt{ResizeAppleGpuBars} to 1 GB will change
+  \texttt{BAR0} to 1 GB and leave \texttt{BAR1} unchanged.
+  \\
+  \emph{Example 2}: Setting \texttt{ResizeAppleGpuBars} to 1 MB will change
+  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 2 MB.
+  \\
+  \emph{Example 3}: Setting \texttt{ResizeAppleGpuBars} to 16 GB will make no
+  changes.
+
+  \emph{Note 1}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
+  size configuration and more details about the technology.
+
+  \emph{Note 2}: Certain GPU drivers do not support non-standard BAR sizes,
+  causing sleep wake issues, for this reason for macOS it is recommended
+  to use minimal supported BAR sizes, i.e. specify \texttt{0} (1 MB).
+
+\item
   \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -1767,9 +1802,9 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk attempts to update the memory map and memory attributes table to correct this.
 
-  \emph{Note}: The need for this quirk is indicated by early boot failures (e.g. halts at
-  black screen), particularly in early boot of the Linux kernel.
-  Only firmware released after 2017 is typically affected.
+  \emph{Note}: The need for this quirk is indicated by early boot failures (note: includes halt at black
+  screen as well as more obvious crash). Particularly likely to affect early boot of Windows or Linux (but
+  not always both) on affected systems. Only firmware released after 2017 is typically affected.
 
 \end{enumerate}
 
@@ -2584,7 +2619,10 @@ blocking.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.10\\
-  \textbf{Description}: Increases 32-bit PCI bar size in IOPCIFamily from 1 to 4 GBs.
+  \textbf{Description}: Allows IOPCIFamily to boot with 2 GB PCI BARs.
+
+  Normally macOS restricts PCI BARs to 1 GB. Enabling this option
+  (still) does not let macOS actually use PCI devices with larger BARs.
 
   \emph{Note}: This option should be avoided whenever possible. A need for this option
   indicates misconfigured or defective firmware.
@@ -6193,79 +6231,72 @@ functioning. Feature highlights:
 
 \subsection{OpenLinuxBoot}\label{uefilinux}
 
-\texttt{OpenLinuxBoot} is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
-It detects and boots Linux distros which are installed according to the
-\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification}
-or to the closely related (but not identical, see next paragraph)
-\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}.
-In effect this means Linux distributions where the available boot options are found in
-\texttt{\{ESP\}/loader/entries/*.conf} files (for instance \texttt{/boot/efi/loader/entries/*.conf})
-or in \texttt{\{boot\}/loader/entries/*.conf} files (for instance \texttt{/boot/loader/entries/*.conf}).
-The former layout -- pure Boot Loader Specification, using kernel files on the EFI System Partition or
-Extended Boot Loader Partition  -- is specific to systemd-boot, the latter
-layout with kernel files typically on the partition which will be mounted as \texttt{/boot}
-applies to most Fedora-related distros including Fedora itself, RHEL and variants.
+OpenLinuxBoot is an OpenCore plugin implementing \texttt{OC\_BOOT\_ENTRY\_PROTOCOL}.
+It aims to automatically detect and boot most Linux distros without additional configuration.
 
-BootLoaderSpecByDefault includes the possibility of expanding GRUB variables
-in its \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
-In order to correctly handle this, \texttt{OpenLinuxBoot} extracts all variables from
-\texttt{\{boot\}/grub2/grubenv} and any unconditionally set variables from \texttt{\{boot\}/grub2/grub.cfg}.
-This has proved sufficient in practice to extract the required variables seen so far in distros which use this
-GRUB-specific feature.
+Usage is as follows:
 
-For distributions which do not use either of the above schemes, \texttt{OpenLinuxBoot} will autodetect and
-boot \texttt{\{boot\}/vmlinuz*} kernel files directly, after linking these automatically -- based on the
-kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files, and after
-searching in \texttt{/etc/default/grub} for kernel boot options and \texttt{/etc/os-release} for the
-distro name.
-This layout applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
+\begin{itemize}
+\tightlist
+  \item Add \texttt{OpenLinuxBoot.efi} and also typically (see below) \texttt{ext4\_x64.efi} to the \texttt{config.plist}
+  \texttt{Drivers} section.
+  \item Make sure \texttt{RequestBootVarRouting} and \texttt{LauncherOption} are enabled in \texttt{config.plist};
+  it is also recommended to enable \texttt{HideAuxiliary} in order to hide older Linux kernels except when required
+  (they are added as auxiliary entries and so may then be shown by pressing the \texttt{Spacebar} key in the OpenCore boot menu).
+  \item Install Linux as normal if this has not been done earlier -- OpenLinuxBoot is not involved in this stage.
+  \item Reboot into OpenCore: the installed Linux distribution should just appear and boot directly from OpenCore
+  when selected, which it does without chainloading via GRUB.
+\end{itemize}
 
-The method of starting the kernel relies on it being compiled with EFISTUB, however this applies
-to almost all modern distros, particularly those which use systemd. Most modern distros
-use systemd as their system manager (even though at the same time most do \emph{not} use systemd-boot as
-their bootloader).
+If OpenCore has already been manually set up to boot Linux, e.g. via \texttt{BlessOverride} or via \texttt{Entries} then
+then these settings may be removed so that the Linux distribution is not displayed twice in the boot menu.
 
-The latest kernel version of a given install is always shown in the boot menu. Additional versions,
-recovery versions, etc. are added as auxiliary boot entries, so depending on OpenCore's
-\texttt{HideAuxiliary} setting may not be shown until the space key is pressed.
+It is recommended to install Linux with its default bootloader, even though this will not be actively used
+when booting via OpenLinuxBoot. This is because OpenLinuxBoot has to detect the correct kernel options to
+use, and does so by looking in files left by the default bootloader. If no bootloader was installed (or
+these options cannot be found) booting is still possible, but the correct boot options must be manually
+specified before OpenLinuxBoot will attempt to start the distro.
 
-\emph{Note 1}: \texttt{OpenLinuxBoot} requires filesystem drivers that may not be available in
-firmware such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
+OpenLinuxBoot typically requires filesystem drivers that are not available in
+firmware, such as EXT4 and BTRFS drivers. These drivers can be obtained from external sources.
 Drivers tested in basic scenarios can be downloaded from \href{https://github.com/acidanthera/OcBinaryData}{OcBinaryData}.
-Be aware that these drivers are neither tested for reliability in all scenarious, nor underwent any
-tamper-resistance testing, therefore have may carry potential security or data-loss risks.
+Be aware that these drivers are not tested for reliability in all scenarious, nor did they undergo
+tamper-resistance testing, therefore they may carry potential security or data-loss risks.
 
-Most Linux distributions keep their boot files on an EXT4 partition even when the distribution's
-root filesystem is something else, such as BTRFS, therefore only an EXT4
-driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} is normally required.
-A BTRFS driver such as \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
-will be required in the currently somewhat less standard situation where the boot files are on a BTRFS
-partition, e.g. as is currently done by default in openSUSE.
+Most Linux distros require the \href{https://github.com/acidanthera/OcBinaryData}{\texttt{ext4\_x64}} driver,
+a few may require the \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}} driver, and a few
+may require no additional file system driver: it depends on the filesystem of the boot partition of the installed
+distro, and on what filesystems are already supported by the system's firmware. LVM is not currently
+supported - this is because it is not believed that there is currently a stand-alone UEFI LVM filesystem driver.
 
-Pure Boot Loader Spec (e.g. as implemented by systemd-boot) keeps all kernel and ramdisk images directly
-on the EFI System Partition (or an Extended Boot Loader Partition), therefore it requires no additional
-filesystem driver - but it is not widely used except in Arch Linux.
+Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
+failure (typically halting with a black screen) of the Linux kernel, due to a firmware bug of some
+firmware released after 2017. When present and not mitigated by this quirk, this affects booting
+via OpenCore with or without OpenLinuxBoot.
 
-\emph{Note 2}: \texttt{OpenLinuxBoot} does not attempt to read and interpret the layout of Linux
-installation media (which can be highly variable). Installation media should be booted directly either from
-the machine's own EFI boot menu or from the OpenCore boot menu. In some cases, e.g. Apple T2 hardware,
-then -- depending on OpenCore's security settings -- OpenCore may be able to start some Linux installers
-which the machine's own bootloader will refuse to boot.
+After installing OpenLinuxBoot, it is recommended to compare the Linux boot options (shown with \texttt{cat /proc/cmdline})
+seen when booting via OpenLinuxBoot and via the distro's original bootloader. If the default bootloader
+is GRUB, expect the options generated by OpenLinuxBoot not to
+contain a \texttt{BOOT\_IMAGE=...} value where the GRUB options do, and to contain an
+\texttt{initrd=...} value while the GRUB options do not.
+All remaining options should match (option order does not matter) -- perhaps excluding less important graphics
+handover options (such as in the Ubuntu example given in \texttt{autoopts} below). If they do not, it is recommended
+to manually add the missing options, e.g. with \texttt{partuuidopts:\{partuuid\}+=\{opts\}} to target a specific
+distro (or just with \texttt{autoopts+=\{opts\}}, which applies to all installed distros, if only one distro is in use).
 
-\emph{Note 3}: systemd-boot users (probably almost exclusively Arch Linux users) should be aware that \texttt{OpenLinuxBoot}
-does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
-therefore use \texttt{efibootmgr} rather than \texttt{bootctl} for any low-level Linux command line interaction with
-the boot menu.
+If using OpenLinuxBoot with Secure Boot, users may wish to use the \texttt{shim-to-cert.tool} included in OpenCore
+utilities, which can be used to extract the required public key to validate a distro's kernels directly, rather
+than via shim. For non-GRUB distros, the required public key must be found by user research.
 
-\emph{Note 4}: Be aware of the \texttt{SyncRuntimePermissions} quirk, which may need to be set to avoid early boot
-failure (i.e. halts with black screen) of the Linux kernel due to a firmware bug of some firmware released after 2017.
+\subsubsection{Configuration}
 
-The default parameter values should work well, but if you need to parameterise this driver the following
-options may be specified in \texttt{UEFI/Drivers/Arguments}:
+The default parameter values should work well with no changes under most circumstances, but if required the following
+options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
   \tightlist
-	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} are set. \medskip
+	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} and
+  \texttt{LINUX\_BOOT\_LOG\_VERBOSE} are set. \medskip
 
 	Available flags are: \medskip
 
@@ -6289,19 +6320,19 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 	  \emph{Note 2}: Regardless of the above flags, a file system must first be
 	  allowed by \texttt{Misc/Security/ScanPolicy} before it can be seen by
-    \texttt{OpenLinuxBoot} or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
+    OpenLinuxBoot or any other \texttt{OC\_BOOT\_ENTRY\_PROTOCOL} driver.
     \medskip
 
 	  \emph{Note 3}: It is recommended to enable scanning \texttt{LINUX\_ROOT} and \texttt{LINUX\_DATA}
-    in both \texttt{OpenLinuxBoot} flags and \texttt{Misc/Security/ScanPolicy} in order to be sure
-    to detect all valid Linux installs.
+    in both OpenLinuxBoot flags and \texttt{Misc/Security/ScanPolicy} in order to be sure to detect
+    all valid Linux installs, since Linux boot filesystems are very often marked as \texttt{LINUX\_DATA}.
     \medskip
 
 	  \item \texttt{0x00000100} (bit \texttt{8}) --- \texttt{LINUX\_BOOT\_ALLOW\_AUTODETECT},
 	  If set allows autodetecting and linking \texttt{vmlinuz*} and \texttt{init*} ramdisk files
 	  when \texttt{loader/entries} files are not found.
 	  \item \texttt{0x00000200} (bit \texttt{9}) --- \texttt{LINUX\_BOOT\_USE\_LATEST},
-	  When a Linux entry generated by \texttt{OpenLinuxBoot} is selected as the default boot entry
+	  When a Linux entry generated by OpenLinuxBoot is selected as the default boot entry
     in OpenCore, automatically switch to the latest kernel when a new version is installed. \medskip
 
 	  When this option is set, an internal menu entry id is shared between kernel versions from the same install
@@ -6318,6 +6349,12 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
+    
+	  \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
+	  In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
+    \texttt{/loader/entries/*.conf} files do not specify a required \texttt{root=...} kernel
+    option -- it is added by GRUB. If this bit is set and this situation is detected, then
+    automatically add this option. (Required for example by Endless OS.)
 	  \item \texttt{0x00004000} (bit \texttt{14}) --- \texttt{LINUX\_BOOT\_LOG\_VERBOSE},
 	  Add additional debug log info about files encountered and autodetect options added while scanning for
     Linux boot entries.
@@ -6341,13 +6378,13 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
 
   \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
-  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is NOT the same for
+  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is not the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
 
-	Typically you should not need this option in the latter case, but in case you do, to find out the unique
-  partition uuid to use, look for \texttt{LNX:} entries in the OpenCore debug	log file. Alternatively, and
-  for more advanced scenarios, you may wish to examine how your drives are mounted using the
-  Linux \texttt{mount} command, and then find out the partuuid of relevant mounted drives by examining the
+	Typically this option should not be needed in the latter case, but in case it is, to find out the unique
+  partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+  for more advanced scenarios, it is possible to examine how the distro's partitions are mounted using the
+  Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
 	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
@@ -6357,23 +6394,43 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
   with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
   a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
-  (check \texttt{cat /proc/cmdline} when booted via your existing bootloader) on Ubuntu and related distros,
+  (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
   showing before the distro splash screen.
   \medskip
-
-  Users may wish to compare their Linux boot options (shown with \texttt{cat /proc/cmdline}) seen when booting via
-  \texttt{OpenLinuxBoot} and via their distro's original bootloader, which is normally GRUB (but might also be e.g.
-  systemd-boot or EXTLINUX). Expect the options generated by \texttt{OpenLinuxBoot} not to
-  contain a \texttt{BOOT\_IMAGE=...} value where GRUB options do, and to contain an
-  \texttt{initrd=...} value where the GRUB options do not, since GRUB hands over ramdisks in a different way.
-  All remaining parameters should match, however -- perhaps excluding less important graphics handover options,
-  such as in the Ubuntu example given in \texttt{autoopts}.
-  \texttt{OpenLinuxBoot} will not start a distro unless it can find some configured options to use, therefore in
-  the hopefully unlikely case where no auto-detectable options are available, the user will need to specify the correct options
-  with \texttt{partuuidopts} or \texttt{autoopts} before the distro will boot. Examine the OpenCore debug log
-  for \texttt{LNX:} entries containing further information about what was found.
 \end{itemize}
+
+\subsubsection{Additional information}
+
+OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the 
+\href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification} or the closely related
+\href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}. The
+former is specific to systemd-boot and is used by Arch Linux, the latter applies to most Fedora-related distros
+including Fedora itself, RHEL and variants.
+
+Where the above files are not present, OpenLinuxBoot can autodetect and
+boot \texttt{\{boot\}/vmlinuz*} kernel files directly. It links these automatically -- based on the
+kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files.
+This applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
+
+When autodetecting, OpenLinuxBoot looks in \texttt{/etc/default/grub} for kernel boot options and
+\texttt{/etc/os-release} for the distro name.
+
+BootLoaderSpecByDefault (but not pure Boot Loader Specification) can expand GRUB variables
+in the \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
+In order to handle this correctly, when this situation is detected OpenLinuxBoot extracts all variables from
+\texttt{\{boot\}/grub2/grubenv} and also any unconditionally set variables from
+\texttt{\{boot\}/grub2/grub.cfg}, and then expands these where required in \texttt{*.conf} file entries.
+
+The only currently supported method of starting Linux kernels relies on their being compiled with EFISTUB.
+This applies to almost all modern distros, particularly those which use systemd. Note that most modern
+distros use systemd as their system manager, even though most do not use systemd-boot as
+their bootloader.
+
+systemd-boot users (probably almost exclusively Arch Linux users) should be aware that OpenLinuxBoot
+does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADER\_INTERFACE/}{Boot Loader Interface};
+therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
+with the boot menu.
 
 \subsection{Properties}\label{uefiprops}
 
@@ -7632,6 +7689,60 @@ options may be specified in \texttt{UEFI/Drivers/Arguments}:
   \item Potentially incompatible boot entries, such as macOS entries, are not deleted
   or corrupted in any way.
   \end{itemize}
+
+\item
+  \texttt{ResizeGpuBars}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Configure GPU PCI BAR sizes.
+
+  This quirk sets GPU PCI BAR sizes as specified or chooses
+  the largest available below the \texttt{ResizeGpuBars} value.
+  The specified value follows PCI Resizable BAR spec.
+  Use \texttt{0} for 1 MB, \texttt{1} for 2 MB, \texttt{2}
+  for 4 MB, and so on up to \texttt{19} for 512 GB.
+
+  Resizable BAR technology allows to ease PCI device programming by mapping
+  a configurable memory region, BAR, into CPU address space (e.g. VRAM to RAM)
+  as opposed to a fixed memory region. This technology is necessary, because
+  one cannot map the largest memory region by default, for the reasons of backwards
+  compatibility with older hardware not supporting 64-bit BARs. Consequentially
+  devices of the last decade use BARs up to 256 MB by default (4 remaining bits are used
+  by other data) but generally allow resizing them to both smaller and larger
+  powers of two (e.g. from 1 MB up to VRAM size).
+
+  Operating systems targeting x86 platforms generally do not control PCI address space,
+  letting UEFI firmware decide on the BAR addresses and sizes. This illicit practice
+  resulted in Resizable BAR technology being unused up until 2020 despite being
+  standardised in 2008 and becoming widely available in the hardware soon after.
+
+  Modern UEFI firmware allow the use of Resizable BAR technology but generally
+  restrict the configurable options to failsafe default (\texttt{OFF})
+  and maximum available (\texttt{ON}). This quirk allows to fine-tune this
+  value for testing and development purposes.
+
+  Consider a GPU with 2 BARs:
+  \begin{itemize}
+    \tightlist
+    \item \texttt{BAR0} supports sizes from 256 MB to 8 GB. Its value is 4 GB.
+    \item \texttt{BAR1} supports sizes from 2 MB to 256 MB. Its value is 256 MB.
+  \end{itemize}
+
+  \emph{Example 1}: Setting \texttt{ResizeGpuBars} to 1 GB will change
+  \texttt{BAR0} to 1 GB and leave \texttt{BAR1} unchanged.
+  \\
+  \emph{Example 2}: Setting \texttt{ResizeGpuBars} to 1 MB will change
+  \texttt{BAR0} to 256 MB and \texttt{BAR0} to 2 MB.
+  \\
+  \emph{Example 3}: Setting \texttt{ResizeGpuBars} to 16 GB will change
+  \texttt{BAR0} to 8 GB and leave \texttt{BAR1} unchanged.
+
+  \emph{Note 1}: This quirk shall not be used to workaround macOS limitation
+  to address BARs over 1 GB. \texttt{ResizeAppleGpuBars} should be used instead.
+
+  \emph{Note 2}: While this quirk can increase GPU PCI BAR sizes, this will not
+  work on most firmware as is, because the quirk does not relocate BARs in memory,
+  and they will likely overlap. Contributions to improve this feature are welcome.
 
 \item
   \texttt{TscSyncTimeout}\\
