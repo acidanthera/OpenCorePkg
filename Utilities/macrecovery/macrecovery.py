@@ -295,7 +295,7 @@ def action_download(args):
         err = linecache.getline(tb.tb_frame.f_code.co_filename, tb.tb_lineno, tb.tb_frame.f_globals).strip()
       except:
         err = "Invalid chunklist"
-    print('\nImage verification failed. ({})'.format(err))
+    print('\rImage verification failed. ({})'.format(err))
     return 1
 
 def action_selfcheck(args):
