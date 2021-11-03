@@ -46,7 +46,7 @@ Recovery flavours also automatically add the OS version:
  - ...
  - **AppleRecv10_4:AppleRecv:Apple10_4:Apple** - macOS Tiger Recovery
 
- Time machine icons _do not_ automatically the add OS version, so per-OS versions would require manual specification by the user (e.g. in `.contentFlavour`) as follows, in order to be found and used:
+ Time machine icons _do not_ automatically add the OS version, so per-OS versions would require manual specification by the user (e.g. in `.contentFlavour`) as follows, in order to be found and used:
 
  - **AppleTM:Apple** - macOS Time Machine, default flavour, not version specific
  - **AppleTM11:AppleTM:Apple11:Apple** - macOS Big Sur Time Machine (`AppleTM11.icns`, etc.)
