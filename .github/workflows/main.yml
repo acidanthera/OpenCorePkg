@@ -69,11 +69,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install nasm uuid-dev libssl-dev iasl
-          file="clang+llvm-9.0.1-x86_64-linux-gnu-ubuntu-16.04"
+          file="clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04"
           suf=".tar.xz"
-          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/${file}${suf}" || exit 1
+          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/${file}${suf}" || exit 1
           sum=$(shasum -a 256 "${file}${suf}" | cut -f1 -d' ')
-          expsum="1af280e96fec62acf5f3bb525e36baafe09f95f940dc9806e22809a83dfff4f8"
+          expsum="2c2fb857af97f41a5032e9ecadf7f78d3eff389a5cd3c9ec620d24f134ceb3c8"
           if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
           tar -xf "${file}${suf}" || exit 1
           echo "$(pwd)/${file}/bin" >> $GITHUB_PATH
@@ -102,8 +102,11 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install nasm uuid-dev iasl clang-8 llvm-8-dev doxygen texlive texlive-latex-extra
-          echo "/usr/lib/llvm-8/bin" >> $GITHUB_PATH
+          sudo apt-get install nasm uuid-dev iasl doxygen texlive texlive-latex-extra
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 13
+          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
 
       - name: CI Bootstrap
         run: |
