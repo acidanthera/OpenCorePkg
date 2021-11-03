@@ -223,7 +223,7 @@ def save_image(url, sess, filename='', dir=''):
       size += len(chunk)
       print('\r{} MBs downloaded...'.format(size / (2**20)), end='')
       sys.stdout.flush()
-    print('\rDownload complete!')
+    print('\rDownload complete!                    ')
 
   return os.path.join(dir, os.path.basename(filename))
 
@@ -240,10 +240,10 @@ def verify_image(dmgpath, cnkpath):
       if len(cnk) != cnksize:
         raise RuntimeError('Invalid chunk {} size: expected {}, read {}'.format(cnkcount, cnksize, len(cnk)))
       if hashlib.sha256(cnk).digest() != cnkhash:
-        raise RuntimeError('Invalid chunk {}: hash mismatch'.format(cnkcount)) 
+        raise RuntimeError('Invalid chunk {}: hash mismatch'.format(cnkcount))
     if dmgf.read(1) != b'':
       raise RuntimeError('Invalid image: larger than chunklist')
-    print('\rImage verification complete!')
+    print('\rImage verification complete!                    ')
 
 def action_download(args):
   """
