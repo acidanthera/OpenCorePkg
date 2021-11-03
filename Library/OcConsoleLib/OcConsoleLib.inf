@@ -43,9 +43,10 @@
 [Sources]
   ConsoleControl.c
   ConsoleGop.c
-  GopPassThrough.c
+  ConsoleGopInternal.h
   Eg2Info.c
   FramebufferInfo.c
+  GopPassThrough.c
   OcConsoleLib.c
   OcConsoleLibInternal.h
   ResolutionParsing.c

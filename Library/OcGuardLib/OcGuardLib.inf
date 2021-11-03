@@ -31,12 +31,13 @@
 [Sources]
   Alignment.c
   BitOverflow.c
+  GuardInternals.h
   Math.c
   NativeOverflow.c
   TripleOverflow.c
-  UbsanPrintf.c
   Ubsan.c
   Ubsan.h
+  UbsanPrintf.c
 
 [Packages]
   MdePkg/MdePkg.dec

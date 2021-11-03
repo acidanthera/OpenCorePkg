@@ -116,7 +116,7 @@ OcAppleEg2InfoInstallProtocol (
   UINT32                          Attributes;
   UINT32                          Rotation;
 
-  DEBUG ((DEBUG_VERBOSE, "OcAppleFbInfoInstallProtocol\n"));
+  DEBUG ((DEBUG_VERBOSE, "OcAppleEg2InfoInstallProtocol\n"));
 
   if (Reinstall) {
     Status = OcUninstallAllProtocolInstances (&gAppleEg2InfoProtocolGuid);

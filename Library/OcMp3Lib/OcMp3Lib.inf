@@ -52,6 +52,7 @@
   helix/hufftabs.c
   helix/imdct.c
   helix/mp3common.h
+  helix/mp3compat.h
   helix/mp3dec.h
   helix/mp3dec.c
   helix/mp3tabs.c

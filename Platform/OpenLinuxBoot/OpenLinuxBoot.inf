@@ -40,6 +40,7 @@
   GrubCfg.c
   GrubEnv.c
   GrubVars.c
+  LinuxBootInternal.h
   LoaderEntry.c
   OpenLinuxBoot.c
   VersionCompare.c

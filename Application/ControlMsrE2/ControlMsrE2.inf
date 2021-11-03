@@ -34,9 +34,10 @@
 
 [Sources]
   ControlMsrE2.c
-  VerifyMsrE2.c
-  ControlMsrE2UI.c
+  ControlMsrE2.h
   ControlMsrE2Hii.c
+  ControlMsrE2UI.c
+  VerifyMsrE2.c
 
 [Packages]
   MdePkg/MdePkg.dec
