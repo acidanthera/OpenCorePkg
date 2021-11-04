@@ -33,10 +33,11 @@ OcVariableInit (
 
 EFI_STATUS
 OcSetSystemVariable (
-  IN CHAR16  *VariableName,
-  IN UINT32  Attributes,
-  IN UINTN   DataSize,
-  IN VOID    *Data
+  IN CHAR16    *VariableName,
+  IN UINT32    Attributes,
+  IN UINTN     DataSize,
+  IN VOID      *Data,
+  IN EFI_GUID  *VendorGuid  OPTIONAL
   )
 {
   EFI_STATUS Status;
@@ -46,6 +47,10 @@ OcSetSystemVariable (
   VOID       *OldData;
 
   UINT8      StackBuffer[256];
+
+  if (VendorGuid == NULL) {
+    VendorGuid = &gOcVendorVariableGuid;
+  }
 
   DEBUG_CODE_BEGIN ();
   ASSERT (mDebugInitialized);
@@ -68,7 +73,7 @@ OcSetSystemVariable (
 
     Status = gRT->GetVariable (
       VariableName,
-      &gOcVendorVariableGuid,
+      VendorGuid,
       NULL,
       &OldDataSize,
       OldData
@@ -81,7 +86,7 @@ OcSetSystemVariable (
       if (OldData != NULL) {
         Status = gRT->GetVariable (
           VariableName,
-          &gOcVendorVariableGuid,
+          VendorGuid,
           NULL,
           &OldDataSize,
           OldData
@@ -123,7 +128,7 @@ OcSetSystemVariable (
 
   return gRT->SetVariable (
     VariableName,
-    &gOcVendorVariableGuid,
+    VendorGuid,
     Attributes,
     DataSize,
     Data

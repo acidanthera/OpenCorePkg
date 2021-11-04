@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Nov  2 10:35:43 2021
-%DIF ADD ../Configuration.tex        Tue Nov  2 10:37:48 2021
+%DIF DEL PreviousConfiguration.tex   Wed Nov  3 14:16:04 2021
+%DIF ADD ../Configuration.tex        Thu Nov  4 18:02:19 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7425,6 +7425,24 @@ with the boot menu.
   \emph{Note}: This option only applies to the \texttt{System} renderer.
    On all known affected systems, \texttt{ConsoleMode} must be set to
    an empty string for this option to work.
+\DIFaddbegin 
+
+\item
+  \texttt{\DIFadd{UIScale}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\DIFadd{, 8 bit}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: User interface scaling factor.
+}
+
+  \DIFadd{Corresponds to }\texttt{\DIFadd{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale}} \DIFadd{variable.
+  }\begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{1}} \DIFadd{--- 1x scaling, corresponds to normal displays.
+    }\item \texttt{\DIFadd{2}} \DIFadd{--- 2x scaling, corresponds to HiDPI displays.
+    }\item \texttt{\DIFadd{-1}} \DIFadd{--- leaves the current variable unchanged.
+    }\item \texttt{\DIFadd{0}} \DIFadd{--- automatically chooses scaling based on the current resolution.
+  }\end{itemize}
+\DIFaddend 
 
 \item
   \texttt{UgaPassThrough}\\

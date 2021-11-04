@@ -40,6 +40,7 @@ OcVariableInit (
                                  EFI_VARIABLE_AUTHENTICATION_2 descriptor below. In this case the DataSize will not
                                  be zero since the EFI_VARIABLE_AUTHENTICATION_2 descriptor will be populated).
   @param[in]  Data               The contents for the variable.
+  @param[in]  VendorGuid         Variable GUID, defaults to gOcVendorVariableGuid if NULL.
 
   @retval EFI_SUCCESS            The firmware has successfully stored the variable and its data as
                                  defined by the Attributes.
@@ -57,10 +58,11 @@ OcVariableInit (
 **/
 EFI_STATUS
 OcSetSystemVariable (
-  IN CHAR16  *VariableName,
-  IN UINT32  Attributes,
-  IN UINTN   DataSize,
-  IN VOID    *Data
+  IN CHAR16    *VariableName,
+  IN UINT32    Attributes,
+  IN UINTN     DataSize,
+  IN VOID      *Data,
+  IN EFI_GUID  *VendorGuid  OPTIONAL
   );
 
 #endif // OC_VARIABLE_LIB_H

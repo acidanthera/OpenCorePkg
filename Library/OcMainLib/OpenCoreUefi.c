@@ -858,7 +858,8 @@ OcLoadUefiSupport (
     OC_BOOT_REDIRECT_VARIABLE_NAME,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
-    &Config->Uefi.Quirks.RequestBootVarRouting
+    &Config->Uefi.Quirks.RequestBootVarRouting,
+    NULL
     );
 
   if (Config->Uefi.Quirks.UnblockFsConnect) {

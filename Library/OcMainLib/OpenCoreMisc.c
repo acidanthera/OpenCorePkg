@@ -69,7 +69,8 @@ OcStoreLoadPath (
     OC_LOG_VARIABLE_PATH,
     OPEN_CORE_NVRAM_ATTR,
     AsciiStrSize (OutPath),
-    OutPath
+    OutPath,
+    NULL
     );
 
   DEBUG ((
@@ -659,7 +660,8 @@ OcMiscMiddleInit (
     OC_BOOT_PROTECT_VARIABLE_NAME,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (BootProtectFlag),
-    &BootProtectFlag
+    &BootProtectFlag,
+    NULL
     );
 }
 
@@ -981,6 +983,7 @@ OcMiscUefiQuirksLoaded (
     OC_SCAN_POLICY_VARIABLE_NAME,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Misc.Security.ScanPolicy),
-    &Config->Misc.Security.ScanPolicy
+    &Config->Misc.Security.ScanPolicy,
+    NULL
     );
 }

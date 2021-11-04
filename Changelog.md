@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC
+- Added automatic scaling factor detection
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation

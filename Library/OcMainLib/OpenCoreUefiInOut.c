@@ -16,6 +16,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Guid/OcVariable.h>
 #include <Guid/GlobalVariable.h>
+#include <Guid/AppleVariable.h>
 
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
@@ -40,6 +41,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcMiscLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -182,14 +184,16 @@ OcLoadUefiOutputSupport (
   IN OC_GLOBAL_CONFIG  *Config
   )
 {
-  EFI_STATUS           Status;
-  CONST CHAR8          *AsciiRenderer;
-  CONST CHAR8          *GopPassThrough;
-  OC_CONSOLE_RENDERER  Renderer;
-  UINT32               Width;
-  UINT32               Height;
-  UINT32               Bpp;
-  BOOLEAN              SetMax;
+  EFI_STATUS                    Status;
+  CONST CHAR8                   *AsciiRenderer;
+  CONST CHAR8                   *GopPassThrough;
+  EFI_GRAPHICS_OUTPUT_PROTOCOL  *Gop;
+  OC_CONSOLE_RENDERER           Renderer;
+  UINT32                        Width;
+  UINT32                        Height;
+  UINT32                        Bpp;
+  BOOLEAN                       SetMax;
+  UINT8                         UIScale;
 
   GopPassThrough = OC_BLOB_GET (&Config->Uefi.Output.GopPassThrough);
   if (AsciiStrCmp (GopPassThrough, "Enabled") == 0) {
@@ -271,6 +275,40 @@ OcLoadUefiOutputSupport (
         Status
         ));
     }
+  }
+
+  if (Config->Uefi.Output.UIScale >= 0 && Config->Uefi.Output.UIScale <= 2) {
+    if (Config->Uefi.Output.UIScale == 0) {
+      Status = gBS->HandleProtocol (
+        gST->ConsoleOutHandle,
+        &gEfiGraphicsOutputProtocolGuid,
+        (VOID **) &Gop
+        );
+      if (!EFI_ERROR (Status)) {
+        UIScale = (UINT64) Gop->Mode->Info->HorizontalResolution
+          * Gop->Mode->Info->VerticalResolution >= 4000000 ? 2 : 1;
+        DEBUG ((
+          DEBUG_INFO,
+          "OC: Selected UIScale %d based on %ux%u resolution\n",
+          UIScale,
+          Gop->Mode->Info->HorizontalResolution,
+          Gop->Mode->Info->VerticalResolution
+          ));
+      } else {
+        UIScale = 1;
+      }
+    } else {
+      UIScale = (UINT8) Config->Uefi.Output.UIScale;
+    }
+
+    Status = OcSetSystemVariable (
+      APPLE_UI_SCALE_VARIABLE_NAME,
+      EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+      sizeof (UIScale),
+      &UIScale,
+      &gAppleVendorVariableGuid
+      );
+    DEBUG ((DEBUG_INFO, "OC: Setting UIScale to %d - %r\n", UIScale, Status));
   }
 
   AsciiRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);

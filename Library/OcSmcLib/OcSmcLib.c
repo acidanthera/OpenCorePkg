@@ -575,7 +575,8 @@ ExportStatusKey (
     VIRTUALSMC_STATUS_KEY,
     EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
     sizeof (StatusBuffer),
-    StatusBuffer
+    StatusBuffer,
+    NULL
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSMC: Failed to create status - %r\n", Status));

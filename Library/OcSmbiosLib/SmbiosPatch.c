@@ -2348,7 +2348,8 @@ OcSmbiosExtractOemInfo (
         OC_OEM_PRODUCT_VARIABLE_NAME,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmProductName),
-        (VOID *) SmProductName
+        (VOID *) SmProductName,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM product\n"));
@@ -2360,7 +2361,8 @@ OcSmbiosExtractOemInfo (
         OC_OEM_VENDOR_VARIABLE_NAME,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmManufacturer),
-        (VOID *) SmManufacturer
+        (VOID *) SmManufacturer,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board manufacturer - %r\n", Status));
@@ -2370,7 +2372,8 @@ OcSmbiosExtractOemInfo (
         OC_OEM_BOARD_VARIABLE_NAME,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmBoard),
-        (VOID *) SmBoard
+        (VOID *) SmBoard,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board - %r\n", Status));

@@ -786,6 +786,7 @@ mUefiOutputSchema[] = {
   OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
   OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
   OC_SCHEMA_STRING_IN  ("TextRenderer",           OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
+  OC_SCHEMA_INTEGER_IN ("UIScale",                OC_GLOBAL_CONFIG, Uefi.Output.UIScale),
   OC_SCHEMA_BOOLEAN_IN ("UgaPassThrough",         OC_GLOBAL_CONFIG, Uefi.Output.UgaPassThrough),
 };
 

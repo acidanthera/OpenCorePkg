@@ -651,6 +651,7 @@ typedef enum {
   _(BOOLEAN                     , ReplaceTabWithSpace         ,     , FALSE  , ()) \
   _(BOOLEAN                     , ReconnectOnResChange        ,     , FALSE  , ()) \
   _(BOOLEAN                     , SanitiseClearScreen         ,     , FALSE  , ()) \
+  _(INT8                        , UIScale                     ,     , -1     , ()) \
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ())

@@ -7367,6 +7367,21 @@ with the boot menu.
    an empty string for this option to work.
 
 \item
+  \texttt{UIScale}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8 bit\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: User interface scaling factor.
+
+  Corresponds to \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale} variable.
+  \begin{itemize}
+    \tightlist
+    \item \texttt{1} --- 1x scaling, corresponds to normal displays.
+    \item \texttt{2} --- 2x scaling, corresponds to HiDPI displays.
+    \item \texttt{-1} --- leaves the current variable unchanged.
+    \item \texttt{0} --- automatically chooses scaling based on the current resolution.
+  \end{itemize}
+
+\item
   \texttt{UgaPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
