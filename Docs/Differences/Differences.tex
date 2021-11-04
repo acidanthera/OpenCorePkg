@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Nov  3 14:16:04 2021
-%DIF ADD ../Configuration.tex        Thu Nov  4 18:02:19 2021
+%DIF ADD ../Configuration.tex        Thu Nov  4 18:36:53 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1793,11 +1793,19 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk reduces GPU PCI BAR sizes for Apple macOS up to the specified
   value or lower if it is unsupported. The specified value follows PCI Resizable
-  BAR spec. Use \texttt{0} for 1 MB, \texttt{1} for 2 MB, \texttt{2}
-  for 4 MB, and so on up to \texttt{19} for 512 GB. Apple macOS supports
-  1 GB maximum, which is \texttt{10}. Use \texttt{-1} to disable this quirk.
+  BAR spec. \DIFdelbegin \DIFdel{Use }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{for 1 MB, }\texttt{\DIFdel{1}} %DIFAUXCMD
+\DIFdel{for 2 MB, }\texttt{\DIFdel{2}}
+  %DIFAUXCMD
+\DIFdel{for 4 MB, and so on up to }\texttt{\DIFdel{19}} %DIFAUXCMD
+\DIFdel{for 512 GB. }\DIFdelend \DIFaddbegin \DIFadd{While }\DIFaddend Apple macOS supports \DIFaddbegin \DIFadd{a theoretical }\DIFaddend 1 GB maximum, \DIFdelbegin \DIFdel{which is }\texttt{\DIFdel{10}}%DIFAUXCMD
+\DIFdel{.}\DIFdelend \DIFaddbegin \DIFadd{in practice all
+  non-default values may not work correctly. For this reason the only supported
+  value for this quirk is the minimal supported BAR size, i.e. }\texttt{\DIFadd{0}}\DIFadd{. }\DIFaddend Use
+  \texttt{-1} to disable this quirk.
 
-  Consider a GPU with 2 BARs:
+  \DIFaddbegin \DIFadd{For the development purposes one may take the risks and try other values.
+  }\DIFaddend Consider a GPU with 2 BARs:
   \begin{itemize}
     \tightlist
     \item \texttt{BAR0} supports sizes from 256 MB to 8 GB. Its value is 4 GB.
@@ -1813,14 +1821,18 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Example 3}: Setting \texttt{ResizeAppleGpuBars} to 16 GB will make no
   changes.
 
-  \emph{Note 1}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
+  \emph{Note\DIFdelbegin \DIFdel{1}\DIFdelend }: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
   size configuration and more details about the technology.
 
-  \emph{Note 2}: Certain GPU drivers do not support non-standard BAR sizes,
+\DIFdelbegin \emph{\DIFdel{Note 2}}%DIFAUXCMD
+\DIFdel{: Certain GPU drivers do not support non-standard BAR sizes,
   causing sleep wake issues, for this reason for macOS it is recommended
-  to use minimal supported BAR sizes, i.e. specify \texttt{0} (1 MB).
+  to use minimal supported BAR sizes, i.e. specify }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{(1 MB).
+}%DIFDELCMD < 
 
-\item
+%DIFDELCMD < %%%
+\DIFdelend \item
   \texttt{SetupVirtualMap}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

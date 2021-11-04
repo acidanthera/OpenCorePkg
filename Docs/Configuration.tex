@@ -1733,10 +1733,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk reduces GPU PCI BAR sizes for Apple macOS up to the specified
   value or lower if it is unsupported. The specified value follows PCI Resizable
-  BAR spec. Use \texttt{0} for 1 MB, \texttt{1} for 2 MB, \texttt{2}
-  for 4 MB, and so on up to \texttt{19} for 512 GB. Apple macOS supports
-  1 GB maximum, which is \texttt{10}. Use \texttt{-1} to disable this quirk.
+  BAR spec. While Apple macOS supports a theoretical 1 GB maximum, in practice all
+  non-default values may not work correctly. For this reason the only supported
+  value for this quirk is the minimal supported BAR size, i.e. \texttt{0}. Use
+  \texttt{-1} to disable this quirk.
 
+  For the development purposes one may take the risks and try other values.
   Consider a GPU with 2 BARs:
   \begin{itemize}
     \tightlist
@@ -1753,12 +1755,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Example 3}: Setting \texttt{ResizeAppleGpuBars} to 16 GB will make no
   changes.
 
-  \emph{Note 1}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
+  \emph{Note}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
   size configuration and more details about the technology.
-
-  \emph{Note 2}: Certain GPU drivers do not support non-standard BAR sizes,
-  causing sleep wake issues, for this reason for macOS it is recommended
-  to use minimal supported BAR sizes, i.e. specify \texttt{0} (1 MB).
 
 \item
   \texttt{SetupVirtualMap}\\
