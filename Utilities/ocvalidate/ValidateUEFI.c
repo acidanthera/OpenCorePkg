@@ -424,6 +424,7 @@ CheckUEFIOutput (
   UINT32               UserHeight;
   UINT32               UserBpp;
   BOOLEAN              UserSetMax;
+  INT8                 UIScale;
 
   ErrorCount           = 0;
   UserUefi             = &Config->Uefi;
@@ -513,6 +514,12 @@ CheckUEFIOutput (
     && !UserSetMax
     && (UserWidth == 0 || UserHeight == 0)) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->Resolution is borked, please check Configurations.pdf!\n"));
+    ++ErrorCount;
+  }
+
+  UIScale = UserUefi->Output.UIScale;
+  if (UIScale < -1 || UIScale > 2) {
+    DEBUG ((DEBUG_WARN, "UEFI->Output->UIScale is borked (Can only be between -1 and 2)!\n"));
     ++ErrorCount;
   }
 
