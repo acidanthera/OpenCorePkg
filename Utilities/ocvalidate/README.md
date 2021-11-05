@@ -111,6 +111,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `AudioSupport` is enabled, AudioDevice cannot be empty and must be a valid path.
 #### Quirks
 - When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded in `UEFI->Drivers`.
+- `ResizeGpuBars` must be set to an integer value between `-1` or `19`.
 #### Drivers
 - When `OpenUsbKbDxe.efi` is in use, `KeySupport` in `UEFI->Input` should never be enabled altogether.
 - When `Ps2KeyboardDxe.efi` is in use, `KeySupport` in `UEFI->Input` should always be enabled altogether.

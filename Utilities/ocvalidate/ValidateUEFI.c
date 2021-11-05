@@ -528,7 +528,20 @@ CheckUEFIQuirks (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  return 0;
+  UINT32          ErrorCount;
+  OC_UEFI_CONFIG  *UserUefi;
+  INT8            ResizeGpuBars;
+
+  ErrorCount      = 0;
+  UserUefi        = &Config->Uefi;
+  ResizeGpuBars   = UserUefi->Quirks.ResizeGpuBars;
+
+  if (ResizeGpuBars < -1 || ResizeGpuBars > 19) {
+    DEBUG ((DEBUG_WARN, "UEFI->Quirks->ResizeGpuBars is borked (Can only be between -1 and 19)!\n"));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
 }
 
 STATIC
