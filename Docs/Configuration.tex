@@ -1738,7 +1738,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   value for this quirk is the minimal supported BAR size, i.e. \texttt{0}. Use
   \texttt{-1} to disable this quirk.
 
-  For the development purposes one may take the risks and try other values.
+  For development purposes one may take risks and try other values.
   Consider a GPU with 2 BARs:
   \begin{itemize}
     \tightlist
@@ -7379,6 +7379,11 @@ with the boot menu.
     \item \texttt{0} --- automatically chooses scaling based on the current resolution.
   \end{itemize}
 
+  \emph{Note 1}: Automatic scale factor detection works on the basis of total pixel area and may fail on small HiDPI displays,
+  in which case the value may be manually managed using the NVRAM section.
+
+  \emph{Note 2}: When switching from manually specified NVRAM variable to this preference an NVRAM reset may be needed.
+
 \item
   \texttt{UgaPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -7626,7 +7631,7 @@ with the boot menu.
   \texttt{ForceOcWriteFlash}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables writing to flash memory for all OpenCore system variables.
+  \textbf{Description}: Enables writing to flash memory for all OpenCore-managed NVRAM system variables.
 
   \emph{Note}: This value should be disabled on most types of firmware but is
   left configurable to account for firmware that may have issues with volatile

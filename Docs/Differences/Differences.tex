@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Nov  3 14:16:04 2021
-%DIF ADD ../Configuration.tex        Thu Nov  4 18:36:53 2021
+%DIF DEL PreviousConfiguration.tex   Tue Nov  2 07:56:56 2021
+%DIF ADD ../Configuration.tex        Fri Nov  5 18:33:39 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -1804,7 +1804,7 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   value for this quirk is the minimal supported BAR size, i.e. }\texttt{\DIFadd{0}}\DIFadd{. }\DIFaddend Use
   \texttt{-1} to disable this quirk.
 
-  \DIFaddbegin \DIFadd{For the development purposes one may take the risks and try other values.
+  \DIFaddbegin \DIFadd{For development purposes one may take risks and try other values.
   }\DIFaddend Consider a GPU with 2 BARs:
   \begin{itemize}
     \tightlist
@@ -7437,10 +7437,9 @@ with the boot menu.
   \emph{Note}: This option only applies to the \texttt{System} renderer.
    On all known affected systems, \texttt{ConsoleMode} must be set to
    an empty string for this option to work.
-\DIFaddbegin 
 
 \item
-  \texttt{\DIFadd{UIScale}}\\
+  \DIFaddbegin \texttt{\DIFadd{UIScale}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\DIFadd{, 8 bit}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: User interface scaling factor.
@@ -7454,10 +7453,16 @@ with the boot menu.
     }\item \texttt{\DIFadd{-1}} \DIFadd{--- leaves the current variable unchanged.
     }\item \texttt{\DIFadd{0}} \DIFadd{--- automatically chooses scaling based on the current resolution.
   }\end{itemize}
-\DIFaddend 
+
+  \emph{\DIFadd{Note 1}}\DIFadd{: Automatic scale factor detection works on the basis of total pixel area and may fail on small HiDPI displays,
+  in which case the value may be manually managed using the NVRAM section.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: When switching from manually specified NVRAM variable to this preference an NVRAM reset may be needed.
+}
 
 \item
-  \texttt{UgaPassThrough}\\
+  \DIFaddend \texttt{UgaPassThrough}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Provide UGA protocol instances on top of GOP protocol instances.
@@ -7703,7 +7708,7 @@ with the boot menu.
   \texttt{ForceOcWriteFlash}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables writing to flash memory for all OpenCore system variables.
+  \textbf{Description}: Enables writing to flash memory for all \DIFdelbegin \DIFdel{OpenCore }\DIFdelend \DIFaddbegin \DIFadd{OpenCore-managed NVRAM }\DIFaddend system variables.
 
   \emph{Note}: This value should be disabled on most types of firmware but is
   left configurable to account for firmware that may have issues with volatile
