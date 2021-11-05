@@ -40,6 +40,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `AllowRelocationBlock` is enabled, `ProvideCustomSlide` should be enabled altogether.
 - When `EnableSafeModeSlide` is enabled, `ProvideCustomSlide` should be enabled altogether.
 - If `ProvideMaxSlide` is set to a number greater than zero, `ProvideCustomSlide` should be enabled altogether.
+- `ResizeAppleGpuBars` must be set to `0` or `-1`.
 - When `DisableVariableWrite`, `EnableWriteUnprotector`, or `ProvideCustomSlide` is enabled, `OpenRuntime.efi` should be loaded in `UEFI->Drivers`.
 
 ### DeviceProperties
