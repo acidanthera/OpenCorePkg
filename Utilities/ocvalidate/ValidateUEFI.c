@@ -13,8 +13,10 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+#include "NvramKeyInfo.h"
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
+#include "UEFIKeyInfo.h"
 
 #include <Library/BaseLib.h>
 #include <Library/OcConsoleLib.h>
@@ -520,6 +522,13 @@ CheckUEFIOutput (
   UIScale = UserUefi->Output.UIScale;
   if (UIScale < -1 || UIScale > 2) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->UIScale is borked (Can only be between -1 and 2)!\n"));
+    ++ErrorCount;
+  } else if (UIScale != -1) {
+    mHasUEFIOutputUIScale = TRUE;
+  }
+
+  if (mHasNvramUIScale && mHasUEFIOutputUIScale) {
+    DEBUG ((DEBUG_WARN, "UIScale is set under both NVRAM and UEFI->Output!\n"));
     ++ErrorCount;
   }
 

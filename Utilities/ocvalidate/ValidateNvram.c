@@ -16,6 +16,7 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 #include "NvramKeyInfo.h"
+#include "UEFIKeyInfo.h"
 
 /**
   Callback function to verify whether one entry is duplicated in NVRAM->Add.
@@ -140,6 +141,13 @@ ValidateNvramKeyByGuid (
                 OC_BLOB_GET (VariableMap->Keys[VariableIndex])
                 ));
               ++ErrorCount;
+            } else {
+              //
+              // Special check for UIScale when it is valid.
+              //
+              if (AsciiStrCmp (OC_BLOB_GET (VariableMap->Keys[VariableIndex]), "UIScale") == 0) {
+                mHasNvramUIScale = TRUE;
+              }
             }
           }
         }

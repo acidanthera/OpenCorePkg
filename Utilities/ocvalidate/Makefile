@@ -9,6 +9,7 @@ OBJS    = $(PROJECT).o \
           OcValidateLib.o \
           KextInfo.o \
           NvramKeyInfo.o \
+          UEFIKeyInfo.o \
           ValidateAcpi.o \
           ValidateBooter.o \
           ValidateDeviceProperties.o \
