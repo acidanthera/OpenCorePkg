@@ -187,4 +187,4 @@ NVRAM_GUID_MAP mGUIDMaps[] = {
 };
 UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
 
-BOOLEAN mHasNvramUIScale;
+BOOLEAN mHasNvramUIScale = FALSE;
