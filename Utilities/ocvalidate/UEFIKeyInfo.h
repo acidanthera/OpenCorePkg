@@ -16,4 +16,4 @@
 /**
   Special check for UIScale under NVRAM and UEFI->Output.
 **/
-extern BOOLEAN mHasUEFIOutputUIScale;
+extern BOOLEAN mHasUefiOutputUIScale;

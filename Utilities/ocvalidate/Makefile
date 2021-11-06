@@ -9,7 +9,7 @@ OBJS    = $(PROJECT).o \
           OcValidateLib.o \
           KextInfo.o \
           NvramKeyInfo.o \
-          UEFIKeyInfo.o \
+          UefiKeyInfo.o \
           ValidateAcpi.o \
           ValidateBooter.o \
           ValidateDeviceProperties.o \
@@ -17,7 +17,7 @@ OBJS    = $(PROJECT).o \
           ValidateMisc.o \
           ValidateNvram.o \
           ValidatePlatformInfo.o \
-          ValidateUEFI.o
+          ValidateUefi.o
 #
 # OcConfigurationLib targets.
 #
