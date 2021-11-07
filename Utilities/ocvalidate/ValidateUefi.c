@@ -16,7 +16,6 @@
 #include "NvramKeyInfo.h"
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
-#include "UefiKeyInfo.h"
 
 #include <Library/BaseLib.h>
 #include <Library/OcConsoleLib.h>
@@ -427,10 +426,12 @@ CheckUefiOutput (
   UINT32               UserBpp;
   BOOLEAN              UserSetMax;
   INT8                 UIScale;
+  BOOLEAN              HasUefiOutputUIScale;
 
   ErrorCount           = 0;
   UserUefi             = &Config->Uefi;
   IsTextRendererSystem = FALSE;
+  HasUefiOutputUIScale = FALSE;
 
   //
   // Sanitise strings.
@@ -524,10 +525,10 @@ CheckUefiOutput (
     DEBUG ((DEBUG_WARN, "UEFI->Output->UIScale is borked (Can only be between -1 and 2)!\n"));
     ++ErrorCount;
   } else if (UIScale != -1) {
-    mHasUefiOutputUIScale = TRUE;
+    HasUefiOutputUIScale = TRUE;
   }
 
-  if (mHasNvramUIScale && mHasUefiOutputUIScale) {
+  if (mHasNvramUIScale && HasUefiOutputUIScale) {
     DEBUG ((DEBUG_WARN, "UIScale is set under both NVRAM and UEFI->Output!\n"));
     ++ErrorCount;
   }

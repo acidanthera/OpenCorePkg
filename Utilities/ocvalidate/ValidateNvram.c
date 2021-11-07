@@ -16,7 +16,6 @@
 #include "ocvalidate.h"
 #include "OcValidateLib.h"
 #include "NvramKeyInfo.h"
-#include "UefiKeyInfo.h"
 
 /**
   Callback function to verify whether one entry is duplicated in NVRAM->Add.
