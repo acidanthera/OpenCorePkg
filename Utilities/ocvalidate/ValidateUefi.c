@@ -528,7 +528,7 @@ CheckUefiOutput (
     HasUefiOutputUIScale = TRUE;
   }
 
-  if (mHasNvramUIScale && HasUefiOutputUIScale) {
+  if (HasUefiOutputUIScale && mHasNvramUIScale) {
     DEBUG ((DEBUG_WARN, "UIScale is set under both NVRAM and UEFI->Output!\n"));
     ++ErrorCount;
   }
