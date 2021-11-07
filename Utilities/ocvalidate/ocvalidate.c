@@ -36,7 +36,7 @@ CheckConfig (
     &CheckMisc,
     &CheckNvram,
     &CheckPlatformInfo,
-    &CheckUEFI
+    &CheckUefi
   };
 
   ErrorCount     = 0;

@@ -120,7 +120,7 @@ CheckPlatformInfo (
   @return     Number of errors detected in UEFI Section.
 **/
 UINT32
-CheckUEFI (
+CheckUefi (
   IN  OC_GLOBAL_CONFIG  *Config
   );
 

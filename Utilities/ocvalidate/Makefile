@@ -16,7 +16,7 @@ OBJS    = $(PROJECT).o \
           ValidateMisc.o \
           ValidateNvram.o \
           ValidatePlatformInfo.o \
-          ValidateUEFI.o
+          ValidateUefi.o
 #
 # OcConfigurationLib targets.
 #

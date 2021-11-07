@@ -186,3 +186,5 @@ NVRAM_GUID_MAP mGUIDMaps[] = {
   { &gAppleVendorVariableGuid, &mAppleVendorVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleVendorVariableGuidKeyMaps) },
 };
 UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
+
+BOOLEAN mHasNvramUIScale = FALSE;
