@@ -478,94 +478,6 @@ InternalBootPickerKeyEvent (
   }
 }
 
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBootPickerLabelLeftShadowBuffer[2 * BOOT_LABEL_SHADOW_WIDTH * 2 * BOOT_LABEL_SHADOW_HEIGHT];
-STATIC GUI_IMAGE mBootPickerLabelLeftShadowImage;
-
-STATIC EFI_GRAPHICS_OUTPUT_BLT_PIXEL mBootPickerLabelRightShadowBuffer[2 * BOOT_LABEL_SHADOW_WIDTH * 2 * BOOT_LABEL_SHADOW_HEIGHT];
-STATIC GUI_IMAGE mBootPickerLabelRightShadowImage;
-
-VOID
-InternalInitialiseLabelShadows (
-  IN CONST GUI_DRAWING_CONTEXT  *DrawContext,
-  IN BOOT_PICKER_GUI_CONTEXT    *GuiContext
-  )
-{
-  UINT32 RowOffset;
-  UINT32 ColumnOffset;
-  UINT32 MaxOffset;
-  UINT8  Opacity;
-
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL LeftPixel;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL RightPixel;
-
-  ASSERT (DrawContext->Scale <= 2);
-
-  mBootPickerLabelLeftShadowImage.Width  = BOOT_LABEL_SHADOW_WIDTH * DrawContext->Scale;
-  mBootPickerLabelLeftShadowImage.Height = BOOT_LABEL_SHADOW_HEIGHT * DrawContext->Scale;
-  mBootPickerLabelLeftShadowImage.Buffer = mBootPickerLabelLeftShadowBuffer;
-
-  mBootPickerLabelRightShadowImage.Width  = BOOT_LABEL_SHADOW_WIDTH * DrawContext->Scale;
-  mBootPickerLabelRightShadowImage.Height = BOOT_LABEL_SHADOW_HEIGHT * DrawContext->Scale;
-  mBootPickerLabelRightShadowImage.Buffer = mBootPickerLabelRightShadowBuffer;
-
-  MaxOffset = mBootPickerLabelLeftShadowImage.Width * mBootPickerLabelLeftShadowImage.Height;
-
-  for (
-    ColumnOffset = 0;
-    ColumnOffset < mBootPickerLabelLeftShadowImage.Width;
-    ++ColumnOffset
-    ) {
-    Opacity = (UINT8) (((ColumnOffset + 1) * 0xFF) / (mBootPickerLabelLeftShadowImage.Width + 1));
-
-    LeftPixel.Blue = RGB_APPLY_OPACITY (
-      GuiContext->BackgroundColor.Pixel.Blue,
-      0xFF - Opacity
-      );
-    LeftPixel.Green = RGB_APPLY_OPACITY (
-      GuiContext->BackgroundColor.Pixel.Green,
-      0xFF - Opacity
-      );
-    LeftPixel.Red = RGB_APPLY_OPACITY (
-      GuiContext->BackgroundColor.Pixel.Red,
-      0xFF - Opacity
-      );
-    LeftPixel.Reserved = 0xFF - Opacity;
-
-    RightPixel.Blue =
-      RGB_APPLY_OPACITY (
-        GuiContext->BackgroundColor.Pixel.Blue,
-        Opacity
-        );
-    RightPixel.Green =
-      RGB_APPLY_OPACITY (
-        GuiContext->BackgroundColor.Pixel.Green,
-        Opacity
-        );
-    RightPixel.Red =
-      RGB_APPLY_OPACITY (
-        GuiContext->BackgroundColor.Pixel.Red,
-        Opacity
-        );
-    RightPixel.Reserved = Opacity;
-
-    for (
-      RowOffset = 0;
-      RowOffset < MaxOffset;
-      RowOffset += mBootPickerLabelLeftShadowImage.Width
-      ) {
-      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Blue     = LeftPixel.Blue;
-      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Green    = LeftPixel.Green;
-      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Red      = LeftPixel.Red;
-      mBootPickerLabelLeftShadowBuffer[RowOffset + ColumnOffset].Reserved = LeftPixel.Reserved;
-
-      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Blue     = RightPixel.Blue;
-      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Green    = RightPixel.Green;
-      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Red      = RightPixel.Red;
-      mBootPickerLabelRightShadowBuffer[RowOffset + ColumnOffset].Reserved = Opacity;
-    }
-  }
-}
-
 STATIC
 VOID
 InternalBootPickerEntryDraw (
@@ -581,6 +493,17 @@ InternalBootPickerEntryDraw (
   IN     UINT8                   Opacity
   )
 {
+  UINT32                 ShadowWidth;
+  UINT32                 ShadowStart;
+  UINT32                 ShadowEnd;
+  UINT32                 LeftShadowSize;
+  UINT32                 RightShadowSize1;
+  UINT32                 RightShadowSize2;
+  UINT32                 LabelWidth;
+  UINT32                 ColumnOffset;
+  UINT8                  ShadowOpacity;
+  INT64                  LabelOffset;
+
   CONST GUI_VOLUME_ENTRY *Entry;
   CONST GUI_IMAGE        *EntryIcon;
   CONST GUI_IMAGE        *Label;
@@ -615,78 +538,182 @@ InternalBootPickerEntryDraw (
       Height
       );
   }
-  //
-  // Draw the label horizontally centered.
-  //
 
-  //
-  // FIXME: Apple allows the label to be up to 340px wide,
-  // but OpenCanopy can't display it now (it would overlap adjacent entries)
-  //
-  //ASSERT (Label->Width  <= BOOT_ENTRY_DIMENSION * DrawContext->Scale);
   ASSERT (Label->Height <= BOOT_ENTRY_LABEL_HEIGHT * DrawContext->Scale);
 
-  GuiDrawChildImage (
-    Label,
-    Opacity,
-    DrawContext,
-    BaseX,
-    BaseY,
-    Entry->LabelOffset,
-    This->Height - Label->Height,
-    OffsetX,
-    OffsetY,
-    Width,
-    Height
-    );
-  //
-  // If the label needs scrolling, draw a second one to get a wraparound effect.
-  //
-  if (Entry->Label.Width > This->Width) {
+  if (Entry->Label.Width <= This->Width) {
+    //
+    // Draw the label horizontally centered.
+    //
     GuiDrawChildImage (
       Label,
       Opacity,
       DrawContext,
       BaseX,
       BaseY,
-      (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale,
+      Entry->LabelOffset,
       This->Height - Label->Height,
       OffsetX,
       OffsetY,
       Width,
       Height
       );
+  } else {
+    //
+    // Draw scrolling label with fade-in and fade-out.
+    //
+    ShadowWidth = BOOT_LABEL_SHADOW_WIDTH * DrawContext->Scale;
 
-    if (Entry->ShowLeftShadow) {
+    if (!Entry->ShowLeftShadow) {
+      LeftShadowSize = 0;
+    } else {
+      //
+      // Draw left shadow one column at a time.
+      //
+      ShadowStart = OffsetX; // <- No left clip, unsigned
+
+      if (OffsetX + Width > ShadowWidth) {
+        ShadowEnd = ShadowWidth;
+      } else {
+        ShadowEnd = OffsetX + Width;
+      }
+
+      if (ShadowEnd <= ShadowStart) {
+        LeftShadowSize = 0;
+      } else {
+        LeftShadowSize = ShadowEnd - ShadowStart;
+
+        for (ColumnOffset = ShadowStart; ColumnOffset < ShadowEnd; ++ColumnOffset) {
+          ShadowOpacity = (UINT8) (((ColumnOffset + 1) * 0xFF) / (ShadowWidth + 1));
+
+          ShadowOpacity = RGB_APPLY_OPACITY (
+            Opacity,
+            ShadowOpacity
+            );
+
+          GuiDrawChildImage (
+            Label,
+            ShadowOpacity,
+            DrawContext,
+            BaseX,
+            BaseY,
+            Entry->LabelOffset,
+            This->Height - Label->Height,
+            ColumnOffset,
+            OffsetY,
+            1,
+            Height
+            );
+        }
+      }
+    }
+
+    //
+    // If the label needs scrolling, draw a second one to get a wraparound effect.
+    //
+
+    //
+    // Draw right shadow one column at a time.
+    //
+    if (OffsetX < This->Width - ShadowWidth) {
+      ShadowStart = This->Width - ShadowWidth;
+    } else {
+      ShadowStart = OffsetX;
+    }
+
+    if (OffsetX + Width > This->Width) {
+      ShadowEnd = This->Width;
+    } else {
+      ShadowEnd = OffsetX + Width;
+    }
+
+    if (ShadowEnd <= ShadowStart) {
+      RightShadowSize1 = 0;
+      RightShadowSize2 = 0;
+    }
+    else {
+      //
+      // Right shadow needs to be drawn on first or second label depending on
+      // position of scroll, but never on both because of the padding between them.
+      //
+      STATIC_ASSERT (BOOT_LABEL_WRAPAROUND_PADDING >= BOOT_LABEL_SHADOW_WIDTH, "additional code required for wraparound padding < shadow width");
+
+      LabelOffset = Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale;
+      if (LabelOffset > This->Width) {
+        LabelOffset = Entry->LabelOffset;
+        RightShadowSize1 = ShadowEnd - ShadowStart;
+        RightShadowSize2 = 0;
+      } else {
+        RightShadowSize1 = 0;
+        RightShadowSize2 = ShadowEnd - ShadowStart;
+      }
+
+      for (ColumnOffset = ShadowStart; ColumnOffset < ShadowEnd; ++ColumnOffset) {
+        ShadowOpacity = (UINT8) (((ColumnOffset - (This->Width - ShadowWidth) + 1) * 0xFF) / (ShadowWidth + 1));
+
+        ShadowOpacity = RGB_APPLY_OPACITY (
+          Opacity,
+          0xFF - ShadowOpacity
+          );
+
+        GuiDrawChildImage (
+          Label,
+          ShadowOpacity,
+          DrawContext,
+          BaseX,
+          BaseY,
+          LabelOffset,
+          This->Height - Label->Height,
+          ColumnOffset,
+          OffsetY,
+          1,
+          Height
+          );
+      }
+    }
+
+    //
+    // Draw non-shaded part of first label.
+    //
+    LabelWidth = Width - MIN (Width, LeftShadowSize);
+    LabelWidth = LabelWidth - MIN (LabelWidth, RightShadowSize1);
+    if (LabelWidth > 0) {
       GuiDrawChildImage (
-        &mBootPickerLabelLeftShadowImage,
+        Label,
         Opacity,
         DrawContext,
         BaseX,
         BaseY,
-        0,
-        This->Height - mBootPickerLabelLeftShadowImage.Height,
-        OffsetX,
+        Entry->LabelOffset,
+        This->Height - Label->Height,
+        OffsetX + LeftShadowSize,
         OffsetY,
-        Width,
+        LabelWidth,
         Height
         );
     }
 
-    GuiDrawChildImage (
-      &mBootPickerLabelRightShadowImage,
-      Opacity,
-      DrawContext,
-      BaseX,
-      BaseY,
-      This->Width - mBootPickerLabelRightShadowImage.Width,
-      This->Height - mBootPickerLabelRightShadowImage.Height,
-      OffsetX,
-      OffsetY,
-      Width,
-      Height
-      );
+    //
+    // Draw non-shaded part of second label.
+    //
+    LabelWidth = Width - MIN (Width, RightShadowSize2);
+    if (LabelWidth > 0) {
+      GuiDrawChildImage (
+        Label,
+        Opacity,
+        DrawContext,
+        BaseX,
+        BaseY,
+        (INT64) Entry->LabelOffset + Entry->Label.Width + BOOT_LABEL_WRAPAROUND_PADDING * DrawContext->Scale,
+        This->Height - Label->Height,
+        OffsetX,
+        OffsetY,
+        LabelWidth,
+        Height
+        );
+    }
   }
+
   //
   // There should be no children.
   //
@@ -1981,8 +2008,6 @@ BootPickerViewInitialize (
     PickerAnim2.Animate = InternalBootPickerAnimateTimeout;
     InsertHeadList (&DrawContext->Animations, &PickerAnim2.Link);
   }
-
-  InternalInitialiseLabelShadows (DrawContext, GuiContext);
 
   /*
   InitBpAnimImageList(GuiInterpolTypeLinear, 25, 25);

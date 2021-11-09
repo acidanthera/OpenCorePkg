@@ -4,6 +4,7 @@ OpenCore Changelog
 - Fixed stack canary support when compiling with GCC
 - Added automatic scaling factor detection
 - Explicitly restricted `ResizeAppleGpuBars` to 0 and -1
+- Fixed OpenCanopy long labels fade-out over graphics background
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation
