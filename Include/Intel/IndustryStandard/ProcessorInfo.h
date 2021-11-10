@@ -205,6 +205,7 @@ enum {
 #define CPU_MODEL_COMETLAKE_U    0xA6
 #define CPU_MODEL_ROCKETLAKE_S   0xA7 /* desktop RocketLake */
 #define CPU_MODEL_TIGERLAKE_U    0x8C
+#define CPU_MODEL_ALDERLAKE_S    0x97
 
 #define AMD_CPU_FAMILY          0xF
 #define AMD_CPU_EXT_FAMILY_15H  0x6
