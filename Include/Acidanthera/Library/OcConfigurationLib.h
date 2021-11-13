@@ -352,7 +352,8 @@
   _(BOOLEAN                     , ApplePanic                  ,     , FALSE        , ()) \
   _(BOOLEAN                     , DisableWatchDog             ,     , FALSE        , ()) \
   _(BOOLEAN                     , SerialInit                  ,     , FALSE        , ()) \
-  _(BOOLEAN                     , SysReport                   ,     , FALSE        , ())
+  _(BOOLEAN                     , SysReport                   ,     , FALSE        , ()) \
+  _(OC_STRING                   , LogModule                   ,     , OC_STRING_CONSTR ("*", _, __) , OC_DESTR (OC_STRING))
   OC_DECLARE (OC_MISC_DEBUG)
 
 #define OCS_EXPOSE_BOOT_PATH   1U
