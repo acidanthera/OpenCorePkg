@@ -3,9 +3,14 @@
  * for Alder Lake CPUs and possibly others with CPU objects
  * declared as Device instead of Processor.
  *
- * Note, just like Rocket Lake CPUs, Alder Lake CPUs require
+ * Note 1: Just like Rocket Lake CPUs, Alder Lake CPUs require
  * custom CPU profile via CPUFriend.
  * REF: https://github.com/dortania/bugtracker/issues/190
+ *
+ * Note 2: PBlockAddress (0x00000510 here) can be corrected
+ * to match MADT and may vary across the boards and vendors.
+ * This field is ignored by macOS and read from MADT instead,
+ * so it is purely cosemtic.
  */
 DefinitionBlock ("", "SSDT", 2, "ACDT", "CpuPlugA", 0x00003000)
 {
