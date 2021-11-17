@@ -8,6 +8,7 @@ OpenCore Changelog
 - Fixed `ProvideConsoleGop` not disabling blit-only modes (e.g. on Z690)
 - Fixed Alder Lake SMBIOS CPU model information
 - Added XCPM CPU power management ACPI table for Intel Alder Lake
+- Updated draw order to avoid graphics tearing in OpenCanopy
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation
