@@ -290,6 +290,19 @@ OcCpuCorrectFlexRatio (
   );
 
 /**
+  Enable VMX in FeatureControl MSR if supported and not already locked by BIOS.
+  Required to use virtualization in Windows on some Mac hardware.
+
+  REF: https://github.com/acidanthera/bugtracker/issues/1870
+  REF: https://www.thomas-krenn.com/en/wiki/Activating_the_Intel_VT_Virtualization_Feature (via rEFInd)
+  REF: 'Intel 64 and IA-32 Architectures Software Developer's Manual Volume 3', p.1296 etc.
+**/
+EFI_STATUS
+OcCpuEnableVmx (
+  VOID
+  );
+
+/**
   Synchronise TSC on all cores (needed on server chipsets and some laptops).
   This does not fully replace VoodooTscSync or TSCAdjustReset due to
   the need to sync on S3 as well and may also work far less reliably

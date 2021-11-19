@@ -7624,6 +7624,16 @@ with the boot menu.
   \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
 
   \item
+  \texttt{EnableVmx}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable Intel virtual machine extensions.
+
+  \emph{Note}: Required to allow virtualization in Windows on some Mac hardware. VMX
+  is enabled or disabled and locked by BIOS before OpenCore starts on most
+  firmware. Use BIOS to enable virtualization where possible.
+
+  \item
   \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

@@ -13,6 +13,7 @@ OpenCore Changelog
 - Added `ReconnectGraphicsOnConnect` option for enabling alternative UEFI graphics drivers
 - Added BiosVideo.efi driver to use with `ReconnectGraphicsOnConnect`
 - Changed `FadtEnableReset` to avoid unreliable keyboard controller reset
+- Added `EnableVmx` quirk to allow virtualization in other OS on some Macs
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation

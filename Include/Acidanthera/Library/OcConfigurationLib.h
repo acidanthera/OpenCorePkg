@@ -691,6 +691,7 @@ typedef enum {
   _(BOOLEAN                     , ActivateHpetSupport         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSecurityPolicy       ,     , FALSE  , ()) \
   _(BOOLEAN                     , EnableVectorAcceleration    ,     , FALSE  , ()) \
+  _(BOOLEAN                     , EnableVmx                   ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForgeUefiSupport            ,     , FALSE  , ()) \
   _(BOOLEAN                     , IgnoreInvalidFlexRatio      ,     , FALSE  , ()) \
   _(INT8                        , ResizeGpuBars               ,     , -1     , ()) \
