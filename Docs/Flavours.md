@@ -127,7 +127,7 @@ Create an Issue or Pull Request to request additional tool icons. If doing so pl
 It is recommended to provide this icon.
 
  - **Tool** - Any tool entry
-   - If provided, is used as fallback for non-OS entries in OC; if not provided falls back again to **HardDrive** (which is required)
+   - If provided, is used as fallback for non-OS entries in OpenCore; if not provided falls back again to **HardDrive** (which is required)
 
 ### Shell Tools
 
@@ -170,7 +170,7 @@ Certain well-known bootloaders have also been assigned a flavour:
 
  - **Boatloader** - Generic bootloader icon (`Bootloader.icns`)
  - **Grub:Bootloader** - Icon for the GRUB2 bootloader (`Grub.icns`)
- - **OpenCore:Bootloader** - OpenCore intentionally does not offer to start instances of itself which have had the OC binary signature applied (i.e. standard release versions), however a) it will show non-signed versions and b) ofc we have to have our own flavour (`OpenCore.icns`)
+ - **OpenCore:Bootloader** - OpenCore intentionally does not offer to start instances of itself which have had the OC binary signature applied (i.e. standard release versions), however a) it will show non-signed versions and b) we need to have our own flavour (`OpenCore.icns`)
 
 ---
 
@@ -227,4 +227,3 @@ These icons are not directly related to boot entry flavours, but they are includ
  - **ShutDown** - additional button: shut down
 
 In addition, **Background** (`Background.icns`) is used as the background image for the OpenCanopy boot picker if provided.
-
