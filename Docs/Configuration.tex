@@ -3828,7 +3828,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note 2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
+  \emph{Note 2}: OpenCore uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
   sets \texttt{0x7F}. To explain the choice:
   \begin{itemize}
   \tightlist
@@ -3979,8 +3979,8 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x01} --- Expose the printable booter path as an UEFI variable.
-    \item \texttt{0x02} --- Expose the OpenCore version as an UEFI variable.
+    \item \texttt{0x01} --- Expose the printable booter path as a UEFI variable.
+    \item \texttt{0x02} --- Expose the OpenCore version as a UEFI variable.
     \item \texttt{0x04} --- Expose the OpenCore version in the OpenCore picker menu title.
     \item \texttt{0x08} --- Expose OEM information as a set of UEFI variables.
   \end{itemize}
@@ -6347,7 +6347,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
-    
+
 	  \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
 	  In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
     \texttt{/loader/entries/*.conf} files do not specify a required \texttt{root=...} kernel
@@ -6400,7 +6400,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \subsubsection{Additional information}
 
-OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the 
+OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the
 \href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification} or the closely related
 \href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}. The
 former is specific to systemd-boot and is used by Arch Linux, the latter applies to most Fedora-related distros
@@ -6650,27 +6650,27 @@ with the boot menu.
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
-  \textbf{Description}: Determine whether OC builtin or OEM Apple Event protocol is used.
+  \textbf{Description}: Determine whether the OpenCore builtin or the OEM Apple Event protocol is used.
 
-  This option determines whether Apple's OEM Apple Event protocol is used (where available), or
+  This option determines whether the OEM Apple Event protocol is used (where available), or
   whether OpenCore's reversed engineered and updated re-implementation is used. In general
   OpenCore's re-implementation should be preferred, since it contains updates such as noticeably
   improved fine mouse cursor movement and configurable key repeat delays.
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Auto} --- Use OEM Apple Event implementation if available, connected and
-  recent enough to be used, otherwise use OC reimplementation.
-  On non-Apple hardware this will use the OpenCore builtin implementation.
-  On some Macs (e.g. classic Mac Pro) this will find the Apple implementation. On both older and
-  newer Macs than this, this option will always or often use the OC implementation. On older Macs
-  this is because the implementation available is too old to be used, on newer Macs it is
-  because of optimisations added by Apple which do not connect the Apple Event protocol
+  \item \texttt{Auto} --- Use the OEM Apple Event implementation if available, connected and
+  recent enough to be used, otherwise use the OpenCore re-implementation.
+  On non-Apple hardware, this will use the OpenCore builtin implementation.
+  On some Macs such as Classic Mac Pros, this will prefer the Apple implementation but on both older and
+  newer Mac models than these, this option will typically use the OpenCore re-implementation instead.
+  On older Macs, this is because the implementation available is too old to be used while on newer Macs,
+  it is because of optimisations added by Apple which do not connect the Apple Event protocol
   except when needed -- e.g. except when the Apple boot picker is explicitly started.
-  Due to its somewhat unpredicatable results, this option is not normally recommended.
+  Due to its somewhat unpredicatable results, this option is not typically recommended.
   \item \texttt{Builtin} ---  Always use OpenCore's updated re-implementation of the Apple Event protocol.
   Use of this setting is recommended even on Apple hardware, due to
-  improvements (better fine mouse control, configurable key delays) made in the OC re-implementation
+  improvements (better fine mouse control, configurable key delays) made in the OpenCore re-implementation
   of the protocol.
   \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. On all Apple hardware
   where a recent enough Apple OEM version of the protocol is available -- whether or not connected automatically
@@ -6683,7 +6683,8 @@ with the boot menu.
   \texttt{CustomDelays}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable custom key repeat delays when using the OpenCore implementation of the Apple Event protocol.
+  \textbf{Description}: Enable custom key repeat delays when using the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   \begin{itemize}
@@ -6696,8 +6697,8 @@ with the boot menu.
   \texttt{KeyInitialDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{50} (500ms before first key repeat)\\
-  \textbf{Description}: Configures the initial delay before keyboard key repeats in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
+  \textbf{Description}: Configures the initial delay before keyboard key repeats in the
+  OpenCore re-implementation of the Apple Event protocol, in units of 10ms.
 
   The Apple OEM default value is \texttt{50} (500ms).
 
@@ -6720,8 +6721,8 @@ with the boot menu.
   \texttt{KeySubsequentDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{5} (50ms between subsequent key repeats)\\
-  \textbf{Description}: Configures the gap between keyboard key repeats in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
+  \textbf{Description}: Configures the gap between keyboard key repeats in the OpenCore re-implementation
+  of the Apple Event protocol, in units of 10ms.
 
   The Apple OEM default value is \texttt{5} (50ms).
   \texttt{0} is an invalid value for this option (will issue a debug log warning and use \texttt{1} instead).
@@ -6753,7 +6754,7 @@ with the boot menu.
   \begin{itemize}
     \tightlist
     \item Setting \texttt{KeyInitialDelay} to \texttt{0} cancels the Apple Event initial repeat
-    delay (when using the OC builtin Apple Event implementation with \texttt{CustomDelays} enabled),
+    delay (when using the OpenCore builtin Apple Event implementation with \texttt{CustomDelays} enabled),
     therefore the only long delay you will see is the the non-configurable and non-avoidable initial
     long delay introduced by the BIOS key support on these machines.
     \item Key-smoothing parameter \texttt{KeyForgetThreshold}
@@ -6773,7 +6774,7 @@ with the boot menu.
   Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
   on the basic console input stream.
 
-  With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
+  With the default setting of \texttt{false}, OpenCore's builtin implementation of AppleEvent replicates this behaviour.
 
   On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
   which use non-Apple key input methods.
@@ -6793,8 +6794,8 @@ with the boot menu.
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed divisor in OpenCore implementation
-  of Apple Event protocol.
+  \textbf{Description}: Configure pointer speed divisor in the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
@@ -6808,8 +6809,8 @@ with the boot menu.
   \texttt{PointerSpeedMul}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed multiplier in OpenCore implementation
-  of Apple Event protocol.
+  \textbf{Description}: Configure pointer speed multiplier in the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
@@ -6964,7 +6965,7 @@ with the boot menu.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. Whether this value is used is implementation defined.
-  
+
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6982,7 +6983,7 @@ with the boot menu.
   \texttt{Arguments}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Some OC plugins accept optional additional arguments
+  \textbf{Description}: Some OpenCore plugins accept optional additional arguments
   which may be specified as a string here.
 
 \end{enumerate}
