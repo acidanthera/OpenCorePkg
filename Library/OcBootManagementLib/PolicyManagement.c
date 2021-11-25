@@ -121,6 +121,13 @@ OcGetDevicePolicyType (
             *External = TRUE;
           }
           return OC_SCAN_ALLOW_DEVICE_SDCARD;
+        case MSG_DEVICE_LOGICAL_UNIT_DP:
+          //
+          // Each device may have multiple units.
+          // E.g. PciRoot(0x0)/Pci(0x1B,0x4)/Pci(0x0,0x0)/Unit(0x1)/HD(...)
+          //
+          DevicePathWalker = NextDevicePathNode (DevicePathWalker);
+          continue;
       }
 
       //
