@@ -823,7 +823,7 @@ OcLoadUefiSupport (
 
   OcReinstallProtocols (Config);
 
-  OcImageLoaderInit ();
+  OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices);
 
   OcLoadAppleSecureBoot (Config);
 

@@ -1741,7 +1741,7 @@ OcRegisterBootstrapBootOption (
 **/
 VOID
 OcImageLoaderInit (
-  VOID
+  IN     CONST BOOLEAN ProtectUefiServices
   );
 
 /**

@@ -14,6 +14,7 @@ OpenCore Changelog
 - Added BiosVideo.efi driver to use with `ReconnectGraphicsOnConnect`
 - Changed `FadtEnableReset` to avoid unreliable keyboard controller reset
 - Added `EnableVmx` quirk to allow virtualization in other OS on some Macs
+- Upgraded `ProtectUefiServices` to prevent GRUB shim overwriting service pointers when chainloading with Secure Boot enabled
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation

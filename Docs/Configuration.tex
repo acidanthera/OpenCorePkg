@@ -1651,8 +1651,14 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also obstruct other quirks depending on the scope of such.
 
-  \emph{Note}: On VMware, the need for this quirk may be determined by the appearance of the
+  GRUB shim makes similar on-the-fly changes to various UEFI image services,
+  which are also protected against by this quirk.
+
+  \emph{Note 1}: On VMware, the need for this quirk may be determined by the appearance of the
   ``Your Mac OS guest might run unreliably with more than one virtual core.'' message.
+
+  \emph{Note 2}: This quirk is needed for correct operation if OpenCore is chainloaded from GRUB
+  with BIOS Secure Boot enabled.
 
 \item
   \texttt{ProvideCustomSlide}\\
