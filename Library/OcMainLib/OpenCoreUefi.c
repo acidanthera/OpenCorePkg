@@ -905,6 +905,13 @@ OcLoadUefiSupport (
       // DriversToConnect is not freed as it is owned by OcRegisterDriversToHighestPriority.
       //
     }
+
+    if (Config->Uefi.Output.ReconnectGraphicsDrivers) {
+      DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers...\n"));
+      OcDisconnectGraphicsDrivers ();
+      DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers done...\n"));
+    }
+
     OcConnectDrivers ();
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {

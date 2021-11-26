@@ -7339,6 +7339,19 @@ with the boot menu.
   console handle, as may be the case on the \texttt{MacPro5,1} when using modern GPUs.
 
 \item
+  \texttt{ReconnectGraphicsDrivers}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect all graphics drivers during driver connection.
+
+  On certain firmware, it may be desireable to use an alternative graphics driver
+  providing better screen resolution options on legacy machines, or a driver supporting
+  \texttt{ForceResolution}. This option attempts to disconnect all currently connected
+  graphics drivers before connecting newly loaded drivers.
+
+  \emph{Note}: This option requires \texttt{ConnectDrivers} to be enabled.
+
+\item
   \texttt{ReconnectOnResChange}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
