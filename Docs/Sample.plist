@@ -1500,7 +1500,7 @@
 			<false/>
 			<key>ProvideConsoleGop</key>
 			<true/>
-			<key>ReconnectGraphicsDrivers</key>
+			<key>ReconnectGraphicsOnConnect</key>
 			<false/>
 			<key>ReconnectOnResChange</key>
 			<false/>

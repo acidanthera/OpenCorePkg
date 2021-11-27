@@ -655,7 +655,7 @@ typedef enum {
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
   _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ReconnectGraphicsDrivers    ,     , FALSE  , ())
+  _(BOOLEAN                     , ReconnectGraphicsOnConnect  ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///

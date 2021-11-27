@@ -906,7 +906,7 @@ OcLoadUefiSupport (
       //
     }
 
-    if (Config->Uefi.Output.ReconnectGraphicsDrivers) {
+    if (Config->Uefi.Output.ReconnectGraphicsOnConnect) {
       DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers...\n"));
       OcDisconnectGraphicsDrivers ();
       DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers done...\n"));
