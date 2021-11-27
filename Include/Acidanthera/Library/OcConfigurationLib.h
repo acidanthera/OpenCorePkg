@@ -654,7 +654,8 @@ typedef enum {
   _(INT8                        , UIScale                     ,     , -1     , ()) \
   _(BOOLEAN                     , UgaPassThrough              ,     , FALSE  , ()) \
   _(BOOLEAN                     , DirectGopRendering          ,     , FALSE  , ()) \
-  _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ())
+  _(BOOLEAN                     , ForceResolution             ,     , FALSE  , ()) \
+  _(BOOLEAN                     , ReconnectGraphicsOnConnect  ,     , FALSE  , ())
   OC_DECLARE (OC_UEFI_OUTPUT)
 
 ///

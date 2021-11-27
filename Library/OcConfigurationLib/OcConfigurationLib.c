@@ -774,20 +774,21 @@ mUefiInputSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiOutputSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
-  OC_SCHEMA_STRING_IN  ("ConsoleMode",            OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
-  OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",     OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
-  OC_SCHEMA_BOOLEAN_IN ("ForceResolution",        OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
-  OC_SCHEMA_STRING_IN  ("GopPassThrough",         OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
-  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
-  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",   OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
-  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
-  OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
-  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
-  OC_SCHEMA_STRING_IN  ("TextRenderer",           OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
-  OC_SCHEMA_INTEGER_IN ("UIScale",                OC_GLOBAL_CONFIG, Uefi.Output.UIScale),
-  OC_SCHEMA_BOOLEAN_IN ("UgaPassThrough",         OC_GLOBAL_CONFIG, Uefi.Output.UgaPassThrough),
+  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",   OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
+  OC_SCHEMA_STRING_IN  ("ConsoleMode",               OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
+  OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",        OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
+  OC_SCHEMA_BOOLEAN_IN ("ForceResolution",           OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
+  OC_SCHEMA_STRING_IN  ("GopPassThrough",            OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
+  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",      OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",         OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
+  OC_SCHEMA_BOOLEAN_IN ("ReconnectGraphicsOnConnect",OC_GLOBAL_CONFIG, Uefi.Output.ReconnectGraphicsOnConnect),
+  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",      OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
+  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",       OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
+  OC_SCHEMA_STRING_IN  ("Resolution",                OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
+  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",       OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
+  OC_SCHEMA_STRING_IN  ("TextRenderer",              OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
+  OC_SCHEMA_INTEGER_IN ("UIScale",                   OC_GLOBAL_CONFIG, Uefi.Output.UIScale),
+  OC_SCHEMA_BOOLEAN_IN ("UgaPassThrough",            OC_GLOBAL_CONFIG, Uefi.Output.UgaPassThrough),
 };
 
 STATIC

@@ -12,7 +12,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 #include <Uefi.h>
 
+#include <IndustryStandard/Pci.h>
+
 #include <Protocol/BlockIo.h>
+#include <Protocol/PciIo.h>
 #include <Protocol/SimpleFileSystem.h>
 
 #include <Library/DebugLib.h>
@@ -125,4 +128,58 @@ OcUnblockUnmountedPartitions (
   }
 
   FreePool (Handles);
+}
+
+VOID
+OcDisconnectGraphicsDrivers (
+  VOID
+  )
+{
+  EFI_STATUS              Status;
+  UINT32                  Index;
+
+  UINTN                   HandleCount;
+  EFI_HANDLE              *HandleBuffer;
+  EFI_PCI_IO_PROTOCOL     *PciIo;
+  PCI_TYPE00              Pci;
+
+  //
+  // Locate all currently connected PCI I/O protocols and disconnect graphics drivers.
+  //
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiPciIoProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCDC: Found %u handles with PCI I/O\n", (UINT32) HandleCount));
+    for (Index = 0; Index < HandleCount; Index++) {
+      Status = gBS->HandleProtocol (
+        HandleBuffer[Index],
+        &gEfiPciIoProtocolGuid,
+        (VOID **) &PciIo
+        );
+      if (EFI_ERROR (Status)) {
+        continue;
+      }
+
+      Status = PciIo->Pci.Read (
+        PciIo,
+        EfiPciIoWidthUint32,
+        0,
+        sizeof (Pci) / sizeof (UINT32),
+        &Pci
+        );
+      if (!EFI_ERROR (Status)) {
+        if (IS_PCI_VGA (&Pci) == TRUE) {
+          Status = gBS->DisconnectController (HandleBuffer[Index], NULL, NULL);
+          DEBUG ((DEBUG_INFO, "OCDC: Disconnected graphics driver handle %u - %p result - %r\n", Index, HandleBuffer[Index], Status));
+        }
+      }
+    }
+
+    FreePool (HandleBuffer);
+  }
 }
