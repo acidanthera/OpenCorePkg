@@ -9,7 +9,7 @@ OpenCore Changelog
 - Fixed Alder Lake SMBIOS CPU model information
 - Added XCPM CPU power management ACPI table for Intel Alder Lake
 - Updated draw order to avoid graphics tearing in OpenCanopy
-- Fixed handling device paths with logical units in ScanPolicy
+- Fixed handling PCI device paths with logical units in ScanPolicy
 - Added `ReconnectGraphicsOnConnect` option for enabling alternative UEFI graphics drivers
 
 #### v0.7.5
