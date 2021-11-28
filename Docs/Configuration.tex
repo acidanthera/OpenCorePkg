@@ -5983,6 +5983,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
 & Open source BTRFS file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
   from a file system which is now quite commonly used with Linux. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BiosVideo}}\textbf{*}
+& CSM video driver implementing graphics output protocol based on VESA and legacy
+  BIOS interfaces. Used for UEFI firmware with fragile GOP support (e.g. low resolution).
+  Requires \texttt{ReconnectGraphicsOnConnect}. Included in OpenDuet out of the box. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
@@ -7344,10 +7348,11 @@ with the boot menu.
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Reconnect all graphics drivers during driver connection.
 
-  On certain firmware, it may be desireable to use an alternative graphics driver
-  providing better screen resolution options on legacy machines, or a driver supporting
-  \texttt{ForceResolution}. This option attempts to disconnect all currently connected
-  graphics drivers before connecting newly loaded drivers.
+  On certain firmware, it may be desireable to use an alternative graphics driver,
+  for example BiosVideo.efi, providing better screen resolution options on legacy
+  machines, or a driver supporting \texttt{ForceResolution}. This option attempts
+  to disconnect all currently connected graphics drivers before connecting newly
+  loaded drivers.
 
   \emph{Note}: This option requires \texttt{ConnectDrivers} to be enabled.
 

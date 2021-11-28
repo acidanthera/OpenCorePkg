@@ -11,6 +11,7 @@ OpenCore Changelog
 - Updated draw order to avoid graphics tearing in OpenCanopy
 - Fixed handling PCI device paths with logical units in ScanPolicy
 - Added `ReconnectGraphicsOnConnect` option for enabling alternative UEFI graphics drivers
+- Added BiosVideo.efi driver to use with `ReconnectGraphicsOnConnect`
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation

@@ -151,19 +151,20 @@ package() {
     cp "${arch}/Shell.efi" "${dstdir}/${arch}/EFI/OC/Tools/OpenShell.efi" || exit 1
 
     efiDrivers=(
+      "AudioDxe.efi"
+      "BiosVideo.efi"
+      "CrScreenshotDxe.efi"
       "HiiDatabase.efi"
       "NvmExpressDxe.efi"
-      "AudioDxe.efi"
-      "CrScreenshotDxe.efi"
       "OpenCanopy.efi"
+      "OpenHfsPlus.efi"
       "OpenLinuxBoot.efi"
       "OpenPartitionDxe.efi"
       "OpenRuntime.efi"
       "OpenUsbKbDxe.efi"
-      "Ps2MouseDxe.efi"
       "Ps2KeyboardDxe.efi"
+      "Ps2MouseDxe.efi"
       "UsbMouseDxe.efi"
-      "OpenHfsPlus.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do
