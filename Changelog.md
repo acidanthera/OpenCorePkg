@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed handling PCI device paths with logical units in ScanPolicy
 - Added `ReconnectGraphicsOnConnect` option for enabling alternative UEFI graphics drivers
 - Added BiosVideo.efi driver to use with `ReconnectGraphicsOnConnect`
+- Changed `FadtEnableReset` to avoid unreliable keyboard controller reset
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation
