@@ -54,13 +54,22 @@ Note, that it does not seem to work on VMware Fusion 11 and results in freezes:
 monitor.debugOnStartGuest32 = "TRUE"
 ```
 
-To force hardware breakpoints (instead of software INT 3 breakpoints) add the following line:
+To force hardware breakpoints use the following line:
 ```
 debugStub.hideBreakpoints = "TRUE"
 ```
 
-To stall during POST for 3 seconds add the following line. Pressing any key will boot into firmware
-settings:
+Alternatively to force software INT 3 breakpoints use the following line:
+```
+debugStub.hideBreakpoints = "FALSE"
+```
+
+Depending on the version of VMware Fusion and the host macOS version, only one or other of the
+above may work to successfully single step and hit breakpoints, so you may need to try both.
+
+When setting up a virtual machine for debugging, it is useful to be able to enter UEFI firmware
+settings easily. To stall during POST for 3 seconds add the following line. Pressing any key
+during this pause will boot into firmware settings:
 ```
 bios.bootDelay = "3000"
 ```
