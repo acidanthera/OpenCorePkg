@@ -22,7 +22,7 @@
  */
 DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
 {
-    External (_SB_.PCI0.LPCB, DeviceObj)
+    External (\_SB.PCI0.LPCB.ECDV, DeviceObj)
 
     /*
      * Uncomment replacing EC0 with your own value in case your
@@ -35,9 +35,10 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
      */
 
     /**
-    External (_SB_.PCI0.LPCB.EC0, DeviceObj)
+    External (\_SB.PCI0.LPCB.ECDV, DeviceObj)
 
-    Scope (\_SB.PCI0.LPCB.EC0)
+    Scope (\_SB.PCI0.LPCB.ECDV
+)
     {
         Method (_STA, 0, NotSerialized)  // _STA: Status
         {
@@ -94,7 +95,7 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
         }
     }
 
-    Scope (\_SB.PCI0.LPCB)
+    Scope (\_SB.PCI0.LPCB.ECDV)
     {
         Device (EC)
         {
