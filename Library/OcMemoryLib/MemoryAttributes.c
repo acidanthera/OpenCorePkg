@@ -438,7 +438,7 @@ OcRebuildAttributes (
   UINT32                             DescriptorVersion;
 
   MemoryAttributesTable = OcGetMemoryAttributes (&MemoryAttributesEntry);
-  if (MemoryAttributesTable == NULL) {
+  if (MemoryAttributesTable == NULL || MemoryAttributesTable->NumberOfEntries == 0) {
     return EFI_UNSUPPORTED;
   }
 
