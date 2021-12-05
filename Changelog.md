@@ -16,6 +16,7 @@ OpenCore Changelog
 - Added `EnableVmx` quirk to allow virtualization in other OS on some Macs
 - Upgraded `ProtectUefiServices` to prevent GRUB shim overwriting service pointers when chainloading with Secure Boot enabled
 - Removed deprecated SSDT-PNLFCFL
+- Fixed handling of zero-sized Memory Attributes Table
 
 #### v0.7.5
 - Revised OpenLinuxBoot documentation
