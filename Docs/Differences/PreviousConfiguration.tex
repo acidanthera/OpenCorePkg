@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.5)
+       Reference Manual (0.7.6)
 
        \vspace{0.2in}
 
@@ -1651,8 +1651,14 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   such as \texttt{DevirtualiseMmio}, \texttt{ProtectMemoryRegions}, or \texttt{RebuildAppleMemoryMap},
   and may also obstruct other quirks depending on the scope of such.
 
-  \emph{Note}: On VMware, the need for this quirk may be determined by the appearance of the
+  GRUB shim makes similar on-the-fly changes to various UEFI image services,
+  which are also protected against by this quirk.
+
+  \emph{Note 1}: On VMware, the need for this quirk may be determined by the appearance of the
   ``Your Mac OS guest might run unreliably with more than one virtual core.'' message.
+
+  \emph{Note 2}: This quirk is needed for correct operation if OpenCore is chainloaded from GRUB
+  with BIOS Secure Boot enabled.
 
 \item
   \texttt{ProvideCustomSlide}\\
@@ -1733,10 +1739,12 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
 
   This quirk reduces GPU PCI BAR sizes for Apple macOS up to the specified
   value or lower if it is unsupported. The specified value follows PCI Resizable
-  BAR spec. Use \texttt{0} for 1 MB, \texttt{1} for 2 MB, \texttt{2}
-  for 4 MB, and so on up to \texttt{19} for 512 GB. Apple macOS supports
-  1 GB maximum, which is \texttt{10}. Use \texttt{-1} to disable this quirk.
+  BAR spec. While Apple macOS supports a theoretical 1 GB maximum, in practice all
+  non-default values may not work correctly. For this reason the only supported
+  value for this quirk is the minimal supported BAR size, i.e. \texttt{0}. Use
+  \texttt{-1} to disable this quirk.
 
+  For development purposes one may take risks and try other values.
   Consider a GPU with 2 BARs:
   \begin{itemize}
     \tightlist
@@ -1753,12 +1761,8 @@ To view their current state, use the \texttt{pmset -g} command in Terminal.
   \emph{Example 3}: Setting \texttt{ResizeAppleGpuBars} to 16 GB will make no
   changes.
 
-  \emph{Note 1}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
+  \emph{Note}: See \texttt{ResizeGpuBars} quirk for general GPU PCI BAR
   size configuration and more details about the technology.
-
-  \emph{Note 2}: Certain GPU drivers do not support non-standard BAR sizes,
-  causing sleep wake issues, for this reason for macOS it is recommended
-  to use minimal supported BAR sizes, i.e. specify \texttt{0} (1 MB).
 
 \item
   \texttt{SetupVirtualMap}\\
@@ -3830,7 +3834,7 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note 2}: OC uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
+  \emph{Note 2}: OpenCore uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
   sets \texttt{0x7F}. To explain the choice:
   \begin{itemize}
   \tightlist
@@ -3981,8 +3985,8 @@ diskutil mount -mountpoint /var/tmp/OSPersonalizationTemp $disk
 
   \begin{itemize}
   \tightlist
-    \item \texttt{0x01} --- Expose the printable booter path as an UEFI variable.
-    \item \texttt{0x02} --- Expose the OpenCore version as an UEFI variable.
+    \item \texttt{0x01} --- Expose the printable booter path as a UEFI variable.
+    \item \texttt{0x02} --- Expose the OpenCore version as a UEFI variable.
     \item \texttt{0x04} --- Expose the OpenCore version in the OpenCore picker menu title.
     \item \texttt{0x08} --- Expose OEM information as a set of UEFI variables.
   \end{itemize}
@@ -5985,6 +5989,10 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
 & Open source BTRFS file system driver, required for booting with \hyperref[uefilinux]{OpenLinuxBoot}
   from a file system which is now quite commonly used with Linux. \\
+\href{https://github.com/acidanthera/OpenCorePkg}{\texttt{BiosVideo}}\textbf{*}
+& CSM video driver implementing graphics output protocol based on VESA and legacy
+  BIOS interfaces. Used for UEFI firmware with fragile GOP support (e.g. low resolution).
+  Requires \texttt{ReconnectGraphicsOnConnect}. Included in OpenDuet out of the box. \\
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{CrScreenshotDxe}}\textbf{*}
 & Screenshot making driver saving images to the root of OpenCore partition (ESP) or
   any available writeable filesystem upon pressing \texttt{F10}.
@@ -6349,7 +6357,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it. To specify this option for specific
     distros only, use \texttt{partuuidopts:\{partuuid\}+=ro} instead of this flag.
-    
+
 	  \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
 	  In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
     \texttt{/loader/entries/*.conf} files do not specify a required \texttt{root=...} kernel
@@ -6402,7 +6410,7 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \subsubsection{Additional information}
 
-OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the 
+OpenLinuxBoot can detect the \texttt{loader/entries/*.conf} files created according to the
 \href{https://systemd.io/BOOT_LOADER_SPECIFICATION/}{Boot Loader Specification} or the closely related
 \href{https://fedoraproject.org/wiki/Changes/BootLoaderSpecByDefault}{systemd BootLoaderSpecByDefault}. The
 former is specific to systemd-boot and is used by Arch Linux, the latter applies to most Fedora-related distros
@@ -6652,27 +6660,27 @@ with the boot menu.
   \texttt{AppleEvent}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
-  \textbf{Description}: Determine whether OC builtin or OEM Apple Event protocol is used.
+  \textbf{Description}: Determine whether the OpenCore builtin or the OEM Apple Event protocol is used.
 
-  This option determines whether Apple's OEM Apple Event protocol is used (where available), or
+  This option determines whether the OEM Apple Event protocol is used (where available), or
   whether OpenCore's reversed engineered and updated re-implementation is used. In general
   OpenCore's re-implementation should be preferred, since it contains updates such as noticeably
   improved fine mouse cursor movement and configurable key repeat delays.
 
   \begin{itemize}
   \tightlist
-  \item \texttt{Auto} --- Use OEM Apple Event implementation if available, connected and
-  recent enough to be used, otherwise use OC reimplementation.
-  On non-Apple hardware this will use the OpenCore builtin implementation.
-  On some Macs (e.g. classic Mac Pro) this will find the Apple implementation. On both older and
-  newer Macs than this, this option will always or often use the OC implementation. On older Macs
-  this is because the implementation available is too old to be used, on newer Macs it is
-  because of optimisations added by Apple which do not connect the Apple Event protocol
+  \item \texttt{Auto} --- Use the OEM Apple Event implementation if available, connected and
+  recent enough to be used, otherwise use the OpenCore re-implementation.
+  On non-Apple hardware, this will use the OpenCore builtin implementation.
+  On some Macs such as Classic Mac Pros, this will prefer the Apple implementation but on both older and
+  newer Mac models than these, this option will typically use the OpenCore re-implementation instead.
+  On older Macs, this is because the implementation available is too old to be used while on newer Macs,
+  it is because of optimisations added by Apple which do not connect the Apple Event protocol
   except when needed -- e.g. except when the Apple boot picker is explicitly started.
-  Due to its somewhat unpredicatable results, this option is not normally recommended.
+  Due to its somewhat unpredicatable results, this option is not typically recommended.
   \item \texttt{Builtin} ---  Always use OpenCore's updated re-implementation of the Apple Event protocol.
   Use of this setting is recommended even on Apple hardware, due to
-  improvements (better fine mouse control, configurable key delays) made in the OC re-implementation
+  improvements (better fine mouse control, configurable key delays) made in the OpenCore re-implementation
   of the protocol.
   \item \texttt{OEM} --- Assume Apple's protocol will be available at driver connection. On all Apple hardware
   where a recent enough Apple OEM version of the protocol is available -- whether or not connected automatically
@@ -6685,7 +6693,8 @@ with the boot menu.
   \texttt{CustomDelays}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable custom key repeat delays when using the OpenCore implementation of the Apple Event protocol.
+  \textbf{Description}: Enable custom key repeat delays when using the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   \begin{itemize}
@@ -6698,8 +6707,8 @@ with the boot menu.
   \texttt{KeyInitialDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{50} (500ms before first key repeat)\\
-  \textbf{Description}: Configures the initial delay before keyboard key repeats in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
+  \textbf{Description}: Configures the initial delay before keyboard key repeats in the
+  OpenCore re-implementation of the Apple Event protocol, in units of 10ms.
 
   The Apple OEM default value is \texttt{50} (500ms).
 
@@ -6722,8 +6731,8 @@ with the boot menu.
   \texttt{KeySubsequentDelay}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{5} (50ms between subsequent key repeats)\\
-  \textbf{Description}: Configures the gap between keyboard key repeats in OpenCore implementation
-  of Apple Event protocol, in units of 10ms.
+  \textbf{Description}: Configures the gap between keyboard key repeats in the OpenCore re-implementation
+  of the Apple Event protocol, in units of 10ms.
 
   The Apple OEM default value is \texttt{5} (50ms).
   \texttt{0} is an invalid value for this option (will issue a debug log warning and use \texttt{1} instead).
@@ -6755,7 +6764,7 @@ with the boot menu.
   \begin{itemize}
     \tightlist
     \item Setting \texttt{KeyInitialDelay} to \texttt{0} cancels the Apple Event initial repeat
-    delay (when using the OC builtin Apple Event implementation with \texttt{CustomDelays} enabled),
+    delay (when using the OpenCore builtin Apple Event implementation with \texttt{CustomDelays} enabled),
     therefore the only long delay you will see is the the non-configurable and non-avoidable initial
     long delay introduced by the BIOS key support on these machines.
     \item Key-smoothing parameter \texttt{KeyForgetThreshold}
@@ -6775,7 +6784,7 @@ with the boot menu.
   Apple’s own implementation of AppleEvent prevents keyboard input during graphics applications from appearing
   on the basic console input stream.
 
-  With the default setting of \texttt{false}, OC's builtin implementation of AppleEvent replicates this behaviour.
+  With the default setting of \texttt{false}, OpenCore's builtin implementation of AppleEvent replicates this behaviour.
 
   On non-Apple hardware this can stop keyboard input working in graphics-based applications such as Windows BitLocker
   which use non-Apple key input methods.
@@ -6795,8 +6804,8 @@ with the boot menu.
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed divisor in OpenCore implementation
-  of Apple Event protocol.
+  \textbf{Description}: Configure pointer speed divisor in the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   Configures the divisor for pointer movements. The Apple OEM default value is \texttt{1}.
@@ -6810,8 +6819,8 @@ with the boot menu.
   \texttt{PointerSpeedMul}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Configure pointer speed multiplier in OpenCore implementation
-  of Apple Event protocol.
+  \textbf{Description}: Configure pointer speed multiplier in the OpenCore re-implementation
+  of the Apple Event protocol.
   Has no effect when using the OEM Apple implementation (see \texttt{AppleEvent} setting).
 
   Configures the multiplier for pointer movements. The Apple OEM default value is \texttt{1}.
@@ -6966,7 +6975,7 @@ with the boot menu.
   \textbf{Failsafe}: Empty\\
   \textbf{Description}: Arbitrary ASCII string used to provide human readable
   reference for the entry. Whether this value is used is implementation defined.
-  
+
 \item
   \texttt{Path}\\
   \textbf{Type}: \texttt{plist\ string}\\
@@ -6984,7 +6993,7 @@ with the boot menu.
   \texttt{Arguments}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: Empty\\
-  \textbf{Description}: Some OC plugins accept optional additional arguments
+  \textbf{Description}: Some OpenCore plugins accept optional additional arguments
   which may be specified as a string here.
 
 \end{enumerate}
@@ -7340,6 +7349,20 @@ with the boot menu.
   console handle, as may be the case on the \texttt{MacPro5,1} when using modern GPUs.
 
 \item
+  \texttt{ReconnectGraphicsOnConnect}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Reconnect all graphics drivers during driver connection.
+
+  On certain firmware, it may be desireable to use an alternative graphics driver,
+  for example BiosVideo.efi, providing better screen resolution options on legacy
+  machines, or a driver supporting \texttt{ForceResolution}. This option attempts
+  to disconnect all currently connected graphics drivers before connecting newly
+  loaded drivers.
+
+  \emph{Note}: This option requires \texttt{ConnectDrivers} to be enabled.
+
+\item
   \texttt{ReconnectOnResChange}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -7365,6 +7388,26 @@ with the boot menu.
   \emph{Note}: This option only applies to the \texttt{System} renderer.
    On all known affected systems, \texttt{ConsoleMode} must be set to
    an empty string for this option to work.
+
+\item
+  \texttt{UIScale}\\
+  \textbf{Type}: \texttt{plist\ integer}, 8 bit\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: User interface scaling factor.
+
+  Corresponds to \texttt{4D1EDE05-38C7-4A6A-9CC6-4BCCA8B38C14:UIScale} variable.
+  \begin{itemize}
+    \tightlist
+    \item \texttt{1} --- 1x scaling, corresponds to normal displays.
+    \item \texttt{2} --- 2x scaling, corresponds to HiDPI displays.
+    \item \texttt{-1} --- leaves the current variable unchanged.
+    \item \texttt{0} --- automatically chooses scaling based on the current resolution.
+  \end{itemize}
+
+  \emph{Note 1}: Automatic scale factor detection works on the basis of total pixel area and may fail on small HiDPI displays,
+  in which case the value may be manually managed using the NVRAM section.
+
+  \emph{Note 2}: When switching from manually specified NVRAM variable to this preference an NVRAM reset may be needed.
 
 \item
   \texttt{UgaPassThrough}\\
@@ -7587,6 +7630,16 @@ with the boot menu.
   \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
 
   \item
+  \texttt{EnableVmx}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable Intel virtual machine extensions.
+
+  \emph{Note}: Required to allow virtualization in Windows on some Mac hardware. VMX
+  is enabled or disabled and locked by BIOS before OpenCore starts on most
+  firmware. Use BIOS to enable virtualization where possible.
+
+  \item
   \texttt{DisableSecurityPolicy}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -7613,7 +7666,7 @@ with the boot menu.
   \texttt{ForceOcWriteFlash}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enables writing to flash memory for all OpenCore system variables.
+  \textbf{Description}: Enables writing to flash memory for all OpenCore-managed NVRAM system variables.
 
   \emph{Note}: This value should be disabled on most types of firmware but is
   left configurable to account for firmware that may have issues with volatile
