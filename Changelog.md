@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.7.7
+- Fixed rare crash caused by register corruption in the entry point
+
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC
 - Added automatic scaling factor detection
