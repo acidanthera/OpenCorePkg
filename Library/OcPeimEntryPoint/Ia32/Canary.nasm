@@ -69,6 +69,7 @@ align 8
 global ASM_PFX(_ModuleEntryPoint)
 ASM_PFX(_ModuleEntryPoint):
 %if FixedPcdGet8(PcdCanaryAllowRdtscFallback)
+  push ebx            ; EBX is nonvolatile
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
   bt ecx, 30          ; check RDRAND feature flag
@@ -80,6 +81,7 @@ ASM_PFX(_ModuleEntryPoint):
 .noRdRand:
   rdtsc               ; Read time-stamp counter into EDX:EAX.
 .done:
+  pop ebx
 %else
 .again:
   rdrand edx

@@ -69,6 +69,7 @@ ASM_PFX(_ModuleEntryPoint):
   mov r8, rcx
 
 %if FixedPcdGet8(PcdCanaryAllowRdtscFallback)
+  mov r10, rbx        ; RBX is nonvolatile
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
   bt ecx, 30          ; check RDRAND feature flag
@@ -82,6 +83,7 @@ ASM_PFX(_ModuleEntryPoint):
   shld rdx, rdx, 32
   or rdx, rax
 .done:
+  mov rbx, r10
 %else
 .again:
   rdrand rdx
