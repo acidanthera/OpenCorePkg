@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Dec  6 21:04:20 2021
-%DIF ADD ../Configuration.tex        Mon Dec  6 21:08:35 2021
+%DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
+%DIF ADD ../Configuration.tex        Wed Dec  8 21:04:06 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -690,6 +690,21 @@ package and requires the
 package. The currently supported EDK II release is hosted in
 \href{https://github.com/acidanthera/audk}{acidanthera/audk}. Required patches
 for this package can be found in the \texttt{Patches} directory.
+\DIFaddbegin 
+
+\DIFadd{When updating the LaTeX documentation (e.g. }\texttt{\DIFadd{Configuration.tex}}\DIFadd{) please
+do }\textit{\DIFadd{not}} \DIFadd{rebuild the PDF files till merging to master happens. This avoids
+unnecessary merge conflicts:
+}\begin{itemize}
+\tightlist
+\item \DIFadd{External contributors using the pull-request approach should request
+  the maintainers to handle the PDF rebuild in the pull-request message.
+}\item \DIFadd{Internal contributors should rebuild the documentation at merge time
+  in the same or in a separate commit. One can ask another maintainer to
+  rebuild the documentation when lacking the necessary tools
+  in the pull-request message.
+}\end{itemize}
+\DIFaddend 
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work but are neither supported nor recommended. Contributions of clean
