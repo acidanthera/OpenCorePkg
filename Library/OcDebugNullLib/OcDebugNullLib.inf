@@ -16,7 +16,7 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcDebugLogLibNull
+  BASE_NAME       = OcDebugNullLib
   FILE_GUID       = 3D2B1682-100F-49E5-A9C3-EA3FCEA3CFA1
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
@@ -29,4 +29,4 @@
   MdePkg/MdePkg.dec
 
 [Sources]
-  OcDebugLogLib.c
+  OcDebugNullLib.c
