@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
-%DIF ADD ../Configuration.tex        Wed Dec  8 21:04:06 2021
+%DIF DEL PreviousConfiguration.tex   Thu Dec  9 14:48:46 2021
+%DIF ADD ../Configuration.tex        Thu Dec  9 14:52:47 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -690,9 +690,8 @@ package and requires the
 package. The currently supported EDK II release is hosted in
 \href{https://github.com/acidanthera/audk}{acidanthera/audk}. Required patches
 for this package can be found in the \texttt{Patches} directory.
-\DIFaddbegin 
 
-\DIFadd{When updating the LaTeX documentation (e.g. }\texttt{\DIFadd{Configuration.tex}}\DIFadd{) please
+\DIFaddbegin \DIFadd{When updating the LaTeX documentation (e.g. }\texttt{\DIFadd{Configuration.tex}}\DIFadd{) please
 do }\textit{\DIFadd{not}} \DIFadd{rebuild the PDF files till merging to master happens. This avoids
 unnecessary merge conflicts:
 }\begin{itemize}
@@ -704,9 +703,8 @@ unnecessary merge conflicts:
   rebuild the documentation when lacking the necessary tools
   in the pull-request message.
 }\end{itemize}
-\DIFaddend 
 
-The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
+\DIFaddend The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work but are neither supported nor recommended. Contributions of clean
 patches are welcome. Please do follow
 \href{https://github.com/tianocore/tianocore.github.io/wiki/Code-Style-C}{EDK II C Codestyle}.
@@ -2277,11 +2275,14 @@ blocking.
     \item Broadwell-E (\texttt{0x0406F1}) to Broadwell (\texttt{0x0306D4}):\\
     \texttt{Cpuid1Data}: \texttt{D4 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-    \item Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
+    \item \DIFaddbegin \DIFadd{Comet Lake U62 (}\texttt{\DIFadd{0x0A0660}}\DIFadd{) to Comet Lake U42 (}\texttt{\DIFadd{0x0806EC}}\DIFadd{):}\\
+    \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
+    \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
+    \item \DIFaddend Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
     \texttt{Cpuid1Data}: \texttt{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-    \item Comet Lake U62 (\texttt{0x0A0660}) to Comet Lake U42 (\texttt{0x0806EC}):\\
-    \texttt{Cpuid1Data}: \texttt{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \item \DIFdelbegin \DIFdel{Comet Lake U62 (}\DIFdelend \DIFaddbegin \DIFadd{Alder Lake (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0A0660}\DIFdelend \DIFaddbegin \DIFadd{0x090672}\DIFaddend }) to Comet Lake \DIFdelbegin \DIFdel{U42 (}\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0806EC}\DIFdelend \DIFaddbegin \DIFadd{0x0906EB}\DIFaddend }):\\
+    \texttt{Cpuid1Data}: \texttt{\DIFdelbegin \DIFdel{EC }\DIFdelend \DIFaddbegin \DIFadd{EB }\DIFaddend 06 \DIFdelbegin \DIFdel{08 }\DIFdelend \DIFaddbegin \DIFadd{09 }\DIFaddend 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
