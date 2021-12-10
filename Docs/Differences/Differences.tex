@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
-%DIF ADD ../Configuration.tex        Fri Dec 10 11:51:28 2021
+%DIF ADD ../Configuration.tex        Fri Dec 10 14:56:58 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2282,11 +2282,11 @@ blocking.
     \item \DIFaddbegin \DIFadd{Comet Lake U62 (}\texttt{\DIFadd{0x0A0660}}\DIFadd{) to Comet Lake U42 (}\texttt{\DIFadd{0x0806EC}}\DIFadd{):}\\
     \texttt{\DIFadd{Cpuid1Data}}\DIFadd{: }\texttt{\DIFadd{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}}\\
     \texttt{\DIFadd{Cpuid1Mask}}\DIFadd{: }\texttt{\DIFadd{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}}
-    \item \DIFaddend Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
-    \texttt{Cpuid1Data}: \texttt{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \item \DIFaddend Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{\DIFdelbegin \DIFdel{0x0906EB}\DIFdelend \DIFaddbegin \DIFadd{0x0A0655}\DIFaddend }):\\
+    \texttt{Cpuid1Data}: \texttt{\DIFdelbegin \DIFdel{EB }\DIFdelend \DIFaddbegin \DIFadd{55 }\DIFaddend 06 \DIFdelbegin \DIFdel{09 }\DIFdelend \DIFaddbegin \DIFadd{0A }\DIFaddend 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-    \item \DIFdelbegin \DIFdel{Comet Lake U62 (}\DIFdelend \DIFaddbegin \DIFadd{Alder Lake (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0A0660}\DIFdelend \DIFaddbegin \DIFadd{0x090672}\DIFaddend }) to Comet Lake \DIFdelbegin \DIFdel{U42 (}\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0806EC}\DIFdelend \DIFaddbegin \DIFadd{0x0906EB}\DIFaddend }):\\
-    \texttt{Cpuid1Data}: \texttt{\DIFdelbegin \DIFdel{EC }\DIFdelend \DIFaddbegin \DIFadd{EB }\DIFaddend 06 \DIFdelbegin \DIFdel{08 }\DIFdelend \DIFaddbegin \DIFadd{09 }\DIFaddend 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \item \DIFdelbegin \DIFdel{Comet Lake U62 (}\DIFdelend \DIFaddbegin \DIFadd{Alder Lake (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0A0660}\DIFdelend \DIFaddbegin \DIFadd{0x090672}\DIFaddend }) to Comet Lake \DIFdelbegin \DIFdel{U42 (}\DIFdelend \DIFaddbegin \DIFadd{(}\DIFaddend \texttt{\DIFdelbegin \DIFdel{0x0806EC}\DIFdelend \DIFaddbegin \DIFadd{0x0A0655}\DIFaddend }):\\
+    \texttt{Cpuid1Data}: \texttt{\DIFdelbegin \DIFdel{EC }\DIFdelend \DIFaddbegin \DIFadd{55 }\DIFaddend 06 \DIFdelbegin \DIFdel{08 }\DIFdelend \DIFaddbegin \DIFadd{0A }\DIFaddend 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
