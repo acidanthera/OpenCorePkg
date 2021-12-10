@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
-%DIF ADD ../Configuration.tex        Thu Dec  9 15:26:01 2021
+%DIF ADD ../Configuration.tex        Fri Dec 10 11:51:28 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2266,6 +2266,10 @@ blocking.
   \texttt{0x0306C3} (Haswell).
 
   \emph{Note 3}: For XCPM support it is recommended to use the following combinations.
+  \DIFaddbegin \DIFadd{Be warned that one is required to set the correct
+  }\href{https://github.com/dortania/bugtracker/issues/190}{\DIFadd{frequency vectors}} \DIFadd{matching
+  the installed CPU.
+}\DIFaddend 
 
   \begin{itemize}
     \tightlist
@@ -2749,14 +2753,26 @@ blocking.
   \texttt{ProvideCurrentCpuInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8 \DIFaddbegin \DIFadd{(10.14)}\DIFaddend \\
   \textbf{Description}: Provides current CPU info to the kernel.
 
-  This quirk currently provides the correct TSC and FSB values to the kernel, as well
-  as disables CPU topology validation.
+  This quirk \DIFdelbegin \DIFdel{currently }\DIFdelend \DIFaddbegin \DIFadd{works differently depending on the CPU:
+}
 
-  \emph{Note}: These patches currently target Microsoft Hyper-V and may need to be extended for
-  other purposes.
+  \begin{itemize}
+  \tightlist
+  \item \DIFadd{For Microsoft Hyper-V it }\DIFaddend provides the correct TSC and FSB values
+    to the kernel, as well as disables CPU topology validation \DIFdelbegin \DIFdel{.
+}%DIFDELCMD < 
+
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: These patches currently target Microsoft Hyper-V and may need to be extended for other purposes.}\DIFdelend \DIFaddbegin \DIFadd{(10.8+).
+  }\item \DIFadd{For Intel CPUs it adds support for asymmetrical SMP systems
+    (e.g. Intel Alder Lake) by patching core count to thread count along
+    with the supplemental required changes (10.14+).
+  }\end{itemize}
+\DIFaddend 
 
 \item
   \texttt{SetApfsTrimTimeout}\\

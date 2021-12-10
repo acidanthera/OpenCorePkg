@@ -2206,6 +2206,9 @@ blocking.
   \texttt{0x0306C3} (Haswell).
 
   \emph{Note 3}: For XCPM support it is recommended to use the following combinations.
+  Be warned that one is required to set the correct
+  \href{https://github.com/dortania/bugtracker/issues/190}{frequency vectors} matching
+  the installed CPU.
 
   \begin{itemize}
     \tightlist
@@ -2689,14 +2692,19 @@ blocking.
   \texttt{ProvideCurrentCpuInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8 (10.14)\\
   \textbf{Description}: Provides current CPU info to the kernel.
 
-  This quirk currently provides the correct TSC and FSB values to the kernel, as well
-  as disables CPU topology validation.
+  This quirk works differently depending on the CPU:
 
-  \emph{Note}: These patches currently target Microsoft Hyper-V and may need to be extended for
-  other purposes.
+  \begin{itemize}
+  \tightlist
+  \item For Microsoft Hyper-V it provides the correct TSC and FSB values
+    to the kernel, as well as disables CPU topology validation (10.8+).
+  \item For Intel CPUs it adds support for asymmetrical SMP systems
+    (e.g. Intel Alder Lake) by patching core count to thread count along
+    with the supplemental required changes (10.14+).
+  \end{itemize}
 
 \item
   \texttt{SetApfsTrimTimeout}\\

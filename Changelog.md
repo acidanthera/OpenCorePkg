@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point
+- Added `ProvideCurrentCpuInfo` support for Intel Alder Lake
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC
