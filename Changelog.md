@@ -5,6 +5,7 @@ OpenCore Changelog
 - Added `ProvideCurrentCpuInfo` support for Intel Alder Lake
 - Fixed typo in `Cpuid1Data` recommendations for Intel Rocket Lake and newer
 - Updated builtin firmware versions for SMBIOS and the rest
+- Updated underlying EDK II package to edk2-stable202111
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC
