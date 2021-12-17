@@ -1153,6 +1153,9 @@ GraphicsConsoleConOutSetMode (
                           ModeData->GopHeight,
                           0
                           );
+      if (EFI_ERROR (Status)) {
+        goto Done;
+      }
     }
   } else if (FeaturePcdGet (PcdUgaConsumeSupport)) {
     //
@@ -1198,6 +1201,9 @@ GraphicsConsoleConOutSetMode (
                           ModeData->GopHeight,
                           0
                           );
+      if (EFI_ERROR (Status)) {
+        goto Done;
+      }
     }
   }
 
