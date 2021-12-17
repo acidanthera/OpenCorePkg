@@ -125,7 +125,7 @@ BigNumLeftShiftWordsAndBits (
   IN     UINT8             NumBits
   )
 {
-  UINTN Index;
+  UINT16 Index;
 
   ASSERT (Result != NULL);
   ASSERT (NumWordsResult > 0);

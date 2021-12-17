@@ -520,9 +520,9 @@ InitKeyboardLayout (
   EFI_KEY_DESCRIPTOR        *TableEntry;
   EFI_KEY_DESCRIPTOR        *NsKey;
   USB_NS_KEY                *UsbNsKey;
-  UINTN                     Index;
-  UINTN                     Index2;
-  UINTN                     KeyCount;
+  UINT8                     Index;
+  UINT8                     Index2;
+  UINT8                     KeyCount;
   UINT8                     KeyCode;
 
   UsbKeyboardDevice->KeyConvertionTable = AllocateZeroPool ((NUMBER_OF_VALID_USB_KEYCODE) * sizeof (EFI_KEY_DESCRIPTOR));
@@ -564,7 +564,7 @@ InitKeyboardLayout (
       //
       KeyCount = 0;
       NsKey = KeyDescriptor + 1;
-      for (Index2 = (UINT8) Index + 1; Index2 < mUsbKeyboardLayoutBin.DescriptorCount; Index2++) {
+      for (Index2 = Index + 1; Index2 < mUsbKeyboardLayoutBin.DescriptorCount; Index2++) {
         CopyMem (&TempKey, NsKey, sizeof (EFI_KEY_DESCRIPTOR));
         if (TempKey.Modifier == EFI_NS_KEY_DEPENDENCY_MODIFIER) {
           KeyCount++;

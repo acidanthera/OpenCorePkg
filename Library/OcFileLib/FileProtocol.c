@@ -31,9 +31,9 @@ EfiGetEpochDays (
   IN  EFI_TIME  *Time
   )
 {
-  UINTN a;
+  UINT8 a;
   UINTN y;
-  UINTN m;
+  UINT8 m;
   UINTN JulianDate;  // Absolute Julian Date representation of the supplied Time
   UINTN EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
 
