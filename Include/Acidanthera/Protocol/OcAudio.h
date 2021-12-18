@@ -19,7 +19,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
-#define OC_AUDIO_PROTOCOL_REVISION  0x020000
+#define OC_AUDIO_PROTOCOL_REVISION  0x030000
 
 //
 // OC_AUDIO_PROTOCOL_GUID
@@ -116,11 +116,11 @@ STATIC_ASSERT (OcVoiceOverAudioFileIndexMax - OcVoiceOverAudioFileIndexBase == 9
 /**
   Connect to Audio I/O.
 
-  @param[in,out] This         Audio protocol instance.
-  @param[in]     DevicePath   Controller device path, optional.
-  @param[in]     CodecAddress Codec address, optional.
-  @param[in]     OutputIndex  Output index, optional.
-  @param[in]     Volume       Raw volume level from 0 to 100.
+  @param[in,out] This             Audio protocol instance.
+  @param[in]     DevicePath       Controller device path, optional.
+  @param[in]     CodecAddress     Codec address, optional.
+  @param[in]     OutputIndexMask  Output index mask.
+  @param[in]     Volume           Raw volume level from 0 to 100.
 
   @retval EFI_SUCESS on success.
   @retval EFI_NOT_FOUND when missing.
@@ -130,9 +130,9 @@ typedef
 EFI_STATUS
 (EFIAPI* OC_AUDIO_CONNECT) (
   IN OUT OC_AUDIO_PROTOCOL         *This,
-  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN     UINT8                     CodecAddress OPTIONAL,
-  IN     UINT8                     OutputIndex  OPTIONAL,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
+  IN     UINT8                     CodecAddress     OPTIONAL,
+  IN     UINT64                    OutputIndexMask,
   IN     UINT8                     Volume
   );
 

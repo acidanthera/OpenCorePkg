@@ -201,10 +201,7 @@ CheckUefiAudio (
   AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
   AsciiPlayChime           = OC_BLOB_GET (&UserUefi->Audio.PlayChime);
   if (IsAudioSupportEnabled) {
-    if (AsciiAudioDevicePath[0] == '\0') {
-      DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevicePath cannot be empty when AudioSupport is enabled!\n"));
-      ++ErrorCount;
-    } else if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
+    if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
       ++ErrorCount;
     }

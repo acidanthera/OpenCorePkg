@@ -6481,8 +6481,12 @@ with the boot menu.
   \textbf{Description}: Configure audio backend support described
   in the \hyperref[uefiaudioprops]{Audio Properties} section below.
 
-  Audio support provides a way for upstream protocols to interact with the
-  selected hardware and audio resources. All audio resources should reside
+  Unless documented otherwise (e.g. \texttt{ResetTrafficClass}) settings in this section
+  are for UEFI audio support only (e.g. OpenCore generated boot chime and audio assist) and are
+  unrelated to any configuration needed for OS audio support (e.g. \texttt{AppleALC}).
+
+  UEFI audio support provides a way for upstream protocols to interact with the
+  selected audio hardware and resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
   directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
@@ -6889,33 +6893,65 @@ with the boot menu.
   \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
   \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
-  As an alternative, \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying an empty device
-  path will result in the first available audio controller being used.
+  If using using \texttt{AudioDxe}, the required device path is also output as:
+
+  \texttt{HDA: Connecting controller \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}}
+
+  Finally, \texttt{gfxutil -f HDEF} command can be used in macOS to obtain the device path.
+  
+  Specifying an empty device path will result in the first available audio controller being used, and can
+  be a convenient option to get UEFI audio working if only one audio controller is present.
 
 \item
-  \texttt{AudioOut}\\
+  \texttt{AudioOutMask}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Index of the output port of the specified codec starting from 0.
+  \textbf{Description}: Bit field indicating which output channels to use for UEFI sound.
 
-  This typically contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
-  The number of output nodes (\texttt{N}) in the debug log (marked in bold-italic):
+  This should typically contain a single bit corresponding to the green out of the builtin analog audio
+  controller (\texttt{HDEF}).
+  The number of available output nodes (\texttt{N}) for each HDA codec is shown in the debug log (marked in bold-italic):
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textit{\textbf{4 outputs}})}\\
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textit{\textbf{1 outputs}})}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textit{\textbf{7 outputs}})}
 
-  The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}.
+  The first available output node is bit 0 (value \texttt{1}), the second node is bit 1 (value \texttt{2}), etc.
 
-\item
+  When the debug version of \texttt{AudioDxe} is used, then additional information on each output channel of each codec
+  is logged during driver binding. Further information on the available output channels may also be found from a Linux
+  codec dump \texttt{cat /proc/asound/card\{n\}/codec\#\{m\}}.
+  
+  Using \texttt{AudioOutMask}, it is possible to play sound to more than one channel (e.g. main speaker plus bass speaker;
+  headphones plus speakers). For example, if the main speaker is ouput 0 and the bass speaker
+  is output 2, then to play to both set \texttt{AudioOutMask} to \texttt{1 << 0 + 1 << 2} i.e. \texttt{5}. This
+  feature is supported when all chosen outputs support the sound file format in use; if any do not then no sound
+  will play and an error will be logged.
+
+  \emph{Note 1}: If all available output channels on the codec support the available sound file format, then a value
+  of \texttt{-1} may be used to play to all channels simultaneously.
+
+  \emph{Note 2}: Bits in \texttt{AudioOutMask} do not represent internal codec node ids as found in detailed codec
+  dumps, but rather the available output nodes as shown e.g. in the \texttt{OCAU} log lines above.
+
+  \item
   \texttt{AudioSupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Activate audio support by connecting to a backend driver.
 
-  Enabling this setting routes audio playback from builtin protocols to a dedicated
-  audio port (\texttt{AudioOut}) of the specified codec (\texttt{AudioCodec}) located
-  on the audio controller (\texttt{AudioDevice}).
+  Enabling this setting routes audio playback from builtin protocols to specified
+  (\texttt{AudioOutMask}) dedicated audio ports of the specified codec (\texttt{AudioCodec}),
+  located on the specified audio controller (\texttt{AudioDevice}).
+
+  \item
+  \texttt{DisconnectHda}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disconnect HDA controller before loading drivers.
+
+  May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to allow
+  a UEFI sound driver (such as \texttt{AudioDxe}) to take control of the audio hardware.
 
 \item
   \texttt{MinimumVolume}\\

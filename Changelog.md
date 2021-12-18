@@ -6,6 +6,12 @@ OpenCore Changelog
 - Fixed typo in `Cpuid1Data` recommendations for Intel Rocket Lake and newer
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated underlying EDK II package to edk2-stable202111
+- Resolved two possible crashes in QEMU in AudioDxe
+- Added AudioDxe settings caching (avoids non-needed setup delays)
+- Added DisconnectHda quirk to allow UEFI sound on Apple hardware (and others)
+- Added autodetected Cirrus Logic GPIO enable to allow UEFI sound on Apple hardware
+- Added workarounds for bugs in QEMU intel-hda driver to allow UEFI sound in QEMU
+- Implemented multi-channel (e.g. bass+main speaker; speakers+headphones) UEFI sound configured with `AudioOutMask`
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

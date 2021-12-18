@@ -539,7 +539,7 @@ OcLoadUefiAudioSupport (
   // NULL DevicePath means choose the first audio device available on the platform.
   //
 
-  OcAudio = OcAudioInstallProtocols (FALSE);
+  OcAudio = OcAudioInstallProtocols (FALSE, FALSE);
   if (OcAudio == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Cannot locate OcAudio protocol\n"));
     if (DevicePath != NULL) {
@@ -555,7 +555,7 @@ OcLoadUefiAudioSupport (
     OcAudio,
     DevicePath,
     Config->Uefi.Audio.AudioCodec,
-    Config->Uefi.Audio.AudioOut,
+    Config->Uefi.Audio.AudioOutMask,
     VolumeLevel < Config->Uefi.Audio.MinimumVolume
       ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
     );

@@ -1623,9 +1623,11 @@
 			<integer>0</integer>
 			<key>AudioDevice</key>
 			<string>PciRoot(0x0)/Pci(0x1b,0x0)</string>
-			<key>AudioOut</key>
-			<integer>0</integer>
+			<key>AudioOutMask</key>
+			<integer>1</integer>
 			<key>AudioSupport</key>
+			<false/>
+			<key>DisconnectHda</key>
 			<false/>
 			<key>MinimumVolume</key>
 			<integer>20</integer>

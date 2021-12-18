@@ -50,7 +50,7 @@ typedef struct {
   EFI_EVENT                             PlaybackEvent;
   UINTN                                 PlaybackDelay;
   UINT8                                 Language;
-  UINT8                                 OutputIndex;
+  UINT64                                OutputIndexMask;
   UINT8                                 Volume;
   OC_AUDIO_PROTOCOL                     OcAudio;
   APPLE_BEEP_GEN_PROTOCOL               BeepGen;
@@ -61,9 +61,9 @@ EFI_STATUS
 EFIAPI
 InternalOcAudioConnect (
   IN OUT OC_AUDIO_PROTOCOL         *This,
-  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN     UINT8                     CodecAddress OPTIONAL,
-  IN     UINT8                     OutputIndex  OPTIONAL,
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
+  IN     UINT8                     CodecAddress     OPTIONAL,
+  IN     UINT64                    OutputIndexMask,
   IN     UINT8                     Volume
   );
 

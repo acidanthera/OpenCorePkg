@@ -25,9 +25,16 @@
 #define OC_CHAR_BIT  8
 
 /**
-  Convert seconds to microseconds for use in e.g. gBS->Stall.
+  Conversions to microseconds for use in e.g. gBS->Stall.
 **/
-#define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
+#define SECONDS_TO_MICROSECONDS(x) ((x) * 1000000)
+#define MS_TO_MICROSECONDS(x)      ((x) * 1000)
+
+/**
+  Conversions to nanoseconds for use in e.g. PciIo->PollMem.
+**/
+#define SECONDS_TO_NANOSECONDS(x)  ((x) * 1000000000)
+#define MS_TO_NANOSECONDS(x)       ((x) * 1000000)
 
 BOOLEAN
 FindPattern (

@@ -345,7 +345,10 @@ OcReinstallProtocols (
   BOOLEAN       InstallAppleEvent;
   BOOLEAN       OverrideAppleEvent;
 
-  if (OcAudioInstallProtocols (Config->Uefi.ProtocolOverrides.AppleAudio) == NULL) {
+  if (OcAudioInstallProtocols (
+    Config->Uefi.ProtocolOverrides.AppleAudio,
+    Config->Uefi.Audio.DisconnectHda
+    ) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
 

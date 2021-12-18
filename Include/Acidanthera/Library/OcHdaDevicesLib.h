@@ -58,6 +58,17 @@
 #define GET_CODEC_DEVICE_ID(a)  (a & 0xFFFFU)
 #define GET_CODEC_GENERIC_ID(a) (a | 0xFFFFU)
 
+//
+// Structure used for HDA PCI class code parsing.
+//
+#pragma pack(1)
+typedef struct {
+  UINT8 ProgInterface;
+  UINT8 SubClass;
+  UINT8 Class;
+} HDA_PCI_CLASSREG;
+#pragma pack()
+
 /**
   Get controller name.
 

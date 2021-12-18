@@ -18,6 +18,7 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAudioLib.h>
+#include <Library/OcDriverConnectionLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -28,20 +29,23 @@
 
 #include "OcAudioInternal.h"
 
+//
+// OC audio protocol must come first in this list.
+//
 STATIC
 EFI_GUID *
 mAudioProtocols[] = {
   &gOcAudioProtocolGuid,
   &gAppleBeepGenProtocolGuid,
   &gAppleVOAudioProtocolGuid,
-  &gAppleHighDefinitionAudioProtocolGuid,
+  &gAppleHighDefinitionAudioProtocolGuid
 };
 
 STATIC
 OC_AUDIO_PROTOCOL_PRIVATE
 mAudioProtocol = {
   .Signature       = OC_AUDIO_PROTOCOL_PRIVATE_SIGNATURE,
-  .AudioIo         = NULL,
+  .AudioIo        = NULL,
   .ProviderAcquire = NULL,
   .ProviderRelease = NULL,
   .ProviderContext = NULL,
@@ -49,7 +53,7 @@ mAudioProtocol = {
   .PlaybackEvent   = NULL,
   .PlaybackDelay   = 0,
   .Language        = AppleVoiceOverLanguageEn,
-  .OutputIndex     = 0,
+  .OutputIndexMask = 0,
   .Volume          = 100,
   .OcAudio         = {
     .Revision           = OC_AUDIO_PROTOCOL_REVISION,
@@ -72,13 +76,20 @@ mAudioProtocol = {
 
 OC_AUDIO_PROTOCOL *
 OcAudioInstallProtocols (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN BOOLEAN  DisconnectHda
   )
 {
   EFI_STATUS         Status;
   UINTN              Index;
   VOID               *Protocol;
   EFI_HANDLE         NewHandle;
+
+  DEBUG ((DEBUG_INFO, "OCAU: OcAudioInstallProtocols (%u, %u)\n", Reinstall, DisconnectHda));
+
+  if (DisconnectHda) {
+    OcDisconnectHdaControllers ();
+  }
 
   if (Reinstall) {
     for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
@@ -89,6 +100,16 @@ OcAudioInstallProtocols (
       }
     }
   } else {
+    DEBUG_CODE_BEGIN ();
+    for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
+      Status = gBS->LocateProtocol (
+        mAudioProtocols[Index],
+        NULL,
+        &Protocol
+        );
+      DEBUG ((DEBUG_INFO, "OCAU: %g protocol - %r\n", mAudioProtocols[Index], Status));
+    }
+    DEBUG_CODE_END ();
     for (Index = 0; Index < ARRAY_SIZE (mAudioProtocols); ++Index) {
       Status = gBS->LocateProtocol (
         mAudioProtocols[Index],
@@ -99,7 +120,6 @@ OcAudioInstallProtocols (
         if (Index == 0) {
           return (OC_AUDIO_PROTOCOL *) Protocol;
         }
-        DEBUG ((DEBUG_INFO, "OCAU: Found %g protocol\n", mAudioProtocols[Index]));
         return NULL;
       }
     }

@@ -131,24 +131,17 @@ InternalOcAudioGenBeep (
 
   Status = Private->AudioIo->SetupPlayback (
     Private->AudioIo,
-    Private->OutputIndex,
+    Private->OutputIndexMask,
     Private->Volume,
     OC_BEEP_AUDIO_FREQUENCY,
     OC_BEEP_AUDIO_BITS,
-    OC_BEEP_AUDIO_CHANNELS
+    OC_BEEP_AUDIO_CHANNELS,
+    Private->PlaybackDelay
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAU: Beep playback setup failure - %r\n", Status));
     FreePool (Buffer);
     return EFI_ABORTED;
-  }
-
-  //
-  // We are required to wait for some time after codec setup on some systems.
-  // REF: https://github.com/acidanthera/bugtracker/issues/971
-  //
-  if (Private->PlaybackDelay > 0) {
-    gBS->Stall (Private->PlaybackDelay);
   }
 
   for (Index = 0; Index < ToneCount; ++Index) {

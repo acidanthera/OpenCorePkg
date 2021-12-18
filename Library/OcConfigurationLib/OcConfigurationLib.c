@@ -750,8 +750,9 @@ OC_SCHEMA
 mUefiAudioSchema[] = {
   OC_SCHEMA_INTEGER_IN ("AudioCodec",         OC_GLOBAL_CONFIG, Uefi.Audio.AudioCodec),
   OC_SCHEMA_STRING_IN  ("AudioDevice",        OC_GLOBAL_CONFIG, Uefi.Audio.AudioDevice),
-  OC_SCHEMA_INTEGER_IN ("AudioOut",           OC_GLOBAL_CONFIG, Uefi.Audio.AudioOut),
+  OC_SCHEMA_INTEGER_IN ("AudioOutMask",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioOutMask),
   OC_SCHEMA_BOOLEAN_IN ("AudioSupport",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioSupport),
+  OC_SCHEMA_BOOLEAN_IN ("DisconnectHda",      OC_GLOBAL_CONFIG, Uefi.Audio.DisconnectHda),
   OC_SCHEMA_INTEGER_IN ("MinimumVolume",      OC_GLOBAL_CONFIG, Uefi.Audio.MinimumVolume),
   OC_SCHEMA_STRING_IN  ("PlayChime",          OC_GLOBAL_CONFIG, Uefi.Audio.PlayChime),
   OC_SCHEMA_BOOLEAN_IN ("ResetTrafficClass",  OC_GLOBAL_CONFIG, Uefi.Audio.ResetTrafficClass),

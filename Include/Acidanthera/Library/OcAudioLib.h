@@ -17,7 +17,8 @@
 /**
   Install audio support protocols.
 
-  @param[in] Reinstall  Overwrite installed protocols.
+  @param[in] Reinstall           Overwrite installed protocols.
+  @param[in] DisconnectHda       Attempt to disconnect HDA controller first.
 
   @retval installed protocol.
   @retval NULL when conflicting audio implementation is present.
@@ -25,7 +26,8 @@
 **/
 OC_AUDIO_PROTOCOL *
 OcAudioInstallProtocols (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN BOOLEAN  DisconnectHda
   );
 
 /**
