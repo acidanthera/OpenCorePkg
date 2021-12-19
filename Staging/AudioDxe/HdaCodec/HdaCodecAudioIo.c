@@ -289,11 +289,18 @@ HdaCodecAudioIoSetupPlayback(
   }
   OutputIndexMask &= ~LShiftU64(MAX_UINT64, HdaCodecDev->OutputPortsCount);
 
+#if defined(HDA_CODEC_ERROR_ON_NO_OUTPUTS)
   // Fail visibily if nothing is requested.
-  // (Not required, should just play nothing without this.)
   if (OutputIndexMask == 0) {
     return EFI_INVALID_PARAMETER;
   }
+#endif
+
+  // Avoid Coverity warnings (the bit mask checks actually ensure that these cannot be used uninitialised).
+  StreamBits = 0;
+  StreamDiv = 0;
+  StreamMult = 0;
+  StreamBase44kHz = FALSE;
 
   // Expand the requested stream frequency and sample size params,
   // and check that every requested channel can support them.
@@ -474,10 +481,12 @@ HdaCodecAudioIoSetupPlayback(
   // Save requested outputs.
   AudioIoPrivateData->SelectedOutputIndexMask = OutputIndexMask;
 
+#if !defined(HDA_CODEC_ERROR_ON_NO_OUTPUTS)
   // Nothing to play.
   if (OutputIndexMask == 0) {
     return EFI_SUCCESS;
   }
+#endif
 
   // Calculate stream format and setup stream.
   StreamFmt = HDA_CONVERTER_FORMAT_SET(Channels - 1, StreamBits,

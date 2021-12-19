@@ -27,6 +27,8 @@
 
 #include "AudioDxe.h"
 
+#define HDA_CODEC_ERROR_ON_NO_OUTPUTS
+
 typedef struct _HDA_CODEC_DEV HDA_CODEC_DEV;
 typedef struct _HDA_FUNC_GROUP HDA_FUNC_GROUP;
 typedef struct _HDA_WIDGET_DEV HDA_WIDGET_DEV;
