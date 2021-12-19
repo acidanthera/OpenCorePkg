@@ -319,7 +319,7 @@ ResizeGpuBars (
   EFI_HANDLE           *HandleBuffer;
   UINTN                Index;
   EFI_PCI_IO_PROTOCOL  *PciIo;
-  UINT32               ClassCode;
+  PCI_CLASSCODE        ClassCode;
   BOOLEAN              HasSuccess;
 
   ASSERT (Size < PciBarTotal);
@@ -352,9 +352,9 @@ ResizeGpuBars (
 
     Status = PciIo->Pci.Read (
       PciIo,
-      EfiPciIoWidthUint32,
-      OFFSET_OF (PCI_DEVICE_INDEPENDENT_REGION, RevisionID),
-      1,
+      EfiPciIoWidthUint8,
+      PCI_CLASSCODE_OFFSET,
+      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
       &ClassCode
       );
     if (EFI_ERROR (Status)) {
@@ -363,7 +363,7 @@ ResizeGpuBars (
 
     DEBUG ((DEBUG_VERBOSE, "OCDM: PCI device %u/%u has class %X\n", Index+1, HandleCount, ClassCode));
 
-    if (((ClassCode >> 24U) & 0xFF) != PCI_CLASS_DISPLAY) {
+    if (ClassCode.BaseCode != PCI_CLASS_DISPLAY) {
       continue;
     }
 

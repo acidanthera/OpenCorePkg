@@ -146,4 +146,20 @@ ResizeGpuBars (
   IN BOOLEAN       Increase
   );
 
+//
+// There is no existing structure for this in EDK II.
+// MdeModulePkg/.../EhciReg.h struct USB_CLASSC contains exactly the same info, but is not
+// intended for general purpose use.
+// BaseTools/.../pci22.h struct PCI_DEVICE_INDEPENDENT_REGION contains the same info, but just
+// as a UINT8[3] array, and in general where just these three bytes are read, they are either read
+// into USB_CLASSC or into a UINT8[3] array (search EDK II for PCI_CLASSCODE_OFFSET for examples).
+//
+#pragma pack(1)
+typedef struct {
+  UINT8                   ProgInterface;
+  UINT8                   SubClassCode;
+  UINT8                   BaseCode;
+} PCI_CLASSCODE;
+#pragma pack()
+
 #endif // OC_DEVICE_MISC_LIB_H

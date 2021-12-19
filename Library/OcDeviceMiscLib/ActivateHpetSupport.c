@@ -36,7 +36,7 @@ ActivateHpetSupport (
   EFI_HANDLE           *HandleBuffer;
   UINTN                Index;
   EFI_PCI_IO_PROTOCOL  *PciIo;
-  UINT32               ClassCode;
+  PCI_CLASSCODE        ClassCode;
   UINT32               Rcba;
   UINT32               Hptc;
 
@@ -66,17 +66,16 @@ ActivateHpetSupport (
 
     Status = PciIo->Pci.Read (
       PciIo,
-      EfiPciIoWidthUint32,
-      OFFSET_OF (PCI_DEVICE_INDEPENDENT_REGION, RevisionID),
-      1,
+      EfiPciIoWidthUint8,
+      PCI_CLASSCODE_OFFSET,
+      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
       &ClassCode
       );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    ClassCode >>= 16U; ///< Drop revision and minor codes.
-    if (ClassCode == (PCI_CLASS_BRIDGE << 8 | PCI_CLASS_BRIDGE_ISA)) {
+    if (ClassCode.BaseCode == PCI_CLASS_BRIDGE && ClassCode.SubClassCode == PCI_CLASS_BRIDGE_ISA) {
       Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, PCI_BRIDGE_RCBA_OFFSET, 1, &Rcba);
       if (EFI_ERROR (Status)) {
         continue;

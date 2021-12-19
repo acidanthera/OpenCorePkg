@@ -818,7 +818,7 @@ HdaControllerDriverBindingSupported (
 {
   EFI_STATUS             Status;
   EFI_PCI_IO_PROTOCOL    *PciIo;
-  HDA_PCI_CLASSREG       HdaClassReg;
+  PCI_CLASSCODE          HdaClassReg;
 
   //
   // Open PCI I/O protocol. If this fails, it's not a PCI device.
@@ -843,7 +843,7 @@ HdaControllerDriverBindingSupported (
     PciIo,
     EfiPciIoWidthUint8,
     PCI_CLASSCODE_OFFSET,
-    sizeof (HDA_PCI_CLASSREG),
+    sizeof (PCI_CLASSCODE),
     &HdaClassReg
     );
 
@@ -851,8 +851,8 @@ HdaControllerDriverBindingSupported (
   // Check class code, ignore everything but HDA controllers.
   //
   if (!EFI_ERROR (Status)
-    && (HdaClassReg.Class != PCI_CLASS_MEDIA
-    || HdaClassReg.SubClass != PCI_CLASS_MEDIA_MIXED_MODE)) {
+    && (HdaClassReg.BaseCode != PCI_CLASS_MEDIA
+    || HdaClassReg.SubClassCode != PCI_CLASS_MEDIA_MIXED_MODE)) {
     return EFI_UNSUPPORTED;
   }
 

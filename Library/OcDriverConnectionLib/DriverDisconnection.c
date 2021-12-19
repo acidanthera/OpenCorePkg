@@ -199,7 +199,7 @@ OcDisconnectHdaControllers (
   UINTN                   HandleCount;
   EFI_HANDLE              *HandleBuffer;
   EFI_PCI_IO_PROTOCOL     *PciIo;
-  HDA_PCI_CLASSREG        HdaClassReg;
+  PCI_CLASSCODE           HdaClassReg;
 
   //
   // Locate all currently connected PCI I/O protocols and disconnect HDA controllers.
@@ -230,7 +230,7 @@ OcDisconnectHdaControllers (
         PciIo,
         EfiPciIoWidthUint8,
         PCI_CLASSCODE_OFFSET,
-        sizeof (HDA_PCI_CLASSREG),
+        sizeof (PCI_CLASSCODE),
         &HdaClassReg
         );
 
@@ -238,8 +238,8 @@ OcDisconnectHdaControllers (
       // Check class code, ignore everything but HDA controllers.
       //
       if (EFI_ERROR (Status)
-        || HdaClassReg.Class != PCI_CLASS_MEDIA
-        || HdaClassReg.SubClass != PCI_CLASS_MEDIA_MIXED_MODE) {
+        || HdaClassReg.BaseCode != PCI_CLASS_MEDIA
+        || HdaClassReg.SubClassCode != PCI_CLASS_MEDIA_MIXED_MODE) {
         continue;
       }
 
