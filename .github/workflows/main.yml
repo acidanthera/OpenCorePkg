@@ -247,3 +247,17 @@ jobs:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
           COVERITY_BUILD_COMMAND: ../build_oc.tool --skip-tests --skip-package RELEASE
+
+  validate-sample-configs:
+    name: validate-sample-configs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install xmllint
+        run: sudo apt-get install -y libxml2-utils
+
+      - name: Validate Sample Configs
+        run: xmllint --noout --dtdvalid Docs/Validators/PropertyList-1.0.dtd Docs/Sample.plist
+
+      - run: xmllint --noout --dtdvalid Docs/Validators/PropertyList-1.0.dtd Docs/SampleCustom.plist
