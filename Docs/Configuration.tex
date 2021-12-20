@@ -6893,7 +6893,7 @@ with the boot menu.
   \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
   \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
-  If using using \texttt{AudioDxe}, the required device path is also output as:
+  If using \texttt{AudioDxe}, the required device path is also output as:
 
   \texttt{HDA: Connecting controller \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}}
 
@@ -6923,7 +6923,7 @@ with the boot menu.
   codec dump \texttt{cat /proc/asound/card\{n\}/codec\#\{m\}}.
   
   Using \texttt{AudioOutMask}, it is possible to play sound to more than one channel (e.g. main speaker plus bass speaker;
-  headphones plus speakers). For example, if the main speaker is ouput 0 and the bass speaker
+  headphones plus speakers). For example, if the main speaker is output 0 and the bass speaker
   is output 2, then to play to both set \texttt{AudioOutMask} to \texttt{1 << 0 + 1 << 2} i.e. \texttt{5}. This
   feature is supported when all chosen outputs support the sound file format in use; if any do not then no sound
   will play and an error will be logged.
