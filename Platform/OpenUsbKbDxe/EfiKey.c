@@ -194,7 +194,9 @@ USBKeyboardDriverBindingStart (
   }
 
   UsbKeyboardDevice = AllocateZeroPool (sizeof (USB_KB_DEV));
-  ASSERT (UsbKeyboardDevice != NULL);
+  if (UsbKeyboardDevice == NULL) {
+    goto ErrorExit1;
+  }
 
   //
   // Get the Device Path Protocol on Controller's handle

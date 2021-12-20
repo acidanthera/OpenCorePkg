@@ -520,8 +520,8 @@ InitKeyboardLayout (
   EFI_KEY_DESCRIPTOR        *TableEntry;
   EFI_KEY_DESCRIPTOR        *NsKey;
   USB_NS_KEY                *UsbNsKey;
-  UINT8                     Index;
-  UINT8                     Index2;
+  UINT8                     sIndex;
+  UINT8                     sIndex2;
   UINT8                     KeyCount;
   UINT8                     KeyCode;
 
@@ -535,7 +535,7 @@ InitKeyboardLayout (
   // Traverse the list of key descriptors following the header of EFI_HII_KEYBOARD_LAYOUT
   //
   KeyDescriptor = (EFI_KEY_DESCRIPTOR *) (&mUsbKeyboardLayoutBin.KeyDescriptor[0]);
-  for (Index = 0; Index < mUsbKeyboardLayoutBin.DescriptorCount; Index++) {
+  for (sIndex = 0; sIndex < mUsbKeyboardLayoutBin.DescriptorCount; sIndex++) {
     //
     // Copy from HII keyboard layout package binary for alignment
     //
@@ -564,7 +564,7 @@ InitKeyboardLayout (
       //
       KeyCount = 0;
       NsKey = KeyDescriptor + 1;
-      for (Index2 = Index + 1; Index2 < mUsbKeyboardLayoutBin.DescriptorCount; Index2++) {
+      for (sIndex2 = sIndex + 1; sIndex2 < mUsbKeyboardLayoutBin.DescriptorCount; sIndex2++) {
         CopyMem (&TempKey, NsKey, sizeof (EFI_KEY_DESCRIPTOR));
         if (TempKey.Modifier == EFI_NS_KEY_DEPENDENCY_MODIFIER) {
           KeyCount++;
@@ -585,7 +585,7 @@ InitKeyboardLayout (
       //
       // Skip over the child physical keys
       //
-      Index += KeyCount;
+      sIndex += KeyCount;
       KeyDescriptor += KeyCount;
     }
 

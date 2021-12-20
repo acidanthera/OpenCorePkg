@@ -1139,23 +1139,21 @@ GraphicsConsoleConOutSetMode (
       }
     } else {
       //
-      // The current graphics mode is correct, so simply clear the entire display
+      // The current graphics mode is correct, so simply clear the entire display.
+      // Note: Blt may fail before mode-set.
       //
-      Status = GraphicsOutput->Blt (
-                          GraphicsOutput,
-                          &mGraphicsEfiColors[0],
-                          EfiBltVideoFill,
-                          0,
-                          0,
-                          0,
-                          0,
-                          ModeData->GopWidth,
-                          ModeData->GopHeight,
-                          0
-                          );
-      if (EFI_ERROR (Status)) {
-        goto Done;
-      }
+      GraphicsOutput->Blt (
+        GraphicsOutput,
+        &mGraphicsEfiColors[0],
+        EfiBltVideoFill,
+        0,
+        0,
+        0,
+        0,
+        ModeData->GopWidth,
+        ModeData->GopHeight,
+        0
+        );
     }
   } else if (FeaturePcdGet (PcdUgaConsumeSupport)) {
     //
@@ -1188,22 +1186,20 @@ GraphicsConsoleConOutSetMode (
     } else {
       //
       // The current graphics mode is correct, so simply clear the entire display
+      // Note: Blt may fail before mode-set.
       //
-      Status = UgaDraw->Blt (
-                          UgaDraw,
-                          (EFI_UGA_PIXEL *) (UINTN) &mGraphicsEfiColors[0],
-                          EfiUgaVideoFill,
-                          0,
-                          0,
-                          0,
-                          0,
-                          ModeData->GopWidth,
-                          ModeData->GopHeight,
-                          0
-                          );
-      if (EFI_ERROR (Status)) {
-        goto Done;
-      }
+      UgaDraw->Blt (
+        UgaDraw,
+        (EFI_UGA_PIXEL *) (UINTN) &mGraphicsEfiColors[0],
+        EfiUgaVideoFill,
+        0,
+        0,
+        0,
+        0,
+        ModeData->GopWidth,
+        ModeData->GopHeight,
+        0
+        );
     }
   }
 
