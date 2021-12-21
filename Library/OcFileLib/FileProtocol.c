@@ -26,16 +26,16 @@
 #define SEC_PER_YEAR                                    ((UINTN) 31,536,000)
 
 STATIC
-UINTN
+UINT32
 EfiGetEpochDays (
   IN  EFI_TIME  *Time
   )
 {
-  UINTN a;
-  UINTN y;
-  UINTN m;
-  UINTN JulianDate;  // Absolute Julian Date representation of the supplied Time
-  UINTN EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
+  UINT8  a;
+  UINT32 y;
+  UINT8  m;
+  UINT32 JulianDate;  // Absolute Julian Date representation of the supplied Time
+  UINT32 EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
 
   a = (14 - Time->Month) / 12 ;
   y = Time->Year + 4800 - a;
@@ -58,9 +58,9 @@ EfiTimeToEpoch (
   UINT32 EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
   UINT32 EpochSeconds;
 
-  EpochDays = (UINT32)EfiGetEpochDays (Time);
+  EpochDays = EfiGetEpochDays (Time);
 
-  EpochSeconds = (EpochDays * SEC_PER_DAY) + ((UINTN)Time->Hour * SEC_PER_HOUR) + (Time->Minute * SEC_PER_MIN) + Time->Second;
+  EpochSeconds = (EpochDays * SEC_PER_DAY) + (Time->Hour * SEC_PER_HOUR) + (Time->Minute * SEC_PER_MIN) + Time->Second;
 
   return EpochSeconds;
 }

@@ -194,7 +194,9 @@ USBKeyboardDriverBindingStart (
   }
 
   UsbKeyboardDevice = AllocateZeroPool (sizeof (USB_KB_DEV));
-  ASSERT (UsbKeyboardDevice != NULL);
+  if (UsbKeyboardDevice == NULL) {
+    goto ErrorExit1;
+  }
 
   //
   // Get the Device Path Protocol on Controller's handle
@@ -468,24 +470,23 @@ USBKeyboardDriverBindingStart (
 // Error handler
 //
 ErrorExit:
-  if (UsbKeyboardDevice != NULL) {
-    if (UsbKeyboardDevice->TimerEvent != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->TimerEvent);
-    }
-    if (UsbKeyboardDevice->SimpleInput.WaitForKey != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->SimpleInput.WaitForKey);
-    }
-    if (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx);
-    }
-    if (UsbKeyboardDevice->KeyNotifyProcessEvent != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->KeyNotifyProcessEvent);
-    }
-    ReleaseKeyboardLayoutResources (UsbKeyboardDevice);
-    UsbKbFreeAppleKeyMapDb (UsbKeyboardDevice);
-    FreePool (UsbKeyboardDevice);
-    UsbKeyboardDevice = NULL;
+  if (UsbKeyboardDevice->TimerEvent != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->TimerEvent);
   }
+  if (UsbKeyboardDevice->SimpleInput.WaitForKey != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->SimpleInput.WaitForKey);
+  }
+  if (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx);
+  }
+  if (UsbKeyboardDevice->KeyNotifyProcessEvent != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->KeyNotifyProcessEvent);
+  }
+  ReleaseKeyboardLayoutResources (UsbKeyboardDevice);
+  UsbKbFreeAppleKeyMapDb (UsbKeyboardDevice);
+  FreePool (UsbKeyboardDevice);
+  UsbKeyboardDevice = NULL;
+
   gBS->CloseProtocol (
          Controller,
          &gEfiUsbIoProtocolGuid,
