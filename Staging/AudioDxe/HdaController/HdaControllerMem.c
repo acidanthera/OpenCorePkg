@@ -399,6 +399,11 @@ HdaControllerInitStreams (
     HdaStream->IsBidirectional  = Index + OutputStreamsOffset >= BidirStreamsOffset;
 
     //
+    // Set this once Index is valid and before doing anything which requires cleanup.
+    //
+    HdaStream->HasIndex         = TRUE;
+
+    //
     // Initialize polling timer.
     //
     Status = gBS->CreateEvent (EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_NOTIFY,
@@ -655,10 +660,18 @@ HdaControllerCleanupStreams (
       HdaStream = &HdaDev->Streams[Index];
 
       //
+      // Is stream at a stage where it can be torn down safely?
+      //
+      if (!HdaStream->HasIndex) {
+        break;
+      }
+
+      //
       // Close poll timer and disable stream.
       //
-      if (HdaStream->PollTimer == NULL) {
+      if (HdaStream->PollTimer != NULL) {
         gBS->CloseEvent (HdaStream->PollTimer);
+        HdaStream->PollTimer = NULL;
       }
       HdaControllerSetStreamState (HdaStream, FALSE);
       HdaControllerSetStreamId (HdaStream, 0);

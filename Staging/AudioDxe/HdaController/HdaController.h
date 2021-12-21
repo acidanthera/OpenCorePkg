@@ -138,6 +138,12 @@ typedef struct {
   //
   UINT8                   Index;
   //
+  // TRUE once Index is valid. Required for tearing down streams safely if there is
+  // an error while setting them up. Assume nothing else for this or following streams
+  // is set up or allocated if this is FALSE.
+  //
+  BOOLEAN                 HasIndex;
+  //
   // Bidirectional stream? This requires a bit to set during reset to enable output.
   //
   BOOLEAN                 IsBidirectional;
