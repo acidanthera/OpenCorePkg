@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Dec 20 23:08:04 2021
-%DIF ADD ../Configuration.tex        Mon Dec 20 23:08:04 2021
+%DIF DEL PreviousConfiguration.tex   Sun Dec 12 09:04:19 2021
+%DIF ADD ../Configuration.tex        Fri Dec 24 11:17:13 2021
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6976,44 +6976,52 @@ with the boot menu.
 \item
   \texttt{\DIFdelbegin \DIFdel{AudioOut}\DIFdelend \DIFaddbegin \DIFadd{AudioOutMask}\DIFaddend }\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{-1}\DIFaddend }\\
   \textbf{Description}: \DIFdelbegin \DIFdel{Index of the output port of the specified codec starting from 0.
 }\DIFdelend \DIFaddbegin \DIFadd{Bit field indicating which output channels to use for UEFI sound.
 }\DIFaddend 
 
-  This \DIFdelbegin \DIFdel{typically contains the index of the }\DIFdelend \DIFaddbegin \DIFadd{should typically contain a single bit corresponding to the }\DIFaddend green out of the builtin analog audio
-  controller (\texttt{HDEF}).
-  The number of \DIFaddbegin \DIFadd{available }\DIFaddend output nodes (\texttt{N}) \DIFaddbegin \DIFadd{for each HDA codec is shown }\DIFaddend in the debug log (marked in bold-italic):
+  \DIFdelbegin \DIFdel{This typically contains the index of the green out of the builtin analog audio controller (}\DIFdelend \DIFaddbegin \DIFadd{Audio mask is 1 << audio output (equivalently 2 }\DIFaddend \texttt{\DIFdelbegin \DIFdel{HDEF}%DIFDELCMD < \MBLOCKRIGHTBRACE%%%
+\DIFdel{). }\DIFdelend \DIFaddbegin \DIFadd{\^{}}} \DIFadd{audio output). E.g. for audio output }\texttt{\DIFadd{0}} \DIFadd{the bitmask is
+  }\texttt{\DIFadd{1}}\DIFadd{, for output }\texttt{\DIFadd{3}} \DIFadd{it is }\texttt{\DIFadd{8}}\DIFadd{, and for outputs }\texttt{\DIFadd{0}} \DIFadd{and }\texttt{\DIFadd{3}} \DIFadd{it is }\texttt{\DIFadd{9}}\DIFadd{.
+}
+
+  \DIFaddend The number of \DIFaddbegin \DIFadd{available }\DIFaddend output nodes (\texttt{N}) \DIFaddbegin \DIFadd{for each HDA codec is shown }\DIFaddend in the debug log (marked in bold-italic)\DIFaddbegin \DIFadd{,
+  audio outputs }\texttt{\DIFadd{0}} \DIFadd{to }\texttt{\DIFadd{N - 1}} \DIFadd{may be selected}\DIFaddend :
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textit{\textbf{4 outputs}})}\\
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textit{\textbf{1 outputs}})}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textit{\textbf{7 outputs}})}
 
-  The \DIFdelbegin \DIFdel{quickest way to find the right port is }\DIFdelend \DIFaddbegin \DIFadd{first available output node is bit 0 (value }\texttt{\DIFadd{1}}\DIFadd{), the second node is bit 1 (value }\texttt{\DIFadd{2}}\DIFadd{), etc.
+  \DIFdelbegin \DIFdel{The quickest way to
+  find the right port is to bruteforce the values from }\DIFdelend \DIFaddbegin \DIFadd{When }\texttt{\DIFadd{AudioDxe}} \DIFadd{is used then additional information about each output channel is logged during driver binding,
+  including the bitmask for each output. The bitmask values for the desired outputs should be added together to
+  obtain the }\texttt{\DIFadd{AudioOutMask}} \DIFadd{value:
 }
 
-  \DIFadd{When the debug version of }\texttt{\DIFadd{AudioDxe}} \DIFadd{is used, then additional information on each output channel of each codec
-  is logged during driver binding. Further information on the available output channels may also be found from a Linux
-  codec dump }\texttt{\DIFadd{cat /proc/asound/card\{n\}/codec\#\{m\}}}\DIFadd{.
+  \texttt{\DIFadd{HDA:  | Port widget @ 0x9 is an output (pin defaults 0x2B4020) (}\textit{\textbf{\DIFadd{bitmask 1}}}\DIFadd{)}}\\
+  \texttt{\DIFadd{HDA:  | Port widget @ 0xA is an output (pin defaults 0x90100112) (}\textit{\textbf{\DIFadd{bitmask 2}}}\DIFadd{)}}\\
+  \texttt{\DIFadd{HDA:  | Port widget @ 0xB is an output (pin defaults 0x90100110) (}\textit{\textbf{\DIFadd{bitmask 4}}}\DIFadd{)}}\\
+  \texttt{\DIFadd{HDA:  | Port widget @ 0x10 is an output (pin defaults 0x4BE030) (}\textit{\textbf{\DIFadd{bitmask 8}}}\DIFadd{)}}
+
+  \DIFadd{Further information on the available output channels may be found from a Linux codec dump using the command:
   }
 
+  \texttt{\DIFadd{cat /proc/asound/card\{n\}/codec\#\{m\}}}
+
   \DIFadd{Using }\texttt{\DIFadd{AudioOutMask}}\DIFadd{, it is possible to play sound to more than one channel (e.g. main speaker plus bass speaker;
-  headphones plus speakers). For example, if the main speaker is output 0 and the bass speaker
-  is output 2, then to play to both set }\texttt{\DIFadd{AudioOutMask}} \DIFaddend to \DIFdelbegin \DIFdel{bruteforce the values from }\DIFdelend \DIFaddbegin \texttt{\DIFadd{1 << 0 + 1 << 2}} \DIFadd{i.e. }\texttt{\DIFadd{5}}\DIFadd{. This
-  feature is supported when all chosen outputs support the sound file format in use; if any do not then no sound
-  will play and an error will be logged.
+  headphones plus speakers) as long as all the chosen outputs support the sound file format in use; if any do not then no
+  sound will play and a warning will be logged.
 }
 
-  \emph{\DIFadd{Note 1}}\DIFadd{: If all available output channels on the codec support the available sound file format, then a value
+  \DIFadd{When all available output channels on the codec support the available sound file format, then a value
   of }\DIFaddend \texttt{\DIFdelbegin \DIFdel{0}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
 \DIFdel{to }\texttt{\DIFdel{N - 1}}%DIFAUXCMD
-\DIFdelend \DIFaddbegin \DIFadd{-1}} \DIFadd{may be used to play to all channels simultaneously}\DIFaddend .
+\DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{-1}} \DIFadd{will play sound to all channels simultaneously. If this does not work, it will usually be quickest
+  to try each available output channel one by one, in order to work out which channel(s) to use.
+}\DIFaddend 
 
-  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: Bits in }\texttt{\DIFadd{AudioOutMask}} \DIFadd{do not represent internal codec node ids as found in detailed codec
-  dumps, but rather the available output nodes as shown e.g. in the }\texttt{\DIFadd{OCAU}} \DIFadd{log lines above.
-}
-
-  \DIFaddend \item
+  \item
   \texttt{AudioSupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

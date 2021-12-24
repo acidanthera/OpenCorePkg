@@ -703,22 +703,44 @@ HdaCodecParsePorts(
         continue;
 
       // Determine if port is an output based on the device type.
+      // The types reported here do not correspond particularly well to the real hardware.
       DefaultDeviceType = HDA_VERB_GET_CONFIGURATION_DEFAULT_DEVICE(HdaWidget->DefaultConfiguration);
       if ((DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_LINE_OUT) || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPEAKER) ||
         (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_HEADPHONE_OUT) || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPDIF_OUT) ||
         (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_OTHER_DIGITAL_OUT)) {
 
         // Try to get upstream output.
-        DEBUG((DEBUG_INFO, "HDA:  | Port widget @ 0x%X is an output (pin defaults 0x%X)\n", HdaWidget->NodeId, HdaWidget->DefaultConfiguration));
         Status = HdaCodecFindUpstreamOutput(HdaWidget, 0);
-        if (EFI_ERROR(Status))
+        if (EFI_ERROR(Status)) {
+          DEBUG((
+            DEBUG_WARN,
+            "HDA: Widget @ 0x%X find upstream output - %r\n",
+            HdaWidget->NodeId,
+            Status
+            ));
           continue;
+        }
 
         // Enable output amp.
         Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId, HDA_CODEC_VERB(HDA_VERB_SET_PIN_WIDGET_CONTROL,
           HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD(0, FALSE, FALSE, TRUE, FALSE)), &Response);
-        if (EFI_ERROR(Status))
+        if (EFI_ERROR(Status)) {
+          DEBUG((
+            DEBUG_WARN,
+            "HDA: Widget @ 0x%X enable output amp - %r\n",
+            HdaWidget->NodeId,
+            Status
+            ));
           continue;
+        }
+
+        // Report output.
+        DEBUG((
+          DEBUG_INFO,
+          "HDA:  | Port widget @ 0x%X is an output (pin defaults 0x%X) (bitmask %u)\n",
+          HdaWidget->NodeId,
+          HdaWidget->DefaultConfiguration, 1 << HdaCodecDev->OutputPortsCount
+          ));
 
         // If EAPD is present, enable.
         if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_EAPD) {
