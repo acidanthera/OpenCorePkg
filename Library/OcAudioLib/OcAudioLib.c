@@ -60,7 +60,7 @@ mAudioProtocol = {
     .Connect            = InternalOcAudioConnect,
     .SetProvider        = InternalOcAudioSetProvider,
     .PlayFile           = InternalOcAudioPlayFile,
-    .StopPlayback       = InternalOcAudioStopPlayBack,
+    .StopPlayback       = InternalOcAudioStopPlayback,
     .SetDelay           = InternalOcAudioSetDelay
   },
   .BeepGen         = {

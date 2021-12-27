@@ -86,7 +86,7 @@ InternalOcAudioPlayFile (
 
 EFI_STATUS
 EFIAPI
-InternalOcAudioStopPlayBack (
+InternalOcAudioStopPlayback (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     BOOLEAN                    Wait
   );
