@@ -12,6 +12,7 @@ OpenCore Changelog
 - Added autodetected Cirrus Logic GPIO enable to allow UEFI sound on Apple hardware
 - Added workarounds for bugs in QEMU intel-hda driver to allow UEFI sound in QEMU
 - Implemented multi-channel (e.g. bass+main speaker; speakers+headphones) UEFI sound configured with `AudioOutMask`
+- Fixed AudioDxe startup stalls when Nvidia HDA audio present
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

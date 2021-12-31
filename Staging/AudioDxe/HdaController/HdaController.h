@@ -298,7 +298,7 @@ typedef struct {
 
 //
 // CORB reset does not stay high when set; affects VMware Fusion, but also
-// affects some real hardware:
+// some real hardware (at least Nvidia HDA controllers):
 // REF: https://github.com/acidanthera/bugtracker/issues/1908
 // For some years AudioDxe had this as default behaviour, and despite not
 // being to Intel HDA spec., it seems like retaining this may work best.
