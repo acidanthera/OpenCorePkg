@@ -279,26 +279,34 @@ typedef struct {
 // at all. Unfortunately, this has to be set for all systems because CORB/RIRB must be
 // set up to detect that we are on QEMU (at least if we rely only on reported controller
 // and codec vendor ids, since QEMU controller incorrectly reports as Intel).
+// TODO: If this causes problems, we may be able to use the previous quirk (which was
+// commented out, but worked somewhat) of setting RINTCNT to 0xFF, in order to make
+// QEMU run long enough to detect that it is QEMU and then only fully enable the rest
+// of this quirk when needed.
 // Problem:
 //  https://github.com/qemu/qemu/blob/a3607d/hw/audio/intel-hda.c#L331
 // Only available work-around:
 //  https://github.com/qemu/qemu/blob/a3607d/hw/audio/intel-hda.c#L561
 //
-#define HDA_CONTROLLER_QUIRK_QEMU_1   BIT0
+#define HDA_CONTROLLER_QUIRK_QEMU_1               BIT0
 
 //
 // Stream reset does not stay high when set.
 // REF: https://gitlab.com/qemu-project/qemu/-/issues/757
 //
-#define HDA_CONTROLLER_QUIRK_QEMU_2   BIT1
+#define HDA_CONTROLLER_QUIRK_QEMU_2               BIT1
 
 //
-// CORB reset does not stay high when set.
+// CORB reset does not stay high when set; affects VMware Fusion, but also
+// affects some real hardware:
+// REF: https://github.com/acidanthera/bugtracker/issues/1908
+// For some years AudioDxe had this as default behaviour, and despite not
+// being to Intel HDA spec., it seems like retaining this may work best.
 //
-#define HDA_CONTROLLER_QUIRK_VMWARE   BIT2
+#define HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET   BIT2
 
 #define HDA_CONTROLLER_QUIRK_INITIAL  ( \
-  HDA_CONTROLLER_QUIRK_QEMU_1 \
+  HDA_CONTROLLER_QUIRK_QEMU_1 | HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET \
   )
 
 struct _HDA_CONTROLLER_DEV {

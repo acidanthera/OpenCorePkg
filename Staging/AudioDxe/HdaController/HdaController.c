@@ -250,7 +250,7 @@ HdaControllerInitPciHw(
       return Status;
     }
   } else if (GET_PCI_VENDOR_ID (HdaControllerDev->VendorId) == VEN_VMWARE_ID) {
-    HdaControllerDev->Quirks |= HDA_CONTROLLER_QUIRK_VMWARE;
+    HdaControllerDev->Quirks |= HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET;
   }
 
   //

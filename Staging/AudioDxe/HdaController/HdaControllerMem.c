@@ -307,7 +307,7 @@ HdaControllerResetRingBuffer (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-    if (!(HdaRingBuffer->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_VMWARE)) {
+    if (!(HdaRingBuffer->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET)) {
       Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, HDA_REG_CORBRP_RST, HDA_REG_CORBRP_RST, MS_TO_NANOSECONDS (50), &HdaRingPointerPollResult);
       if (EFI_ERROR (Status)) {
         return Status;
