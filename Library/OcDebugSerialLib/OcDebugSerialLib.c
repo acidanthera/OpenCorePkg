@@ -417,7 +417,16 @@ VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
   IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL
+  )
+{
+}
+
+VOID
+DebugPrintDevicePathForHandle (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_HANDLE                Handle       OPTIONAL
   )
 {
 }

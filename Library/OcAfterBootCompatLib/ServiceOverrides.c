@@ -927,6 +927,17 @@ OcStartImage (
 /**
   UEFI Boot Services ExitBootServices override.
   Patches kernel entry point with jump to our KernelEntryPatchJumpBack().
+  
+  Notes:
+    - Most OSes attempt to call ExitBootServices more than once if it fails initially
+      (similar to OpenCore ForceExitBootServices)
+      - Therefore, OcExitBootServices may get called more than once
+      - However this should never be relied upon for correct operation
+    - Any logging within this call but before original ExitBootServices is attempted
+      (e.g. within a scheduled handler) may cause ExitBootServices to fail (e.g. it may
+      change the memory map by allocating), and should only be done, if at all, in the
+      case of unexpected errors
+    - Never log after original ExitBootServices has been attempted, not even on error
 **/
 STATIC
 EFI_STATUS

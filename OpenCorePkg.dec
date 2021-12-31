@@ -697,26 +697,43 @@
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
 
-  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot Services
+  ## event is triggered.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect itself.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect itself.<BR>
   ## @Prompt Disconnect the USB KeyBoard Driver when exitting Boot Services.
   gOpenCorePkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver|TRUE|BOOLEAN|0x00000002
 
-  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ##   FALSE - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver|TRUE|BOOLEAN|0x00000003
 
-  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect other drivers.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect other drivers.<BR>
   ## @Prompt Disconnect other drivers for the USB KeyBoard Driver to take precedence over them.
   gOpenCorePkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence|TRUE|BOOLEAN|0x00000004
+
+  ## Indicates whether audio codec setup code produces an error when no valid output bits are specified.<BR><BR>
+  ##   TRUE  - Produce an error.<BR>
+  ##   FALSE - No error, just play no sound.<BR>
+  ## @Prompt Audio codec setup code should produce an error when no valid output bits are specified.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs|TRUE|BOOLEAN|0x00000005
+
+  ## Indicates if AudioDxe will try to reset the PCI associated with the HDA controller on Exit Boot Services.<BR><BR>
+  ##   TRUE  - Register event to reset the controller on Exit Boot Services.<BR>
+  ##   FALSE - Do not reset the contoller on Exit Boot Services.<BR>
+  ## @Prompt AudioDxe will try to reset the HDA controller on Exit Boot Services.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices|TRUE|BOOLEAN|0x00000006
+
+  ## Indicates if AudioDxe will try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER
+  ## fails with access denied.<BR><BR>
+  ##   TRUE  - Use EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.<BR>
+  ##   FALSE - Do not use EFI_OPEN_PROTOCOL_GET_PROTOCOL.<BR>
+  ## @Prompt Try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|FALSE|BOOLEAN|0x00000007
 
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>

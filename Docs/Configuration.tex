@@ -6935,9 +6935,10 @@ with the boot menu.
   headphones plus speakers) as long as all the chosen outputs support the sound file format in use; if any do not then no
   sound will play and a warning will be logged.
 
-  When all available output channels on the codec support the available sound file format, then a value
-  of \texttt{-1} will play sound to all channels simultaneously. If this does not work, it will usually be quickest
-  to try each available output channel one by one, in order to work out which channel(s) to use.
+  When all available output channels on the codec support the available sound file format then a value
+  of \texttt{-1} will play sound to all channels simultaneously. If this does not work it will usually be quickest
+  to try each available output channel one by one, by setting \texttt{AudioOutMask} to \texttt{1}, \texttt{2},
+  \texttt{4}, etc., up to 2 \texttt{\^{}} \texttt{N - 1}, in order to work out which channel(s) produce sound.
 
   \item
   \texttt{AudioSupport}\\

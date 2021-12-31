@@ -6,6 +6,7 @@
 #include "HdaCodec.h"
 #include <Protocol/AudioIo.h>
 #include <Library/OcMiscLib.h>
+#include <Library/PcdLib.h>
 
 //
 // Cache playback setup.
@@ -260,11 +261,11 @@ HdaCodecAudioIoSetupPlayback(
   DEBUG((DEBUG_VERBOSE, "HdaCodecAudioIoSetupPlayback(): start\n"));
 
   // Basic settings caching.
-  if (mOutputIndexMask == OutputIndexMask &&
-      mVolume == Volume &&
-      mFreq == Freq &&
-      mBits == Bits &&
-      mChannels == Channels) {
+  if (mOutputIndexMask == OutputIndexMask
+      && mVolume == Volume
+      && mFreq == Freq
+      && mBits == Bits
+      && mChannels == Channels) {
     return EFI_SUCCESS;
   }
 
@@ -289,12 +290,10 @@ HdaCodecAudioIoSetupPlayback(
   }
   OutputIndexMask &= ~LShiftU64(MAX_UINT64, HdaCodecDev->OutputPortsCount);
 
-#if defined(HDA_CODEC_ERROR_ON_NO_OUTPUTS)
   // Fail visibily if nothing is requested.
-  if (OutputIndexMask == 0) {
+  if (PcdGetBool (PcdAudioCodecErrorOnNoOutputs) && OutputIndexMask == 0) {
     return EFI_INVALID_PARAMETER;
   }
-#endif
 
   // Avoid Coverity warnings (the bit mask checks actually ensure that these cannot be used uninitialised).
   StreamBits = 0;
@@ -481,12 +480,10 @@ HdaCodecAudioIoSetupPlayback(
   // Save requested outputs.
   AudioIoPrivateData->SelectedOutputIndexMask = OutputIndexMask;
 
-#if !defined(HDA_CODEC_ERROR_ON_NO_OUTPUTS)
   // Nothing to play.
   if (OutputIndexMask == 0) {
     return EFI_SUCCESS;
   }
-#endif
 
   // Calculate stream format and setup stream.
   StreamFmt = HDA_CONVERTER_FORMAT_SET(Channels - 1, StreamBits,

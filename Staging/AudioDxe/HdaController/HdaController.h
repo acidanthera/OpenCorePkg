@@ -323,6 +323,8 @@ struct _HDA_CONTROLLER_DEV {
   // PCI.
   UINT64 OriginalPciAttributes;
   BOOLEAN OriginalPciAttributesSaved;
+  UINT16 OriginalPciDeviceControl;
+  BOOLEAN OriginalPciDeviceControlSaved;
 
   // Published info protocol.
   HDA_CONTROLLER_INFO_PRIVATE_DATA *HdaControllerInfoData;
@@ -353,7 +355,7 @@ struct _HDA_CONTROLLER_DEV {
 
   // Events.
   EFI_EVENT ResponsePollTimer;
-  EFI_EVENT ExitBootServiceEvent;
+  EFI_EVENT ExitBootServicesEvent;
   SPIN_LOCK SpinLock;
 
   // Required quirks. 
@@ -495,7 +497,8 @@ HdaControllerStreamOutputPollTimerHandler (
 EFI_STATUS
 EFIAPI
 HdaControllerReset (
-  IN HDA_CONTROLLER_DEV *HdaControllerDev
+  IN HDA_CONTROLLER_DEV *HdaControllerDev,
+  IN BOOLEAN            Restart
   );
 
 EFI_STATUS

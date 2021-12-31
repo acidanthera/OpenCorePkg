@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Jan  2 00:29:23 2022
-%DIF ADD ../Configuration.tex        Sun Jan  2 00:33:00 2022
+%DIF DEL PreviousConfiguration.tex   Sun Dec 12 09:04:19 2021
+%DIF ADD ../Configuration.tex        Sun Jan  2 08:49:19 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -7014,12 +7014,11 @@ with the boot menu.
   sound will play and a warning will be logged.
 }
 
-  \DIFadd{When all available output channels on the codec support the available sound file format, then a value
+  \DIFadd{When all available output channels on the codec support the available sound file format then a value
   of }\DIFaddend \texttt{\DIFdelbegin \DIFdel{0}%DIFDELCMD < \MBLOCKRIGHTBRACE %%%
-\DIFdel{to }\texttt{\DIFdel{N - 1}}%DIFAUXCMD
-\DIFdel{. }\DIFdelend \DIFaddbegin \DIFadd{-1}} \DIFadd{will play sound to all channels simultaneously. If this does not work, it will usually be quickest
-  to try each available output channel one by one, in order to work out which channel(s) to use.
-}\DIFaddend 
+\DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{-1}} \DIFadd{will play sound to all channels simultaneously. If this does not work it will usually be quickest
+  to try each available output channel one by one, by setting }\texttt{\DIFadd{AudioOutMask}} \DIFadd{to }\texttt{\DIFadd{1}}\DIFadd{, }\texttt{\DIFadd{2}}\DIFadd{,
+  }\texttt{\DIFadd{4}}\DIFadd{, etc., up to 2 }\texttt{\DIFadd{\^{}}} \DIFaddend \texttt{N - 1}\DIFaddbegin \DIFadd{, in order to work out which channel(s) produce sound}\DIFaddend .
 
   \item
   \texttt{AudioSupport}\\

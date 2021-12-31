@@ -56,7 +56,7 @@
 #include <Protocol/HdaControllerInfo.h>
 
 // Driver version
-#define AUDIODXE_VERSION        0xA
+#define AUDIODXE_VERSION        0xB
 #define AUDIODXE_PKG_VERSION    1
 
 // Driver Bindings.

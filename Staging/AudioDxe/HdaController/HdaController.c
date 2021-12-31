@@ -27,9 +27,11 @@
 
 #include <Library/OcGuardLib.h>
 #include <Library/OcDeviceMiscLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/PcdLib.h>
 
 VOID
 EFIAPI
@@ -265,6 +267,10 @@ HdaControllerInitPciHw(
   // If No Snoop is currently enabled, disable it.
   //
   if (HdaDevC & PCI_HDA_DEVC_NOSNOOPEN) {
+    DEBUG ((DEBUG_INFO, "HDA: Controller disable no snoop\n"));
+    HdaControllerDev->OriginalPciDeviceControl = HdaDevC;
+    HdaControllerDev->OriginalPciDeviceControlSaved = TRUE;
+
     HdaDevC &= ~PCI_HDA_DEVC_NOSNOOPEN;
     Status = PciIo->Pci.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_DEVC_OFFSET, 1, &HdaDevC);
     if (EFI_ERROR (Status)) {
@@ -324,10 +330,51 @@ HdaControllerGetName (
   DEBUG ((DEBUG_INFO, "HDA: Controller is %s\n", HdaControllerDev->Name));
 }
 
+STATIC
+EFI_STATUS
+HdaControllerRestoreNoSnoopEn (
+  IN HDA_CONTROLLER_DEV *HdaControllerDev
+  )
+{
+  EFI_PCI_IO_PROTOCOL *PciIo;
+
+  if (!HdaControllerDev->OriginalPciDeviceControlSaved) {
+    return EFI_SUCCESS;
+  }
+
+  PciIo = HdaControllerDev->PciIo;
+
+  DEBUG ((DEBUG_VERBOSE, "HdaControllerCleanup(): restore PCI device control\n"));
+  return PciIo->Pci.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_DEVC_OFFSET, 1, &HdaControllerDev->OriginalPciDeviceControl);
+}
+
+STATIC
+VOID
+EFIAPI
+HdaControllerExitBootServicesHandler (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  HDA_CONTROLLER_DEV *HdaControllerDev;
+
+  HdaControllerDev = Context;
+
+  //
+  // Restore No Snoop Enable bit at Exit Boot Services to avoid breaking in-OS sound in Windows with some firmware.
+  // Note: Windows sound is fine even without this on many systems where AudioDxe disables No Snoop.
+  // REF: https://github.com/acidanthera/bugtracker/issues/1909
+  // REF: https://github.com/acidanthera/bugtracker/issues/740#issuecomment-998762564
+  // REF: Intel I/O Controller Hub 9 (ICH9) Family Datasheet (DEVC - Device Conrol Register/NSNPEN)
+  //
+  HdaControllerRestoreNoSnoopEn (HdaControllerDev);
+}
+
 EFI_STATUS
 EFIAPI
 HdaControllerReset (
-  IN HDA_CONTROLLER_DEV *HdaControllerDev
+  IN HDA_CONTROLLER_DEV *HdaControllerDev,
+  IN BOOLEAN            Restart
   ) 
 {
   DEBUG ((DEBUG_VERBOSE, "HdaControllerReset(): start\n"));
@@ -359,6 +406,24 @@ HdaControllerReset (
     //
     Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_GCTL,
       HDA_REG_GCTL_CRST, 0, MS_TO_NANOSECONDS (100), &Tmp);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+  }
+
+  if (!Restart) {
+    return EFI_SUCCESS;
+  }
+
+  if (PcdGetBool (PcdAudioControllerResetPciOnExitBootServices)
+    && HdaControllerDev->ExitBootServicesEvent == NULL) {
+    Status = gBS->CreateEvent (
+      EVT_SIGNAL_EXIT_BOOT_SERVICES,
+      TPL_CALLBACK,
+      HdaControllerExitBootServicesHandler,
+      HdaControllerDev,
+      &HdaControllerDev->ExitBootServicesEvent
+      );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -734,19 +799,27 @@ HdaControllerInstallProtocols (
 
 VOID
 EFIAPI
-HdaControllerCleanup(
-  IN HDA_CONTROLLER_DEV *HdaControllerDev) {
+HdaControllerCleanup (
+  IN HDA_CONTROLLER_DEV *HdaControllerDev
+  )
+{
+  EFI_STATUS            Status;
+  EFI_PCI_IO_PROTOCOL   *PciIo;
+
   DEBUG((DEBUG_VERBOSE, "HdaControllerCleanup(): start\n"));
 
   // If controller device is already free, we are done.
   if (HdaControllerDev == NULL)
     return;
 
-  // Create variables.
-  EFI_STATUS Status;
-  EFI_PCI_IO_PROTOCOL *PciIo = HdaControllerDev->PciIo;
-  UINT32 HdaGCtl;
+  PciIo = HdaControllerDev->PciIo;
 
+  // Clear ExitBootServices event.
+  if (HdaControllerDev->ExitBootServicesEvent != NULL) {
+    gBS->CloseEvent (HdaControllerDev->ExitBootServicesEvent);
+    HdaControllerDev->ExitBootServicesEvent = NULL;
+  }
+  
   // Clean HDA Controller info protocol.
   if (HdaControllerDev->HdaControllerInfoData != NULL) {
     // Uninstall protocol.
@@ -793,16 +866,26 @@ HdaControllerCleanup(
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Corb, HDA_RING_BUFFER_TYPE_CORB);
   HdaControllerCleanupRingBuffer (&HdaControllerDev->Rirb, HDA_RING_BUFFER_TYPE_RIRB);
 
-  // Get value of CRST bit.
-  Status = PciIo->Mem.Read(PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_GCTL, 1, &HdaGCtl);
-
   // Place controller into a reset state to stop it.
-  if (!(EFI_ERROR(Status))) {
-    HdaGCtl &= ~HDA_REG_GCTL_CRST;
-    Status = PciIo->Mem.Write(PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_GCTL, 1, &HdaGCtl);
+  HdaControllerReset (HdaControllerDev, FALSE);
+
+  //
+  // Restore PCI device control and attributes if needed.
+  //
+  HdaControllerRestoreNoSnoopEn (HdaControllerDev);
+
+  if (HdaControllerDev->OriginalPciAttributesSaved) {
+    DEBUG((DEBUG_VERBOSE, "HdaControllerCleanup(): restore PCI attributes\n"));
+    PciIo->Attributes (
+      PciIo,
+      EfiPciIoAttributeOperationSet,
+      HdaControllerDev->OriginalPciAttributes,
+      NULL
+      );
   }
 
   // Free controller device.
+  DEBUG((DEBUG_VERBOSE, "HdaControllerCleanup(): free controller device\n"));
   gBS->UninstallProtocolInterface(HdaControllerDev->ControllerHandle,
     &gEfiCallerIdGuid, HdaControllerDev);
   FreePool(HdaControllerDev);
@@ -872,20 +955,11 @@ HdaControllerDriverBindingStart (
   EFI_DEVICE_PATH_PROTOCOL  *HdaControllerDevicePath;
   HDA_CONTROLLER_DEV        *HdaControllerDev;
   UINT32                    OpenMode;
-  CHAR16                    *DevicePath;
 
   //
   // Identify device by the path required to access it in config.plist.
   //
-  DevicePath = ConvertDevicePathToText (
-    DevicePathFromHandle (ControllerHandle),
-    FALSE,
-    FALSE
-    );
-  DEBUG ((DEBUG_INFO, "HDA: Connecting controller %s\n", DevicePath));
-  if (DevicePath != NULL) {
-    FreePool (DevicePath);
-  }
+  DebugPrintDevicePathForHandle (DEBUG_INFO, "HDA: Connecting controller", ControllerHandle);
 
   OpenMode = EFI_OPEN_PROTOCOL_BY_DRIVER;
 
@@ -894,19 +968,33 @@ HdaControllerDriverBindingStart (
   // Access Denied typically means OpenCore DisconnectHda quirk is required
   // to free up the controller, e.g. on Apple hardware or VMware Fusion.
   //
-  Status = gBS->OpenProtocol (
-    ControllerHandle,
-    &gEfiPciIoProtocolGuid,
-    (VOID**) &PciIo,
-    This->DriverBindingHandle,
-    ControllerHandle,
-    OpenMode
-    );
+  do {
+    Status = gBS->OpenProtocol (
+      ControllerHandle,
+      &gEfiPciIoProtocolGuid,
+      (VOID**) &PciIo,
+      This->DriverBindingHandle,
+      ControllerHandle,
+      OpenMode
+      );
 
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "HDA: Open PCI IO protocol - %r\n", Status));
-    return Status;
-  }
+    if (EFI_ERROR (Status)) {
+      if (PcdGetBool (PcdAudioControllerTryProtocolGetMode)
+        && Status == EFI_ACCESS_DENIED
+        && OpenMode == EFI_OPEN_PROTOCOL_BY_DRIVER) {
+        //
+        // No longer applied just if protocol gVMwareHdaProtocolGuid is found, since it also
+        // allows sound on other devices where HDA controller is already connected, e.g. Macs.
+        // Now on Pcd because it appears never to be needed if DisconnectHda is applied.
+        //
+        DEBUG ((DEBUG_INFO, "HDA: %r using DRIVER mode, trying GET mode\n", Status));
+        OpenMode = EFI_OPEN_PROTOCOL_GET_PROTOCOL;
+        continue;
+      }
+      DEBUG ((DEBUG_WARN, "HDA: Open PCI I/O protocol (try DisconnectHda quirk?) - %r\n", Status));
+      return Status;
+    }
+  } while (EFI_ERROR (Status));
 
   //
   // Open Device Path protocol.
@@ -962,7 +1050,7 @@ HdaControllerDriverBindingStart (
   //
   // Reset controller.
   //
-  Status = HdaControllerReset (HdaControllerDev);
+  Status = HdaControllerReset (HdaControllerDev, TRUE);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "HDA: Controller reset - %r\n", Status));
     goto FREE_CONTROLLER;
@@ -1040,18 +1128,6 @@ HdaControllerDriverBindingStart (
 FREE_CONTROLLER:
 
   //
-  // Restore PCI attributes if needed.
-  //
-  if (HdaControllerDev->OriginalPciAttributesSaved) {
-    PciIo->Attributes (
-      PciIo,
-      EfiPciIoAttributeOperationSet,
-      HdaControllerDev->OriginalPciAttributes,
-      NULL
-      );
-  }
-
-  //
   // Free controller device.
   //
   HdaControllerCleanup (HdaControllerDev);
@@ -1092,12 +1168,15 @@ HdaControllerDriverBindingStop (
   HDA_CONTROLLER_DEV  *HdaControllerDev;
   UINT32              OpenMode;
 
-  DEBUG ((DEBUG_INFO, "HDA: Stopping for %p\n", ControllerHandle));
+  //
+  // Identify device by the path required to access it in config.plist.
+  //
+  DebugPrintDevicePathForHandle (DEBUG_INFO, "HDA: Disconnecting controller", ControllerHandle);
 
   OpenMode = EFI_OPEN_PROTOCOL_BY_DRIVER;
 
   //
-  // Get codec device.
+  // Get controller device.
   //
   Status = gBS->OpenProtocol (
     ControllerHandle,
@@ -1109,6 +1188,7 @@ HdaControllerDriverBindingStop (
     );
 
   if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_VERBOSE, "HDA: Cleaning up\n"));
     //
     // Gather open mode.
     //
@@ -1122,18 +1202,6 @@ HdaControllerDriverBindingStop (
     }
 
     //
-    // Restore PCI attributes if needed.
-    //
-    if (HdaControllerDev->OriginalPciAttributesSaved) {
-      HdaControllerDev->PciIo->Attributes (
-        HdaControllerDev->PciIo,
-        EfiPciIoAttributeOperationSet,
-        HdaControllerDev->OriginalPciAttributes,
-        NULL
-        );
-    }
-
-    //
     // Cleanup controller.
     //
     HdaControllerCleanup (HdaControllerDev);
@@ -1143,21 +1211,23 @@ HdaControllerDriverBindingStop (
   // Close protocols.
   //
   if (OpenMode == EFI_OPEN_PROTOCOL_BY_DRIVER) {
-    gBS->CloseProtocol (
+    Status = gBS->CloseProtocol (
       ControllerHandle,
       &gEfiDevicePathProtocolGuid,
       This->DriverBindingHandle,
       ControllerHandle
       );
-    gBS->CloseProtocol (
+    DEBUG ((DEBUG_VERBOSE, "HDA: Close device path protocol - %r\n", Status));
+    Status = gBS->CloseProtocol (
       ControllerHandle,
       &gEfiPciIoProtocolGuid,
       This->DriverBindingHandle,
       ControllerHandle
       );
+    DEBUG ((DEBUG_VERBOSE, "HDA: Close PCI I/O protocol - %r\n", Status));
   }
 
-  DEBUG ((DEBUG_INFO, "HDA: Stopping done for %p\n", ControllerHandle));
+  DEBUG ((DEBUG_INFO, "HDA: Disconnected\n"));
 
   return EFI_SUCCESS;
 }

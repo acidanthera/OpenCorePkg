@@ -22,6 +22,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcDriverConnectionLib.h>
 #include <Library/OcHdaDevicesLib.h>
@@ -243,8 +244,9 @@ OcDisconnectHdaControllers (
         continue;
       }
 
+      DebugPrintDevicePathForHandle (DEBUG_INFO, "OCDC: Disconnecting audio controller", HandleBuffer[Index]);
       Status = gBS->DisconnectController (HandleBuffer[Index], NULL, NULL);
-      DEBUG ((DEBUG_INFO, "OCDC: Disconnected audio controller handle %u - %p result - %r\n", Index, HandleBuffer[Index], Status));
+      DEBUG ((DEBUG_INFO, "OCDC: Disconnected - %r\n", Status));
     }
 
     FreePool (HandleBuffer);

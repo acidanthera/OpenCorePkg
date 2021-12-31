@@ -60,6 +60,11 @@
   gEfiAudioDecodeProtocolGuid         # PRODUCES
   gVMwareHdaProtocolGuid              # SOMETIMES_CONSUMES
 
+[FeaturePcd]
+  gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs                ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode         ## CONSUMES
+
 [Sources]
   HdaCodec/HdaCodecComponentName.h
   HdaCodec/HdaCodecComponentName.c
