@@ -125,6 +125,7 @@ AppleModelYear:
   - 2019
   - 2020
   - 2021
+  - 2022
 MinimumOSVersion: "10.14"
 MaximumOSVersion: null
 AppleModelId: "J174"

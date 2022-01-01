@@ -109,6 +109,7 @@ AppleBoardCode:
 AppleModelYear:
   - 2020
   - 2021
+  - 2022
 MinimumOSVersion: "10.15.6"
 MaximumOSVersion: null
 AppleModelId: "J185F"
