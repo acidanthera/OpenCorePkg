@@ -101,28 +101,6 @@ struct _HDA_FUNC_GROUP {
   UINT8 WidgetsCount;
 };
 
-//
-// Quirks.
-//
-
-//
-// Apple hardware Cirrus logic codecs require speakers and headphones bits set
-// in GPIO to enable sound. Speakers are always BIT3, headphones are BIT1 or BIT2
-// depending on the model; we just enable all.
-// REF:
-// - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L43-L57
-// - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L493-L517
-//
-#define HDA_CODEC_QUIRK_CIRRUSLOGIC      BIT0
-
-#define HDA_CIRRUSLOGIC_GPIO_HEADPHONES1  BIT1
-#define HDA_CIRRUSLOGIC_GPIO_HEADPHONES2  BIT2
-#define HDA_CIRRUSLOGIC_GPIO_SPEAKERS     BIT3
-#define HDA_CIRRUSLOGIC_GPIO_ALL    (\
-  HDA_CIRRUSLOGIC_GPIO_HEADPHONES1  |\
-  HDA_CIRRUSLOGIC_GPIO_HEADPHONES2  |\
-  HDA_CIRRUSLOGIC_GPIO_SPEAKERS     )
-
 struct _HDA_CODEC_DEV {
   // Signature.
   UINTN Signature;
@@ -150,9 +128,6 @@ struct _HDA_CODEC_DEV {
   HDA_WIDGET_DEV **InputPorts;
   UINTN OutputPortsCount;
   UINTN InputPortsCount;
-
-  // Required quirks. 
-  UINTN Quirks;
 };
 
 // HDA Codec Info private data.

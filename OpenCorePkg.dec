@@ -735,6 +735,12 @@
   ## @Prompt Try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.
   gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|FALSE|BOOLEAN|0x00000007
 
+  ## Indicates if AudioDxe will use Pin Capabilities to identify outputs.<BR><BR>
+  ##   TRUE  - Use Pin Capabilities to identify outputs.<BR>
+  ##   FALSE - Use default device type to identify outputs.<BR>
+  ## @Prompt Use Pin Capabilities to identify audio outputs.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs|TRUE|BOOLEAN|0x00000008
+
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>
   ##   0 - EfiConsoleControlScreenText<BR>

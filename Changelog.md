@@ -6,16 +6,17 @@ OpenCore Changelog
 - Fixed typo in `Cpuid1Data` recommendations for Intel Rocket Lake and newer
 - Updated builtin firmware versions for SMBIOS and the rest
 - Updated underlying EDK II package to edk2-stable202111
-- Resolved two possible crashes in QEMU in AudioDxe
+- Resolved crashes in QEMU with AudioDxe
 - Added AudioDxe settings caching (avoids non-needed setup delays)
-- Added DisconnectHda quirk to allow UEFI sound on Apple hardware (and others)
-- Added autodetected Cirrus Logic GPIO quirk to enable UEFI audio on some Apple hardware
-- Added workarounds for bugs in QEMU intel-hda driver to allow UEFI sound in QEMU
+- Added DisconnectHda quirk to allow UEFI sound on Apple hardware and others
+- Added workarounds for bugs in QEMU `intel-hda` driver to allow UEFI sound in QEMU
 - Implemented multi-channel (e.g. bass+main speaker; speakers+headphones) UEFI sound with `AudioOutMask`
-- Fixed AudioDxe startup stalls when Nvidia HDA audio present
+- Fixed AudioDxe startup stalls when Nvidia HDA audio is present
 - Resolved AudioDxe disabling sound in Windows on some firmware
 - Added pointer polling period tuning in the builtin AppleEvent implementation
 - Added pointer device list tuning in the builtin AppleEvent implementation
+- Added audio GPIO and VREF handling to support UEFI sound on more Apple hardware
+- Updated audio output channel detection to support UEFI sound on more Apple hardware
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

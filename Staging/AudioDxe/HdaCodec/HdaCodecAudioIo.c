@@ -243,7 +243,9 @@ HdaCodecAudioIoSetupPlayback(
   EFI_HDA_IO_PROTOCOL *HdaIo;
   UINTN Index;
   UINT64 IndexMask;
-  UINT32 GpioData;
+  UINT32 Response;
+  UINT8 NumGpios;
+  UINT8 Payload;
 
   // Widgets.
   HDA_WIDGET_DEV *PinWidget;
@@ -503,13 +505,50 @@ HdaCodecAudioIoSetupPlayback(
       goto CLOSE_STREAM;
   }
 
-  // Apply any codec-specific quirks.
-  if (HdaCodecDev->Quirks & HDA_CODEC_QUIRK_CIRRUSLOGIC) {
-    Status = HdaIo->SendCommand (HdaIo, 0x01,
-      HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, HDA_CIRRUSLOGIC_GPIO_ALL), &GpioData);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "HDA: Failed to apply Cirrus Logic output enable, continuing anyway\n"));
+  //
+  // Enable any GPIO pins. This is similar to how Linux drivers enable audio on e.g. Cirrus Logic and
+  // Realtek devices on Mac, by enabling specific GPIO pins as required, but this is an attempt to
+  // make a more general purpose system.
+  // REF:
+  // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L43-L57
+  // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L493-L517
+  // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_realtek.c#L244-L258
+  //
+  NumGpios = HDA_PARAMETER_GPIO_COUNT_NUM_GPIOS (HdaCodecDev->AudioFuncGroup->GpioCapabilities);
+  if (NumGpios) {
+    ASSERT (NumGpios <= 7); ///< According to Intel HDA spec this can be from 0 to 7
+    Payload = (1 << NumGpios) - 1; ///< Enable all available pins
+    Status = HdaIo->SendCommand (
+      HdaIo,
+      HdaCodecDev->AudioFuncGroup->NodeId,
+      HDA_CODEC_VERB (HDA_VERB_SET_GPIO_ENABLE_MASK, Payload),
+      &Response
+      );
+    if (!EFI_ERROR (Status)) {
+      Status = HdaIo->SendCommand (
+        HdaIo,
+        HdaCodecDev->AudioFuncGroup->NodeId,
+        HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DIRECTION, Payload),
+        &Response
+        );
     }
+    if (!EFI_ERROR (Status)) {
+      gBS->Stall (MS_TO_MICROSECONDS (1));
+      Status = HdaIo->SendCommand (
+        HdaIo,
+        HdaCodecDev->AudioFuncGroup->NodeId,
+        HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, Payload),
+        &Response
+        );
+    }
+    DEBUG ((
+      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+      "HDA: GPIO output enable 0x%02X - %r\n",
+      Payload,
+      Status
+      ));
+    if (EFI_ERROR(Status))
+      goto CLOSE_STREAM;
   }
   
   //

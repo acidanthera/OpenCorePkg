@@ -580,10 +580,6 @@ HdaCodecProbeCodec(
     return Status;
   DEBUG((DEBUG_INFO, "HDA:  | Codec ID: 0x%X:0x%X\n", HDA_PARAMETER_VENDOR_ID_VEN(HdaCodecDev->VendorId), HDA_PARAMETER_VENDOR_ID_DEV(HdaCodecDev->VendorId)));
 
-  if (GET_CODEC_VENDOR_ID(HdaCodecDev->VendorId) == VEN_CIRRUSLOGIC_ID) {
-    HdaCodecDev->Quirks |= HDA_CODEC_QUIRK_CIRRUSLOGIC;
-  }
-
   // Get revision ID.
   Status = HdaIo->SendCommand(HdaIo, HDA_NID_ROOT,
     HDA_CODEC_VERB(HDA_VERB_GET_PARAMETER, HDA_PARAMETER_REVISION_ID), &HdaCodecDev->RevisionId);
@@ -673,16 +669,20 @@ HdaCodecFindUpstreamOutput(
 EFI_STATUS
 EFIAPI
 HdaCodecParsePorts(
-  IN HDA_CODEC_DEV *HdaCodecDev) {
-  //DEBUG((DEBUG_INFO, "HdaCodecParsePorts(): start\n"));
-
-  // Create variables.
+  IN HDA_CODEC_DEV *HdaCodecDev
+  )
+{
   EFI_STATUS Status;
-  EFI_HDA_IO_PROTOCOL *HdaIo = HdaCodecDev->HdaIo;
+  EFI_HDA_IO_PROTOCOL *HdaIo;
   HDA_FUNC_GROUP *HdaFuncGroup;
   HDA_WIDGET_DEV *HdaWidget;
   UINT8 DefaultDeviceType;
   UINT32 Response;
+  BOOLEAN IsOutput;
+
+  //DEBUG((DEBUG_INFO, "HdaCodecParsePorts(): start\n"));
+
+  HdaIo = HdaCodecDev->HdaIo;
 
   // Loop through each function group.
   for (UINT8 f = 0; f < HdaCodecDev->FuncGroupsCount; f++) {
@@ -699,16 +699,33 @@ HdaCodecParsePorts(
       // If the default association for the pin complex is zero, also ignore it.
       if ((HdaWidget->Type != HDA_WIDGET_TYPE_PIN_COMPLEX) ||
         (HDA_VERB_GET_CONFIGURATION_DEFAULT_PORT_CONN(HdaWidget->DefaultConfiguration) == HDA_CONFIG_DEFAULT_PORT_CONN_NONE) ||
-        (HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION(HdaWidget->DefaultConfiguration) == 0))
+        (HDA_VERB_GET_CONFIGURATION_DEFAULT_ASSOCIATION(HdaWidget->DefaultConfiguration) == 0)) {
+        DEBUG((
+          DEBUG_VERBOSE,
+          "HDA:  | Ignoring widget @ 0x%X\n",
+          HdaWidget->NodeId
+          ));
         continue;
+      }
 
-      // Determine if port is an output based on the device type.
-      // The types reported here do not correspond particularly well to the real hardware.
-      DefaultDeviceType = HDA_VERB_GET_CONFIGURATION_DEFAULT_DEVICE(HdaWidget->DefaultConfiguration);
-      if ((DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_LINE_OUT) || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPEAKER) ||
-        (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_HEADPHONE_OUT) || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPDIF_OUT) ||
-        (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_OTHER_DIGITAL_OUT)) {
+      if (PcdGetBool (PcdAudioControllerUsePinCapsForOutputs)) {
+        // Use PinCaps to identify all pin complexes which can be configured as outputs.
+        // On certain systes, e.g. MacPro5,1, ports which are inputs according to default
+        // type are the correct output channels to use on the system.
+        IsOutput = (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_OUTPUT) != 0;
+      } else {
+        // Determine if port is an output based on the default device type.
+        // The types reported here do not correspond particularly well to the real hardware.
+        DefaultDeviceType = HDA_VERB_GET_CONFIGURATION_DEFAULT_DEVICE(HdaWidget->DefaultConfiguration);
 
+        IsOutput = (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_LINE_OUT)
+          || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPEAKER)
+          || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_HEADPHONE_OUT)
+          || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_SPDIF_OUT)
+          || (DefaultDeviceType == HDA_CONFIG_DEFAULT_DEVICE_OTHER_DIGITAL_OUT);
+      }
+
+      if (IsOutput) {
         // Try to get upstream output.
         Status = HdaCodecFindUpstreamOutput(HdaWidget, 0);
         if (EFI_ERROR(Status)) {
@@ -721,25 +738,13 @@ HdaCodecParsePorts(
           continue;
         }
 
-        // Enable output amp.
-        Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId, HDA_CODEC_VERB(HDA_VERB_SET_PIN_WIDGET_CONTROL,
-          HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD(0, FALSE, FALSE, TRUE, FALSE)), &Response);
-        if (EFI_ERROR(Status)) {
-          DEBUG((
-            DEBUG_WARN,
-            "HDA: Widget @ 0x%X enable output amp - %r\n",
-            HdaWidget->NodeId,
-            Status
-            ));
-          continue;
-        }
-
         // Report output.
         DEBUG((
           DEBUG_INFO,
           "HDA:  | Port widget @ 0x%X is an output (pin defaults 0x%X) (bitmask %u)\n",
           HdaWidget->NodeId,
-          HdaWidget->DefaultConfiguration, 1 << HdaCodecDev->OutputPortsCount
+          HdaWidget->DefaultConfiguration,
+          1 << HdaCodecDev->OutputPortsCount
           ));
 
         // If EAPD is present, enable.
@@ -945,7 +950,7 @@ HdaCodecDisableWidgetPath(
     // If widget is a pin complex, disable output.
     if (HdaWidget->Type == HDA_WIDGET_TYPE_PIN_COMPLEX) {
       Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId, HDA_CODEC_VERB(HDA_VERB_SET_PIN_WIDGET_CONTROL,
-        HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD(0, FALSE, FALSE, FALSE, FALSE)), &Response);
+        HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD(0, FALSE, FALSE, FALSE)), &Response);
       if (EFI_ERROR(Status))
         return Status;
     }
@@ -964,17 +969,22 @@ HdaCodecEnableWidgetPath(
   IN HDA_WIDGET_DEV *HdaWidget,
   IN UINT8 Volume,
   IN UINT8 StreamId,
-  IN UINT16 StreamFormat) {
+  IN UINT16 StreamFormat
+  )
+{
+  EFI_STATUS Status;
+  EFI_HDA_IO_PROTOCOL *HdaIo;
+  UINT32 Response;
+  UINT8 VrefCaps;
+  UINT8 VrefCtrl;
+
   //DEBUG((DEBUG_INFO, "HdaCodecEnableWidgetPath(): start\n"));
 
   // Check if widget is valid.
   if ((HdaWidget == NULL) || (Volume > EFI_AUDIO_IO_PROTOCOL_MAX_VOLUME))
     return EFI_INVALID_PARAMETER;
 
-  // Create variables.
-  EFI_STATUS Status;
-  EFI_HDA_IO_PROTOCOL *HdaIo = HdaWidget->FuncGroup->HdaCodecDev->HdaIo;
-  UINT32 Response;
+  HdaIo = HdaWidget->FuncGroup->HdaCodecDev->HdaIo;
 
   // Crawl through widget path.
   while (HdaWidget != NULL) {
@@ -982,8 +992,37 @@ HdaCodecEnableWidgetPath(
 
     // If pin complex, set as output.
     if (HdaWidget->Type == HDA_WIDGET_TYPE_PIN_COMPLEX) {
-      Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId, HDA_CODEC_VERB(HDA_VERB_SET_PIN_WIDGET_CONTROL,
-        HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD(0, FALSE, FALSE, TRUE, FALSE)), &Response);
+      VrefCaps = HDA_PARAMETER_PIN_CAPS_VREF (HdaWidget->PinCapabilities);
+
+      // If voltage reference control is available, choose the lowest supported voltage.
+      // This is similar to how Linux drivers enable audio e.g. on Realtek devices on Mac,
+      // but this is an attempt to make a more general purpose system.
+      // REF: https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_realtek.c#L1999-L2012
+      VrefCtrl = HDA_PIN_WIDGET_CONTROL_VREF_HIZ;
+      if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_50) {
+        VrefCtrl = HDA_PIN_WIDGET_CONTROL_VREF_50;
+      } else if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_80) {
+        VrefCtrl = HDA_PIN_WIDGET_CONTROL_VREF_80;
+      } else if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_100) {
+        VrefCtrl = HDA_PIN_WIDGET_CONTROL_VREF_100;
+      }
+
+      Status = HdaIo->SendCommand (
+        HdaIo,
+        HdaWidget->NodeId,
+        HDA_CODEC_VERB (
+          HDA_VERB_SET_PIN_WIDGET_CONTROL,
+          HDA_VERB_SET_PIN_WIDGET_CONTROL_PAYLOAD (VrefCtrl, FALSE, TRUE, FALSE)
+          ),
+        &Response
+        );
+      DEBUG ((
+        EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+        "HDA: Widget @ 0x%X enable output amp vref %u - %r\n",
+        HdaWidget->NodeId,
+        VrefCtrl,
+        Status
+        ));
       if (EFI_ERROR(Status))
         return Status;
 

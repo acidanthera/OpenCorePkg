@@ -64,6 +64,7 @@
   gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs                ## CONSUMES
   gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices ## CONSUMES
   gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode         ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs       ## CONSUMES
 
 [Sources]
   HdaCodec/HdaCodecComponentName.h

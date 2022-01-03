@@ -6952,14 +6952,15 @@ with the boot menu.
   \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
   \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
-  If using \texttt{AudioDxe}, the required device path is also output as:
+  If using \texttt{AudioDxe}, the available controller device paths are also output on lines formatted like this:
 
   \texttt{HDA: Connecting controller - \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}}
 
   Finally, \texttt{gfxutil -f HDEF} command can be used in macOS to obtain the device path.
   
-  Specifying an empty device path will result in the first available audio controller being used, and can
-  be a convenient option to get UEFI audio working if only one audio controller is present.
+  Specifying an empty device path results in the first available codec and audio controller being used. The value
+  of \texttt{AudioCodec} is ignored in this case. This can be a convenient initial option to try to get UEFI
+  audio working. Manual settings as above will be required when this default value does not work.
 
 \item
   \texttt{AudioOutMask}\\
