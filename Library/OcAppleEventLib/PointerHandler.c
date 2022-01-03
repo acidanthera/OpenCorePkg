@@ -44,8 +44,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //         most machines. Poll with 10 ms, which matches the keyboard behaviour,
 //         and also is the minimum for QEMU.
 //
-#define MIN_POINTER_POLL_PERIOD  /*EFI_TIMER_PERIOD_MILLISECONDS*/ (10 * 10000)
-#define MAX_POINTER_POLL_PERIOD  /*EFI_TIMER_PERIOD_MILLISECONDS*/ (80 * 10000)
+#define MIN_POINTER_POLL_PERIOD  10
+#define MAX_POINTER_POLL_PERIOD  80
 
 GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedDiv = 0;
 GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedMul = 0;
@@ -92,8 +92,8 @@ STATIC EFI_EVENT mSimplePointerPollEvent = NULL;
 
 // mSimplePointerPollTime
 STATIC UINT64 mSimplePointerPollTime;
-STATIC UINT64 mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD;
-STATIC UINT64 mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD;
+STATIC UINT64 mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD * 10000;
+STATIC UINT64 mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD * 10000;
 
 STATIC UINT32 mSimplePointerPollMask = POINTER_POLL_ALL_MASK;
 
@@ -150,13 +150,13 @@ InternalSetPointerPolling (
     PointerPollMin = MIN_POINTER_POLL_PERIOD;
   }
 
-  mSimplePointerMinPollTime = PointerPollMin;
+  mSimplePointerMinPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMin);
 
   if (PointerPollMax == POINTER_POLL_DEFAULT) {
     PointerPollMax = MAX_POINTER_POLL_PERIOD;
   }
 
-  mSimplePointerMaxPollTime = PointerPollMax;
+  mSimplePointerMaxPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMax);
 
   mSimplePointerPollMask = PointerPollMask;
 }
