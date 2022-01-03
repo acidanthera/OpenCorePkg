@@ -191,6 +191,7 @@ CheckUefiAudio (
   UINT32                   ErrorCount;
   OC_UEFI_CONFIG           *UserUefi;
   BOOLEAN                  IsAudioSupportEnabled;
+  UINT64                   AudioOutMask;
   CONST CHAR8              *AsciiAudioDevicePath;
   CONST CHAR8              *AsciiPlayChime;
 
@@ -198,9 +199,15 @@ CheckUefiAudio (
   UserUefi                 = &Config->Uefi;
 
   IsAudioSupportEnabled    = UserUefi->Audio.AudioSupport;
+  AudioOutMask             = UserUefi->Audio.AudioOutMask;
   AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
   AsciiPlayChime           = OC_BLOB_GET (&UserUefi->Audio.PlayChime);
   if (IsAudioSupportEnabled) {
+    if (AudioOutMask == 0) {
+      DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioOutMask is zero when AudioSupport is enabled, no sound will play!\n"));
+      ++ErrorCount;
+    }
+
     if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));
       ++ErrorCount;
