@@ -6834,12 +6834,12 @@ with the boot menu.
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Configure minimal pointer polling period in ms.
 
-  This is the minimal period AppleEvent polls pointer devices (e.g. mice, trackpads)
-  for motion events. Defaults to 10 ms in the OpenCore AppleEvent implementation
-  and to 2 ms in the OEM Apple implementation.
+  This is the minimal period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The current
+  implementation defaults to 10 ms. Setting \texttt{0} leaves this
+  default unchanged.
 
-  \emph{Note}: Has no effect when using the OEM Apple implementation
-  (see \texttt{AppleEvent} setting).
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
 
   \item
   \texttt{PointerPollMax}\\
@@ -6847,13 +6847,13 @@ with the boot menu.
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Configure maximum pointer polling period in ms.
 
-  This is the maximum period AppleEvent polls pointer devices (e.g. mice, trackpads)
-  for motion events. The period is increased up to this value as long as the devices
-  do not respond in time. Defaults to 80 ms in the OpenCore AppleEvent implementation
-  and to 2 ms in the OEM Apple implementation.
+  This is the maximum period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The period
+  is increased up to this value as long as the devices do not respond
+  in time. The current implementation defaults to 80 ms. Setting
+  \texttt{0} leaves this default unchanged.
 
-  \emph{Note}: Has no effect when using the OEM Apple implementation
-  (see \texttt{AppleEvent} setting).
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
 
   \item
   \texttt{PointerPollMask}\\
@@ -7259,7 +7259,7 @@ with the boot menu.
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
   ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
-  In case of issues, this option can be left as \texttt{0}.
+  In case of issues, this option can be left as \texttt{0} to not change the timer resolution.
 
 \end{enumerate}
 
