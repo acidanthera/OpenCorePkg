@@ -6857,14 +6857,15 @@ with the boot menu.
 
   \item
   \texttt{PointerPollMask}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Type}: \texttt{plist\ integer, 32 bit}\\
   \textbf{Failsafe}: \texttt{-1}\\
   \textbf{Description}: Configure indices of polled pointers.
 
   Selects pointer devices to poll for AppleEvent motion events.
   \texttt{-1} implies all devices. A bit sum is used to determine
   particular devices. E.g. to enable devices 0, 2, 3 the value
-  will be \texttt{1+4+8} (corresponding powers of two).
+  will be \texttt{1+4+8} (corresponding powers of two). A total
+  of 32 configurable devices is supported.
 
   The amount of pointer devices available in the system can be
   found in the log. Refer to \texttt{Found N pointer devices} message

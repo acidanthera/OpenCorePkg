@@ -18,8 +18,8 @@
 
 #include <Protocol/AppleEvent.h>
 
-#define POINTER_POLL_DEFAULT_FREQUENCY       0
-#define POINTER_POLL_ALL_MASK                (UINT32)(-1)
+#define POINTER_POLL_DEFAULT    0
+#define POINTER_POLL_ALL_MASK   (UINT32)(-1)
 
 /**
   Install and initialise Apple Event protocol.
@@ -36,8 +36,8 @@
   @param[in] GraphicsInputMirroring If true, disable Apple default behaviour which can
                                     prevent keyboard input reaching non-Apple GUI UEFI apps.
                                     OC builtin AppleEvent only.
-  @param[in] PointerPollMin         Pointer polling minimal frequency.
-  @param[in] PointerPollMax         Pointer polling maximum frequency.
+  @param[in] PointerPollMin         Pointer polling minimal period in ms.
+  @param[in] PointerPollMax         Pointer polling maximum period in ms.
   @param[in] PointerPollMask        Pointer polling mask to choose polled handles.
   @param[in] PointerSpeedDiv        Pointer speed divisor. If zero, warn and use 1.
   @param[in] PointerSpeedMul        Pointer speed multiplier.
