@@ -58,6 +58,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/Security.h>
 #include <Protocol/Security2.h>
+#include <Protocol/SimplePointer.h>
 
 #define OC_EXIT_BOOT_SERVICES_HANDLER_MAX 5
 
@@ -413,6 +414,9 @@ OcReinstallProtocols (
     Config->Uefi.AppleInput.KeyInitialDelay,
     Config->Uefi.AppleInput.KeySubsequentDelay,
     Config->Uefi.AppleInput.GraphicsInputMirroring,
+    Config->Uefi.AppleInput.PointerPollMin,
+    Config->Uefi.AppleInput.PointerPollMax,
+    Config->Uefi.AppleInput.PointerPollMask,
     Config->Uefi.AppleInput.PointerSpeedDiv,
     Config->Uefi.AppleInput.PointerSpeedMul
     ) == NULL
@@ -821,6 +825,8 @@ OcLoadUefiSupport (
 {
   EFI_STATUS            Status;
   EFI_HANDLE            *DriversToConnect;
+  EFI_HANDLE            *HandleBuffer;
+  UINTN                 HandleCount;
   EFI_EVENT             Event;
   BOOLEAN               AvxEnabled;
 
@@ -926,6 +932,22 @@ OcLoadUefiSupport (
   } else {
     OcLoadDrivers (Storage, Config, NULL);
   }
+
+  DEBUG_CODE_BEGIN ();
+  HandleCount = 0;
+  HandleBuffer = NULL;
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiSimplePointerProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+  DEBUG ((DEBUG_INFO, "OC: Found %u pointer devices - %r\n", HandleCount, Status));
+  if (!EFI_ERROR (Status)) {
+    FreePool (HandleBuffer);
+  }
+  DEBUG_CODE_END ();
 
   if (Config->Uefi.Apfs.EnableJumpstart) {
     OcApfsConfigure (

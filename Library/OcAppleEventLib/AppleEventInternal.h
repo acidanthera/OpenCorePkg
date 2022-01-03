@@ -164,6 +164,13 @@ InternalSetKeyBehaviour (
   );
 
 VOID
+InternalSetPointerPolling (
+  IN UINT32 PointerPollMin,
+  IN UINT32 PointerPollMax,
+  IN UINT32 PointerPollMask
+  );
+
+VOID
 InternalSetPointerSpeed (
   IN UINT16 PointerSpeedDiv,
   IN UINT16 PointerSpeedMul

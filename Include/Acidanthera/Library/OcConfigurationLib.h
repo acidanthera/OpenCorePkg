@@ -604,6 +604,9 @@ typedef enum {
   _(UINT16                      , KeyInitialDelay       ,     , 50                                , ()) \
   _(UINT16                      , KeySubsequentDelay    ,     , 5                                 , ()) \
   _(BOOLEAN                     , GraphicsInputMirroring,     , FALSE                             , ()) \
+  _(UINT32                      , PointerPollMin        ,     , 0                                 , ()) \
+  _(UINT32                      , PointerPollMax        ,     , 0                                 , ()) \
+  _(UINT32                      , PointerPollMask       ,     , ((UINT32) (-1))                   , ()) \
   _(UINT16                      , PointerSpeedDiv       ,     , 1                                 , ()) \
   _(UINT16                      , PointerSpeedMul       ,     , 1                                 , ())
   OC_DECLARE (OC_UEFI_APPLEINPUT)

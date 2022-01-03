@@ -14,6 +14,8 @@ OpenCore Changelog
 - Implemented multi-channel (e.g. bass+main speaker; speakers+headphones) UEFI sound with `AudioOutMask`
 - Fixed AudioDxe startup stalls when Nvidia HDA audio present
 - Resolved AudioDxe disabling sound in Windows on some firmware
+- Added pointer polling period tuning in the builtin AppleEvent implementation
+- Added pointer device list tuning in the builtin AppleEvent implementation
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

@@ -46,6 +46,7 @@
   gEfiAudioDecodeProtocolGuid         ## SOMETIMES_CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
   gEfiDevicePathProtocolGuid          ## CONSUMES
+  gEfiSimplePointerProtocolGuid       ## SOMETIMES_CONSUMES
   gEfiLoadedImageProtocolGuid         ## CONSUMES
   gEfiSimpleFileSystemProtocolGuid    ## CONSUMES
   gOcInterfaceProtocolGuid            ## SOMETIMES_CONSUMES

@@ -741,6 +741,9 @@ mUefiAppleInputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN  ("GraphicsInputMirroring",  OC_GLOBAL_CONFIG,  Uefi.AppleInput.GraphicsInputMirroring),
   OC_SCHEMA_INTEGER_IN  ("KeyInitialDelay",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeyInitialDelay),
   OC_SCHEMA_INTEGER_IN  ("KeySubsequentDelay",      OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeySubsequentDelay),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMask",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMask),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMax",          OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMax),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMin",          OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMin),
   OC_SCHEMA_INTEGER_IN  ("PointerSpeedDiv",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedDiv),
   OC_SCHEMA_INTEGER_IN  ("PointerSpeedMul",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedMul),
 };

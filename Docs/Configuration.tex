@@ -6829,6 +6829,51 @@ with the boot menu.
   \end{itemize}
 
   \item
+  \texttt{PointerPollMin}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure minimal pointer polling period in ms.
+
+  This is the minimal period AppleEvent polls pointer devices (e.g. mice, trackpads)
+  for motion events. Defaults to 10 ms in the OpenCore AppleEvent implementation
+  and to 2 ms in the OEM Apple implementation.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+  \item
+  \texttt{PointerPollMax}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure maximum pointer polling period in ms.
+
+  This is the maximum period AppleEvent polls pointer devices (e.g. mice, trackpads)
+  for motion events. The period is increased up to this value as long as the devices
+  do not respond in time. Defaults to 80 ms in the OpenCore AppleEvent implementation
+  and to 2 ms in the OEM Apple implementation.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+  \item
+  \texttt{PointerPollMask}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Configure indices of polled pointers.
+
+  Selects pointer devices to poll for AppleEvent motion events.
+  \texttt{-1} implies all devices. A bit sum is used to determine
+  particular devices. E.g. to enable devices 0, 2, 3 the value
+  will be \texttt{1+4+8} (corresponding powers of two).
+
+  The amount of pointer devices available in the system can be
+  found in the log. Refer to \texttt{Found N pointer devices} message
+  for more details.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+  \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
