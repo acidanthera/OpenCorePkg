@@ -6829,6 +6829,65 @@ with the boot menu.
   \end{itemize}
 
   \item
+  \texttt{PointerPollMin}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure minimal pointer polling period in ms.
+
+  This is the minimal period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The current
+  implementation defaults to 10 ms. Setting \texttt{0} leaves this
+  default unchanged.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+  \item
+  \texttt{PointerPollMax}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure maximum pointer polling period in ms.
+
+  This is the maximum period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The period
+  is increased up to this value as long as the devices do not respond
+  in time. The current implementation defaults to 80 ms. Setting
+  \texttt{0} leaves this default unchanged.
+
+  Certain trackpad drivers often found in Dell laptops can be very slow
+  to respond when no physical movement happens. This can affect
+  OpenCanopy and FileVault 2 user interface responsiveness and loading times.
+  Increasing the polling periods can reduce the impact.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+  \item
+  \texttt{PointerPollMask}\\
+  \textbf{Type}: \texttt{plist\ integer, 32 bit}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Configure indices of polled pointers.
+
+  Selects pointer devices to poll for AppleEvent motion events.
+  \texttt{-1} implies all devices. A bit sum is used to determine
+  particular devices. E.g. to enable devices 0, 2, 3 the value
+  will be \texttt{1+4+8} (corresponding powers of two). A total
+  of 32 configurable devices is supported.
+
+  Certain pointer devices can be present in the firmware even when
+  no corresponding physical devices are available. These devices
+  usually are placeholders, aggregate devices, or proxies.
+  Gathering information from these devices may result in inaccurate
+  motion activity in the user interfaces and even cause performance
+  issues. Disabling such pointer devices is recommended for laptop
+  setups having issues of this kind.
+
+  The amount of pointer devices available in the system can be
+  found in the log. Refer to \texttt{Found N pointer devices} message
+  for more details.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+  \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
@@ -7213,7 +7272,7 @@ with the boot menu.
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
   ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
-  In case of issues, this option can be left as \texttt{0}.
+  In case of issues, this option can be left as \texttt{0} to not change the timer resolution.
 
 \end{enumerate}
 

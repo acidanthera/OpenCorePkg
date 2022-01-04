@@ -545,26 +545,6 @@ AppleEventUnload (
   return Status;
 }
 
-/**
-  Install and initialise Apple Event protocol.
-
-  @param[in] Install                If false, do not install even when no suitable OEM version found.
-  @param[in] Reinstall              If true, force overwrite installed protocol.
-                                    If false, use Apple OEM protocol where possible.
-  @param[in] CustomDelays           If true, use key delays specified.
-                                    If false, use Apple OEM default key delay values.
-                                    OC builtin AppleEvent only.
-  @param[in] KeyInitialDelay        Key repeat initial delay in 10ms units.
-  @param[in] KeySubsequentDelay     Key repeat subsequent delay in 10ms units.
-                                    If zero, warn and use 1.
-  @param[in] GraphicsInputMirroring If true, disable Apple default behaviour which can
-                                    prevent keyboard input reaching non-Apple GUI UEFI apps.
-                                    OC builtin AppleEvent only.
-  @param[in] PointerSpeedDiv        Pointer speed divisor. If zero, warn and use 1.
-  @param[in] PointerSpeedMul        Pointer speed multiplier.
-
-  @retval installed or located protocol or NULL.
-**/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
   IN BOOLEAN  Install,
@@ -573,6 +553,9 @@ OcAppleEventInstallProtocol (
   IN UINT16   KeyInitialDelay,
   IN UINT16   KeySubsequentDelay,
   IN BOOLEAN  GraphicsInputMirroring,
+  IN UINT32   PointerPollMin,
+  IN UINT32   PointerPollMax,
+  IN UINT32   PointerPollMask,
   IN UINT16   PointerSpeedDiv,
   IN UINT16   PointerSpeedMul
   )
@@ -627,7 +610,8 @@ OcAppleEventInstallProtocol (
     KeySubsequentDelay,
     GraphicsInputMirroring
     );
-  
+
+  InternalSetPointerPolling (PointerPollMin, PointerPollMax, PointerPollMask);
   InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
 
   Status = gBS->InstallMultipleProtocolInterfaces (

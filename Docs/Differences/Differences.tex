@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sun Dec 12 09:04:19 2021
-%DIF ADD ../Configuration.tex        Sun Jan  2 10:55:11 2022
+%DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
+%DIF ADD ../Configuration.tex        Mon Jan  3 20:26:21 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6898,7 +6898,78 @@ with the boot menu.
   \end{itemize}
 
   \item
-  \texttt{PointerSpeedDiv}\\
+  \DIFaddbegin \texttt{\DIFadd{PointerPollMin}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure minimal pointer polling period in ms.
+}
+
+  \DIFadd{This is the minimal period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The current
+  implementation defaults to 10 ms. Setting }\texttt{\DIFadd{0}} \DIFadd{leaves this
+  default unchanged.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The OEM Apple implementation uses a polling rate of 2 ms.
+}
+
+  \item
+  \texttt{\DIFadd{PointerPollMax}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure maximum pointer polling period in ms.
+}
+
+  \DIFadd{This is the maximum period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The period
+  is increased up to this value as long as the devices do not respond
+  in time. The current implementation defaults to 80 ms. Setting
+  }\texttt{\DIFadd{0}} \DIFadd{leaves this default unchanged.
+}
+
+  \DIFadd{Certain trackpad drivers often found in Dell laptops can be very slow
+  to respond when no physical movement happens. This can affect
+  OpenCanopy and FileVault 2 user interface responsiveness and loading times.
+  Increasing the polling periods can reduce the impact.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The OEM Apple implementation uses a polling rate of 2 ms.
+}
+
+  \item
+  \texttt{\DIFadd{PointerPollMask}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer, 32 bit}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-1}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Configure indices of polled pointers.
+}
+
+  \DIFadd{Selects pointer devices to poll for AppleEvent motion events.
+  }\texttt{\DIFadd{-1}} \DIFadd{implies all devices. A bit sum is used to determine
+  particular devices. E.g. to enable devices 0, 2, 3 the value
+  will be }\texttt{\DIFadd{1+4+8}} \DIFadd{(corresponding powers of two). A total
+  of 32 configurable devices is supported.
+}
+
+  \DIFadd{Certain pointer devices can be present in the firmware even when
+  no corresponding physical devices are available. These devices
+  usually are placeholders, aggregate devices, or proxies.
+  Gathering information from these devices may result in inaccurate
+  motion activity in the user interfaces and even cause performance
+  issues. Disabling such pointer devices is recommended for laptop
+  setups having issues of this kind.
+}
+
+  \DIFadd{The amount of pointer devices available in the system can be
+  found in the log. Refer to }\texttt{\DIFadd{Found N pointer devices}} \DIFadd{message
+  for more details.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Has no effect when using the OEM Apple implementation
+  (see }\texttt{\DIFadd{AppleEvent}} \DIFadd{setting).
+}
+
+  \item
+  \DIFaddend \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
   \textbf{Description}: Configure pointer speed divisor in the OpenCore re-implementation
@@ -7029,21 +7100,21 @@ with the boot menu.
   Enabling this setting routes audio playback from builtin protocols to \DIFdelbegin \DIFdel{a dedicated
   audio port (}\DIFdelend \DIFaddbegin \DIFadd{specified
   (}\DIFaddend \texttt{\DIFdelbegin \DIFdel{AudioOut}\DIFdelend \DIFaddbegin \DIFadd{AudioOutMask}\DIFaddend }) \DIFaddbegin \DIFadd{dedicated audio ports }\DIFaddend of the specified codec (\texttt{AudioCodec})\DIFaddbegin \DIFadd{,
-  }\DIFaddend located on the \DIFaddbegin \DIFadd{specified }\DIFaddend audio controller (\texttt{AudioDevice})\DIFaddbegin \DIFadd{.
-}
+  }\DIFaddend located on the \DIFaddbegin \DIFadd{specified }\DIFaddend audio controller (\texttt{AudioDevice}).
 
   \item
-  \texttt{\DIFadd{DisconnectHda}}\\
+  \DIFaddbegin \texttt{\DIFadd{DisconnectHda}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disconnect HDA controller before loading drivers.
 }
 
   \DIFadd{May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to allow
-  a UEFI sound driver (such as }\texttt{\DIFadd{AudioDxe}}\DIFadd{) to take control of the audio hardware}\DIFaddend .
+  a UEFI sound driver (such as }\texttt{\DIFadd{AudioDxe}}\DIFadd{) to take control of the audio hardware.
+}
 
 \item
-  \texttt{MinimumVolume}\\
+  \DIFaddend \texttt{MinimumVolume}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0}\\
   \textbf{Description}: Minimal heard volume level from \texttt{0} to \texttt{100}.
@@ -7296,7 +7367,7 @@ with the boot menu.
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
   ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
-  In case of issues, this option can be left as \texttt{0}.
+  In case of issues, this option can be left as \texttt{0} \DIFaddbegin \DIFadd{to not change the timer resolution}\DIFaddend .
 
 \end{enumerate}
 

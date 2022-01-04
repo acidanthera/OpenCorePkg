@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/SimplePointer.h>
 
 #include <Library/AppleEventLib.h>
+#include <Library/OcAppleEventLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -43,8 +44,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 //         most machines. Poll with 10 ms, which matches the keyboard behaviour,
 //         and also is the minimum for QEMU.
 //
-#define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (10)
-#define MAX_POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (80)
+#define MIN_POINTER_POLL_PERIOD  10
+#define MAX_POINTER_POLL_PERIOD  80
 
 GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedDiv = 0;
 GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedMul = 0;
@@ -91,6 +92,10 @@ STATIC EFI_EVENT mSimplePointerPollEvent = NULL;
 
 // mSimplePointerPollTime
 STATIC UINT64 mSimplePointerPollTime;
+STATIC UINT64 mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD * 10000;
+STATIC UINT64 mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD * 10000;
+
+STATIC UINT32 mSimplePointerPollMask = POINTER_POLL_ALL_MASK;
 
 // mUiScale
 STATIC UINT8 mUiScale = 1;
@@ -133,6 +138,28 @@ STATIC UINT64 mMaxPointerResolutionY = 1;
 
 STATIC INT64 mPointerRawX;
 STATIC INT64 mPointerRawY;
+
+VOID
+InternalSetPointerPolling (
+  IN UINT32 PointerPollMin,
+  IN UINT32 PointerPollMax,
+  IN UINT32 PointerPollMask
+  )
+{
+  if (PointerPollMin == POINTER_POLL_DEFAULT) {
+    PointerPollMin = MIN_POINTER_POLL_PERIOD;
+  }
+
+  mSimplePointerMinPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMin);
+
+  if (PointerPollMax == POINTER_POLL_DEFAULT) {
+    PointerPollMax = MAX_POINTER_POLL_PERIOD;
+  }
+
+  mSimplePointerMaxPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMax);
+
+  mSimplePointerPollMask = PointerPollMask;
+}
 
 VOID
 InternalSetPointerSpeed (
@@ -725,6 +752,11 @@ InternalSimplePointerPollNotifyFunction (
     CommonStatus = EFI_NOT_READY;
 
     for (Index = 0; Index < mNumberOfPointerProtocols; ++Index) {
+      if (mSimplePointerPollMask != POINTER_POLL_ALL_MASK
+        && (Index >= 32 || ((1U << Index) & mSimplePointerPollMask) == 0)) {
+        continue;
+      }
+
       Instance      = &mPointerProtocols[Index];
       SimplePointer = Instance->Interface;
       Status        = SimplePointer->GetState (SimplePointer, &State);
@@ -854,7 +886,7 @@ InternalSimplePointerPollNotifyFunction (
   // which is still far from enough. The event system on these laptops is pretty broken,
   // and even adding gBS->CheckEvent prior to GetState almost does not reduce the time spent.
   //
-  if (mSimplePointerPollEvent != NULL && mSimplePointerPollTime < MAX_POINTER_POLL_FREQUENCY) {
+  if (mSimplePointerPollEvent != NULL && mSimplePointerPollTime < mSimplePointerMaxPollTime) {
     EndTime = GetPerformanceCounter ();
     if (StartTime > EndTime) {
       EndTime = StartTime;
@@ -869,8 +901,8 @@ InternalSimplePointerPollNotifyFunction (
         );
 
       mSimplePointerPollTime = DivU64x32 (EndTime, 50);
-      if (mSimplePointerPollTime > MAX_POINTER_POLL_FREQUENCY) {
-        mSimplePointerPollTime = MAX_POINTER_POLL_FREQUENCY;
+      if (mSimplePointerPollTime > mSimplePointerMaxPollTime) {
+        mSimplePointerPollTime = mSimplePointerMaxPollTime;
       }
 
       mMaximumClickDuration = (UINT16) DivU64x64Remainder (
@@ -930,7 +962,7 @@ EventCreateSimplePointerPollEvent (
   InternalGetScreenResolution ();
   ZeroMem (&mCursorPosition, sizeof (mCursorPosition));
 
-  mSimplePointerPollTime = POINTER_POLL_FREQUENCY;
+  mSimplePointerPollTime = mSimplePointerMinPollTime;
   mSimplePointerPollEvent = EventLibCreateNotifyTimerEvent (
                               InternalSimplePointerPollNotifyFunction,
                               NULL,
