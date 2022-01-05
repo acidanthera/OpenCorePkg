@@ -245,7 +245,7 @@ HdaCodecAudioIoSetupPlayback(
   UINT64 IndexMask;
   UINT32 Response;
   UINT8 NumGpios;
-  UINT8 Payload;
+  UINT8 ChannelPayload;
 
   // Widgets.
   HDA_WIDGET_DEV *PinWidget;
@@ -506,57 +506,84 @@ HdaCodecAudioIoSetupPlayback(
   }
 
   //
-  // Enable any GPIO pins. This is similar to how Linux drivers enable audio on e.g. Cirrus Logic and
-  // Realtek devices on Mac, by enabling specific GPIO pins as required, but this is an attempt to
-  // make a more general purpose system.
+  // Enable GPIO pins. This is similar to how Linux drivers enable audio on e.g. Cirrus Logic and
+  // Realtek devices on Mac, by enabling specific GPIO pins as required.
   // REF:
   // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L43-L57
   // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_cirrus.c#L493-L517
   // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_realtek.c#L244-L258
   //
-  NumGpios = HDA_PARAMETER_GPIO_COUNT_NUM_GPIOS (HdaCodecDev->AudioFuncGroup->GpioCapabilities);
+  // Note 1: On at least one WWHC system, waiting for current sound to finish playing stopped working when this was
+  // applied automatically, whereas everything already worked fine without this, so we now need to require users to
+  // specify at least `-gpio-setup` (which means: all stages, automatic pins') in the driver params, to use this.
   //
-  // According to Intel HDA spec this can be from 0 to 7, however we
-  // have seen 8 in the wild, and values up to 8 are perfectly usable.
-  // REF: https://github.com/acidanthera/bugtracker/issues/740#issuecomment-1005279476
+  // Note 2: So far we have found no need to specify anything other than 'all stages, automatic (i.e. all) pins', although
+  // we do know that not all systems require all stages (e.g. MBP10,2 only requires DATA stage; but based on Linux
+  // drivers, it is likely that some do), and almost certainly no systems require all pins.
   //
-  if (NumGpios > 8) {
-    Status = EFI_INVALID_PARAMETER;
-    goto CLOSE_STREAM;
-  }
-  if (NumGpios) {
-    Payload = (1 << NumGpios) - 1; ///< Enable all available pins
-    Status = HdaIo->SendCommand (
-      HdaIo,
-      HdaCodecDev->AudioFuncGroup->NodeId,
-      HDA_CODEC_VERB (HDA_VERB_SET_GPIO_ENABLE_MASK, Payload),
-      &Response
-      );
-    if (!EFI_ERROR (Status)) {
-      Status = HdaIo->SendCommand (
-        HdaIo,
-        HdaCodecDev->AudioFuncGroup->NodeId,
-        HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DIRECTION, Payload),
-        &Response
-        );
+  if (gGpioSetupStageMask != 0) {
+    if (gGpioPinMask != 0) {
+      //
+      // Enable user-specified pins.
+      //
+      ChannelPayload = (UINT8)gGpioPinMask;
+    } else {
+      NumGpios = HDA_PARAMETER_GPIO_COUNT_NUM_GPIOS (HdaCodecDev->AudioFuncGroup->GpioCapabilities);
+      //
+      // According to Intel HDA spec this can be from 0 to 7, however we
+      // have seen 8 in the wild, and values up to 8 are perfectly usable.
+      // REF: https://github.com/acidanthera/bugtracker/issues/740#issuecomment-1005279476
+      //
+      if (NumGpios > 8) {
+        Status = EFI_INVALID_PARAMETER;
+        goto CLOSE_STREAM;
+      }
+      ChannelPayload = (1 << NumGpios) - 1; ///< Enable all available pins
     }
-    if (!EFI_ERROR (Status)) {
-      gBS->Stall (MS_TO_MICROSECONDS (1));
-      Status = HdaIo->SendCommand (
-        HdaIo,
-        HdaCodecDev->AudioFuncGroup->NodeId,
-        HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, Payload),
-        &Response
-        );
+
+    if (ChannelPayload != 0) {
+      Status = EFI_SUCCESS;
+
+      if ((gGpioSetupStageMask & GPIO_SETUP_STAGE_ENABLE) != 0) {
+        Status = HdaIo->SendCommand (
+          HdaIo,
+          HdaCodecDev->AudioFuncGroup->NodeId,
+          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_ENABLE_MASK, ChannelPayload),
+          &Response
+          );
+      }
+
+      if (!EFI_ERROR (Status)
+        && (gGpioSetupStageMask & GPIO_SETUP_STAGE_DIRECTION) != 0) {
+        Status = HdaIo->SendCommand (
+          HdaIo,
+          HdaCodecDev->AudioFuncGroup->NodeId,
+          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DIRECTION, ChannelPayload),
+          &Response
+          );
+      }
+
+      if (!EFI_ERROR (Status)
+        && (gGpioSetupStageMask & GPIO_SETUP_STAGE_DATA) != 0) {
+        gBS->Stall (MS_TO_MICROSECONDS (1));
+        Status = HdaIo->SendCommand (
+          HdaIo,
+          HdaCodecDev->AudioFuncGroup->NodeId,
+          HDA_CODEC_VERB (HDA_VERB_SET_GPIO_DATA, ChannelPayload),
+          &Response
+          );
+      }
+
+      DEBUG ((
+        EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
+        "HDA: GPIO setup on pins 0x%02X - %r\n",
+        ChannelPayload,
+        Status
+        ));
+
+      if (EFI_ERROR(Status))
+        goto CLOSE_STREAM;
     }
-    DEBUG ((
-      EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "HDA: GPIO output enable 0x%02X - %r\n",
-      Payload,
-      Status
-      ));
-    if (EFI_ERROR(Status))
-      goto CLOSE_STREAM;
   }
   
   //

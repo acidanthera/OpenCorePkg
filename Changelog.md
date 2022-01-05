@@ -15,8 +15,9 @@ OpenCore Changelog
 - Resolved AudioDxe disabling sound in Windows on some firmware
 - Added pointer polling period tuning in the builtin AppleEvent implementation
 - Added pointer device list tuning in the builtin AppleEvent implementation
-- Added audio GPIO and VREF handling to support UEFI sound on more Apple hardware
+- Added VREF handling to support UEFI sound on more Apple hardware
 - Updated audio output channel detection to support UEFI sound on more Apple hardware
+- Added manual GPIO config (use `--gpio-setup` AudioDxe driver argument for UEFI sound on Apple hardware)
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

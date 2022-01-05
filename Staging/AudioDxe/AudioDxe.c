@@ -28,6 +28,13 @@
 #include "HdaCodec/HdaCodec.h"
 #include "HdaCodec/HdaCodecComponentName.h"
 
+#include <Protocol/LoadedImage.h>
+#include <Library/OcBootManagementLib.h>
+#include <Library/OcFlexArrayLib.h>
+
+UINTN	gGpioSetupStageMask   = GPIO_SETUP_STAGE_NONE;
+UINTN	gGpioPinMask          = GPIO_PIN_MASK_AUTO;
+
 /**
   HdaController Driver Binding.
 **/
@@ -61,7 +68,45 @@ AudioDxeInit(
   IN EFI_SYSTEM_TABLE  *SystemTable
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS                    Status;
+  EFI_LOADED_IMAGE_PROTOCOL     *LoadedImage;
+  OC_FLEX_ARRAY                 *ParsedLoadOptions;
+
+  //
+  // Parse optional driver params.
+  //
+  Status = gBS->HandleProtocol (
+    ImageHandle,
+    &gEfiLoadedImageProtocolGuid,
+    (VOID **) &LoadedImage
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  Status = OcParseLoadOptions (LoadedImage, &ParsedLoadOptions);
+  if (!EFI_ERROR (Status)) {
+    Status = OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-setup", &gGpioSetupStageMask, TRUE);
+    if (Status == EFI_NOT_FOUND && OcHasParsedVar (ParsedLoadOptions, L"--gpio-setup", TRUE)) {
+      gGpioSetupStageMask = GPIO_SETUP_STAGE_ALL;
+    }
+    DEBUG ((DEBUG_INFO, "HDA: GPIO setup stages 0x%X\n", gGpioSetupStageMask));
+
+    if (gGpioSetupStageMask != GPIO_SETUP_STAGE_NONE) {
+      OcParsedVarsGetInt (ParsedLoadOptions, L"--gpio-pins", &gGpioPinMask, TRUE);
+      DEBUG ((
+        DEBUG_INFO,
+        "HDA: GPIO pin mask 0x%X%a\n",
+        gGpioPinMask,
+        gGpioPinMask == 0 ? " (auto)" : ""
+        ));
+    }
+
+    OcFlexArrayFree (&ParsedLoadOptions);
+  } else if (Status != EFI_NOT_FOUND) {
+    return Status;
+  }
 
   //
   // Register HdaController Driver Binding.

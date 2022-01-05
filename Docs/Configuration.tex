@@ -6007,7 +6007,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 
 \begin{longtable}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
-& HDA audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+& \hyperref[uefiaudio]{HDA audio support driver} in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
@@ -6464,6 +6464,68 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
+\subsection{AudioDxe}\label{uefiaudio}
+
+High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+
+\subsubsection{Configuration}
+
+Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+section, but if required the following additonal configuration options (which are needed to produce sound
+on most Apple hardware, and possibly some others) may be specified in \texttt{UEFI/Drivers/Arguments}:
+
+\begin{itemize}
+  \tightlist
+	\item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
+  or \texttt{7} (all GPIO setup stages stages enabled) if the argument is provided with no value. \medskip
+
+	Available values, which may be combined by adding, are: \medskip
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{GPIO\_SETUP\_STAGE\_DATA},
+    set GPIO pin data high on specified pins. Required e.g. on \texttt{MacBookPro10,2} and \texttt{MacPro5,1}.
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{GPIO\_SETUP\_STAGE\_DIRECTION},
+    set GPIO data direction to output on specified pins. Required e.g. on \texttt{MacPro5,1}.
+    \item \texttt{0x00000004} (bit \texttt{2}) --- \texttt{GPIO\_SETUP\_STAGE\_ENABLE},
+    enable specified GPIO pins. Required e.g. on \texttt{MacPro5,1}.
+  \end{itemize} \medskip
+
+  If audio appears to be `playing' on the correct codec, e.g. based on the debug log, but no
+  sound is heard on any channel, it is suggested to use \texttt{-{}-gpio-setup} (with no
+  value) in the AudioDxe driver arguments. If specified with no value, all
+  stages will be enabled (equivalent of specifying \texttt{7}). If this produces sound,
+  it is then possible to try fewer bits, e.g. \texttt{-{}-gpio-setup=1}, \texttt{-{}-gpio-setup=3},
+  to find out which stages are actually required. \medskip
+
+  \emph{Note}: Value \texttt{7} (all flags enabled) of this option -- as required for the
+  \texttt{MacPro5,1} -- is compatible with most systems, but is known to cause problems with
+  sound (previous sounds are not allowed to finish before new sounds start) on a small number
+  of other systems, hence this option is not enabled by default. \medskip
+
+	\item \texttt{-{}-gpio-pins} - Default: \texttt{0}, auto-detect. \medskip
+
+	Specifies which GPIO pins should be operated on by \texttt{-{}-gpio-setup}. This is a bit mask,
+  with possible values from \texttt{0x0} to \texttt{0xFF}. The usable maximum depends on
+  the number if available pins on the audio out function group of the codec in use, e.g. it is
+  \texttt{0x3} (lowest two bits) if two GPIO pins are present, \texttt{0x7} if three pins are present,
+  etc. \medskip
+
+  When \texttt{-{}-gpio-setup} is enabled (i.e. non-zero), then \texttt{0} is a special
+  value for \texttt{-{}-gpio-pins}, meaning that the pin mask will be auto-generated based on the
+  reported number of GPIO pins on the specified codec (see \texttt{AudioCodec}), e.g. if the
+  codec's audio out function group reports 4 GPIO pins, a mask of \texttt{0xF} will be used.
+  The value in use can be seen in the debug log in a line such as: \medskip
+
+  \texttt{HDA: GPIO setup on pins 0x0F - Success} \medskip
+
+  Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
+  in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}.
+\end{itemize}
+
+\emph{Note}: AudioDxe is a staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+for known issues.
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -6479,7 +6541,7 @@ with the boot menu.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
-  in the \hyperref[uefiaudioprops]{Audio Properties} section below.
+  in the \hyperref[uefiaudioprops]{\texttt{Audio Properties}} section below.
 
   Unless documented otherwise (e.g. \texttt{ResetTrafficClass}) settings in this section
   are for UEFI audio support only (e.g. OpenCore generated boot chime and audio assist) and are
@@ -7018,6 +7080,10 @@ with the boot menu.
 
   May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to allow
   a UEFI sound driver (such as \texttt{AudioDxe}) to take control of the audio hardware.
+
+  \emph{Note}: In addition to this option, most Apple hardware also requires the
+  \texttt{-{}-gpio-setup} driver argument which is dealt with in the
+  \hyperref[uefiaudio]{AudioDxe} section.
 
 \item
   \texttt{MinimumVolume}\\

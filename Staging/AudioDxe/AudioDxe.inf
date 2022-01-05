@@ -41,7 +41,9 @@
   DebugLib
   DevicePathLib
   MemoryAllocationLib
+  OcBootManagementLib
   OcDeviceMiscLib
+  OcFlexArrayLib
   OcHdaDevicesLib
   OcMp3Lib
   OcStringLib
