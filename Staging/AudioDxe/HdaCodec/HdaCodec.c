@@ -482,7 +482,7 @@ HdaCodecProbeFuncGroup(
     HDA_CODEC_VERB(HDA_VERB_GET_PARAMETER, HDA_PARAMETER_GPIO_COUNT), &FuncGroup->GpioCapabilities);
   if (EFI_ERROR(Status))
     return Status;
-  //DEBUG((DEBUG_INFO, "HDA:  | Function group @ 0x%X GPIO capabilities: 0x%X\n", FuncGroup->NodeId, FuncGroup->GpioCapabilities));
+  DEBUG((DEBUG_INFO, "HDA:  | Function group @ 0x%X GPIO capabilities: 0x%X\n", FuncGroup->NodeId, FuncGroup->GpioCapabilities));
 
   // Get number of widgets in function group.
   Status = HdaIo->SendCommand(HdaIo, FuncGroup->NodeId,

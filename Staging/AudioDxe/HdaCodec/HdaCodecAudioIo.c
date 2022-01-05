@@ -515,8 +515,16 @@ HdaCodecAudioIoSetupPlayback(
   // - https://github.com/torvalds/linux/blob/6f513529296fd4f696afb4354c46508abe646541/sound/pci/hda/patch_realtek.c#L244-L258
   //
   NumGpios = HDA_PARAMETER_GPIO_COUNT_NUM_GPIOS (HdaCodecDev->AudioFuncGroup->GpioCapabilities);
+  //
+  // According to Intel HDA spec this can be from 0 to 7, however we
+  // have seen 8 in the wild, and values up to 8 are perfectly usable.
+  // REF: https://github.com/acidanthera/bugtracker/issues/740#issuecomment-1005279476
+  //
+  if (NumGpios > 8) {
+    Status = EFI_INVALID_PARAMETER;
+    goto CLOSE_STREAM;
+  }
   if (NumGpios) {
-    ASSERT (NumGpios <= 7); ///< According to Intel HDA spec this can be from 0 to 7
     Payload = (1 << NumGpios) - 1; ///< Enable all available pins
     Status = HdaIo->SendCommand (
       HdaIo,
