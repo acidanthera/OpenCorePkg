@@ -184,6 +184,40 @@ CheckUefiAppleInput (
 
 STATIC
 UINT32
+CheckUefiGain (
+  INT8    Gain,
+  CHAR8   *GainName,
+  INT8    GainAbove,      OPTIONAL
+  CHAR8   *GainAboveName  OPTIONAL
+  )
+{
+  UINT32 ErrorCount;
+
+  ErrorCount = 0;
+
+//
+// Cannot check these as they are already truncated to INT8 before we can validate them.
+// TODO: (?) Add check during DEBUG parsing that specified values fit into what they will be cast to.
+//
+#if 0
+  if (Gain < -128) {
+    DEBUG ((DEBUG_WARN, "UEFI->Audio->%a must be greater than or equal to -128!\n", GainName));
+    ++ErrorCount;
+  } else if (Gain > 127) {
+    DEBUG ((DEBUG_WARN, "UEFI->Audio->%a must be less than or equal to 127!\n", GainName));
+    ++ErrorCount;
+  }
+#endif
+
+  if (GainAboveName != NULL && Gain > GainAbove) {
+    DEBUG ((DEBUG_WARN, "UEFI->Audio->%a must be less than or equal to UEFI->Audio->%a!\n", GainName, GainAboveName));
+    ++ErrorCount;
+  }
+
+  return ErrorCount;
+}
+STATIC
+UINT32
 CheckUefiAudio (
   IN  OC_GLOBAL_CONFIG  *Config
   )
@@ -207,6 +241,35 @@ CheckUefiAudio (
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioOutMask is zero when AudioSupport is enabled, no sound will play!\n"));
       ++ErrorCount;
     }
+
+    ErrorCount += CheckUefiGain (
+      UserUefi->Audio.MaximumGain,
+      "MaximumGain",
+      0,
+      NULL
+      );
+
+    // No operational reason for MinimumAssistGain <= MaximumGain, but is safer to ensure non-deafening sound levels.
+    ErrorCount += CheckUefiGain (
+      UserUefi->Audio.MinimumAssistGain,
+      "MinimumAssistGain",
+      UserUefi->Audio.MaximumGain,
+      "MaximumGain"
+      );
+
+    ErrorCount += CheckUefiGain (
+      UserUefi->Audio.MinimumAudibleGain,
+      "MinimumAudibleGain",
+      UserUefi->Audio.MinimumAssistGain,
+      "MinimumAssistGain"
+      );
+
+    ErrorCount += CheckUefiGain (
+      UserUefi->Audio.MinimumAudibleGain,
+      "MinimumAudibleGain",
+      UserUefi->Audio.MaximumGain,
+      "MaximumGain"
+      );
 
     if (!AsciiDevicePathIsLegal (AsciiAudioDevicePath)) {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioDevice is borked! Please check the information above!\n"));

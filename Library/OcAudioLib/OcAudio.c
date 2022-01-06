@@ -168,7 +168,7 @@ InternalOcAudioConnect (
   IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
   IN     UINT8                     CodecAddress     OPTIONAL,
   IN     UINT64                    OutputIndexMask,
-  IN     UINT8                     Volume
+  IN     INT8                      Gain
   )
 {
   EFI_STATUS                  Status;
@@ -180,7 +180,7 @@ InternalOcAudioConnect (
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
   Private->OutputIndexMask  = OutputIndexMask;
-  Private->Volume      = Volume;
+  Private->Gain             = Gain;
 
   if (DevicePath == NULL) {
     Status = gBS->LocateProtocol (
@@ -303,6 +303,8 @@ EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     UINT32                     File,
+  IN     INT8                       Gain  OPTIONAL,
+  IN     BOOLEAN                    UseGain,
   IN     BOOLEAN                    Wait
   )
 {
@@ -366,7 +368,7 @@ InternalOcAudioPlayFile (
   Status = Private->AudioIo->SetupPlayback (
     Private->AudioIo,
     Private->OutputIndexMask,
-    Private->Volume,
+    UseGain ? Gain : Private->Gain,
     Frequency,
     Bits,
     Channels,

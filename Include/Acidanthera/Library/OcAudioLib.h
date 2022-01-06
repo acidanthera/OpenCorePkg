@@ -12,7 +12,7 @@
 #include <Library/OcFileLib.h>
 #include <Protocol/OcAudio.h>
 
-#define OC_AUDIO_DEFAULT_VOLUME_LEVEL  70
+#define OC_AUDIO_DEFAULT_GAIN     (-30)
 
 /**
   Install audio support protocols.
@@ -43,16 +43,14 @@ OcLanguageCodeToString (
   );
 
 /**
-  Get system volume level in 0~100 range.
+  Get system amplifier gain.
 
-  @param[in]   Amplifier  Amplification coefficient 1~999.
-  @param[out]  Muted      Whether volume is off.
+  @param[out]  Muted      Whether amplifier should be muted.
 
   @retval ASCII string.
 **/
-UINT8
-OcGetVolumeLevel (
-  IN  UINT32   Amplifier,
+INT8
+OcGetAmplifierGain (
   OUT BOOLEAN  *Muted
   );
 

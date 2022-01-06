@@ -235,7 +235,7 @@ EFIAPI
 HdaCodecAudioIoSetupPlayback(
   IN EFI_AUDIO_IO_PROTOCOL *This,
   IN UINT64 OutputIndexMask,
-  IN UINT8 Volume,
+  IN INT8 Gain,
   IN EFI_AUDIO_IO_PROTOCOL_FREQ Freq,
   IN EFI_AUDIO_IO_PROTOCOL_BITS Bits,
   IN UINT8 Channels,
@@ -293,7 +293,7 @@ EFI_STATUS
 EFIAPI
 HdaCodecEnableWidgetPath(
   IN HDA_WIDGET_DEV *HdaWidget,
-  IN UINT8 Volume,
+  IN INT8 Gain,
   IN UINT8 StreamId,
   IN UINT16 StreamFormat);
 

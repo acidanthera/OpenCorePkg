@@ -18,6 +18,8 @@ OpenCore Changelog
 - Added VREF handling to support UEFI sound on more Apple hardware
 - Updated audio output channel detection to support UEFI sound on more Apple hardware
 - Added manual GPIO config (use `--gpio-setup` AudioDxe driver argument for UEFI sound on Apple hardware)
+- Switched UEFI audio levels to decibel gain to allow accurate matching of saved macOS volume levels
+- Separated settings for minimum audio assist volume and minimum audible volume
 
 #### v0.7.6
 - Fixed stack canary support when compiling with GCC

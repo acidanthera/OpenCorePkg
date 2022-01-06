@@ -496,7 +496,7 @@ OcLoadUefiAudioSupport (
   CHAR16                           *UnicodeDevicePath;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
   OC_AUDIO_PROTOCOL                *OcAudio;
-  UINT8                            VolumeLevel;
+  INT8                             Gain;
   BOOLEAN                          Muted;
 
   if (Config->Uefi.Audio.ResetTrafficClass) {
@@ -518,7 +518,7 @@ OcLoadUefiAudioSupport (
     return;
   }
 
-  VolumeLevel = OcGetVolumeLevel (Config->Uefi.Audio.VolumeAmplifier, &Muted);
+  Gain = OcGetAmplifierGain (&Muted);
 
   DevicePath        = NULL;
   AsciiDevicePath   = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
@@ -549,15 +549,28 @@ OcLoadUefiAudioSupport (
   }
 
   //
-  // Never disable sound completely, as it is vital for accessability.
+  // Have a max. volume to limit very loud user volume during boot, as Apple do.
+  //
+  if (Gain > Config->Uefi.Audio.MaximumGain) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Limiting gain %d dB -> %d dB\n",
+      Gain,
+      Config->Uefi.Audio.MaximumGain
+      ));
+    Gain = Config->Uefi.Audio.MaximumGain;
+  }
+
+  //
+  // Never disable audio assist sound completely, as it is vital for accessibility.
   //
   Status = OcAudio->Connect (
     OcAudio,
     DevicePath,
     Config->Uefi.Audio.AudioCodec,
     Config->Uefi.Audio.AudioOutMask,
-    VolumeLevel < Config->Uefi.Audio.MinimumVolume
-      ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
+    Gain < Config->Uefi.Audio.MinimumAssistGain
+      ? Config->Uefi.Audio.MinimumAssistGain : Gain
     );
 
   if (DevicePath != NULL) {
@@ -587,12 +600,15 @@ OcLoadUefiAudioSupport (
 
   OcSetVoiceOverLanguage (NULL);
 
-  if (OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))
-    && VolumeLevel >= Config->Uefi.Audio.MinimumVolume && !Muted) {
+  if (!Muted
+    && Gain >= Config->Uefi.Audio.MinimumAudibleGain
+    && OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))) {
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,
       AppleVoiceOverAudioFileVoiceOverBoot,
+      Gain,
+      TRUE,
       FALSE
       );
     DEBUG ((DEBUG_INFO, "OC: Play chime started - %r\n", Status));

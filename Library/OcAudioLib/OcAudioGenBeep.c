@@ -132,7 +132,7 @@ InternalOcAudioGenBeep (
   Status = Private->AudioIo->SetupPlayback (
     Private->AudioIo,
     Private->OutputIndexMask,
-    Private->Volume,
+    Private->Gain,
     OC_BEEP_AUDIO_FREQUENCY,
     OC_BEEP_AUDIO_BITS,
     OC_BEEP_AUDIO_CHANNELS,

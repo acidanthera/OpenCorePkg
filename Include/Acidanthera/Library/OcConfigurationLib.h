@@ -618,11 +618,12 @@ typedef enum {
   _(OC_STRING                   , AudioDevice        ,     , OC_STRING_CONSTR ("", _, __)      , OC_DESTR (OC_STRING)) \
   _(OC_STRING                   , PlayChime          ,     , OC_STRING_CONSTR ("Auto", _, __)  , OC_DESTR (OC_STRING)) \
   _(UINT32                      , SetupDelay         ,     , 0                                 , ()) \
-  _(UINT16                      , VolumeAmplifier    ,     , 0                                 , ()) \
   _(BOOLEAN                     , AudioSupport       ,     , FALSE                             , ()) \
-  _(UINT8                       , AudioCodec         ,     , 0                                 , ()) \
   _(UINT64                      , AudioOutMask       ,     , MAX_UINT64                        , ()) \
-  _(UINT8                       , MinimumVolume      ,     , 0                                 , ()) \
+  _(UINT8                       , AudioCodec         ,     , 0                                 , ()) \
+  _(INT8                        , MaximumGain        ,     , -15                               , ()) \
+  _(INT8                        , MinimumAssistGain  ,     , -30                               , ()) \
+  _(INT8                        , MinimumAudibleGain ,     , -128                              , ()) \
   _(BOOLEAN                     , ResetTrafficClass  ,     , FALSE                             , ()) \
   _(BOOLEAN                     , DisconnectHda      ,     , FALSE                             , ())
   OC_DECLARE (OC_UEFI_AUDIO)

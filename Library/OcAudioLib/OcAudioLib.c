@@ -54,7 +54,7 @@ mAudioProtocol = {
   .PlaybackDelay   = 0,
   .Language        = AppleVoiceOverLanguageEn,
   .OutputIndexMask = 0,
-  .Volume          = 100,
+  .Gain            = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN,
   .OcAudio         = {
     .Revision           = OC_AUDIO_PROTOCOL_REVISION,
     .Connect            = InternalOcAudioConnect,
@@ -158,51 +158,75 @@ OcAudioInstallProtocols (
   return &mAudioProtocol.OcAudio;
 }
 
-UINT8
-OcGetVolumeLevel (
-  IN  UINT32   Amplifier,
+INT8
+OcGetAmplifierGain (
   OUT BOOLEAN  *Muted
   )
 {
   EFI_STATUS  Status;
+  EFI_STATUS  AltStatus;
   UINTN       Size;
   UINT8       Value;
-  UINT8       NewValue;
+  INT8        DbValue;
 
+  *Muted = FALSE;
+
+  //
+  // Check mute initially (only available in raw, amp-specific gain setting).
+  //
   Size   = sizeof (Value);
-  Status = gRT->GetVariable (
+  AltStatus = gRT->GetVariable (
     APPLE_SYSTEM_AUDIO_VOLUME_VARIABLE_NAME,
     &gAppleBootVariableGuid,
     NULL,
     &Size,
     &Value
     );
-  if (EFI_ERROR (Status)) {
-    Value = OC_AUDIO_DEFAULT_VOLUME_LEVEL;
+  if (EFI_ERROR (AltStatus)) {
+    Value = 0;
+  } else if ((Value & APPLE_SYSTEM_AUDIO_VOLUME_MUTED) != 0) {
+    *Muted = TRUE;
+    Value &= APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK;
   }
 
-  if ((Value & APPLE_SYSTEM_AUDIO_VOLUME_MUTED) != 0) {
-    Value  &= APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK;
-    *Muted = TRUE;
+  //
+  // If no mute, use dB gain setting (which can be applied to any amp on any codec).
+  //
+  if (*Muted) {
+    //
+    // SystemAudioVolumeDB appears not to contain sane values when SystemAudioVolume indicates muted,
+    // therefore we have to fall back to default gain value for use with audio assist, which never mutes.
+    //
+    DbValue = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN;
+    Status = EFI_NOT_STARTED;
   } else {
     *Muted = FALSE;
+    Size   = sizeof (DbValue);
+    Status = gRT->GetVariable (
+      APPLE_SYSTEM_AUDIO_VOLUME_DB_VARIABLE_NAME,
+      &gAppleBootVariableGuid,
+      NULL,
+      &Size,
+      &DbValue
+      );
+    if (EFI_ERROR (Status)) {
+      DbValue = OC_AUDIO_DEFAULT_GAIN;
+    }
   }
 
-  if (Amplifier > 0) {
-    NewValue = (UINT8) (Value * Amplifier / 100);
-  } else {
-    NewValue = Value;
-  }
-
-  NewValue = MIN (NewValue, 100);
-
+  //
+  // Log system saved raw gain for debugging purposes. Value derived later from dB gain should
+  // be the same to within about +/- 1, if applied on an amp with the same amp capabilities.
+  //
   DEBUG ((
     DEBUG_INFO,
-    "OCAU: System volume is %d (calculated from %d) - %r\n",
-    NewValue,
+    "OCAU: System amp gain %d dB, saved raw gain 0x%X, system audio mute (for chime) %u  - %r/%r\n",
+    DbValue,
     Value,
+    *Muted,
+    AltStatus,
     Status
     ));
 
-  return NewValue;
+  return DbValue;
 }

@@ -19,7 +19,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
-#define OC_AUDIO_PROTOCOL_REVISION  0x030000
+#define OC_AUDIO_PROTOCOL_REVISION  0x040000
 
 //
 // OC_AUDIO_PROTOCOL_GUID
@@ -120,7 +120,8 @@ STATIC_ASSERT (OcVoiceOverAudioFileIndexMax - OcVoiceOverAudioFileIndexBase == 9
   @param[in]     DevicePath       Controller device path, optional.
   @param[in]     CodecAddress     Codec address, optional.
   @param[in]     OutputIndexMask  Output index mask.
-  @param[in]     Volume           Raw volume level from 0 to 100.
+  @param[in]     Gain             The amplifier gain (or attenuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                  is usually at at or near max available volume, but is not required to be so in the spec).
 
   @retval EFI_SUCESS on success.
   @retval EFI_NOT_FOUND when missing.
@@ -133,7 +134,7 @@ EFI_STATUS
   IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
   IN     UINT8                     CodecAddress     OPTIONAL,
   IN     UINT64                    OutputIndexMask,
-  IN     UINT8                     Volume
+  IN     INT8                      Gain
   );
 
 /**
@@ -202,6 +203,8 @@ EFI_STATUS
 
   @param[in,out] This         Audio protocol instance.
   @param[in]     File         File to play.
+  @param[in]     Gain         The amplifier gain (or attenuation if negative) in dB to use, relative to 0 dB level.
+  @param[in]     UseGain      If TRUE use provided volume level, otherwise use stored global volume level.
   @param[in]     Wait         Wait for completion of the previous track.
 
   @retval EFI_SUCCESS on successful playback startup.
@@ -211,6 +214,8 @@ EFI_STATUS
 (EFIAPI* OC_AUDIO_PLAY_FILE) (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     UINT32                     File,
+  IN     INT8                       Gain  OPTIONAL,
+  IN     BOOLEAN                    UseGain,
   IN     BOOLEAN                    Wait
   );
 

@@ -129,7 +129,7 @@ InternalOcAudioVoiceOverPlay (
 {
   OC_AUDIO_PROTOCOL_PRIVATE  *Private;
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_VOICE_OVER (This);
-  return Private->OcAudio.PlayFile (&Private->OcAudio, File, TRUE);
+  return Private->OcAudio.PlayFile (&Private->OcAudio, File, 0, FALSE, TRUE);
 }
 
 EFI_STATUS

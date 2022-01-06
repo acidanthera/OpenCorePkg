@@ -3,6 +3,8 @@
   SPDX-License-Identifier: BSD-3-Clause
 **/
 
+#include <Guid/AppleVariable.h>
+
 #include "HdaCodec.h"
 #include <Protocol/AudioIo.h>
 #include <Library/OcMiscLib.h>
@@ -12,7 +14,7 @@
 // Cache playback setup.
 //
 STATIC UINT64                     mOutputIndexMask = 0;
-STATIC UINT8                      mVolume = 0;
+STATIC INT8                       mGain = APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN;
 STATIC EFI_AUDIO_IO_PROTOCOL_FREQ mFreq = 0;
 STATIC EFI_AUDIO_IO_PROTOCOL_BITS mBits = 0;
 STATIC UINT8                      mChannels = 0xFFU;
@@ -216,7 +218,8 @@ HdaCodecAudioIoGetOutputs(
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
   @param[in] OutputIndexMask    A mask indicating the desired outputs.
-  @param[in] Volume             The volume (0-100) to use.
+  @param[in] Gain               The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
   @param[in] Bits               The width in bits of the source data.
   @param[in] Freq               The frequency of the source data.
   @param[in] Channels           The number of channels the source data contains.
@@ -230,7 +233,7 @@ EFIAPI
 HdaCodecAudioIoSetupPlayback(
   IN EFI_AUDIO_IO_PROTOCOL *This,
   IN UINT64 OutputIndexMask,
-  IN UINT8 Volume,
+  IN INT8 Gain,
   IN EFI_AUDIO_IO_PROTOCOL_FREQ Freq,
   IN EFI_AUDIO_IO_PROTOCOL_BITS Bits,
   IN UINT8 Channels,
@@ -264,7 +267,7 @@ HdaCodecAudioIoSetupPlayback(
 
   // Basic settings caching.
   if (mOutputIndexMask == OutputIndexMask
-      && mVolume == Volume
+      && mGain == Gain
       && mFreq == Freq
       && mBits == Bits
       && mChannels == Channels) {
@@ -272,14 +275,15 @@ HdaCodecAudioIoSetupPlayback(
   }
 
   mOutputIndexMask = OutputIndexMask;
-  mVolume = Volume;
+  mGain = Gain;
   mFreq = Freq;
   mBits = Bits;
   mChannels = Channels;
 
   // If a parameter is invalid, return error.
-  if ((This == NULL) || (Volume > EFI_AUDIO_IO_PROTOCOL_MAX_VOLUME))
+  if (This == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
 
   // Get private data.
   AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS(This);
@@ -500,7 +504,7 @@ HdaCodecAudioIoSetupPlayback(
     if ((OutputIndexMask & IndexMask) == 0) {
       continue;
     }
-    Status = HdaCodecEnableWidgetPath(HdaCodecDev->OutputPorts[Index], Volume, HdaStreamId, StreamFmt);
+    Status = HdaCodecEnableWidgetPath(HdaCodecDev->OutputPorts[Index], Gain, HdaStreamId, StreamFmt);
     if (EFI_ERROR(Status))
       goto CLOSE_STREAM;
   }

@@ -166,7 +166,8 @@ EFI_STATUS
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
   @param[in] OutputIndexMask    A mask indicating the desired outputs.
-  @param[in] Volume             The volume (0-100) to use.
+  @param[in] Gain               The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
   @param[in] Bits               The width in bits of the source data.
   @param[in] Freq               The frequency of the source data.
   @param[in] Channels           The number of channels the source data contains.
@@ -180,7 +181,7 @@ EFI_STATUS
 (EFIAPI *EFI_AUDIO_IO_SETUP_PLAYBACK) (
   IN EFI_AUDIO_IO_PROTOCOL        *This,
   IN UINT64                       OutputIndexMask,
-  IN UINT8                        Volume,
+  IN INT8                         Gain,
   IN EFI_AUDIO_IO_PROTOCOL_FREQ   Freq,
   IN EFI_AUDIO_IO_PROTOCOL_BITS   Bits,
   IN UINT8                        Channels,

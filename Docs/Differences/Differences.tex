@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Jan  5 23:59:13 2022
-%DIF ADD ../Configuration.tex        Thu Jan  6 09:12:56 2022
+%DIF DEL PreviousConfiguration.tex   Sun Jan  9 22:59:35 2022
+%DIF ADD ../Configuration.tex        Mon Jan 10 09:58:30 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4945,12 +4945,31 @@ troubleshooting:
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolume}
   \break
   System audio volume level for firmware audio support. 8-bit integer.
-  The bit of \texttt{0x80} means muted. Lower bits are used to encode
-  volume range specific to installed audio codec. The value is capped
-  by \texttt{MaximumBootBeepVolume} AppleHDA layout value to avoid
-  too loud audio playback in the firmware.
-\item
-  \texttt{5EDDA193-A070-416A-85EB-2A1181F45B18:PEXConf}
+  The bit of \texttt{0x80} means muted. \DIFdelbegin \DIFdel{Lower }\DIFdelend \DIFaddbegin \DIFadd{The remaining }\DIFaddend bits are used
+  to encode \DIFdelbegin \DIFdel{volume range specific to installed audio
+  codec. The }\DIFdelend \DIFaddbegin \DIFadd{the raw amplifier gain setting to be applied to the audio
+  amplifier in use. Exactly what this value means depends on the codec
+  (and potentially on the specific amplifier within the codec). This }\DIFaddend value
+  is capped by \DIFaddbegin \DIFadd{macOS to the }\DIFaddend \texttt{MaximumBootBeepVolume} AppleHDA layout
+  value\DIFdelbegin \DIFdel{to avoid
+  too loud }\DIFdelend \DIFaddbegin \DIFadd{, to avoid over-loud }\DIFaddend audio playback in the firmware.
+  \item
+  \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolumeDB}}
+  \break
+  \DIFadd{Current system audio volume level in decibels (dB). The value
+  is a signed byte representing the audio offset (gain if positive,
+  attentuation if negative) in dB relative to the amplifier reference value
+  of 0 dB. Exactly which volume level is represented by 0 dB depends on the
+  codec (and potentially on the specific amplifier within the codec)
+  but it is normally at or near the maximum available amplifier volume.
+  Typical values of this variable range from approximately -60 (the exact value
+  depends on the audio hardware) up to exactly 0. On non-typical audio
+  hardware, the value may go above zero.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: Unlike }\texttt{\DIFadd{SystemAudioVolume}}\DIFadd{, this value is not capped.
+}\item
+  \DIFaddend \texttt{5EDDA193-A070-416A-85EB-2A1181F45B18:PEXConf}
   \break
   PCI expansion slot configuration for \texttt{MacPro7,1}.
   8-byte sequence describing default PCI slot configuration.
@@ -7171,8 +7190,8 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
   }\DIFaddend located on the \DIFaddbegin \DIFadd{specified }\DIFaddend audio controller (\texttt{AudioDevice}).
 
   \item
-  \DIFaddbegin \texttt{\DIFadd{DisconnectHda}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \texttt{\DIFdelbegin \DIFdel{MinimumVolume}\DIFdelend \DIFaddbegin \DIFadd{DisconnectHda}\DIFaddend }\\
+  \textbf{Type}: \DIFaddbegin \texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Description}}\DIFadd{: Disconnect HDA controller before loading drivers.
 }
@@ -7186,25 +7205,80 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
   }\hyperref[uefiaudio]{AudioDxe} \DIFadd{section.
 }
 
-\item
-  \DIFaddend \texttt{MinimumVolume}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Minimal heard volume level from \texttt{0} to \texttt{100}.
+  \item
+  \texttt{\DIFadd{MaximumGain}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\DIFaddend \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{\DIFdelbegin \DIFdel{0}\DIFdelend \DIFaddbegin \DIFadd{-15}\DIFaddend }\\
+  \textbf{Description}: \DIFdelbegin \DIFdel{Minimal heard volume level from }%DIFDELCMD < \texttt{%%%
+\DIFdelend \DIFaddbegin \DIFadd{Maximum gain to use for UEFI audio, specified in decibels (dB) with respect to amplifier
+  reference level of }\DIFaddend 0 \DIFdelbegin %DIFDELCMD < \MBLOCKRIGHTBRACE %%%
+\DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{dB (see note 1).
+}
 
-  The screen reader will use this volume level when the calculated volume level is lower
-  than \texttt{MinimumVolume} and the boot chime will not play if the calculated
-  volume level is lower than \texttt{MinimumVolume}.
+  \DIFadd{All UEFI audio will use this gain setting when the system amplifier gain read from the }\DIFaddend \texttt{\DIFdelbegin \DIFdel{100}\DIFdelend \DIFaddbegin \DIFadd{SystemAudioVolumeDB}\DIFaddend }
+  \DIFaddbegin \DIFadd{NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
+  or the }\texttt{\DIFadd{SystemAudioVolumeDB}} \DIFadd{NVRAM value has been misconfigured}\DIFaddend .
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: A typical range of system gain values is from roughly -60 dB to exactly 0 dB, where 0 dB represents the
+  amplifier maximum volume. However these values depend on the hardware and may be different,
+  including gain levels above zero (therefore 0 dB is not the amplifier maximum volume) on non-standard hardware.
+  On any hardware, following the Intel HDA specification, the range will always include 0 dB somewere
+  (at either end or somewhere in between).
+  }
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: Values outside $-128$ dB to $+127$ dB (which are well beyond physically plausible decibel values) are not allowed.
+}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: Digital audio output -- which does not have a volume slider in-OS -- ignores this and all other gain settings,
+  only mute settings are relevant.
+}
+
+  \item
+  \texttt{\DIFadd{MinimumAssistGain}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-30}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Minimum gain in decibels (dB) to use for picker audio assist.
+}
+
+  \DIFaddend The screen reader will use this \DIFdelbegin \DIFdel{volume level when the calculated volume level }\DIFdelend \DIFaddbegin \DIFadd{amplifier gain if the system amplifier gain read from the }\texttt{\DIFadd{SystemAudioVolumeDB}}
+  \DIFadd{NVRAM variable }\DIFaddend is lower than \DIFdelbegin \texttt{\DIFdel{MinimumVolume}} %DIFAUXCMD
+\DIFdel{and the }\DIFdelend \DIFaddbegin \DIFadd{this.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: In addition to this setting, because audio assist must be audible to serve its function, audio assist
+  is not muted even if the OS sound is muted or the }\texttt{\DIFadd{StartupMute}} \DIFadd{NVRAM variable is set.
+}
+
+  \item
+  \texttt{\DIFadd{MinimumAudibleGain}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{-128}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Minimum gain in decibels (dB) at which to attempt to play any sound.
+}
+
+  \DIFadd{The }\DIFaddend boot chime will not play if the \DIFdelbegin \DIFdel{calculated
+  volume level }\DIFdelend \DIFaddbegin \DIFadd{system amplifier gain level in the
+  }\texttt{\DIFadd{SystemAudioVolumeDB}} \DIFadd{NVRAM variable }\DIFaddend is lower than \DIFdelbegin \texttt{\DIFdel{MinimumVolume}}%DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{this}\DIFaddend .
+
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: This setting is designed to save unecessary pauses due to audio setup at inaudible volume
+  levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the
+  hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware
+  that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations,
+  the lowest part of the volume range may not be audible at all.
+}
+
+\DIFaddend \item
   \texttt{PlayChime}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Auto}\\
   \textbf{Description}: Play chime sound at startup.
 
   Enabling this setting plays the boot chime using the builtin audio support. The volume
-  level is determined by the \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings
-  as well as the \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
+  level is determined by the \texttt{\DIFdelbegin \DIFdel{MinimumVolume}\DIFdelend \DIFaddbegin \DIFadd{SystemAudioVolumeDB}\DIFaddend } \DIFdelbegin \DIFdel{and }\texttt{\DIFdel{VolumeAmplifier}} %DIFAUXCMD
+\DIFdel{settings
+  as well as the }\texttt{\DIFdel{SystemAudioVolume}} %DIFAUXCMD
+\DIFdelend NVRAM variable. \DIFdelbegin \DIFdel{Possible values include}\DIFdelend \DIFaddbegin \DIFadd{Supported values are}\DIFaddend :
 
   \begin{itemize}
     \tightlist
@@ -7214,10 +7288,14 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
     \item \texttt{Disabled} --- Disables chime unconditionally.
   \end{itemize}
 
-  \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
+  \emph{Note \DIFaddbegin \DIFadd{1}\DIFaddend }: \texttt{Enabled} can be used \DIFdelbegin \DIFdel{in separate from }\DIFdelend \DIFaddbegin \DIFadd{separately from the }\DIFaddend \texttt{StartupMute}
   NVRAM variable to avoid conflicts when the firmware is able to play the boot chime.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 2}}\DIFadd{: Regardless of this setting, the boot chime will not play if system audio is muted,
+  i.e.~if the }\texttt{\DIFadd{SystemAudioVolume}} \DIFadd{NVRAM variable has bit }\texttt{\DIFadd{0x80}} \DIFadd{set.
+}
+
+\DIFaddend \item
   \texttt{ResetTrafficClass}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -7240,23 +7318,50 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
   (e.g. volume setting). This option makes it configurable. A typical
   delay can be up to 0.5 seconds.
 
-\item
-  \texttt{VolumeAmplifier}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Multiplication coefficient for system volume to raw volume linear translation
-  from \texttt{0} to \texttt{1000}.
+\DIFdelbegin %DIFDELCMD < \item
+\item%DIFAUXCMD
+%DIFDELCMD <   %%%
+\texttt{\DIFdel{VolumeAmplifier}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Type}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{plist\ integer}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Failsafe}}%DIFAUXCMD
+\DIFdel{: }\texttt{\DIFdel{0}}%DIFAUXCMD
+%DIFDELCMD < \\
+%DIFDELCMD <   %%%
+\textbf{\DIFdel{Description}}%DIFAUXCMD
+\DIFdel{: Multiplication coefficient for system volume to raw volume linear translation
+  from }\texttt{\DIFdel{0}} %DIFAUXCMD
+\DIFdel{to }\texttt{\DIFdel{1000}}%DIFAUXCMD
+\DIFdel{.
+}%DIFDELCMD < 
 
-  Volume level range read from \texttt{SystemAudioVolume} varies depending on the codec.
-  To transform read value in \texttt{[0, 127]} range into raw volume range \texttt{[0, 100]}
-  the read value is scaled to \texttt{VolumeAmplifier} percents:
-  \begin{align*}
-      RawVolume &= MIN(\frac{SystemAudioVolume * VolumeAmplifier}{100}, 100)
-  \end{align*}
-  \emph{Note}: the transformation used in macOS is not linear, but it is very close
+%DIFDELCMD <   %%%
+\DIFdel{Volume level range read from }\texttt{\DIFdel{SystemAudioVolume}} %DIFAUXCMD
+\DIFdel{varies depending on the codec.
+  To transform read value in }\texttt{%DIFDELCMD < [%%%
+\DIFdel{0, 127}%DIFDELCMD < ]%%%
+} %DIFAUXCMD
+\DIFdel{range into raw volume range }\texttt{%DIFDELCMD < [%%%
+\DIFdel{0, 100}%DIFDELCMD < ]%%%
+}
+  %DIFAUXCMD
+\DIFdel{the read value is scaled to }\texttt{\DIFdel{VolumeAmplifier}} %DIFAUXCMD
+\DIFdel{percents:
+  }\begin{align*}
+      \DIFdel{RawVolume }&\DIFdel{= MIN(\frac{SystemAudioVolume * VolumeAmplifier}{100}, 100)
+  }\end{align*}%DIFAUXCMD
+%DIFDELCMD <   %%%
+\emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: the transformation used in macOS is not linear, but it is very close
   and this nuance is thus ignored.
+}%DIFDELCMD < 
 
-\end{enumerate}
+%DIFDELCMD < %%%
+\DIFdelend \end{enumerate}
 
 \subsection{Drivers Properties}\label{uefidriversprops}
 
