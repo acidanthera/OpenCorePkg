@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Dec 17 13:37:32 2021
-%DIF ADD ../Configuration.tex        Tue Jan  4 07:23:37 2022
+%DIF DEL PreviousConfiguration.tex   Wed Jan  5 23:59:13 2022
+%DIF ADD ../Configuration.tex        Thu Jan  6 09:12:56 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6075,7 +6075,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 
 \begin{longtable}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
-& HDA audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+& \DIFdelbegin \DIFdel{HDA audio support driver }\DIFdelend \DIFaddbegin \hyperref[uefiaudio]{HDA audio support driver} \DIFaddend in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
@@ -6532,7 +6532,72 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
-\subsection{Properties}\label{uefiprops}
+\DIFaddbegin \subsection{\DIFadd{AudioDxe}}\label{uefiaudio}
+
+\DIFadd{High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+}
+
+\subsubsection{\DIFadd{Configuration}}
+
+\DIFadd{Most UEFI audio configuration is handled via the }\hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+\DIFadd{section, but if required the following additonal configuration options (which are needed to produce sound
+on most Apple hardware, and possibly some others) may be specified in }\texttt{\DIFadd{UEFI/Drivers/Arguments}}\DIFadd{:
+}
+
+\begin{itemize}
+  \tightlist
+	\item \texttt{\DIFadd{-}{}\DIFadd{-gpio-setup}} \DIFadd{- Default value is }\texttt{\DIFadd{0}} \DIFadd{(GPIO setup disabled) if argument is not provided,
+  or }\texttt{\DIFadd{7}} \DIFadd{(all GPIO setup stages stages enabled) if the argument is provided with no value. }\medskip
+
+	\DIFadd{Available values, which may be combined by adding, are: }\medskip
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{\DIFadd{0x00000001}} \DIFadd{(bit }\texttt{\DIFadd{0}}\DIFadd{) --- }\texttt{\DIFadd{GPIO\_SETUP\_STAGE\_DATA}}\DIFadd{,
+    set GPIO pin data high on specified pins. Required e.g. on }\texttt{\DIFadd{MacBookPro10,2}} \DIFadd{and }\texttt{\DIFadd{MacPro5,1}}\DIFadd{.
+    }\item \texttt{\DIFadd{0x00000002}} \DIFadd{(bit }\texttt{\DIFadd{1}}\DIFadd{) --- }\texttt{\DIFadd{GPIO\_SETUP\_STAGE\_DIRECTION}}\DIFadd{,
+    set GPIO data direction to output on specified pins. Required e.g. on }\texttt{\DIFadd{MacPro5,1}}\DIFadd{.
+    }\item \texttt{\DIFadd{0x00000004}} \DIFadd{(bit }\texttt{\DIFadd{2}}\DIFadd{) --- }\texttt{\DIFadd{GPIO\_SETUP\_STAGE\_ENABLE}}\DIFadd{,
+    enable specified GPIO pins. Required e.g. on }\texttt{\DIFadd{MacPro5,1}}\DIFadd{.
+  }\end{itemize} \medskip
+
+  \DIFadd{If audio appears to be `playing' on the correct codec, e.g. based on the debug log, but no
+  sound is heard on any channel, it is suggested to use }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup}} \DIFadd{(with no
+  value) in the AudioDxe driver arguments. If specified with no value, all
+  stages will be enabled (equivalent of specifying }\texttt{\DIFadd{7}}\DIFadd{). If this produces sound,
+  it is then possible to try fewer bits, e.g. }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup=1}}\DIFadd{, }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup=3}}\DIFadd{,
+  to find out which stages are actually required. }\medskip
+
+  \emph{\DIFadd{Note}}\DIFadd{: Value }\texttt{\DIFadd{7}} \DIFadd{(all flags enabled) of this option -- as required for the
+  }\texttt{\DIFadd{MacPro5,1}} \DIFadd{-- is compatible with most systems, but is known to cause problems with
+  sound (previous sounds are not allowed to finish before new sounds start) on a small number
+  of other systems, hence this option is not enabled by default. }\medskip
+
+	\item \texttt{\DIFadd{-}{}\DIFadd{-gpio-pins}} \DIFadd{- Default: }\texttt{\DIFadd{0}}\DIFadd{, auto-detect. }\medskip
+
+	\DIFadd{Specifies which GPIO pins should be operated on by }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup}}\DIFadd{. This is a bit mask,
+  with possible values from }\texttt{\DIFadd{0x0}} \DIFadd{to }\texttt{\DIFadd{0xFF}}\DIFadd{. The usable maximum depends on
+  the number if available pins on the audio out function group of the codec in use, e.g. it is
+  }\texttt{\DIFadd{0x3}} \DIFadd{(lowest two bits) if two GPIO pins are present, }\texttt{\DIFadd{0x7}} \DIFadd{if three pins are present,
+  etc. }\medskip
+
+  \DIFadd{When }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup}} \DIFadd{is enabled (i.e. non-zero), then }\texttt{\DIFadd{0}} \DIFadd{is a special
+  value for }\texttt{\DIFadd{-}{}\DIFadd{-gpio-pins}}\DIFadd{, meaning that the pin mask will be auto-generated based on the
+  reported number of GPIO pins on the specified codec (see }\texttt{\DIFadd{AudioCodec}}\DIFadd{), e.g. if the
+  codec's audio out function group reports 4 GPIO pins, a mask of }\texttt{\DIFadd{0xF}} \DIFadd{will be used.
+  The value in use can be seen in the debug log in a line such as: }\medskip
+
+  \texttt{\DIFadd{HDA: GPIO setup on pins 0x0F - Success}} \medskip
+
+  \DIFadd{Values for driver parameters can be specified in hexadecimal beginning with }\texttt{\DIFadd{0x}} \DIFadd{or
+  in decimal, e.g. }\texttt{\DIFadd{-}{}\DIFadd{-gpio-pins=0x12}} \DIFadd{or }\texttt{\DIFadd{-}{}\DIFadd{-gpio-pins=18}}\DIFadd{.
+}\end{itemize}
+
+\emph{\DIFadd{Note}}\DIFadd{: AudioDxe is a staging driver, refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{\DIFadd{acidanthera/bugtracker\#740}}
+\DIFadd{for known issues.
+}
+
+\DIFaddend \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
 \item
@@ -6547,7 +6612,8 @@ with the boot menu.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
-  in the \hyperref[uefiaudioprops]{Audio Properties} section below.
+  in the \DIFdelbegin %DIFDELCMD < \hyperref[uefiaudioprops]{Audio Properties} %%%
+\DIFdelend \DIFaddbegin \hyperref[uefiaudioprops]{\texttt{Audio Properties}} \DIFaddend section below.
 
   \DIFdelbegin \DIFdel{Audio support }\DIFdelend \DIFaddbegin \DIFadd{Unless documented otherwise (e.g. }\texttt{\DIFadd{ResetTrafficClass}}\DIFadd{) settings in this section
   are for UEFI audio support only (e.g. OpenCore generated boot chime and audio assist) and are
@@ -7113,6 +7179,11 @@ with the boot menu.
 
   \DIFadd{May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to allow
   a UEFI sound driver (such as }\texttt{\DIFadd{AudioDxe}}\DIFadd{) to take control of the audio hardware.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: In addition to this option, most Apple hardware also requires the
+  }\texttt{\DIFadd{-}{}\DIFadd{-gpio-setup}} \DIFadd{driver argument which is dealt with in the
+  }\hyperref[uefiaudio]{AudioDxe} \DIFadd{section.
 }
 
 \item
