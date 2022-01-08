@@ -34,9 +34,9 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "SsdtEC", 0x00001000)
      */
 
     /**
-    External (_SB_.PCI0.LPCB.EC0, DeviceObj)
+    External (_SB_.PCI0.LPCB.ECDV, DeviceObj)
 
-    Scope (\_SB.PCI0.LPCB.EC0)
+    Scope (\_SB.PCI0.LPCB.ECDV)
     {
         Method (_STA, 0, NotSerialized)  // _STA: Status
         {
