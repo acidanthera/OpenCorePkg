@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Dec  8 21:04:04 2021
-%DIF ADD ../Configuration.tex        Tue Jan 11 01:59:39 2022
+%DIF DEL PreviousConfiguration.tex   Sun Jan  9 22:59:35 2022
+%DIF ADD ../Configuration.tex        Mon Jan 10 23:09:59 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4944,7 +4944,7 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolume}
   \break
-  System audio volume level for firmware audio support. 8-bit integer.
+  System audio volume level for firmware audio support. 8-bit \DIFaddbegin \DIFadd{unsigned }\DIFaddend integer.
   The bit of \texttt{0x80} means muted. \DIFdelbegin \DIFdel{Lower }\DIFdelend \DIFaddbegin \DIFadd{The remaining }\DIFaddend bits are used
   to encode \DIFdelbegin \DIFdel{volume range specific to installed audio
   codec. The }\DIFdelend \DIFaddbegin \DIFadd{the raw amplifier gain setting to be applied to the audio
@@ -4956,8 +4956,8 @@ troubleshooting:
   \item
   \DIFaddbegin \texttt{\DIFadd{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolumeDB}}
   \break
-  \DIFadd{Current system audio volume level in decibels (dB). The value
-  is a signed byte representing the audio offset (gain if positive,
+  \DIFadd{Current system audio volume level in decibels (dB).  8-bit signed integer.
+  The value represents the audio offset (gain if positive,
   attenuation if negative) in dB relative to the amplifier reference value
   of 0 dB. Exactly which volume level is represented by 0 dB depends on the
   codec (and potentially on the specific amplifier within the codec)
@@ -7219,14 +7219,17 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
   \DIFaddbegin \DIFadd{NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
   or the }\texttt{\DIFadd{SystemAudioVolumeDB}} \DIFadd{NVRAM value has been misconfigured}\DIFaddend .
 
-  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: A typical range of system gain values is from roughly -60 dB to exactly 0 dB, where 0 dB represents the
-  amplifier maximum volume. However these values depend on the hardware and may be different,
-  including gain levels above zero (therefore 0 dB is not the amplifier maximum volume) on non-standard hardware.
-  On any hardware, following the Intel HDA specification, the range will always include 0 dB somewere
-  (at either end or somewhere in between).
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: Decibels (dB) specify gain (postive values; increase in volume) or attenuation (negative values; decrease
+  in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say,
+  the reference level is the sound level just audible to an average human. However generally
+  in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use
+  decibels to specify volume level. On most Intel HDA hardware the reference level of 0 dB is the
+  }\emph{\DIFadd{loudest}} \DIFadd{volume of the hardware, and all lower volumes are therefore negative numbers. The quietest volume
+  on typical sound hardware is around -55 dB to -60 dB.
   }
 
-  \emph{\DIFadd{Note 2}}\DIFadd{: Values outside $-128$ dB to $+127$ dB (which are well beyond physically plausible decibel values) are not allowed.
+  \emph{\DIFadd{Note 2}}\DIFadd{: Matching how macOS handles decibel values, this value is converted to a signed byte; therefore values
+  outside $-128$ dB to $+127$ dB (which are well beyond physically plausible volume levels) are not allowed.
 }
 
   \emph{\DIFadd{Note 3}}\DIFadd{: Digital audio output -- which does not have a volume slider in-OS -- ignores this and all other gain settings,
@@ -7245,8 +7248,11 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
 \DIFdel{and the }\DIFdelend \DIFaddbegin \DIFadd{this.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: In addition to this setting, because audio assist must be audible to serve its function, audio assist
+  \emph{\DIFadd{Note 1}}\DIFadd{: In addition to this setting, because audio assist must be audible to serve its function, audio assist
   is not muted even if the OS sound is muted or the }\texttt{\DIFadd{StartupMute}} \DIFadd{NVRAM variable is set.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: See }\texttt{\DIFadd{MaximumGain}} \DIFadd{for an explanation of decibel volume levels.
 }
 
   \item
@@ -7261,11 +7267,14 @@ on most Apple hardware, and possibly some others) may be specified in }\texttt{\
   }\texttt{\DIFadd{SystemAudioVolumeDB}} \DIFadd{NVRAM variable }\DIFaddend is lower than \DIFdelbegin \texttt{\DIFdel{MinimumVolume}}%DIFAUXCMD
 \DIFdelend \DIFaddbegin \DIFadd{this}\DIFaddend .
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: This setting is designed to save unecessary pauses due to audio setup at inaudible volume
+  \DIFaddbegin \emph{\DIFadd{Note 1}}\DIFadd{: This setting is designed to save unecessary pauses due to audio setup at inaudible volume
   levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the
   hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware
   that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations,
   the lowest part of the volume range may not be audible at all.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: See }\texttt{\DIFadd{MaximumGain}} \DIFadd{for an explanation of decibel volume levels.
 }
 
 \DIFaddend \item
