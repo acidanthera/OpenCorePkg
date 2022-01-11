@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.7.8
+- Updated ocvalidate to warn about insecure DmgLoading with secure SecureBootModel (already disallowed in runtime)
+
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point
 - Added `ProvideCurrentCpuInfo` support for Intel Alder Lake

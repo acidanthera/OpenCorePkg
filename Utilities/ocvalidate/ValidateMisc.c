@@ -546,6 +546,14 @@ CheckMiscSecurity (
     ++ErrorCount;
   }
 
+  if (!(AsciiStrCmp (AsciiDmgLoading, "Disabled") == 0
+    || AsciiStrCmp (AsciiDmgLoading, "Signed") == 0
+    || AsciiDmgLoading[0] == '\0') ///< Default is "Signed", and assume default will always be secure.
+   && AsciiStrCmp (SecureBootModel, "Disabled") != 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Security->DmgLoading must be Disabled or Signed unless Misc->Security->SecureBootModel is Disabled!\n"));
+    ++ErrorCount;
+  }
+
   return ErrorCount;
 }
 
