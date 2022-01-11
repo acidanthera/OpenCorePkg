@@ -45,13 +45,18 @@ OcLanguageCodeToString (
 /**
   Get system amplifier gain.
 
-  @param[out]  Muted      Whether amplifier should be muted.
-
-  @retval ASCII string.
+  @param[out]  RawGain        Raw codec gain setting.
+  @param[out]  DecibelGain    Decibel gain setting.
+  @param[out]  Muted          Whether amplifier should be muted.
+  @param[out]  TryConversion  TRUE when decibel gain setting is a default value and
+                              raw codec gain setting is a real value.
 **/
-INT8
+VOID
 OcGetAmplifierGain (
-  OUT BOOLEAN  *Muted
+  OUT UINT8              *RawGain,
+  OUT INT8               *DecibelGain,
+  OUT BOOLEAN            *Muted,
+  OUT BOOLEAN            *TryConversion
   );
 
 /**

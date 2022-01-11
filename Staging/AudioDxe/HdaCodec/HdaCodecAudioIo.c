@@ -213,6 +213,61 @@ HdaCodecAudioIoGetOutputs(
 }
 
 /**
+  Convert raw amplifier gain setting to decibel gain value; converts using the parameters of the first channel specified
+  in OutputIndexMask which has non-zero amp capabilities.
+  Note: It seems very typical - though it is certainly not required by the spec - that all amps on a codec which have
+  non-zero amp capabilities, actually all have the same params as each other.
+
+  @param[in]  This              A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
+  @param[in]  OutputIndexMask   A mask indicating the desired outputs.
+  @param[in]  GainParam         The raw gain parameter for the amplifier.
+  @param[out] Gain              The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
+
+  @retval EFI_SUCCESS           The gain value was calculated successfully.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+**/
+EFI_STATUS
+EFIAPI
+HdaCodecAudioIoRawGainToDecibels (
+  IN  EFI_AUDIO_IO_PROTOCOL       *This,
+  IN  UINT64                      OutputIndexMask,
+  IN  UINT8                       GainParam,
+  OUT INT8                        *Gain
+  )
+{
+  EFI_STATUS            Status;
+  AUDIO_IO_PRIVATE_DATA *AudioIoPrivateData;
+  HDA_CODEC_DEV         *HdaCodecDev;
+  UINTN                 Index;
+  UINT64                IndexMask;
+
+  // If a parameter is invalid, return error.
+  if (This == NULL || Gain == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // Get private data.
+  AudioIoPrivateData = AUDIO_IO_PRIVATE_DATA_FROM_THIS (This);
+  HdaCodecDev = AudioIoPrivateData->HdaCodecDev;
+
+  Status = EFI_NOT_FOUND;
+
+  // Try to convert on requested outputs.
+  for (Index = 0, IndexMask = 1; Index < HdaCodecDev->OutputPortsCount; Index++, IndexMask <<= 1) {
+    if ((OutputIndexMask & IndexMask) == 0) {
+      continue;
+    }
+    Status = HdaCodecWidgetRawGainToDecibels (HdaCodecDev->OutputPorts[Index], GainParam, Gain);
+    if (!EFI_ERROR (Status) || Status != EFI_NOT_FOUND) {
+      return Status;
+    }
+  }
+
+  return Status;
+}
+
+/**
   Sets up the device to play audio data. Basic caching is implemented: no actions are taken
   the second and subsequent times that set up is called again with exactly the same paremeters. 
 

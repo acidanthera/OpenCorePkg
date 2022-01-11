@@ -232,6 +232,14 @@ HdaCodecAudioIoGetOutputs(
 
 EFI_STATUS
 EFIAPI
+HdaCodecAudioIoRawGainToDecibels(
+  IN  EFI_AUDIO_IO_PROTOCOL *This,
+  IN  UINT64 OutputIndexMask,
+  IN  UINT8 GainParam,
+  OUT INT8 *Gain);
+
+EFI_STATUS
+EFIAPI
 HdaCodecAudioIoSetupPlayback(
   IN EFI_AUDIO_IO_PROTOCOL *This,
   IN UINT64 OutputIndexMask,
@@ -288,6 +296,14 @@ EFI_STATUS
 EFIAPI
 HdaCodecDisableWidgetPath(
   IN HDA_WIDGET_DEV *HdaWidget);
+
+EFI_STATUS
+EFIAPI
+HdaCodecWidgetRawGainToDecibels (
+  IN     HDA_WIDGET_DEV  *HdaWidget,
+  IN     UINT8           GainParam,
+     OUT INT8            *Gain
+  );
 
 EFI_STATUS
 EFIAPI

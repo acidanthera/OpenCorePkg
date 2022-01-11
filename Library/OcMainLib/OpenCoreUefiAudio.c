@@ -496,8 +496,10 @@ OcLoadUefiAudioSupport (
   CHAR16                           *UnicodeDevicePath;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
   OC_AUDIO_PROTOCOL                *OcAudio;
-  INT8                             Gain;
+  UINT8                            RawGain;
   BOOLEAN                          Muted;
+  INT8                             DecibelGain;
+  BOOLEAN                          TryConversion;
 
   if (Config->Uefi.Audio.ResetTrafficClass) {
     ResetAudioTrafficClass ();
@@ -517,8 +519,6 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Cannot locate audio decoder protocol - %r\n", Status));
     return;
   }
-
-  Gain = OcGetAmplifierGain (&Muted);
 
   DevicePath        = NULL;
   AsciiDevicePath   = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
@@ -548,29 +548,11 @@ OcLoadUefiAudioSupport (
     return;
   }
 
-  //
-  // Have a max. volume to limit very loud user volume during boot, as Apple do.
-  //
-  if (Gain > Config->Uefi.Audio.MaximumGain) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OC: Limiting gain %d dB -> %d dB\n",
-      Gain,
-      Config->Uefi.Audio.MaximumGain
-      ));
-    Gain = Config->Uefi.Audio.MaximumGain;
-  }
-
-  //
-  // Never disable audio assist sound completely, as it is vital for accessibility.
-  //
   Status = OcAudio->Connect (
     OcAudio,
     DevicePath,
     Config->Uefi.Audio.AudioCodec,
-    Config->Uefi.Audio.AudioOutMask,
-    Gain < Config->Uefi.Audio.MinimumAssistGain
-      ? Config->Uefi.Audio.MinimumAssistGain : Gain
+    Config->Uefi.Audio.AudioOutMask
     );
 
   if (DevicePath != NULL) {
@@ -581,6 +563,43 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));
     return;
   }
+
+  OcGetAmplifierGain (
+    &RawGain,
+    &DecibelGain,
+    &Muted,
+    &TryConversion
+    );
+
+  //
+  // Conversion will only be correct if current codec and channel(s)
+  // correspond to the saved raw gain parameter.
+  //
+  if (TryConversion) {
+    OcAudio->RawGainToDecibels (OcAudio, RawGain, &DecibelGain);
+  }
+
+  //
+  // Have a max. volume to limit very loud user volume during boot, as Apple do.
+  //
+  if (DecibelGain > Config->Uefi.Audio.MaximumGain) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Limiting gain %d dB -> %d dB\n",
+      DecibelGain,
+      Config->Uefi.Audio.MaximumGain
+      ));
+    DecibelGain = Config->Uefi.Audio.MaximumGain;
+  }
+
+  //
+  // Never disable audio assist sound completely, as it is vital for accessibility.
+  //
+  Status = OcAudio->SetDefaultGain (
+    OcAudio,
+    DecibelGain < Config->Uefi.Audio.MinimumAssistGain
+      ? Config->Uefi.Audio.MinimumAssistGain : DecibelGain
+    );
 
   Status = OcAudio->SetProvider (
     OcAudio,
@@ -601,13 +620,13 @@ OcLoadUefiAudioSupport (
   OcSetVoiceOverLanguage (NULL);
 
   if (!Muted
-    && Gain >= Config->Uefi.Audio.MinimumAudibleGain
+    && DecibelGain >= Config->Uefi.Audio.MinimumAudibleGain
     && OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))) {
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,
       AppleVoiceOverAudioFileVoiceOverBoot,
-      Gain,
+      DecibelGain,
       TRUE,
       FALSE
       );

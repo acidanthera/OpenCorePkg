@@ -833,6 +833,7 @@ HdaCodecInstallProtocols(
   AudioIoData->HdaCodecDev = HdaCodecDev;
   AudioIoData->AudioIo.Revision = EFI_AUDIO_IO_PROTOCOL_REVISION;
   AudioIoData->AudioIo.GetOutputs = HdaCodecAudioIoGetOutputs;
+  AudioIoData->AudioIo.RawGainToDecibels = HdaCodecAudioIoRawGainToDecibels;
   AudioIoData->AudioIo.SetupPlayback = HdaCodecAudioIoSetupPlayback;
   AudioIoData->AudioIo.StartPlayback = HdaCodecAudioIoStartPlayback;
   AudioIoData->AudioIo.StartPlaybackAsync = HdaCodecAudioIoStartPlaybackAsync;
@@ -965,6 +966,62 @@ HdaCodecDisableWidgetPath(
 
 EFI_STATUS
 EFIAPI
+HdaCodecWidgetRawGainToDecibels (
+  IN     HDA_WIDGET_DEV  *HdaWidget,
+  IN     UINT8           GainParam,
+     OUT INT8            *Gain
+  )
+{
+  UINT8               Offset;
+  UINT8               NumSteps;
+  UINT8               StepSize;
+
+  // Check if widget is valid.
+  if (HdaWidget == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
+  // Crawl through widget path.
+  while (HdaWidget != NULL) {
+    DEBUG ((DEBUG_INFO, "HDA: Widget @ 0x%X calculating gain\n", HdaWidget->NodeId));
+
+    // If there is an output amp, use its parameters.
+    if (HdaWidget->Capabilities & HDA_PARAMETER_WIDGET_CAPS_OUT_AMP) {
+      // If there are no overriden amp capabilities, check function group.
+      if (HdaWidget->AmpOverride) {
+        Offset   = HDA_PARAMETER_AMP_CAPS_OFFSET(HdaWidget->AmpOutCapabilities);
+        NumSteps = HDA_PARAMETER_AMP_CAPS_NUM_STEPS(HdaWidget->AmpOutCapabilities);
+        StepSize = HDA_PARAMETER_AMP_CAPS_STEP_SIZE(HdaWidget->AmpOutCapabilities);
+      } else {
+        Offset  = HDA_PARAMETER_AMP_CAPS_OFFSET(HdaWidget->FuncGroup->AmpOutCapabilities);
+        NumSteps = HDA_PARAMETER_AMP_CAPS_NUM_STEPS(HdaWidget->FuncGroup->AmpOutCapabilities);
+        StepSize = HDA_PARAMETER_AMP_CAPS_STEP_SIZE(HdaWidget->FuncGroup->AmpOutCapabilities);
+      }
+
+      // Ignore any fixed volume amps.
+      if (NumSteps > 0) {
+        if (GainParam > NumSteps) {
+          return EFI_INVALID_PARAMETER;
+        }
+
+        // Calculate decibel gain from widget gain param.
+        *Gain = ((INTN) GainParam - Offset) * (StepSize + 1) / 4;
+
+        DEBUG ((DEBUG_INFO, "HDA: Calculated amp gain %d dB (from 0x%X raw)\n", *Gain, GainParam));
+
+        return EFI_SUCCESS;
+      }
+    }
+
+    // Move to upstream widget.
+    HdaWidget = HdaWidget->UpstreamWidget;
+  }
+
+  return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
+EFIAPI
 HdaCodecEnableWidgetPath(
   IN HDA_WIDGET_DEV *HdaWidget,
   IN INT8 Gain,
@@ -1087,7 +1144,7 @@ HdaCodecEnableWidgetPath(
       } else if (GainParam < 0) {
         GainParam = 0;
       }
-      DEBUG((DEBUG_INFO, "HDA: Amp gain 0x%X (from %d dB)\n", GainParam, Gain));
+      DEBUG((DEBUG_INFO, "HDA: Applying amp gain 0x%X (from %d dB)\n", GainParam, Gain));
       Status = HdaIo->SendCommand(HdaIo, HdaWidget->NodeId, HDA_CODEC_VERB(HDA_VERB_SET_AMP_GAIN_MUTE,
         HDA_VERB_SET_AMP_GAIN_MUTE_PAYLOAD(0, GainParam, FALSE, TRUE, TRUE, FALSE, TRUE)), &Response);
       if (EFI_ERROR(Status))

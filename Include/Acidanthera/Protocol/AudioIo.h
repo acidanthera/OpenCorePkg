@@ -37,7 +37,7 @@
 
 typedef struct EFI_AUDIO_IO_PROTOCOL_ EFI_AUDIO_IO_PROTOCOL;
 
-#define EFI_AUDIO_IO_PROTOCOL_REVISION 2
+#define EFI_AUDIO_IO_PROTOCOL_REVISION 3
 
 /**
   Port type.
@@ -161,6 +161,30 @@ EFI_STATUS
   );
 
 /**
+  Convert raw amplifier gain setting to decibel gain value; converts using the parameters of the first channel specified
+  in OutputIndexMask which has non-zero amp capabilities.
+  Note: It seems very typical - though it is certainly not required by the spec - that all amps on a codec which have
+  non-zero amp capabilities all have the same params as each other.
+
+  @param[in]  This              A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
+  @param[in]  OutputIndexMask   A mask indicating the desired outputs.
+  @param[in]  GainParam         The raw gain parameter for the amplifier.
+  @param[out] Gain              The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
+
+  @retval EFI_SUCCESS           The gain value was calculated successfully.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS) (
+  IN  EFI_AUDIO_IO_PROTOCOL       *This,
+  IN  UINT64                      OutputIndexMask,
+  IN  UINT8                       GainParam,
+  OUT INT8                        *Gain
+  );
+
+/**
   Sets up the device to play audio data. Basic caching is implemented: no actions are taken
   the second and subsequent times that set up is called again with exactly the same paremeters. 
 
@@ -254,6 +278,7 @@ EFI_STATUS
 struct EFI_AUDIO_IO_PROTOCOL_ {
   UINTN                               Revision;
   EFI_AUDIO_IO_GET_OUTPUTS            GetOutputs;
+  EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS   RawGainToDecibels;
   EFI_AUDIO_IO_SETUP_PLAYBACK         SetupPlayback;
   EFI_AUDIO_IO_START_PLAYBACK         StartPlayback;
   EFI_AUDIO_IO_START_PLAYBACK_ASYNC   StartPlaybackAsync;

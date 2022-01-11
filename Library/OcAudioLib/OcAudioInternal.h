@@ -59,12 +59,18 @@ typedef struct {
 
 EFI_STATUS
 EFIAPI
+InternalOcAudioSetDefaultGain (
+  IN OUT OC_AUDIO_PROTOCOL         *This,
+  IN     INT8                      Gain
+  );
+
+EFI_STATUS
+EFIAPI
 InternalOcAudioConnect (
   IN OUT OC_AUDIO_PROTOCOL         *This,
   IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
   IN     UINT8                     CodecAddress     OPTIONAL,
-  IN     UINT64                    OutputIndexMask,
-  IN     INT8                      Gain
+  IN     UINT64                    OutputIndexMask
   );
 
 EFI_STATUS
@@ -74,6 +80,14 @@ InternalOcAudioSetProvider (
   IN     OC_AUDIO_PROVIDER_ACQUIRE  Acquire,
   IN     OC_AUDIO_PROVIDER_RELEASE  Release  OPTIONAL,
   IN     VOID                       *Context
+  );
+
+EFI_STATUS
+EFIAPI
+InternalOcAudioRawGainToDecibels (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINT8                      GainParam,
+     OUT INT8                       *Gain
   );
 
 EFI_STATUS

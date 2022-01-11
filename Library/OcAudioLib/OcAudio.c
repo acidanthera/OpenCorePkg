@@ -163,12 +163,27 @@ InternalMatchCodecDevicePath (
 
 EFI_STATUS
 EFIAPI
+InternalOcAudioSetDefaultGain (
+  IN OUT OC_AUDIO_PROTOCOL         *This,
+  IN     INT8                      Gain
+  )
+{
+  OC_AUDIO_PROTOCOL_PRIVATE   *Private;
+
+  Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
+
+  Private->Gain             = Gain;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 InternalOcAudioConnect (
   IN OUT OC_AUDIO_PROTOCOL         *This,
   IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
   IN     UINT8                     CodecAddress     OPTIONAL,
-  IN     UINT64                    OutputIndexMask,
-  IN     INT8                      Gain
+  IN     UINT64                    OutputIndexMask
   )
 {
   EFI_STATUS                  Status;
@@ -180,8 +195,7 @@ InternalOcAudioConnect (
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
   Private->OutputIndexMask  = OutputIndexMask;
-  Private->Gain             = Gain;
-
+  
   if (DevicePath == NULL) {
     Status = gBS->LocateProtocol (
       &gEfiAudioIoProtocolGuid,
@@ -296,6 +310,38 @@ InernalOcAudioPlayFileDone (
   Private->CurrentBuffer = NULL;
 
   gBS->SignalEvent (Private->PlaybackEvent);
+}
+
+EFI_STATUS
+EFIAPI
+InternalOcAudioRawGainToDecibels (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINT8                      GainParam,
+     OUT INT8                       *Gain
+  )
+{
+  EFI_STATUS                      Status;
+  OC_AUDIO_PROTOCOL_PRIVATE       *Private;
+
+  Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
+
+  if (Private->AudioIo == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAU: RawGainToDecibels has no AudioIo\n"));
+    return EFI_ABORTED;
+  }
+
+  Status = Private->AudioIo->RawGainToDecibels (
+    Private->AudioIo,
+    Private->OutputIndexMask,
+    GainParam,
+    Gain
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAU: RawGainToDecibels conversion failure - %r\n", Status));
+  }
+
+  return Status;
 }
 
 EFI_STATUS
