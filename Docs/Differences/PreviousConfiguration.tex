@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.6)
+       Reference Manual (0.7.7)
 
        \vspace{0.2in}
 
@@ -106,7 +106,7 @@
 
        \rmfamily
 
-       Copyright \textcopyright 2018-2021 vit9696
+       Copyright \textcopyright 2018-2022 vit9696
 
    \end{center}
 \end{titlepage}
@@ -630,6 +630,19 @@ package and requires the
 package. The currently supported EDK II release is hosted in
 \href{https://github.com/acidanthera/audk}{acidanthera/audk}. Required patches
 for this package can be found in the \texttt{Patches} directory.
+
+When updating the LaTeX documentation (e.g. \texttt{Configuration.tex}) please
+do \textit{not} rebuild the PDF files till merging to master happens. This avoids
+unnecessary merge conflicts:
+\begin{itemize}
+\tightlist
+\item External contributors using the pull-request approach should request
+  the maintainers to handle the PDF rebuild in the pull-request message.
+\item Internal contributors should rebuild the documentation at merge time
+  in the same or in a separate commit. One can ask another maintainer to
+  rebuild the documentation when lacking the necessary tools
+  in the pull-request message.
+\end{itemize}
 
 The only officially supported toolchain is \texttt{XCODE5}. Other toolchains
 might work but are neither supported nor recommended. Contributions of clean
@@ -2193,6 +2206,9 @@ blocking.
   \texttt{0x0306C3} (Haswell).
 
   \emph{Note 3}: For XCPM support it is recommended to use the following combinations.
+  Be warned that one is required to set the correct
+  \href{https://github.com/dortania/bugtracker/issues/190}{frequency vectors} matching
+  the installed CPU.
 
   \begin{itemize}
     \tightlist
@@ -2202,11 +2218,14 @@ blocking.
     \item Broadwell-E (\texttt{0x0406F1}) to Broadwell (\texttt{0x0306D4}):\\
     \texttt{Cpuid1Data}: \texttt{D4 06 03 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
-    \item Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0906EB}):\\
-    \texttt{Cpuid1Data}: \texttt{EB 06 09 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
-    \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
     \item Comet Lake U62 (\texttt{0x0A0660}) to Comet Lake U42 (\texttt{0x0806EC}):\\
     \texttt{Cpuid1Data}: \texttt{EC 06 08 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
+    \item Rocket Lake (\texttt{0x0A0670}) to Comet Lake (\texttt{0x0A0655}):\\
+    \texttt{Cpuid1Data}: \texttt{55 06 0A 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
+    \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
+    \item Alder Lake (\texttt{0x090672}) to Comet Lake (\texttt{0x0A0655}):\\
+    \texttt{Cpuid1Data}: \texttt{55 06 0A 00 00 00 00 00 00 00 00 00 00 00 00 00}\\
     \texttt{Cpuid1Mask}: \texttt{FF FF FF FF 00 00 00 00 00 00 00 00 00 00 00 00}
   \end{itemize}
 
@@ -2673,14 +2692,19 @@ blocking.
   \texttt{ProvideCurrentCpuInfo}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Requirement}: 10.8\\
+  \textbf{Requirement}: 10.8 (10.14)\\
   \textbf{Description}: Provides current CPU info to the kernel.
 
-  This quirk currently provides the correct TSC and FSB values to the kernel, as well
-  as disables CPU topology validation.
+  This quirk works differently depending on the CPU:
 
-  \emph{Note}: These patches currently target Microsoft Hyper-V and may need to be extended for
-  other purposes.
+  \begin{itemize}
+  \tightlist
+  \item For Microsoft Hyper-V it provides the correct TSC and FSB values
+    to the kernel, as well as disables CPU topology validation (10.8+).
+  \item For Intel CPUs it adds support for asymmetrical SMP systems
+    (e.g. Intel Alder Lake) by patching core count to thread count along
+    with the supplemental required changes (10.14+).
+  \end{itemize}
 
 \item
   \texttt{SetApfsTrimTimeout}\\
@@ -4852,11 +4876,27 @@ troubleshooting:
 \item
   \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolume}
   \break
-  System audio volume level for firmware audio support. 8-bit integer.
-  The bit of \texttt{0x80} means muted. Lower bits are used to encode
-  volume range specific to installed audio codec. The value is capped
-  by \texttt{MaximumBootBeepVolume} AppleHDA layout value to avoid
-  too loud audio playback in the firmware.
+  System audio volume level for firmware audio support. 8-bit unsigned integer.
+  The bit of \texttt{0x80} means muted. The remaining bits are used
+  to encode the raw amplifier gain setting to be applied to the audio
+  amplifier in use. Exactly what this value means depends on the codec
+  (and potentially on the specific amplifier within the codec). This value
+  is capped by macOS to the \texttt{MaximumBootBeepVolume} AppleHDA layout
+  value, to avoid over-loud audio playback in the firmware.
+  \item
+  \texttt{7C436110-AB2A-4BBB-A880-FE41995C9F82:SystemAudioVolumeDB}
+  \break
+  Current system audio volume level in decibels (dB).  8-bit signed integer.
+  The value represents the audio offset (gain if positive,
+  attenuation if negative) in dB relative to the amplifier reference value
+  of 0 dB. Exactly which volume level is represented by 0 dB depends on the
+  codec (and potentially on the specific amplifier within the codec)
+  but it is normally at or near the maximum available amplifier volume.
+  Typical values of this variable range from approximately -60 (the exact value
+  depends on the audio hardware) up to exactly 0. On non-typical audio
+  hardware, the value may go above zero.
+
+  \emph{Note}: Unlike \texttt{SystemAudioVolume}, this value is not capped.
 \item
   \texttt{5EDDA193-A070-416A-85EB-2A1181F45B18:PEXConf}
   \break
@@ -5983,7 +6023,7 @@ even cause permanent firmware damage. Some of the known drivers are listed below
 
 \begin{longtable}{p{1.3in}p{5.55in}}
 \href{https://github.com/acidanthera/OpenCorePkg}{\texttt{AudioDxe}}\textbf{*}
-& HDA audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+& \hyperref[uefiaudio]{HDA audio support driver} in UEFI firmware for most Intel and some other analog audio controllers.
   Staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
   for known issues in AudioDxe. \\
 \href{https://github.com/acidanthera/OcBinaryData}{\texttt{btrfs\_x64}}
@@ -6440,6 +6480,68 @@ does not support the systemd-boot--specific \href{https://systemd.io/BOOT\_LOADE
 therefore \texttt{efibootmgr} rather than \texttt{bootctl} must be used for any low-level Linux command line interaction
 with the boot menu.
 
+\subsection{AudioDxe}\label{uefiaudio}
+
+High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
+
+\subsubsection{Configuration}
+
+Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
+section, but if required the following additonal configuration options (which are needed to produce sound
+on most Apple hardware, and possibly some others) may be specified in \texttt{UEFI/Drivers/Arguments}:
+
+\begin{itemize}
+  \tightlist
+	\item \texttt{-{}-gpio-setup} - Default value is \texttt{0} (GPIO setup disabled) if argument is not provided,
+  or \texttt{7} (all GPIO setup stages stages enabled) if the argument is provided with no value. \medskip
+
+	Available values, which may be combined by adding, are: \medskip
+
+  \begin{itemize}
+  \tightlist
+    \item \texttt{0x00000001} (bit \texttt{0}) --- \texttt{GPIO\_SETUP\_STAGE\_DATA},
+    set GPIO pin data high on specified pins. Required e.g. on \texttt{MacBookPro10,2} and \texttt{MacPro5,1}.
+    \item \texttt{0x00000002} (bit \texttt{1}) --- \texttt{GPIO\_SETUP\_STAGE\_DIRECTION},
+    set GPIO data direction to output on specified pins. Required e.g. on \texttt{MacPro5,1}.
+    \item \texttt{0x00000004} (bit \texttt{2}) --- \texttt{GPIO\_SETUP\_STAGE\_ENABLE},
+    enable specified GPIO pins. Required e.g. on \texttt{MacPro5,1}.
+  \end{itemize} \medskip
+
+  If audio appears to be `playing' on the correct codec, e.g. based on the debug log, but no
+  sound is heard on any channel, it is suggested to use \texttt{-{}-gpio-setup} (with no
+  value) in the AudioDxe driver arguments. If specified with no value, all
+  stages will be enabled (equivalent of specifying \texttt{7}). If this produces sound,
+  it is then possible to try fewer bits, e.g. \texttt{-{}-gpio-setup=1}, \texttt{-{}-gpio-setup=3},
+  to find out which stages are actually required. \medskip
+
+  \emph{Note}: Value \texttt{7} (all flags enabled) of this option -- as required for the
+  \texttt{MacPro5,1} -- is compatible with most systems, but is known to cause problems with
+  sound (previous sounds are not allowed to finish before new sounds start) on a small number
+  of other systems, hence this option is not enabled by default. \medskip
+
+	\item \texttt{-{}-gpio-pins} - Default: \texttt{0}, auto-detect. \medskip
+
+	Specifies which GPIO pins should be operated on by \texttt{-{}-gpio-setup}. This is a bit mask,
+  with possible values from \texttt{0x0} to \texttt{0xFF}. The usable maximum depends on
+  the number if available pins on the audio out function group of the codec in use, e.g. it is
+  \texttt{0x3} (lowest two bits) if two GPIO pins are present, \texttt{0x7} if three pins are present,
+  etc. \medskip
+
+  When \texttt{-{}-gpio-setup} is enabled (i.e. non-zero), then \texttt{0} is a special
+  value for \texttt{-{}-gpio-pins}, meaning that the pin mask will be auto-generated based on the
+  reported number of GPIO pins on the specified codec (see \texttt{AudioCodec}), e.g. if the
+  codec's audio out function group reports 4 GPIO pins, a mask of \texttt{0xF} will be used.
+  The value in use can be seen in the debug log in a line such as: \medskip
+
+  \texttt{HDA: GPIO setup on pins 0x0F - Success} \medskip
+
+  Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
+  in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}.
+\end{itemize}
+
+\emph{Note}: AudioDxe is a staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
+for known issues.
+
 \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
@@ -6455,10 +6557,14 @@ with the boot menu.
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Failsafe}: None\\
   \textbf{Description}: Configure audio backend support described
-  in the \hyperref[uefiaudioprops]{Audio Properties} section below.
+  in the \hyperref[uefiaudioprops]{\texttt{Audio Properties}} section below.
 
-  Audio support provides a way for upstream protocols to interact with the
-  selected hardware and audio resources. All audio resources should reside
+  Unless documented otherwise (e.g. \texttt{ResetTrafficClass}) settings in this section
+  are for UEFI audio support only (e.g. OpenCore generated boot chime and audio assist) and are
+  unrelated to any configuration needed for OS audio support (e.g. \texttt{AppleALC}).
+
+  UEFI audio support provides a way for upstream protocols to interact with the
+  selected audio hardware and resources. All audio resources should reside
   in \texttt{\textbackslash EFI\textbackslash OC\textbackslash Resources\textbackslash Audio}
   directory. Currently the supported audio file formats are MP3 and WAVE PCM. While it is
   driver-dependent which audio stream format is supported, most common audio cards
@@ -6801,6 +6907,65 @@ with the boot menu.
   \end{itemize}
 
   \item
+  \texttt{PointerPollMin}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure minimal pointer polling period in ms.
+
+  This is the minimal period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The current
+  implementation defaults to 10 ms. Setting \texttt{0} leaves this
+  default unchanged.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+  \item
+  \texttt{PointerPollMax}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0}\\
+  \textbf{Description}: Configure maximum pointer polling period in ms.
+
+  This is the maximum period the OpenCore builtin AppleEvent driver polls
+  pointer devices (e.g. mice, trackpads) for motion events. The period
+  is increased up to this value as long as the devices do not respond
+  in time. The current implementation defaults to 80 ms. Setting
+  \texttt{0} leaves this default unchanged.
+
+  Certain trackpad drivers often found in Dell laptops can be very slow
+  to respond when no physical movement happens. This can affect
+  OpenCanopy and FileVault 2 user interface responsiveness and loading times.
+  Increasing the polling periods can reduce the impact.
+
+  \emph{Note}: The OEM Apple implementation uses a polling rate of 2 ms.
+
+  \item
+  \texttt{PointerPollMask}\\
+  \textbf{Type}: \texttt{plist\ integer, 32 bit}\\
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Configure indices of polled pointers.
+
+  Selects pointer devices to poll for AppleEvent motion events.
+  \texttt{-1} implies all devices. A bit sum is used to determine
+  particular devices. E.g. to enable devices 0, 2, 3 the value
+  will be \texttt{1+4+8} (corresponding powers of two). A total
+  of 32 configurable devices is supported.
+
+  Certain pointer devices can be present in the firmware even when
+  no corresponding physical devices are available. These devices
+  usually are placeholders, aggregate devices, or proxies.
+  Gathering information from these devices may result in inaccurate
+  motion activity in the user interfaces and even cause performance
+  issues. Disabling such pointer devices is recommended for laptop
+  setups having issues of this kind.
+
+  The amount of pointer devices available in the system can be
+  found in the log. Refer to \texttt{Found N pointer devices} message
+  for more details.
+
+  \emph{Note}: Has no effect when using the OEM Apple implementation
+  (see \texttt{AppleEvent} setting).
+
+  \item
   \texttt{PointerSpeedDiv}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
@@ -6865,43 +7030,132 @@ with the boot menu.
   \texttt{OCAU: 2/3 \textit{\textbf{PciRoot(0x0)/Pci(0x3,0x0)}}/VenMsg(<redacted>,00000000) (1 outputs)}\\
   \texttt{OCAU: 3/3 \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}/VenMsg(<redacted>,02000000) (7 outputs)}
 
-  As an alternative, \texttt{gfxutil -f HDEF} command can be used in macOS. Specifying an empty device
-  path will result in the first available audio controller being used.
+  If using \texttt{AudioDxe}, the available controller device paths are also output on lines formatted like this:
+
+  \texttt{HDA: Connecting controller - \textit{\textbf{PciRoot(0x0)/Pci(0x1B,0x0)}}}
+
+  Finally, \texttt{gfxutil -f HDEF} command can be used in macOS to obtain the device path.
+  
+  Specifying an empty device path results in the first available codec and audio controller being used. The value
+  of \texttt{AudioCodec} is ignored in this case. This can be a convenient initial option to try to get UEFI
+  audio working. Manual settings as above will be required when this default value does not work.
 
 \item
-  \texttt{AudioOut}\\
+  \texttt{AudioOutMask}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Index of the output port of the specified codec starting from 0.
+  \textbf{Failsafe}: \texttt{-1}\\
+  \textbf{Description}: Bit field indicating which output channels to use for UEFI sound.
 
-  This typically contains the index of the green out of the builtin analog audio controller (\texttt{HDEF}).
-  The number of output nodes (\texttt{N}) in the debug log (marked in bold-italic):
+  Audio mask is 1 << audio output (equivalently 2 \texttt{\^{}} audio output). E.g. for audio output \texttt{0} the bitmask is
+  \texttt{1}, for output \texttt{3} it is \texttt{8}, and for outputs \texttt{0} and \texttt{3} it is \texttt{9}.
+
+  The number of available output nodes (\texttt{N}) for each HDA codec is shown in the debug log (marked in bold-italic),
+  audio outputs \texttt{0} to \texttt{N - 1} may be selected:
 
   \texttt{OCAU: 1/3 PciRoot(0x0)/Pci(0x1,0x0)/Pci(0x0,0x1)/VenMsg(<redacted>,00000000) (\textit{\textbf{4 outputs}})}\\
   \texttt{OCAU: 2/3 PciRoot(0x0)/Pci(0x3,0x0)/VenMsg(<redacted>,00000000) (\textit{\textbf{1 outputs}})}\\
   \texttt{OCAU: 3/3 PciRoot(0x0)/Pci(0x1B,0x0)/VenMsg(<redacted>,02000000) (\textit{\textbf{7 outputs}})}
 
-  The quickest way to find the right port is to bruteforce the values from \texttt{0} to \texttt{N - 1}.
+  When \texttt{AudioDxe} is used then additional information about each output channel is logged during driver binding,
+  including the bitmask for each output. The bitmask values for the desired outputs should be added together to
+  obtain the \texttt{AudioOutMask} value:
 
-\item
+  \texttt{HDA:  | Port widget @ 0x9 is an output (pin defaults 0x2B4020) (\textit{\textbf{bitmask 1}})}\\
+  \texttt{HDA:  | Port widget @ 0xA is an output (pin defaults 0x90100112) (\textit{\textbf{bitmask 2}})}\\
+  \texttt{HDA:  | Port widget @ 0xB is an output (pin defaults 0x90100110) (\textit{\textbf{bitmask 4}})}\\
+  \texttt{HDA:  | Port widget @ 0x10 is an output (pin defaults 0x4BE030) (\textit{\textbf{bitmask 8}})}
+
+  Further information on the available output channels may be found from a Linux codec dump using the command:
+  
+  \texttt{cat /proc/asound/card\{n\}/codec\#\{m\}}
+  
+  Using \texttt{AudioOutMask}, it is possible to play sound to more than one channel (e.g. main speaker plus bass speaker;
+  headphones plus speakers) as long as all the chosen outputs support the sound file format in use; if any do not then no
+  sound will play and a warning will be logged.
+
+  When all available output channels on the codec support the available sound file format then a value
+  of \texttt{-1} will play sound to all channels simultaneously. If this does not work it will usually be quickest
+  to try each available output channel one by one, by setting \texttt{AudioOutMask} to \texttt{1}, \texttt{2},
+  \texttt{4}, etc., up to 2 \texttt{\^{}} \texttt{N - 1}, in order to work out which channel(s) produce sound.
+
+  \item
   \texttt{AudioSupport}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Activate audio support by connecting to a backend driver.
 
-  Enabling this setting routes audio playback from builtin protocols to a dedicated
-  audio port (\texttt{AudioOut}) of the specified codec (\texttt{AudioCodec}) located
-  on the audio controller (\texttt{AudioDevice}).
+  Enabling this setting routes audio playback from builtin protocols to specified
+  (\texttt{AudioOutMask}) dedicated audio ports of the specified codec (\texttt{AudioCodec}),
+  located on the specified audio controller (\texttt{AudioDevice}).
 
-\item
-  \texttt{MinimumVolume}\\
+  \item
+  \texttt{DisconnectHda}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Disconnect HDA controller before loading drivers.
+
+  May be required on some systems (e.g. Apple hardware, VMware Fusion guest) to allow
+  a UEFI sound driver (such as \texttt{AudioDxe}) to take control of the audio hardware.
+
+  \emph{Note}: In addition to this option, most Apple hardware also requires the
+  \texttt{-{}-gpio-setup} driver argument which is dealt with in the
+  \hyperref[uefiaudio]{AudioDxe} section.
+
+  \item
+  \texttt{MaximumGain}\\
   \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Minimal heard volume level from \texttt{0} to \texttt{100}.
+  \textbf{Failsafe}: \texttt{-15}\\
+  \textbf{Description}: Maximum gain to use for UEFI audio, specified in decibels (dB) with respect to amplifier
+  reference level of 0 dB (see note 1).
 
-  The screen reader will use this volume level when the calculated volume level is lower
-  than \texttt{MinimumVolume} and the boot chime will not play if the calculated
-  volume level is lower than \texttt{MinimumVolume}.
+  All UEFI audio will use this gain setting when the system amplifier gain read from the \texttt{SystemAudioVolumeDB}
+  NVRAM variable is higher than this. This is to avoid over-loud UEFI audio when the system volume is set very high,
+  or the \texttt{SystemAudioVolumeDB} NVRAM value has been misconfigured.
+  
+  \emph{Note 1}: Decibels (dB) specify gain (postive values; increase in volume) or attenuation (negative values; decrease
+  in volume) compared to some reference level. When you hear the sound level of a jet plane expressed as 120 decibels, say,
+  the reference level is the sound level just audible to an average human. However generally
+  in acoustic science and computer audio any reference level can be specified. Intel HDA and macOS natively use
+  decibels to specify volume level. On most Intel HDA hardware the reference level of 0 dB is the
+  \emph{loudest} volume of the hardware, and all lower volumes are therefore negative numbers. The quietest volume
+  on typical sound hardware is around -55 dB to -60 dB.
+  
+  \emph{Note 2}: Matching how macOS handles decibel values, this value is converted to a signed byte; therefore values
+  outside $-128$ dB to $+127$ dB (which are well beyond physically plausible volume levels) are not allowed.
+
+  \emph{Note 3}: Digital audio output -- which does not have a volume slider in-OS -- ignores this and all other gain settings,
+  only mute settings are relevant.
+
+  \item
+  \texttt{MinimumAssistGain}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-30}\\
+  \textbf{Description}: Minimum gain in decibels (dB) to use for picker audio assist.
+
+  The screen reader will use this amplifier gain if the system amplifier gain read from the \texttt{SystemAudioVolumeDB}
+  NVRAM variable is lower than this.
+
+  \emph{Note 1}: In addition to this setting, because audio assist must be audible to serve its function, audio assist
+  is not muted even if the OS sound is muted or the \texttt{StartupMute} NVRAM variable is set.
+
+  \emph{Note 2}: See \texttt{MaximumGain} for an explanation of decibel volume levels.
+
+  \item
+  \texttt{MinimumAudibleGain}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{-128}\\
+  \textbf{Description}: Minimum gain in decibels (dB) at which to attempt to play any sound.
+
+  The boot chime will not play if the system amplifier gain level in the
+  \texttt{SystemAudioVolumeDB} NVRAM variable is lower than this.
+
+  \emph{Note 1}: This setting is designed to save unecessary pauses due to audio setup at inaudible volume
+  levels, when no sound will be heard anyway. Whether there are inaudible volume levels depends on the
+  hardware. On some hardware (including Apple) the audio values are well enough matched to the hardware
+  that the lowest volume levels available are very quiet but audible, whereas on some other hardware combinations,
+  the lowest part of the volume range may not be audible at all.
+
+  \emph{Note 2}: See \texttt{MaximumGain} for an explanation of decibel volume levels.
 
 \item
   \texttt{PlayChime}\\
@@ -6910,8 +7164,7 @@ with the boot menu.
   \textbf{Description}: Play chime sound at startup.
 
   Enabling this setting plays the boot chime using the builtin audio support. The volume
-  level is determined by the \texttt{MinimumVolume} and \texttt{VolumeAmplifier} settings
-  as well as the \texttt{SystemAudioVolume} NVRAM variable. Possible values include:
+  level is determined by the \texttt{SystemAudioVolumeDB} NVRAM variable. Supported values are:
 
   \begin{itemize}
     \tightlist
@@ -6921,8 +7174,11 @@ with the boot menu.
     \item \texttt{Disabled} --- Disables chime unconditionally.
   \end{itemize}
 
-  \emph{Note}: \texttt{Enabled} can be used in separate from \texttt{StartupMute}
+  \emph{Note 1}: \texttt{Enabled} can be used separately from the \texttt{StartupMute}
   NVRAM variable to avoid conflicts when the firmware is able to play the boot chime.
+
+  \emph{Note 2}: Regardless of this setting, the boot chime will not play if system audio is muted,
+  i.e.~if the \texttt{SystemAudioVolume} NVRAM variable has bit \texttt{0x80} set.
 
 \item
   \texttt{ResetTrafficClass}\\
@@ -6946,22 +7202,6 @@ with the boot menu.
   Some codecs require a vendor-specific delay after the reconfiguration
   (e.g. volume setting). This option makes it configurable. A typical
   delay can be up to 0.5 seconds.
-
-\item
-  \texttt{VolumeAmplifier}\\
-  \textbf{Type}: \texttt{plist\ integer}\\
-  \textbf{Failsafe}: \texttt{0}\\
-  \textbf{Description}: Multiplication coefficient for system volume to raw volume linear translation
-  from \texttt{0} to \texttt{1000}.
-
-  Volume level range read from \texttt{SystemAudioVolume} varies depending on the codec.
-  To transform read value in \texttt{[0, 127]} range into raw volume range \texttt{[0, 100]}
-  the read value is scaled to \texttt{VolumeAmplifier} percents:
-  \begin{align*}
-      RawVolume &= MIN(\frac{SystemAudioVolume * VolumeAmplifier}{100}, 100)
-  \end{align*}
-  \emph{Note}: the transformation used in macOS is not linear, but it is very close
-  and this nuance is thus ignored.
 
 \end{enumerate}
 
@@ -7147,7 +7387,7 @@ with the boot menu.
 
   The recommended value is \texttt{50000} (\texttt{5} milliseconds) or slightly higher. Select
   ASUS Z87 boards use \texttt{60000} for the interface. Apple boards use \texttt{100000}.
-  In case of issues, this option can be left as \texttt{0}.
+  In case of issues, this option can be left as \texttt{0} to not change the timer resolution.
 
 \end{enumerate}
 
