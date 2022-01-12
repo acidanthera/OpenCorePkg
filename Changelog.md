@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
+- Fixed AudioDxe not disabling unused channels after 0.7.7 updates
 
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point
