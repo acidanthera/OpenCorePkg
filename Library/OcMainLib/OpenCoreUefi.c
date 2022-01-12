@@ -454,6 +454,7 @@ OcLoadAppleSecureBoot (
   APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
   CONST CHAR8                 *SecureBootModel;
   CONST CHAR8                 *RealSecureBootModel;
+  CONST CHAR8                 *DmgLoading;
   UINT8                       SecureBootPolicy;
 
   SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
@@ -481,11 +482,18 @@ OcLoadAppleSecureBoot (
   // essentially skipping secure boot in this case.
   // Do not allow enabling one but not the other.
   //
-  if (SecureBootPolicy != AppleImg4SbModeDisabled
-    && AsciiStrCmp (OC_BLOB_GET (&Config->Misc.Security.DmgLoading), "Any") == 0) {
-    DEBUG ((DEBUG_ERROR, "OC: Cannot use Secure Boot with Any DmgLoading!\n"));
-    CpuDeadLoop ();
-    return;
+  if (SecureBootPolicy != AppleImg4SbModeDisabled) {
+    DmgLoading = OC_BLOB_GET (&Config->Misc.Security.DmgLoading);
+    //
+    // Check against all valid values in case more are added.
+    //
+    if (AsciiStrCmp (DmgLoading, "Signed") != 0
+      && AsciiStrCmp (DmgLoading, "Disabled") != 0
+      && DmgLoading[0] != '\0') {
+      DEBUG ((DEBUG_ERROR, "OC: Cannot use Secure Boot with Any DmgLoading!\n"));
+      CpuDeadLoop ();
+      return;
+    }
   }
 
   DEBUG ((
