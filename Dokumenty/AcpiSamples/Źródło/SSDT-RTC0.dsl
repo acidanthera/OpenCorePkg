@@ -37,3 +37,5 @@ DefinitionBlock ("", "SSDT", 2, "ACDT", "RTC0", 0x00000000)
         }
     }
 }
+External (_SB_.PCI0.LPCB, DeviceObj) <- Rename this
+Scope (_SB.PCI0.LPCB) <- Rename this
