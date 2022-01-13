@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jan 11 03:43:46 2022
-%DIF ADD ../Configuration.tex        Tue Jan 11 03:45:54 2022
+%DIF DEL PreviousConfiguration.tex   Tue Jan 11 11:01:53 2022
+%DIF ADD ../Configuration.tex        Thu Jan 13 09:54:02 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -3318,7 +3318,35 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{Note 2}: While NVRAM resets executed from OpenCore would not typically erase the boot option
   created in \texttt{Bootstrap}, executing NVRAM resets prior to loading OpenCore will erase the boot
   option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4,
-  an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
+  an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby
+  if any boot option refers to a path on a USB drive, then that is the only boot option shown when any USB
+  drive is inserted. In the case of OpenCore, this means that only the OpenCore boot entry will be
+  shown when any USB is inserted (but this highly non-standard BIOS behaviour affects other software as well).
+  The best way to avoid this is to leave }\texttt{\DIFadd{LauncherOption}} \DIFadd{at }\texttt{\DIFadd{Disabled}} \DIFadd{on any version of
+  OpenCore which will be started from a USB drive on this BIOS. However, if the problem has already occurred
+  the quickest reliable fix is:
+  }\begin{itemize}
+  \tightlist
+    \item \DIFadd{Enable the system UEFI Shell in Intel Visual BIOS
+    }\item \DIFadd{With power off, insert an OpenCore USB
+    }\item \DIFadd{Power up and select the system UEFI Shell
+    }\item \DIFadd{Since the system shell does not include }\texttt{\DIFadd{bcfg}}\DIFadd{, use the system shell to start OpenCore's OpenShell
+    (e.g. by entering the command }\texttt{\DIFadd{FS2:\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenShell.efi}} \DIFadd{,
+    but you will need to work out which drive is correct for OpenCore and modify the drive number }\texttt{\DIFadd{FS\#:}} \DIFadd{accordingly)
+    }\item \DIFadd{Within OpenShell, use }\texttt{\DIFadd{bcfg boot dump}} \DIFadd{to display the NVRAM boot options and then use }\texttt{\DIFadd{bcfg boot rm \#}}
+    \DIFadd{(where }\texttt{\DIFadd{\#}} \DIFadd{is the number of the OpenCore boot entry) to remove the OpenCore entry
+  }\end{itemize}
+  \DIFadd{It is alteratively possible to start OpenShell directly from the OpenCore boot menu, if you have
+  a working configured OpenCore for the system. In that case, and if OpenCore has }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{enabled, it will be
+  necessary to run the command }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenControl.efi disable}}
+  \DIFadd{before using }\texttt{\DIFadd{bcfg}}\DIFadd{. (After }\texttt{\DIFadd{OpenControl disable}}\DIFadd{, it is necessary to either reboot or run }\texttt{\DIFadd{OpenControl restore}}\DIFadd{,
+  before booting an operating system.)
+  It is also possible to use }\texttt{\DIFadd{efibootmgr}} \DIFadd{within Linux to remove the offending entry, if you have a working
+  version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{disabled
+  for this to work}\DIFaddend .
 
 \item
   \texttt{LauncherPath}\\

@@ -3260,6 +3260,33 @@ the default boot entry choice will remain changed until the next manual reconfig
   option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4,
   an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
 
+  \emph{Note 3}: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby
+  if any boot option refers to a path on a USB drive, then that is the only boot option shown when any USB
+  drive is inserted. In the case of OpenCore, this means that only the OpenCore boot entry will be
+  shown when any USB is inserted (but this highly non-standard BIOS behaviour affects other software as well).
+  The best way to avoid this is to leave \texttt{LauncherOption} at \texttt{Disabled} on any version of
+  OpenCore which will be started from a USB drive on this BIOS. However, if the problem has already occurred
+  the quickest reliable fix is:
+  \begin{itemize}
+  \tightlist
+    \item Enable the system UEFI Shell in Intel Visual BIOS
+    \item With power off, insert an OpenCore USB
+    \item Power up and select the system UEFI Shell
+    \item Since the system shell does not include \texttt{bcfg}, use the system shell to start OpenCore's OpenShell
+    (e.g. by entering the command \texttt{FS2:\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenShell.efi} ,
+    but you will need to work out which drive is correct for OpenCore and modify the drive number \texttt{FS\#:} accordingly)
+    \item Within OpenShell, use \texttt{bcfg boot dump} to display the NVRAM boot options and then use \texttt{bcfg boot rm \#}
+    (where \texttt{\#} is the number of the OpenCore boot entry) to remove the OpenCore entry
+  \end{itemize}
+  It is alteratively possible to start OpenShell directly from the OpenCore boot menu, if you have
+  a working configured OpenCore for the system. In that case, and if OpenCore has \texttt{RequestBootVarRouting} enabled, it will be
+  necessary to run the command \texttt{\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenControl.efi disable}
+  before using \texttt{bcfg}. (After \texttt{OpenControl disable}, it is necessary to either reboot or run \texttt{OpenControl restore},
+  before booting an operating system.)
+  It is also possible to use \texttt{efibootmgr} within Linux to remove the offending entry, if you have a working
+  version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with \texttt{RequestBootVarRouting} disabled
+  for this to work.
+  
 \item
   \texttt{LauncherPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
