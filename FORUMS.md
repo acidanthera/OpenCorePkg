@@ -1,6 +1,9 @@
 ## OpenCore Discussion Forums
 
-- [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
+- AppleLife.ru in Russian
+  - [Development](https://applelife.ru/threads/razrabotka-opencore.2943955)
+  - [Discussion](https://www.applelife.ru/threads/opencore-obsuzhdenie-i-ustanovka.2944066/)
+  - [Icon sets](https://applelife.ru/threads/kastomizacija-opencanopy.2945020/)
 - [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
 - InsanelyMac.com in English:
   - [Development](https://www.insanelymac.com/forum/topic/338527-opencore-development/)
