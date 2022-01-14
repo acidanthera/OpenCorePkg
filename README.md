@@ -58,4 +58,4 @@ details.
 
 #### Discussion
 
-Please refer to the following [list of OpenCore discussion forums](FORUMS.md).
+Please refer to the following [list of OpenCore discussion forums](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/FORUMS.md).
