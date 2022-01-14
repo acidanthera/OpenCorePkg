@@ -2,7 +2,7 @@
 
 - AppleLife.ru in Russian
   - [Development](https://applelife.ru/threads/razrabotka-opencore.2943955)
-  - [Discussion](https://www.applelife.ru/threads/opencore-obsuzhdenie-i-ustanovka.2944066/)
+  - [Discussion](https://applelife.ru/threads/opencore-obsuzhdenie-i-ustanovka.2944066/)
   - [Icon sets](https://applelife.ru/threads/kastomizacija-opencanopy.2945020/)
 - [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
 - InsanelyMac.com in English:
