@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Jan 13 15:18:30 2022
-%DIF ADD ../Configuration.tex        Thu Jan 13 15:31:26 2022
+%DIF DEL PreviousConfiguration.tex   Tue Jan 11 11:01:53 2022
+%DIF ADD ../Configuration.tex        Sun Jan 16 09:31:35 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -3318,10 +3318,9 @@ the default boot entry choice will remain changed until the next manual reconfig
   \emph{Note 2}: While NVRAM resets executed from OpenCore would not typically erase the boot option
   created in \texttt{Bootstrap}, executing NVRAM resets prior to loading OpenCore will erase the boot
   option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4,
-  an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled\DIFaddbegin \DIFadd{.
-}
+  an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
 
-  \emph{\DIFadd{Note 3}}\DIFadd{: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby if any boot
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby if any boot
   option is added referring to a path on a USB drive, from then on that is the only boot option which will be shown
   when any USB drive is inserted. If OpenCore is started from a USB drive on this firmware with
   }\texttt{\DIFadd{LauncherOption}} \DIFadd{set to }\texttt{\DIFadd{Full}} \DIFadd{or }\texttt{\DIFadd{Short}}\DIFadd{, this applies and only the OpenCore boot entry will be
@@ -3331,7 +3330,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   occurred the quickest reliable fix is:
   }\begin{itemize}
   \tightlist
-    \item \DIFadd{Enable the system UEFI Shell in Intel Visual BIOS
+    \DIFaddend \item \DIFaddbegin \DIFadd{Enable the system UEFI Shell in Intel Visual BIOS
     }\item \DIFadd{With power off, insert an OpenCore USB
     }\item \DIFadd{Power up and select the system UEFI Shell
     }\item \DIFadd{Since the system shell does not include }\texttt{\DIFadd{bcfg}}\DIFadd{, use the system shell to start OpenCore's OpenShell
@@ -3347,10 +3346,11 @@ the default boot entry choice will remain changed until the next manual reconfig
   before booting an operating system.)
   It is also possible to use }\texttt{\DIFadd{efibootmgr}} \DIFadd{within Linux to remove the offending entry, if you have a working
   version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{disabled
-  for this to work}\DIFaddend .
+  for this to work.
+  }
 
 \item
-  \texttt{LauncherPath}\\
+  \DIFaddend \texttt{LauncherPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Default}\\
   \textbf{Description}: Launch path for the \texttt{LauncherOption} property.
@@ -3941,30 +3941,43 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   entry for disabling and enabling System Integrity Protection in OpenCore picker.
 
   This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
-  SIP Enabled and a practical default value for SIP Disabled (currently \texttt{0x26F}).
+  SIP Enabled and a practical default value for SIP Disabled\DIFdelbegin \DIFdel{(currently }\texttt{\DIFdel{0x26F}}%DIFAUXCMD
+\DIFdel{)}\DIFdelend .
 
   \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note 2}: OpenCore uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
-  sets \texttt{0x7F}. To explain the choice:
-  \begin{itemize}
+  \emph{Note 2}: OpenCore uses \texttt{\DIFdelbegin \DIFdel{0x26F}\DIFdelend \DIFaddbegin \DIFadd{0x27F}\DIFaddend } \DIFdelbegin \DIFdel{even though }\DIFdelend \DIFaddbegin \DIFadd{while }\DIFaddend \texttt{csrutil disable} on \DIFdelbegin \DIFdel{Big Sur
+  }\DIFdelend \DIFaddbegin \DIFadd{macOS Big Sur
+  and Monterey }\DIFaddend sets \texttt{0x7F}.
+  \DIFdelbegin \DIFdel{To explain the choice:
+  }\DIFdelend \begin{itemize}
   \tightlist
-  \item \texttt{csrutil disable -{}-no-internal} actually sets \texttt{0x6F}, and this is
-  preferable because \texttt{CSR\_ALLOW\_APPLE\_INTERNAL} (\texttt{0x10}) prevents updates
+  \item \DIFdelbegin \texttt{\DIFdel{csrutil disable -}%DIFDELCMD < {}%%%
+\DIFdel{-no-internal}} %DIFAUXCMD
+\DIFdel{actually sets }\texttt{\DIFdel{0x6F}}%DIFAUXCMD
+\DIFdel{, and this is
+  preferable because }\texttt{\DIFdel{CSR\_ALLOW\_APPLE\_INTERNAL}} %DIFAUXCMD
+\DIFdel{(}\texttt{\DIFdel{0x10}}%DIFAUXCMD
+\DIFdel{) prevents updates
   (unless you are running an internal build of macOS).
-  \item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
-  where you do need to have SIP disabled, as it allows installing unsigned kexts without manual
-  approval in System Preferences.
-  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not practical as it prevents
-  incremental (non-full) OTA updates.
+  }%DIFDELCMD < \item %%%
+\item %DIFAUXCMD
+\DIFdelend \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
+  where you do need to have SIP disabled \DIFaddbegin \DIFadd{anyway}\DIFaddend , as it allows installing unsigned kexts without
+  manual approval in System Preferences.
+  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not \DIFdelbegin \DIFdel{practical as it prevents
+  incremental (non-full) }\DIFdelend \DIFaddbegin \DIFadd{included, as it is
+  very easy when using it to inadvertently break OS seal and prevent incremental }\DIFaddend OTA updates.
   \end{itemize}
 
   \emph{Note3}: For any other value which you may need to use, it is possible to
   configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
-  different value, e.g. use \texttt{toggle\ 0x6F} in \texttt{Arguments} to toggle the
-  SIP disabled value set by default by \texttt{csrutil disable -{}-no-internal} in Big Sur.
+  different value, e.g. use \texttt{toggle\ \DIFdelbegin \DIFdel{0x6F}\DIFdelend \DIFaddbegin \DIFadd{0x77}\DIFaddend } in \texttt{Arguments} to toggle the
+  SIP disabled value set by default \DIFdelbegin \DIFdel{by }\texttt{\DIFdel{csrutil disable -}%DIFDELCMD < {}%%%
+\DIFdel{-no-internal}} %DIFAUXCMD
+\DIFdel{in Big Sur}\DIFdelend \DIFaddbegin \DIFadd{in macOS Catalina}\DIFaddend .
 
 \item
   \texttt{ApECID}\\

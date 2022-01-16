@@ -3880,30 +3880,27 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   entry for disabling and enabling System Integrity Protection in OpenCore picker.
 
   This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
-  SIP Enabled and a practical default value for SIP Disabled (currently \texttt{0x26F}).
+  SIP Enabled and a practical default value for SIP Disabled.
 
   \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note 2}: OpenCore uses \texttt{0x26F} even though \texttt{csrutil disable} on Big Sur
-  sets \texttt{0x7F}. To explain the choice:
+  \emph{Note 2}: OpenCore uses \texttt{0x27F} while \texttt{csrutil disable} on macOS Big Sur
+  and Monterey sets \texttt{0x7F}.
   \begin{itemize}
   \tightlist
-  \item \texttt{csrutil disable -{}-no-internal} actually sets \texttt{0x6F}, and this is
-  preferable because \texttt{CSR\_ALLOW\_APPLE\_INTERNAL} (\texttt{0x10}) prevents updates
-  (unless you are running an internal build of macOS).
   \item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
-  where you do need to have SIP disabled, as it allows installing unsigned kexts without manual
-  approval in System Preferences.
-  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not practical as it prevents
-  incremental (non-full) OTA updates.
+  where you do need to have SIP disabled anyway, as it allows installing unsigned kexts without
+  manual approval in System Preferences.
+  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not included, as it is
+  very easy when using it to inadvertently break OS seal and prevent incremental OTA updates.
   \end{itemize}
 
   \emph{Note3}: For any other value which you may need to use, it is possible to
   configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
-  different value, e.g. use \texttt{toggle\ 0x6F} in \texttt{Arguments} to toggle the
-  SIP disabled value set by default by \texttt{csrutil disable -{}-no-internal} in Big Sur.
+  different value, e.g. use \texttt{toggle\ 0x77} in \texttt{Arguments} to toggle the
+  SIP disabled value set by default in macOS Catalina.
 
 \item
   \texttt{ApECID}\\
