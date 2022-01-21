@@ -1163,9 +1163,9 @@ DoConvertLoaderEntriesToBootEntries (
 
     PickerEntry->Auxiliary = Entry->OcAuxiliary;
 
-    PickerEntry->RealPath = TRUE;
-    PickerEntry->TextMode = FALSE;
-    PickerEntry->Tool = FALSE;
+    PickerEntry->RealPath  = TRUE;
+    PickerEntry->TextMode  = FALSE;
+    PickerEntry->Tool      = FALSE;
   }
 
   if (EFI_ERROR (Status)) {
@@ -1183,7 +1183,7 @@ DoConvertLoaderEntriesToBootEntries (
 
 STATIC
 EFI_STATUS
-MakeUnique (
+AppendVersion (
   LOADER_ENTRY      *Entry
   )
 {
@@ -1210,7 +1210,7 @@ MakeUnique (
 
 STATIC
 EFI_STATUS
-MakeAllUnique (
+AppendVersions (
   VOID
   )
 {
@@ -1218,14 +1218,14 @@ MakeAllUnique (
   UINTN               Index;
   LOADER_ENTRY        *Entry;
 
-  if (gPickerContext->HideAuxiliary) {
+  if (gPickerContext->HideAuxiliary && (gLinuxBootFlags & LINUX_BOOT_USE_LATEST) != 0) {
     return EFI_SUCCESS;
   }
 
   for (Index = 0; Index < gLoaderEntries->Count; Index++) {
     Entry = OcFlexArrayItemAt (gLoaderEntries, Index);
     
-    Status = MakeUnique (Entry);
+    Status = AppendVersion (Entry);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -1374,12 +1374,13 @@ InternalConvertLoaderEntriesToBootEntries (
   Status = ApplyDefaults (RootDirectory);
 
   //
-  // Append version to titles when !HideAuxiliary.
-  // We previously implemented a pure-BLSpec process of disambiguating only if the
-  // title is ambiguous with others on the same partition, but this works better.
+  // Always append version to titles when !HideAuxiliary.
+  // We previously implemented a pure-BLSpec process of disambiguating by appending version
+  // only if the title is ambiguous with others on the same partition, but it is more natural
+  // to do it always.
   //
   if (!EFI_ERROR (Status)) {
-    Status = MakeAllUnique ();
+    Status = AppendVersions ();
   }
 
   //

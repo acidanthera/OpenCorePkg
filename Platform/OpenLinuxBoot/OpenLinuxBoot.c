@@ -272,6 +272,8 @@ UefiMain (
 {
   EFI_STATUS                        Status;
   EFI_LOADED_IMAGE_PROTOCOL         *LoadedImage;
+  UINTN                             AddBootFlags;
+  UINTN                             RemoveBootFlags;
 
   Status = gBS->HandleProtocol (
     ImageHandle,
@@ -285,7 +287,13 @@ UefiMain (
 
   Status = OcParseLoadOptions (LoadedImage, &gParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
-    OcParsedVarsGetInt (gParsedLoadOptions, L"flags", &gLinuxBootFlags, TRUE);
+    AddBootFlags = 0;
+    RemoveBootFlags = 0;
+    OcParsedVarsGetInt (gParsedLoadOptions, L"flags",  &gLinuxBootFlags, TRUE);
+    OcParsedVarsGetInt (gParsedLoadOptions, L"flags+", &AddBootFlags,    TRUE);
+    OcParsedVarsGetInt (gParsedLoadOptions, L"flags-", &RemoveBootFlags, TRUE);
+    gLinuxBootFlags |= AddBootFlags;
+    gLinuxBootFlags &= ~RemoveBootFlags;
   } else if (Status != EFI_NOT_FOUND) {
     return Status;
   }

@@ -71,7 +71,6 @@ typedef struct OC_HOTKEY_CONTEXT_ OC_HOTKEY_CONTEXT;
 #define OC_FLAVOUR_APPLE_FW             "AppleRecv:Apple"
 #define OC_FLAVOUR_APPLE_TIME_MACHINE   "AppleTM:Apple"
 #define OC_FLAVOUR_WINDOWS              "Windows"
-#define OC_FLAVOUR_OTHER_OS             "Other"
 
 /**
   Predefined flavour ids.

@@ -48,6 +48,10 @@ CHAR8
 *mPrettyName;
 
 STATIC
+CHAR8
+*mDiskLabel;
+
+STATIC
 OC_FLEX_ARRAY
 *mEtcDefaultGrubOptions;
 
@@ -93,13 +97,16 @@ ProcessVmlinuzFile (
     return EFI_NOT_FOUND;
   }
 
-  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-    "LNX: Found %s...\n", FileInfo->FileName ));
+  DEBUG ((
+    (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Found %s...\n",
+    FileInfo->FileName
+    ));
 
   if (VmlinuzFile == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  
+
   VmlinuzFile->FileName = AllocateCopyPool (StrSize (FileInfo->FileName), FileInfo->FileName);
   if (VmlinuzFile->FileName == NULL) {
     return EFI_OUT_OF_RESOURCES;
@@ -123,12 +130,15 @@ CreateAsciiRelativePath (
 {
   UINTN           Size;
 
-  Size = DirectoryPathLength + FilePathLength + 2;
+  Size  = DirectoryPathLength + FilePathLength + 2;
   *Dest = AllocatePool (Size);
+
   if (*Dest == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
+
   AsciiSPrint (*Dest, Size, "%s\\%s", DirectoryPath, FilePath);
+
   return EFI_SUCCESS;
 }
 
@@ -178,16 +188,19 @@ AutodetectTitle (
         mEtcOsReleaseOptions,
         Index == 0 ? "PRETTY_NAME" : "NAME",
         &mPrettyName
-        ) &&
-        mPrettyName != NULL) {
+        )
+        && mPrettyName != NULL) {
         Found = TRUE;
         break;
       }
     }
 
     if (Found) {
-      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-        "LNX: Found distro %a\n", mPrettyName));
+      DEBUG ((
+        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Found distro %a\n",
+        mPrettyName
+        ));
     } else {
       DEBUG ((DEBUG_WARN, "LNX: Neither %a nor %a found in %s\n", "PRETTY_NAME", "NAME", OS_RELEASE_FILE));
     }
@@ -196,53 +209,82 @@ AutodetectTitle (
 
 STATIC
 EFI_STATUS
-LoadEtcFiles (
+LoadOsRelease (
   IN     CONST EFI_FILE_PROTOCOL        *RootDirectory
   )
 {
   EFI_STATUS        Status;
-
-  Status = EFI_SUCCESS;
+  BOOLEAN           ReadRequired;
 
   mEtcOsReleaseOptions        = NULL;
-  mEtcDefaultGrubOptions      = NULL;
   mEtcOsReleaseFileContents   = NULL;
-  mEtcDefaultGrubFileContents = NULL;
   mPrettyName                 = NULL;
+
+  ReadRequired = (mDiskLabel == NULL);
+
+  DEBUG_CODE_BEGIN ();
+  ReadRequired = TRUE;
+  DEBUG_CODE_END ();
 
   //
   // Load distro name from /etc/os-release.
   //
-  mEtcOsReleaseFileContents = OcReadFileFromDirectory (RootDirectory, OS_RELEASE_FILE, NULL, 0);
-  if (mEtcOsReleaseFileContents == NULL) {
-    DEBUG ((DEBUG_WARN, "LNX: %s not found\n", OS_RELEASE_FILE));
-  } else {
-    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-      "LNX: Reading %s\n", OS_RELEASE_FILE));
-    Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, FALSE);
-    if (EFI_ERROR (Status)) {
-      FreePool (mEtcOsReleaseFileContents);
-      mEtcOsReleaseFileContents = NULL;
-      DEBUG ((DEBUG_WARN, "LNX: Cannot parse %s - %r\n", OS_RELEASE_FILE, Status));
-      return Status;
-    }
+  if (ReadRequired) {
+    mEtcOsReleaseFileContents = OcReadFileFromDirectory (RootDirectory, OS_RELEASE_FILE, NULL, 0);
+    if (mEtcOsReleaseFileContents == NULL) {
+      DEBUG ((DEBUG_WARN, "LNX: %s not found\n", OS_RELEASE_FILE));
+    } else {
+      DEBUG ((
+        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Reading %s\n",
+        OS_RELEASE_FILE
+        ));
+      Status = OcParseVars (mEtcOsReleaseFileContents, &mEtcOsReleaseOptions, FALSE);
+      if (EFI_ERROR (Status)) {
+        FreePool (mEtcOsReleaseFileContents);
+        mEtcOsReleaseFileContents = NULL;
+        DEBUG ((DEBUG_WARN, "LNX: Cannot parse %s - %r\n", OS_RELEASE_FILE, Status));
+        return Status;
+      }
 
-    //
-    // Do this early purely to give a nicer log entry order - distro is named
-    // before reports about it (esp. e.g. error below if it is not GRUB-based).
-    //
-    AutodetectTitle ();
+      //
+      // Do this early to give a nicer log entry order: distro name from os-release is logged
+      // before reports about distro (e.g. before the error below if it is not GRUB-based).
+      //
+      AutodetectTitle ();
+    }
   }
+
+  if (mDiskLabel != NULL) {
+    mPrettyName = mDiskLabel;
+  }
+
+  return EFI_SUCCESS;
+}
+
+STATIC
+EFI_STATUS
+LoadDefaultGrub (
+  IN CONST EFI_FILE_PROTOCOL *RootDirectory
+  )
+{
+  EFI_STATUS        Status;
+
+  mEtcDefaultGrubOptions      = NULL;
+  mEtcDefaultGrubFileContents = NULL;
 
   //
   // Load kernel options from /etc/default/grub.
   //
-  mEtcDefaultGrubFileContents   = OcReadFileFromDirectory (RootDirectory, GRUB_DEFAULT_FILE, NULL, 0);
+  mEtcDefaultGrubFileContents = OcReadFileFromDirectory (RootDirectory, GRUB_DEFAULT_FILE, NULL, 0);
   if (mEtcDefaultGrubFileContents == NULL) {
     DEBUG ((DEBUG_INFO, "LNX: %s not found (bootloader is not GRUB?)\n", GRUB_DEFAULT_FILE));
   } else {
-    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-      "LNX: Reading %s\n", GRUB_DEFAULT_FILE));
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Reading %s\n",
+      GRUB_DEFAULT_FILE
+      ));
     Status = OcParseVars (mEtcDefaultGrubFileContents, &mEtcDefaultGrubOptions, FALSE);
     if (EFI_ERROR (Status)) {
       FreePool (mEtcDefaultGrubFileContents);
@@ -257,23 +299,52 @@ LoadEtcFiles (
 
 STATIC
 VOID
+LoadAppleDiskLabel (
+  IN     CONST EFI_FILE_PROTOCOL  *VmlinuzDirectory
+  )
+{
+  mDiskLabel = NULL;
+
+  if ((gPickerContext->PickerAttributes & OC_ATTR_USE_DISK_LABEL_FILE) != 0) {
+    mDiskLabel = OcReadFileFromDirectory (VmlinuzDirectory, L".contentDetails", NULL, 0);
+    if (mDiskLabel == NULL) {
+      mDiskLabel = OcReadFileFromDirectory (VmlinuzDirectory, L".disk_label.contentDetails", NULL, 0);
+    }
+
+    if (mDiskLabel == NULL) {
+      DEBUG ((DEBUG_INFO, "LNX: %s %s not present\n", L".contentDetails", L".disk_label.contentDetails"));
+    } else {
+      DEBUG ((DEBUG_INFO, "LNX: Found disk label '%a'\n", mDiskLabel));
+    }
+  }
+}
+
+STATIC
+VOID
 FreeEtcFiles (
   VOID
   )
 {
   //
-  // If non-null, refers to string inside mEtcOsReleaseFileContents
+  // If non-null, refers to string inside mEtcOsReleaseFileContents or copy of mDiskLabel.
   //
   mPrettyName = NULL;
+
+  if (mDiskLabel != NULL) {
+    FreePool (mDiskLabel);
+    mDiskLabel = NULL;
+  }
 
   OcFlexArrayFree (&mEtcOsReleaseOptions);
   if (mEtcOsReleaseFileContents != NULL) {
     FreePool (mEtcOsReleaseFileContents);
+    mEtcOsReleaseFileContents = NULL;
   }
 
   OcFlexArrayFree (&mEtcDefaultGrubOptions);
   if (mEtcDefaultGrubFileContents != NULL) {
     FreePool (mEtcDefaultGrubFileContents);
+    mEtcDefaultGrubFileContents = NULL;
   }
 }
 
@@ -296,7 +367,7 @@ InsertOption (
   } else {
     OptionsLength = AsciiStrLen (Value);
   }
-  
+
   if (OptionsLength > 0) {
     Option = OcFlexArrayInsertItem (Options, InsertIndex);
     if (Option == NULL) {
@@ -341,8 +412,11 @@ InsertRootOption (
 {
   CHAR8             **NewOption;
 
-  DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-    "LNX: Creating \"root=PARTUUID=%g\"\n", gPartuuid));
+  DEBUG ((
+    (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+    "LNX: Creating \"root=PARTUUID=%g\"\n",
+    gPartuuid
+    ));
 
   NewOption = OcFlexArrayInsertItem (Options, 0);
   if (NewOption == NULL) {
@@ -375,6 +449,7 @@ AutodetectBootOptions (
   CHAR8             *GrubVarName;
   BOOLEAN           FoundOptions;
   BOOLEAN           PlusOpts;
+  CHAR8             *AddRxOption;
 
   OptionCount = 0;
   if (gParsedLoadOptions != NULL) {
@@ -399,22 +474,28 @@ AutodetectBootOptions (
         continue;
       }
 
-      Status = StrToGuid (&Option->Unicode.Name[L_STR_LEN(L"partuuidopts:")], &Guid);
-      if (EFI_ERROR(Status)) {
+      Status = StrToGuid (&Option->Unicode.Name[L_STR_LEN (L"partuuidopts:")], &Guid);
+      if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_WARN, "LNX: Cannot parse partuuid from %s - %r\n", Option->Unicode.Name, Status));
         continue;
       }
-      
+
       if (CompareMem (&gPartuuid, &Guid, sizeof (EFI_GUID)) != 0) {
-        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: No match partuuidopts:%g != %g\n", &Guid, &gPartuuid));
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: No match partuuidopts:%g != %g\n",
+          &Guid,
+          &gPartuuid
+          ));
       } else {
         PlusOpts = OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE);
 
-        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
           "LNX: Using partuuidopts%a=\"%s\"\n",
           PlusOpts ? "+" : "",
-          Option->Unicode.Value));
+          Option->Unicode.Value
+          ));
 
         Status = AddOption (Options, Option->Unicode.Value, TRUE);
         if (EFI_ERROR (Status)) {
@@ -444,8 +525,12 @@ AutodetectBootOptions (
         continue;
       }
 
-      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-        "LNX: Using %s=\"%s\"\n", Option->Unicode.Name, Option->Unicode.Value));
+      DEBUG ((
+        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Using %s=\"%s\"\n",
+        Option->Unicode.Name,
+        Option->Unicode.Value
+        ));
 
       Status = AddOption (Options, Option->Unicode.Value, TRUE);
       return Status;
@@ -455,8 +540,12 @@ AutodetectBootOptions (
         continue;
       }
 
-      DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-        "LNX: Using %s=\"%s\"\n", Option->Unicode.Name, Option->Unicode.Value));
+      DEBUG ((
+        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Using %s=\"%s\"\n",
+        Option->Unicode.Name,
+        Option->Unicode.Value
+        ));
 
       Status = AddOption (Options, Option->Unicode.Value, TRUE);
       if (EFI_ERROR (Status)) {
@@ -494,11 +583,15 @@ AutodetectBootOptions (
         mEtcDefaultGrubOptions,
         GrubVarName,
         &AsciiStrValue
-        ) &&
-        AsciiStrValue != NULL) {
+        )
+        && AsciiStrValue != NULL) {
 
-        DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: Using %a=\"%a\"\n", GrubVarName, AsciiStrValue));
+        DEBUG ((
+          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+          "LNX: Using %a=\"%a\"\n",
+          GrubVarName,
+          AsciiStrValue
+          ));
 
         if (AsciiStrValue[0] != '\0') {
           Status = InsertOption (InsertIndex, Options, AsciiStrValue, FALSE);
@@ -552,10 +645,19 @@ AutodetectBootOptions (
   }
   InsertIndex = 1;
 
-  if ((gLinuxBootFlags & LINUX_BOOT_ADD_RO) != 0) {
-    DEBUG (((gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-      "LNX: Adding \"ro\"\n"));
-    Status = InsertOption (InsertIndex, Options, "ro", FALSE);
+  AddRxOption = NULL;
+  if ((gLinuxBootFlags & LINUX_BOOT_ADD_RW) != 0) {
+    AddRxOption = "rw";
+  } else if ((gLinuxBootFlags & LINUX_BOOT_ADD_RO) != 0) {
+    AddRxOption = "ro";
+  }
+  if (AddRxOption != NULL) {
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Adding \"%a\"\n",
+      AddRxOption
+      ));
+    Status = InsertOption (InsertIndex, Options, AddRxOption, FALSE);
   }
 
   return Status;
@@ -623,7 +725,13 @@ GenerateEntriesForVmlinuzFiles (
     //
     // Linux.
     //
-    Status = CreateAsciiRelativePath (&Entry->Linux, DirectoryPath, DirectoryPathLength, VmlinuzFile->FileName, VmlinuzFile->StrLen);
+    Status = CreateAsciiRelativePath (
+      &Entry->Linux,
+      DirectoryPath,
+      DirectoryPathLength,
+      VmlinuzFile->FileName,
+      VmlinuzFile->StrLen
+      );
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -637,7 +745,7 @@ GenerateEntriesForVmlinuzFiles (
     }
 
     //
-    // Use title from os-release file.
+    // Use title from .contentDetails or os-release file.
     //
     if (mPrettyName != NULL) {
       Entry->Title = AllocateCopyPool (AsciiStrSize (mPrettyName), mPrettyName);
@@ -660,7 +768,13 @@ GenerateEntriesForVmlinuzFiles (
       if (Option == NULL) {
         return EFI_OUT_OF_RESOURCES;
       }
-      Status = CreateAsciiRelativePath (Option, DirectoryPath, DirectoryPathLength, InitrdMatch->FileName, InitrdMatch->StrLen);
+      Status = CreateAsciiRelativePath (
+        Option,
+        DirectoryPath,
+        DirectoryPathLength,
+        InitrdMatch->FileName,
+        InitrdMatch->StrLen
+        );
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -718,14 +832,14 @@ InternalAutodetectLinux (
     DEBUG ((DEBUG_WARN, "LNX: Does not appear to be root filesystem - %r\n", Status));
   }
 
-  if (!EFI_ERROR (Status)){
+  if (!EFI_ERROR (Status)) {
     mVmlinuzFiles = OcFlexArrayInit (sizeof (VMLINUZ_FILE), OcFlexArrayFreePointerItem);
     if (mVmlinuzFiles == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     }
   }
 
-  if (!EFI_ERROR (Status)){
+  if (!EFI_ERROR (Status)) {
     mInitrdFiles = OcFlexArrayInit (sizeof (VMLINUZ_FILE), OcFlexArrayFreePointerItem);
     if (mInitrdFiles == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
@@ -735,20 +849,27 @@ InternalAutodetectLinux (
   //
   // Place vmlinuz* and init* files into arrays.
   //
-  if (!EFI_ERROR (Status)){
+  if (!EFI_ERROR (Status)) {
     Status = OcScanDirectory (VmlinuzDirectory, ProcessVmlinuzFile, NULL);
   }
 
   if (!EFI_ERROR (Status)) {
-    gLoaderEntries = OcFlexArrayInit (sizeof (LOADER_ENTRY), (OC_FLEX_ARRAY_FREE_ITEM) InternalFreeLoaderEntry);
+    gLoaderEntries = OcFlexArrayInit (
+      sizeof (LOADER_ENTRY),
+      (OC_FLEX_ARRAY_FREE_ITEM)InternalFreeLoaderEntry
+      );
     if (gLoaderEntries == NULL) {
       Status = EFI_OUT_OF_RESOURCES;
     } else {
-      Status = LoadEtcFiles (RootDirectory);
+      LoadAppleDiskLabel (VmlinuzDirectory);
+      Status = LoadOsRelease (RootDirectory);
+      if (!EFI_ERROR (Status)) {
+        Status = LoadDefaultGrub (RootDirectory);
+      }
       if (!EFI_ERROR (Status)) {
         Status = GenerateEntriesForVmlinuzFiles (AUTODETECT_DIR);
       }
-      FreeEtcFiles();
+      FreeEtcFiles ();
     }
 
     if (!EFI_ERROR (Status)) {
@@ -784,7 +905,7 @@ AutodetectLinux (
   EFI_STATUS                      Status;
 
   Status = InternalAutodetectLinux (RootDirectory, Entries, NumEntries);
-  
+
   DEBUG ((
     (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) ? DEBUG_WARN : DEBUG_INFO,
     "LNX: AutodetectLinux - %r\n",

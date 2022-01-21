@@ -675,9 +675,21 @@ InternalAddBootEntryFromCustomEntry (
     }
 
     //
-    // Try to get content flavour from file.
+    // NOTE: It is not currently necessary/useful to apply .contentDetails around here because:
+    //  a) Entries have user-specified names already.
+    //  b) OpenLinuxBoot needs to read the label file early, when allowed by picker attributes,
+    //     so it can be used for pretty name with kernel version appended when required.
+    // If any future boot entry protocol drivers do want .contentDetails applied for them, we will need
+    // to pass back an entry flag indicating whether .contentDetails has already been applied or not.
     //
-    if (AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0) {
+
+    //
+    // Try to get content flavour from file.
+    // If enabled and present, .contentFlavour always overrides flavour from boot entry protocol,
+    // but is only applied to Entries if they have flavour Auto.
+    //
+    if ((BootContext->PickerContext->PickerAttributes & OC_ATTR_USE_FLAVOUR_ICON) != 0
+      && (IsBootEntryProtocol || AsciiStrCmp (BootEntry->Flavour, OC_FLAVOUR_AUTO) == 0)) {
       Status = OcBootPolicyDevicePathToDirPath (
         BootEntry->DevicePath,
         &BootDirectoryName,
@@ -695,9 +707,23 @@ InternalAddBootEntryFromCustomEntry (
           ContentFlavour = InternalGetContentFlavour (SimpleFileSystem, BootDirectoryName, L".contentFlavour");
           
           if (ContentFlavour != NULL) {
-            FreePool (BootEntry->Flavour);
-            BootEntry->Flavour = ContentFlavour;
+            //
+            // 'Auto' read from file means do not override.
+            //
+            if (AsciiStrCmp (ContentFlavour, OC_FLAVOUR_AUTO) == 0) {
+              FreePool (ContentFlavour);
+            } else {
+              if (BootEntry->Flavour != NULL) {
+                FreePool (BootEntry->Flavour);
+              }
+              BootEntry->Flavour = ContentFlavour;
+            }
           }
+
+          //
+          // There is no need for the additional flavour fixup from BootEntryInfo.c, since type
+          // OC_BOOT_EXTERNAL_OS does not need fixing up, and already determines our voiceover.
+          //
         }
 
         FreePool (BootDirectoryName);

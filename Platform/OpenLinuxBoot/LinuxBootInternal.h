@@ -54,14 +54,19 @@
 */
 #define LINUX_BOOT_USE_LATEST           BIT9
 /*
-  If set, add "ro" as initial option to all distros. Can be sepcified per
+  If set, add "ro" as initial option to all distros. Can be specified per
   FS by using argument partuuidopts:{partuuid}+=ro instead.
 */
 #define LINUX_BOOT_ADD_RO               BIT10
 /*
+  If set, add "rw" as initial option to all distros. Can be specified per
+  FS by using argument partuuidopts:{partuuid}+=rw instead.
+*/
+#define LINUX_BOOT_ADD_RW               BIT11
+/*
   TODO: Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
 */
-//#define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT11
+//#define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT12
 /*
   Add root= option if missing in loader/entries *.conf options.
 */

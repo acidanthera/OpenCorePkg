@@ -6,6 +6,10 @@ OpenCore Changelog
 - Allow gain to track OS volume on old macOS without `SystemAudioVolumeDB`
 - Fixed crash on no mouse support when verifying password
 - Fixed AppleInternal CSR bit being set with `ProvideCustomSlide` enabled
+- Added support for `.contentFlavour` and `.contentDetails` files for boot entry protocol entries including OpenLinuxBoot
+- Added `LINUX_BOOT_ADD_RW` flag to OpenLinuxBoot to support EndeavourOS
+- Added `flags+=` and `flags-=` arguments to OpenLinuxBoot to simplify setting driver flags if needed
+- Fixed OpenLinuxBoot entry name disambiguation when `LINUX_BOOT_USE_LATEST` flag is clear
 
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point

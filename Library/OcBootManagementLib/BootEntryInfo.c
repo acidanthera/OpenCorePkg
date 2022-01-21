@@ -755,9 +755,6 @@ InternalDescribeBootEntry (
       case OC_BOOT_WINDOWS:
         ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_WINDOWS), OC_FLAVOUR_WINDOWS);
         break;
-      case OC_BOOT_EXTERNAL_OS:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_OTHER_OS), OC_FLAVOUR_OTHER_OS);
-        break;
       case OC_BOOT_UNKNOWN:
         ContentFlavour = NULL;
         break;
