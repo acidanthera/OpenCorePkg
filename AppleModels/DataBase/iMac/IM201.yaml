@@ -16,8 +16,7 @@ BoardManufacturer: "Apple Inc."
 #  "Mac-smthelse"
 BoardProduct: "Mac-CFF7D910A743CAAF"
 BoardVersion: "iMac20,1"
-# FIXME:
-BoardRevision: 0x1
+BoardRevision: 0x3
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -25,16 +24,11 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-CFF7D910A743CAAF"
 ChassisAssetTag: ""
-# FIXME:
 PlatformFeature: 0x20
-# FIXME:
-FirmwareFeatures: 0xFD8FF576
-# FIXME:
-FirmwareFeaturesMask: 0xFFDFFF7F
-# FIXME:
-ExtendedFirmwareFeatures: 0x00000008FD8FF576
-# FIXME:
-ExtendedFirmwareFeaturesMask: 0x00000008FFDFFF7F
+FirmwareFeatures: 0xFFB3F066
+FirmwareFeaturesMask: 0xFFFFFFFF
+ExtendedFirmwareFeatures: 0x00000008FFB3F066
+ExtendedFirmwareFeaturesMask: 0x00000008FFFFFFFF
 MemoryFormFactor: 0x9
 # FIXME: Correct this one
 ProcessorType:
@@ -99,6 +93,7 @@ AppleModelCode:
   - "PN7C"
 # Note, first board code is used by macserial
 AppleBoardCode:
+  - "PHC1"
   - "PHCD"
 # Note, first year is used by macserial
 AppleModelYear:

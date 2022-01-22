@@ -17,7 +17,7 @@ BoardManufacturer: "Apple Inc."
 BoardProduct: "Mac-AF89B6D9451A490B"
 BoardVersion: "iMac20,2"
 # FIXME:
-BoardRevision: 0x1
+BoardRevision: 0x3
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -25,16 +25,15 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-AF89B6D9451A490B"
 ChassisAssetTag: ""
-# FIXME:
 PlatformFeature: 0x20
 # FIXME:
-FirmwareFeatures: 0xFD8FF576
+FirmwareFeatures: 0xFFB3F066
 # FIXME:
-FirmwareFeaturesMask: 0xFFDFFF7F
+FirmwareFeaturesMask: 0xFFFFFFFF
 # FIXME:
-ExtendedFirmwareFeatures: 0x00000008FD8FF576
+ExtendedFirmwareFeatures: 0x00000008FFB3F066
 # FIXME:
-ExtendedFirmwareFeaturesMask: 0x00000008FFDFFF7F
+ExtendedFirmwareFeaturesMask: 0x00000008FFFFFFFF
 MemoryFormFactor: 0x9
 # FIXME: Correct this one
 ProcessorType:
