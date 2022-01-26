@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "447.60.3.0.0"
-BIOSLegacyVersion: "IM181.88Z.F000.B00.2110271739"
-BIOSReleaseDate: "10/27/2021"
+BIOSVersion: "447.80.3.0.0"
+BIOSLegacyVersion: "IM181.88Z.F000.B00.2112121742"
+BIOSReleaseDate: "12/12/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac18,1"
 SystemVersion: "1.0"
@@ -65,17 +65,17 @@ SmcPlatform:
 SmcEPCI: 0xF07009
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM181.88Z.F000.B00.2110271739
+    BIOS ID:      IM181.88Z.F000.B00.2112121742
     Model:        IM181
-    EFI Version:  447.60.3.0.0
-    Built by:     root@bb-g9-pdb38
-    Date:         Wed Oct 27 17:39:18 2021
-    Revision:     447.60.3 (B&I)
+    EFI Version:  447.80.3.0.0
+    Built by:     root@bb-g8-pdb115
+    Date:         Sun Dec 12 17:42:13 2021
+    Revision:     447.80.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
     Compiler:     clang-1300.0.29.10
-    UUID:         4D2F67F5-E613-31CB-B304-DB5609337E00
-    UUID:         99B99A13-95CB-3CC3-93A3-0E50042F80D1
+    UUID:         6A25118D-1951-38A1-89EA-813167F03C0D
+    UUID:         7944EF27-4449-305F-B35A-7CD450B53BC7
 Specifications:
   CPUCodename:
     - "Kaby Lake"
