@@ -10,6 +10,13 @@
 #define OC_TRACE_GRUB_VARS DEBUG_VERBOSE
 #endif
 
+/*
+  Standard attached drives on OVMF appear as MBR, so it can be convenient when
+  debugging to allow entries with incorrect (i.e. specifies no/every drive)
+  root=... .
+*/
+//#define LINUX_ALLOW_MBR
+
 #include <Uefi.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>

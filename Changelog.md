@@ -11,6 +11,7 @@ OpenCore Changelog
 - Added `flags+=` and `flags-=` arguments to OpenLinuxBoot to simplify setting driver flags if needed
 - Fixed OpenLinuxBoot entry name disambiguation when `LINUX_BOOT_USE_LATEST` flag is clear
 - Updated builtin firmware versions for SMBIOS and the rest
+- Fixed crash in OpenLinuxBoot with partly (re-)installed Linux distro
 
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point

@@ -623,18 +623,13 @@ AutodetectBootOptions (
     return EFI_INVALID_PARAMETER;
   }
 
-  //
-  // Standard attached drives on OVMF appear as MBR, so it can be convenient when
-  // debugging to allow entries with incorrect (i.e. specifies no/every drive)
-  // root=... on NOOPT debugging build.
-  //
-//#if !defined(OC_TARGET_NOOPT)
+#if !defined(LINUX_ALLOW_MBR)
   if (CompareGuid (&gPartuuid, &gEfiPartTypeUnusedGuid)) {
     Status = EFI_UNSUPPORTED;
     DEBUG ((DEBUG_WARN, "LNX: Cannot autodetect root on MBR partition - %r\n", Status));
     return Status;
   }
-//#endif
+#endif
 
   //
   // Insert "root=PARTUUID=..." option, followed by "ro" if requested, only if we get to here.
@@ -682,6 +677,8 @@ GenerateEntriesForVmlinuzFiles (
   BOOLEAN                         IsRescue;
 
   ASSERT (DirectoryPath != NULL);
+  ASSERT (mVmlinuzFiles->Count > 0);
+
   DirectoryPathLength = StrLen (DirectoryPath);
 
   for (VmlinuzIndex = 0; VmlinuzIndex < mVmlinuzFiles->Count; VmlinuzIndex++) {
@@ -851,6 +848,13 @@ InternalAutodetectLinux (
   //
   if (!EFI_ERROR (Status)) {
     Status = OcScanDirectory (VmlinuzDirectory, ProcessVmlinuzFile, NULL);
+
+    if (!EFI_ERROR (Status) && mVmlinuzFiles->Count == 0) {
+      //
+      // If initrd files but no vmlinuz files are present in autodetect dir.
+      //
+      Status = EFI_NOT_FOUND;
+    }
   }
 
   if (!EFI_ERROR (Status)) {
