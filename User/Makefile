@@ -5,6 +5,8 @@
 
 .DEFAULT_GOAL := all
 
+.ONESHELL:
+
 LCOV          ?= lcov
 GENHTML       ?= genhtml
 CC            ?= gcc
@@ -70,7 +72,7 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	SUFFIX := .exe
+	OUT_SUFFIX := .exe
 	CFLAGS += -D_ISOC99_SOURCE=1
 endif
 
@@ -116,9 +118,9 @@ else
 endif
 
 ifeq ($(SYDR),1)
-	OUT_SUFFIX := _SYDR
+	SUFFIX := _SYDR
 else
-	OUT_SUFFIX :=
+	SUFFIX :=
 endif
 
 #
@@ -239,7 +241,7 @@ OBJS    += UserFile.o UserPseudoRandom.o
 # Directory where objects will be produced.
 # As well, OBJS will be prepended with actual paths.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)$(OUT_SUFFIX)
+OUT_DIR := $(DIST)_$(UDK_ARCH)$(SUFFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
@@ -259,6 +261,22 @@ fuzz: $(PRODUCT) FORCE
 	@rm -f fuzz*.log
 	@$(MKDIR) FUZZDICT
 	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
+
+sydr-fuzz: $(PROJECT)$(OUT_SUFFIX) $(PROJECT)$(SUFFIX)$(OUT_SUFFIX) FORCE
+	@rm -rf sydr-work sydr-fuzz.log
+	@cat <<- EOF > sydr-fuzz.toml
+		exit-on-time = 7200
+
+	 	[sydr]
+		args = "--invert-n 2048 -j 4"
+		target = "./$(PROJECT)$(SUFFIX)$(OUT_SUFFIX) @@"
+		jobs = 1
+
+		[libfuzzer]
+		path = "./$(PROJECT)$(OUT_SUFFIX)"
+		args = "-jobs=4 -workers=4 -rss_limit_mb=4096 ./FUZZDICT"
+	EOF
+	sydr-fuzz run -l debug
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
