@@ -115,6 +115,12 @@ else
 	STRIPFLAGS ?= -x
 endif
 
+ifeq ($(SYDR),1)
+	OUT_SUFFIX := _SYDR
+else
+	OUT_SUFFIX :=
+endif
+
 #
 # Search Paths.
 #
@@ -233,7 +239,7 @@ OBJS    += UserFile.o UserPseudoRandom.o
 # Directory where objects will be produced.
 # As well, OBJS will be prepended with actual paths.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)
+OUT_DIR := $(DIST)_$(UDK_ARCH)$(OUT_SUFFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
