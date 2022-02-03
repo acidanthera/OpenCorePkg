@@ -98,7 +98,7 @@ AllocatePool (
 {
   VOID *p;
 
-  if ((mPoolAllocationMask & (1U << mPoolAllocationIndex)) != 0) {
+  if ((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) {
     // UEFI guarantees 8-byte alignment.
     p = malloc ((AllocationSize + 7U) & ~7U);
   } else {
@@ -185,7 +185,7 @@ AllocatePages (
 {
   VOID  *Memory;
 
-  if ((mPageAllocationMask & (1U << mPageAllocationIndex)) != 0) {
+  if ((mPageAllocationMask & (1ULL << mPageAllocationIndex)) != 0) {
 #ifdef WIN32
     Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
 #else // !WIN32

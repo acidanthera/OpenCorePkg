@@ -129,12 +129,18 @@ static void loadConfig(const uint8_t *data, size_t size) {
   Off += sizeof(UINT64);
   if (size >= Off)
     memcpy(&mPoolAllocationMask, &data[size - Off], sizeof(UINT64));
+  else
+    mPoolAllocationMask = MAX_UINT64;
   Off += sizeof(UINT64);
   if (size >= Off)
     memcpy(&mPageAllocationMask, &data[size - Off], sizeof(UINT64));
+  else
+    mPageAllocationMask = MAX_UINT64;
   Off += sizeof(UINT8);
   if (size >= Off)
     PcdValidHashes = data[size - Off];
+  else
+    PcdValidHashes = MAX_UINT8;
 }
 
 RETURN_STATUS
@@ -191,9 +197,10 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   //PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
   //PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
 
+  loadConfig(Data, Size);
+
   void *p = AllocatePool(Size);
   if (p != NULL) {
-    loadConfig(Data, Size);
     memcpy(p, Data, Size);
     PeCoffTestLoadFull(p, Size);
     FreePool(p);
