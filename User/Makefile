@@ -267,15 +267,15 @@ sydr-fuzz: $(PROJECT)$(SUFFIX) $(PROJECT)_SYDR$(SUFFIX) FORCE
 		exit-on-time = 7200
 
 	 	[sydr]
-		args = "--invert-n 2048 -j 4"
+		args = "-s 90 -j $(FUZZ_JOBS)"
 		target = "$(PROJECT)_SYDR$(SUFFIX) @@"
 		jobs = 1
 
 		[libfuzzer]
 		path = "$(PROJECT)$(SUFFIX)"
-		args = "-jobs=4 -workers=4 -rss_limit_mb=4096 FUZZDICT"
+		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM)"
 	EOF
-	sydr-fuzz run -l debug
+	sydr-fuzz -l debug run
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
@@ -290,6 +290,6 @@ coverage: $(PRODUCT) FORCE
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE
-	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).exe
+	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT)_SYDR $(PRODUCT).exe $(PRODUCT)_SYDR.exe
 
 FORCE:

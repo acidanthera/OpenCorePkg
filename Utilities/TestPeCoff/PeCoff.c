@@ -103,6 +103,15 @@ TestImageLoad (
   return EFI_SUCCESS;
 }
 
+INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+  if (Data != NULL) {
+    void *DataCopy = AllocateCopyPool(Size, Data);
+    TestImageLoad (DataCopy, Size);
+    FreePool(DataCopy);
+  }
+  return 0;
+}
+
 int ENTRY_POINT (int argc, char *argv[]) {
   if (argc < 2) {
     printf ("Please provide a valid PE image path\n");

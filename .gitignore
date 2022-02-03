@@ -41,8 +41,11 @@ Utilities/TestPeCoff/PeCoff
 *.exe
 *.gcda
 *.gcno
+sydr-fuzz.toml
 FUZZDICT
 COVERAGE
+*_SYDR
+sydr-fuzz-out
 fuzz-*.log
 crash-*
 oom-*
