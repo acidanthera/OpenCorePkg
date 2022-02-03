@@ -17,7 +17,6 @@
 #include <UserFile.h>
 #include <UserMemory.h>
 
-STATIC UINT64  PcdValidAllocMask = MAX_UINT64;
 STATIC UINT8 PcdValidHashes = MAX_UINT8;
 UINTN HashDependency;
 
@@ -118,15 +117,24 @@ PeCoffTestLoad (
 
 static void loadConfig(const uint8_t *data, size_t size) {
   HashDependency = 0;
-  PcdGetBool(PcdImageLoaderRtRelocAllowTargetMismatch) = (data[size - 1] & 1U) != 0;
-  PcdGetBool(PcdImageLoaderHashProhibitOverlap) = (data[size - 1] & 2U) != 0;
-  PcdGetBool(PcdImageLoaderLoadHeader) = (data[size - 1] & 4U) != 0;
-  PcdGetBool(PcdImageLoaderSupportArmThumb) = (data[size - 1] & 8U) != 0;
-  PcdGetBool(PcdImageLoaderForceLoadDebug) = (data[size - 1] & 16U) != 0;
-  PcdGetBool(PcdImageLoaderTolerantLoad) = (data[size - 1] & 32U) != 0;
-  PcdGetBool(PcdImageLoaderSupportDebug) = (data[size - 1] & 64U) != 0;
-  memcpy(&PcdValidAllocMask, &data[size - MIN(size, sizeof(UINT64))], MIN(size, sizeof(UINT64)));
-  PcdValidHashes = data[size - MIN(size, sizeof(UINT64) + sizeof(UINT8))];
+  UINT32 Off = sizeof(UINT8);
+  UINT32 LastByte = data[size - Off];
+  PcdGetBool(PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
+  PcdGetBool(PcdImageLoaderHashProhibitOverlap) = (LastByte & 2U) != 0;
+  PcdGetBool(PcdImageLoaderLoadHeader) = (LastByte & 4U) != 0;
+  PcdGetBool(PcdImageLoaderSupportArmThumb) = (LastByte & 8U) != 0;
+  PcdGetBool(PcdImageLoaderForceLoadDebug) = (LastByte & 16U) != 0;
+  PcdGetBool(PcdImageLoaderTolerantLoad) = (LastByte & 32U) != 0;
+  PcdGetBool(PcdImageLoaderSupportDebug) = (LastByte & 64U) != 0;
+  Off += sizeof(UINT64);
+  if (size >= Off)
+    memcpy(&mPoolAllocationMask, &data[size - Off], sizeof(UINT64));
+  Off += sizeof(UINT64);
+  if (size >= Off)
+    memcpy(&mPageAllocationMask, &data[size - Off], sizeof(UINT64));
+  Off += sizeof(UINT8);
+  if (size >= Off)
+    PcdValidHashes = data[size - Off];
 }
 
 RETURN_STATUS

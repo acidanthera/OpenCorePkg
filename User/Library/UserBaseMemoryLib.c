@@ -20,6 +20,11 @@
 UINTN mPoolAllocations;
 UINTN mPageAllocations;
 
+UINT64 mPoolAllocationMask = MAX_UINT64;
+UINTN mPoolAllocationIndex;
+UINT64 mPageAllocationMask = MAX_UINT64;
+UINTN mPageAllocationIndex;
+
 VOID *
 EFIAPI
 CopyMem (
@@ -91,8 +96,18 @@ AllocatePool (
   IN  UINTN  AllocationSize
   )
 {
-  // UEFI guarantees 8-byte alignment.
-  void *p = malloc ((AllocationSize + 7U) & ~7U);
+  VOID *p;
+
+  if ((mPoolAllocationMask & (1U << mPoolAllocationIndex)) != 0) {
+    // UEFI guarantees 8-byte alignment.
+    p = malloc ((AllocationSize + 7U) & ~7U);
+  } else {
+    p = NULL;
+  }
+
+  ++mPoolAllocationIndex;
+  mPoolAllocationIndex &= 63U;
+
   DEBUG ((
     DEBUG_POOL,
     "UMEM: Allocating pool %u at 0x%p\n",
@@ -170,20 +185,23 @@ AllocatePages (
 {
   VOID  *Memory;
 
-  #ifdef WIN32
-  Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
-  #else // !WIN32
-  INTN  RetVal;
-
-  Memory = NULL;
-
-  RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
-
-  if (RetVal != 0) {
-    DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
+  if ((mPageAllocationMask & (1U << mPageAllocationIndex)) != 0) {
+#ifdef WIN32
+    Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
+#else // !WIN32
+    Memory = NULL;
+    INTN  RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
+    if (RetVal != 0) {
+      DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
+      Memory = NULL;
+    }
+#endif // WIN32
+  } else {
     Memory = NULL;
   }
-  #endif // WIN32
+
+  ++mPageAllocationIndex;
+  mPageAllocationIndex &= 63U;
 
   DEBUG ((
     DEBUG_PAGE,
