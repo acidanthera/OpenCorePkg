@@ -97,7 +97,7 @@ ifeq ($(FUZZ_JOBS),)
 endif
 
 ifeq ($(FUZZ_MEM),)
-	FUZZ_MEM = 4096
+	FUZZ_MEM = 6144
 endif
 
 ifeq ($(COVERAGE),1)
