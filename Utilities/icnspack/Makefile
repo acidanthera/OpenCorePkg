@@ -6,6 +6,6 @@
 
 STANDALONE = 1
 PROJECT    = icnspack
-PRODUCT    = $(PROJECT)$(SUFFIX)
+PRODUCT    = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS       = $(PROJECT).o
 include ../../User/Makefile

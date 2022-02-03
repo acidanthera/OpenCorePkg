@@ -71,11 +71,13 @@ Example 4. Perform fuzzing with the help of [Sydr](https://www.ispras.ru/en/tech
 
 ```sh
 CC=clang DEBUG=1 FUZZ=1 SANITIZE=1 make
-CC=clang DEBUG=1 SYDR=1 make
-make sydr-fuzz
+CC=clang DEBUG=1 SYDR=1 make sydr-fuzz
+# Import Sydr inputs to FUZZDICT.
+CC=clang DEBUG=1 SYDR=1 make sydr-fuzz-import
+# LCOV is required for running this command.
+make clean
+COVERAGE=1 DEBUG=1 make coverage
 ```
-
-Note: fuzzing corpus is saved in `sydr-fuzz-out/corpus`.
 
 ### Predefined variables
 

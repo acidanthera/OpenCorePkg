@@ -4,7 +4,7 @@
 ##
 
 PROJECT = Smbios
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 #
 # From OpenCore.

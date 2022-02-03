@@ -4,7 +4,7 @@
 ##
 
 PROJECT = DiskImage
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	FileDummy.o \
 	OcAppleChunklistLib.o \

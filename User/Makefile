@@ -88,6 +88,10 @@ else
 	CFLAGS  += -D ENTRY_POINT=main
 endif
 
+ifeq ($(FUZZ_DIR),)
+	FUZZ_DIR = FUZZDICT
+endif
+
 ifeq ($(FUZZ_JOBS),)
 	FUZZ_JOBS = 4
 endif
@@ -118,8 +122,7 @@ else
 endif
 
 ifeq ($(SYDR),1)
-	SUFFIX := _SYDR$(SUFFIX)
-	OUT_SUFFIX := _SYDR
+	INFIX := .sydr
 endif
 
 #
@@ -240,7 +243,7 @@ OBJS    += UserFile.o UserPseudoRandom.o
 # Directory where objects will be produced.
 # As well, OBJS will be prepended with actual paths.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)$(OUT_SUFFIX)
+OUT_DIR := $(DIST)_$(UDK_ARCH)$(INFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
@@ -258,24 +261,28 @@ $(PRODUCT): $(OBJS)
 
 fuzz: $(PRODUCT) FORCE
 	@rm -f fuzz*.log
-	@$(MKDIR) FUZZDICT
-	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
+	@$(MKDIR) $(FUZZ_DIR)
+	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)
 
-sydr-fuzz: $(PROJECT)$(SUFFIX) $(PROJECT)_SYDR$(SUFFIX) FORCE
-	@rm -rf sydr-work sydr-fuzz.log
+sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@$(MKDIR) $(FUZZ_DIR)
+	@rm -rf sydr-fuzz-out
 	@cat <<- EOF > sydr-fuzz.toml
 		exit-on-time = 7200
 
 	 	[sydr]
 		args = "-s 90 -j $(FUZZ_JOBS)"
-		target = "$(PROJECT)_SYDR$(SUFFIX) @@"
+		target = "$(PROJECT).sydr$(SUFFIX) @@"
 		jobs = 1
 
 		[libfuzzer]
 		path = "$(PROJECT)$(SUFFIX)"
-		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM)"
+		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
 	EOF
-	sydr-fuzz -l debug run
+	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
+
+sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/corpus
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
@@ -283,13 +290,13 @@ coverage: $(PRODUCT) FORCE
 	@$(MKDIR) COVERAGE
 	$(LCOV) --no-checksum --zerocounters --directory .
 	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
-	for f in FUZZDICT/*; do  ./$(PRODUCT) $$f ; done || true
+	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f ; done || true
 	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info || exit 1
 	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_tmp || exit 1
 	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info_final || exit 1
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE
-	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT)_SYDR $(PRODUCT).exe $(PRODUCT)_SYDR.exe
+	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).sydr $(PRODUCT).exe $(PRODUCT).sydr.exe sydr-fuzz.toml
 
 FORCE:

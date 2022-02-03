@@ -4,7 +4,7 @@
 ##
 
 PROJECT = Img4
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 #
 # From OcAppleImg4Lib.

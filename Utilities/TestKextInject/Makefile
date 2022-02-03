@@ -4,7 +4,7 @@
 ##
 
 PROJECT = KextInject
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	CommonPatches.o \
 	CpuidPatches.o \
