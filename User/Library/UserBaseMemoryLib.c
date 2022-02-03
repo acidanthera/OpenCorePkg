@@ -5,6 +5,7 @@
 
 #include <Uefi.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiApplicationEntryPoint.h>
@@ -15,6 +16,9 @@
 #ifdef WIN32
 #include <malloc.h>
 #endif // WIN32
+
+UINTN mPoolAllocations;
+UINTN mPageAllocations;
 
 VOID *
 EFIAPI
@@ -87,7 +91,19 @@ AllocatePool (
   IN  UINTN  AllocationSize
   )
 {
-  return malloc (AllocationSize);
+  // UEFI guarantees 8-byte alignment.
+  void *p = malloc ((AllocationSize + 7U) & ~7U);
+  DEBUG ((
+    DEBUG_POOL,
+    "UMEM: Allocating pool %u at %p\n",
+    (UINT32) AllocationSize,
+    p
+    ));
+  ASSERT (((UINTN)p & 7U) == 0);
+  if (p != NULL) {
+    ++mPoolAllocations;
+  }
+  return p;
 }
 
 VOID *
@@ -140,7 +156,7 @@ ReallocatePool (
 
   if (NewBuffer != NULL && OldBuffer != NULL) {
     memcpy (NewBuffer, OldBuffer, MIN (OldSize, NewSize));
-    free (OldBuffer);
+    FreePool (OldBuffer);
   }
 
   return NewBuffer;
@@ -152,10 +168,11 @@ AllocatePages (
   IN UINTN  Pages
   )
 {
-  #ifdef WIN32
-  return _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
-  #else // !WIN32
   VOID  *Memory;
+
+  #ifdef WIN32
+  Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
+  #else // !WIN32
   INTN  RetVal;
 
   Memory = NULL;
@@ -164,11 +181,22 @@ AllocatePages (
 
   if (RetVal != 0) {
     DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
-    return NULL;
+    Memory = NULL;
   }
-  
-  return Memory;
   #endif // WIN32
+
+  DEBUG ((
+    DEBUG_PAGE,
+    "UMEM: Allocating %u pages at %p\n",
+    (UINT32) Pages,
+    Memory
+    ));
+
+  if (Memory != NULL) {
+    mPageAllocations += Pages;
+  }
+
+  return Memory;
 }
 
 VOID
@@ -178,6 +206,13 @@ FreePool (
   )
 {
   ASSERT (Buffer != NULL);
+  DEBUG ((
+    DEBUG_POOL,
+    "UMEM: Deallocating pool %p\n",
+    Buffer
+    ));
+
+  --mPoolAllocations;
 
   free (Buffer);
 }
@@ -190,6 +225,15 @@ FreePages (
   )
 {
   ASSERT (Buffer != NULL);
+
+  DEBUG ((
+    DEBUG_PAGE,
+    "UMEM: Deallocating %u pages at %p\n",
+    (UINT32) Pages,
+    Buffer
+    ));
+
+  mPageAllocations -= Pages;
 
   free (Buffer);
 }
