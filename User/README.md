@@ -41,6 +41,7 @@ Additional variables are supported to adjust the compilation process.
 - `UDK_ARCH=Ia32` — build with 32-bit UDK architecture (defaults to `X64`).
 - `UDK_PATH=/path/to/UDK` — build with custom UDK path (defaults to `$PACKAGES_PATH`).
 - `WERROR=1` — treat compiler warnings as errors.
+- `SYDR=1` — change `$(SUFFIX)` to store compilation results in a directory distinct from the default one.
 
 Example 1. To build for 32-bit Windows (requires MinGW installed) use the following command:
 
@@ -64,6 +65,14 @@ make clean
 COVERAGE=1 DEBUG=1 make coverage
 ```
 
+Example 4. Perform fuzzing with the help of Sydr tool (path to which should be in `$PATH`):
+
+```sh
+CC=clang DEBUG=1 FUZZ=1 SANITIZE=1 make
+CC=clang DEBUG=1 SYDR=1 make
+make sydr-fuzz
+```
+
 ### Predefined variables
 
 Most UDK variables are available due to including the original headers.
@@ -75,4 +84,3 @@ Most UDK variables are available due to including the original headers.
 - To detect sanitizing status use `SANITIZE_TEST`.
 - To detect fuzzing status use `FUZZING_TEST`.
 - Use `ENTRY_POINT` variable for `main` to automatically disable it for fuzzing.
-
