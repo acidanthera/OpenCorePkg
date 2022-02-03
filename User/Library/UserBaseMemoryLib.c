@@ -95,7 +95,7 @@ AllocatePool (
   void *p = malloc ((AllocationSize + 7U) & ~7U);
   DEBUG ((
     DEBUG_POOL,
-    "UMEM: Allocating pool %u at %p\n",
+    "UMEM: Allocating pool %u at 0x%p\n",
     (UINT32) AllocationSize,
     p
     ));
@@ -187,7 +187,7 @@ AllocatePages (
 
   DEBUG ((
     DEBUG_PAGE,
-    "UMEM: Allocating %u pages at %p\n",
+    "UMEM: Allocating %u pages at 0x%p\n",
     (UINT32) Pages,
     Memory
     ));
@@ -208,7 +208,7 @@ FreePool (
   ASSERT (Buffer != NULL);
   DEBUG ((
     DEBUG_POOL,
-    "UMEM: Deallocating pool %p\n",
+    "UMEM: Deallocating pool 0x%p\n",
     Buffer
     ));
 
@@ -228,7 +228,7 @@ FreePages (
 
   DEBUG ((
     DEBUG_PAGE,
-    "UMEM: Deallocating %u pages at %p\n",
+    "UMEM: Deallocating %u pages at 0x%p\n",
     (UINT32) Pages,
     Buffer
     ));

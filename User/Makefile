@@ -146,7 +146,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o QuickSort.o
+	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o QuickSort.o UserFile.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
@@ -237,7 +237,7 @@ endif
 # Miscellaneous implementations that do not depend on UDK.
 #
 VPATH   += $(OC_USER)/User/Library:$
-OBJS    += UserFile.o UserPseudoRandom.o
+OBJS    += UserPseudoRandom.o
 
 #
 # Directory where objects will be produced.
