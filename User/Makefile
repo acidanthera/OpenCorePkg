@@ -72,7 +72,7 @@ ifeq ($(DIST),Darwin)
 endif
 
 ifeq ($(DIST),Windows)
-	OUT_SUFFIX := .exe
+	SUFFIX := .exe
 	CFLAGS += -D_ISOC99_SOURCE=1
 endif
 
@@ -118,9 +118,8 @@ else
 endif
 
 ifeq ($(SYDR),1)
-	SUFFIX := _SYDR
-else
-	SUFFIX :=
+	SUFFIX := _SYDR$(SUFFIX)
+	OUT_SUFFIX := _SYDR
 endif
 
 #
@@ -241,7 +240,7 @@ OBJS    += UserFile.o UserPseudoRandom.o
 # Directory where objects will be produced.
 # As well, OBJS will be prepended with actual paths.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)$(SUFFIX)
+OUT_DIR := $(DIST)_$(UDK_ARCH)$(OUT_SUFFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
@@ -262,19 +261,19 @@ fuzz: $(PRODUCT) FORCE
 	@$(MKDIR) FUZZDICT
 	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
 
-sydr-fuzz: $(PROJECT)$(OUT_SUFFIX) $(PROJECT)$(SUFFIX)$(OUT_SUFFIX) FORCE
+sydr-fuzz: $(PROJECT)$(SUFFIX) $(PROJECT)_SYDR$(SUFFIX) FORCE
 	@rm -rf sydr-work sydr-fuzz.log
 	@cat <<- EOF > sydr-fuzz.toml
 		exit-on-time = 7200
 
 	 	[sydr]
 		args = "--invert-n 2048 -j 4"
-		target = "./$(PROJECT)$(SUFFIX)$(OUT_SUFFIX) @@"
+		target = "$(PROJECT)_SYDR$(SUFFIX) @@"
 		jobs = 1
 
 		[libfuzzer]
-		path = "./$(PROJECT)$(OUT_SUFFIX)"
-		args = "-jobs=4 -workers=4 -rss_limit_mb=4096 ./FUZZDICT"
+		path = "$(PROJECT)$(SUFFIX)"
+		args = "-jobs=4 -workers=4 -rss_limit_mb=4096 FUZZDICT"
 	EOF
 	sydr-fuzz run -l debug
 
