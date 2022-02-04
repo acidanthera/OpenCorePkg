@@ -298,6 +298,18 @@ XmlNodePrepend (
   );
 
 /**
+  Remove the child node from the current node.
+
+  @param[in,out]  Node        Current node.
+  @param[in]      ChildNode   Child node to be removed.
+**/
+VOID
+XmlNodeRemove (
+  IN OUT  XML_NODE     *Node,
+  IN      XML_NODE     *ChildNode
+  );
+
+/**
   Get the root node of the plist document.
 
   @param[in]  Document  A pointer to the plist document.
