@@ -1668,10 +1668,12 @@ XmlNodeRemove (
   ASSERT (ChildNode != NULL);
   ASSERT (Index < Node->Children->NodeCount);
 
-  for (Index = 0; CompareMem (Node->Children->NodeList[Index], ChildNode, sizeof (XML_NODE)) != 0; ++Index) {
-    //
-    // Locate ChildNode inside Node.
-    //
+  //
+  // Locate ChildNode inside Node.
+  //
+  Index = 0;
+  while (CompareMem (Node->Children->NodeList[Index], ChildNode, sizeof (XML_NODE)) != 0) {
+    ++Index;
   }
 
   XmlNodeRemoveByIndex (Node, Index);
