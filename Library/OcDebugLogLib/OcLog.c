@@ -30,6 +30,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcTimerLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -289,7 +290,7 @@ OcLogAddEntry  (
     //
     if ((OcLog->Options & OC_LOG_FILE) != 0 && OcLog->FileSystem != NULL) {
       if (EfiGetCurrentTpl () <= TPL_CALLBACK) {
-        SetFileData (
+        OcSetFileData (
           OcLog->FileSystem,
           OcLog->FilePath,
           Private->AsciiBuffer,
@@ -316,7 +317,10 @@ OcLogAddEntry  (
         if ((OcLog->Options & OC_LOG_NONVOLATILE) != 0) {
           Attributes |= EFI_VARIABLE_NON_VOLATILE;
         }
-
+        //
+        // Do not use OcSetSystemVariable() as persistence is configured by the
+        // user.
+        //
         Status = gRT->SetVariable (
           OC_LOG_VARIABLE_NAME,
           &gOcVendorVariableGuid,
@@ -448,14 +452,14 @@ OcConfigureLogProtocol (
         Status = LogFileSystem->OpenVolume (LogFileSystem, &LogRoot);
         if (EFI_ERROR (Status)) {
           LogRoot = NULL;
-        } else if (!IsWritableFileSystem (LogRoot)) {
+        } else if (!OcIsWritableFileSystem (LogRoot)) {
           LogRoot->Close (LogRoot);
           LogRoot = NULL;
         }
       }
 
       if (LogRoot == NULL) {
-        Status = FindWritableFileSystem (&LogRoot);
+        Status = OcFindWritableFileSystem (&LogRoot);
         if (EFI_ERROR (Status)) {
           DEBUG ((DEBUG_ERROR, "OCL: There is no place to write log file to - %r\n", Status));
           LogRoot = NULL;
@@ -537,7 +541,7 @@ OcConfigureLogProtocol (
   if (LogRoot != NULL) {
     if (!EFI_ERROR (Status)) {
       if (OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBufferSize > 0) {
-        SetFileData (
+        OcSetFileData (
           LogRoot,
           LogPath,
           OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog)->AsciiBuffer,

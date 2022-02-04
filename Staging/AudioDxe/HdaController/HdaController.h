@@ -49,14 +49,6 @@ typedef struct _HDA_CONTROLLER_INFO_PRIVATE_DATA HDA_CONTROLLER_INFO_PRIVATE_DAT
 //
 // PCI support.
 //
-// Structure used for PCI class code parsing.
-#pragma pack(1)
-typedef struct {
-  UINT8 ProgInterface;
-  UINT8 SubClass;
-  UINT8 Class;
-} HDA_PCI_CLASSREG;
-#pragma pack()
 
 // HDA controller is accessed via MMIO on BAR #0.
 #define PCI_HDA_BAR 0
@@ -145,6 +137,12 @@ typedef struct {
   // Stream index. This value is zero-based from the first stream on the controller.
   //
   UINT8                   Index;
+  //
+  // TRUE once Index is valid. Required for tearing down streams safely if there is
+  // an error while setting them up. Assume nothing else for this or following streams
+  // is set up or allocated if this is FALSE.
+  //
+  BOOLEAN                 HasIndex;
   //
   // Bidirectional stream? This requires a bit to set during reset to enable output.
   //
@@ -272,6 +270,45 @@ typedef struct {
   EFI_DEVICE_PATH_PROTOCOL *DevicePath;
 } HDA_IO_CHILD;
 
+//
+// Quirks.
+//
+
+//
+// QEMU must be run in interrupt mode not polling mode in order for CORB/RIRB to work
+// at all. Unfortunately, this has to be set for all systems because CORB/RIRB must be
+// set up to detect that we are on QEMU (at least if we rely only on reported controller
+// and codec vendor ids, since QEMU controller incorrectly reports as Intel).
+// TODO: If this causes problems, we may be able to use the previous quirk (which was
+// commented out, but worked somewhat) of setting RINTCNT to 0xFF, in order to make
+// QEMU run long enough to detect that it is QEMU and then only fully enable the rest
+// of this quirk when needed.
+// Problem:
+//  https://github.com/qemu/qemu/blob/a3607d/hw/audio/intel-hda.c#L331
+// Only available work-around:
+//  https://github.com/qemu/qemu/blob/a3607d/hw/audio/intel-hda.c#L561
+//
+#define HDA_CONTROLLER_QUIRK_QEMU_1               BIT0
+
+//
+// Stream reset does not stay high when set.
+// REF: https://gitlab.com/qemu-project/qemu/-/issues/757
+//
+#define HDA_CONTROLLER_QUIRK_QEMU_2               BIT1
+
+//
+// CORB reset does not stay high when set; affects VMware Fusion, but also
+// some real hardware (at least Nvidia HDA controllers):
+// REF: https://github.com/acidanthera/bugtracker/issues/1908
+// For some years AudioDxe had this as default behaviour, and despite not
+// being to Intel HDA spec., it seems like retaining this may work best.
+//
+#define HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET   BIT2
+
+#define HDA_CONTROLLER_QUIRK_INITIAL  ( \
+  HDA_CONTROLLER_QUIRK_QEMU_1 | HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET \
+  )
+
 struct _HDA_CONTROLLER_DEV {
   // Signature.
   UINTN Signature;
@@ -286,6 +323,8 @@ struct _HDA_CONTROLLER_DEV {
   // PCI.
   UINT64 OriginalPciAttributes;
   BOOLEAN OriginalPciAttributesSaved;
+  UINT16 OriginalPciDeviceControl;
+  BOOLEAN OriginalPciDeviceControlSaved;
 
   // Published info protocol.
   HDA_CONTROLLER_INFO_PRIVATE_DATA *HdaControllerInfoData;
@@ -316,9 +355,11 @@ struct _HDA_CONTROLLER_DEV {
 
   // Events.
   EFI_EVENT ResponsePollTimer;
-  EFI_EVENT ExitBootServiceEvent;
+  EFI_EVENT ExitBootServicesEvent;
   SPIN_LOCK SpinLock;
 
+  // Required quirks. 
+  UINTN Quirks;
 };
 
 // HDA I/O private data.
@@ -359,49 +400,55 @@ struct _HDA_CONTROLLER_INFO_PRIVATE_DATA {
 //
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoGetAddress(
+HdaControllerHdaIoGetAddress (
   IN  EFI_HDA_IO_PROTOCOL *This,
-  OUT UINT8 *CodecAddress);
+  OUT UINT8 *CodecAddress
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoSendCommand(
+HdaControllerHdaIoSendCommand (
   IN  EFI_HDA_IO_PROTOCOL *This,
   IN  UINT8 Node,
   IN  UINT32 Verb,
-  OUT UINT32 *Response);
+  OUT UINT32 *Response
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoSendCommands(
+HdaControllerHdaIoSendCommands (
   IN EFI_HDA_IO_PROTOCOL *This,
   IN UINT8 Node,
-  IN EFI_HDA_IO_VERB_LIST *Verbs);
+  IN EFI_HDA_IO_VERB_LIST *Verbs
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoSetupStream(
+HdaControllerHdaIoSetupStream (
   IN  EFI_HDA_IO_PROTOCOL *This,
   IN  EFI_HDA_IO_PROTOCOL_TYPE Type,
   IN  UINT16 Format,
-  OUT UINT8 *StreamId);
+  OUT UINT8 *StreamId
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoCloseStream(
+HdaControllerHdaIoCloseStream (
   IN EFI_HDA_IO_PROTOCOL *This,
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type);
+  IN EFI_HDA_IO_PROTOCOL_TYPE Type
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoGetStream(
+HdaControllerHdaIoGetStream (
   IN  EFI_HDA_IO_PROTOCOL *This,
   IN  EFI_HDA_IO_PROTOCOL_TYPE Type,
-  OUT BOOLEAN *State);
+  OUT BOOLEAN *State
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoStartStream(
+HdaControllerHdaIoStartStream (
   IN EFI_HDA_IO_PROTOCOL *This,
   IN EFI_HDA_IO_PROTOCOL_TYPE Type,
   IN VOID *Buffer,
@@ -410,13 +457,15 @@ HdaControllerHdaIoStartStream(
   IN EFI_HDA_IO_STREAM_CALLBACK Callback OPTIONAL,
   IN VOID *Context1 OPTIONAL,
   IN VOID *Context2 OPTIONAL,
-  IN VOID *Context3 OPTIONAL);
+  IN VOID *Context3 OPTIONAL
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerHdaIoStopStream(
+HdaControllerHdaIoStopStream (
   IN EFI_HDA_IO_PROTOCOL *This,
-  IN EFI_HDA_IO_PROTOCOL_TYPE Type);
+  IN EFI_HDA_IO_PROTOCOL_TYPE Type
+  );
 
 //
 // HDA Controller Info protcol functions.
@@ -440,56 +489,56 @@ HdaControllerInfoGetVendorId (
 //
 VOID
 EFIAPI
-HdaControllerStreamOutputPollTimerHandler(
+HdaControllerStreamOutputPollTimerHandler (
   IN EFI_EVENT Event,
-  IN VOID *Context);
+  IN VOID *Context
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerReset(
-  IN HDA_CONTROLLER_DEV *HdaControllerDev);
+HdaControllerReset (
+  IN HDA_CONTROLLER_DEV *HdaControllerDev,
+  IN BOOLEAN            Restart
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerSendCommands(
+HdaControllerSendCommands (
   IN HDA_CONTROLLER_DEV *HdaDev,
   IN UINT8 CodecAddress,
   IN UINT8 Node,
-  IN EFI_HDA_IO_VERB_LIST *Verbs);
-
-
-
-
-
-
+  IN EFI_HDA_IO_VERB_LIST *Verbs
+  );
 
 //
 // Driver Binding protocol functions.
 //
 EFI_STATUS
 EFIAPI
-HdaControllerDriverBindingSupported(
+HdaControllerDriverBindingSupported (
   IN EFI_DRIVER_BINDING_PROTOCOL *This,
   IN EFI_HANDLE ControllerHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL);
+  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerDriverBindingStart(
+HdaControllerDriverBindingStart (
   IN EFI_DRIVER_BINDING_PROTOCOL *This,
   IN EFI_HANDLE ControllerHandle,
-  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL);
+  IN EFI_DEVICE_PATH_PROTOCOL *RemainingDevicePath OPTIONAL
+  );
 
 EFI_STATUS
 EFIAPI
-HdaControllerDriverBindingStop(
+HdaControllerDriverBindingStop (
   IN EFI_DRIVER_BINDING_PROTOCOL *This,
   IN EFI_HANDLE ControllerHandle,
   IN UINTN NumberOfChildren,
-  IN EFI_HANDLE *ChildHandleBuffer OPTIONAL);
+  IN EFI_HANDLE *ChildHandleBuffer OPTIONAL
+  );
 
-
-BOOLEAN
+EFI_STATUS
 HdaControllerInitRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer,
   IN HDA_CONTROLLER_DEV *HdaDev,
@@ -498,21 +547,23 @@ HdaControllerInitRingBuffer (
 
 VOID
 HdaControllerCleanupRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer
+  IN HDA_RING_BUFFER      *HdaRingBuffer,
+  IN HDA_RING_BUFFER_TYPE Type
   );
 
-BOOLEAN
+EFI_STATUS
 HdaControllerSetRingBufferState (
-  IN HDA_RING_BUFFER    *HdaRingBuffer,
-  IN BOOLEAN            Enable
+  IN HDA_RING_BUFFER      *HdaRingBuffer,
+  IN BOOLEAN              Enable,
+  IN HDA_RING_BUFFER_TYPE Type
   );
 
-BOOLEAN
+EFI_STATUS
 HdaControllerResetRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer
   );
 
-BOOLEAN
+EFI_STATUS
 HdaControllerInitStreams (
   IN HDA_CONTROLLER_DEV *HdaDev
   );

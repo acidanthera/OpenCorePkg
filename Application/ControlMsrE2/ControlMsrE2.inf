@@ -1,0 +1,70 @@
+## @file
+#  Control MSR 0xE2 BIOS Option.
+#
+#  Copyright (c) 2020, Brumbaer. All rights reserved.<BR>
+#
+#  This program and the accompanying materials
+#  are licensed and made available under the terms and conditions of the BSD License
+#  which accompanies this distribution.  The full text of the license may be found at
+#  http://opensource.org/licenses/bsd-license.php
+#  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+#  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = ControlMsrE2
+  FILE_GUID                      = A779AF43-2D2E-4C9F-998E-CA1AE5DD248B
+
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+#
+#  This flag specifies whether HII resource section is generated into PE image.
+#
+  UEFI_HII_RESOURCE_SECTION      = TRUE
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  ControlMsrE2.c
+  ControlMsrE2.h
+  ControlMsrE2Hii.c
+  ControlMsrE2UI.c
+  VerifyMsrE2.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  HiiLib
+  IoLib
+  MemoryAllocationLib
+  OcConsoleControlEntryModeGenericLib
+  OcMemoryLib
+  OcMiscLib
+  OcStringLib
+  PcdLib
+  UefiApplicationEntryPoint
+  UefiHiiServicesLib
+  UefiLib
+
+[Guids]
+gEfiHiiPlatformSetupFormsetGuid
+
+[Protocols]
+gEfiMpServiceProtocolGuid                 ## CONSUMES
+gEfiHiiDatabaseProtocolGuid
+

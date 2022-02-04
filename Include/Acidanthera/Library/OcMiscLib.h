@@ -25,9 +25,16 @@
 #define OC_CHAR_BIT  8
 
 /**
-  Convert seconds to microseconds for use in e.g. gBS->Stall.
+  Conversions to microseconds for use in e.g. gBS->Stall.
 **/
-#define SECONDS_TO_MICROSECONDS(x) ((x)*1000000)
+#define SECONDS_TO_MICROSECONDS(x) ((x) * 1000000)
+#define MS_TO_MICROSECONDS(x)      ((x) * 1000)
+
+/**
+  Conversions to nanoseconds for use in e.g. PciIo->PollMem.
+**/
+#define SECONDS_TO_NANOSECONDS(x)  ((x) * 1000000000)
+#define MS_TO_NANOSECONDS(x)       ((x) * 1000000)
 
 BOOLEAN
 FindPattern (
@@ -108,19 +115,45 @@ OcCountProtocolInstances (
   );
 
 /**
+  Obtain protocol.
+  If not obtained returns NULL, and optionally adds log message
+  "[CallerName] cannot get protocol [ProtocolName] - %r".
+
+  @param[in]  Protocol      Protocol to search for.
+  @param[in]  ErrorLevel    The error level of the debug log message to print if protocol not found.
+                            Send zero to generate no log message (caller becomes reponsible).
+  @param[in]  CallerName    The caller name for the error message; should always be provided
+                            if ErrorLevel is non-zero; will work, but with less useful log output,
+                            if ommitted in that case.
+  @param[in]  ProtocolName  The protocol name for the error message; optional, protocol GUID will
+                            be used as protocol name in error message when required, otherwise.
+
+  @return     Protocol instance, or NULL if not found.
+**/
+VOID *
+OcGetProtocol (
+  IN  EFI_GUID      *Protocol,
+  IN  UINTN         ErrorLevel,
+  IN  CONST CHAR8   *CallerName     OPTIONAL,
+  IN  CONST CHAR8   *ProtocolName   OPTIONAL
+  );
+
+/**
   Run and execute image file from buffer.
 
-  @param[in]  DevicePath   Image device path, optional.
-  @param[in]  Buffer       Buffer with image data, optional when DP is given.
-  @param[in]  BufferSize   Image data size in the buffer.
-  @param[out] ImageHandle  Loaded image handle for drivers, optional.
+  @param[in]  DevicePath    Image device path, optional.
+  @param[in]  Buffer        Buffer with image data, optional when DP is given.
+  @param[in]  BufferSize    Image data size in the buffer.
+  @param[out] ImageHandle   Loaded image handle for drivers, optional.
+  @param[out] OptionalData  Data that is passed to the loaded image, optional.
 **/
 EFI_STATUS
 OcLoadAndRunImage (
-  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN   VOID                      *Buffer      OPTIONAL,
+  IN   EFI_DEVICE_PATH_PROTOCOL  *DevicePath   OPTIONAL,
+  IN   VOID                      *Buffer       OPTIONAL,
   IN   UINTN                     BufferSize,
-  OUT  EFI_HANDLE                *ImageHandle OPTIONAL
+  OUT  EFI_HANDLE                *ImageHandle  OPTIONAL,
+  IN   CHAR16                    *OptionalData OPTIONAL
   );
 
 /**
@@ -177,6 +210,14 @@ OcReadApplePlatformData (
   IN      EFI_GUID                               *HobGuid,
   IN OUT  UINT32                                 *Size,
      OUT  VOID                                   *Data
+  );
+
+/**
+  Performs ConIn keyboard input flush.
+**/
+VOID
+OcConsoleFlush (
+  VOID
   );
 
 /**

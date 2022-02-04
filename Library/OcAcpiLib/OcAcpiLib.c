@@ -674,6 +674,55 @@ AcpiNormalizeTableHeaders (
   return Modified;
 }
 
+/**
+  Cleanup RSDP table from unprintable symbols.
+  Reference: https://alextjam.es/debugging-appleacpiplatform/.
+
+  @param Rsdp        RSDP table.
+  @param HasXsdt     RSDP has XSDT and is extended.
+**/
+STATIC
+BOOLEAN
+AcpiNormalizeRsdp (
+  IN EFI_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_POINTER  *Rsdp,
+  IN BOOLEAN                                       HasXsdt
+  )
+{
+  BOOLEAN  Modified;
+  CHAR8    *Walker;
+  UINT32   Index;
+
+  Modified = FALSE;
+
+  Walker = (CHAR8 *) &Rsdp->OemId;
+  for (Index = 0; Index < sizeof (Rsdp->OemId); ++Index) {
+    if (!IsAsciiPrint (Walker[Index])) {
+      Walker[Index] = '?';
+      Modified = TRUE;
+    }
+  }
+
+  if (Modified) {
+    //
+    // Checksum is to be the first 0-19 bytes of RSDP.
+    // ExtendedChecksum is the entire table, only if newer than ACPI 1.0.
+    //
+    Rsdp->Checksum = 0;
+    Rsdp->Checksum = CalculateCheckSum8 (
+      (UINT8 *) Rsdp, 20
+      );
+
+    if (HasXsdt) {
+      Rsdp->ExtendedChecksum = 0;
+      Rsdp->ExtendedChecksum = CalculateCheckSum8 (
+        (UINT8 *) Rsdp, Rsdp->Length
+        );
+    }
+  }
+
+  return Modified;
+}
+
 EFI_STATUS
 AcpiInitContext (
   IN OUT OC_ACPI_CONTEXT  *Context
@@ -1107,6 +1156,38 @@ AcpiNormalizeHeaders (
   EFI_ACPI_COMMON_HEADER  *NewTable;
   UINT32                  TablePrintSignature;
 
+  if (AcpiNormalizeRsdp (Context->Rsdp, Context->Xsdt != NULL)) {
+    DEBUG ((DEBUG_INFO, "OCA: Normalized RSDP\n"));
+  }
+
+  if (Context->Xsdt != NULL) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Xsdt, 0, &NewTable);
+      if (EFI_ERROR (Status)) {
+        return;
+      }
+      Context->Xsdt = (OC_ACPI_6_2_EXTENDED_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+    }
+
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Xsdt)) {
+      DEBUG ((DEBUG_INFO, "OCA: Normalized XSDT of %u bytes headers\n", Context->Xsdt->Header.Length));
+    }
+  }
+
+  if (Context->Rsdt != NULL) {
+    if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt)) {
+      Status = AcpiAllocateCopyTable ((EFI_ACPI_COMMON_HEADER *) Context->Rsdt, 0, &NewTable);
+      if (EFI_ERROR (Status)) {
+        return;
+      }
+      Context->Rsdt = (OC_ACPI_6_2_ROOT_SYSTEM_DESCRIPTION_TABLE *) NewTable;
+    }
+
+    if (AcpiNormalizeTableHeaders ((EFI_ACPI_DESCRIPTION_HEADER *) Context->Rsdt)) {
+      DEBUG ((DEBUG_INFO, "OCA: Normalized RSDT of %u bytes headers\n", Context->Rsdt->Header.Length));
+    }
+  }
+
   if (Context->Dsdt != NULL) {
     if (!AcpiIsTableWritable ((EFI_ACPI_COMMON_HEADER *) Context->Dsdt)) {
       Status = AcpiAllocateCopyDsdt (Context, NULL);
@@ -1438,11 +1519,11 @@ AcpiFadtEnableReset (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-
   } else if (!((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0
     || Context->Fadt->ResetReg.Address == 0
+    || Context->Fadt->ResetReg.Address == 0x64
     || Context->Fadt->ResetReg.RegisterBitWidth != 8)) {
     return EFI_SUCCESS;
   }
@@ -1454,10 +1535,17 @@ AcpiFadtEnableReset (
   Context->Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON | EFI_ACPI_6_2_RESET_REG_SUP;
   Context->Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
 
-  if (Context->Fadt->ResetReg.Address == 0 || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
+  //
+  // We also change keyboard controller reset (0xFE to 0x64) to 0xCF9 reset
+  // as it is known to work incorrectly at least on Dell Latitude E6410
+  // when the NVIDIA GPU is attached.
+  //
+  if (Context->Fadt->ResetReg.Address == 0
+    || Context->Fadt->ResetReg.Address == 0x64
+    || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
     //
     // Resetting through port 0xCF9 is universal on Intel and AMD.
-    // But may not be the case on some laptops, which use 0xB2.
+    // But may not be the case on e.g. Dell laptops and desktops, which use 0xB2.
     //
     Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
     Context->Fadt->ResetReg.RegisterBitWidth  = 8;
@@ -1512,6 +1600,66 @@ AcpiResetLogoStatus (
       }
       break;
     }
+  }
+}
+
+VOID
+AcpiSyncTableIds (
+  IN OUT OC_ACPI_CONTEXT  *Context
+  )
+{
+  EFI_ACPI_DESCRIPTION_HEADER  *Slic;
+  UINT32                       Index;
+
+  Slic = NULL;
+  for (Index = 0; Index < Context->NumberOfTables; ++Index) {
+    if (Context->Tables[Index]->Signature == EFI_ACPI_6_2_SOFTWARE_LICENSING_TABLE_SIGNATURE) {
+      Slic = (VOID *)Context->Tables[Index];
+      break;
+    }
+  }
+
+  if (Slic == NULL) {
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table is not found\n"));
+    return;
+  }
+
+  //
+  // SLIC identifiers must match RSDT and FADT, also doing XSDT for newer EFI just in case.
+  // REF: https://bugzilla.redhat.com/show_bug.cgi?id=1248758
+  //
+
+  if (Context->Rsdt != NULL) {
+    CopyMem (&Context->Rsdt->Header.OemId, &Slic->OemId, sizeof (Context->Rsdt->Header.OemId));
+    Context->Rsdt->Header.OemTableId = Slic->OemTableId;
+    Context->Rsdt->Header.Checksum = 0;
+    Context->Rsdt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Rsdt,
+      Context->Rsdt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in RSDT\n"));
+  }
+
+  if (Context->Xsdt != NULL) {
+    CopyMem (&Context->Xsdt->Header.OemId, &Slic->OemId, sizeof (Context->Xsdt->Header.OemId));
+    Context->Xsdt->Header.OemTableId = Slic->OemTableId;
+    Context->Xsdt->Header.Checksum = 0;
+    Context->Xsdt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Xsdt,
+      Context->Xsdt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in XSDT\n"));
+  }
+
+  if (Context->Fadt != NULL) {
+    CopyMem (&Context->Fadt->Header.OemId, &Slic->OemId, sizeof (Context->Fadt->Header.OemId));
+    Context->Fadt->Header.OemTableId = Slic->OemTableId;
+    Context->Fadt->Header.Checksum = 0;
+    Context->Fadt->Header.Checksum = CalculateCheckSum8 (
+      (UINT8 *) Context->Fadt,
+      Context->Fadt->Header.Length
+      );
+    DEBUG ((DEBUG_INFO, "OCA: SLIC table IDs fixed in FADT\n"));
   }
 }
 

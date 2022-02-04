@@ -1,21 +1,18 @@
 /** @file
-  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.<BR>
+  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #ifndef OC_TIMER_LIB_H
 #define OC_TIMER_LIB_H
 
 #include <Library/TimerLib.h>
+
+//
+// Minimal CPU delay in microseconds (us, 10^-6) for use with MicroSecondDelay e.g. in polling loops
+//
+#define OC_MINIMAL_CPU_DELAY 10
 
 /**
   Calculate the TSC frequency
@@ -24,6 +21,18 @@
 **/
 UINT64
 RecalculateTSC (
+  VOID
+  );
+
+/**
+  Return cached PerformanceCounterFrequency value. For instrumentation purposes only.
+
+  @retval               The timer frequency in use.
+
+**/
+UINT64
+EFIAPI
+GetTscFrequency (
   VOID
   );
 

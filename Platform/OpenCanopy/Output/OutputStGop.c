@@ -15,6 +15,9 @@
 
 #include "../GuiIo.h"
 
+#define MIN_RESOLUTION_HORIZONTAL  640U
+#define MIN_RESOLUTION_VERTICAL    480U
+
 struct GUI_OUTPUT_CONTEXT_ {
   EFI_GRAPHICS_OUTPUT_PROTOCOL *Gop;
 };
@@ -45,7 +48,7 @@ InternalGuiOutputLocateGop (
 
 GUI_OUTPUT_CONTEXT *
 GuiOutputConstruct (
-  VOID
+  IN UINT32  Scale
   )
 {
   // TODO: alloc on the fly?
@@ -55,6 +58,19 @@ GuiOutputConstruct (
 
   Gop = InternalGuiOutputLocateGop();
   if (Gop == NULL) {
+    return NULL;
+  }
+
+  if (Gop->Mode->Info->HorizontalResolution < MIN_RESOLUTION_HORIZONTAL * Scale
+   || Gop->Mode->Info->VerticalResolution < MIN_RESOLUTION_VERTICAL * Scale) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCUI: Expected at least %dx%d for resolution, actual %dx%d\n",
+      MIN_RESOLUTION_HORIZONTAL * Scale,
+      MIN_RESOLUTION_VERTICAL * Scale,
+      Context.Gop->Mode->Info->HorizontalResolution,
+      Context.Gop->Mode->Info->VerticalResolution
+      ));
     return NULL;
   }
 

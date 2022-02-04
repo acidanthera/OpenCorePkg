@@ -189,6 +189,6 @@ AIKTargetSubmit (
   }
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "Failed to submit keys to AppleMapDb - %r", Status));
+    DEBUG ((DEBUG_INFO, "Failed to submit keys to AppleMapDb - %r\n", Status));
   }
 }

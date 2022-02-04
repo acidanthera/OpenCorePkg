@@ -1,0 +1,31 @@
+## @file
+#  Reset System Library instance that accounts for defective UEFI systems.
+#
+#  Copyright (c) 2021, Marvin Häuser. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OcResetSystemLib
+  FILE_GUID      = BBC22992-DB8C-44F3-AA8C-B69FC2E3FB8F
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = ResetSystemLib
+
+[Sources]
+  OcResetSystemLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[LibraryClasses]
+  BaseLib
+  DebugLib
+  OcDeviceMiscLib
+  UefiRuntimeServicesTableLib

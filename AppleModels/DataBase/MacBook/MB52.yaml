@@ -115,6 +115,5 @@ AppleBoardCode:
 # Note, first year is used by macserial
 AppleModelYear:
   - 2009
-CloverSerialNumber: "W8913HAC4R1"
 MinimumOSVersion: "10.5.7"
 MaximumOSVersion: "10.11.6"

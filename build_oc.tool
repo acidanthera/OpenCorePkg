@@ -50,6 +50,11 @@ buildutil() {
       UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make clean || exit 1
       UDK_ARCH=Ia32 CC=i686-w64-mingw32-gcc STRIP=i686-w64-mingw32-strip DIST=Windows make -j "$cores" || exit 1
     fi
+    if [ "$(which x86_64-linux-musl-gcc)" != "" ]; then
+      echo "Building ${util} for Linux..."
+      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make clean || exit 1
+      STATIC=1 SUFFIX=.linux UDK_ARCH=X64 CC=x86_64-linux-musl-gcc STRIP=x86_64-linux-musl-strip DIST=Linux make -j "$cores" || exit 1
+    fi
     cd - || exit 1
   done
   popd || exit
@@ -110,29 +115,33 @@ package() {
       )
     for efiOCBM in "${efiOCBMs[@]}"; do
       dd if="${bootsig}" \
-         of="${arch}/${efiOCBM}" seek=64 bs=1 count=64 conv=notrunc || exit 1
+         of="${arch}/${efiOCBM}" seek=64 bs=1 count=56 conv=notrunc || exit 1
     done
 
     # copy OpenCore main program.
     cp "${arch}/OpenCore.efi" "${dstdir}/${arch}/EFI/OC" || exit 1
+    printf "%s" "OpenCore" > "${dstdir}/${arch}/EFI/OC/.contentFlavour" || exit 1
 
     local suffix="${arch}"
     if [ "${suffix}" = "X64" ]; then
       suffix="x64"
     fi
     cp "${arch}/Bootstrap.efi" "${dstdir}/${arch}/EFI/BOOT/BOOT${suffix}.efi" || exit 1
+    printf "%s" "OpenCore" > "${dstdir}/${arch}/EFI/BOOT/.contentFlavour" || exit 1
 
     efiTools=(
       "BootKicker.efi"
       "ChipTune.efi"
       "CleanNvram.efi"
+      "CsrUtil.efi"
       "GopStop.efi"
       "KeyTester.efi"
       "MmapDump.efi"
       "ResetSystem.efi"
       "RtcRw.efi"
+      "TpmInfo.efi"
       "OpenControl.efi"
-      "VerifyMsrE2.efi"
+      "ControlMsrE2.efi"
       )
     for efiTool in "${efiTools[@]}"; do
       cp "${arch}/${efiTool}" "${dstdir}/${arch}/EFI/OC/Tools"/ || exit 1
@@ -142,18 +151,20 @@ package() {
     cp "${arch}/Shell.efi" "${dstdir}/${arch}/EFI/OC/Tools/OpenShell.efi" || exit 1
 
     efiDrivers=(
+      "AudioDxe.efi"
+      "BiosVideo.efi"
+      "CrScreenshotDxe.efi"
       "HiiDatabase.efi"
       "NvmExpressDxe.efi"
-      "AudioDxe.efi"
-      "CrScreenshotDxe.efi"
       "OpenCanopy.efi"
+      "OpenHfsPlus.efi"
+      "OpenLinuxBoot.efi"
       "OpenPartitionDxe.efi"
       "OpenRuntime.efi"
       "OpenUsbKbDxe.efi"
-      "Ps2MouseDxe.efi"
       "Ps2KeyboardDxe.efi"
+      "Ps2MouseDxe.efi"
       "UsbMouseDxe.efi"
-      "OpenHfsPlus.efi"
       "XhciDxe.efi"
       )
     for efiDriver in "${efiDrivers[@]}"; do
@@ -186,6 +197,7 @@ package() {
     "CreateVault"
     "macrecovery"
     "kpdescribe"
+    "ShimToCert"
     )
   for utilScpt in "${utilScpts[@]}"; do
     cp -r "${selfdir}/Utilities/${utilScpt}" "${dstdir}/Utilities"/ || exit 1
@@ -233,9 +245,11 @@ package() {
     mkdir -p "${dest}" || exit 1
     bin="${selfdir}/Utilities/${util}/${util}"
     cp "${bin}" "${dest}" || exit 1
-    binEXE="${bin}.exe"
-    if [ -f "${binEXE}" ]; then
-      cp "${binEXE}" "${dest}" || exit 1
+    if [ -f "${bin}.exe" ]; then
+      cp "${bin}.exe" "${dest}" || exit 1
+    fi
+    if [ -f "${bin}.linux" ]; then
+      cp "${bin}.linux" "${dest}" || exit 1
     fi
   done
   # additional docs for macserial.

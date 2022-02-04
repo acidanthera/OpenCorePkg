@@ -4,7 +4,7 @@
 ##
 
 PROJECT = ocvalidate
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
           OcValidateLib.o \
           KextInfo.o \
@@ -16,7 +16,7 @@ OBJS    = $(PROJECT).o \
           ValidateMisc.o \
           ValidateNvram.o \
           ValidatePlatformInfo.o \
-          ValidateUEFI.o
+          ValidateUefi.o
 #
 # OcConfigurationLib targets.
 #

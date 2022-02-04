@@ -177,6 +177,10 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 // See: https://github.com/Piker-Alpha/macosxbootloader/blob/1abba11e3b792dd29c2a08c410c122efd1d19e98/src/boot/AcpiUtils.cpp#L152
 //
 #define FW_FEATURE_DISABLE_BOOTSCRIPT_WORKAROUND      0x80000000U // 31
+//
+// Supports large BaseSystem. Checked by patchd. Required by macOS 12.
+//
+#define FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM         0x800000000U // 35
 
 //
 // OEM Platform Feature Information - Platform feature bits

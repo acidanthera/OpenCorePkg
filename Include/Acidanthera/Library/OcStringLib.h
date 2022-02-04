@@ -97,6 +97,16 @@ AsciiUefiSlashes (
   IN OUT CHAR8    *String
   );
 
+/**
+  Convert path with mixed slashes to Unix slashes (/).
+
+  @param[in,out]  String      Path.
+**/
+VOID
+AsciiUnixSlashes (
+  IN OUT CHAR8    *String
+  );
+
 /** Convert null terminated ascii string to unicode.
 
   @param[in]  String  A pointer to the ascii string to convert to unicode.
@@ -129,12 +139,12 @@ AsciiUint64ToLowerHex (
 /**
   Alternative to AsciiSPrint, which checks that the buffer can contain all the characters.
 
-  @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated
-                          ASCII string.
-  @param  BufferSize      The size, in bytes, of the output buffer specified by StartOfBuffer.
-  @param  FormatString    A Null-terminated ASCII format string.
-  @param  ...             Variable argument list whose contents are accessed based on the
-                          format string specified by FormatString.
+  @param[out]  StartOfBuffer    A pointer to the output buffer for the produced Null-terminated
+                                ASCII string.
+  @param[in]   BufferSize       The size, in bytes, of the output buffer specified by StartOfBuffer.
+  @param[in]   FormatString     A Null-terminated ASCII format string.
+  @param[in]   ...              Variable argument list whose contents are accessed based on the
+                                format string specified by FormatString.
 
   @retval EFI_SUCCESS           When data was printed to supplied buffer.
   @retval EFI_OUT_OF_RESOURCES  When supplied buffer cannot contain all the characters.
@@ -173,9 +183,9 @@ OcAsciiSafeSPrint (
   than PcdMaximumAsciiStringLength ASCII characters, not including the
   Null-terminator, then ASSERT().
 
-  @param  FirstString   A pointer to a Null-terminated ASCII string.
-  @param  SecondString  A pointer to a Null-terminated ASCII string.
-  @param  Length        The maximum number of ASCII characters to compare.
+  @param[in]  FirstString   A pointer to a Null-terminated ASCII string.
+  @param[in]  SecondString  A pointer to a Null-terminated ASCII string.
+  @param[in]  Length        The maximum number of ASCII characters to compare.
 
   @retval ==0    FirstString is identical to SecondString using case
                  insensitive comparisons.
@@ -208,6 +218,23 @@ OcAsciiEndsWith (
   IN BOOLEAN          CaseInsensitiveMatch
   );
 
+/** Check if ASCII string starts with another ASCII string.
+
+  @param[in]  String                A pointer to a Null-terminated ASCII string.
+  @param[in]  SearchString          A pointer to a Null-terminated ASCII string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
+
+  @retval  TRUE if String starts with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcAsciiStartsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  );
+
 /**
   Performs a case insensitive comparison of two Null-terminated Unicode strings,
   and returns the difference between the first mismatched Unicode characters.
@@ -228,8 +255,8 @@ OcAsciiEndsWith (
   than PcdMaximumUnicodeStringLength Unicode characters, not including the
   Null-terminator, then ASSERT().
 
-  @param  FirstString   A pointer to a Null-terminated Unicode string.
-  @param  SecondString  A pointer to a Null-terminated Unicode string.
+  @param[in]  FirstString   A pointer to a Null-terminated Unicode string.
+  @param[in]  SecondString  A pointer to a Null-terminated Unicode string.
 
   @retval ==0    FirstString is identical to SecondString using case
                  insensitiv comparisons.
@@ -272,9 +299,9 @@ OcStriCmp (
   than PcdMaximumUnicodeStringLength Unicode characters, not including the
   Null-terminator, then ASSERT().
 
-  @param  FirstString   A pointer to a Null-terminated Unicode string.
-  @param  SecondString  A pointer to a Null-terminated Unicode string.
-  @param  Length        The maximum number of Unicode characters to compare.
+  @param[in]  FirstString   A pointer to a Null-terminated Unicode string.
+  @param[in]  SecondString  A pointer to a Null-terminated Unicode string.
+  @param[in]  Length        The maximum number of Unicode characters to compare.
 
   @retval ==0    FirstString is identical to SecondString using case
                  insensitive comparisons.
@@ -306,8 +333,8 @@ OcStrniCmp (
   or String contains more than PcdMaximumAsciiStringLength ASCII
   characters, not including the Null-terminator, then ASSERT().
 
-  @param  String          The pointer to a Null-terminated ASCII string.
-  @param  SearchString    The pointer to a Null-terminated ASCII string to search for.
+  @param[in]  String          The pointer to a Null-terminated ASCII string.
+  @param[in]  SearchString    The pointer to a Null-terminated ASCII string to search for.
 
   @retval NULL            If the SearchString does not appear in String.
   @return others          If there is a match.
@@ -330,8 +357,8 @@ OcAsciiStriStr (
   contains more than PcdMaximumAsciiStringLength ASCII
   characters, not including the Null-terminator, then ASSERT().
 
-  @param  String          The pointer to a Null-terminated ASCII string.
-  @param  Char            Character to be located.
+  @param[in]  String          The pointer to a Null-terminated ASCII string.
+  @param[in]  Char            Character to be located.
 
   @return                 A pointer to the first occurrence of Char in String.
   @retval NULL            If Char cannot be found in String.
@@ -353,8 +380,8 @@ OcAsciiStrChr (
   contains more than PcdMaximumAsciiStringLength ASCII
   characters, not including the Null-terminator, then ASSERT().
 
-  @param  String          The pointer to a Null-terminated ASCII string.
-  @param  Char            Character to be located.
+  @param[in]  String          The pointer to a Null-terminated ASCII string.
+  @param[in]  Char            Character to be located.
 
   @return                 A pointer to the last occurrence of Char in String.
   @retval NULL            If Char cannot be found in String.
@@ -384,8 +411,8 @@ OcAsciiStringNPrintable (
   Convert a Null-terminated ASCII GUID string to a value of type
   EFI_GUID with RFC 4122 (raw) encoding.
 
-  @param  String                   Pointer to a Null-terminated ASCII string.
-  @param  Guid                     Pointer to the converted GUID.
+  @param[in]   String                   Pointer to a Null-terminated ASCII string.
+  @param[out]  Guid                     Pointer to the converted GUID.
 
   @retval EFI_SUCCESS           Guid is translated from String.
   @retval EFI_INVALID_PARAMETER If String is NULL.
@@ -397,6 +424,37 @@ EFIAPI
 OcAsciiStrToRawGuid (
   IN  CONST CHAR8        *String,
   OUT GUID               *Guid
+  );
+
+/**
+ Write formatted ASCII strings to buffers.
+  @param[in,out]  AsciiBuffer      A pointer to the output buffer for the produced Null-terminated
+                                   ASCII string.
+  @param[in,out]  AsciiBufferSize  The size, in bytes, of the output buffer specified by AsciiBuffer.
+  @param[in]      FormatString     A Null-terminated ASCII format string.
+  @param[in]      ...              Variable argument list whose contents are accessed based on the
+                                   format string specified by FormatString.
+ **/
+VOID
+EFIAPI
+OcAsciiPrintBuffer (
+  IN OUT CHAR8        **AsciiBuffer,
+  IN OUT UINTN        *AsciiBufferSize,
+  IN     CONST CHAR8  *FormatString,
+  ...
+  );
+
+/**
+  Convert a null-terminated ASCII string, in-place, to all lowercase.
+  Then return it.
+
+  @param  Str    The null-terminated string to be converted to all lowercase.
+
+  @return        The null-terminated string converted into all lowercase.
+**/
+CHAR8 *
+OcAsciiToLower (
+  CHAR8 *Str
   );
 
 /**
@@ -417,8 +475,8 @@ OcAsciiStrToRawGuid (
   or String contains more than PcdMaximumUnicodeStringLength Unicode
   characters, not including the Null-terminator, then ASSERT().
 
-  @param  String          The pointer to a Null-terminated Unicode string.
-  @param  SearchString    The pointer to a Null-terminated Unicode string to search for.
+  @param[in]  String          The pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString    The pointer to a Null-terminated Unicode string to search for.
 
   @retval NULL            If the SearchString does not appear in String.
   @return others          If there is a match.
@@ -451,14 +509,52 @@ OcStrStrLength (
   );
 
 /**
+  Returns a pointer to the first occurrence of Char
+  in a Null-terminated Unicode string.
+
+  If String is NULL, then ASSERT().
+
+  @param[in]  String          The pointer to a Null-terminated Unicode string.
+  @param[in]  Char            Character to be located.
+
+  @return                     A pointer to the first occurrence of Char in String.
+  @retval NULL                If Char cannot be found in String.
+**/
+CHAR16 *
+EFIAPI
+OcStrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  );
+
+/**
+  Returns a pointer to the last occurrence of Char
+  in a Null-terminated Unicode string.
+
+  If String is NULL, then ASSERT().
+
+  @param[in]  String          The pointer to a Null-terminated Unicode string.
+  @param[in]  Char            Character to be located.
+
+  @return                     A pointer to the last occurrence of Char in String.
+  @retval NULL                If Char cannot be found in String.
+**/
+CHAR16 *
+EFIAPI
+OcStrrChr (
+  IN      CONST CHAR16              *String,
+  IN            CHAR16              Char
+  );
+
+/**
   Alternative to UnicodeSPrint, which checks that the buffer can contain all the characters.
 
-  @param  StartOfBuffer   A pointer to the output buffer for the produced Null-terminated
-                          Unicode string.
-  @param  BufferSize      The size, in bytes, of the output buffer specified by StartOfBuffer.
-  @param  FormatString    A Null-terminated Unicode format string.
-  @param  ...             Variable argument list whose contents are accessed based on the
-                          format string specified by FormatString.
+  @param[out]  StartOfBuffer    A pointer to the output buffer for the produced Null-terminated
+                                Unicode string.
+  @param[in]   BufferSize       The size, in bytes, of the output buffer specified by StartOfBuffer.
+  @param[in]   FormatString     A Null-terminated Unicode format string.
+  @param[in]   ...              Variable argument list whose contents are accessed based on the
+                                format string specified by FormatString.
 
   @retval EFI_SUCCESS           When data was printed to supplied buffer.
   @retval EFI_OUT_OF_RESOURCES  When supplied buffer cannot contain all the characters.
@@ -484,6 +580,23 @@ OcUnicodeSafeSPrint (
 BOOLEAN
 EFIAPI
 OcUnicodeEndsWith (
+  IN CONST CHAR16     *String,
+  IN CONST CHAR16     *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  );
+
+/** Check if Unicode string starts with another Unicode string.
+
+  @param[in]  String                A pointer to a Null-terminated Unicode string.
+  @param[in]  SearchString          A pointer to a Null-terminated Unicode string
+                                    to compare against String.
+  @param[in]  CaseInsensitiveMatch  Perform case-insensitive comparison.
+
+  @retval  TRUE if String starts with SearchString.
+**/
+BOOLEAN
+EFIAPI
+OcUnicodeStartsWith (
   IN CONST CHAR16     *String,
   IN CONST CHAR16     *SearchString,
   IN BOOLEAN          CaseInsensitiveMatch
@@ -531,6 +644,18 @@ UnicodeFilterString (
   );
 
 /**
+  Filter string from unprintable characters.
+
+  @param[in,out]  String      String to filter.
+  @param[in]      SingleLine  Enforce only one line.
+**/
+VOID
+AsciiFilterString (
+  IN OUT CHAR8    *String,
+  IN     BOOLEAN  SingleLine
+  );
+
+/**
   Check if string is filtered.
 
   @param[in]      String      String to be checked.
@@ -567,8 +692,8 @@ HasValidGuidStringPrefix (
   mismatched character in SecondString subtracted from the first mismatched
   character in FirstString.
 
-  @param  FirstString   A pointer to a Null-terminated Unicode string.
-  @param  SecondString  A pointer to a Null-terminated ASCII string.
+  @param[in]  FirstString   A pointer to a Null-terminated Unicode string.
+  @param[in]  SecondString  A pointer to a Null-terminated ASCII string.
 
   @retval ==0      FirstString is identical to SecondString.
   @retval !=0      FirstString is not identical to SecondString.
@@ -578,6 +703,35 @@ INTN
 MixedStrCmp (
   IN CONST CHAR16  *FirstString,
   IN CONST CHAR8   *SecondString
+  );
+
+/**
+  Function to reverse sort when comparing by Unicode strings using UefiSortLib PerformQuickSort.
+
+  @param[in] Buffer1            The pointer to String to compare (CHAR16**).
+  @param[in] Buffer2            The pointer to second String to compare (CHAR16**).
+
+  @retval 0                     Buffer1 equal to Buffer2.
+  @return < 0                   Buffer1 is less than Buffer2.
+  @return > 0                   Buffer1 is greater than Buffer2.
+**/
+INTN
+EFIAPI
+OcReverseStringCompare (
+  IN  CONST VOID                *Buffer1,
+  IN  CONST VOID                *Buffer2
+  );
+
+/**
+  Determine if a particular character is whitespace.
+
+  @param[in] Ch               The character to check.
+
+  @return  Returns TRUE if Ch is a whitespace character.
+**/
+BOOLEAN
+OcIsSpace (
+  CHAR16    Ch
   );
 
 #endif // OC_STRING_LIB_H

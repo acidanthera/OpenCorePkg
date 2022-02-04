@@ -1353,7 +1353,7 @@ MachoGetVtableSymbolsFromSmcp64 (
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 32
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -1365,7 +1365,7 @@ MachoRelocationIsPairIntel32 (
 /**
   Returns whether the Relocation's type indicates a Pair for the Intel 64
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -1377,7 +1377,7 @@ MachoRelocationIsPairIntel64 (
 /**
   Returns whether the Relocation's type matches a Pair's for the Intel 64
   platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -1388,7 +1388,7 @@ MachoIsRelocationPairTypeIntel64 (
 
 /**
   Returns whether the Relocation shall be preserved for the Intel 64 platform.
-  
+
   @param[in] Type  The Relocation's type to verify.
 
 **/
@@ -1541,7 +1541,7 @@ MachoGetIndirectSymbolTable64 (
   Returns a pointer to the Mach-O file at the specified virtual address.
 
   @param[in,out] Context  Context of the Mach-O.
-  @param[in]     Address  Virtual address to look up.    
+  @param[in]     Address  Virtual address to look up.
   @param[out]    MaxSize  Maximum data safely available from FileOffset.
                           If NULL is returned, the output is undefined.
 
@@ -1680,7 +1680,7 @@ FatFilterArchitecture32 (
 
   @param[in,out] FileData  Pointer to pointer of the file's data.
   @param[in,out] FileSize  Pointer to file size of FileData.
-  
+
   @return EFI_SUCCESS if no FAT, or a valid 64-bit arch exists.
 **/
 EFI_STATUS

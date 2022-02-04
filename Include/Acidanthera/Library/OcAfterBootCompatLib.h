@@ -180,6 +180,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  SyncRuntimePermissions;
   ///
+  /// Reduce GPU BARs for macOS to maximum supported version.
+  ///
+  INT8     ResizeAppleGpuBars;
+  ///
   /// List of physical addresses to not be devirtualised by DevirtualiseMmio.
   ///
   EFI_PHYSICAL_ADDRESS *MmioWhitelist;

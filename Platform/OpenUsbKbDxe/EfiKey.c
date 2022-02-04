@@ -194,7 +194,9 @@ USBKeyboardDriverBindingStart (
   }
 
   UsbKeyboardDevice = AllocateZeroPool (sizeof (USB_KB_DEV));
-  ASSERT (UsbKeyboardDevice != NULL);
+  if (UsbKeyboardDevice == NULL) {
+    goto ErrorExit1;
+  }
 
   //
   // Get the Device Path Protocol on Controller's handle
@@ -468,24 +470,23 @@ USBKeyboardDriverBindingStart (
 // Error handler
 //
 ErrorExit:
-  if (UsbKeyboardDevice != NULL) {
-    if (UsbKeyboardDevice->TimerEvent != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->TimerEvent);
-    }
-    if (UsbKeyboardDevice->SimpleInput.WaitForKey != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->SimpleInput.WaitForKey);
-    }
-    if (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx);
-    }
-    if (UsbKeyboardDevice->KeyNotifyProcessEvent != NULL) {
-      gBS->CloseEvent (UsbKeyboardDevice->KeyNotifyProcessEvent);
-    }
-    ReleaseKeyboardLayoutResources (UsbKeyboardDevice);
-    UsbKbFreeAppleKeyMapDb (UsbKeyboardDevice);
-    FreePool (UsbKeyboardDevice);
-    UsbKeyboardDevice = NULL;
+  if (UsbKeyboardDevice->TimerEvent != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->TimerEvent);
   }
+  if (UsbKeyboardDevice->SimpleInput.WaitForKey != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->SimpleInput.WaitForKey);
+  }
+  if (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->SimpleInputEx.WaitForKeyEx);
+  }
+  if (UsbKeyboardDevice->KeyNotifyProcessEvent != NULL) {
+    gBS->CloseEvent (UsbKeyboardDevice->KeyNotifyProcessEvent);
+  }
+  ReleaseKeyboardLayoutResources (UsbKeyboardDevice);
+  UsbKbFreeAppleKeyMapDb (UsbKeyboardDevice);
+  FreePool (UsbKeyboardDevice);
+  UsbKeyboardDevice = NULL;
+
   gBS->CloseProtocol (
          Controller,
          &gEfiUsbIoProtocolGuid,
@@ -636,7 +637,7 @@ USBKeyboardDriverBindingStop (
                                   data for the key that was pressed.
 
   @retval EFI_SUCCESS             The keystroke information was returned.
-  @retval EFI_NOT_READY           There was no keystroke data availiable.
+  @retval EFI_NOT_READY           There was no keystroke data available.
   @retval EFI_DEVICE_ERROR        The keystroke information was not returned due to
                                   hardware errors.
   @retval EFI_INVALID_PARAMETER   KeyData is NULL.
@@ -737,7 +738,7 @@ USBKeyboardReset (
                                information for the key that was pressed.
 
   @retval EFI_SUCCESS          The keystroke information was returned.
-  @retval EFI_NOT_READY        There was no keystroke data availiable.
+  @retval EFI_NOT_READY        There was no keystroke data available.
   @retval EFI_DEVICE_ERROR     The keystroke information was not returned due to
                                hardware errors.
 
@@ -814,9 +815,9 @@ USBKeyboardWaitForKey (
   // Enter critical section
   //
   OldTpl = gBS->RaiseTPL (TPL_NOTIFY);
-  
+
   //
-  // WaitforKey doesn't suppor the partial key.
+  // WaitforKey doesn't support the partial key.
   // Considering if the partial keystroke is enabled, there maybe a partial
   // keystroke in the queue, so here skip the partial keystroke and get the
   // next key from the queue
@@ -949,7 +950,7 @@ KbdFreeNotifyList (
   @param  InputData         A pointer to keystroke data for the key that was pressed.
 
   @retval TRUE              Key pressed matches a registered key.
-  @retval FLASE             Key pressed does not matches a registered key.
+  @retval FALSE             Key pressed does not matches a registered key.
 
 **/
 BOOLEAN
@@ -1268,6 +1269,7 @@ USBKeyboardUnregisterKeyNotify (
 
 /**
   Process key notify.
+
   @param  Event                 Indicates the event that invoke this function.
   @param  Context               Indicates the calling context.
 **/

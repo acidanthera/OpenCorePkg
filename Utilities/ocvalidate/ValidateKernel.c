@@ -197,6 +197,36 @@ CheckKernelAdd (
     }
 
     //
+    // Check the length of path relative to OC directory.
+    //
+    if (StrLen (OPEN_CORE_KEXT_PATH) + AsciiStrSize (BundlePath) > OC_STORAGE_SAFE_PATH_MAX) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->BundlePath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+    //
+    // There is one missing '\\' after the concatenation of BundlePath and ExecutablePath. Append one.
+    //
+    if (StrLen (OPEN_CORE_KEXT_PATH) + AsciiStrLen (BundlePath) + 1 + AsciiStrSize (ExecutablePath) > OC_STORAGE_SAFE_PATH_MAX) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->ExecutablePath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+    //
+    // There is one missing '\\' after the concatenation of BundlePath and PlistPath. Append one.
+    //
+    if (StrLen (OPEN_CORE_KEXT_PATH) + AsciiStrLen (BundlePath) + 1 + AsciiStrSize (PlistPath) > OC_STORAGE_SAFE_PATH_MAX) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->PlistPath is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+      ++ErrorCount;
+    }
+
+    //
+    // MinKernel must not be below macOS 10.4 (Darwin version 8).
+    //
+    if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Add[%u]->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
+
+    //
     // FIXME: Handle correct kernel version checking.
     //
     if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
@@ -324,6 +354,14 @@ CheckKernelBlock (
     }
 
     //
+    // MinKernel must not be below macOS 10.4 (Darwin version 8).
+    //
+    if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
+
+    //
     // FIXME: Handle correct kernel version checking.
     //
     if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
@@ -370,11 +408,19 @@ CheckKernelEmulate (
   ErrorCount          = 0;
   UserKernel          = &Config->Kernel; 
 
+  MaxKernel = OC_BLOB_GET (&UserKernel->Emulate.MaxKernel);
+  MinKernel = OC_BLOB_GET (&UserKernel->Emulate.MinKernel);
+
+  //
+  // MinKernel must not be below macOS 10.4 (Darwin version 8).
+  //
+  if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {
+    DEBUG ((DEBUG_WARN, "Kernel->Emulate->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", MinKernel));
+    ++ErrorCount;
+  }
   //
   // FIXME: Handle correct kernel version checking.
   //
-  MaxKernel = OC_BLOB_GET (&UserKernel->Emulate.MaxKernel);
-  MinKernel = OC_BLOB_GET (&UserKernel->Emulate.MinKernel);
   if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
     DEBUG ((DEBUG_WARN, "Kernel->Emulate->MaxKernel (currently set to %a) is borked!\n", MaxKernel));
     ++ErrorCount;
@@ -387,7 +433,8 @@ CheckKernelEmulate (
   Result = DataHasProperMasking (
     UserKernel->Emulate.Cpuid1Data,
     UserKernel->Emulate.Cpuid1Mask,
-    sizeof (UserKernel->Emulate.Cpuid1Data)
+    sizeof (UserKernel->Emulate.Cpuid1Data),
+    sizeof (UserKernel->Emulate.Cpuid1Mask)
     );
 
   if (!Result) {
@@ -475,6 +522,14 @@ CheckKernelForce (
     }
 
     //
+    // MinKernel must not be below macOS 10.4 (Darwin version 8).
+    //
+    if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Force[%u]->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
+
+    //
     // FIXME: Handle correct kernel version checking.
     //
     if (MaxKernel[0] != '\0' && OcParseDarwinVersion (MaxKernel) == 0) {
@@ -556,6 +611,14 @@ CheckKernelPatch (
     }
     if (!AsciiIdentifierIsLegal (Identifier, TRUE)) {
       DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->Identifier contains illegal character!\n", Index));
+      ++ErrorCount;
+    }
+
+    //
+    // MinKernel must not be below macOS 10.4 (Darwin version 8).
+    //
+    if (!OcMatchDarwinVersion (OcParseDarwinVersion (MinKernel), KERNEL_VERSION_TIGER_MIN, 0)) {
+      DEBUG ((DEBUG_WARN, "Kernel->Patch[%u]->MinKernel has a Darwin version %a, which is below 8 (macOS 10.4)!\n", Index, MinKernel));
       ++ErrorCount;
     }
 

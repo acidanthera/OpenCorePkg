@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "429.80.1.0.0"
-BIOSLegacyVersion: "IM171.88Z.F000.B00.2101051914"
-BIOSReleaseDate: "01/05/2021"
+BIOSVersion: "447.80.3.0.0"
+BIOSLegacyVersion: "IM171.88Z.F000.B00.2112121737"
+BIOSReleaseDate: "12/12/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac17,1"
 SystemVersion: "1.0"
@@ -32,8 +32,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x0
 FirmwareFeatures: 0xFC0FE137
 FirmwareFeaturesMask: 0xFF1FFF3F
-ExtendedFirmwareFeatures: 0x00000000FC0FE137
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF3F
+ExtendedFirmwareFeatures: 0x00000008FC0FE137
+ExtendedFirmwareFeaturesMask: 0x00000008FF1FFF3F
 MemoryFormFactor: 0xD
 # FIXME: Correct this one
 ProcessorType:
@@ -72,17 +72,17 @@ SmcPlatform:
 SmcEPCI: 0xF01008
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM171.88Z.F000.B00.2101051914
+    BIOS ID:      IM171.88Z.F000.B00.2112121737
     Model:        IM171
-    EFI Version:  429.80.1.0.0
-    Built by:     root@osx362
-    Date:         Tue Jan  5 19:14:26 2021
-    Revision:     429.80.1 (B&I)
+    EFI Version:  447.80.3.0.0
+    Built by:     root@bb-g8-pdb30
+    Date:         Sun Dec 12 17:37:00 2021
+    Revision:     447.80.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1200.0.30.4
-    UUID:         9AD8F22A-2317-3B04-8BAC-00D86459A111
-    UUID:         AD0FBE58-F169-3333-92E5-99464CD9CC37
+    Compiler:     clang-1300.0.29.10
+    UUID:         986FDC2F-3835-3400-BF1C-573C9BCE37DD
+    UUID:         7944EF27-4449-305F-B35A-7CD450B53BC7
 Specifications:
   CPUCodename:
     - "Skylake"
@@ -179,7 +179,5 @@ AppleModelYear:
   - 2015
   - 2016
   - 2017
-# Optional, override for SystemSerialNumber for Clover
-CloverSerialNumber: "C02QFHACGG7L"
 MinimumOSVersion: "10.11"
 MaximumOSVersion: null

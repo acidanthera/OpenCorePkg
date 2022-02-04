@@ -18,6 +18,8 @@
 #include <Uefi.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/AppleIntelCpuInfo.h>
+#include <Protocol/FrameworkMpService.h>
+#include <Protocol/MpService.h>
 
 /**
   Assumed CPU frequency when it cannot be detected.
@@ -36,8 +38,9 @@ typedef enum {
   OcCpuGenerationPrePenryn,
   OcCpuGenerationPenryn,
   OcCpuGenerationNehalem,
-  OcCpuGenerationBonnel,
+  OcCpuGenerationBonnell,
   OcCpuGenerationWestmere,
+  OcCpuGenerationSilvermont,
   OcCpuGenerationSandyBridge,
   OcCpuGenerationPostSandyBridge,
   OcCpuGenerationIvyBridge,
@@ -47,8 +50,11 @@ typedef enum {
   OcCpuGenerationKabyLake,
   OcCpuGenerationCoffeeLake,
   OcCpuGenerationCometLake,
+  OcCpuGenerationRocketLake,
   OcCpuGenerationCannonLake,
   OcCpuGenerationIceLake,
+  OcCpuGenerationTigerLake,
+  OcCpuGenerationAlderLake,
   OcCpuGenerationMaxGeneration
 } OC_CPU_GENERATION;
 
@@ -157,14 +163,119 @@ typedef struct {
   UINT64                      FSBFrequency;
 } OC_CPU_INFO;
 
+typedef struct {
+  //
+  // MSR_PLATFORM_INFO
+  //
+  BOOLEAN                     CpuHasMsrPlatformInfo;
+  UINT64                      CpuMsrPlatformInfoValue;
+
+  //
+  // MSR_TURBO_RATIO_LIMIT
+  //
+  BOOLEAN                     CpuHasMsrTurboRatioLimit;
+  UINT64                      CpuMsrTurboRatioLimitValue;
+
+  //
+  // MSR_PKG_POWER_INFO (TODO: To be confirmed)
+  //
+  BOOLEAN                     CpuHasMsrPkgPowerInfo;
+  UINT64                      CpuMsrPkgPowerInfoValue;
+
+  //
+  // IA32_MISC_ENABLE
+  //
+  BOOLEAN                     CpuHasMsrIa32MiscEnable;
+  UINT64                      CpuMsrIa32MiscEnableValue;
+
+  //
+  // MSR_IA32_EXT_CONFIG
+  //
+  BOOLEAN                     CpuHasMsrIa32ExtConfig;
+  UINT64                      CpuMsrIa32ExtConfigValue;
+
+  //
+  // MSR_FSB_FREQ
+  //
+  BOOLEAN                     CpuHasMsrFsbFreq;
+  UINT64                      CpuMsrFsbFreqValue;
+
+  //
+  // MSR_IA32_PERF_STATUS
+  //
+  BOOLEAN                     CpuHasMsrIa32PerfStatus;
+  UINT64                      CpuMsrIa32PerfStatusValue;
+
+  //
+  // MSR_BROADWELL_PKG_CST_CONFIG_CONTROL_REGISTER (0xE2)
+  //
+  BOOLEAN                     CpuHasMsrE2;
+  UINT64                      CpuMsrE2Value;
+} OC_CPU_MSR_REPORT;
+
+//
+// Wrapped structure to be passed as ProcedureArgument to MpServices->StartupAllAPs ().
+//
+typedef struct {
+  //
+  // Pointer to MP Services.
+  //
+  EFI_MP_SERVICES_PROTOCOL  *MpServices;
+  //
+  // Pointer to CPU MSR report list.
+  //
+  OC_CPU_MSR_REPORT         *Reports;
+  //
+  // Pointer to the CPU Info.
+  //
+  OC_CPU_INFO               *CpuInfo;
+} OC_CPU_MSR_REPORT_PROCEDURE_ARGUMENT;
+
 /**
   Scan the processor and fill the cpu info structure with results.
 
-  @param[in] Cpu  A pointer to the cpu info structure to fill with results.
+  @param[in,out] Cpu  A pointer to the cpu info structure to fill with results.
 **/
 VOID
 OcCpuScanProcessor (
   IN OUT OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Get the MSR report of one core on the CPU.
+
+  @param[in]   CpuInfo  A pointer to the cpu info.
+  @param[out]  Report   The report generated based on CpuInfo.
+**/
+VOID
+OcCpuGetMsrReport (
+  IN  OC_CPU_INFO        *CpuInfo,
+  OUT OC_CPU_MSR_REPORT  *Report
+  );
+
+/**
+ Get the MSR report of a single core on the CPU. Used as a parameter of MpServices->StartupAllAPs ().
+
+ @param[in,out] Buffer  The pointer to private data buffer.
+ **/
+VOID
+EFIAPI
+OcCpuGetMsrReportPerCore (
+  IN OUT VOID  *Buffer
+  );
+
+/**
+ Get the MSR reports of all cores on the CPU.
+
+ @param[in]   CpuInfo     A pointer to the cpu info.
+ @param[out]  EntryCount  Number of CPU cores.
+
+ @return A list of reports of MSR status at each core that must be freed manually, or NULL on failure.
+ **/
+OC_CPU_MSR_REPORT *
+OcCpuGetMsrReports (
+  IN  OC_CPU_INFO        *CpuInfo,
+  OUT UINTN              *EntryCount
   );
 
 /**
@@ -176,6 +287,19 @@ OcCpuScanProcessor (
 VOID
 OcCpuCorrectFlexRatio (
   IN OC_CPU_INFO  *Cpu
+  );
+
+/**
+  Enable VMX in FeatureControl MSR if supported and not already locked by BIOS.
+  Required to use virtualization in Windows on some Mac hardware.
+
+  REF: https://github.com/acidanthera/bugtracker/issues/1870
+  REF: https://www.thomas-krenn.com/en/wiki/Activating_the_Intel_VT_Virtualization_Feature (via rEFInd)
+  REF: 'Intel 64 and IA-32 Architectures Software Developer's Manual Volume 3', p.1296 etc.
+**/
+EFI_STATUS
+OcCpuEnableVmx (
+  VOID
   );
 
 /**

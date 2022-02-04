@@ -96,7 +96,7 @@ ChaChaRngStir (
       mRng.Buffer[Index] ^= KeySeed[Index];
     }
     for (Index = 0; Index < ARRAY_SIZE (IvSeed); ++Index) {
-      mRng.Buffer[ARRAY_SIZE (KeySeed) + Index] ^= KeySeed[Index];
+      mRng.Buffer[ARRAY_SIZE (KeySeed) + Index] ^= IvSeed[Index];
     }
   } else {
     mRng.PrngInitialised = TRUE;

@@ -44,7 +44,9 @@
   Input/InputSimTextIn.c
   OcBootstrap.c
   Output/OutputStGop.c
+  Views/Common.c
   Views/BootPicker.c
+  Views/Password.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
@@ -61,6 +63,7 @@
   gEfiAbsolutePointerProtocolGuid
   gEfiUserInterfaceThemeProtocolGuid
   gAppleEventProtocolGuid
+  gAppleKeyMapAggregatorProtocolGuid
   gOcInterfaceProtocolGuid
   gEfiLoadedImageProtocolGuid
 
@@ -71,13 +74,14 @@
   FrameBufferBltLib
   MemoryAllocationLib
   MtrrLib
-  OcAppleKeyMapLib
   OcCompressionLib
   OcConsoleLib
   OcGuardLib
   OcMiscLib
   OcPngLib
   OcStorageLib
+  ResetSystemLib
   TimerLib
   UefiBootServicesTableLib
   UefiDriverEntryPoint
+  OcAppleEventLib

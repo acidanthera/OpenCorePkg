@@ -140,18 +140,20 @@ CheckBooterQuirks (
   IN  OC_GLOBAL_CONFIG  *Config
   )
 {
-  UINT32            ErrorCount;
-  UINT32            Index;
-  OC_BOOTER_CONFIG  *UserBooter;
-  OC_UEFI_CONFIG    *UserUefi;
-  CONST CHAR8       *Driver;
-  UINT8             MaxSlide;
-  BOOLEAN           IsAllowRelocationBlockEnabled;
-  BOOLEAN           IsProvideCustomSlideEnabled;
-  BOOLEAN           IsEnableSafeModeSlideEnabled;
-  BOOLEAN           IsDisableVariableWriteEnabled;
-  BOOLEAN           IsEnableWriteUnprotectorEnabled;
-  BOOLEAN           HasOpenRuntimeEfiDriver;
+  UINT32                ErrorCount;
+  UINT32                Index;
+  OC_BOOTER_CONFIG      *UserBooter;
+  OC_UEFI_CONFIG        *UserUefi;
+  OC_UEFI_DRIVER_ENTRY  *DriverEntry;
+  CONST CHAR8           *Driver;
+  UINT8                 MaxSlide;
+  BOOLEAN               IsAllowRelocationBlockEnabled;
+  BOOLEAN               IsProvideCustomSlideEnabled;
+  BOOLEAN               IsEnableSafeModeSlideEnabled;
+  BOOLEAN               IsDisableVariableWriteEnabled;
+  BOOLEAN               IsEnableWriteUnprotectorEnabled;
+  BOOLEAN               HasOpenRuntimeEfiDriver;
+  INT8                  ResizeAppleGpuBars;
 
   ErrorCount                      = 0;
   UserBooter                      = &Config->Booter;
@@ -163,15 +165,17 @@ CheckBooterQuirks (
   IsEnableWriteUnprotectorEnabled = UserBooter->Quirks.EnableWriteUnprotector;
   HasOpenRuntimeEfiDriver         = FALSE;
   MaxSlide                        = UserBooter->Quirks.ProvideMaxSlide;
+  ResizeAppleGpuBars              = UserBooter->Quirks.ResizeAppleGpuBars;
 
   for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    Driver = OC_BLOB_GET (UserUefi->Drivers.Values[Index]);
+    DriverEntry = UserUefi->Drivers.Values[Index];
+    Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     //
     // Skip sanitising UEFI->Drivers as it will be performed when checking UEFI section.
     //
 
-    if (AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
+    if (DriverEntry->Enabled && AsciiStrCmp (Driver, "OpenRuntime.efi") == 0) {
       HasOpenRuntimeEfiDriver = TRUE;
     }
   }
@@ -204,6 +208,17 @@ CheckBooterQuirks (
       DEBUG ((DEBUG_WARN, "Booter->Quirks->ProvideMaxSlide is set to %u, but ProvideCustomSlide is not enabled altogether!\n", MaxSlide));
       ++ErrorCount;
     }
+  }
+
+  if (ResizeAppleGpuBars > 10) {
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->ResizeAppleGpuBars is set to %d, which is unsupported by macOS!\n", UserBooter->Quirks.ResizeAppleGpuBars));
+    ++ErrorCount;
+  } else if (ResizeAppleGpuBars > 8) {
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->ResizeAppleGpuBars is set to %d, which is unstable with macOS sleep-wake!\n", UserBooter->Quirks.ResizeAppleGpuBars));
+    ++ErrorCount;
+  } else if (ResizeAppleGpuBars > 0) {
+    DEBUG ((DEBUG_WARN, "Booter->Quirks->ResizeAppleGpuBars is set to %d, which is not useful for macOS!\n", UserBooter->Quirks.ResizeAppleGpuBars));
+    ++ErrorCount;
   }
 
   return ErrorCount;

@@ -139,9 +139,12 @@ typedef enum {
 #define APPLE_SYSTEM_AUDIO_VOLUME_MUTED        BIT7
 #define APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK  0x7FU
 
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN       (-128)
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MAX       (127)
+
 ///
 /// System audio volume.
-/// UINT8: APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK | APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK
+/// UINT8: APPLE_SYSTEM_AUDIO_VOLUME_MUTED | APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK
 /// gAppleBootVariableGuid
 ///
 #define APPLE_SYSTEM_AUDIO_VOLUME_VARIABLE_NAME  L"SystemAudioVolume"
@@ -155,10 +158,10 @@ typedef enum {
 
 ///
 /// System audio volume in decibels, created by AppleHDA.kext.
-/// UINT8: SystemAudioVolume'
+/// UINT8: SystemAudioVolumeDB
 /// gAppleBootVariableGuid
 ///
-#define APPLE_SYSTEM_AUDIO_VOLUME_SAVED_VARIABLE_DB_NAME  L"SystemAudioVolumeDB"
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_VARIABLE_NAME  L"SystemAudioVolumeDB"
 
 ///
 /// System language.
@@ -217,6 +220,13 @@ typedef enum {
 #define APPLE_PANIC_INFO_NO_VARIABLE_NAME L"AAPL,PanicInfo%04x"
 
 ///
+/// Set display rotation angle.
+/// UINT32: 0, 90, 180, 270.
+/// gAppleBootVariableGuid
+///
+#define APPLE_FORCE_DISPLAY_ROTATION_VARIABLE_NAME L"ForceDisplayRotationInEFI"
+
+///
 /// BootCampt device path.
 /// UEFI Device Path.
 /// gAppleBootVariableGuid
@@ -249,6 +259,14 @@ typedef enum {
 /// gAppleVendorVariableGuid
 ///
 #define APPLE_RECOVERY_BOOT_INITIATOR_VARIABLE_NAME L"RecoveryBootInitiator"
+
+///
+/// Bridge OS hardware model variable used to propagate to IODT bridge-model
+/// by EfiBoot. Read by hw.target sysctl, used by SoftwareUpdateCoreSupport.
+/// Uppercase ASCII string with \0 terminator (e.g. J137AP).
+/// gAppleVendorVariableGuid
+///
+#define APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME L"BridgeOSHardwareModel"
 
 ///
 /// A global variable storing the GUID of the APPLE_VENDOR EFI variable scope.

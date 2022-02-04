@@ -177,7 +177,7 @@ AIKSourceInstall (
       NULL, &Source->AmiKeycode->WaitForKeyEx
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: AmiEfiKeycodeProtocol WaitForKey replace failed - %r\n", Status));
       Source->AmiKeycode->WaitForKeyEx = Source->AmiWait;
       Source->AmiWait = NULL;
     }
@@ -192,7 +192,7 @@ AIKSourceInstall (
       NULL, &Source->TextInput->WaitForKey
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInProtocol WaitForKey replace failed - %r\n", Status));
       Source->TextInput->WaitForKey = Source->TextWait;
       Source->TextWait = NULL;
     }
@@ -207,7 +207,7 @@ AIKSourceInstall (
       NULL, &Source->TextInputEx->WaitForKeyEx
       );
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol WaitForKey replace failed - %r", Status));
+      DEBUG ((DEBUG_INFO, "OCII: EfiSimpleTextInputExProtocol WaitForKey replace failed - %r\n", Status));
       Source->TextInputEx->WaitForKeyEx = Source->TextWaitEx;
       Source->TextWaitEx = NULL;
     }

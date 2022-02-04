@@ -252,7 +252,7 @@ RsaVerifySigHashFromProcessed (
   }
 
   if (SignatureSize != ModulusSize) {
-    DEBUG ((DEBUG_INFO, "OCCR: Signature length does not match key length"));
+    DEBUG ((DEBUG_INFO, "OCCR: Signature length does not match key length\n"));
     return FALSE;
   }
 
@@ -294,6 +294,9 @@ RsaVerifySigHashFromProcessed (
   Index = NumWords;
   while (Index > 0) {
     --Index;
+    //
+    // Note: This does work with Big Endian systems.
+    //
     Tmp = BigNumSwapWord (
             DecryptedSigNum[NumWords - 1 - Index]
             );

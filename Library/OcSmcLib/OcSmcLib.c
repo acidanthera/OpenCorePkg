@@ -25,6 +25,7 @@
 #include <Library/OcMiscLib.h>
 #include <Library/OcSmcLib.h>
 #include <Library/OcRtcLib.h>
+#include <Library/OcVariableLib.h>
 
 #include "OcSmcLibInternal.h"
 
@@ -570,12 +571,12 @@ ExportStatusKey (
   //
   // Set status key for kext frontend.
   //
-  Status = gRT->SetVariable (
+  Status = OcSetSystemVariable (
     VIRTUALSMC_STATUS_KEY,
-    &gOcReadOnlyVariableGuid,
     EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
     sizeof (StatusBuffer),
-    StatusBuffer
+    StatusBuffer,
+    NULL
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSMC: Failed to create status - %r\n", Status));

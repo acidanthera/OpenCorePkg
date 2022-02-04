@@ -12,6 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
+#include <IndustryStandard/AppleCsrConfig.h>
+
 #include <Library/OcMainLib.h>
 
 #include <Guid/AppleVariable.h>
@@ -24,10 +26,14 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAcpiLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcAudioLib.h>
+#include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
+#include <Library/OcCpuLib.h>
 #include <Library/OcDebugLogLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -59,12 +65,12 @@ OcStoreLoadPath (
     AsciiSPrint (OutPath, sizeof (OutPath), "Unknown");
   }
 
-  Status = gRT->SetVariable (
+  Status = OcSetSystemVariable (
     OC_LOG_VARIABLE_PATH,
-    &gOcVendorVariableGuid,
     OPEN_CORE_NVRAM_ATTR,
     AsciiStrSize (OutPath),
-    OutPath
+    OutPath,
+    NULL
     );
 
   DEBUG ((
@@ -87,22 +93,25 @@ ProduceDebugReport (
   EFI_FILE_PROTOCOL  *Fs;
   EFI_FILE_PROTOCOL  *SysReport;
   EFI_FILE_PROTOCOL  *SubReport;
+  OC_CPU_INFO        CpuInfo;
+
+  OcCpuScanProcessor (&CpuInfo);
 
   if (VolumeHandle != NULL) {
-    Fs = LocateRootVolume (VolumeHandle, NULL);
+    Fs = OcLocateRootVolume (VolumeHandle, NULL);
   } else {
     Fs = NULL;
   }
 
   if (Fs == NULL) {
-    Status = FindWritableFileSystem (&Fs);
+    Status = OcFindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OC: No usable filesystem for report - %r\n", Status));
       return EFI_NOT_FOUND;
     }
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -116,7 +125,7 @@ ProduceDebugReport (
     return EFI_ALREADY_STARTED;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &SysReport,
     L"SysReport",
@@ -129,7 +138,7 @@ ProduceDebugReport (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"ACPI",
@@ -143,7 +152,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: ACPI dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"SMBIOS",
@@ -157,7 +166,7 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: SMBIOS dumping - %r\n", Status));
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     SysReport,
     &SubReport,
     L"Audio",
@@ -171,6 +180,34 @@ ProduceDebugReport (
   }
   DEBUG ((DEBUG_INFO, "OC: Audio dumping - %r\n", Status));
 
+  Status = OcSafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"CPU",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping CPUInfo for report...\n"));
+    Status = OcCpuInfoDump (&CpuInfo, SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: CPUInfo dumping - %r\n", Status));
+
+  Status = OcSafeFileOpen (
+    SysReport,
+    &SubReport,
+    L"PCI",
+    EFI_FILE_MODE_READ | EFI_FILE_MODE_WRITE | EFI_FILE_MODE_CREATE,
+    EFI_FILE_DIRECTORY
+    );
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OC: Dumping PCIInfo for report...\n"));
+    Status = OcPciInfoDump (SubReport);
+    SubReport->Close (SubReport);
+  }
+  DEBUG ((DEBUG_INFO, "OC: PCIInfo dumping - %r\n", Status));
+
   SysReport->Close (SysReport);
   Fs->Close (Fs);
 
@@ -181,7 +218,7 @@ STATIC
 EFI_STATUS
 EFIAPI
 OcToolLoadEntry (
-  IN  VOID                        *Context,
+  IN  OC_STORAGE_CONTEXT          *Storage,
   IN  OC_BOOT_ENTRY               *ChosenEntry,
   OUT VOID                        **Data,
   OUT UINT32                      *DataSize,
@@ -192,7 +229,6 @@ OcToolLoadEntry (
 {
   EFI_STATUS          Status;
   CHAR16              ToolPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_STORAGE_CONTEXT  *Storage;
 
   Status = OcUnicodeSafeSPrint (
     ToolPath,
@@ -209,8 +245,6 @@ OcToolLoadEntry (
       ));
     return EFI_NOT_FOUND;
   }
-
-  Storage = (OC_STORAGE_CONTEXT *) Context;
 
   *Data = OcStorageReadFileUnicode (
     Storage,
@@ -241,128 +275,6 @@ OcToolLoadEntry (
   }
 
   return EFI_SUCCESS;
-}
-
-STATIC
-EFI_STATUS
-EFIAPI
-OcToolDescribeEntry (
-  IN  VOID                        *Context,
-  IN  OC_BOOT_ENTRY               *ChosenEntry,
-  IN  UINT8                       LabelScale           OPTIONAL,
-  OUT VOID                        **IconData           OPTIONAL,
-  OUT UINT32                      *IconDataSize        OPTIONAL,
-  OUT VOID                        **LabelData          OPTIONAL,
-  OUT UINT32                      *LabelDataSize       OPTIONAL
-  )
-{
-  EFI_STATUS          Status;
-  CHAR16              DescPath[OC_STORAGE_SAFE_PATH_MAX];
-  OC_STORAGE_CONTEXT  *Storage;
-  BOOLEAN             HasIcon;
-  BOOLEAN             HasLabel;
-
-  Storage  = (OC_STORAGE_CONTEXT *) Context;
-  HasIcon  = FALSE;
-  HasLabel = FALSE;
-
-  if (IconData != NULL && IconDataSize != NULL) {
-    *IconData     = NULL;
-    *IconDataSize = 0;
-
-    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
-      Status = StrCpyS (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_IMAGE_PATH "ResetNVRAM.icns"
-        );
-    } else {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_TOOL_PATH "%s.icns",
-        ChosenEntry->PathName
-        );
-    }
-    if (!EFI_ERROR (Status)) {
-      if (OcStorageExistsFileUnicode (Context, DescPath)) {
-        *IconData = OcStorageReadFileUnicode (
-          Storage,
-          DescPath,
-          IconDataSize
-          );
-        HasIcon = *IconData != NULL;
-      }
-    } else {
-      DEBUG ((
-        DEBUG_WARN,
-        "OC: Custom label %s%s.icns does not fit path!\n",
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? OPEN_CORE_IMAGE_PATH : OPEN_CORE_TOOL_PATH,
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? L"ResetNVRAM": ChosenEntry->PathName
-        ));
-    }
-  }
-
-  if (LabelData != NULL && LabelDataSize != NULL) {
-    *LabelData     = NULL;
-    *LabelDataSize = 0;
-
-    if (ChosenEntry->Type == OC_BOOT_RESET_NVRAM) {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_LABEL_PATH "ResetNVRAM.%a",
-        LabelScale == 2 ? "l2x" : "lbl"
-        );
-    } else {
-      Status = OcUnicodeSafeSPrint (
-        DescPath,
-        sizeof (DescPath),
-        OPEN_CORE_TOOL_PATH "%s.%a",
-        ChosenEntry->PathName,
-        LabelScale == 2 ? "l2x" : "lbl"
-        );
-    }
-
-    if (!EFI_ERROR (Status)) {
-      if (OcStorageExistsFileUnicode (Context, DescPath)) {
-        *LabelData = OcStorageReadFileUnicode (
-          Storage,
-          DescPath,
-          LabelDataSize
-          );
-        HasLabel = *LabelData != NULL;
-      }
-    } else {
-      DEBUG ((
-        DEBUG_WARN,
-        "OC: Custom label %s%s.%a does not fit path!\n",
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? OPEN_CORE_LABEL_PATH : OPEN_CORE_TOOL_PATH,
-        ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-          ? L"ResetNVRAM" : ChosenEntry->PathName,
-        LabelScale == 2 ? "l2x" : "lbl"
-        ));
-    }
-  }
-
-  DEBUG ((
-    DEBUG_INFO,
-    "OC: Got label %d icon %d for type %u - %s\n",
-    HasLabel,
-    HasIcon,
-    ChosenEntry->Type,
-    ChosenEntry->Type == OC_BOOT_RESET_NVRAM
-      ? L"ResetNVRAM" : ChosenEntry->PathName
-    ));
-
-  if (HasIcon || HasLabel) {
-    return EFI_SUCCESS;
-  }
-
-  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -402,7 +314,7 @@ SavePanicLog (
       &RootFs
       );
     if (!EFI_ERROR (Status)) {
-      Status = SetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
+      Status = OcSetFileData (RootFs, PanicLogName, PanicLog, PanicLogSize);
       RootFs->Close (RootFs);
     }
 
@@ -517,6 +429,8 @@ OcMiscEarlyInit (
     CpuDeadLoop ();
     return EFI_UNSUPPORTED; ///< Should be unreachable.
   }
+
+  OcVariableInit (Config->Uefi.Quirks.ForceOcWriteFlash);
 
   AsciiVault = OC_BLOB_GET (&Config->Misc.Security.Vault);
   if (AsciiStrCmp (AsciiVault, "Secure") == 0) {
@@ -718,7 +632,7 @@ OcMiscMiddleInit (
         (VOID **) &FileSystem
         );
       if (!EFI_ERROR (Status)) {
-        LauncherData = ReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
+        LauncherData = OcReadFile (FileSystem, FullLauncherPath, &LauncherSize, BASE_32MB);
         if (LauncherData != NULL) {
           Sha1 (Signature, LauncherData, LauncherSize);
           DEBUG ((
@@ -742,12 +656,12 @@ OcMiscMiddleInit (
   //
   // Inform about boot protection.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable (
     OC_BOOT_PROTECT_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (BootProtectFlag),
-    &BootProtectFlag
+    &BootProtectFlag,
+    NULL
     );
 }
 
@@ -953,15 +867,14 @@ OcMiscBoot (
   Context->StartImage            = StartImage;
   Context->CustomBootGuid        = CustomBootGuid;
   Context->LoaderHandle          = LoadHandle;
-  Context->CustomEntryContext    = Storage;
+  Context->StorageContext        = Storage;
   Context->CustomRead            = OcToolLoadEntry;
-  Context->CustomDescribe        = OcToolDescribeEntry;
   Context->PrivilegeContext      = Privilege;
   Context->RequestPrivilege      = OcShowSimplePasswordRequest;
+  Context->VerifyPassword        = OcVerifyPassword;
   Context->ShowMenu              = OcShowSimpleBootMenu;
   Context->GetEntryLabelImage    = OcGetBootEntryLabelImage;
   Context->GetEntryIcon          = OcGetBootEntryIcon;
-  Context->GetKeyIndex           = OcGetAppleKeyIndex;
   Context->PlayAudioFile         = OcPlayAudioFile;
   Context->PlayAudioBeep         = OcPlayAudioBeep;
   Context->PlayAudioEntry        = OcPlayAudioEntry;
@@ -992,6 +905,7 @@ OcMiscBoot (
       Context->CustomEntries[EntryIndex].Name      = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Name);
       Context->CustomEntries[EntryIndex].Path      = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Path);
       Context->CustomEntries[EntryIndex].Arguments = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Arguments);
+      Context->CustomEntries[EntryIndex].Flavour   = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Flavour);
       Context->CustomEntries[EntryIndex].Auxiliary = Config->Misc.Entries.Values[Index]->Auxiliary;
       Context->CustomEntries[EntryIndex].Tool      = FALSE;
       Context->CustomEntries[EntryIndex].TextMode  = Config->Misc.Entries.Values[Index]->TextMode;
@@ -1010,6 +924,7 @@ OcMiscBoot (
       Context->CustomEntries[EntryIndex].Name      = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
       Context->CustomEntries[EntryIndex].Path      = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
       Context->CustomEntries[EntryIndex].Arguments = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Arguments);
+      Context->CustomEntries[EntryIndex].Flavour   = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Flavour);
       Context->CustomEntries[EntryIndex].Auxiliary = Config->Misc.Tools.Values[Index]->Auxiliary;
       Context->CustomEntries[EntryIndex].Tool      = TRUE;
       Context->CustomEntries[EntryIndex].TextMode  = Config->Misc.Tools.Values[Index]->TextMode;
@@ -1027,6 +942,7 @@ OcMiscBoot (
 
   OcLoadPickerHotKeys (Context);
 
+  Context->ShowToggleSip   = Config->Misc.Security.AllowToggleSip;
   Context->ShowNvramReset  = Config->Misc.Security.AllowNvramReset;
   Context->AllowSetDefault = Config->Misc.Security.AllowSetDefault;
   if (!Config->Misc.Security.AllowNvramReset && Context->PickerCommand == OcPickerResetNvram) {
@@ -1063,11 +979,11 @@ OcMiscUefiQuirksLoaded (
   //
   // Inform drivers about our scan policy.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable(
     OC_SCAN_POLICY_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Misc.Security.ScanPolicy),
-    &Config->Misc.Security.ScanPolicy
+    &Config->Misc.Security.ScanPolicy,
+    NULL
     );
 }

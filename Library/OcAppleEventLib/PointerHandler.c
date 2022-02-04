@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/SimplePointer.h>
 
 #include <Library/AppleEventLib.h>
+#include <Library/OcAppleEventLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
@@ -38,31 +39,33 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include <Library/BaseLib.h>
 
-// POINTER_POLL_FREQUENCY
-#define POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (2)
-#define MAX_POINTER_POLL_FREQUENCY  EFI_TIMER_PERIOD_MILLISECONDS (80)
+//
+// CHANGE: Apple polls with a frequency of 2 ms, however this is infeasible on
+//         most machines. Poll with 10 ms, which matches the keyboard behaviour,
+//         and also is the minimum for QEMU.
+//
+#define MIN_POINTER_POLL_PERIOD  10
+#define MAX_POINTER_POLL_PERIOD  80
 
-// MAXIMUM_DOUBLE_CLICK_SPEED
-/// (EFI_TIMER_PERIOD_MILLISECONDS (748) / POINTER_POLL_FREQUENCY)
-#define MAXIMUM_DOUBLE_CLICK_SPEED  374
+GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedDiv = 0;
+GLOBAL_REMOVE_IF_UNREFERENCED UINT32 mPointerSpeedMul = 0;
 
-// MAXIMUM_CLICK_DURATION
-/// (EFI_TIMER_PERIOD_MILLISECONDS (148) / POINTER_POLL_FREQUENCY)
-#define MAXIMUM_CLICK_DURATION  74
+STATIC UINT16 mMaximumDoubleClickSpeed = 75; // 374 for 2 ms
+STATIC UINT16 mMaximumClickDuration    = 15;  // 74 for 2 ms
 
 // MINIMAL_MOVEMENT
 #define MINIMAL_MOVEMENT  5
 
 // POINTER_BUTTON_INFORMATION
 typedef struct {
-  APPLE_EVENT_TYPE  EventType;          ///<
-  UINTN             NumberOfStrokes;    ///<
-  UINTN             Polls;              ///<
-  UINTN             PreviousEventType;  ///<
-  BOOLEAN           PreviousButton;     ///<
-  BOOLEAN           CurrentButton;      ///<
-  DIMENSION         PreviousPosition;   ///<
-  DIMENSION         Position;           ///<
+  APPLE_EVENT_TYPE  EventType;
+  UINTN             ButtonTicksHold;
+  UINTN             ButtonTicksSinceClick;
+  UINTN             PreviousClickEventType;
+  BOOLEAN           PreviousButton;
+  BOOLEAN           CurrentButton;
+  DIMENSION         MouseDownPosition;
+  DIMENSION         ClickPosition;
 } POINTER_BUTTON_INFORMATION;
 
 // SIMPLE_POINTER_INSTANCE
@@ -89,6 +92,10 @@ STATIC EFI_EVENT mSimplePointerPollEvent = NULL;
 
 // mSimplePointerPollTime
 STATIC UINT64 mSimplePointerPollTime;
+STATIC UINT64 mSimplePointerMinPollTime = MIN_POINTER_POLL_PERIOD * 10000;
+STATIC UINT64 mSimplePointerMaxPollTime = MAX_POINTER_POLL_PERIOD * 10000;
+
+STATIC UINT32 mSimplePointerPollMask = POINTER_POLL_ALL_MASK;
 
 // mUiScale
 STATIC UINT8 mUiScale = 1;
@@ -123,11 +130,56 @@ STATIC DIMENSION mCursorPosition;
 // mMouseMoved
 STATIC BOOLEAN mMouseMoved;
 
-// mScreenResolutionSet
-STATIC BOOLEAN mScreenResolutionSet;
-
 // mScreenResolution
-STATIC DIMENSION mResolution;
+STATIC DIMENSION mResolution = { 800, 600 };
+
+STATIC UINT64 mMaxPointerResolutionX = 1;
+STATIC UINT64 mMaxPointerResolutionY = 1;
+
+STATIC INT64 mPointerRawX;
+STATIC INT64 mPointerRawY;
+
+VOID
+InternalSetPointerPolling (
+  IN UINT32 PointerPollMin,
+  IN UINT32 PointerPollMax,
+  IN UINT32 PointerPollMask
+  )
+{
+  if (PointerPollMin == POINTER_POLL_DEFAULT) {
+    PointerPollMin = MIN_POINTER_POLL_PERIOD;
+  }
+
+  mSimplePointerMinPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMin);
+
+  if (PointerPollMax == POINTER_POLL_DEFAULT) {
+    PointerPollMax = MAX_POINTER_POLL_PERIOD;
+  }
+
+  mSimplePointerMaxPollTime = EFI_TIMER_PERIOD_MILLISECONDS (PointerPollMax);
+
+  mSimplePointerPollMask = PointerPollMask;
+}
+
+VOID
+InternalSetPointerSpeed (
+  IN UINT16 PointerSpeedDiv,
+  IN UINT16 PointerSpeedMul
+  )
+{
+  if (PointerSpeedDiv != 0) {
+    mPointerSpeedDiv = PointerSpeedDiv;
+  } else {
+    DEBUG ((
+      DEBUG_WARN,
+      "OCAE: Illegal PointerSpeedDiv value 0, using 1\n",
+      mPointerSpeedDiv
+      ));
+    mPointerSpeedDiv = 1;
+  }
+
+  mPointerSpeedMul = PointerSpeedMul;
+}
 
 // InternalRegisterSimplePointerInterface
 STATIC
@@ -171,6 +223,26 @@ InternalRegisterSimplePointerInterface (
     }
 
     mPointerProtocols = Instance;
+
+    if (SimplePointer->Mode->ResolutionX > mMaxPointerResolutionX) {
+      mPointerRawX = MultS64x64 (mPointerRawX, (INT64) mMaxPointerResolutionX);
+      mPointerRawX = DivS64x64Remainder (
+        mPointerRawX,
+        (INT64) SimplePointer->Mode->ResolutionX,
+        NULL
+        );
+      mMaxPointerResolutionX = SimplePointer->Mode->ResolutionX;
+    }
+
+    if (SimplePointer->Mode->ResolutionY > mMaxPointerResolutionY) {
+      mPointerRawY = MultS64x64 (mPointerRawY, (INT64) mMaxPointerResolutionY);
+      mPointerRawY = DivS64x64Remainder (
+        mPointerRawY,
+        (INT64) SimplePointer->Mode->ResolutionY,
+        NULL
+        );
+      mMaxPointerResolutionY = SimplePointer->Mode->ResolutionY;
+    }
   }
 }
 
@@ -391,7 +463,7 @@ EventCloseSimplePointerInstallNotifyEvent (
 
 // InternalGetScreenResolution
 STATIC
-EFI_STATUS
+VOID
 InternalGetScreenResolution (
   VOID
   )
@@ -407,64 +479,75 @@ InternalGetScreenResolution (
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetScreenResolution\n"));
 
+  //
+  // CHANGE: Do not cache screen resolution to account for changes.
+  //
+
+  HorizontalResolution = 0;
+  VerticalResolution   = 0;
+
   Status = gBS->HandleProtocol (
-                  gST->ConsoleOutHandle,
-                  &gEfiGraphicsOutputProtocolGuid,
-                  (VOID **)&GraphicsOutput
-                  );
-
-  if (Status == EFI_UNSUPPORTED) {
-    //
-    // Fallback to default resolution.
-    //
-    mResolution.Horizontal = 800;
-    mResolution.Vertical   = 600;
-
+    gST->ConsoleOutHandle,
+    &gEfiGraphicsOutputProtocolGuid,
+    (VOID **)&GraphicsOutput
+    );
+  if (!EFI_ERROR (Status)) {
+    Info                 = GraphicsOutput->Mode->Info;
+    HorizontalResolution = Info->HorizontalResolution;
+    VerticalResolution   = Info->VerticalResolution;
+  } else if (Status == EFI_UNSUPPORTED) {
     Status = gBS->HandleProtocol (
-                    gST->ConsoleOutHandle,
-                    &gEfiUgaDrawProtocolGuid,
-                    (VOID **)&UgaDraw
-                    );
+      gST->ConsoleOutHandle,
+      &gEfiUgaDrawProtocolGuid,
+      (VOID **)&UgaDraw
+      );
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAE: Failed to handle GOP, discovering UGA - %r\n",
+      Status
+      ));
 
     if (!EFI_ERROR (Status)) {
       Status = UgaDraw->GetMode (
-                          UgaDraw,
-                          &HorizontalResolution,
-                          &VerticalResolution,
-                          &ColorDepth,
-                          &RefreshRate
-                          );
-    }
-
-    //
-    // Apple does not check for Horizontal/Vertical resolution being > 0 here
-    //
-    if (!EFI_ERROR (Status) && HorizontalResolution > 0 && VerticalResolution > 0) {
-      mResolution.Horizontal = HorizontalResolution;
-      mResolution.Vertical   = VerticalResolution;
-      //
-      // Apple does not set mScreenResolutionSet to true here
-      //
-      mScreenResolutionSet   = TRUE;
-    }
-
-    Status = EFI_SUCCESS;
-  } else if (!EFI_ERROR (Status)) {
-    Info                   = GraphicsOutput->Mode->Info;
-    mResolution.Horizontal = Info->HorizontalResolution;
-    mResolution.Vertical   = Info->VerticalResolution;
-
-    //
-    // Apple does not check Info->HorizontalResolution being > 0 here
-    //
-    if (Info->HorizontalResolution > 0 && Info->VerticalResolution > 0) {
-      mScreenResolutionSet = TRUE;
-    } else {
-      Status = EFI_NOT_READY;
+        UgaDraw,
+        &HorizontalResolution,
+        &VerticalResolution,
+        &ColorDepth,
+        &RefreshRate
+        );
     }
   }
 
-  return Status;
+  if (!EFI_ERROR (Status)) {
+    if (HorizontalResolution > 0 && VerticalResolution > 0) {
+      mResolution.Horizontal = (INT32) HorizontalResolution;
+      mResolution.Vertical   = (INT32) VerticalResolution;
+
+      if (mCursorPosition.Horizontal >= mResolution.Horizontal) {
+        mCursorPosition.Horizontal = mResolution.Horizontal - 1;
+      }
+
+      if (mCursorPosition.Vertical >= mResolution.Vertical) {
+        mCursorPosition.Vertical = mResolution.Vertical - 1;
+      }
+
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAE: Set screen resolution to %dx%d - %r\n",
+        mResolution.Horizontal,
+        mResolution.Vertical,
+        Status
+        ));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAE: Screen resolution has 0-dimension\n"));
+    }
+  } else {
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAE: Failed to get screen resolution - %r\n",
+      Status
+      ));
+  }
 }
 
 // InternalGetUiScaleData
@@ -546,8 +629,8 @@ InternalHandleButtonInteraction (
   if (!EFI_ERROR (PointerStatus)) {
     if (!Pointer->PreviousButton) {
       if (Pointer->CurrentButton) {
-        Pointer->NumberOfStrokes  = 0;
-        Pointer->PreviousPosition = mCursorPosition;
+        Pointer->ButtonTicksHold   = 0;
+        Pointer->MouseDownPosition = mCursorPosition;
 
         Information = InternalCreatePointerEventQueueInformation (
                         (Pointer->EventType | APPLE_EVENT_TYPE_MOUSE_DOWN),
@@ -568,21 +651,23 @@ InternalHandleButtonInteraction (
         EventAddEventToQueue (Information);
       }
 
-      if (Pointer->NumberOfStrokes <= MAXIMUM_CLICK_DURATION) {
-        HorizontalMovement = ABS(Pointer->PreviousPosition.Horizontal - mCursorPosition.Horizontal);
-        VerticalMovement   = ABS(Pointer->PreviousPosition.Vertical - mCursorPosition.Vertical);
-
-        if ((HorizontalMovement <= MINIMAL_MOVEMENT)
-         && (VerticalMovement <= MINIMAL_MOVEMENT)) {
+      if (Pointer->ButtonTicksHold <= mMaximumClickDuration) {
+        HorizontalMovement = ABS(Pointer->MouseDownPosition.Horizontal - mCursorPosition.Horizontal);
+        VerticalMovement   = ABS(Pointer->MouseDownPosition.Vertical - mCursorPosition.Vertical);
+        //
+        // CHANGE: Apple did not scale by UIScale.
+        //
+        if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+         && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
           EventType = APPLE_EVENT_TYPE_MOUSE_CLICK;
 
-          if ((Pointer->PreviousEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
-           && (Pointer->Polls <= MAXIMUM_DOUBLE_CLICK_SPEED)) {
-            HorizontalMovement = ABS(Pointer->Position.Horizontal - mCursorPosition.Horizontal);
-            VerticalMovement   = ABS(Pointer->Position.Vertical - mCursorPosition.Vertical);
+          if ((Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_CLICK)
+           && (Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed)) {
+            HorizontalMovement = ABS(Pointer->ClickPosition.Horizontal - mCursorPosition.Horizontal);
+            VerticalMovement   = ABS(Pointer->ClickPosition.Vertical - mCursorPosition.Vertical);
 
-            if ((HorizontalMovement <= MINIMAL_MOVEMENT)
-             && (VerticalMovement <= MINIMAL_MOVEMENT)) {
+            if ((HorizontalMovement <= mUiScale * MINIMAL_MOVEMENT)
+             && (VerticalMovement <= mUiScale * MINIMAL_MOVEMENT)) {
               EventType = APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK;
             }
           }
@@ -596,15 +681,15 @@ InternalHandleButtonInteraction (
             EventAddEventToQueue (Information);
           }
 
-          if (Pointer->PreviousEventType == APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) {
-            EventType = ((Pointer->Polls <= MAXIMUM_DOUBLE_CLICK_SPEED)
+          if (Pointer->PreviousClickEventType == APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK) {
+            EventType = ((Pointer->ButtonTicksSinceClick <= mMaximumDoubleClickSpeed)
                             ? APPLE_EVENT_TYPE_MOUSE_DOUBLE_CLICK
                             : APPLE_EVENT_TYPE_MOUSE_CLICK);
           }
 
-          Pointer->PreviousEventType = EventType;
-          Pointer->Position          = mCursorPosition;
-          Pointer->Polls             = 0;
+          Pointer->PreviousClickEventType = EventType;
+          Pointer->ClickPosition          = mCursorPosition;
+          Pointer->ButtonTicksSinceClick  = 0;
         }
       }
     }
@@ -613,10 +698,10 @@ InternalHandleButtonInteraction (
   }
 
   if (Pointer->PreviousButton && Pointer->CurrentButton) {
-    ++Pointer->NumberOfStrokes;
+    ++Pointer->ButtonTicksHold;
   }
 
-  ++Pointer->Polls;
+  ++Pointer->ButtonTicksSinceClick;
 }
 
 // InternalSimplePointerPollNotifyFunction
@@ -637,13 +722,17 @@ InternalSimplePointerPollNotifyFunction (
   EFI_SIMPLE_POINTER_STATE    State;
   INT64                       UiScaleX;
   INT64                       UiScaleY;
-  INT64                       MovementY;
-  INT64                       MovementX;
+  INT64                       ScaledY;
+  INT64                       ScaledX;
   DIMENSION                   NewPosition;
   APPLE_EVENT_INFORMATION     *Information;
   APPLE_EVENT_DATA            EventData;
   UINT64                      StartTime;
   UINT64                      EndTime;
+  INT64                       MaxRawPointerX;
+  INT64                       MaxRawPointerY;
+  UINT64                      ClickTemp;
+  UINT64                      DoubleClickTemp;
 
   StartTime = GetPerformanceCounter ();
 
@@ -663,71 +752,87 @@ InternalSimplePointerPollNotifyFunction (
     CommonStatus = EFI_NOT_READY;
 
     for (Index = 0; Index < mNumberOfPointerProtocols; ++Index) {
+      if (mSimplePointerPollMask != POINTER_POLL_ALL_MASK
+        && (Index >= 32 || ((1U << Index) & mSimplePointerPollMask) == 0)) {
+        continue;
+      }
+
       Instance      = &mPointerProtocols[Index];
       SimplePointer = Instance->Interface;
       Status        = SimplePointer->GetState (SimplePointer, &State);
 
       if (!EFI_ERROR (Status)) {
+        //
+        // CHANGE: Apple scaled the deltas and due to rounding errors, this is
+        //         unacceptable. Changed to scale all pointer deltas to the
+        //         maximum pointer resolution and scaling down to display
+        //         coordinates always based on the accurate raw input value.
+        //
+
         UiScaleX = InternalGetUiScaleData ((INT64)State.RelativeMovementX);
+        UiScaleX = MultS64x64 (UiScaleX, (INT64) mMaxPointerResolutionX);
+        UiScaleX = MultS64x64 (UiScaleX, mPointerSpeedMul);
+        UiScaleX = DivS64x64Remainder (UiScaleX, mPointerSpeedDiv, NULL);
+
         UiScaleY = InternalGetUiScaleData ((INT64)State.RelativeMovementY);
+        UiScaleY = MultS64x64 (UiScaleY, (INT64) mMaxPointerResolutionY);
+        UiScaleY = MultS64x64 (UiScaleY, mPointerSpeedMul);
+        UiScaleY = DivS64x64Remainder (UiScaleY, mPointerSpeedDiv, NULL);
 
+        if (SimplePointer->Mode->ResolutionX > 0) {
+          UiScaleX = DivS64x64Remainder (
+            UiScaleX,
+            (INT64) SimplePointer->Mode->ResolutionX,
+            NULL
+            );
+        }
+
+        if (SimplePointer->Mode->ResolutionY > 0) {
+          UiScaleY = DivS64x64Remainder (
+            UiScaleY,
+            (INT64) SimplePointer->Mode->ResolutionY,
+            NULL
+            );
+        }
         //
-        // Apple did not check for zero resolution here
+        // CHANGE: Fix maximum coordinates.
         //
-
-        if (SimplePointer->Mode->ResolutionX > 0
-          && SimplePointer->Mode->ResolutionY > 0) {
-          MovementX = DivS64x64Remainder (
-                        UiScaleX,
-                        (INT64)SimplePointer->Mode->ResolutionX,
-                        NULL
-                        );
-
-          MovementY = DivS64x64Remainder (
-                        UiScaleY,
-                        (INT64)SimplePointer->Mode->ResolutionY,
-                        NULL
-                        );
-        } else {
-          MovementX = 0;
-          MovementY = 0;
+        mPointerRawX += UiScaleX;
+        MaxRawPointerX = MultS64x64 (
+          mResolution.Horizontal - 1,
+          (INT64) mMaxPointerResolutionX
+          );
+        if (mPointerRawX > MaxRawPointerX) {
+          mPointerRawX = MaxRawPointerX;
+        } else if (mPointerRawX < 0) {
+          mPointerRawX = 0;
         }
 
-        if (MovementX == 0) {
-          if (State.RelativeMovementX > 0) {
-            MovementX = 1;
-          } else if (State.RelativeMovementX < 0) {
-            MovementX = -1;
-          }
+        mPointerRawY += UiScaleY;
+        MaxRawPointerY = MultS64x64 (
+          mResolution.Vertical - 1,
+          (INT64) mMaxPointerResolutionY
+          );
+        if (mPointerRawY > MaxRawPointerY) {
+          mPointerRawY = MaxRawPointerY;
+        } else if (mPointerRawY < 0) {
+          mPointerRawY = 0;
         }
 
-        if (MovementY == 0) {
-          if (State.RelativeMovementY > 0) {
-            MovementY = 1;
-          } else if (State.RelativeMovementY < 0) {
-            MovementY = -1;
-          }
-        }
+        ScaledX = DivS64x64Remainder (
+          mPointerRawX,
+          (INT64) mMaxPointerResolutionX,
+          NULL
+          );
 
-        NewPosition.Horizontal = (INT32)(
-                                  mCursorPosition.Horizontal + MovementX
-                                  );
+        ScaledY = DivS64x64Remainder (
+          mPointerRawY,
+          (INT64) mMaxPointerResolutionY,
+          NULL
+          );
 
-        NewPosition.Vertical   = (INT32)(
-                                  mCursorPosition.Vertical + MovementY
-                                  );
-
-        if (NewPosition.Horizontal > mResolution.Horizontal) {
-          NewPosition.Horizontal = mResolution.Horizontal;
-        } else if (NewPosition.Horizontal < 0) {
-          NewPosition.Horizontal = 0;
-        }
-
-        if (NewPosition.Vertical > mResolution.Vertical) {
-          NewPosition.Vertical = mResolution.Vertical;
-        } else if (NewPosition.Vertical < 0) {
-          NewPosition.Vertical = 0;
-        }
+        NewPosition.Horizontal = (INT32) ScaledX;
+        NewPosition.Vertical   = (INT32) ScaledY;
 
         if ((mCursorPosition.Horizontal != NewPosition.Horizontal)
          || (mCursorPosition.Vertical != NewPosition.Vertical)) {
@@ -742,7 +847,7 @@ InternalSimplePointerPollNotifyFunction (
 
         mLeftButtonInfo.PreviousButton  = mLeftButtonInfo.CurrentButton;
         mLeftButtonInfo.CurrentButton   = State.LeftButton;
-        mRightButtonInfo.PreviousButton = mLeftButtonInfo.CurrentButton;
+        mRightButtonInfo.PreviousButton = mRightButtonInfo.CurrentButton;
         mRightButtonInfo.CurrentButton  = State.RightButton;
         CommonStatus                    = Status;
       }
@@ -781,7 +886,7 @@ InternalSimplePointerPollNotifyFunction (
   // which is still far from enough. The event system on these laptops is pretty broken,
   // and even adding gBS->CheckEvent prior to GetState almost does not reduce the time spent.
   //
-  if (mSimplePointerPollEvent != NULL && mSimplePointerPollTime < MAX_POINTER_POLL_FREQUENCY) {
+  if (mSimplePointerPollEvent != NULL && mSimplePointerPollTime < mSimplePointerMaxPollTime) {
     EndTime = GetPerformanceCounter ();
     if (StartTime > EndTime) {
       EndTime = StartTime;
@@ -789,10 +894,28 @@ InternalSimplePointerPollNotifyFunction (
     EndTime = GetTimeInNanoSecond (EndTime - StartTime);
     // Maximum time allowed in this function is half the interval plus some margin (0.55 * 100ns)
     if (EndTime > mSimplePointerPollTime * 55ULL) {
+      ClickTemp = MultU64x32 (mSimplePointerPollTime, mMaximumClickDuration);
+      DoubleClickTemp = MultU64x32 (
+        mSimplePointerPollTime,
+        mMaximumDoubleClickSpeed
+        );
+
       mSimplePointerPollTime = DivU64x32 (EndTime, 50);
-      if (mSimplePointerPollTime > MAX_POINTER_POLL_FREQUENCY) {
-        mSimplePointerPollTime = MAX_POINTER_POLL_FREQUENCY;
+      if (mSimplePointerPollTime > mSimplePointerMaxPollTime) {
+        mSimplePointerPollTime = mSimplePointerMaxPollTime;
       }
+
+      mMaximumClickDuration = (UINT16) DivU64x64Remainder (
+        ClickTemp,
+        mSimplePointerPollTime,
+        NULL
+        );
+      mMaximumDoubleClickSpeed = (UINT16) DivU64x64Remainder (
+        DoubleClickTemp,
+        mSimplePointerPollTime,
+        NULL
+        );
+
       gBS->SetTimer (mSimplePointerPollEvent, TimerPeriodic, mSimplePointerPollTime);
     }
   }
@@ -839,7 +962,7 @@ EventCreateSimplePointerPollEvent (
   InternalGetScreenResolution ();
   ZeroMem (&mCursorPosition, sizeof (mCursorPosition));
 
-  mSimplePointerPollTime = POINTER_POLL_FREQUENCY;
+  mSimplePointerPollTime = mSimplePointerMinPollTime;
   mSimplePointerPollEvent = EventLibCreateNotifyTimerEvent (
                               InternalSimplePointerPollNotifyFunction,
                               NULL,
@@ -884,26 +1007,28 @@ EventSetCursorPositionImpl (
 
   DEBUG ((DEBUG_VERBOSE, "EventSetCursorPositionImpl\n"));
 
-  if (!mScreenResolutionSet) {
-    Status = InternalGetScreenResolution ();
-  }
+  InternalGetScreenResolution ();
 
-  if (mScreenResolutionSet) {
-    Status = EFI_INVALID_PARAMETER;
+  Status = EFI_INVALID_PARAMETER;
 
-    //
-    // Apple did not check for negatives here.
-    //
+  //
+  // Apple did not check for negatives here.
+  //
 
-    if (Position->Horizontal >= 0 && Position->Vertical >= 0
-     && (Position->Horizontal < mResolution.Horizontal)
-     && (Position->Vertical < mResolution.Vertical)) {
-      mCursorPosition.Horizontal = Position->Horizontal;
-      mCursorPosition.Vertical   = Position->Vertical;
-      Status = EFI_SUCCESS;
-    }
-  } else if (EFI_ERROR (Status)) {
-    Status = EFI_NOT_READY;
+  if (Position->Horizontal >= 0 && Position->Vertical >= 0
+    && (Position->Horizontal < mResolution.Horizontal)
+    && (Position->Vertical < mResolution.Vertical)) {
+    mCursorPosition.Horizontal = Position->Horizontal;
+    mCursorPosition.Vertical   = Position->Vertical;
+    mPointerRawX = MultS64x64 (
+      mCursorPosition.Horizontal,
+      (INT64) mMaxPointerResolutionX
+      );
+    mPointerRawY = MultS64x64 (
+      mCursorPosition.Vertical,
+      (INT64) mMaxPointerResolutionY
+      );
+    Status = EFI_SUCCESS;
   }
 
   return Status;

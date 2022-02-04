@@ -154,7 +154,21 @@ VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
   IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL
+  );
+
+/**
+  Print Device Path corresponding to EFI Handle to log.
+
+  @param[in] ErrorLevel  Debug error level.
+  @param[in] Message     Prefixed message.
+  @param[in] Handle      Handle corresponding to Device path to print.
+**/
+VOID
+DebugPrintDevicePathForHandle (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_HANDLE                Handle       OPTIONAL
   );
 
 /**

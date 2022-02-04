@@ -516,7 +516,7 @@ FindStringBlock (
 
         //
         // Since string package tool set FontId initially to 0 and increases it
-        // progressively by one, StringPackage->FondId always represents an unique
+        // progressively by one, StringPackage->FondId always represents a unique
         // and available FontId.
         //
         StringPackage->FontId++;

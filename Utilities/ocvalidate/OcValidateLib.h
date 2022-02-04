@@ -99,13 +99,15 @@ AsciiPropertyIsLegal (
 /**
   Check if a UEFI Driver matches specific conventions.
 
-  @param[in]  Driver                   Driver to be checked.
+  @param[in]  Driver                   Driver path name to be checked.
+  @param[in]  DriverIndex              Index of driver being checked.
 
   @retval     TRUE                     If path of Driver contains .efi suffix, and only contains 0-9, A-Z, a-z, '_', '-', '.', and '/'.
 **/
 BOOLEAN
 AsciiUefiDriverIsLegal (
-  IN  CONST CHAR8  *Driver
+  IN  CONST CHAR8  *Driver,
+  IN  CONST UINTN  DriverIndex
   );
 
 /**
@@ -139,7 +141,8 @@ AsciiGuidIsLegal (
 
   @param[in]  Data                     Data to be checked.
   @param[in]  Mask                     Mask to be applied to Data.
-  @param[in]  Size                     Size of Data and Mask.
+  @param[in]  DataSize                 Size of Data.
+  @param[in]  MaskSize                 Size of Mask.
 
   @retval     TRUE                     If corresponding bits of Mask to Data are active (set to non-zero).
 **/
@@ -147,7 +150,8 @@ BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
-  IN  UINTN        Size
+  IN  UINTN        DataSize,
+  IN  UINTN        MaskSize
   );
 
 /**

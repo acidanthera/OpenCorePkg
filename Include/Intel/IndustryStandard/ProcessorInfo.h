@@ -166,6 +166,7 @@ enum {
 #define CPU_MODEL_SANDYBRIDGE    0x2A  ///< Sandy Bridge
 #define CPU_MODEL_JAKETOWN       0x2D  ///< Sandy Bridge Xeon E5, Core i7 Extreme
 #define CPU_MODEL_SALTWELL       0x36  ///< Saltwell, Cedarview
+#define CPU_MODEL_SILVERMONT     0x37  ///< Bay Trail
 #define CPU_MODEL_IVYBRIDGE      0x3A  ///< Ivy Bridge
 #define CPU_MODEL_IVYBRIDGE_EP   0x3E
 #define CPU_MODEL_CRYSTALWELL    0x46
@@ -202,13 +203,9 @@ enum {
 #define CPU_MODEL_COMETLAKE_S    0xA5 /* desktop CometLake */
 #define CPU_MODEL_COMETLAKE_Y    0xA5 /* aka 10th generation Amber Lake Y */
 #define CPU_MODEL_COMETLAKE_U    0xA6
-
-#define CPU_SOCKET_UNKNOWN  0x02
-#define CPU_SOCKET_PGA478   0x0F
-#define CPU_SOCKET_LGA771   0x14
-#define CPU_SOCKET_LGA775   0x15
-#define CPU_SOCKET_LGA1156  0x1D
-#define CPU_SOCKET_LGA1366  0x19
+#define CPU_MODEL_ROCKETLAKE_S   0xA7 /* desktop RocketLake */
+#define CPU_MODEL_TIGERLAKE_U    0x8C
+#define CPU_MODEL_ALDERLAKE_S    0x97
 
 #define AMD_CPU_FAMILY          0xF
 #define AMD_CPU_EXT_FAMILY_15H  0x6

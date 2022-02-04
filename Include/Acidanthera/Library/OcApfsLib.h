@@ -34,10 +34,16 @@
 #define OC_APFS_DATE_CATALINA       20200306U
 
 /**
+  Latest known APFS from Big Sur 11.4 (20F71).
+**/
+#define OC_APFS_VERSION_BIG_SUR     1677120009000000ULL
+#define OC_APFS_DATE_BIG_SUR        20210508U
+
+/**
   Default version subject to increase.
 **/
-#define OC_APFS_VERSION_DEFAULT     OC_APFS_VERSION_HIGH_SIERRA
-#define OC_APFS_DATE_DEFAULT        OC_APFS_DATE_HIGH_SIERRA
+#define OC_APFS_VERSION_DEFAULT     1600000000000000ULL
+#define OC_APFS_DATE_DEFAULT        20210101U
 
 /**
   Use default version as a minimal.

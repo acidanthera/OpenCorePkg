@@ -28,6 +28,7 @@
 #include "GuiIo.h"
 #include "GuiApp.h"
 #include "Views/BootPicker.h"
+#include "Blending.h"
 
 typedef struct {
   UINT32 X;
@@ -39,9 +40,9 @@ typedef struct {
 //
 // I/O contexts
 //
-STATIC GUI_OUTPUT_CONTEXT            *mOutputContext    = NULL;
-STATIC GUI_POINTER_CONTEXT           *mPointerContext   = NULL;
-STATIC GUI_KEY_CONTEXT               *mKeyContext       = NULL;
+STATIC GUI_OUTPUT_CONTEXT                         *mOutputContext  = NULL;
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_POINTER_CONTEXT *mPointerContext = NULL;
+GLOBAL_REMOVE_IF_UNREFERENCED GUI_KEY_CONTEXT     *mKeyContext     = NULL;
 //
 // Screen buffer information
 //
@@ -56,10 +57,12 @@ STATIC UINT64                        mStartTsc          = 0;
 // Drawing rectangles information
 //
 STATIC UINT8                         mNumValidDrawReqs  = 0;
-STATIC GUI_DRAW_REQUEST              mDrawRequests[4]   = { { 0 } };
+STATIC GUI_DRAW_REQUEST              mDrawRequests[6]   = { { 0 } };
 
-STATIC INT64                         mPointerOldBaseX = 0;
-STATIC INT64                         mPointerOldBaseY = 0;
+STATIC UINT32                        mPointerOldDrawBaseX  = 0;
+STATIC UINT32                        mPointerOldDrawBaseY  = 0;
+STATIC UINT32                        mPointerOldDrawWidth  = 0;
+STATIC UINT32                        mPointerOldDrawHeight = 0;
 
 #define PIXEL_TO_UINT32(Pixel)  \
   ((UINT32) SIGNATURE_32 ((Pixel)->Blue, (Pixel)->Green, (Pixel)->Red, (Pixel)->Reserved))
@@ -136,18 +139,20 @@ GuiObjDrawDelegate (
   IN     UINT32                  OffsetX,
   IN     UINT32                  OffsetY,
   IN     UINT32                  Width,
-  IN     UINT32                  Height
+  IN     UINT32                  Height,
+  IN     UINT8                   Opacity
   )
 {
   BOOLEAN       Result;
 
-  LIST_ENTRY    *ChildEntry;
+  UINTN         Index;
   GUI_OBJ_CHILD *Child;
 
   UINT32        ChildDrawOffsetX;
   UINT32        ChildDrawOffsetY;
   UINT32        ChildDrawWidth;
   UINT32        ChildDrawHeight;
+  UINT8         ChildOpacity;
 
   ASSERT (This != NULL);
   ASSERT (OffsetX < This->Width);
@@ -158,12 +163,8 @@ GuiObjDrawDelegate (
   ASSERT (Height <= This->Height);
   ASSERT (DrawContext != NULL);
 
-  for (
-    ChildEntry = GetPreviousNode (&This->Children, &This->Children);
-    !IsNull (&This->Children, ChildEntry);
-    ChildEntry = GetPreviousNode (&This->Children, ChildEntry)
-    ) {
-    Child = BASE_CR (ChildEntry, GUI_OBJ_CHILD, Link);
+  for (Index = 0; Index < This->NumChildren; ++Index) {
+    Child = This->Children[Index];
 
     ChildDrawOffsetX = OffsetX;
     ChildDrawWidth   = Width;
@@ -189,6 +190,14 @@ GuiObjDrawDelegate (
       continue;
     }
 
+    if (Opacity == 0xFF) {
+      ChildOpacity = Child->Obj.Opacity;
+    } else if (Child->Obj.Opacity == 0xFF) {
+      ChildOpacity = Opacity;
+    } else {
+      ChildOpacity = RGB_APPLY_OPACITY (Child->Obj.Opacity, Opacity);
+    }
+
     ASSERT (ChildDrawOffsetX + ChildDrawWidth <= Child->Obj.Width);
     ASSERT (ChildDrawOffsetY + ChildDrawHeight <= Child->Obj.Height);
     ASSERT (ChildDrawWidth > 0);
@@ -203,7 +212,8 @@ GuiObjDrawDelegate (
                  ChildDrawOffsetX,
                  ChildDrawOffsetY,
                  ChildDrawWidth,
-                 ChildDrawHeight
+                 ChildDrawHeight,
+                 ChildOpacity
                  );
   }
 }
@@ -213,32 +223,30 @@ GuiObjDelegatePtrEvent (
   IN OUT GUI_OBJ                 *This,
   IN OUT GUI_DRAWING_CONTEXT     *DrawContext,
   IN     BOOT_PICKER_GUI_CONTEXT *Context,
-  IN     GUI_PTR_EVENT           Event,
   IN     INT64                   BaseX,
   IN     INT64                   BaseY,
-  IN     INT64                   OffsetX,
-  IN     INT64                   OffsetY
+  IN     CONST GUI_PTR_EVENT     *Event
   )
 {
+  UINTN         Index;
   GUI_OBJ       *Obj;
-  LIST_ENTRY    *ChildEntry;
   GUI_OBJ_CHILD *Child;
 
   ASSERT (This != NULL);
-  ASSERT (This->Width  > OffsetX);
-  ASSERT (This->Height > OffsetY);
+  ASSERT (Event->Pos.Pos.X >= BaseX);
+  ASSERT (Event->Pos.Pos.Y >= BaseY);
+  ASSERT (This->Width  > Event->Pos.Pos.X - BaseX);
+  ASSERT (This->Height > Event->Pos.Pos.Y - BaseY);
   ASSERT (DrawContext != NULL);
-
-  for (
-    ChildEntry = GetFirstNode (&This->Children);
-    !IsNull (&This->Children, ChildEntry);
-    ChildEntry = GetNextNode (&This->Children, ChildEntry)
-    ) {
-    Child = BASE_CR (ChildEntry, GUI_OBJ_CHILD, Link);
-    if (OffsetX  < Child->Obj.OffsetX
-     || OffsetX >= Child->Obj.OffsetX + Child->Obj.Width
-     || OffsetY  < Child->Obj.OffsetY
-     || OffsetY >= Child->Obj.OffsetY + Child->Obj.Height) {
+  //
+  // Pointer event propagation is backwards due to forwards draw order.
+  //
+  for (Index = This->NumChildren; Index > 0; --Index) {
+    Child = This->Children[Index - 1];
+    if (Event->Pos.Pos.X - BaseX  < Child->Obj.OffsetX
+     || Event->Pos.Pos.X - BaseX >= Child->Obj.OffsetX + Child->Obj.Width
+     || Event->Pos.Pos.Y - BaseY  < Child->Obj.OffsetY
+     || Event->Pos.Pos.Y - BaseY >= Child->Obj.OffsetY + Child->Obj.Height) {
       continue;
     }
 
@@ -247,11 +255,9 @@ GuiObjDelegatePtrEvent (
                        &Child->Obj,
                        DrawContext,
                        Context,
-                       Event,
-                       BaseX   + Child->Obj.OffsetX,
-                       BaseY   + Child->Obj.OffsetY,
-                       OffsetX - Child->Obj.OffsetX,
-                       OffsetY - Child->Obj.OffsetY
+                       BaseX + Child->Obj.OffsetX,
+                       BaseY + Child->Obj.OffsetY,
+                       Event
                        );
     if (Obj != NULL) {
       return Obj;
@@ -276,25 +282,24 @@ GuiDrawToBufferFill (
 
   ASSERT (Colour != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen != NULL);
   ASSERT (Width > 0);
   ASSERT (Height > 0);
   //
   // Screen cropping happens in GuiRequestDrawCrop().
   //
-  ASSERT (DrawContext->Screen->Width  >= PosX);
-  ASSERT (DrawContext->Screen->Height >= PosY);
-  ASSERT (PosX + Width <= DrawContext->Screen->Width);
-  ASSERT (PosY + Height <= DrawContext->Screen->Height);
+  ASSERT (DrawContext->Screen.Width  >= PosX);
+  ASSERT (DrawContext->Screen.Height >= PosY);
+  ASSERT (PosX + Width <= DrawContext->Screen.Width);
+  ASSERT (PosY + Height <= DrawContext->Screen.Height);
   //
   // Iterate over each row of the request.
   //
   for (
     RowIndex = 0,
-      TargetRowOffset = PosY * DrawContext->Screen->Width;
+      TargetRowOffset = PosY * DrawContext->Screen.Width;
     RowIndex < Height;
     ++RowIndex,
-      TargetRowOffset += DrawContext->Screen->Width
+      TargetRowOffset += DrawContext->Screen.Width
     ) {
     //
     // Populate the row pixel-by-pixel with Source's (0,0).
@@ -316,10 +321,10 @@ GuiDrawToBufferFill (
   //
   for (
     RowIndex = 0,
-      TargetRowOffset = PosY * DrawContext->Screen->Width;
+      TargetRowOffset = PosY * DrawContext->Screen.Width;
     RowIndex < Height;
     ++RowIndex,
-      TargetRowOffset += DrawContext->Screen->Width
+      TargetRowOffset += DrawContext->Screen.Width
     ) {
     //
     // Blend the row pixel-by-pixel with Source's (0,0).
@@ -362,7 +367,6 @@ GuiDrawToBuffer (
 
   ASSERT (Image != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen != NULL);
   ASSERT (BaseX + OffsetX >= 0);
   ASSERT (BaseY + OffsetY >= 0);
   ASSERT (Width > 0);
@@ -377,10 +381,10 @@ GuiDrawToBuffer (
   //
   // Screen cropping happens in GuiRequestDrawCrop().
   //
-  ASSERT (DrawContext->Screen->Width  >= PosX);
-  ASSERT (DrawContext->Screen->Height >= PosY);
-  ASSERT (PosX + Width <= DrawContext->Screen->Width);
-  ASSERT (PosY + Height <= DrawContext->Screen->Height);
+  ASSERT (DrawContext->Screen.Width  >= PosX);
+  ASSERT (DrawContext->Screen.Height >= PosY);
+  ASSERT (PosX + Width <= DrawContext->Screen.Width);
+  ASSERT (PosY + Height <= DrawContext->Screen.Height);
 
   if (Opacity == 0) {
     return;
@@ -406,11 +410,11 @@ GuiDrawToBuffer (
     for (
       RowIndex = 0,
         SourceRowOffset = OffsetY * Image->Width,
-        TargetRowOffset = PosY * DrawContext->Screen->Width;
+        TargetRowOffset = PosY * DrawContext->Screen.Width;
       RowIndex < Height;
       ++RowIndex,
         SourceRowOffset += Image->Width,
-        TargetRowOffset += DrawContext->Screen->Width
+        TargetRowOffset += DrawContext->Screen.Width
       ) {
       //
       // Blend the row pixel-by-pixel.
@@ -432,11 +436,11 @@ GuiDrawToBuffer (
     for (
       RowIndex = 0,
         SourceRowOffset = OffsetY * Image->Width,
-        TargetRowOffset = PosY * DrawContext->Screen->Width;
+        TargetRowOffset = PosY * DrawContext->Screen.Width;
       RowIndex < Height;
       ++RowIndex,
         SourceRowOffset += Image->Width,
-        TargetRowOffset += DrawContext->Screen->Width
+        TargetRowOffset += DrawContext->Screen.Width
       ) {
       //
       // Blend the row pixel-by-pixel.
@@ -562,7 +566,6 @@ GuiRequestDrawCrop (
   INT64  EffHeight;
 
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen != NULL);
 
   EffWidth  = Width;
   EffHeight = Height;
@@ -583,8 +586,8 @@ GuiRequestDrawCrop (
     PosY       = 0;
   }
 
-  EffWidth  = MIN (EffWidth,  (INT64) DrawContext->Screen->Width  - PosX);
-  EffHeight = MIN (EffHeight, (INT64) DrawContext->Screen->Height - PosY);
+  EffWidth  = MIN (EffWidth,  (INT64) DrawContext->Screen.Width  - PosX);
+  EffHeight = MIN (EffHeight, (INT64) DrawContext->Screen.Height - PosY);
 
   if (EffWidth <= 0 || EffHeight <= 0) {
     return;
@@ -598,17 +601,17 @@ GuiOverlayPointer (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  CONST GUI_IMAGE   *CursorImage;
-  UINT32            MaxWidth;
-  UINT32            MaxHeight;
-  GUI_POINTER_STATE PointerState;
+  CONST GUI_IMAGE  *CursorImage;
+  UINT32           MaxWidth;
+  UINT32           MaxHeight;
+  GUI_PTR_POSITION PointerPos;
 
-  INT64             BaseX;
-  INT64             BaseY;
-  UINT32            ImageOffsetX;
-  UINT32            ImageOffsetY;
-  UINT32            DrawBaseX;
-  UINT32            DrawBaseY;
+  INT64            BaseX;
+  INT64            BaseY;
+  UINT32           ImageOffsetX;
+  UINT32           ImageOffsetY;
+  UINT32           DrawBaseX;
+  UINT32           DrawBaseY;
 
   ASSERT (DrawContext != NULL);
 
@@ -618,10 +621,10 @@ GuiOverlayPointer (
   //
   // Poll the current cursor position late to reduce input lag.
   //
-  GuiPointerGetState (mPointerContext, &PointerState);
+  GuiPointerGetPosition (mPointerContext, &PointerPos);
 
-  ASSERT (PointerState.X < DrawContext->Screen->Width);
-  ASSERT (PointerState.Y < DrawContext->Screen->Height);
+  ASSERT (PointerPos.Pos.X < DrawContext->Screen.Width);
+  ASSERT (PointerPos.Pos.Y < DrawContext->Screen.Height);
 
   //
   // Unconditionally draw the cursor to increase frametime consistency and
@@ -635,7 +638,7 @@ GuiOverlayPointer (
   // Draw the new cursor at the new position.
   //
 
-  BaseX = (INT64) PointerState.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  BaseX = (INT64) PointerPos.Pos.X - BOOT_CURSOR_OFFSET * DrawContext->Scale;
   if (BaseX < 0) {
     ImageOffsetX = (UINT32) -BaseX;
     DrawBaseX    = 0;
@@ -644,9 +647,17 @@ GuiOverlayPointer (
     DrawBaseX    = (UINT32) BaseX;
   }
 
-  MaxWidth = MIN (CursorImage->Width, (UINT32) (DrawContext->Screen->Width - BaseX));
+  //
+  // MaxWidth/Height are for subsequent GuiDrawToBuffer, but also for
+  // saved PointerOldDraw size below; so we replicate out here clipping
+  // which is done inside GuiDrawToBuffer, in order to only redraw the
+  // minimum required.
+  // BaseX/Y may be negative but will then add, and will not overflow
+  // when within valid bounds.
+  //
+  MaxWidth = MIN (CursorImage->Width - ImageOffsetX, (UINT32) (DrawContext->Screen.Width - BaseX));
 
-  BaseY = (INT64) PointerState.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
+  BaseY = (INT64) PointerPos.Pos.Y - BOOT_CURSOR_OFFSET * DrawContext->Scale;
   if (BaseY < 0) {
     ImageOffsetY = (UINT32) -BaseY;
     DrawBaseY    = 0;
@@ -655,11 +666,11 @@ GuiOverlayPointer (
     DrawBaseY    = (UINT32) BaseY;
   }
 
-  MaxHeight = MIN (CursorImage->Height, (UINT32) (DrawContext->Screen->Height - BaseY));
+  MaxHeight = MIN (CursorImage->Height - ImageOffsetY, (UINT32) (DrawContext->Screen.Height - BaseY));
 
   GuiDrawToBuffer (
     CursorImage,
-    0xFF,
+    DrawContext->CursorOpacity,
     DrawContext,
     BaseX,
     BaseY,
@@ -678,8 +689,10 @@ GuiOverlayPointer (
     MaxHeight
     );
 
-  mPointerOldBaseX = DrawBaseX;
-  mPointerOldBaseY = DrawBaseY;
+  mPointerOldDrawBaseX  = DrawBaseX;
+  mPointerOldDrawBaseY  = DrawBaseY;
+  mPointerOldDrawWidth  = MaxWidth;
+  mPointerOldDrawHeight = MaxHeight;
 }
 
 /**
@@ -723,23 +736,19 @@ GuiFlushScreen (
   IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  EFI_TPL OldTpl;
-
   UINTN   Index;
+  UINTN   ReverseIndex;
 
   UINT64  EndTsc;
   UINT64  DeltaTsc;
 
-  BOOLEAN Interrupts;
-
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen != NULL);
-  ASSERT (DrawContext->Screen->OffsetX == 0);
-  ASSERT (DrawContext->Screen->OffsetY == 0);
-  ASSERT (DrawContext->Screen->Draw != NULL);
+  ASSERT (DrawContext->Screen.OffsetX == 0);
+  ASSERT (DrawContext->Screen.OffsetY == 0);
+  ASSERT (DrawContext->Screen.Draw != NULL);
   for (Index = 0; Index < mNumValidDrawReqs; ++Index) {
-    DrawContext->Screen->Draw (
-      DrawContext->Screen,
+    DrawContext->Screen.Draw (
+      &DrawContext->Screen,
       DrawContext,
       DrawContext->GuiContext,
       0,
@@ -747,14 +756,10 @@ GuiFlushScreen (
       mDrawRequests[Index].X,
       mDrawRequests[Index].Y,
       mDrawRequests[Index].Width,
-      mDrawRequests[Index].Height
+      mDrawRequests[Index].Height,
+      DrawContext->Screen.Opacity
       );
   }
-  //
-  // Raise the TPL to not interrupt timing or flushing.
-  //
-  OldTpl     = gBS->RaiseTPL (TPL_NOTIFY);
-  Interrupts = SaveAndDisableInterrupts ();
 
   EndTsc   = AsmReadTsc ();
   DeltaTsc = EndTsc - mStartTsc;
@@ -766,25 +771,40 @@ GuiFlushScreen (
     GuiOverlayPointer (DrawContext);
   }
 
+  //
+  // FIXME: Reversing the blit order here has several benefits, due to the implicit
+  // old-before-new ordering which has been used when making the draw requests. The whole
+  // screen is updated in the memory buffer (by redrawing just the changing parts), then
+  // these parts are transferred one by one to the video memory.
+  // Due to lack of vsync in UEFI, any point through this transfer can be visible on screen.
+  // Reversing the blit order means:
+  //  - Combined old+new mouse pointer area can no longer show part of moving text one frame
+  //    ahead of the rest (see REF); moving text may instead 'tear' mouse, but this is
+  //    much less visible
+  //  - If mouse pointer is moving fast (old+new area is not merged), new pointer
+  //    is always added before old pointer is removed, avoiding mouse disappearing
+  //  - (A similar logic to the preceding should apply e.g. to the moving OS selector too)
+  // So reversing here gives a 'free' small but visible improvement in the display, given the
+  // current draw order; but a better full fix would be to specify explicit ordering
+  // requirements with each draw request, which would allow the best blit order to get this
+  // same improvement to be calculated independently of the order in which requests are added.
+  // REF: https://github.com/acidanthera/bugtracker/issues/1852
+  //
   for (Index = 0; Index < mNumValidDrawReqs; ++Index) {
+    ReverseIndex = mNumValidDrawReqs - Index - 1;
     GuiOutputBlt (
       mOutputContext,
       mScreenBuffer,
       EfiBltBufferToVideo,
-      mDrawRequests[Index].X,
-      mDrawRequests[Index].Y,
-      mDrawRequests[Index].X,
-      mDrawRequests[Index].Y,
-      mDrawRequests[Index].Width,
-      mDrawRequests[Index].Height,
+      mDrawRequests[ReverseIndex].X,
+      mDrawRequests[ReverseIndex].Y,
+      mDrawRequests[ReverseIndex].X,
+      mDrawRequests[ReverseIndex].Y,
+      mDrawRequests[ReverseIndex].Width,
+      mDrawRequests[ReverseIndex].Height,
       mScreenBufferDelta
       );
   }
-
-  if (Interrupts) {
-    EnableInterrupts ();
-  }
-  gBS->RestoreTPL (OldTpl);
 
   mNumValidDrawReqs = 0;
   //
@@ -800,24 +820,25 @@ GuiRedrawAndFlushScreen (
   )
 {
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen != NULL);
 
   mStartTsc = AsmReadTsc ();
 
-  GuiRequestDraw (0, 0, DrawContext->Screen->Width, DrawContext->Screen->Height);
+  GuiRequestDraw (0, 0, DrawContext->Screen.Width, DrawContext->Screen.Height);
   GuiFlushScreen (DrawContext);
 }
 
 EFI_STATUS
 GuiLibConstruct (
-  IN OC_PICKER_CONTEXT  *PickerContext,
-  IN UINT32             CursorDefaultX,
-  IN UINT32             CursorDefaultY
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN INT32                    CursorOffsetX,
+  IN INT32                    CursorOffsetY
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
+  INT64                                      CursorX;
+  INT64                                      CursorY;
 
-  mOutputContext = GuiOutputConstruct ();
+  mOutputContext = GuiOutputConstruct (GuiContext->Scale);
   if (mOutputContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise output\n"));
     return EFI_UNSUPPORTED;
@@ -826,22 +847,33 @@ GuiLibConstruct (
   OutputInfo = GuiOutputGetInfo (mOutputContext);
   ASSERT (OutputInfo != NULL);
 
-  CursorDefaultX = MIN (CursorDefaultX, OutputInfo->HorizontalResolution - 1);
-  CursorDefaultY = MIN (CursorDefaultY, OutputInfo->VerticalResolution   - 1);
+  if ((GuiContext->PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
+    CursorX = (INT64) CursorOffsetX + OutputInfo->HorizontalResolution / 2;
+    if (CursorX < 0) {
+      CursorX = 0;
+    } else if (CursorX > OutputInfo->HorizontalResolution - 1) {
+      CursorX = OutputInfo->HorizontalResolution - 1;
+    }
+    CursorY = (INT64) CursorOffsetY + OutputInfo->VerticalResolution / 2;
+    if (CursorY < 0) {
+      CursorY = 0;
+    } else if (CursorY > OutputInfo->VerticalResolution - 1) {
+      CursorY = OutputInfo->VerticalResolution - 1;
+    }
 
-  if ((PickerContext->PickerAttributes & OC_ATTR_USE_POINTER_CONTROL) != 0) {
     mPointerContext = GuiPointerConstruct (
-      CursorDefaultX,
-      CursorDefaultY,
+      (UINT32) CursorX,
+      (UINT32) CursorY,
       OutputInfo->HorizontalResolution,
-      OutputInfo->VerticalResolution
+      OutputInfo->VerticalResolution,
+      GuiContext->Scale
       );
     if (mPointerContext == NULL) {
       DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise pointer\n"));
     }
   }
 
-  mKeyContext = GuiKeyConstruct (PickerContext);
+  mKeyContext = GuiKeyConstruct (GuiContext->PickerContext);
   if (mKeyContext == NULL) {
     DEBUG ((DEBUG_WARN, "OCUI: Failed to initialise key input\n"));
   }
@@ -893,29 +925,34 @@ GuiLibDestruct (
 
 VOID
 GuiViewInitialize (
-  OUT    GUI_DRAWING_CONTEXT     *DrawContext,
-  IN OUT GUI_OBJ                 *Screen,
-  IN     GUI_CURSOR_GET_IMAGE    GetCursorImage,
-  IN     GUI_EXIT_LOOP           ExitLoop,
-  IN     BOOT_PICKER_GUI_CONTEXT *GuiContext
+  OUT GUI_DRAWING_CONTEXT      *DrawContext,
+  IN  BOOT_PICKER_GUI_CONTEXT  *GuiContext,
+  IN  CONST GUI_VIEW_CONTEXT   *ViewContext
   )
 {
   CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
 
   ASSERT (DrawContext != NULL);
-  ASSERT (Screen != NULL);
-  ASSERT (GetCursorImage != NULL);
-  ASSERT (ExitLoop != NULL);
 
   OutputInfo = GuiOutputGetInfo (mOutputContext);
   ASSERT (OutputInfo != NULL);
 
-  Screen->Width  = OutputInfo->HorizontalResolution;
-  Screen->Height = OutputInfo->VerticalResolution;
+  DrawContext->CursorOpacity = 0xFF;
+  DrawContext->Scale         = GuiContext->Scale;
 
-  DrawContext->Screen         = Screen;
-  DrawContext->GetCursorImage = GetCursorImage;
-  DrawContext->ExitLoop       = ExitLoop;
+  DrawContext->Screen.OffsetX     = 0;
+  DrawContext->Screen.OffsetY     = 0;
+  DrawContext->Screen.Width       = OutputInfo->HorizontalResolution;
+  DrawContext->Screen.Height      = OutputInfo->VerticalResolution;
+  DrawContext->Screen.Opacity     = 0xFF;
+  DrawContext->Screen.Draw        = ViewContext->Draw;
+  DrawContext->Screen.KeyEvent    = ViewContext->KeyEvent;
+  DrawContext->Screen.PtrEvent    = ViewContext->PtrEvent;
+  DrawContext->Screen.NumChildren = ViewContext->NumChildren;
+  DrawContext->Screen.Children    = ViewContext->Children;
+
+  DrawContext->GetCursorImage = ViewContext->GetCursorImage;
+  DrawContext->ExitLoop       = ViewContext->ExitLoop;
   DrawContext->GuiContext     = GuiContext;
   InitializeListHead (&DrawContext->Animations);
 }
@@ -926,12 +963,14 @@ GuiViewDeinitialize (
   OUT    BOOT_PICKER_GUI_CONTEXT *GuiContext
   )
 {
-  GUI_POINTER_STATE PointerState;
+  GUI_PTR_POSITION                           CursorPosition;
+  CONST EFI_GRAPHICS_OUTPUT_MODE_INFORMATION *OutputInfo;
 
   if (mPointerContext != NULL) {
-    GuiPointerGetState (mPointerContext, &PointerState);
-    GuiContext->CursorDefaultX = PointerState.X;
-    GuiContext->CursorDefaultY = PointerState.Y;
+    OutputInfo = GuiOutputGetInfo (mOutputContext);
+    GuiPointerGetPosition (mPointerContext, &CursorPosition);
+    GuiContext->CursorOffsetX = (INT32) ((INT64) CursorPosition.Pos.X - OutputInfo->HorizontalResolution / 2);
+    GuiContext->CursorOffsetY = (INT32) ((INT64) CursorPosition.Pos.Y - OutputInfo->VerticalResolution / 2);
   }
 
   ZeroMem (DrawContext, sizeof (*DrawContext));
@@ -949,26 +988,45 @@ GuiGetBaseCoords (
   GUI_OBJ_CHILD *ChildObj;
   INT64         X;
   INT64         Y;
+  UINT32        Index;
 
   ASSERT (This != NULL);
   ASSERT (DrawContext != NULL);
-  ASSERT (DrawContext->Screen->OffsetX == 0);
-  ASSERT (DrawContext->Screen->OffsetY == 0);
+  ASSERT (DrawContext->Screen.OffsetX == 0);
+  ASSERT (DrawContext->Screen.OffsetY == 0);
   ASSERT (BaseX != NULL);
   ASSERT (BaseY != NULL);
 
   X   = 0;
   Y   = 0;
   Obj = This;
-  while (Obj != DrawContext->Screen) {
+  do {
     X += Obj->OffsetX;
     Y += Obj->OffsetY;
 
     ChildObj = BASE_CR (Obj, GUI_OBJ_CHILD, Obj);
     Obj      = ChildObj->Parent;
-    ASSERT (Obj != NULL);
-    ASSERT (IsNodeInList (&Obj->Children, &ChildObj->Link));
+
+    DEBUG_CODE_BEGIN ();
+    if (Obj != NULL) {
+      for (Index = 0; Index < Obj->NumChildren; ++Index) {
+        if (Obj->Children[Index] == ChildObj) {
+          break;
+        }
+      }
+      ASSERT (Index != Obj->NumChildren);
+    }
+    DEBUG_CODE_END ();
+  } while (Obj != NULL);
+
+  DEBUG_CODE_BEGIN ();
+  for (Index = 0; Index < DrawContext->Screen.NumChildren; ++Index) {
+    if (DrawContext->Screen.Children[Index] == ChildObj) {
+      break;
+    }
   }
+  ASSERT (Index != DrawContext->Screen.NumChildren);
+  DEBUG_CODE_END ();
 
   *BaseX = X;
   *BaseY = Y;
@@ -976,36 +1034,28 @@ GuiGetBaseCoords (
 
 VOID
 GuiDrawLoop (
-  IN OUT GUI_DRAWING_CONTEXT  *DrawContext,
-  IN     UINT32               TimeOutSeconds
+  IN OUT GUI_DRAWING_CONTEXT  *DrawContext
   )
 {
-  EFI_STATUS          Status;
   BOOLEAN             Result;
 
-  INTN                InputKey;
-  BOOLEAN             Modifier;
-  GUI_POINTER_STATE   PointerState;
-  GUI_OBJ             *HoldObject;
-  INT64               HoldObjBaseX;
-  INT64               HoldObjBaseY;
-  CONST LIST_ENTRY    *AnimEntry;
-  CONST GUI_ANIMATION *Animation;
-  UINT64              LoopStartTsc;
-  UINT64              LastTsc;
-  UINT64              NewLastTsc;
-  BOOLEAN             ObjectHeld;
-
-  CONST GUI_IMAGE     *CursorImage;
-  UINT64              FrameTime;
+  GUI_KEY_EVENT        KeyEvent;
+  GUI_PTR_EVENT        PointerEvent;
+  GUI_OBJ              *TempObject;
+  GUI_OBJ              *HoldObject;
+  INT64                HoldObjBaseX;
+  INT64                HoldObjBaseY;
+  CONST LIST_ENTRY     *AnimEntry;
+  GUI_ANIMATION        *Animation;
+  UINT64               LoopStartTsc;
+  UINT64               LastTsc;
+  UINT64               NewLastTsc;
 
   ASSERT (DrawContext != NULL);
 
-  mNumValidDrawReqs = 0;
-  FrameTime         = 0;
-  HoldObject        = NULL;
-  ObjectHeld        = FALSE;
-
+  mNumValidDrawReqs      = 0;
+  DrawContext->FrameTime = 0;
+  HoldObject             = NULL;
   //
   // Clear previous inputs.
   //
@@ -1025,90 +1075,64 @@ GuiDrawLoop (
   do {
     if (mPointerContext != NULL) {
       //
-      // TODO: Put cursor dimensions in some context?
-      //
-      ASSERT (DrawContext->GetCursorImage != NULL);
-      CursorImage = DrawContext->GetCursorImage (DrawContext->GuiContext);
-      ASSERT (CursorImage != NULL);
-      //
       // Restore the rectangle previously covered by the cursor.
       // The new cursor is drawn right before flushing the screen.
       //
-      GuiRequestDrawCrop (
-        DrawContext,
-        mPointerOldBaseX,
-        mPointerOldBaseY,
-        CursorImage->Width,
-        CursorImage->Height
+      GuiRequestDraw (
+        mPointerOldDrawBaseX,
+        mPointerOldDrawBaseY,
+        mPointerOldDrawWidth,
+        mPointerOldDrawHeight
         );
       //
       // Process pointer events.
       //
-      GuiPointerGetState (mPointerContext, &PointerState);
-
-      if (PointerState.PrimaryDown) {
-        if (!ObjectHeld && HoldObject == NULL) {
-          HoldObject = GuiObjDelegatePtrEvent (
-                          DrawContext->Screen,
-                          DrawContext,
-                          DrawContext->GuiContext,
-                          GuiPointerPrimaryDown,
-                          0,
-                          0,
-                          PointerState.X,
-                          PointerState.Y
-                          );
-          
+      Result = GuiPointerGetEvent (mPointerContext, &PointerEvent);
+      if (Result) {
+        if (PointerEvent.Type == GuiPointerPrimaryUp) {
+          //
+          // 'Button down' must have caught and set an interaction object, but
+          // it may be NULL for objects that solely delegate pointer events.
+          //
+          if (HoldObject != NULL) {
+            GuiGetBaseCoords (
+              HoldObject,
+              DrawContext,
+              &HoldObjBaseX,
+              &HoldObjBaseY
+              );
+            HoldObject->PtrEvent (
+              HoldObject,
+              DrawContext,
+              DrawContext->GuiContext,
+              HoldObjBaseX,
+              HoldObjBaseY,
+              &PointerEvent
+              );
+            HoldObject = NULL;
+          }
+        } else {
+          //
+          // HoldObject == NULL cannot be tested here as double-click may arrive
+          // before button up.
+          //
+          ASSERT (PointerEvent.Type != GuiPointerPrimaryUp);
+          TempObject = DrawContext->Screen.PtrEvent (
+            &DrawContext->Screen,
+            DrawContext,
+            DrawContext->GuiContext,
+            0,
+            0,
+            &PointerEvent
+            );
+          if (PointerEvent.Type == GuiPointerPrimaryDown) {
+            HoldObject = TempObject;
+          }
         }
-
-        ObjectHeld = TRUE;
-      } else {
-        ObjectHeld = FALSE;
-      }
-
-      if (HoldObject != NULL) {
-        GuiGetBaseCoords (
-          HoldObject,
-          DrawContext,
-          &HoldObjBaseX,
-          &HoldObjBaseY
-          );
-        HoldObject->PtrEvent (
-                      HoldObject,
-                      DrawContext,
-                      DrawContext->GuiContext,
-                      !PointerState.PrimaryDown ? GuiPointerPrimaryUp : GuiPointerPrimaryHold,
-                      HoldObjBaseX,
-                      HoldObjBaseY,
-                      (INT64)PointerState.X - HoldObjBaseX,
-                      (INT64)PointerState.Y - HoldObjBaseY
-                      );
-        if (!PointerState.PrimaryDown) {
-          HoldObject = NULL;
-        }
-      }
-    }
-
-    if (mKeyContext != NULL) {
-      //
-      // Process key events. Only allow one key at a time for now.
-      //
-      Status = GuiKeyRead (mKeyContext, &InputKey, &Modifier);
-      if (!EFI_ERROR (Status)) {
-        ASSERT (DrawContext->Screen->KeyEvent != NULL);
-        DrawContext->Screen->KeyEvent (
-                               DrawContext->Screen,
-                               DrawContext,
-                               DrawContext->GuiContext,
-                               0,
-                               0,
-                               InputKey,
-                               Modifier
-                               );
         //
-        // If detected key press then disable menu timeout
+        // If detected pointer press then disable menu timeout
         //
-        if (TimeOutSeconds > 0) {
+        if (DrawContext->TimeOutSeconds > 0) {
           //
           // Voice only unrelated key press.
           //
@@ -1121,7 +1145,61 @@ GuiDrawLoop (
               );
           }
 
-          TimeOutSeconds = 0;
+          DrawContext->TimeOutSeconds = 0;
+        }
+      } else if (HoldObject != NULL) {
+        //
+        // If there are no events to process, update the cursor position with
+        // the interaction object for visual effects.
+        //
+        PointerEvent.Type = GuiPointerPrimaryDown;
+        GuiPointerGetPosition (mPointerContext, &PointerEvent.Pos);
+        GuiGetBaseCoords (
+          HoldObject,
+          DrawContext,
+          &HoldObjBaseX,
+          &HoldObjBaseY
+          );
+        HoldObject->PtrEvent (
+          HoldObject,
+          DrawContext,
+          DrawContext->GuiContext,
+          HoldObjBaseX,
+          HoldObjBaseY,
+          &PointerEvent
+          );
+      }
+    }
+
+    if (mKeyContext != NULL) {
+      //
+      // Process key events. Only allow one key at a time for now.
+      //
+      Result = GuiKeyGetEvent (mKeyContext, &KeyEvent);
+      if (Result) {
+        DrawContext->Screen.KeyEvent (
+          &DrawContext->Screen,
+          DrawContext,
+          DrawContext->GuiContext,
+          &KeyEvent
+          );
+        //
+        // If detected key press then disable menu timeout
+        //
+        if (DrawContext->TimeOutSeconds > 0) {
+          //
+          // Voice only unrelated key press.
+          //
+          if (!DrawContext->GuiContext->ReadyToBoot
+            && DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileAbortTimeout,
+              FALSE
+              );
+          }
+
+          DrawContext->TimeOutSeconds = 0;
         }
       }
     }
@@ -1131,15 +1209,16 @@ GuiDrawLoop (
     AnimEntry = GetFirstNode (&DrawContext->Animations);
     while (!IsNull (&DrawContext->Animations, AnimEntry)) {
       Animation = BASE_CR (AnimEntry, GUI_ANIMATION, Link);
-      Result = Animation->Animate (Animation->Context, DrawContext, FrameTime);
+      Result = Animation->Animate (Animation->Context, DrawContext, DrawContext->FrameTime);
 
       AnimEntry = GetNextNode (&DrawContext->Animations, AnimEntry);
 
       if (Result) {
         RemoveEntryList (&Animation->Link);
+        InitializeListHead (&Animation->Link);
       }
     }
-    ++FrameTime;
+    ++DrawContext->FrameTime;
     //
     // Flush the changes performed in this refresh iteration.
     //
@@ -1154,23 +1233,79 @@ GuiDrawLoop (
         1000000
         ));
       if (DrawContext->GuiContext->AudioPlaybackTimeout <= 0) {
-        DrawContext->GuiContext->PickerContext->PlayAudioFile (
-          DrawContext->GuiContext->PickerContext,
-          OcVoiceOverAudioFileSelected,
-          FALSE
-          );
-        DrawContext->GuiContext->PickerContext->PlayAudioEntry (
-          DrawContext->GuiContext->PickerContext,
-          DrawContext->GuiContext->BootEntry
-          );
+        switch (DrawContext->GuiContext->VoAction) {
+          case CanopyVoSelectedEntry:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
+            DrawContext->GuiContext->PickerContext->PlayAudioEntry (
+              DrawContext->GuiContext->PickerContext,
+              DrawContext->GuiContext->BootEntry
+              );
+            break;
+          }
+
+          case CanopyVoFocusPassword:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileEnterPassword,
+              TRUE
+              );
+            break;
+          }
+
+          case CanopyVoFocusShutDown:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileShutDown,
+              TRUE
+              );
+            break;
+          }
+
+          case CanopyVoFocusRestart:
+          {
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileSelected,
+              FALSE
+              );
+            DrawContext->GuiContext->PickerContext->PlayAudioFile (
+              DrawContext->GuiContext->PickerContext,
+              OcVoiceOverAudioFileRestart,
+              TRUE
+              );
+            break;
+          }
+
+          default:
+          {
+            ASSERT (FALSE);
+            break;
+          }
+        }
+        //
+        // Avoid playing twice if we reach precisely 0.
+        //
+        DrawContext->GuiContext->AudioPlaybackTimeout = -1;
       }
     }
 
     //
     // Exit early if reach timer timeout and timer isn't disabled due to key event
     //
-    if (TimeOutSeconds > 0
-      && GetTimeInNanoSecond (NewLastTsc - LoopStartTsc) >= TimeOutSeconds * 1000000000ULL) {
+    if (DrawContext->TimeOutSeconds > 0
+      && GetTimeInNanoSecond (NewLastTsc - LoopStartTsc) >= DrawContext->TimeOutSeconds * 1000000000ULL) {
       if (DrawContext->GuiContext->PickerContext->PickerAudioAssist) {
         DrawContext->GuiContext->PickerContext->PlayAudioFile (
           DrawContext->GuiContext->PickerContext,
@@ -1183,7 +1318,7 @@ GuiDrawLoop (
     }
 
     LastTsc = NewLastTsc;
-  } while (!DrawContext->ExitLoop (DrawContext->GuiContext));
+  } while (!DrawContext->ExitLoop (DrawContext, DrawContext->GuiContext));
 }
 
 VOID
@@ -1200,8 +1335,8 @@ GuiClearScreen (
     0,
     0,
     0,
-    DrawContext->Screen->Width,
-    DrawContext->Screen->Height,
+    DrawContext->Screen.Width,
+    DrawContext->Screen.Height,
     0
     );
 }

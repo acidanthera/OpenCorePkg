@@ -21,6 +21,7 @@
   PeCoffDebug.c
   PeCoffHash.c
   PeCoffInit.c
+  PeCoffInternal.h
   PeCoffLoad.c
   PeCoffRelocate.c
 

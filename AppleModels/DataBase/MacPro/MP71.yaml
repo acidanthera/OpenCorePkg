@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1554.80.3.0.0"
-BIOSLegacyVersion: "MP71.88Z.F000.B00.2101062036"
-BIOSReleaseDate: "01/06/2021"
+BIOSVersion: "1715.81.2.0.0"
+BIOSLegacyVersion: "MP71.88Z.F000.B00.2201062037"
+BIOSReleaseDate: "01/06/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacPro7,1"
 SystemVersion: "1.0"
@@ -27,8 +27,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x0
 FirmwareFeatures: 0xFDAFF066
 FirmwareFeaturesMask: 0xFFFFFF7F
-ExtendedFirmwareFeatures: 0x00000000FDAFF066
-ExtendedFirmwareFeaturesMask: 0x00000000FFFFFF7F
+ExtendedFirmwareFeatures: 0x00000008FDAFF066
+ExtendedFirmwareFeaturesMask: 0x00000008FFFFFF7F
 MemoryFormFactor: 0x9
 ProcessorType:
   - 0x0F02
@@ -47,17 +47,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      MP71.88Z.F000.B00.2101062036
+    BIOS ID:      MP71.88Z.F000.B00.2201062037
     Model:        MP71
-    EFI Version:  1554.80.3.0.0
-    Built by:     root@bb-g8-pdb54
-    Date:         Wed Jan  6 20:36:37 2021
-    Revision:     1554.80.3 (B&I)
+    EFI Version:  1715.81.2.0.0
+    Built by:     root@bb-g8-pdb163
+    Date:         Thu Jan  6 20:37:56 2022
+    Revision:     1715.81.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1200.0.30.4
-    UUID:         C1394BE3-3DE9-34D8-954D-F0AE3CDAFFF4
-    UUID:         FB5A746B-90B0-30BE-A206-2B02D0A69117
+    Compiler:     clang-1300.0.29.10
+    UUID:         CDA70B77-48BE-34BA-9C82-1D63158088BF
+    UUID:         2CD6A5E1-79C5-382B-9C11-1885F572E574
 Specifications:
   CPUCodename:
     - "Cascade Lake"
@@ -69,6 +69,9 @@ Specifications:
     - "Radeon Pro W5700X"
     - "Radeon Pro Vega II"
     - "Radeon Pro Vega II Duo"
+    - "Radeon Pro W6800X"
+    - "Radeon Pro W6900X"
+    - "Radeon Pro W6800X Duo"
   RAM:
     - "32GB DDR4 ECC"
   SystemReportName:
@@ -98,6 +101,7 @@ AppleModelYear:
   - 2019
   - 2020
   - 2021
+  - 2022
 MinimumOSVersion: "10.15.1"
 MaximumOSVersion: null
 AppleModelId: "J160"

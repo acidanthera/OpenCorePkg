@@ -26,6 +26,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcDeviceMiscLib.h>
 #include <Library/OcMemoryLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcOSInfoLib.h>
@@ -405,7 +406,7 @@ ApplyBooterPatches (
     (VOID **)&LoadedImage
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OCABC: Failed to handle LoadedImage protocol - %r", Status));
+    DEBUG ((DEBUG_ERROR, "OCABC: Failed to handle LoadedImage protocol - %r\n", Status));
     return;
   }
 
@@ -823,6 +824,11 @@ OcStartImage (
       AppleLoadedImage,
       BootCompat->ServicePtrs.GetMemoryMap
       );
+
+    if (BootCompat->Settings.ResizeAppleGpuBars >= 0
+      && BootCompat->Settings.ResizeAppleGpuBars < PciBarTotal) {
+      ResizeGpuBars (BootCompat->Settings.ResizeAppleGpuBars, FALSE);
+    }
   } else if (BootCompat->Settings.SignalAppleOS) {
     Status = gBS->LocateProtocol (
       &gEfiOSInfoProtocolGuid,
@@ -921,6 +927,17 @@ OcStartImage (
 /**
   UEFI Boot Services ExitBootServices override.
   Patches kernel entry point with jump to our KernelEntryPatchJumpBack().
+  
+  Notes:
+    - Most OSes attempt to call ExitBootServices more than once if it fails initially
+      (similar to OpenCore ForceExitBootServices)
+      - Therefore, OcExitBootServices may get called more than once
+      - However this should never be relied upon for correct operation
+    - Any logging within this call but before original ExitBootServices is attempted
+      (e.g. within a scheduled handler) may cause ExitBootServices to fail (e.g. it may
+      change the memory map by allocating), and should only be done, if at all, in the
+      case of unexpected errors
+    - Never log after original ExitBootServices has been attempted, not even on error
 **/
 STATIC
 EFI_STATUS

@@ -856,7 +856,12 @@ AppleSlideRestore (
   // Restore csr-active-config to a value it was before our slide=X alteration.
   //
   if (BootArgs->CsrActiveConfig != NULL && SlideSupport->HasCsrActiveConfig) {
-    *BootArgs->CsrActiveConfig = SlideSupport->CsrActiveConfig;
+    //
+    // Never enable more bits than EfiBoot actually allowed.
+    // On public builds EfiBoot will clear the CSR_ALLOW_APPLE_INTERNAL
+    // bit, and we must not re-enable it.
+    //
+    *BootArgs->CsrActiveConfig &= SlideSupport->CsrActiveConfig;
   }
 
   //

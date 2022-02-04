@@ -1,0 +1,50 @@
+## @file
+# Module entry point library for UEFI Application.
+#
+# Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcApplicationEntryPoint
+  MODULE_UNI_FILE                = UefiApplicationEntryPoint.uni
+  FILE_GUID                      = F2C556D6-C7FA-4930-8F04-5953D9E7A98B
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = UefiApplicationEntryPoint|UEFI_APPLICATION
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  ApplicationEntryPoint.c
+
+[Sources.Ia32]
+  Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
+
+[Sources.X64]
+  X64/Canary.nasm
+  X64/GS.nasm          | MSFT
+
+[Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
+  CanaryDummy.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  UefiBootServicesTableLib
+  DebugLib
+  BaseLib
+  PcdLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES

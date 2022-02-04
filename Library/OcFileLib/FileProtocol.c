@@ -1,19 +1,11 @@
 /** @file
-  Copyright (C) 2019, vit9696. All rights reserved.
-
-  All rights reserved.
-
-  This program and the accompanying materials
-  are licensed and made available under the terms and conditions of the BSD License
-  which accompanies this distribution.  The full text of the license may be found at
-  http://opensource.org/licenses/bsd-license.php
-
-  THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
-  WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+  Copyright (C) 2019-2021, vit9696, Goldfish64, mikebeaton. All rights reserved.<BR>
+  SPDX-License-Identifier: BSD-3-Clause
 **/
 
 #include <Uefi.h>
 #include <Guid/FileInfo.h>
+#include <Protocol/OcBootstrap.h>
 #include <Protocol/SimpleFileSystem.h>
 
 #include <Library/BaseLib.h>
@@ -34,16 +26,16 @@
 #define SEC_PER_YEAR                                    ((UINTN) 31,536,000)
 
 STATIC
-UINTN
+UINT32
 EfiGetEpochDays (
   IN  EFI_TIME  *Time
   )
 {
-  UINTN a;
-  UINTN y;
-  UINTN m;
-  UINTN JulianDate;  // Absolute Julian Date representation of the supplied Time
-  UINTN EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
+  UINT8  a;
+  UINT32 y;
+  UINT8  m;
+  UINT32 JulianDate;  // Absolute Julian Date representation of the supplied Time
+  UINT32 EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
 
   a = (14 - Time->Month) / 12 ;
   y = Time->Year + 4800 - a;
@@ -66,15 +58,15 @@ EfiTimeToEpoch (
   UINT32 EpochDays;   // Number of days elapsed since EPOCH_JULIAN_DAY
   UINT32 EpochSeconds;
 
-  EpochDays = (UINT32)EfiGetEpochDays (Time);
+  EpochDays = EfiGetEpochDays (Time);
 
-  EpochSeconds = (EpochDays * SEC_PER_DAY) + ((UINTN)Time->Hour * SEC_PER_HOUR) + (Time->Minute * SEC_PER_MIN) + Time->Second;
+  EpochSeconds = (EpochDays * SEC_PER_DAY) + (Time->Hour * SEC_PER_HOUR) + (Time->Minute * SEC_PER_MIN) + Time->Second;
 
   return EpochSeconds;
 }
 
 EFI_STATUS
-GetFileData (
+OcGetFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   IN  UINT32             Position,
   IN  UINT32             Size,
@@ -119,7 +111,7 @@ GetFileData (
 }
 
 EFI_STATUS
-GetFileSize (
+OcGetFileSize (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT32             *Size
   )
@@ -134,7 +126,7 @@ GetFileSize (
     // Some drivers, like EfiFs, return EFI_UNSUPPORTED when trying to seek
     // past the file size. Use slow method via attributes for them.
     //
-    FileInfo = GetFileInfo (File, &gEfiFileInfoGuid, sizeof (*FileInfo), NULL);
+    FileInfo = OcGetFileInfo (File, &gEfiFileInfoGuid, sizeof (*FileInfo), NULL);
     if (FileInfo != NULL) {
       if ((UINT32) FileInfo->FileSize == FileInfo->FileSize) {
         *Size = (UINT32) FileInfo->FileSize;
@@ -161,14 +153,14 @@ GetFileSize (
 }
 
 EFI_STATUS
-GetFileModificationTime (
+OcGetFileModificationTime (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT EFI_TIME           *Time
   )
 {
   EFI_FILE_INFO  *FileInfo;
 
-  FileInfo = GetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
+  FileInfo = OcGetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
   if (FileInfo == NULL) {
     return EFI_INVALID_PARAMETER;
   }
@@ -180,7 +172,7 @@ GetFileModificationTime (
 }
 
 BOOLEAN
-IsWritableFileSystem (
+OcIsWritableFileSystem (
   IN EFI_FILE_PROTOCOL  *Fs
   )
 {
@@ -190,7 +182,7 @@ IsWritableFileSystem (
   //
   // We cannot test if the file system is writeable without attempting to create some file.
   //
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &File,
     L"octest.fil",
@@ -200,7 +192,7 @@ IsWritableFileSystem (
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
-  
+
   //
   // Delete the temporary file and report the found file system.
   //
@@ -209,7 +201,7 @@ IsWritableFileSystem (
 }
 
 EFI_STATUS
-FindWritableFileSystem (
+OcFindWritableFileSystem (
   IN OUT EFI_FILE_PROTOCOL  **WritableFs
   )
 {
@@ -249,7 +241,7 @@ FindWritableFileSystem (
         ));
       continue;
     }
-    
+
     Status = SimpleFs->OpenVolume (SimpleFs, &Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((
@@ -261,7 +253,7 @@ FindWritableFileSystem (
       continue;
     }
 
-    if (IsWritableFileSystem (Fs)) {
+    if (OcIsWritableFileSystem (Fs)) {
       FreePool (HandleBuffer);
       *WritableFs = Fs;
       return EFI_SUCCESS;
@@ -279,7 +271,42 @@ FindWritableFileSystem (
 }
 
 EFI_STATUS
-SetFileData (
+OcFindWritableOcFileSystem (
+  OUT EFI_FILE_PROTOCOL  **FileSystem
+  )
+{
+  EFI_STATUS             Status;
+  OC_BOOTSTRAP_PROTOCOL  *Bootstrap;
+  EFI_HANDLE             PreferedHandle;
+
+  PreferedHandle = NULL;
+
+  Status = gBS->LocateProtocol (
+    &gOcBootstrapProtocolGuid,
+    NULL,
+    (VOID **) &Bootstrap
+    );
+  if (!EFI_ERROR (Status) && Bootstrap->Revision == OC_BOOTSTRAP_PROTOCOL_REVISION) {
+    PreferedHandle = Bootstrap->GetLoadHandle (Bootstrap);
+  }
+
+  if (PreferedHandle != NULL) {
+    *FileSystem = OcLocateRootVolume (PreferedHandle, NULL);
+  } else {
+    *FileSystem = NULL;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCFS: Preferred handle is %p found fs %p\n", PreferedHandle, *FileSystem));
+
+  if (*FileSystem == NULL) {
+    return OcFindWritableFileSystem (FileSystem);
+  }
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcSetFileData (
   IN EFI_FILE_PROTOCOL  *WritableFs OPTIONAL,
   IN CONST CHAR16       *FileName,
   IN CONST VOID         *Buffer,
@@ -295,7 +322,7 @@ SetFileData (
   ASSERT (Buffer != NULL);
 
   if (WritableFs == NULL) {
-    Status = FindWritableFileSystem (&Fs);
+    Status = OcFindWritableFileSystem (&Fs);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_VERBOSE, "OCFS: WriteFileData can't find writable FS\n"));
       return Status;
@@ -304,7 +331,7 @@ SetFileData (
     Fs = WritableFs;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Fs,
     &File,
     (CHAR16 *) FileName,
@@ -335,13 +362,13 @@ SetFileData (
 
   if (WritableFs == NULL) {
     Fs->Close (Fs);
-  } 
+  }
 
   return Status;
 }
 
 EFI_STATUS
-AllocateCopyFileData (
+OcAllocateCopyFileData (
   IN  EFI_FILE_PROTOCOL  *File,
   OUT UINT8              **Buffer,
   OUT UINT32             *BufferSize
@@ -354,7 +381,7 @@ AllocateCopyFileData (
   //
   // Get full file data.
   //
-  Status = GetFileSize (File, &ReadSize);
+  Status = OcGetFileSize (File, &ReadSize);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -363,7 +390,7 @@ AllocateCopyFileData (
   if (FileBuffer == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
-  Status = GetFileData (File, 0, ReadSize, FileBuffer);
+  Status = OcGetFileData (File, 0, ReadSize, FileBuffer);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);
     return Status;
@@ -375,7 +402,7 @@ AllocateCopyFileData (
 }
 
 VOID
-DirectorySeachContextInit (
+OcDirectorySeachContextInit (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context
   )
 {
@@ -385,7 +412,31 @@ DirectorySeachContextInit (
 }
 
 EFI_STATUS
-GetNewestFileFromDirectory (
+OcEnsureDirectoryFile (
+  IN     EFI_FILE_PROTOCOL        *File,
+  IN     BOOLEAN                  IsDirectory
+  )
+{
+  EFI_FILE_INFO     *FileInfo;
+
+  //
+  // Ensure this is a directory/file.
+  //
+  FileInfo = OcGetFileInfo (File, &gEfiFileInfoGuid, 0, NULL);
+  if (FileInfo == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+  if (((FileInfo->Attribute & EFI_FILE_DIRECTORY) != 0) != IsDirectory) {
+    FreePool (FileInfo);
+    return EFI_INVALID_PARAMETER;
+  }
+  FreePool (FileInfo);
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+OcGetNewestFileFromDirectory (
   IN OUT DIRECTORY_SEARCH_CONTEXT *Context,
   IN     EFI_FILE_PROTOCOL        *Directory,
   IN     CHAR16                   *FileNameStartsWith OPTIONAL,
@@ -409,18 +460,10 @@ GetNewestFileFromDirectory (
   LatestIndex = 0;
   LatestEpoch = 0;
 
-  //
-  // Ensure this is a directory.
-  //
-  FileInfoCurrent = GetFileInfo (Directory, &gEfiFileInfoGuid, 0, NULL);
-  if (FileInfoCurrent == NULL) {
-    return EFI_INVALID_PARAMETER;
+  Status = OcEnsureDirectoryFile (Directory, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
-  if (!(FileInfoCurrent->Attribute & EFI_FILE_DIRECTORY)) {
-    FreePool (FileInfoCurrent);
-    return EFI_INVALID_PARAMETER;
-  }
-  FreePool (FileInfoCurrent);
 
   //
   // Allocate two FILE_INFO structures.
@@ -527,4 +570,81 @@ GetNewestFileFromDirectory (
   Context->PreviousTime   = LatestEpoch;
 
   return EFI_SUCCESS;
+}
+
+//
+// TODO: OcGetNewestFileFromDirectory above and ScanExtensions in CachelessContext.c could be redone using this.
+// TODO: I am unclear exactly what the Apple 32-bit HFS is being described as doing (see also OcGetFileInfo), so
+// have just copied the existing handling.
+//
+EFI_STATUS
+OcScanDirectory (
+  IN      EFI_FILE_HANDLE                 Directory,
+  IN      OC_PROCESS_DIRECTORY_ENTRY      ProcessEntry,
+  IN OUT  VOID                            *Context            OPTIONAL
+  )
+{
+  EFI_STATUS        Status;
+  EFI_STATUS        TempStatus;
+  EFI_FILE_INFO     *FileInfo;
+  UINTN             FileInfoSize;
+
+  ASSERT (Directory != NULL);
+  ASSERT (ProcessEntry != NULL);
+
+  Status = OcEnsureDirectoryFile (Directory, TRUE);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  //
+  // Allocate FILE_INFO structure.
+  //
+  FileInfo = AllocatePool (SIZE_1KB);
+  if (FileInfo == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  Status = EFI_NOT_FOUND;
+  Directory->SetPosition (Directory, 0);
+
+  do {
+    //
+    // Apple's HFS+ driver does not adhere to the spec and will return zero for
+    // EFI_BUFFER_TOO_SMALL. EFI_FILE_INFO structures larger than 1KB are
+    // unrealistic as the filename is the only variable.
+    //
+    FileInfoSize = SIZE_1KB - sizeof (CHAR16);
+    TempStatus = Directory->Read (Directory, &FileInfoSize, FileInfo);
+    if (EFI_ERROR (TempStatus)) {
+      Status = TempStatus;
+      break;
+    }
+
+    if (FileInfoSize > 0) {
+      TempStatus = ProcessEntry (Directory, FileInfo, FileInfoSize, Context);
+
+      //
+      // Act as if no matching file was found.
+      //
+      if (TempStatus == EFI_NOT_FOUND) {
+        continue;
+      }
+
+      if (EFI_ERROR (TempStatus)) {
+        Status = TempStatus;
+        break;
+      }
+
+      //
+      // At least one file found.
+      //
+      Status = EFI_SUCCESS;
+    }
+  } while (FileInfoSize > 0);
+
+  Directory->SetPosition (Directory, 0);
+  FreePool (FileInfo);
+
+  return Status;
 }

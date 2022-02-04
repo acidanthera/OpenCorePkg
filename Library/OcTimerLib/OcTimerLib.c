@@ -232,6 +232,21 @@ GetTimeInNanoSecond (
 }
 
 /**
+  Return cached PerformanceCounterFrequency value.
+
+  @retval               The timer frequency in use.
+
+**/
+UINT64
+EFIAPI
+GetTscFrequency (
+  VOID
+  )
+{
+  return mTscFrequency;
+}
+
+/**
   The constructor function caches PerformanceCounterFrequency.
 
   @retval EFI_SUCCESS   The constructor always returns RETURN_SUCCESS.

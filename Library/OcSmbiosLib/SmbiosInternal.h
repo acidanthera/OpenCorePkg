@@ -42,13 +42,13 @@ enum {
   OcSmbiosSystemInformationHandle,
   OcSmbiosBaseboardInformationHandle,
   OcSmbiosSystemEnclosureHandle,
-  OcSmbiosProcessorInformationHandle,
+  /* OcSmbiosProcessorInformationHandle, */
   OcSmbiosMemoryControllerInformationHandle,
   OcSmbiosMemoryModuleInformatonHandle,
   /* OcSmbiosCacheInformationHandle, */
-  OcSmbiosL1CacheHandle,
-  OcSmbiosL2CacheHandle,
-  OcSmbiosL3CacheHandle,
+  /* OcSmbiosL1CacheHandle, */
+  /* OcSmbiosL2CacheHandle, */
+  /* OcSmbiosL3CacheHandle, */
   /* OcSmbiosPortConnectorInformationHandle, */
   /* OcSmbiosSystemSlotsHandle, */
   OcSmbiosOnboardDeviceInformationHandle,

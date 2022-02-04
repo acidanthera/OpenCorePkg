@@ -664,6 +664,7 @@
 		35529AD22461768100CF8169 /* VirtualMemory.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = VirtualMemory.h; sourceTree = "<group>"; };
 		35529AD32461768100CF8169 /* ProcessorInfo.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = ProcessorInfo.h; sourceTree = "<group>"; };
 		357E232523F2A06B00BC930F /* UDK */ = {isa = PBXFileReference; lastKnownFileType = folder; path = UDK; sourceTree = "<group>"; };
+		EC81B0C5248DA5D4005033B6 /* ControlMsrE2 */ = {isa = PBXFileReference; lastKnownFileType = folder; path = ControlMsrE2; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -808,6 +809,7 @@
 		3511D57D23FDB2A700CC3B17 /* Application */ = {
 			isa = PBXGroup;
 			children = (
+				EC81B0C5248DA5D4005033B6 /* ControlMsrE2 */,
 				3511D57E23FDB2A800CC3B17 /* Bootstrap */,
 			);
 			path = Application;

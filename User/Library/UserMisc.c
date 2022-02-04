@@ -662,3 +662,21 @@ GetFirstGuidHob (
 {
   return NULL;
 }
+
+EFI_DEVICE_PATH_PROTOCOL *
+EFIAPI
+DevicePathFromHandle (
+  IN EFI_HANDLE                      Handle
+  )
+{
+  return NULL;
+}
+
+EFI_FILE_PROTOCOL *
+OcLocateRootVolume (
+  IN  EFI_HANDLE                         DeviceHandle  OPTIONAL,
+  IN  EFI_DEVICE_PATH_PROTOCOL           *FilePath     OPTIONAL
+  )
+{
+  return NULL;
+}

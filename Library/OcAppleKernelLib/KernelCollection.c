@@ -27,8 +27,6 @@
 #include <Library/OcGuardLib.h>
 
 #include "PrelinkedInternal.h"
-#include "ProcessorBind.h"
-#include "Uefi/UefiInternalFormRepresentation.h"
 
 STATIC
 UINTN

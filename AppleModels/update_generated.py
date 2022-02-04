@@ -138,6 +138,12 @@ def export_db_macinfolib(db, path, year=0):
       if max(info['AppleModelYear']) < year:
         continue
 
+      sb_model = info.get('AppleModelId')
+      if sb_model:
+        sb_model = '"{}"'.format(sb_model.lower())
+      else:
+        sb_model = 'NULL'
+
       print(' {\n'
         '  .SystemProductName = "%s",\n'
         '  .BoardProduct = "%s",\n'
@@ -161,6 +167,7 @@ def export_db_macinfolib(db, path, year=0):
         '  .ChassisAssetTag = "%s",\n'
         '  .FirmwareFeatures = 0x%XULL,\n'
         '  .FirmwareFeaturesMask = 0x%XULL,\n'
+        '  .SecureBootModel = %s,\n'
         ' },' % (
           info['SystemProductName'],
           info['BoardProduct'][0] if isinstance(info['BoardProduct'], list) else info['BoardProduct'],
@@ -183,7 +190,8 @@ def export_db_macinfolib(db, path, year=0):
           '0x{:X}'.format(info['PlatformFeature']) if 'PlatformFeature' in info else 'MAC_INFO_PLATFORM_FEATURE_MISSING',
           info['ChassisAssetTag'],
           info.get('ExtendedFirmwareFeatures', info.get('FirmwareFeatures', 0)),
-          info.get('ExtendedFirmwareFeaturesMask', info.get('FirmwareFeaturesMask', 0))
+          info.get('ExtendedFirmwareFeaturesMask', info.get('FirmwareFeaturesMask', 0)),
+          sb_model
         ), file=fh)
 
     print('};', file=fh)

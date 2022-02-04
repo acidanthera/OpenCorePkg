@@ -4,6 +4,7 @@
 **/
 
 #include <UserFile.h>
+#include <Library/MemoryAllocationLib.h>
 
 uint8_t *UserReadFile(const char *str, uint32_t *size) {
   FILE *f = fopen(str, "rb");
@@ -14,7 +15,7 @@ uint8_t *UserReadFile(const char *str, uint32_t *size) {
   long fsize = ftell(f);
   fseek(f, 0, SEEK_SET);
 
-  uint8_t *string = malloc(fsize + 1);
+  uint8_t *string = AllocatePool(fsize + 1);
   if (fsize > 0 && fread(string, fsize, 1, f) != 1)
     abort();
   fclose(f);

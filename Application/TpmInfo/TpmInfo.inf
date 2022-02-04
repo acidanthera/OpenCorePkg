@@ -1,0 +1,48 @@
+## @file
+#  Read Intel PTT TPM information.
+#
+#  Copyright (c) 2021, vit9696. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = TpmInfo
+  FILE_GUID                      = 11618E79-0B23-4BEF-9E45-6A266B2A3536
+  MODULE_TYPE                    = UEFI_APPLICATION
+  VERSION_STRING                 = 1.0
+  ENTRY_POINT                    = UefiMain
+
+#
+#  This flag specifies whether HII resource section is generated into PE image.
+#
+  UEFI_HII_RESOURCE_SECTION      = TRUE
+
+#
+# The following information is for reference only and not required by the build tools.
+#
+#  VALID_ARCHITECTURES           = IA32 X64 IPF EBC
+#
+
+[Sources]
+  TpmInfo.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+  IoLib
+  MemoryAllocationLib
+  OcConsoleControlEntryModeGenericLib
+  OcHeciLib
+  PrintLib
+  TimerLib
+  UefiLib
+  UefiBootServicesTableLib
+  UefiApplicationEntryPoint

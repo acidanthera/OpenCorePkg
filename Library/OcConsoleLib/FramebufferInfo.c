@@ -13,6 +13,7 @@
 **/
 
 #include "OcConsoleLibInternal.h"
+#include "ConsoleGopInternal.h"
 
 #include <Protocol/AppleFramebufferInfo.h>
 #include <Protocol/GraphicsOutput.h>
@@ -41,6 +42,7 @@ AppleFramebufferGetInfo (
   EFI_GRAPHICS_OUTPUT_PROTOCOL          *GraphicsOutput;
   EFI_GRAPHICS_OUTPUT_PROTOCOL_MODE     *Mode;
   EFI_GRAPHICS_OUTPUT_MODE_INFORMATION  *Info;
+  CONST CONSOLE_GOP_CONTEXT             *DirectConsole;
 
   if (This == NULL
     || FramebufferBase == NULL
@@ -50,6 +52,17 @@ AppleFramebufferGetInfo (
     || ScreenHeight == NULL
     || ScreenDepth == NULL) {
     return EFI_INVALID_PARAMETER;
+  }
+
+  DirectConsole = InternalGetDirectGopContext ();
+  if (DirectConsole != NULL) {
+    *FramebufferBase = DirectConsole->OriginalFrameBufferBase;
+    *FramebufferSize = (UINT32) DirectConsole->OriginalFrameBufferSize;
+    *ScreenRowBytes  = (UINT32) (DirectConsole->OriginalModeInfo.PixelsPerScanLine * sizeof (EFI_GRAPHICS_OUTPUT_BLT_PIXEL));
+    *ScreenWidth     = DirectConsole->CustomModeInfo.HorizontalResolution;
+    *ScreenHeight    = DirectConsole->CustomModeInfo.VerticalResolution;
+    *ScreenDepth     = DEFAULT_COLOUR_DEPTH;
+    return EFI_SUCCESS;
   }
 
   Status = gBS->HandleProtocol (

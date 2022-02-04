@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "426.0.0.0.0"
-BIOSLegacyVersion: "MBP114.88Z.F000.B00.2012171738"
-BIOSReleaseDate: "12/17/2020"
+BIOSVersion: "428.60.3.0.0"
+BIOSLegacyVersion: "MBP114.88Z.F000.B00.2110271808"
+BIOSReleaseDate: "10/27/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBookPro11,4"
 SystemVersion: "1.0"
@@ -26,8 +26,8 @@ ChassisAssetTag: ""
 PlatformFeature: 0x2
 FirmwareFeatures: 0xEB0FF577
 FirmwareFeaturesMask: 0xFF1FFF7F
-ExtendedFirmwareFeatures: 0x00000000EB0FF577
-ExtendedFirmwareFeaturesMask: 0x00000000FF1FFF7F
+ExtendedFirmwareFeatures: 0x00000008EB0FF577
+ExtendedFirmwareFeaturesMask: 0x00000008FF1FFF7F
 MemoryFormFactor: 0xD
 # FIXME: check values (most should be correct?) and add missing, if any
 ProcessorType:
@@ -72,13 +72,13 @@ SmcEPCI: 0xF0B007
 OEMStrings: |-
   Apple ROM Version
     Model:        MBP114
-    EFI Version:  426.0.0.0.0
-    Built by:     root@osx355
-    Date:         Thu Dec 17 17:38:24 PST 2020
-    Revision:     426 (B&I)
+    EFI Version:  428.60.3.0.0
+    Built by:     root@bb-g8-pdb150
+    Date:         Wed Oct 27 18:08:31 PDT 2021
+    Revision:     428.60.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1200.0.30.4
+    Compiler:     clang-1300.0.29.10
 Specifications:
   CPUCodename:
     - "Crystal Well"
@@ -134,6 +134,5 @@ AppleModelYear:
   - 2016
   - 2017
   - 2018
-CloverSerialNumber: "C02Q7HACG8WL"
 MinimumOSVersion: "10.10.3"
 MaximumOSVersion: null

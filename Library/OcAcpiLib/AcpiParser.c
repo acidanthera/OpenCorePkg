@@ -766,16 +766,7 @@ ParseExternal (
     return EFI_DEVICE_ERROR;
   }
 
-  CONTEXT_ADVANCE_OPCODE (Context);
-
-  //
-  // FIXME: This looks suspicious.
-  //
-  while (Context->CurrentOpcode[0] != AML_ZERO_OP) {
-    CONTEXT_ADVANCE_OPCODE (Context);
-  }
-
-  CONTEXT_CONSUME_BYTES (Context, 1);
+  CONTEXT_CONSUME_BYTES (Context, 2);
   CONTEXT_DECREASE_NESTING (Context);
   return EFI_NOT_FOUND;
 }
@@ -1314,13 +1305,17 @@ ParseIfElse (
     }
   }
 
-  if (Context->CurrentOpcode > IfEnd || Status == EFI_DEVICE_ERROR) {
+  if (Status == EFI_DEVICE_ERROR) {
     return EFI_DEVICE_ERROR;
   }
 
   if (Status == EFI_SUCCESS) {
     CONTEXT_DECREASE_NESTING (Context);
     return EFI_SUCCESS;
+  }
+
+  if (Context->CurrentOpcode > IfEnd) {
+    Context->CurrentOpcode = IfEnd;
   }
 
   Context->CurrentIdentifier = CurrentPath;

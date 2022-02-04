@@ -129,6 +129,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2010
   - 2011
-CloverSerialNumber: "C02G5834DC79"
 MinimumOSVersion: "10.6.3"
 MaximumOSVersion: "10.13.6"

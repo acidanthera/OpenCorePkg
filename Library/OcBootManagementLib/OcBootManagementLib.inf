@@ -39,6 +39,9 @@
   BootEntryInfo.c
   BootEntryManagement.c
   BootManagementInternal.h
+  BootEntryProtocol.c
+  BootEntryProtocolInternal.h
+  BuiltinPicker.c
   DefaultEntryChoice.c
   DmgBootSupport.c
   HotKeySupport.c
@@ -50,6 +53,7 @@
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   UefiCpuPkg/UefiCpuPkg.dec
 
 [Guids]
@@ -75,6 +79,7 @@
   gAppleSecureBootVariableGuid                  ## SOMETIMES_CONSUMES
   gAppleTamperResistantBootSecureVariableGuid   ## SOMETIMES_CONSUMES
   gAppleTamperResistantBootEfiUserVariableGuid  ## SOMETIMES_CONSUMES
+  gEfiPartTypeUnusedGuid                        ## SOMETIMES_CONSUMES
   gOcVendorVariableGuid                         ## SOMETIMES_CONSUMES
   gOcReadOnlyVariableGuid                       ## SOMETIMES_CONSUMES
   gOcWriteOnlyVariableGuid                      ## SOMETIMES_CONSUMES
@@ -90,6 +95,7 @@
   gOcFirmwareRuntimeProtocolGuid     ## SOMETIMES_CONSUMES
   gOcAudioProtocolGuid               ## SOMETIMES_CONSUMES
   gAppleBeepGenProtocolGuid          ## SOMETIMES_CONSUMES
+  gOcBootEntryProtocolGuid           ## CONSUMES
 
 [LibraryClasses]
   BaseLib
@@ -110,11 +116,15 @@
   OcCryptoLib
   OcDeviceMiscLib
   OcDevicePathLib
-  OcGuardLib
   OcFileLib
+  OcFlexArrayLib
+  OcGuardLib
   OcMachoLib
+  OcMiscLib
   OcPeCoffLib
   OcRtcLib
+  OcTypingLib
   OcXmlLib
   TimerLib
   FileHandleLib
+  ResetSystemLib

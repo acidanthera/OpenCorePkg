@@ -152,6 +152,7 @@ ScanExtensions (
   XML_NODE            *InfoPlistRoot;
   XML_NODE            *InfoPlistValue;
   XML_NODE            *InfoPlistLibraries;
+  XML_NODE            *InfoPlistLibraries64;
   CONST CHAR8         *TmpKeyValue;
   UINT32              FieldCount;
   UINT32              FieldIndex;
@@ -212,7 +213,7 @@ ScanExtensions (
           //
           // Parse Info.plist.
           //
-          Status = AllocateCopyFileData (FilePlist, (UINT8**)&InfoPlist, &InfoPlistSize);
+          Status = OcAllocateCopyFileData (FilePlist, (UINT8**)&InfoPlist, &InfoPlistSize);
           FilePlist->Close (FilePlist);
           if (EFI_ERROR (Status)) {
             FileKext->Close (FileKext);
@@ -258,6 +259,7 @@ ScanExtensions (
           //
           // Search for plist properties.
           //
+          InfoPlistLibraries = NULL;
           FieldCount = PlistDictChildren (InfoPlistRoot);
           for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
             TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, &InfoPlistValue));
@@ -300,8 +302,22 @@ ScanExtensions (
               }
 
             } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_KEY) == 0) {
-              InfoPlistLibraries = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
-              if (InfoPlistLibraries == NULL) {
+              if (!Context->Is32Bit && InfoPlistLibraries64 == NULL) {
+                InfoPlistLibraries = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+                if (InfoPlistLibraries == NULL) {
+                  FreeBuiltInKext (BuiltinKext);
+                  XmlDocumentFree (InfoPlistDocument);
+                  FreePool (InfoPlist);
+                  FileKext->Close (FileKext);
+                  File->SetPosition (File, 0);
+                  FreePool (FileInfo);
+                  return EFI_INVALID_PARAMETER;
+                }
+              }
+
+            } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+              InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+              if (InfoPlistLibraries64 == NULL) {
                 FreeBuiltInKext (BuiltinKext);
                 XmlDocumentFree (InfoPlistDocument);
                 FreePool (InfoPlist);
@@ -311,16 +327,22 @@ ScanExtensions (
                 return EFI_INVALID_PARAMETER;
               }
 
-              Status = AddKextDependencies (&BuiltinKext->Dependencies, InfoPlistLibraries);
-              if (EFI_ERROR (Status)) {
-                FreeBuiltInKext (BuiltinKext);
-                XmlDocumentFree (InfoPlistDocument);
-                FreePool (InfoPlist);
-                FileKext->Close (FileKext);
-                File->SetPosition (File, 0);
-                FreePool (FileInfo);
-                return Status;
+              if (!Context->Is32Bit) {
+                InfoPlistLibraries = InfoPlistLibraries64;
               }
+            }
+          }
+
+          if (InfoPlistLibraries != NULL) {
+            Status = AddKextDependencies (&BuiltinKext->Dependencies, InfoPlistLibraries);
+            if (EFI_ERROR (Status)) {
+              FreeBuiltInKext (BuiltinKext);
+              XmlDocumentFree (InfoPlistDocument);
+              FreePool (InfoPlist);
+              FileKext->Close (FileKext);
+              File->SetPosition (File, 0);
+              FreePool (FileInfo);
+              return Status;
             }
           }
 
@@ -786,6 +808,7 @@ CachelessContextAddKext (
   XML_NODE          *InfoPlistRoot;
   XML_NODE          *InfoPlistValue;
   XML_NODE          *InfoPlistLibraries;
+  XML_NODE          *InfoPlistLibraries64;
   CHAR8             *TmpInfoPlist;
   CONST CHAR8       *TmpKeyValue;
   UINT32            FieldCount;
@@ -847,6 +870,7 @@ CachelessContextAddKext (
   //
   // Search for plist properties.
   //
+  InfoPlistLibraries = NULL;
   FieldCount = PlistDictChildren (InfoPlistRoot);
   for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
     TmpKeyValue = PlistKeyValue (PlistDictChild (InfoPlistRoot, FieldIndex, &InfoPlistValue));
@@ -888,23 +912,41 @@ CachelessContextAddKext (
       IsLoadable = TRUE;
 
     } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_KEY) == 0) {
-      InfoPlistLibraries = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
-      if (InfoPlistLibraries == NULL) {
-        XmlDocumentFree (InfoPlistDocument);
-        FreePool (TmpInfoPlist);
-        FreePool (NewKext->PlistData);
-        FreePool (NewKext);
-        return EFI_INVALID_PARAMETER;
-      }
+      if (!Context->Is32Bit && InfoPlistLibraries64 == NULL) {
+        InfoPlistLibraries = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+        if (InfoPlistLibraries == NULL) {
+          XmlDocumentFree (InfoPlistDocument);
+          FreePool (TmpInfoPlist);
+          FreePool (NewKext->PlistData);
+          FreePool (NewKext);
+          return EFI_INVALID_PARAMETER;
+        }
 
-      Status = AddKextDependencies (&Context->InjectedDependencies, InfoPlistLibraries);
-      if (EFI_ERROR (Status)) {
-        XmlDocumentFree (InfoPlistDocument);
-        FreePool (TmpInfoPlist);
-        FreePool (NewKext->PlistData);
-        FreePool (NewKext);
-        return Status;
+      } else if (AsciiStrCmp (TmpKeyValue, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+        InfoPlistLibraries64 = PlistNodeCast (InfoPlistValue, PLIST_NODE_TYPE_DICT);
+        if (InfoPlistLibraries64 == NULL) {
+          XmlDocumentFree (InfoPlistDocument);
+          FreePool (TmpInfoPlist);
+          FreePool (NewKext->PlistData);
+          FreePool (NewKext);
+          return EFI_INVALID_PARAMETER;
+        }
+
+        if (!Context->Is32Bit) {
+          InfoPlistLibraries = InfoPlistLibraries64;
+        }
       }
+    }
+  }
+
+  if (InfoPlistLibraries != NULL) {
+    Status = AddKextDependencies (&Context->InjectedDependencies, InfoPlistLibraries);
+    if (EFI_ERROR (Status)) {
+      XmlDocumentFree (InfoPlistDocument);
+      FreePool (TmpInfoPlist);
+      FreePool (NewKext->PlistData);
+      FreePool (NewKext);
+      return Status;
     }
   }
 
@@ -1059,7 +1101,7 @@ CachelessContextOverlayExtensionsDir (
   //
   // Create directory overlay.
   //
-  Status = GetFileModificationTime (Context->ExtensionsDir, &ModificationTime);
+  Status = OcGetFileModificationTime (Context->ExtensionsDir, &ModificationTime);
   if (EFI_ERROR (Status)) {
     ZeroMem (&ModificationTime, sizeof (ModificationTime));
   }
@@ -1400,7 +1442,7 @@ CachelessContextHookBuiltin (
       //
       // Open Info.plist
       //
-      Status = AllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
+      Status = OcAllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -1462,7 +1504,7 @@ CachelessContextHookBuiltin (
       //
       // Virtualize newly created Info.plist.
       //
-      Status = GetFileModificationTime (File, &ModificationTime);
+      Status = OcGetFileModificationTime (File, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
@@ -1487,7 +1529,7 @@ CachelessContextHookBuiltin (
         return EFI_INVALID_PARAMETER;
       }
 
-      Status = AllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
+      Status = OcAllocateCopyFileData (File, (UINT8 **) &Buffer, &BufferSize);
       if (EFI_ERROR (Status)) {
         return Status;
       }
@@ -1545,7 +1587,7 @@ CachelessContextHookBuiltin (
       //
       // Virtualize patched binary.
       //
-      Status = GetFileModificationTime (File, &ModificationTime);
+      Status = OcGetFileModificationTime (File, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }

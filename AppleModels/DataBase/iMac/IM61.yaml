@@ -106,6 +106,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2006
   - 2007
-CloverSerialNumber: "QP708HACXA6"
 MinimumOSVersion: "10.4.7"
 MaximumOSVersion: "10.7.5"

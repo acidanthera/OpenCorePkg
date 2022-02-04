@@ -18,6 +18,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/UefiApplicationEntryPoint.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcMiscLib.h>
+#include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 #include <Protocol/OcFirmwareRuntime.h>
 
@@ -47,13 +48,13 @@ UefiMain (
       return EFI_SUCCESS;
     }
 
-    if (StrCmp (Argv[1], L"disable") == 0) {
+    if (OcStriCmp (Argv[1], L"disable") == 0) {
       ZeroMem (&Config, sizeof (Config));
       FwRuntime->SetOverride (&Config);
       return EFI_SUCCESS;
     }
 
-    if (StrCmp (Argv[1], L"restore") == 0) {
+    if (OcStriCmp (Argv[1], L"restore") == 0) {
       FwRuntime->SetOverride (NULL);
       return EFI_SUCCESS;
     }

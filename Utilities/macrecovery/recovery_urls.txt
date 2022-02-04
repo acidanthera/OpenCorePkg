@@ -28,6 +28,9 @@ Catalina
 ./macrecovery.py -b Mac-CFF7D910A743CAAF -m 00000000000PHCD00
 ./macrecovery.py -b Mac-00BE6ED71E35EB86 -m 00000000000000000
 
+Big Sur
+./macrecovery.py -b Mac-2BD1B31983FE1663 -m 00000000000000000
+
 Diagnostics
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000000000 -diag
 ./macrecovery.py -b Mac-E43C1C25D4880AD6 -m 00000000000GDVQ00 -diag

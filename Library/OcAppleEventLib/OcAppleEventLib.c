@@ -536,61 +536,90 @@ AppleEventUnload (
   InternalUnregisterHandlers ();
   InternalCancelPollEvents ();
 
-  Status = gBS->UninstallProtocolInterface (
-                  gImageHandle,
-                  &gAppleEventProtocolGuid,
-                  (VOID *)&mAppleEventProtocol
-                  );
+  Status = gBS->UninstallMultipleProtocolInterfaces (
+    gImageHandle,
+    &gAppleEventProtocolGuid,
+    (VOID *) &mAppleEventProtocol
+    );
 
   return Status;
 }
 
-/**
-  Install and initialise Apple Event protocol.
-
-  @param[in] Reinstall  Overwrite installed protocol.
-
-  @retval installed or located protocol or NULL.
-**/
 APPLE_EVENT_PROTOCOL *
 OcAppleEventInstallProtocol (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Install,
+  IN BOOLEAN  Reinstall,
+  IN BOOLEAN  CustomDelays,
+  IN UINT16   KeyInitialDelay,
+  IN UINT16   KeySubsequentDelay,
+  IN BOOLEAN  GraphicsInputMirroring,
+  IN UINT32   PointerPollMin,
+  IN UINT32   PointerPollMax,
+  IN UINT32   PointerPollMask,
+  IN UINT16   PointerSpeedDiv,
+  IN UINT16   PointerSpeedMul
   )
 {
-  EFI_STATUS           Status;
-  APPLE_EVENT_PROTOCOL *Protocol;
-  EFI_HANDLE           NewHandle;
+  EFI_STATUS                    Status;
+  APPLE_EVENT_PROTOCOL          *AppleEvent;
 
   DEBUG ((DEBUG_VERBOSE, "OcAppleEventInstallProtocol\n"));
 
-  if (Reinstall) {
-    Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OCAE: Uninstall failed: %r\n", Status));
-      return NULL;
-    }
-  } else {
+  if (!Reinstall) {
     Status = gBS->LocateProtocol (
       &gAppleEventProtocolGuid,
       NULL,
-      (VOID *) &Protocol
+      (VOID *) &AppleEvent
       );
 
     if (!EFI_ERROR (Status)) {
-      return Protocol;
+      if (AppleEvent->Revision < APPLE_EVENT_PROTOCOL_REVISION_MINIMUM) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAE: Not using OEM revision %u, does not meet required minimum %u\n",
+          (UINT32) AppleEvent->Revision,
+          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          ));
+        Reinstall = TRUE;
+      } else {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAE: Using OEM revision %u, meets required minimum %u\n",
+          (UINT32) AppleEvent->Revision,
+          (UINT32) APPLE_EVENT_PROTOCOL_REVISION_MINIMUM
+          ));
+        return AppleEvent;
+      }
     }
   }
 
-  //
-  // Apple code supports unloading, ours does not.
-  //
-  NewHandle = NULL;
-  Status      = gBS->InstallProtocolInterface (
-                       &NewHandle,
-                       &gAppleEventProtocolGuid,
-                       EFI_NATIVE_INTERFACE,
-                       (VOID *)&mAppleEventProtocol
-                       );
+  if (!Install) {
+    DEBUG ((DEBUG_INFO, "OCAE: Letting OEM protocol connect later\n"));
+    return NULL;
+  }
+
+  Status = OcUninstallAllProtocolInstances (&gAppleEventProtocolGuid);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCAE: OEM uninstall failed: %r\n", Status));
+    return NULL;
+  }
+
+  InternalSetKeyBehaviour (
+    CustomDelays,
+    KeyInitialDelay,
+    KeySubsequentDelay,
+    GraphicsInputMirroring
+    );
+
+  InternalSetPointerPolling (PointerPollMin, PointerPollMax, PointerPollMask);
+  InternalSetPointerSpeed (PointerSpeedDiv, PointerSpeedMul);
+
+  Status = gBS->InstallMultipleProtocolInterfaces (
+    &gImageHandle,
+    &gAppleEventProtocolGuid,
+    &mAppleEventProtocol,
+    NULL
+    );
 
   if (!EFI_ERROR (Status)) {
     InternalCreateQueueEvent ();
@@ -599,9 +628,11 @@ OcAppleEventInstallProtocol (
   }
 
   if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_ERROR, "OCAE: Builtin install failed\n"));
     AppleEventUnload ();
     return NULL;
   }
 
+  DEBUG ((DEBUG_INFO, "OCAE: Builtin installed\n"));
   return &mAppleEventProtocol;
 }

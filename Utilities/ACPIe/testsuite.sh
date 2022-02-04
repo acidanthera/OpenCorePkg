@@ -170,13 +170,12 @@ then echo FAIL && code=1
 else (echo OK; rm -f Tests/Output/test20_output.txt)
 fi
 
-printf "%s" "Test_100(Tests/Input/broken3.bin, \\_SB.PCI0.GFX0, 1): "
-./ACPIe -f Tests/Input/broken3.bin \\_SB.PCI0.GFX0 > Tests/Output/test100_output.txt
-diff -q Tests/Output/test100_output.txt Tests/Correct/test100_output.txt
+printf "%s" "Test_21(Tests/Input/DSDT-XOSI.bin, \\_SB.PCI0.LPCB.HPET, 1): "
+./ACPIe -f Tests/Input/DSDT-XOSI.bin \\_SB.PCI0.LPCB.HPET > Tests/Output/test21_output.txt
+diff -q Tests/Output/test21_output.txt Tests/Output/test21_output.txt
 if (($? == 1))
 then echo FAIL && code=1
-else (echo OK; rm -f Tests/Output/test100_output.txt)
+else (echo OK; rm -f Tests/Output/test21_output.txt)
 fi
-
 
 exit $code

@@ -18,6 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/OcStringLib.h>
 
 // IsAsciiPrint
@@ -85,8 +86,22 @@ AsciiUefiSlashes (
 {
   CHAR8  *Needle;
 
-  while ((Needle = AsciiStrStr (String, "/")) != NULL) {
-    *Needle = '\\';
+  Needle = String;
+  while ((Needle = AsciiStrStr (Needle, "/")) != NULL) {
+    *Needle++ = '\\';
+  }
+}
+
+VOID
+AsciiUnixSlashes (
+  IN OUT CHAR8    *String
+  )
+{
+  CHAR8  *Needle;
+
+  Needle = String;
+  while ((Needle = AsciiStrStr (Needle, "\\")) != NULL) {
+    *Needle++ = '/';
   }
 }
 
@@ -265,6 +280,39 @@ OcAsciiEndsWith (
     && AsciiStrnCmp (&String[StringLength - SearchStringLength], SearchString, SearchStringLength) == 0;
 }
 
+BOOLEAN
+EFIAPI
+OcAsciiStartsWith (
+  IN CONST CHAR8      *String,
+  IN CONST CHAR8      *SearchString,
+  IN BOOLEAN          CaseInsensitiveMatch
+  )
+{
+  CHAR8   First;
+  CHAR8   Second;
+
+  ASSERT (String != NULL);
+  ASSERT (SearchString != NULL);
+
+  while (TRUE) {
+    First = *String++;
+    Second = *SearchString++;
+    if (Second == '\0') {
+      return TRUE;
+    }
+    if (First == '\0') {
+      return FALSE;
+    }
+    if (CaseInsensitiveMatch) {
+      First  = AsciiCharToUpper (First);
+      Second = AsciiCharToUpper (Second);
+    }
+    if (First != Second) {
+      return FALSE;
+    }
+  }
+}
+
 CHAR8 *
 EFIAPI
 OcAsciiStriStr (
@@ -416,4 +464,95 @@ OcAsciiStrToRawGuid (
   Guid->Data2 = SwapBytes16 (Guid->Data2);
   Guid->Data3 = SwapBytes16 (Guid->Data3);
   return EFI_SUCCESS;
+}
+
+VOID
+AsciiFilterString (
+  IN OUT CHAR8    *String,
+  IN     BOOLEAN  SingleLine
+  )
+{
+  while (*String != L'\0') {
+    if ((*String & 0x7F) != *String) {
+      //
+      // Remove all unicode characters.
+      //
+      *String = '_';
+    } else if (SingleLine && (*String == '\r' || *String == '\n')) {
+      //
+      // Stop after printing one line.
+      //
+      *String = '\0';
+      break;
+    } else if (*String < 0x20 || *String == 0x7F) {
+      //
+      // Drop all unprintable spaces but space including tabs.
+      //
+      *String = '_';
+    }
+
+    ++String;
+  }
+}
+
+VOID
+EFIAPI
+OcAsciiPrintBuffer (
+  IN OUT CHAR8        **AsciiBuffer,
+  IN OUT UINTN        *AsciiBufferSize,
+  IN     CONST CHAR8  *FormatString,
+  ...
+  )
+{
+  EFI_STATUS  Status;
+  VA_LIST     Marker;
+  CHAR8       Tmp[256];
+  CHAR8       *NewBuffer;
+  UINTN       NewBufferSize;
+
+  if (*AsciiBuffer == NULL) {
+    return;
+  }
+
+  VA_START (Marker, FormatString);
+  AsciiVSPrint (Tmp, sizeof (Tmp), FormatString, Marker);
+  VA_END (Marker);
+
+  Status = AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
+  if (Status == EFI_BUFFER_TOO_SMALL) {
+    if (OcOverflowMulUN (*AsciiBufferSize, 2, &NewBufferSize)) {
+      return;
+    }
+    NewBuffer = ReallocatePool (*AsciiBufferSize, NewBufferSize, *AsciiBuffer);
+    if (NewBuffer == NULL) {
+      FreePool (*AsciiBuffer);
+
+      *AsciiBuffer     = NULL;
+      *AsciiBufferSize = 0;
+
+      return;
+    }
+
+    *AsciiBuffer      = NewBuffer;
+    *AsciiBufferSize  = NewBufferSize;
+
+    AsciiStrCatS (*AsciiBuffer, *AsciiBufferSize, Tmp);
+  }
+}
+
+CHAR8 *
+OcAsciiToLower (
+  CHAR8 *Str
+  )
+{
+  UINTN Index;
+
+  ASSERT (Str != NULL);
+
+  for (Index = 0; Str[Index] != '\0'; ++Index) {
+    if (Str[Index] >= 'A' && Str[Index] <= 'Z') {
+      Str[Index] -= ('A' - 'a');
+    }
+  }
+  return Str;
 }

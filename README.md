@@ -1,18 +1,9 @@
-<img src="https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Logos/OpenCore_with_text_Small.png" width="200" height="48"/>
+<img src="/Docs/Logos/OpenCore_with_text_Small.png" width="200" height="48"/>
 
 [![Build Status](https://github.com/acidanthera/OpenCorePkg/workflows/CI/badge.svg?branch=master)](https://github.com/acidanthera/OpenCorePkg/actions) [![Scan Status](https://scan.coverity.com/projects/18169/badge.svg?flat=1)](https://scan.coverity.com/projects/18169)
 -----
 
 OpenCore bootloader with development SDK.
-
-## Discussion
-
-- [AppleLife.ru](https://applelife.ru/threads/razrabotka-opencore.2943955) in Russian
-- [Hackintosh-Forum.de](https://www.hackintosh-forum.de/forum/thread/42353-opencore-bootloader) in German
-- [InsanelyMac.com](https://www.insanelymac.com/forum/topic/338527-opencore-development/) in English
-- [MacRumors.com](https://forums.macrumors.com/threads/opencore-on-the-mac-pro.2207814/) in English, legacy Apple hardware
-- [KVM-OpenCore](https://github.com/Leoyzen/KVM-Opencore) in English, KVM configuration
-- [macOS86.it](https://www.macos86.it/showthread.php?4570-OpenCore-aka-OC-Nuovo-BootLoader) in Italian
 
 ## Libraries
 
@@ -58,8 +49,13 @@ details.
 - [Andrey1970AppleLife](https://github.com/Andrey1970AppleLife)
 - [mhaeuser (ex Download-Fritz)](https://github.com/mhaeuser)
 - [Goldfish64](https://github.com/Goldfish64)
+- [MikeBeaton](https://github.com/MikeBeaton)
 - [nms42](https://github.com/nms42)
 - [PMheart](https://github.com/PMheart)
 - [savvamitrofanov](https://github.com/savvamitrofanov)
 - [usr-sse2](https://github.com/usr-sse2)
 - [vit9696](https://github.com/vit9696)
+
+#### Discussion
+
+Please refer to the following [list of OpenCore discussion forums](/Docs/FORUMS.md).

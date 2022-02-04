@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for OcMisclibrary.
+#  Component description file for OcDeviceMiscLib.
 #
 #  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -30,20 +30,49 @@
   OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
   MdeModulePkg/MdeModulePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Guids]
+  gEfiEventExitBootServicesGuid
+  gEfiEventVirtualAddressChangeGuid
 
 [Protocols]
   gEfiPciIoProtocolGuid
+  gEfiDecompressProtocolGuid
+
+  # For handle parsing
+  gEfiLoadedImageProtocolGuid
+  gEfiDriverBindingProtocolGuid
+  gEfiDriverConfiguration2ProtocolGuid
+  gEfiDriverConfigurationProtocolGuid
+  gEfiDriverDiagnostics2ProtocolGuid
+  gEfiDriverDiagnosticsProtocolGuid
+  gEfiComponentName2ProtocolGuid
+  gEfiComponentNameProtocolGuid
+  gEfiDevicePathProtocolGuid
 
 [LibraryClasses]
   BaseLib
+  BaseMemoryLib
   DebugLib
+  DevicePathLib
   IoLib
+  MemoryAllocationLib
   OcGuardLib
+  PrintLib
   UefiLib
   UefiBootServicesTableLib
 
 [Sources]
   ActivateHpetSupport.c
+  CpuInfoDump.c
   DirectReset.c
+  ForgeUefi.c
+  HandleParsingMin.c
+  HandleParsingMin.h
+  PciExtInternal.h
+  PciInfoDump.c
   ReleaseUsbOwnership.c
+  ReloadOptionRoms.c
   ResetAudioTrafficClass.c
+  SetResizableBar.c

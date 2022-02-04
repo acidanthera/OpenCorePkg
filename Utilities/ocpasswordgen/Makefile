@@ -4,7 +4,7 @@
 ##
 
 PROJECT = ocpasswordgen
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 #
 # OcCryptoLib targets.

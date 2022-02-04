@@ -17,6 +17,7 @@
 #define OC_USER_UTILITIES_OCVALIDATE_H
 
 #include <Library/OcConfigurationLib.h>
+#include <Library/OcMainLib.h>
 
 /**
   OpenCore Configuration checker.
@@ -119,7 +120,7 @@ CheckPlatformInfo (
   @return     Number of errors detected in UEFI Section.
 **/
 UINT32
-CheckUEFI (
+CheckUefi (
   IN  OC_GLOBAL_CONFIG  *Config
   );
 

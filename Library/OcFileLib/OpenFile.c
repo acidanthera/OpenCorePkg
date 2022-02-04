@@ -26,12 +26,12 @@
 #include <Protocol/SimpleFileSystem.h>
 
 EFI_STATUS
-SafeFileOpen (
-  IN  EFI_FILE_PROTOCOL       *Protocol,
-  OUT EFI_FILE_PROTOCOL       **NewHandle,
-  IN  CONST CHAR16            *FileName,
-  IN  UINT64                  OpenMode,
-  IN  UINT64                  Attributes
+OcSafeFileOpen (
+  IN     CONST EFI_FILE_PROTOCOL  *Protocol,
+     OUT       EFI_FILE_PROTOCOL  **NewHandle,
+  IN     CONST CHAR16             *FileName,
+  IN     CONST UINT64             OpenMode,
+  IN     CONST UINT64             Attributes
   )
 {
   EFI_STATUS  Status;
@@ -48,7 +48,7 @@ SafeFileOpen (
 
   *NewHandle = NULL;
   Status = Protocol->Open (
-    Protocol,
+    (EFI_FILE_PROTOCOL  *) Protocol,
     NewHandle,
     (CHAR16 *) FileName,
     OpenMode,
@@ -162,7 +162,7 @@ OcOpenFileByRemainingDevicePath (
     //
     // Open or create the file corresponding to the next pathname fragment.
     //
-    Status = SafeFileOpen (
+    Status = OcSafeFileOpen (
       LastFile,
       &NextFile,
       PathName,

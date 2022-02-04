@@ -23,6 +23,15 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: Add Linux Toolchain
+        run: brew tap FiloSottile/homebrew-musl-cross
+
+      - name: Install Linux Toolchain
+        run: brew install musl-cross
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+          HOMEBREW_NO_AUTO_UPDATE: 1
+
       - name: Install Dependencies
         run: brew install openssl mingw-w64
         env:
@@ -60,11 +69,11 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install nasm uuid-dev libssl-dev iasl
-          file="clang+llvm-9.0.1-x86_64-linux-gnu-ubuntu-16.04"
+          file="clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04"
           suf=".tar.xz"
-          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-9.0.1/${file}${suf}" || exit 1
+          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/${file}${suf}" || exit 1
           sum=$(shasum -a 256 "${file}${suf}" | cut -f1 -d' ')
-          expsum="1af280e96fec62acf5f3bb525e36baafe09f95f940dc9806e22809a83dfff4f8"
+          expsum="2c2fb857af97f41a5032e9ecadf7f78d3eff389a5cd3c9ec620d24f134ceb3c8"
           if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
           tar -xf "${file}${suf}" || exit 1
           echo "$(pwd)/${file}/bin" >> $GITHUB_PATH
@@ -93,8 +102,11 @@ jobs:
       - name: Install Dependencies
         run: |
           sudo apt-get update
-          sudo apt-get install nasm uuid-dev iasl clang-8 llvm-8-dev doxygen texlive texlive-latex-extra
-          echo "/usr/lib/llvm-8/bin" >> $GITHUB_PATH
+          sudo apt-get install nasm uuid-dev iasl doxygen texlive texlive-latex-extra
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 13
+          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
 
       - name: CI Bootstrap
         run: |
@@ -117,7 +129,7 @@ jobs:
           path: Binaries/*.zip
 
   build-windows:
-    name: Build Windows VS2017
+    name: Build Windows VS2019
     runs-on: windows-latest
     env:
       HAS_OPENSSL_BUILD: 0
@@ -178,8 +190,39 @@ jobs:
 
       - name: Lint Samples
         run: |
-          plutil -lint Docs/Sample.plist || exit 1
-          plutil -lint Docs/SampleCustom.plist || exit 1
+          File='Docs/Sample.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+          File='Docs/SampleCustom.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+  analyze-docs-linux:
+    name: Analyze Documentation
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive latexdiff
+
+      - name: Check documentation
+        run: |
+          ./Docs/BuildDocs.tool
 
   analyze-coverity:
     name: Analyze Coverity

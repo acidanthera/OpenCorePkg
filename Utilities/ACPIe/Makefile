@@ -4,7 +4,7 @@
 ##
 
 PROJECT = ACPIe
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o AcpiParser.o
 VPATH   = ../../Library/OcAcpiLib:$
 

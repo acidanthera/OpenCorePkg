@@ -145,6 +145,5 @@ AppleBoardCode:
 # Note, first year is used by macserial
 AppleModelYear:
   - 2006
-CloverSerialNumber: "W8634HACVWZ"
 MinimumOSVersion: "10.4.5"
 MaximumOSVersion: "10.6.8"

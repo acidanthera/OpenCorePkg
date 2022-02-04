@@ -37,6 +37,7 @@
 
 [Guids]
   gAppleSecureBootVariableGuid  ## SOMETIMES_CONSUMES
+  gAppleVendorVariableGuid      ## SOMETIMES_CONSUMES
 
 [Protocols]
   gAppleSecureBootProtocolGuid        ## SOMETIMES_PRODUCES

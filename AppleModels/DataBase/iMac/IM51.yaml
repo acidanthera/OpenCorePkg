@@ -133,6 +133,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2006
   - 2007
-CloverSerialNumber: "CK708HACVUW"
 MinimumOSVersion: "10.4.7"
 MaximumOSVersion: "10.7.5"

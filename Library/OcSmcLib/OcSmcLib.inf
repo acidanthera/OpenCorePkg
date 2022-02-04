@@ -52,6 +52,7 @@
   OcCryptoLib
   OcMiscLib
   OcRtcLib
+  OcVariableLib
   PcdLib
   UefiBootServicesTableLib
   UefiLib

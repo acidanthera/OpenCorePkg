@@ -57,5 +57,6 @@
   OcCpuLib
   OcFileLib
   OcMemoryLib
+  OcVariableLib
   PrintLib
 

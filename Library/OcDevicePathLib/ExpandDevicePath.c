@@ -21,12 +21,15 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+
+#define ACPI_VMD0001_HID 0x000159A4 // EisaId ("VMD0001")
+#define ACPI_VBS0001_HID 0x00015853 // EisaId ("VBS0001")
 
 // CHANGE: Track InternalConnectAll() execution status.
 STATIC BOOLEAN mConnectAllExecuted = FALSE;
@@ -799,6 +802,93 @@ BmConnectUsbShortFormDevicePath (
   return AtLeastOneConnected ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
+/**
+  Match macOS-made Hyper-V device path onto Hyper-V UEFI firmware device path.
+  macOS is unaware of Hyper-V and therefore produces paths like:
+  Acpi(0x000159A4,0x0)
+    /Acpi(0x00015853,0x0)
+    /Scsi(0x0,0x0)
+    /HD(2,GPT,63882141-5773-4630-B8FD-2C6E4A491C78,0x64028,0x3A66090)
+  We need to match them on real Hyper-V device paths like:
+  AcpiEx(@@@0000,@@@0000,0x0,VMBus,,)
+    /VenHw(9B17E5A2-0891-42DD-B653-80B5C22809BA,D96361BAA104294DB60572E2FFB1DC7F19539477F36F4B429750F8B5593AAA27)
+    /Scsi(0x0,0x0)
+    /HD(2,GPT,63882141-5773-4630-B8FD-2C6E4A491C78,0x64028,0x3A66090)
+
+  @param[in] FilePath macOS-made device path with ACPI parts trimmed (i.e. Scsi(0x0, 0x0)/.../File).
+
+  @return  real Hyper-V device path or NULL.
+**/
+STATIC
+EFI_DEVICE_PATH_PROTOCOL *
+BmExpandHyperVDevicePath (
+  IN  EFI_DEVICE_PATH_PROTOCOL          *FilePath
+  )
+{
+  EFI_STATUS                 Status;
+  UINTN                      HandleCount;
+  UINTN                      Index;
+  EFI_HANDLE                 *HandleBuffer;
+  EFI_DEVICE_PATH_PROTOCOL   *HvDevicePath;
+  EFI_DEVICE_PATH_PROTOCOL   *Node;
+  EFI_DEVICE_PATH_PROTOCOL   *NewDevicePath;
+  UINTN                      HvSuffixSize;
+
+  DebugPrintDevicePath (DEBUG_INFO, "OCDP: Expanding Hyper-V DP", FilePath);
+
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiSimpleFileSystemProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+
+  if (EFI_ERROR (Status)) {
+    return NULL;
+  }
+
+  for (Index = 0; Index < HandleCount; ++Index) {
+    Status = gBS->HandleProtocol (
+      HandleBuffer[Index],
+      &gEfiDevicePathProtocolGuid,
+      (VOID **) &HvDevicePath
+      );
+    if (EFI_ERROR (Status)) {
+      continue;
+    }
+
+    DebugPrintDevicePath (DEBUG_INFO, "OCDP: Matching Hyper-V DP", HvDevicePath);
+
+    for (Node = HvDevicePath; !IsDevicePathEnd (Node); Node = NextDevicePathNode (Node)) {
+      //
+      // Skip till we find the matching node in the middle of macOS-made DP.
+      //
+      if (DevicePathType (Node) == DevicePathType (FilePath)
+        && DevicePathSubType (Node) == DevicePathSubType (FilePath)) {
+        //
+        // Match the macOS-made DP till the filename.
+        //
+        HvSuffixSize = GetDevicePathSize (Node) - END_DEVICE_PATH_LENGTH;
+        if (CompareMem (Node, FilePath, HvSuffixSize) == 0) {
+          NewDevicePath = AppendDevicePath (
+            HvDevicePath,
+            (VOID *) ((UINTN) FilePath + HvSuffixSize)
+            );
+          if (NewDevicePath != NULL) {
+            DebugPrintDevicePath (DEBUG_INFO, "OCDP: Matched Hyper-V DP", NewDevicePath);
+          }
+          FreePool (HandleBuffer);
+          return NewDevicePath;
+        }
+      }
+    }
+  }
+
+  FreePool (HandleBuffer);
+  return NULL;
+}
+
 EFI_DEVICE_PATH_PROTOCOL *
 OcGetNextLoadOptionDevicePath (
   IN  EFI_DEVICE_PATH_PROTOCOL          *FilePath,
@@ -807,6 +897,7 @@ OcGetNextLoadOptionDevicePath (
 {
   EFI_HANDLE                      Handle;
   EFI_DEVICE_PATH_PROTOCOL        *Node;
+  ACPI_HID_DEVICE_PATH            *AcpiNode;
   EFI_STATUS                      Status;
 
   ASSERT (FilePath != NULL);
@@ -823,6 +914,35 @@ OcGetNextLoadOptionDevicePath (
 
     return DuplicateDevicePath (FilePath);
   }
+
+  // CHANGE: Hyper-V support start.
+
+  //
+  // Match ACPI_VMD0001_HID.
+  //
+  if (FullPath == NULL ///< First and only call.
+    && DevicePathType (Node) == ACPI_DEVICE_PATH
+    && DevicePathSubType (Node) == ACPI_DP
+    && DevicePathNodeLength (Node) == sizeof (ACPI_HID_DEVICE_PATH)) {
+    AcpiNode = (ACPI_HID_DEVICE_PATH *) Node;
+    if (AcpiNode->HID == ACPI_VMD0001_HID && AcpiNode->UID == 0) {
+      //
+      // Match ACPI_VBS0001_HID.
+      //
+      Node = NextDevicePathNode (Node);
+      if (DevicePathType (Node) == ACPI_DEVICE_PATH
+        && DevicePathSubType (Node) == ACPI_DP
+        && DevicePathNodeLength (Node) == sizeof (ACPI_HID_DEVICE_PATH)) {
+        AcpiNode = (ACPI_HID_DEVICE_PATH *) Node;
+        if (AcpiNode->HID == ACPI_VBS0001_HID && AcpiNode->UID == 0) {
+          Node = NextDevicePathNode (Node);
+          return BmExpandHyperVDevicePath (Node);
+        }
+      }
+    }
+  }
+
+  // CHANGE: Hyper-V support end.
 
   Status = gBS->LocateDevicePath (&gEfiBlockIoProtocolGuid, &Node, &Handle);
   if (!EFI_ERROR (Status) && IsDevicePathEnd (Node)) {

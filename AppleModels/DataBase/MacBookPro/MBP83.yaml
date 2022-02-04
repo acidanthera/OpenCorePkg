@@ -215,6 +215,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2011
   - 2012
-CloverSerialNumber: "W88F9CDEDF93"
 MinimumOSVersion: "10.7.2"
 MaximumOSVersion: "10.13.6"

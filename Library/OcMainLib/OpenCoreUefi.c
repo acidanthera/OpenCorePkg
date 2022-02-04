@@ -48,6 +48,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmcLib.h>
 #include <Library/OcOSInfoLib.h>
 #include <Library/OcUnicodeCollationEngGenericLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiLib.h>
@@ -57,6 +58,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/GraphicsOutput.h>
 #include <Protocol/Security.h>
 #include <Protocol/Security2.h>
+#include <Protocol/SimplePointer.h>
 
 #define OC_EXIT_BOOT_SERVICES_HANDLER_MAX 5
 
@@ -88,15 +90,20 @@ OcLoadDrivers (
   OUT EFI_HANDLE          **DriversToConnect  OPTIONAL
   )
 {
-  EFI_STATUS  Status;
-  VOID        *Driver;
-  UINT32      DriverSize;
-  UINT32      Index;
-  CHAR16      DriverPath[OC_STORAGE_SAFE_PATH_MAX];
-  EFI_HANDLE  ImageHandle;
-  EFI_HANDLE  *DriversToConnectIterator;
-  VOID        *DriverBinding;
-  BOOLEAN     SkipDriver;
+  EFI_STATUS                  Status;
+  VOID                        *Driver;
+  UINT32                      DriverSize;
+  UINT32                      Index;
+  CHAR16                      DriverPath[OC_STORAGE_SAFE_PATH_MAX];
+  EFI_HANDLE                  ImageHandle;
+  EFI_LOADED_IMAGE_PROTOCOL   *LoadedImage;
+  EFI_HANDLE                  *DriversToConnectIterator;
+  VOID                        *DriverBinding;
+  BOOLEAN                     SkipDriver;
+  OC_UEFI_DRIVER_ENTRY        *DriverEntry;
+  CONST CHAR8                 *DriverComment;
+  CHAR8                       *DriverFileName;
+  CONST CHAR8                 *DriverArguments;
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -106,18 +113,24 @@ OcLoadDrivers (
   DEBUG ((DEBUG_INFO, "OC: Got %u drivers\n", Config->Uefi.Drivers.Count));
 
   for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
-    SkipDriver = OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])[0] == '#';
+    DriverEntry     = Config->Uefi.Drivers.Values[Index];
+    DriverComment   = OC_BLOB_GET (&DriverEntry->Comment);
+    DriverFileName  = OC_BLOB_GET (&DriverEntry->Path);
+    DriverArguments = OC_BLOB_GET (&DriverEntry->Arguments);
+
+    SkipDriver = !DriverEntry->Enabled || DriverFileName == NULL || DriverFileName[0] == '\0';
 
     DEBUG ((
       DEBUG_INFO,
-      "OC: Driver %a at %u is %a\n",
-      OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+      "OC: Driver %a at %u (%a) is %a\n",
+      DriverFileName,
       Index,
+      DriverComment,
       SkipDriver ? "skipped!" : "being loaded..."
       ));
 
     //
-    // Skip drivers marked as comments.
+    // Skip disabled drivers.
     //
     if (SkipDriver) {
       continue;
@@ -127,14 +140,14 @@ OcLoadDrivers (
       DriverPath,
       sizeof (DriverPath),
       OPEN_CORE_UEFI_DRIVER_PATH "%a",
-      OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
+      DriverFileName
       );
     if (EFI_ERROR (Status)) {
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %s%a does not fit path!\n",
         OPEN_CORE_UEFI_DRIVER_PATH,
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index])
+        DriverFileName
         ));
       continue;
     }
@@ -144,7 +157,7 @@ OcLoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be found!\n",
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        DriverFileName,
         Index
         ));
       //
@@ -169,12 +182,44 @@ OcLoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be loaded - %r!\n",
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        DriverFileName,
         Index,
         Status
         ));
       FreePool (Driver);
       continue;
+    }
+
+    if (DriverArguments != NULL && DriverArguments[0] != '\0') {
+      Status = gBS->HandleProtocol (
+        ImageHandle,
+        &gEfiLoadedImageProtocolGuid,
+        (VOID **) &LoadedImage
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OC: Failed to locate loaded image for driver %a at %u - %r!\n",
+          DriverFileName,
+          Index,
+          Status
+          ));
+        gBS->UnloadImage (ImageHandle);
+        FreePool (Driver);
+        continue;
+      }
+      if (!OcAppendArgumentsToLoadedImage (LoadedImage, &DriverArguments, 1, TRUE)) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OC: Unable to apply arguments to driver %a at %u - %r!\n",
+          DriverFileName,
+          Index,
+          Status
+          ));
+        gBS->UnloadImage (ImageHandle);
+        FreePool (Driver);
+        continue;
+      }
     }
 
     Status = gBS->StartImage (
@@ -187,7 +232,7 @@ OcLoadDrivers (
       DEBUG ((
         DEBUG_ERROR,
         "OC: Driver %a at %u cannot be started - %r!\n",
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        DriverFileName,
         Index,
         Status
         ));
@@ -198,7 +243,7 @@ OcLoadDrivers (
       DEBUG ((
         DEBUG_INFO,
         "OC: Driver %a at %u is successfully loaded!\n",
-        OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+        DriverFileName,
         Index
         ));
 
@@ -233,7 +278,7 @@ OcLoadDrivers (
           DEBUG ((
             DEBUG_INFO,
             "OC: Driver %a at %u needs connection.\n",
-            OC_BLOB_GET (Config->Uefi.Drivers.Values[Index]),
+            DriverFileName,
             Index
             ));
         }
@@ -297,68 +342,106 @@ OcReinstallProtocols (
   IN OC_GLOBAL_CONFIG    *Config
   )
 {
-  if (OcAudioInstallProtocols (Config->Uefi.ProtocolOverrides.AppleAudio) == NULL) {
+  CONST CHAR8   *AppleEventMode;
+  BOOLEAN       InstallAppleEvent;
+  BOOLEAN       OverrideAppleEvent;
+
+  if (OcAudioInstallProtocols (
+    Config->Uefi.ProtocolOverrides.AppleAudio,
+    Config->Uefi.Audio.DisconnectHda
+    ) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Disabling audio in favour of firmware implementation\n"));
   }
 
   if (OcAppleBootPolicyInstallProtocol (Config->Uefi.ProtocolOverrides.AppleBootPolicy) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install boot policy protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install boot policy protocol\n"));
   }
 
   if (OcDataHubInstallProtocol (Config->Uefi.ProtocolOverrides.DataHub) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install data hub protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install data hub protocol\n"));
   }
 
   if (OcDevicePathPropertyInstallProtocol (Config->Uefi.ProtocolOverrides.DeviceProperties) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install device properties protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install device properties protocol\n"));
   }
 
   if (OcAppleImageConversionInstallProtocol (Config->Uefi.ProtocolOverrides.AppleImageConversion) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install image conversion protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install image conversion protocol\n"));
   }
 
   if (OcAppleDebugLogInstallProtocol (Config->Uefi.ProtocolOverrides.AppleDebugLog) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install debug log protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install debug log protocol\n"));
   }
 
   if (OcSmcIoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleSmcIo, Config->Misc.Security.AuthRestart) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install smc i/o protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install smc i/o protocol\n"));
   }
 
   if (OcAppleUserInterfaceThemeInstallProtocol (Config->Uefi.ProtocolOverrides.AppleUserInterfaceTheme) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install user interface theme protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install user interface theme protocol\n"));
   }
 
   if (OcUnicodeCollationEngInstallProtocol (Config->Uefi.ProtocolOverrides.UnicodeCollation) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install unicode collation protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install unicode collation protocol\n"));
   }
 
   if (OcHashServicesInstallProtocol (Config->Uefi.ProtocolOverrides.HashServices) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install hash services protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install hash services protocol\n"));
   }
 
   if (OcAppleKeyMapInstallProtocols (Config->Uefi.ProtocolOverrides.AppleKeyMap) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install key map protocols\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install key map protocols\n"));
   }
 
-  if (OcAppleEventInstallProtocol (Config->Uefi.ProtocolOverrides.AppleEvent) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install key event protocol\n"));
+  InstallAppleEvent   = TRUE;
+  OverrideAppleEvent  = FALSE;
+
+  AppleEventMode = OC_BLOB_GET (&Config->Uefi.AppleInput.AppleEvent);
+
+  if (AsciiStrCmp (AppleEventMode, "Auto") == 0) {
+  } else if (AsciiStrCmp (AppleEventMode, "OEM") == 0) {
+    InstallAppleEvent = FALSE;
+  } else if (AsciiStrCmp (AppleEventMode, "Builtin") == 0) {
+    OverrideAppleEvent = TRUE;
+  } else {
+    DEBUG ((DEBUG_INFO, "OC: Invalid AppleInput AppleEvent setting %a, using Auto\n", AppleEventMode));
   }
+
+  if (OcAppleEventInstallProtocol (
+    InstallAppleEvent,
+    OverrideAppleEvent,
+    Config->Uefi.AppleInput.CustomDelays,
+    Config->Uefi.AppleInput.KeyInitialDelay,
+    Config->Uefi.AppleInput.KeySubsequentDelay,
+    Config->Uefi.AppleInput.GraphicsInputMirroring,
+    Config->Uefi.AppleInput.PointerPollMin,
+    Config->Uefi.AppleInput.PointerPollMax,
+    Config->Uefi.AppleInput.PointerPollMask,
+    Config->Uefi.AppleInput.PointerSpeedDiv,
+    Config->Uefi.AppleInput.PointerSpeedMul
+    ) == NULL
+    && InstallAppleEvent) {
+    DEBUG ((DEBUG_INFO, "OC: Failed to install apple event protocol\n"));
+  };
 
   if (OcFirmwareVolumeInstallProtocol (Config->Uefi.ProtocolOverrides.FirmwareVolume) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install firmware volume protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install firmware volume protocol\n"));
   }
 
   if (OcOSInfoInstallProtocol (Config->Uefi.ProtocolOverrides.OSInfo) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install os info protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install os info protocol\n"));
   }
 
   if (OcAppleRtcRamInstallProtocol (Config->Uefi.ProtocolOverrides.AppleRtcRam) == NULL) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to install rtc ram protocol\n"));
+    DEBUG ((DEBUG_INFO, "OC: Failed to install rtc ram protocol\n"));
   }
 
   if (OcAppleFbInfoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleFramebufferInfo) == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Failed to install fb info protocol\n"));
+  }
+
+  if (OcAppleEg2InfoInstallProtocol (Config->Uefi.ProtocolOverrides.AppleEg2Info) == NULL) {
+    DEBUG ((DEBUG_INFO, "OC: Failed to install eg2 info protocol\n"));
   }
 }
 
@@ -371,13 +454,24 @@ OcLoadAppleSecureBoot (
   APPLE_SECURE_BOOT_PROTOCOL  *SecureBoot;
   CONST CHAR8                 *SecureBootModel;
   CONST CHAR8                 *RealSecureBootModel;
+  CONST CHAR8                 *DmgLoading;
   UINT8                       SecureBootPolicy;
 
   SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
+  if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DEFAULT) == 0 || SecureBootModel[0] == '\0') {
+    SecureBootModel = OcGetDefaultSecureBootModel (Config);
+  }
+
+  RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
 
   if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DISABLED) == 0) {
     SecureBootPolicy = AppleImg4SbModeDisabled;
-  } else if (Config->Misc.Security.ApECID != 0) {
+  } else if (Config->Misc.Security.ApECID != 0
+    && (RealSecureBootModel == NULL
+      || AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) != 0)) {
+    //
+    // Note, for x86legacy it is always medium policy.
+    //
     SecureBootPolicy = AppleImg4SbModeFull;
   } else {
     SecureBootPolicy = AppleImg4SbModeMedium;
@@ -388,11 +482,18 @@ OcLoadAppleSecureBoot (
   // essentially skipping secure boot in this case.
   // Do not allow enabling one but not the other.
   //
-  if (SecureBootPolicy != AppleImg4SbModeDisabled
-    && AsciiStrCmp (OC_BLOB_GET (&Config->Misc.Security.DmgLoading), "Any") == 0) {
-    DEBUG ((DEBUG_ERROR, "OC: Cannot use Secure Boot with Any DmgLoading!\n"));
-    CpuDeadLoop ();
-    return;
+  if (SecureBootPolicy != AppleImg4SbModeDisabled) {
+    DmgLoading = OC_BLOB_GET (&Config->Misc.Security.DmgLoading);
+    //
+    // Check against all valid values in case more are added.
+    //
+    if (AsciiStrCmp (DmgLoading, "Signed") != 0
+      && AsciiStrCmp (DmgLoading, "Disabled") != 0
+      && DmgLoading[0] != '\0') {
+      DEBUG ((DEBUG_ERROR, "OC: Cannot use Secure Boot with Any DmgLoading!\n"));
+      CpuDeadLoop ();
+      return;
+    }
   }
 
   DEBUG ((
@@ -403,21 +504,30 @@ OcLoadAppleSecureBoot (
     ));
 
   if (SecureBootPolicy != AppleImg4SbModeDisabled) {
-    RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
     if (RealSecureBootModel == NULL) {
       DEBUG ((DEBUG_ERROR, "OC: Failed to find SB model %a\n", SecureBootModel));
       return;
     }
 
+    //
+    // This is what Apple does at least.
+    // I believe no ECID is invalid for macOS 12.
+    //
+    if (AsciiStrCmp (RealSecureBootModel, OC_SB_MODEL_LEGACY) == 0
+      && Config->Misc.Security.ApECID == 0) {
+      DEBUG ((DEBUG_INFO, "OC: Discovered x86legacy with zero ECID, using system-id\n"));
+      OcGetLegacySecureBootECID (Config, &Config->Misc.Security.ApECID);
+    }
+
     Status = OcAppleImg4BootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap IMG4 values - %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap IMG4 NVRAM values - %r\n", Status));
       return;
     }
 
     Status = OcAppleSecureBootBootstrapValues (RealSecureBootModel, Config->Misc.Security.ApECID);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap SB values - %r\n", Status));
+      DEBUG ((DEBUG_ERROR, "OC: Failed to bootstrap SB NVRAM values - %r\n", Status));
       return;
     }
   }
@@ -542,6 +652,7 @@ OcLoadBooterUefiSupport (
   AbcSettings.ProvideMaxSlide        = Config->Booter.Quirks.ProvideMaxSlide;
   AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
   AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
+  AbcSettings.ResizeAppleGpuBars     = Config->Booter.Quirks.ResizeAppleGpuBars;
   AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
   AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
   AbcSettings.SyncRuntimePermissions = Config->Booter.Quirks.SyncRuntimePermissions;
@@ -720,12 +831,16 @@ OcLoadUefiSupport (
   IN UINT8               *Signature
   )
 {
+  EFI_STATUS            Status;
   EFI_HANDLE            *DriversToConnect;
+  EFI_HANDLE            *HandleBuffer;
+  UINTN                 HandleCount;
   EFI_EVENT             Event;
+  BOOLEAN               AvxEnabled;
 
   OcReinstallProtocols (Config);
 
-  OcImageLoaderInit ();
+  OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices);
 
   OcLoadAppleSecureBoot (Config);
 
@@ -744,6 +859,11 @@ OcLoadUefiSupport (
     OcCpuCorrectFlexRatio (CpuInfo);
   }
 
+  if (Config->Uefi.Quirks.EnableVmx) {
+    Status = OcCpuEnableVmx ();
+    DEBUG ((EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO, "OC: Enable VMX - %r\n", Status));
+  }
+
   if (Config->Uefi.Quirks.TscSyncTimeout > 0) {
     OcCpuCorrectTscSync (CpuInfo, Config->Uefi.Quirks.TscSyncTimeout);
   }
@@ -757,12 +877,12 @@ OcLoadUefiSupport (
   //
   // Inform platform support whether we want Boot#### routing or not.
   //
-  gRT->SetVariable (
+  OcSetSystemVariable (
     OC_BOOT_REDIRECT_VARIABLE_NAME,
-    &gOcVendorVariableGuid,
     OPEN_CORE_INT_NVRAM_ATTR,
     sizeof (Config->Uefi.Quirks.RequestBootVarRouting),
-    &Config->Uefi.Quirks.RequestBootVarRouting
+    &Config->Uefi.Quirks.RequestBootVarRouting,
+    NULL
     );
 
   if (Config->Uefi.Quirks.UnblockFsConnect) {
@@ -771,6 +891,25 @@ OcLoadUefiSupport (
 
   if (Config->Uefi.Quirks.DisableSecurityPolicy) {
     OcInstallPermissiveSecurityPolicy ();
+  }
+
+  if (Config->Uefi.Quirks.ForgeUefiSupport) {
+    OcForgeUefiSupport ();
+  }
+
+  if (Config->Uefi.Quirks.ReloadOptionRoms) {
+    OcReloadOptionRoms ();
+  }
+
+  if (Config->Uefi.Quirks.EnableVectorAcceleration) {
+    AvxEnabled = TryEnableAvx ();
+    DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AvxEnabled));
+  }
+
+  if (Config->Uefi.Quirks.ResizeGpuBars >= 0
+    && Config->Uefi.Quirks.ResizeGpuBars < PciBarTotal) {
+    DEBUG ((DEBUG_INFO, "OC: Increasing GPU BARs to %d\n", Config->Uefi.Quirks.ResizeGpuBars));
+    ResizeGpuBars (Config->Uefi.Quirks.ResizeGpuBars, TRUE);
   }
 
   OcMiscUefiQuirksLoaded (Config);
@@ -789,11 +928,34 @@ OcLoadUefiSupport (
       // DriversToConnect is not freed as it is owned by OcRegisterDriversToHighestPriority.
       //
     }
+
+    if (Config->Uefi.Output.ReconnectGraphicsOnConnect) {
+      DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers...\n"));
+      OcDisconnectGraphicsDrivers ();
+      DEBUG ((DEBUG_INFO, "OC: Disconnecting graphics drivers done...\n"));
+    }
+
     OcConnectDrivers ();
     DEBUG ((DEBUG_INFO, "OC: Connecting drivers done...\n"));
   } else {
     OcLoadDrivers (Storage, Config, NULL);
   }
+
+  DEBUG_CODE_BEGIN ();
+  HandleCount = 0;
+  HandleBuffer = NULL;
+  Status = gBS->LocateHandleBuffer (
+    ByProtocol,
+    &gEfiSimplePointerProtocolGuid,
+    NULL,
+    &HandleCount,
+    &HandleBuffer
+    );
+  DEBUG ((DEBUG_INFO, "OC: Found %u pointer devices - %r\n", HandleCount, Status));
+  if (!EFI_ERROR (Status)) {
+    FreePool (HandleBuffer);
+  }
+  DEBUG_CODE_END ();
 
   if (Config->Uefi.Apfs.EnableJumpstart) {
     OcApfsConfigure (

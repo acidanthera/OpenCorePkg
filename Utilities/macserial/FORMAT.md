@@ -40,6 +40,8 @@ There generally are 2 similar formats of serial encoding: the old 11 character f
 | Old (11)  | `LL`      | `Y`  | `WW` | `SSS` | `PPP`    |
 | New (12)  | `LLL`     | `Y`  | `W`  | `SSS` | `PPPP`   |
 
+Note: Models late 2021+ contain SN with 10 character format.  
+
 ### Location
 
 This value encodes the manufacturing location, which is often more descriptive than `Made in China`, since it may reveal the responsible company and the city. For example, `F5K` means `USA (Flextronics)` and `QT` means `Taiwan (Quanta Computer)`. The list is not standardised or published anywhere, but you can see several known locations by running `./macserial -l`.

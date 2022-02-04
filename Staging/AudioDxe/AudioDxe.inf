@@ -33,6 +33,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [LibraryClasses]
   BaseMemoryLib
@@ -40,6 +41,9 @@
   DebugLib
   DevicePathLib
   MemoryAllocationLib
+  OcBootManagementLib
+  OcDeviceMiscLib
+  OcFlexArrayLib
   OcHdaDevicesLib
   OcMp3Lib
   OcStringLib
@@ -57,6 +61,12 @@
   gEfiAudioIoProtocolGuid             # PRODUCES
   gEfiAudioDecodeProtocolGuid         # PRODUCES
   gVMwareHdaProtocolGuid              # SOMETIMES_CONSUMES
+
+[FeaturePcd]
+  gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs                ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode         ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs       ## CONSUMES
 
 [Sources]
   HdaCodec/HdaCodecComponentName.h

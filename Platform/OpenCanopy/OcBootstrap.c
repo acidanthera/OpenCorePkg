@@ -30,6 +30,13 @@
 #include "BmfLib.h"
 #include "GuiApp.h"
 
+//
+// Add slight x offset of cursor by its position within its icon file,
+// in order to match look of Apple picker initial position.
+//
+#define DEFAULT_CURSOR_OFFSET_X  BOOT_CURSOR_OFFSET
+#define DEFAULT_CURSOR_OFFSET_Y  112U
+
 extern BOOT_PICKER_GUI_CONTEXT mGuiContext;
 
 STATIC GUI_DRAWING_CONTEXT              mDrawContext;
@@ -38,15 +45,15 @@ STATIC EFI_CONSOLE_CONTROL_SCREEN_MODE  mPreviousMode;
 STATIC
 EFI_STATUS
 OcShowMenuByOcEnter (
-  IN     OC_BOOT_CONTEXT          *BootContext
+  IN BOOT_PICKER_GUI_CONTEXT  *GuiContext
   )
 {
   EFI_STATUS  Status;
 
   Status = GuiLibConstruct (
-    BootContext->PickerContext,
-    mGuiContext.CursorDefaultX,
-    mGuiContext.CursorDefaultY
+    GuiContext,
+    mGuiContext.CursorOffsetX,
+    mGuiContext.CursorOffsetY
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -75,6 +82,21 @@ OcShowMenuByOcLeave (
   OcConsoleControlSetMode (mPreviousMode);
 }
 
+STATIC
+VOID
+OcSetInitialCursorOffset (
+  VOID
+  )
+{
+  //
+  // The cursor position is updated on GUI exit, so don't overwrite it.
+  //
+  if (mGuiContext.PickerContext == NULL) {
+    mGuiContext.CursorOffsetX = DEFAULT_CURSOR_OFFSET_X * mGuiContext.Scale;
+    mGuiContext.CursorOffsetY = DEFAULT_CURSOR_OFFSET_Y * mGuiContext.Scale;
+  }
+}
+
 EFI_STATUS
 EFIAPI
 OcShowMenuByOc (
@@ -87,6 +109,7 @@ OcShowMenuByOc (
   UINTN         Index;
 
   *ChosenBootEntry = NULL;
+  OcSetInitialCursorOffset();
   mGuiContext.BootEntry = NULL;
   mGuiContext.ReadyToBoot = FALSE;
   mGuiContext.HideAuxiliary = BootContext->PickerContext->HideAuxiliary;
@@ -94,11 +117,12 @@ OcShowMenuByOc (
   mGuiContext.PickerContext = BootContext->PickerContext;
   mGuiContext.AudioPlaybackTimeout = -1;
 
-  Status = OcShowMenuByOcEnter (BootContext);
+  Status = OcShowMenuByOcEnter (&mGuiContext);
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
+  mDrawContext.TimeOutSeconds = BootContext->PickerContext->TimeoutSeconds;
   //
   // Do not play intro animation for blind.
   //
@@ -109,7 +133,8 @@ OcShowMenuByOc (
   Status = BootPickerViewInitialize (
     &mDrawContext,
     &mGuiContext,
-    InternalGetCursorImage
+    InternalGetCursorImage,
+    (UINT8) BootContext->BootEntryCount
     );
   if (EFI_ERROR (Status)) {
     OcShowMenuByOcLeave ();
@@ -117,11 +142,11 @@ OcShowMenuByOc (
   }
 
   for (Index = 0; Index < BootContext->BootEntryCount; ++Index) {
-    Status = BootPickerEntriesAdd (
+    Status = BootPickerEntriesSet (
       BootContext->PickerContext,
       &mGuiContext,
       BootEntries[Index],
-      Index == BootContext->DefaultEntry->EntryIndex - 1
+      (UINT8) Index
       );
     if (EFI_ERROR (Status)) {
       OcShowMenuByOcLeave ();
@@ -129,7 +154,11 @@ OcShowMenuByOc (
     }
   }
 
-  BootPickerViewLateInitialize ();
+  BootPickerViewLateInitialize (
+    &mDrawContext,
+    &mGuiContext,
+    (UINT8) BootContext->DefaultEntry->EntryIndex - 1
+    );
 
   GuiRedrawAndFlushScreen (&mDrawContext);
 
@@ -160,14 +189,19 @@ OcShowMenuByOc (
       );
   }
 
-  GuiDrawLoop (&mDrawContext, BootContext->PickerContext->TimeoutSeconds);
+  GuiDrawLoop (&mDrawContext);
   ASSERT (mGuiContext.BootEntry != NULL || mGuiContext.Refresh);
 
+  if (!mGuiContext.Refresh) {
+    //
+    // Clear the screen only when we exit.
+    //
+    GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
+  }
   //
   // Note, it is important to destruct GUI here, as we must ensure
   // that keyboard/mouse polling does not conflict with FV2 ui.
   //
-  GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
   BootPickerViewDeinitialize (&mDrawContext, &mGuiContext);
   OcShowMenuByOcLeave ();
 
@@ -176,6 +210,64 @@ OcShowMenuByOc (
   if (mGuiContext.Refresh) {
     return EFI_ABORTED;
   }
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
+OcShowPasswordByOc (
+  IN OC_PICKER_CONTEXT   *Context,
+  IN OC_PRIVILEGE_LEVEL  Level
+  )
+{
+  EFI_STATUS    Status;
+  OcSetInitialCursorOffset ();
+  mGuiContext.BootEntry = NULL;
+  mGuiContext.ReadyToBoot = FALSE;
+  mGuiContext.HideAuxiliary = TRUE;
+  mGuiContext.Refresh = FALSE;
+  mGuiContext.PickerContext = Context;
+  mGuiContext.AudioPlaybackTimeout = -1;
+
+  Status = OcShowMenuByOcEnter (&mGuiContext);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  mDrawContext.TimeOutSeconds = 0;
+
+  //
+  // Do not play intro animation for blind.
+  //
+  if (Context->PickerAudioAssist) {
+    mGuiContext.DoneIntroAnimation = TRUE;
+  }
+
+  Status = PasswordViewInitialize (
+    &mDrawContext,
+    &mGuiContext
+    );
+  if (EFI_ERROR (Status)) {
+    OcShowMenuByOcLeave ();
+    return Status;
+  }
+
+  GuiRedrawAndFlushScreen (&mDrawContext);
+
+  GuiDrawLoop (&mDrawContext);
+  //
+  // Clear the screen only if we will not show BootPicker afterwards.
+  //
+  if (Context->PickerCommand != OcPickerShowPicker) {
+    GuiClearScreen (&mDrawContext, &mGuiContext.BackgroundColor.Pixel);
+  }
+  //
+  // Note, it is important to destruct GUI here, as we must ensure
+  // that keyboard/mouse polling does not conflict with FV2 ui.
+  //
+  PasswordViewDeinitialize (&mDrawContext, &mGuiContext);
+  OcShowMenuByOcLeave ();
+
   return EFI_SUCCESS;
 }
 
@@ -202,7 +294,8 @@ GuiOcInterfacePopulate (
     return Status;
   }
 
-  Context->ShowMenu = OcShowMenuByOc;
+  Context->ShowMenu         = OcShowMenuByOc;
+  Context->RequestPrivilege = OcShowPasswordByOc;
 
   return EFI_SUCCESS;
 }

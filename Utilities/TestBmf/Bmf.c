@@ -69,12 +69,12 @@ int main (int argc, char** argv)
 
   FontImage   = UserReadFile (argv[1], &FontImageSize);
   FontMetrics = UserReadFile (argv[2], &FontMetricsSize);
-  Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize);
+  Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize, 1);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));
     return -1;
   }
-  
+
   Result = GuiGetLabel (&Label, &Context, L"Time Machine HD", sizeof ("Time Machine HD") - 1, FALSE);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: label failed\n"));

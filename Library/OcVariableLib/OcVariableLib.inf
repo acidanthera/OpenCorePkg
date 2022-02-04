@@ -1,0 +1,30 @@
+## @file
+# Component description file for the OpenCore Variable library.
+#
+# Copyright (C) 2021, Marvin Häuser. All rights reserved.<BR>
+# SPDX-License-Identifier: BSD-3-Clause
+##
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OcVariableLib
+  FILE_GUID      = 753B2D09-E59C-4427-BE9E-372A483C2582
+  MODULE_TYPE    = DXE_DRIVER
+  VERSION_STRING = 1.0
+  LIBRARY_CLASS  = OcVariableLib|DXE_DRIVER DXE_RUNTIME_DRIVER UEFI_DRIVER UEFI_APPLICATION DXE_SMM_DRIVER
+
+[Sources]
+  OcVariableLib.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[Guids]
+  gOcVendorVariableGuid
+
+[LibraryClasses]
+  BaseMemoryLib
+  DebugLib
+  MemoryAllocationLib
+  UefiRuntimeServicesTableLib

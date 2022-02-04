@@ -12,12 +12,13 @@
 #include <Library/OcFileLib.h>
 #include <Protocol/OcAudio.h>
 
-#define OC_AUDIO_DEFAULT_VOLUME_LEVEL  70
+#define OC_AUDIO_DEFAULT_GAIN     (-30)
 
 /**
   Install audio support protocols.
 
-  @param[in] Reinstall  Overwrite installed protocols.
+  @param[in] Reinstall           Overwrite installed protocols.
+  @param[in] DisconnectHda       Attempt to disconnect HDA controller first.
 
   @retval installed protocol.
   @retval NULL when conflicting audio implementation is present.
@@ -25,7 +26,8 @@
 **/
 OC_AUDIO_PROTOCOL *
 OcAudioInstallProtocols (
-  IN BOOLEAN  Reinstall
+  IN BOOLEAN  Reinstall,
+  IN BOOLEAN  DisconnectHda
   );
 
 /**
@@ -41,17 +43,20 @@ OcLanguageCodeToString (
   );
 
 /**
-  Get system volume level in 0~100 range.
+  Get system amplifier gain.
 
-  @param[in]   Amplifier  Amplification coefficient 1~999.
-  @param[out]  Muted      Whether volume is off.
-
-  @retval ASCII string.
+  @param[out]  RawGain        Raw codec gain setting.
+  @param[out]  DecibelGain    Decibel gain setting.
+  @param[out]  Muted          Whether amplifier should be muted.
+  @param[out]  TryConversion  TRUE when decibel gain setting is a default value and
+                              raw codec gain setting is a real value.
 **/
-UINT8
-OcGetVolumeLevel (
-  IN  UINT32   Amplifier,
-  OUT BOOLEAN  *Muted
+VOID
+OcGetAmplifierGain (
+  OUT UINT8              *RawGain,
+  OUT INT8               *DecibelGain,
+  OUT BOOLEAN            *Muted,
+  OUT BOOLEAN            *TryConversion
   );
 
 /**

@@ -16,8 +16,10 @@ Utility to validate whether a `config.plist` matches requirements and convention
 ### Global Rules
 - All entries must be set once only. Duplication is strictly prohibited.
 - All strings (fields with plist `String` format) throughout the whole config only accept ASCII printable characters at most. Stricter rules may apply. For instance, some fields only accept specified values, as indicated in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf).
+- All the paths relative to OpenCore root must be 128 bytes total including '\0' terminator.
 - Most binary patches must have `Find`, `Replace`, `Mask` (if used), and `ReplaceMask` (if used) identical size set. Also, `Find` requires `Mask` (or `Replace` requires `ReplaceMask`) to be active (set to non-zero) for corresponding bits.
 - `MinKernel` and `MaxKernel` entries should follow conventions specified in [Configuration.pdf](https://github.com/acidanthera/OpenCorePkg/blob/master/Docs/Configuration.pdf). (TODO: Bring decent checks for this)
+- `MinKernel` cannot be a value that is below macOS 10.4 (Darwin version 8).
 - Entries taking file system path only accept `0-9, A-Z, a-z, '_', '-', '.', '/', and '\'`.
 - Device Paths (e.g. `PciRoot(0x0)/Pci(0x1b,0x0)`) only accept strings in canonic string format.
 - Paths of UEFI Drivers only accept `0-9, A-Z, a-z, '_', '-', '.', and '/'`.
@@ -38,6 +40,7 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - When `AllowRelocationBlock` is enabled, `ProvideCustomSlide` should be enabled altogether.
 - When `EnableSafeModeSlide` is enabled, `ProvideCustomSlide` should be enabled altogether.
 - If `ProvideMaxSlide` is set to a number greater than zero, `ProvideCustomSlide` should be enabled altogether.
+- `ResizeAppleGpuBars` must be set to `0` or `-1`.
 - When `DisableVariableWrite`, `EnableWriteUnprotector`, or `ProvideCustomSlide` is enabled, `OpenRuntime.efi` should be loaded in `UEFI->Drivers`.
 
 ### DeviceProperties
@@ -105,9 +108,11 @@ Utility to validate whether a `config.plist` matches requirements and convention
 #### APFS
 - When `EnableJumpstart` is enabled, `ScanPolicy` in `Misc->Security` should have `OC_SCAN_ALLOW_FS_APFS` (bit 8) set, together with `OC_SCAN_FILE_SYSTEM_LOCK` (bit 0) set. Or `ScanPolicy` should be `0` (failsafe value).
 #### Audio
-- When `AudioSupport` is enabled, AudioDevice cannot be empty and must be a valid path.
+- When `AudioSupport` is enabled, `AudioDevice` must be either empty or a valid path.
+- When `AudioSupport` is enabled, `AudioOutMask` must be non-zero.
 #### Quirks
 - When `RequestBootVarRouting` is enabled, `OpenRuntime.efi` should be loaded in `UEFI->Drivers`.
+- `ResizeGpuBars` must be set to an integer value between `-1` and `19`.
 #### Drivers
 - When `OpenUsbKbDxe.efi` is in use, `KeySupport` in `UEFI->Input` should never be enabled altogether.
 - When `Ps2KeyboardDxe.efi` is in use, `KeySupport` in `UEFI->Input` should always be enabled altogether.
@@ -120,5 +125,6 @@ Utility to validate whether a `config.plist` matches requirements and convention
 #### Output
 - `ClearScreenOnModeSwitch`, `IgnoreTextInGraphics`, `ReplaceTabWithSpace`, and `SanitiseClearScreen` only apply to `System` TextRenderer
 - `Resolution` should match `NUMBERxNUMBER` or `NUMBERxNUMBER@NUMBER` sequences (unless it is an `Empty string` or is set to `Max`).
+- `UIScale` must be set to an integer value between `-1` and `2`.
 #### ReservedMemory
 - Type: Only `Reserved`, `LoaderCode`, `LoaderData`, `BootServiceCode`, `BootServiceData`, `RuntimeCode`, `RuntimeData`, `Available`, `Persistent`, `UnusableMemory`, `ACPIReclaimMemory`, `ACPIMemoryNVS`, `MemoryMappedIO`, `MemoryMappedIOPortSpace`, or `PalCode` are accepted.

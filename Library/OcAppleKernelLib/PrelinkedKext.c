@@ -39,7 +39,8 @@ PRELINKED_KEXT *
 InternalCreatePrelinkedKext (
   IN OUT PRELINKED_CONTEXT  *Prelinked OPTIONAL,
   IN XML_NODE               *KextPlist,
-  IN CONST CHAR8            *Identifier OPTIONAL
+  IN CONST CHAR8            *Identifier OPTIONAL,
+  IN BOOLEAN                Is32Bit
   )
 {
   PRELINKED_KEXT           *NewKext;
@@ -79,6 +80,13 @@ InternalCreatePrelinkedKext (
 
   Found       = Identifier == NULL;
 
+  //
+  // Prelinked bitness overrides parameter.
+  //
+  if (Prelinked != NULL) {
+    Is32Bit = Prelinked->Is32Bit;
+  }
+
   FieldCount = PlistDictChildren (KextPlist);
   for (FieldIndex = 0; FieldIndex < FieldCount; ++FieldIndex) {
     KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, FieldIndex, &KextPlistValue));
@@ -99,7 +107,7 @@ InternalCreatePrelinkedKext (
         break;
       }
       BundleLibraries = KextPlistValue;
-    } else if (BundleLibraries64 == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_64_KEY) == 0) {
+    } else if (BundleLibraries64 == NULL && AsciiStrCmp (KextPlistKey, INFO_BUNDLE_LIBRARIES_64_KEY) == 0 && !Is32Bit) {
       if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_DICT) == NULL) {
         break;
       }
@@ -139,7 +147,7 @@ InternalCreatePrelinkedKext (
     }
 
     if (KextIdentifier != NULL
-      && BundleLibraries64 != NULL
+      && ((BundleLibraries64 != NULL && !Is32Bit) || (BundleLibraries != NULL && Is32Bit))
       && CompatibleVersion != NULL
       && (Prelinked == NULL
         || (Prelinked != NULL
@@ -228,7 +236,7 @@ InternalCreatePrelinkedKext (
   NewKext->Context.VirtualBase        = VirtualBase;
   NewKext->Context.VirtualKmod        = VirtualKmod;
   NewKext->Context.IsKernelCollection = Prelinked != NULL ? Prelinked->IsKernelCollection : FALSE;
-  NewKext->Context.Is32Bit            = Prelinked != NULL ? Prelinked->Is32Bit : FALSE;
+  NewKext->Context.Is32Bit            = Is32Bit;
 
   //
   // Provide pointer to 10.6.8 KXLD state.
@@ -633,7 +641,7 @@ InternalNewPrelinkedKext (
 {
   PRELINKED_KEXT  *NewKext;
 
-  NewKext = InternalCreatePrelinkedKext (NULL, KextPlist, NULL);
+  NewKext = InternalCreatePrelinkedKext (NULL, KextPlist, NULL, Context->Is32Bit);
   if (NewKext == NULL) {
     return NULL;
   }
@@ -696,7 +704,7 @@ InternalCachedPrelinkedKext (
       continue;
     }
 
-    NewKext = InternalCreatePrelinkedKext (Prelinked, KextPlist, Identifier);
+    NewKext = InternalCreatePrelinkedKext (Prelinked, KextPlist, Identifier, Prelinked->Is32Bit);
     if (NewKext != NULL) {
       break;
     }
@@ -941,6 +949,8 @@ InternalScanPrelinkedKext (
       if (DependencyId == NULL) {
         continue;
       }
+
+      DEBUG ((DEBUG_VERBOSE, "OCAK: Checking dependency %a for kext %a\n", DependencyId, Kext->Identifier));
 
       //
       // In 11.0 KPIs just like plist-only kexts are not present in memory and their

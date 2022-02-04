@@ -106,7 +106,7 @@ OcGopDrawBlt (
 
 EFI_STATUS
 OcProvideGopPassThrough (
-  VOID
+  IN BOOLEAN  ForAll
   )
 {
   EFI_STATUS                       Status;
@@ -187,8 +187,6 @@ OcProvideGopPassThrough (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with UGA - %r\n", Status));
-    FreePool (HandleBuffer);
-
     return Status;
   }
 
@@ -234,7 +232,7 @@ OcProvideGopPassThrough (
         HandleBuffer[Index],
         Status
         ));
-      if (HasAppleFramebuffer) {
+      if (HasAppleFramebuffer || !ForAll) {
         continue;
       }
     } else {

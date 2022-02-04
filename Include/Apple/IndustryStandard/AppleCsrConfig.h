@@ -52,6 +52,21 @@
 
 #define CSR_ALWAYS_ENFORCED_FLAGS (CSR_ALLOW_DEVICE_CONFIGURATION | CSR_ALLOW_ANY_RECOVERY_OS)
 
+/* Flags set by default by Apple `csrutil disable`. */
+#define CSR_DISABLE_FLAGS (CSR_ALLOW_UNTRUSTED_KEXTS | \
+                           CSR_ALLOW_UNRESTRICTED_FS | \
+                           CSR_ALLOW_TASK_FOR_PID | \
+                           CSR_ALLOW_KERNEL_DEBUGGER | \
+                           CSR_ALLOW_APPLE_INTERNAL | \
+                           CSR_ALLOW_UNRESTRICTED_DTRACE | \
+                           CSR_ALLOW_UNRESTRICTED_NVRAM)
+
+/* Flags set by default by OC `csrutil disable`. */
+#define OC_CSR_DISABLE_FLAGS (CSR_DISABLE_FLAGS | CSR_ALLOW_UNAPPROVED_KEXTS)
+
+#define CSR_APPLE_SIP_NVRAM_ATTR       (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS)
+#define CSR_APPLE_SIP_NVRAM_NV_ATTR    (EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE)
+
 ///
 /// CSR capabilities that a booter can give to the system.
 ///

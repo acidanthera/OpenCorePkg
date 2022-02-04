@@ -14,6 +14,7 @@
 
 #include "OpenCanopy.h"
 #include "BmfLib.h"
+#include "GuiApp.h"
 
 CONST BMF_CHAR *
 BmfGetChar (
@@ -154,8 +155,7 @@ BmfContextInitialize (
   CONST BMF_BLOCK_HEADER *Block;
   UINTN                  Index;
 
-  INT16                  MinY;
-  UINT16                 MaxY;
+  UINT16                 MaxHeight;
   INT32                  Height;
   INT32                  Width;
   INT32                  Advance;
@@ -323,8 +323,7 @@ BmfContextInitialize (
   }
 
   Chars = Context->Chars;
-  MinY  = MAX_INT16;
-  MaxY  = 0;
+  MaxHeight  = 0;
 
   for (Index = 0; Index < Context->NumChars; ++Index) {
     Result = OcOverflowAddS32 (
@@ -374,8 +373,7 @@ BmfContextInitialize (
       return FALSE;
     }
 
-    MinY = MIN (MinY, Chars[Index].yoffset);
-    MaxY = MAX (MaxY, (UINT16) Height);
+    MaxHeight = MAX (MaxHeight, (UINT16) Height);
     //
     // This only yields unexpected but not undefined behaviour when not met,
     // hence it is fine verifying it only DEBUG mode.
@@ -393,24 +391,7 @@ BmfContextInitialize (
     DEBUG_CODE_END ();
   }
 
-  Result = OcOverflowSubS32 (
-             MaxY,
-             MinY,
-             &Height
-             );
-  if (Result
-   || 0 >= Height || Height > MAX_UINT16) {
-     DEBUG ((
-       DEBUG_WARN,
-       "BMF: Insane font Y info %d %d\n",
-       MaxY,
-       MinY
-       ));
-    return FALSE;
-  }
-
-  Context->Height  = Context->Common->lineHeight;
-  Context->OffsetY = -MinY;
+  Context->Height  = (UINT16) MaxHeight;
 
   Pairs = Context->KerningPairs;
   if (Pairs != NULL) { // According to the docs, kerning pairs are optional
@@ -490,7 +471,8 @@ BmfGetTextInfo (
   IN CONST BMF_CONTEXT  *Context,
   IN CONST CHAR16       *String,
   IN UINTN              StringLen,
-  IN UINTN              MaxWidth
+  IN UINT8              PosX,
+  IN UINT8              PosY
   )
 {
   BOOLEAN                Result;
@@ -532,7 +514,7 @@ BmfGetTextInfo (
   InfoPairs = (CONST BMF_KERNING_PAIR **)&TextInfo->Chars[StringLen];
 
   TextInfo->Chars[0] = Char;
-  Width = Char->xadvance;
+  Width = (INT32) PosX + Char->xadvance;
 
   for (Index = 1; Index < StringLen; ++Index) {
     ASSERT (String[Index] != 0);
@@ -557,29 +539,8 @@ BmfGetTextInfo (
       return NULL;
     }
 
-    /*if (Width > MaxWidth) {
-      break;
-    }*/
-
     TextInfo->Chars[Index] = Char;
     InfoPairs[Index - 1]   = Pair;
-  }
-
-  if (Index != StringLen) {
-    CONST BMF_KERNING_PAIR *PeriodPair;
-
-    Char = BmfGetChar (Context, '.');
-    if (Char == NULL) {
-      FreePool (TextInfo);
-      return NULL;
-    }
-
-    CurWidth = 2 * (INT32)Char->xadvance + (INT32)Char->xoffset + (INT32)Char->width;
-
-    PeriodPair = BmfGetKerningPair (Context, '.', '.');
-    if (PeriodPair != NULL) {
-      CurWidth += 2 * (INT32)PeriodPair->amount;
-    }
   }
 
   Width += ((INT32)TextInfo->Chars[Index - 1]->xoffset + (INT32)TextInfo->Chars[Index - 1]->width - (INT32)TextInfo->Chars[Index - 1]->xadvance);
@@ -593,8 +554,9 @@ BmfGetTextInfo (
   }
 
   TextInfo->Width   = (UINT16)Width;
-  TextInfo->Height  = Context->Height;
-  TextInfo->OffsetY = Context->OffsetY;
+  ASSERT (PosY + Context->Height >= PosY);
+  TextInfo->Height  = PosY + Context->Height;
+  TextInfo->OffsetY = PosY;
   return TextInfo;
 }
 
@@ -650,12 +612,19 @@ GuiGetLabel (
   INT32                         TargetCharX;
   INT32                         InitialCharX;
   INT32                         InitialWidthOffset;
+  INT32                         OffsetY;
 
   ASSERT (LabelImage != NULL);
   ASSERT (Context    != NULL);
   ASSERT (String     != NULL);
 
-  TextInfo = BmfGetTextInfo (&Context->BmfContext, String, StringLen, 0);
+  TextInfo = BmfGetTextInfo (
+    &Context->BmfContext,
+    String,
+    StringLen,
+    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale,
+    BOOT_ENTRY_LABEL_TEXT_OFFSET * Context->Scale
+    );
   if (TextInfo == NULL) {
     DEBUG ((DEBUG_WARN, "BMF: GetTextInfo failed\n"));
     return FALSE;
@@ -669,23 +638,28 @@ GuiGetLabel (
   }
 
   InfoPairs   = (CONST BMF_KERNING_PAIR **)&TextInfo->Chars[StringLen];
-  TargetCharX = 0;
+  TargetCharX = 2 * Context->Scale;
 
-  if (TextInfo->Chars[0]->xoffset >= 0) {
-    InitialCharX       = 0;
-    InitialWidthOffset = 0;
-  } else {
-    InitialCharX       = -TextInfo->Chars[0]->xoffset;
-    InitialWidthOffset = TextInfo->Chars[0]->xoffset;
-  }
+  InitialCharX       = -TextInfo->Chars[0]->xoffset;
+  InitialWidthOffset = TextInfo->Chars[0]->xoffset;
 
   for (Index = 0; Index < StringLen; ++Index) {
+    OffsetY = TextInfo->Chars[Index]->yoffset + TextInfo->OffsetY;
+    if (OffsetY < 0) {
+      OffsetY = 0;
+      DEBUG ((
+        DEBUG_INFO,
+        "BMF: Char %d y-offset off-screen by %d pixels\n",
+        TextInfo->Chars[Index]->id,
+        -OffsetY
+        ));
+    }
     ASSERT (TextInfo->Chars[Index]->yoffset + TextInfo->OffsetY >= 0);
 
     for (
       RowIndex = 0,
         SourceRowOffset = TextInfo->Chars[Index]->y * Context->FontImage.Width,
-        TargetRowOffset = (TextInfo->Chars[Index]->yoffset + TextInfo->OffsetY) * TextInfo->Width;
+        TargetRowOffset = OffsetY * TextInfo->Width;
       RowIndex < TextInfo->Chars[Index]->height;
       ++RowIndex,
         SourceRowOffset += Context->FontImage.Width,
@@ -732,7 +706,8 @@ GuiFontConstruct (
   IN  VOID              *FontImage,
   IN  UINTN             FontImageSize,
   IN  VOID              *FileBuffer,
-  IN  UINT32            FileSize
+  IN  UINT32            FileSize,
+  IN  UINT8             Scale
   )
 {
   EFI_STATUS    Status;
@@ -765,6 +740,8 @@ GuiFontConstruct (
     GuiFontDestruct (Context);
     return FALSE;
   }
+
+  Context->Scale = Scale;
 
   // TODO: check file size
   return TRUE;

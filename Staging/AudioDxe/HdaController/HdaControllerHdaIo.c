@@ -263,8 +263,8 @@ HdaControllerHdaIoCloseStream(
     goto DONE;
   }
 
-  // Raise TPL so we can't be messed with.
-  OldTpl = gBS->RaiseTPL(TPL_HIGH_LEVEL);
+  // Raise TPL so we can't be messed with (but beware nested gBS->SetTimer calls).
+  OldTpl = gBS->RaiseTPL (TPL_DXE_CORE_TIMER);
 
   // Stop stream.
   Status = HdaControllerHdaIoStopStream(This, Type);
@@ -335,8 +335,10 @@ HdaControllerHdaIoStartStream(
   IN EFI_HDA_IO_STREAM_CALLBACK Callback OPTIONAL,
   IN VOID *Context1 OPTIONAL,
   IN VOID *Context2 OPTIONAL,
-  IN VOID *Context3 OPTIONAL) {
-  //DEBUG((DEBUG_INFO, "HdaControllerHdaIoStartStream(): start\n"));
+  IN VOID *Context3 OPTIONAL
+  )
+{
+  DEBUG((DEBUG_VERBOSE, "HdaControllerHdaIoStartStream(): start\n"));
 
   // Create variables.
   EFI_STATUS Status;
@@ -400,7 +402,7 @@ HdaControllerHdaIoStartStream(
   HdaStreamCurrentBlock = HdaStreamDmaPos / HDA_BDL_BLOCKSIZE;
   HdaStreamNextBlock = HdaStreamCurrentBlock + 1;
   HdaStreamNextBlock %= HDA_BDL_ENTRY_COUNT;
-  DEBUG((DEBUG_INFO, "HdaControllerHdaIoStartStream(): stream %u DMA pos 0x%X\n",
+  DEBUG((DEBUG_INFO, "HDA: Stream %u DMA pos 0x%X\n",
     HdaStream->Index, HdaStreamDmaPos));
 
   // Save pointer to buffer.

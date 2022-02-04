@@ -161,7 +161,7 @@ OcStorageInitializeVault (
     OC_STORAGE_VAULT_DESTRUCT (&Context->Vault, sizeof (Context->Vault));
     DEBUG ((
       DEBUG_ERROR,
-      "OCST: Unsupported vault data verion %u vs %u\n",
+      "OCST: Unsupported vault data version %u vs %u\n",
       Context->Vault.Version,
       OC_STORAGE_VAULT_VERSION
       ));
@@ -243,7 +243,7 @@ OcStorageInitFromFs (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     RootVolume,
     &Context->Storage,
     (CHAR16 *) StorageRoot,
@@ -364,7 +364,7 @@ OcStorageExistsFileUnicode (
     return FALSE;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Context->Storage,
     &File,
     (CHAR16 *) FilePath,
@@ -415,7 +415,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Context->Storage,
     &File,
     (CHAR16 *) FilePath,
@@ -427,7 +427,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = GetFileSize (File, &Size);
+  Status = OcGetFileSize (File, &Size);
   if (EFI_ERROR (Status) || Size >= MAX_UINT32 - 1) {
     File->Close (File);
     return NULL;
@@ -439,7 +439,7 @@ OcStorageReadFileUnicode (
     return NULL;
   }
 
-  Status = GetFileData (File, 0, Size, FileBuffer);
+  Status = OcGetFileData (File, 0, Size, FileBuffer);
   File->Close (File);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);

@@ -450,6 +450,14 @@ mPerfCtrlFind2[] = {
 
 STATIC
 UINT8
+mPerfCtrlFind3[] = {
+  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
+  0x4C, 0x89, 0xF0,             ///< mov rax, r14
+  0x0F, 0x30                    ///< wrmsr
+};
+
+STATIC
+UINT8
 mPerfCtrlMax[] = {
   0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
   0x31, 0xD2,                   ///< xor edx, edx
@@ -487,7 +495,8 @@ PatchAppleXcpmForceBoost (
       && Current[2] == mPerfCtrlFind1[2]
       && Current[3] == mPerfCtrlFind1[3]) {
       if (CompareMem (&Current[4], &mPerfCtrlFind1[4], sizeof (mPerfCtrlFind1) - 4) == 0
-        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0) {
+        || CompareMem (&Current[4], &mPerfCtrlFind2[4], sizeof (mPerfCtrlFind2) - 4) == 0
+        || CompareMem (&Current[4], &mPerfCtrlFind3[4], sizeof (mPerfCtrlFind3) - 4) == 0) {
         break;
       }
     }
@@ -1387,6 +1396,49 @@ mPowerStateTimeoutPanicMasterPatch = {
 };
 
 STATIC
+UINT8
+mPowerStateTimeoutPanicInlineFind[] = {
+  0x80, 0x00, 0x01, 0x6F,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0x75, 0x00,              ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,              ///< jnz short fail
+};
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicInlineMask[] = {
+  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
+  0xFF, 0x00,              ///< jnz short fail
+  0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0xFF, 0x00,              ///< jnz short fail
+};
+
+
+STATIC
+UINT8
+mPowerStateTimeoutPanicInlineReplace[] = {
+  0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Eh ; 'n'
+  0x75, 0x00,              ///< jnz short fail
+  0x80, 0x00, 0x02, 0x6D,  ///< cmp byte ptr [rax+2], 6Dh ; 'm'
+  0x75, 0x00,              ///< jnz short fail
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mPowerStateTimeoutPanicInlinePatch = {
+  .Comment     = DEBUG_POINTER ("PowerStateTimeout"),
+  .Base        = "__ZN9IOService12ackTimerTickEv",
+  .Find        = mPowerStateTimeoutPanicInlineFind,
+  .Mask        = mPowerStateTimeoutPanicInlineMask,
+  .Replace     = mPowerStateTimeoutPanicInlineReplace,
+  .ReplaceMask = mPowerStateTimeoutPanicInlineMask,
+  .Size        = sizeof (mPowerStateTimeoutPanicInlineFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0x1000
+};
+
+STATIC
 EFI_STATUS
 PatchPowerStateTimeout (
   IN OUT PATCHER_CONTEXT    *Patcher,
@@ -1401,6 +1453,14 @@ PatchPowerStateTimeout (
     DEBUG ((DEBUG_INFO, "OCAK: Skipping power state patch on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
+
+  Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicInlinePatch);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success inline power state\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: No inline power state patch - %r, trying fallback\n", Status));
 
   Status = PatcherApplyGenericPatch (Patcher, &mPowerStateTimeoutPanicMasterPatch);
   if (EFI_ERROR (Status)) {
@@ -1645,11 +1705,13 @@ PatchBTFeatureFlags (
 {
   EFI_STATUS Status;
 
-  ASSERT (Patcher != NULL);
-
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, KERNEL_VERSION_BIG_SUR_MAX)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
     return EFI_SUCCESS;
+  }
+
+  if (Patcher == NULL) {
+    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (
@@ -1917,6 +1979,34 @@ mApfsTimeoutPatch = {
   .Limit       = 0
 };
 
+STATIC
+UINT8
+mApfsTimeoutV2Find[] = {
+  0x40, 0x42, 0x0F, 0x00
+};
+
+STATIC
+UINT8
+mApfsTimeoutV2Replace[] = {
+  0x00, 0x02, 0x00, 0x00
+};
+
+
+STATIC
+PATCHER_GENERIC_PATCH
+mApfsTimeoutV2Patch = {
+  .Comment     = DEBUG_POINTER ("ApfsTimeout V2"),
+  .Base        = "_spaceman_scan_free_blocks",
+  .Find        = mApfsTimeoutV2Find,
+  .Mask        = NULL,
+  .Replace     = mApfsTimeoutV2Replace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mApfsTimeoutV2Find),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 4096
+};
+
 VOID
 PatchSetApfsTimeout (
   IN UINT32  Timeout
@@ -1925,6 +2015,7 @@ PatchSetApfsTimeout (
   // FIXME: This is really ugly, make quirks take a context param.
   DEBUG ((DEBUG_INFO, "OCAK: Registering %u APFS timeout\n", Timeout));
   CopyMem (&mApfsTimeoutReplace[2], &Timeout, sizeof (Timeout));
+  CopyMem (&mApfsTimeoutV2Replace[0], &Timeout, sizeof (Timeout));
 }
 
 STATIC
@@ -1945,11 +2036,20 @@ PatchSetApfsTrimTimeout (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+  if (KernelVersion >= KERNEL_VERSION_MONTEREY_MIN) {
+    Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutV2Patch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeoutV2 - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeoutV2\n"));
+    }
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+    Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
+    } else {
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
+    }
   }
 
   return Status;

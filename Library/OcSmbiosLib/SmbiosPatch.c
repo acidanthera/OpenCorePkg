@@ -30,6 +30,7 @@
 #include <Library/OcGuardLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcStringLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
@@ -156,15 +157,15 @@ SmbiosGetFormFactor (
   }
 
   //
-  // If not valid at all, fall back to zero.
+  // If not valid at all, fall back on the failsafe.
   //
-  return 0;
+  return MemoryFormFactorUnknown;
 }
 
 /** Type 0
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 
   @retval TRUE                      Apple SMBIOS detected
   @retval FALSE                     Apple SMBIOS not detected
@@ -222,7 +223,7 @@ PatchBiosInformation (
 /** Type 1
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -258,7 +259,7 @@ PatchSystemInformation (
 /** Type 2
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -308,7 +309,7 @@ PatchBaseboardInformation (
 /** Type 3
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -369,88 +370,22 @@ PatchSystemEnclosure (
   SmbiosFinaliseStruct (Table);
 }
 
-/** Type 4
-
-  @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
-**/
-STATIC
-VOID
-PatchProcessorInformation (
-  IN OUT OC_SMBIOS_TABLE *Table,
-  IN     OC_SMBIOS_DATA  *Data,
-  IN     OC_CPU_INFO     *CpuInfo
-  )
-{
-  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
-  UINT8                           MinLength;
-  UINT8                           StringIndex;
-  UINT8                           TmpCount;
-  UINT16                          MhzSpeed;
-
-  Original      = SmbiosGetOriginalStructure (SMBIOS_TYPE_PROCESSOR_INFORMATION, 1);
-  MinLength     = sizeof (*Original.Standard.Type4);
-  StringIndex   = 0;
-
-  if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PROCESSOR_INFORMATION, MinLength, 1))) {
-    return;
-  }
-
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->Socket, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorType, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorManufacture, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorId, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
-  Table->CurrentPtr.Standard.Type4->ExternalClock = CpuInfo->ExternalClock;
-
-  MhzSpeed = OcCpuFrequencyToDisplayFrequency (CpuInfo->CPUFrequency);
-
-  DEBUG ((DEBUG_INFO, "OCSMB: CPU display frequency is %uMHz\n", MhzSpeed));
-
-  Table->CurrentPtr.Standard.Type4->MaxSpeed = MhzSpeed;
-  Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
-
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->Status, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorUpgrade, Original, NULL, NULL);
-
-  Table->CurrentPtr.Standard.Type4->L1CacheHandle = OcSmbiosL1CacheHandle;
-  Table->CurrentPtr.Standard.Type4->L2CacheHandle = OcSmbiosL2CacheHandle;
-  Table->CurrentPtr.Standard.Type4->L3CacheHandle = OcSmbiosL3CacheHandle;
-
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->SerialNumber, Original, NULL, &StringIndex, NULL);
-  //
-  // Most bootloaders set this to ProcessorVersion, yet Apple does not care and has UNKNOWN.
-  //
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->AssetTag, Original, NULL, &StringIndex, NULL);
-  SMBIOS_OVERRIDE_S (Table, Standard.Type4->PartNumber, Original, NULL, &StringIndex, NULL);
-
-  TmpCount = (UINT8) (CpuInfo->CoreCount < 256 ? CpuInfo->CoreCount : 0xFF);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount, Original, NULL, &TmpCount);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount, Original, NULL, &TmpCount);
-  TmpCount = (UINT8) (CpuInfo->ThreadCount < 256 ? CpuInfo->ThreadCount : 0xFF);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount, Original, NULL, &TmpCount);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorCharacteristics, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily2, Original, NULL, NULL);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount2, Original, NULL, &CpuInfo->CoreCount);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount2, Original, NULL, &CpuInfo->CoreCount);
-  SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount2, Original, NULL, &CpuInfo->ThreadCount);
-
-  SmbiosFinaliseStruct (Table);
-}
-
 /** Type 7
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] Index                  Pointer to cache table index.
+  @param[in] OriginalHandle         Original cache table handle.
+  @param[in] NewHandle              Pointer to new cache table handle.
 **/
 STATIC
 VOID
 PatchCacheInformation (
   IN OUT OC_SMBIOS_TABLE  *Table,
-  IN     OC_SMBIOS_DATA   *Data
+  IN     OC_SMBIOS_DATA   *Data,
+  IN OUT UINT16           *Index,
+  IN     SMBIOS_HANDLE    OriginalHandle,
+     OUT SMBIOS_HANDLE    *NewHandle
   )
 {
   APPLE_SMBIOS_STRUCTURE_POINTER  Original;
@@ -458,37 +393,35 @@ PatchCacheInformation (
   UINT16                          EntryNo;
   UINT8                           MinLength;
   UINT8                           StringIndex;
-  UINT16                          CacheLevel;
-  BOOLEAN                         CacheLevels[3];
 
-  ZeroMem (CacheLevels, sizeof (CacheLevels));
+  //
+  // A handle of 0xFFFF indicates no cache data present.
+  //
+  *NewHandle = 0xFFFF;
+  if (OriginalHandle == 0xFFFF) {
+    return;
+  }
 
   NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_CACHE_INFORMATION);
 
   DEBUG ((DEBUG_INFO, "OCSMB: Number of CPU cache entries is %u\n", (UINT32) NumberEntries));
 
+  //
+  // Locate original cache data specified by the handle.
+  //
   for (EntryNo = 1; EntryNo <= NumberEntries; ++EntryNo) {
     Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_CACHE_INFORMATION, EntryNo);
-    if (Original.Raw == NULL || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)) {
-      continue;
-    }
-
-    //
-    // Check if already done with this cache type.
-    // Only support L1 to L3 caches.
-    //
-    CacheLevel = Original.Standard.Type7->CacheConfiguration & 7U;
-    if (CacheLevel <= 2 && !CacheLevels[CacheLevel]) {
-      CacheLevels[CacheLevel] = TRUE;
-    } else {
+    if (Original.Raw == NULL
+      || !SMBIOS_ACCESSIBLE (Original, Standard.Type7->CacheConfiguration)
+      || Original.Standard.Type7->Hdr.Handle != OriginalHandle) {
       continue;
     }
 
     MinLength     = sizeof (*Original.Standard.Type7);
     StringIndex   = 0;
 
-    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_CACHE_INFORMATION, MinLength, CacheLevel+1))) {
-      continue;
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_CACHE_INFORMATION, MinLength, *Index))) {
+      return;
     }
 
     SMBIOS_OVERRIDE_S (Table, Standard.Type7->SocketDesignation, Original, NULL, &StringIndex, NULL);
@@ -501,8 +434,117 @@ PatchCacheInformation (
     SMBIOS_OVERRIDE_V (Table, Standard.Type7->ErrorCorrectionType, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type7->SystemCacheType, Original, NULL, NULL);
     SMBIOS_OVERRIDE_V (Table, Standard.Type7->Associativity, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_V (Table, Standard.Type7->MaximumCacheSize2, Original, NULL, NULL);
-    SMBIOS_OVERRIDE_V (Table, Standard.Type7->InstalledSize2, Original, NULL, NULL);
+
+    //
+    // MaximumCacheSize2 and InstalledSize2 are to be set to the same values
+    // as MaximumCacheSize and InstalledSize if the cache size is under 2047MB.
+    //
+    if (!SMBIOS_ACCESSIBLE (Original, Standard.Type7->MaximumCacheSize2)) {
+      Table->CurrentPtr.Standard.Type7->MaximumCacheSize2  = Table->CurrentPtr.Standard.Type7->MaximumCacheSize & 0x7FFF;
+      Table->CurrentPtr.Standard.Type7->MaximumCacheSize2 |= Table->CurrentPtr.Standard.Type7->MaximumCacheSize & BIT15 ? BIT31 : 0;
+      Table->CurrentPtr.Standard.Type7->InstalledSize2     = Table->CurrentPtr.Standard.Type7->InstalledSize & 0x7FFF;
+      Table->CurrentPtr.Standard.Type7->InstalledSize2    |= Table->CurrentPtr.Standard.Type7->InstalledSize & BIT15 ? BIT31 : 0;
+    } else {
+      SMBIOS_OVERRIDE_V (Table, Standard.Type7->MaximumCacheSize2, Original, NULL, NULL);
+      SMBIOS_OVERRIDE_V (Table, Standard.Type7->InstalledSize2, Original, NULL, NULL);
+    }
+
+    *NewHandle = Table->CurrentPtr.Standard.Hdr->Handle;
+    (*Index)++;
+    SmbiosFinaliseStruct (Table);
+  }
+}
+
+/** Type 4
+
+  @param[in] Table                  Pointer to location containing the current address within the buffer.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
+**/
+STATIC
+VOID
+PatchProcessorInformation (
+  IN OUT OC_SMBIOS_TABLE *Table,
+  IN     OC_SMBIOS_DATA  *Data,
+  IN     OC_CPU_INFO     *CpuInfo
+  )
+{
+  APPLE_SMBIOS_STRUCTURE_POINTER  Original;
+  UINT16                          NumberEntries;
+  UINT16                          EntryNo;
+  UINT8                           MinLength;
+  UINT8                           StringIndex;
+  UINT8                           TmpCount;
+  UINT16                          MhzSpeed;
+
+  SMBIOS_HANDLE                   HandleL1Cache;
+  SMBIOS_HANDLE                   HandleL2Cache;
+  SMBIOS_HANDLE                   HandleL3Cache;
+  UINT16                          CacheIndex;
+
+  NumberEntries = SmbiosGetOriginalStructureCount (SMBIOS_TYPE_PROCESSOR_INFORMATION);
+  CacheIndex    = 0;
+
+  for (EntryNo = 1; EntryNo <= NumberEntries; EntryNo++) {
+    Original = SmbiosGetOriginalStructure (SMBIOS_TYPE_PROCESSOR_INFORMATION, EntryNo);
+    if (Original.Raw == NULL) {
+      continue;
+    }
+
+    //
+    // Create cache tables.
+    //
+    PatchCacheInformation (Table, Data, &CacheIndex, Original.Standard.Type4->L1CacheHandle, &HandleL1Cache);
+    PatchCacheInformation (Table, Data, &CacheIndex, Original.Standard.Type4->L2CacheHandle, &HandleL2Cache);
+    PatchCacheInformation (Table, Data, &CacheIndex, Original.Standard.Type4->L3CacheHandle, &HandleL3Cache);
+
+    MinLength     = sizeof (*Original.Standard.Type4);
+    StringIndex   = 0;
+
+    if (EFI_ERROR (SmbiosInitialiseStruct (Table, SMBIOS_TYPE_PROCESSOR_INFORMATION, MinLength, EntryNo))) {
+      continue;
+    }
+
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->Socket, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorType, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorManufacturer, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorId, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->ProcessorVersion, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->Voltage, Original, NULL, NULL);
+    Table->CurrentPtr.Standard.Type4->ExternalClock = CpuInfo->ExternalClock;
+
+    MhzSpeed = OcCpuFrequencyToDisplayFrequency (CpuInfo->CPUFrequency);
+
+    DEBUG ((DEBUG_INFO, "OCSMB: CPU%u display frequency is %uMHz\n", EntryNo, MhzSpeed));
+
+    Table->CurrentPtr.Standard.Type4->MaxSpeed      = MhzSpeed;
+    Table->CurrentPtr.Standard.Type4->CurrentSpeed  = Table->CurrentPtr.Standard.Type4->MaxSpeed;
+
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->Status, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorUpgrade, Original, NULL, NULL);
+
+    Table->CurrentPtr.Standard.Type4->L1CacheHandle = HandleL1Cache;
+    Table->CurrentPtr.Standard.Type4->L2CacheHandle = HandleL2Cache;
+    Table->CurrentPtr.Standard.Type4->L3CacheHandle = HandleL3Cache;
+
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->SerialNumber, Original, NULL, &StringIndex, NULL);
+    //
+    // Most bootloaders set this to ProcessorVersion, yet Apple does not care and has UNKNOWN.
+    //
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->AssetTag, Original, NULL, &StringIndex, NULL);
+    SMBIOS_OVERRIDE_S (Table, Standard.Type4->PartNumber, Original, NULL, &StringIndex, NULL);
+
+    TmpCount = (UINT8) (CpuInfo->CoreCount < 256 ? CpuInfo->CoreCount : 0xFF);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount, Original, NULL, &TmpCount);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount, Original, NULL, &TmpCount);
+    TmpCount = (UINT8) (CpuInfo->ThreadCount < 256 ? CpuInfo->ThreadCount : 0xFF);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount, Original, NULL, &TmpCount);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorCharacteristics, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ProcessorFamily2, Original, NULL, NULL);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->CoreCount2, Original, NULL, &CpuInfo->CoreCount);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->EnabledCoreCount2, Original, NULL, &CpuInfo->CoreCount);
+    SMBIOS_OVERRIDE_V (Table, Standard.Type4->ThreadCount2, Original, NULL, &CpuInfo->ThreadCount);
 
     SmbiosFinaliseStruct (Table);
   }
@@ -511,7 +553,7 @@ PatchCacheInformation (
 /** Type 8
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -554,7 +596,7 @@ PatchSystemPorts (
 /** Type 9
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -679,7 +721,7 @@ PatchSystemSlots (
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -710,7 +752,7 @@ PatchMemoryArray (
   Table->CurrentPtr.Standard.Type16->MemoryErrorInformationHandle = 0xFFFF;
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->NumberOfMemoryDevices, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type16->ExtendedMaximumCapacity, Original, NULL, NULL);
- 
+
   //
   // Return assigned handle
   //
@@ -722,7 +764,7 @@ PatchMemoryArray (
 /** Type 16
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -760,7 +802,7 @@ CreateMemoryArray (
     Table->CurrentPtr.Standard.Type16->MaximumCapacity          = SIZE_2TB / SIZE_1KB;
     Table->CurrentPtr.Standard.Type16->ExtendedMaximumCapacity  = *Data->MemoryMaxCapacity;
   }
- 
+
   //
   // Return assigned handle
   //
@@ -772,7 +814,7 @@ CreateMemoryArray (
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -785,9 +827,9 @@ PatchMemoryDevice (
      OUT SMBIOS_HANDLE                   *Handle
   )
 {
-  UINT8    MinLength;
-  UINT8    StringIndex;
-  UINT8    FormFactor;
+  UINT8        MinLength;
+  UINT8        StringIndex;
+  UINT8        FormFactor;
 
   *Handle       = OcSmbiosInvalidHandle;
   MinLength     = sizeof (*Original.Standard.Type17);
@@ -822,11 +864,21 @@ PatchMemoryDevice (
   //
   // Some machines may have NULL values for these fields, which will cause SPMemoryReporter
   // crashes or ??? to be displayed in About This Mac. Fallback to "Unknown" for such fields.
+  // If there is no stick in the slot, the Manufacturer value must be "NO DIMM", this
+  // is checked in System Profiler, at least by iMacPro1,1 (see ExpansionSlotSupport.framework).
   //
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, "Unknown");
-  SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, "Unknown");
+  if (Table->CurrentPtr.Standard.Type17->Size > 0) {
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->Manufacturer, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->SerialNumber, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->AssetTag, Original, NULL, &StringIndex, "Unknown");
+    SMBIOS_OVERRIDE_S (Table, Standard.Type17->PartNumber, Original, NULL, &StringIndex, "Unknown");
+  } else {
+    SmbiosOverrideString (Table, "NO DIMM", &StringIndex);
+    Table->CurrentPtr.Standard.Type17->Manufacturer = StringIndex;
+    Table->CurrentPtr.Standard.Type17->SerialNumber = StringIndex;
+    Table->CurrentPtr.Standard.Type17->AssetTag     = StringIndex;
+    Table->CurrentPtr.Standard.Type17->PartNumber   = StringIndex;
+  }
 
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->Attributes, Original, NULL, NULL);
   SMBIOS_OVERRIDE_V (Table, Standard.Type17->ExtendedSize, Original, NULL, NULL);
@@ -846,7 +898,7 @@ PatchMemoryDevice (
 /** Type 17
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -920,7 +972,7 @@ CreateMemoryDevice (
 /** Type 19
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -966,7 +1018,7 @@ PatchMemoryMappedAddress (
 /** Type 20
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1015,7 +1067,7 @@ PatchMemoryMappedDevice (
 /** Type 22
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1065,7 +1117,7 @@ PatchPortableBatteryDevice (
 /** Type 32
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1093,8 +1145,8 @@ PatchBootInformation (
 /** Type 128
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1140,7 +1192,7 @@ CreateOrPatchAppleFirmwareVolume (
 /** Type 131
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
 **/
 STATIC
@@ -1169,7 +1221,7 @@ CreateAppleProcessorType (
 /** Type 132
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
   @param[in] CpuInfo                Pointer to a valid pico cpu info structure.
 **/
 STATIC
@@ -1205,8 +1257,8 @@ CreateAppleProcessorSpeed (
 /** Type 133
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1246,8 +1298,8 @@ CreateOrPatchApplePlatformFeature (
 /** Type 134
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
-  @param[in] HasAppleSMBIOS         TRUE iff Apple SMBIOS present.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
+  @param[in] HasAppleSMBIOS         TRUE if Apple SMBIOS present.
 **/
 STATIC
 VOID
@@ -1287,7 +1339,7 @@ CreateOrPatchAppleSmcInformation (
 /** Type 127
 
   @param[in] Table                  Pointer to location containing the current address within the buffer.
-  @param[in] Data                   Pointer to tocation containing SMBIOS data.
+  @param[in] Data                   Pointer to location containing SMBIOS data.
 **/
 STATIC
 VOID
@@ -1966,7 +2018,6 @@ OcSmbiosCreate (
   PatchBaseboardInformation (SmbiosTable, Data);
   PatchSystemEnclosure (SmbiosTable, Data);
   PatchProcessorInformation (SmbiosTable, Data, CpuInfo);
-  PatchCacheInformation (SmbiosTable, Data);
   PatchSystemPorts (SmbiosTable, Data);
   PatchSystemSlots (SmbiosTable, Data);
 
@@ -1980,7 +2031,7 @@ OcSmbiosCreate (
       Data,
       &MemoryArrayHandle
       );
-    
+
       //
       // Generate new memory device tables (type 17) for this memory array.
       //
@@ -2293,12 +2344,12 @@ OcSmbiosExtractOemInfo (
 
   if (UseVariableStorage) {
     if (SmProductName != NULL) {
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_PRODUCT_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmProductName),
-        (VOID *) SmProductName
+        (VOID *) SmProductName,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM product\n"));
@@ -2306,23 +2357,23 @@ OcSmbiosExtractOemInfo (
     }
 
     if (SmManufacturer != NULL && SmBoard != NULL) {
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_VENDOR_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmManufacturer),
-        (VOID *) SmManufacturer
+        (VOID *) SmManufacturer,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board manufacturer - %r\n", Status));
       }
 
-      Status = gRT->SetVariable (
+      Status = OcSetSystemVariable (
         OC_OEM_BOARD_VARIABLE_NAME,
-        &gOcVendorVariableGuid,
         EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
         AsciiStrLen (SmBoard),
-        (VOID *) SmBoard
+        (VOID *) SmBoard,
+        NULL
         );
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCSMB: Cannot write OEM board - %r\n", Status));

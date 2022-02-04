@@ -115,6 +115,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2009
   - 2010
-CloverSerialNumber: "G8942B1V5PJ"
 MinimumOSVersion: "10.6.2"
 MaximumOSVersion: "10.13.6"

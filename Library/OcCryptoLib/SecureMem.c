@@ -57,7 +57,7 @@ SecureCompareMem (
     XorDiff |= (UINT8)((Destination[Index] ^ (Source[Index])) & 0xFFU);
   }
   //
-  // This is implemented as an arithmetic operation to have an uniform
+  // This is implemented as an arithmetic operation to have a uniform
   // execution time for success and failure cases.
   //
   // For XorDiff = 0, the subtraction wraps around and leads to a value of

@@ -39,6 +39,11 @@ EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 #include <Protocol/SimpleTextInEx.h>
 #include <Protocol/SimpleFileSystem.h>
 
+//
+// Keyboard protocol arrival event.
+//
+STATIC EFI_EVENT mProtocolNotification;
+
 STATIC
 EFI_STATUS
 EFIAPI
@@ -137,42 +142,6 @@ ShowStatus (
 
 STATIC
 EFI_STATUS
-FindWritableFs (
-  OUT EFI_FILE_PROTOCOL  **FsPtr
-  )
-{
-  EFI_STATUS             Status;
-  OC_BOOTSTRAP_PROTOCOL  *Bootstrap;
-  EFI_HANDLE             PreferedHandle;
-
-  PreferedHandle = NULL;
-
-  Status = gBS->LocateProtocol (
-    &gOcBootstrapProtocolGuid,
-    NULL,
-    (VOID **) &Bootstrap
-    );
-  if (!EFI_ERROR (Status) && Bootstrap->Revision == OC_BOOTSTRAP_PROTOCOL_REVISION) {
-    PreferedHandle = Bootstrap->GetLoadHandle (Bootstrap);
-  }
-
-  if (PreferedHandle != NULL) {
-    *FsPtr = LocateRootVolume (PreferedHandle, NULL);
-  } else {
-    *FsPtr = NULL;
-  }
-
-  DEBUG ((DEBUG_INFO, "OCSCR: Preferred handle is %p found fs %p\n", PreferedHandle, *FsPtr));
-
-  if (*FsPtr == NULL) {
-    return FindWritableFileSystem (FsPtr);
-  }
-
-  return EFI_SUCCESS;
-}
-
-STATIC
-EFI_STATUS
 EFIAPI
 TakeScreenshot (
   IN EFI_KEY_DATA *KeyData
@@ -192,7 +161,7 @@ TakeScreenshot (
   UINTN                         Index;
   UINT8                         Temp;
 
-  Status = FindWritableFs (&Fs);
+  Status = OcFindWritableOcFileSystem (&Fs);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCSCR: Can't find writable FS - %r\n", Status));
     ShowStatus (0xFF, 0xFF, 0x00); ///< Yellow
@@ -316,7 +285,7 @@ TakeScreenshot (
   //
   // Write PNG image into the file.
   //
-  Status = SetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
+  Status = OcSetFileData (Fs, FileName, PngFile, (UINT32) PngFileSize);
   gBS->FreePool (PngFile);
   Fs->Close (Fs);
   if (EFI_ERROR (Status)) {
@@ -361,11 +330,10 @@ AppleEventKeyHandler (
   }
 }
 
+STATIC
 EFI_STATUS
-EFIAPI
-CrScreenshotDxeEntry (
-  IN EFI_HANDLE         ImageHandle,
-  IN EFI_SYSTEM_TABLE   *SystemTable
+InstallKeyHandler (
+  VOID
   )
 {
   EFI_STATUS                         Status;
@@ -509,6 +477,61 @@ CrScreenshotDxeEntry (
     }
 
     gBS->FreePool (HandleBuffer);
+  }
+
+  return EFI_SUCCESS;
+}
+
+VOID
+EFIAPI
+InstallKeyHandlerWrapper (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  InstallKeyHandler ();
+  gBS->CloseEvent (mProtocolNotification);
+}
+
+EFI_STATUS
+EFIAPI
+CrScreenshotDxeEntry (
+  IN EFI_HANDLE         ImageHandle,
+  IN EFI_SYSTEM_TABLE   *SystemTable
+  )
+{
+  EFI_STATUS  Status;
+  VOID        *Registration;
+
+  Status = InstallKeyHandler ();
+  if (EFI_ERROR (Status)) {
+    Status = gBS->CreateEvent (
+      EVT_NOTIFY_SIGNAL,
+      TPL_CALLBACK,
+      InstallKeyHandlerWrapper,
+      NULL,
+      &mProtocolNotification
+      );
+
+    if (!EFI_ERROR (Status)) {
+      gBS->RegisterProtocolNotify (
+        &gEfiSimpleTextInputExProtocolGuid,
+        mProtocolNotification,
+        &Registration
+        );
+
+      gBS->RegisterProtocolNotify (
+        &gAppleEventProtocolGuid,
+        mProtocolNotification,
+        &Registration
+        );
+    } else {
+      DEBUG ((
+        DEBUG_INFO,
+        "CRSCR: Cannot create event for keyboard protocol arrivals %r\n",
+        Status
+        ));
+    }
   }
 
   return EFI_SUCCESS;

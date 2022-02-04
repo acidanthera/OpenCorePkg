@@ -87,7 +87,7 @@ int ENTRY_POINT(int argc, char** argv) {
   EFI_STATUS Status;
   Status = gBS->InstallConfigurationTable (&gEfiSmbios3TableGuid, &gSmbios3);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "Failed to install gSmbios3 - %r", Status));
+    DEBUG ((DEBUG_ERROR, "Failed to install gSmbios3 - %r\n", Status));
   }
 
   OC_CPU_INFO  CpuInfo;
@@ -107,18 +107,18 @@ int ENTRY_POINT(int argc, char** argv) {
           fwrite((const void *) (uintptr_t) (patchedTablePtr->TableAddress), (size_t) (patchedTablePtr->TableMaximumSize), 1, fh);
           fclose(fh);
         } else {
-          DEBUG ((DEBUG_ERROR, "Failed to produce out.bin - %r", Status));
+          DEBUG ((DEBUG_ERROR, "Failed to produce out.bin - %r\n", Status));
         }
       } else {
-        DEBUG ((DEBUG_ERROR, "EfiGetSystemConfigurationTable returns error - %r", Status));
+        DEBUG ((DEBUG_ERROR, "EfiGetSystemConfigurationTable returns error - %r\n", Status));
       }
     } else {
-      DEBUG ((DEBUG_ERROR, "OcSmbiosCreate returns error - %r", Status));
+      DEBUG ((DEBUG_ERROR, "OcSmbiosCreate returns error - %r\n", Status));
     }
 
     OcSmbiosTableFree (&SmbiosTable);
   } else {
-    DEBUG ((DEBUG_ERROR, "Failed to prepare smbios table - %r", Status));
+    DEBUG ((DEBUG_ERROR, "Failed to prepare smbios table - %r\n", Status));
   }
 
   return 0;

@@ -173,12 +173,12 @@ STATIC NVRAM_KEY_MAP  mAppleBootVariableGuidKeyMaps[] = {
 };
 
 STATIC NVRAM_KEY_MAP  mAppleVendorVariableGuidKeyMaps[] = {
-  { "UIScale",                  ValidateUIScale                },
-  { "FirmwareFeatures",         ValidateNvramKeySize32         },
-  { "ExtendedFirmwareFeatures", ValidateNvramKeySize64         },
-  { "FirmwareFeaturesMask",     ValidateNvramKeySize32         },
-  { "ExtendedFirmwareFeatures", ValidateNvramKeySize64         },
-  { "DefaultBackgroundColor",   ValidateDefaultBackgroundColor },
+  { "UIScale",                      ValidateUIScale                },
+  { "FirmwareFeatures",             ValidateNvramKeySize32         },
+  { "ExtendedFirmwareFeatures",     ValidateNvramKeySize64         },
+  { "FirmwareFeaturesMask",         ValidateNvramKeySize32         },
+  { "ExtendedFirmwareFeaturesMask", ValidateNvramKeySize64         },
+  { "DefaultBackgroundColor",       ValidateDefaultBackgroundColor },
 };
 
 NVRAM_GUID_MAP mGUIDMaps[] = {
@@ -186,3 +186,5 @@ NVRAM_GUID_MAP mGUIDMaps[] = {
   { &gAppleVendorVariableGuid, &mAppleVendorVariableGuidKeyMaps[0], ARRAY_SIZE (mAppleVendorVariableGuidKeyMaps) },
 };
 UINTN mGUIDMapsCount = ARRAY_SIZE (mGUIDMaps);
+
+BOOLEAN mHasNvramUIScale = FALSE;

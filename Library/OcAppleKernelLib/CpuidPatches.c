@@ -926,3 +926,557 @@ PatchKernelCpuId (
 
   return EFI_UNSUPPORTED;
 }
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoTopologyValidationReplace[] = {
+  // ret
+  0xC3
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyValidationPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoTopologyValidation"),
+  .Base        = "_x86_validate_topology",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoTopologyValidationReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyValidationReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+// Offset of value in below patch.
+#define CURRENT_CPU_INFO_CORE_COUNT_OFFSET 1
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind[] = {
+  // mov ecx, 0x10001
+  0xB9, 0x01, 0x00, 0x01, 0x00
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace[] = {
+  // mov ecx, core/thread count
+  0xB9, 0x00, 0x00, 0x00, 0x00
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch = {
+  .Comment     = DEBUG_POINTER ("ProvideCurrentCpuInfoZeroMsrThreadCoreCount"),
+  .Base        = "_cpuid_set_info",
+  .Find        = mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoZeroMsrThreadCoreCountFind),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+UINT8*
+PatchMovVar (
+  IN OUT  UINT8             *Location,
+  IN      UINT8             *Start,
+  IN      MACH_SECTION_ANY  *DataSection,
+  IN      MACH_SECTION_ANY  *TextSection,
+  IN      BOOLEAN           Is32Bit,
+  IN      UINT8             *Var,
+  IN      UINT64            Value
+  )
+{
+  INT32   Delta;
+  UINT64  LocationAddr;
+  UINT64  VarAddr64;
+  UINT32  VarAddr32;
+  UINT32  ValueLower;
+  UINT32  ValueUpper;
+
+  if (Is32Bit) {
+    ValueLower = (UINT32) Value;
+    ValueUpper = (UINT32) (Value >> 32);
+
+    //
+    // mov [var], value lower
+    //
+    VarAddr32 = (UINT32) ((Var - Start) + DataSection->Section32.Address - DataSection->Section32.Offset);
+    *Location++ = 0xC7;
+    *Location++ = 0x05;
+    CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
+    Location += sizeof (VarAddr32);
+    CopyMem (Location, &ValueLower, sizeof (ValueLower));
+    Location += sizeof (ValueLower);
+
+    //
+    // mov [var+4], value upper
+    //
+    VarAddr32 += sizeof (UINT32);
+    *Location++ = 0xC7;
+    *Location++ = 0x05;
+    CopyMem (Location, &VarAddr32, sizeof (VarAddr32));
+    Location += sizeof (VarAddr32);
+    CopyMem (Location, &ValueUpper, sizeof (ValueUpper));
+    Location += sizeof (ValueUpper);
+
+  } else {
+    //
+    // mov rax, value
+    //
+    *Location++ = 0x48;
+    *Location++ = 0xB8;
+    CopyMem (Location, &Value, sizeof (Value));
+    Location += sizeof (Value);
+
+    LocationAddr = (Location - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
+    VarAddr64    = (Var - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
+
+    //
+    // mov [var], rax
+    //
+    Delta = (INT32) (VarAddr64 - (LocationAddr + 7));
+    *Location++ = 0x48;
+    *Location++ = 0x89;
+    *Location++ = 0x05;
+    CopyMem (Location, &Delta, sizeof (Delta));
+    Location += sizeof (Delta);
+  }
+
+  return Location;
+}
+
+// 10.14:
+// 44 89 E8                 mov        eax, r13d
+// C1 E8 1A                 shr        eax, 0x1a
+// FF C0                    inc        eax
+// 89 05 68 60 98 00        mov        dword [dword_ffffff8000e4b1c8], eax
+
+// 10.15
+// 44 89 EA                 mov        edx, r13d
+// C1 EA 1A                 shr        edx, 26
+// FF C2                    inc        edx
+// 89 15 2F 55 A2 00        mov        dword [dword_FFFFFF8000E551D8], edx
+
+// 11.0.1
+// 44 89 EA                 mov        edx, r13d
+// C1 EA 1A                 shr        edx, 0x1a
+// FF C2                    inc        edx
+// 89 15 9F 9C A8 00        mov        dword [dword_ffffff8000e4b1d8], edx
+
+// 12.0.1
+// 44 89 EA                 mov        edx, r13d
+// C1 EA 1A                 shr        edx, 0x1a
+// 83 C2 01                 add        edx, 0x1
+// 89 15 DD F9 AA 00        mov        dword [dword_ffffff8000e6e1d8], edx
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCoreCountFind[] = {
+  0xB9, 0x35, 0x00, 0x00, 0x00, 0x0F, 0x32
+};
+
+STATIC
+UINT8
+mProvideCurrentCpuInfoTopologyCoreCountReplace[] = {
+  0xB8, 0x00, 0x00, 0x00, 0x00, 0x31, 0xD2
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyCoreCountPatch = {
+  .Comment     = DEBUG_POINTER ("Set core count to thread count"),
+  .Base        = "_cpuid_set_info",
+  .Find        = mProvideCurrentCpuInfoTopologyCoreCountFind,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoTopologyCoreCountReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyCoreCountReplace),
+  .Count       = 2,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV1Find[] = {
+  // mov  eax, r13d
+  // shr  eax, 0x1a    <--- start
+  // inc  eax
+  // mov  dword[], eax
+  0xC1, 0xE8, 0x1A, 0xFF, 0xC0, 0x89
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV1Replace[] = {
+  // mov  eax, r13d
+  // mov  eax, 0x80    <--- start
+  // mov  dword[], eax
+  0xB8, 0x80, 0x00, 0x00, 0x00, 0x89
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyCorePerPackageV1Patch = {
+  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V1"),
+  .Base        = NULL,
+  .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV1Find,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoTopologyCorePerPackageV1Replace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyCorePerPackageV1Replace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Find[] = {
+  // mov  edx, r13d
+  // shr  edx, 0x1a    <--- start
+  // inc  edx
+  // mov  dword[], edx
+  0xC1, 0xEA, 0x1A, 0xFF, 0xC2, 0x89
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Replace[] = {
+  // mov  edx, r13d
+  // mov  edx, 0x80    <--- start
+  // mov  dword[], edx
+  0xBA, 0x80, 0x00, 0x00, 0x00, 0x89
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Patch = {
+  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V1_5"),
+  .Base        = NULL,
+  .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Find,
+  .Mask        = NULL,
+  .Replace     = mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Replace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Replace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV2Find[] = {
+  // mov  eax/edx, r13d
+  // shr  eax/edx, 0x1a    <--- start
+  // add  eax/edx, 1
+  // mov  dword[], eax/edx
+  0xC1, 0xE8 /* 0xEA */, 0x1A, 0x83, 0xC0 /* 0xC2 */, 0x01, 0x89
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV2Mask[] = {
+  0xFF, 0xFD, 0xFF, 0xFF, 0xFD, 0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+mProvideCurrentCpuInfoTopologyCorePerPackageV2Replace[] = {
+  // mov  eax/edx, r13d
+  // shr  eax/edx, 0x1a    <--- start
+  // nop
+  // mov  al/dl, 128
+  // mov  dword[], eax/edx
+  0xC1, 0xE8 /* 0xEA */, 0x1A, 0x90, 0xB0 /* 0xB2 */, 0x80, 0x89
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mProvideCurrentCpuInfoTopologyCorePerPackageV2Patch = {
+  .Comment     = DEBUG_POINTER ("Set core per package count to 128 V2"),
+  .Base        = NULL,
+  .Find        = mProvideCurrentCpuInfoTopologyCorePerPackageV2Find,
+  .Mask        = mProvideCurrentCpuInfoTopologyCorePerPackageV2Mask,
+  .Replace     = mProvideCurrentCpuInfoTopologyCorePerPackageV2Replace,
+  .ReplaceMask = mProvideCurrentCpuInfoTopologyCorePerPackageV2Mask,
+  .Size        = sizeof (mProvideCurrentCpuInfoTopologyCorePerPackageV2Replace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+STATIC
+EFI_STATUS
+PatchProvideCurrentCpuInfoForAmpCpu (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+  UINT32      CoreThreadCount;
+
+  //
+  // TODO: We can support older, just there is no real need.
+  // Anyone can test/contribute as needed.
+  //
+  if (KernelVersion < KERNEL_VERSION_MOJAVE_MIN) {
+    DEBUG ((DEBUG_INFO, "OCAK: Ignoring CPU INFO for AMP below macOS 10.14\n"));
+    return EFI_SUCCESS;
+  }
+
+  CoreThreadCount =
+    (((UINT32) CpuInfo->ThreadCount) << 16U) | ((UINT32) CpuInfo->ThreadCount);
+  CopyMem (
+    &mProvideCurrentCpuInfoTopologyCoreCountReplace[1],
+    &CoreThreadCount,
+    sizeof (UINT32)
+    );
+
+  Status = PatcherApplyGenericPatch (
+    Patcher,
+    &mProvideCurrentCpuInfoTopologyCoreCountPatch
+    );
+
+  DEBUG ((DEBUG_INFO, "OCAK: Patching MSR 35h to %08x - %r\n", CoreThreadCount, Status));
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  if (KernelVersion >= KERNEL_VERSION_MONTEREY_MIN) {
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mProvideCurrentCpuInfoTopologyCorePerPackageV2Patch
+      );
+  } else {
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mProvideCurrentCpuInfoTopologyCorePerPackageV1Patch
+      );
+    if (EFI_ERROR (Status)) {
+      Status = PatcherApplyGenericPatch (
+        Patcher,
+        &mProvideCurrentCpuInfoTopologyCorePerPackageV1_5Patch
+        );
+    }
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Patching core per package count - %r\n", Status));
+
+  return Status;
+}
+
+EFI_STATUS
+PatchProvideCurrentCpuInfo (
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
+  IN     UINT32           KernelVersion
+  )
+{
+  EFI_STATUS        Status;
+
+  UINT8             *Start;
+  MACH_SECTION_ANY  *DataSection;
+  MACH_SECTION_ANY  *TextSection;
+
+  INT32             Delta;
+  UINT64            LocationAddr;
+  UINT64            VarAddr64;
+
+  UINT8             *TscInitFunc;
+  UINT8             *TmrCvtFunc;
+
+  UINT8             *BusFreq;
+  UINT8             *BusFCvtt2n;
+  UINT8             *BusFCvtn2t;
+  UINT8             *TscFreq;
+  UINT8             *TscFCvtt2n;
+  UINT8             *TscFCvtn2t;
+  UINT8             *TscGranularity;
+  UINT8             *Bus2Tsc;
+
+  UINT8             *TscLocation;
+
+  UINT64            busFreqValue;
+  UINT64            busFCvtt2nValue;
+  UINT64            busFCvtn2tValue;
+  UINT64            tscFreqValue;
+  UINT64            tscFCvtt2nValue;
+  UINT64            tscFCvtn2tValue;
+  UINT64            tscGranularityValue;
+
+  UINT32            msrCoreThreadCount;
+
+  ASSERT (Patcher != NULL);
+
+  if (!CpuInfo->Hypervisor && CpuInfo->Vendor[0] == CPUID_VENDOR_INTEL) {
+    return PatchProvideCurrentCpuInfoForAmpCpu (Patcher, CpuInfo, KernelVersion);
+  }
+
+  Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
+
+  //
+  // 10.6 and below has variables in __DATA/__data instead of __DATA/__common
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_LION_MIN, 0)) {
+    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__common");
+  } else {
+    DataSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__DATA", "__data");
+  }
+  TextSection = MachoGetSegmentSectionByName (&Patcher->MachContext, "__TEXT", "__text");
+
+  //
+  // Pull required symbols.
+  //
+  Status = EFI_SUCCESS;
+  Status |= PatcherGetSymbolAddress (Patcher, "_tsc_init",        (UINT8 **) &TscInitFunc);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt",          (UINT8 **) &TmrCvtFunc);
+
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFreq",         (UINT8 **) &BusFreq);
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtt2n",      (UINT8 **) &BusFCvtt2n);
+  Status |= PatcherGetSymbolAddress (Patcher, "_busFCvtn2t",      (UINT8 **) &BusFCvtn2t);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFreq",         (UINT8 **) &TscFreq);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtt2n",      (UINT8 **) &TscFCvtt2n);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscFCvtn2t",      (UINT8 **) &TscFCvtn2t);
+  Status |= PatcherGetSymbolAddress (Patcher, "_tscGranularity",  (UINT8 **) &TscGranularity);
+  Status |= PatcherGetSymbolAddress (Patcher, "_bus2tsc",         (UINT8 **) &Bus2Tsc);
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_WARN, "OCAK: Failed to locate one or more TSC symbols - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  //
+  // Perform TSC and FSB calculations. This is traditionally done in tsc.c in XNU.
+  //  
+  busFreqValue = CpuInfo->FSBFrequency;
+  busFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), busFreqValue, NULL);
+  busFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, busFCvtt2nValue, NULL);
+
+  tscFreqValue = CpuInfo->CPUFrequency;
+  tscFCvtt2nValue = DivU64x64Remainder ((1000000000ULL << 32), tscFreqValue, NULL);
+  tscFCvtn2tValue = DivU64x64Remainder (0xFFFFFFFFFFFFFFFFULL, tscFCvtt2nValue, NULL);
+
+  tscGranularityValue = DivU64x64Remainder (tscFreqValue, busFreqValue, NULL);
+
+  DEBUG ((DEBUG_INFO, "OCAK: BusFreq = %LuHz, BusFCvtt2n = %Lu, BusFCvtn2t = %Lu\n", busFreqValue, busFCvtt2nValue, busFCvtn2tValue));
+  DEBUG ((DEBUG_INFO, "OCAK: TscFreq = %LuHz, TscFCvtt2n = %Lu, TscFCvtn2t = %Lu\n", tscFreqValue, tscFCvtt2nValue, tscFCvtn2tValue));
+
+  //
+  // Patch _tsc_init with above values.
+  //
+  TscLocation = TscInitFunc;
+  
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtt2n, busFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFCvtn2t, busFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFreq, tscFreqValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtt2n, tscFCvtt2nValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscFCvtn2t, tscFCvtn2tValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, TscGranularity, tscGranularityValue);
+  TscLocation = PatchMovVar (TscLocation, Start, DataSection, TextSection, Patcher->Is32Bit, BusFreq, busFreqValue);
+
+  if (Patcher->Is32Bit) {
+    // TODO
+  } else {
+    //
+    // mov rdi, FSB freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBF;
+    CopyMem (TscLocation, &busFreqValue, sizeof (busFreqValue));
+    TscLocation += sizeof (busFreqValue);
+
+    //
+    // mov rsi, TSC freq
+    //
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0xBE;
+    CopyMem (TscLocation, &tscFreqValue, sizeof (tscFreqValue));
+    TscLocation += sizeof (tscFreqValue);
+
+    //
+    // call _tmrCvt
+    //
+    Delta = (INT32) (TmrCvtFunc - (TscLocation + 5));
+    *TscLocation++ = 0xE8;
+    CopyMem (TscLocation, &Delta, sizeof (Delta));
+    TscLocation += sizeof (Delta);
+
+    //
+    // mov [_bus2tsc], rax
+    //
+    LocationAddr = (TscLocation - Start) + TextSection->Section64.Address - TextSection->Section64.Offset;
+    VarAddr64    = (Bus2Tsc - Start) + DataSection->Section64.Address - DataSection->Section64.Offset;
+    Delta        = (INT32) (VarAddr64 - (LocationAddr + 7));
+
+    *TscLocation++ = 0x48;
+    *TscLocation++ = 0x89;
+    *TscLocation++ = 0x05;
+    CopyMem (TscLocation, &Delta, sizeof (Delta));
+    TscLocation += sizeof (Delta);
+  }
+
+  //
+  // ret
+  //
+  *TscLocation++ = 0xC3;
+
+  //
+  // Patch MSR 0x35 fallback value on 10.13 and above.
+  //
+  // This value is used if the MSR 0x35 is read as zero, typically on VMs or AMD processors.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    //
+    // 10.15 and above have two instances that need patching.
+    //
+    if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_CATALINA_MIN, 0)) {
+      mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch.Count = 2;
+    }
+
+    msrCoreThreadCount = (CpuInfo->CoreCount << 16) | CpuInfo->ThreadCount;
+
+    CopyMem (
+      &mProvideCurrentCpuInfoZeroMsrThreadCoreCountReplace[CURRENT_CPU_INFO_CORE_COUNT_OFFSET],
+      &msrCoreThreadCount,
+      sizeof (msrCoreThreadCount)
+      );
+
+      Status = PatcherApplyGenericPatch (
+        Patcher,
+        &mProvideCurrentCpuInfoZeroMsrThreadCoreCountPatch
+        );
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU MSR 0x35 default value patch - %r\n", Status));
+      }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU MSR 0x35 default value patch on %u\n", KernelVersion));
+  }
+
+  //
+  // Disable _x86_validate_topology on 10.13 and above.
+  //
+  if (OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
+    Status = PatcherApplyGenericPatch (
+      Patcher,
+      &mProvideCurrentCpuInfoTopologyValidationPatch
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find CPU topology validation patch - %r\n", Status));
+    }
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping CPU topology validation patch on %u\n", KernelVersion));
+  }
+
+  return EFI_SUCCESS;
+}

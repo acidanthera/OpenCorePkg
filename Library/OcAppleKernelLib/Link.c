@@ -651,6 +651,9 @@ InternalCalculateTargets (
     }
 
     TargetAddress = Context->Is32Bit ? Symbol->Symbol32.Value : Symbol->Symbol64.Value;
+    if (TargetAddress == 0) {
+      DEBUG ((DEBUG_INFO, "OCAK: Symbol %a has 0-value\n", Name));
+    }
   } else {
     if ((Relocation->SymbolNumber == NO_SECT)
      || (Relocation->SymbolNumber > MAX_SECT)) {

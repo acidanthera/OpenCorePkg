@@ -19,6 +19,7 @@
 #include <Guid/ApplePlatformInfo.h>
 #include <IndustryStandard/CpuId.h>
 #include <IndustryStandard/GenericIch.h>
+#include <IndustryStandard/McpMemoryController.h>
 #include <Protocol/PciIo.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
@@ -29,6 +30,7 @@
 #include <Library/PciLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcGuardLib.h>
+#include <Library/OcVariableLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>
 #include <IndustryStandard/ProcessorInfo.h>
@@ -216,6 +218,10 @@ InternalCalculateTSCFromPMTimer (
     // Set the variable if not present and valid.
     //
     if (TSCFrequency != 0 && Status == EFI_NOT_FOUND) {
+      //
+      // Do not use OcSetSystemVariable() as this may be called by a
+      // constructor.
+      //
       gRT->SetVariable (
         OC_ACPI_CPU_FREQUENCY_VARIABLE_NAME,
         &gOcVendorVariableGuid,
@@ -236,22 +242,21 @@ InternalSelectAppleFsbFrequency (
   IN UINT32  FsbFrequncyCount
   )
 {
-  UINT32               Freq;
+  UINT32               Pll;
 
   if (FsbFrequncyCount < 5) {
     return 0 /* Invalid */;
   }
 
   //
-  // This one is for nForce MCP89 installed in MacBook7,1.
-  // Not sure what it reads from.
+  // Tested on nForce MCP89 installed in MacBook7,1.
   //
-  Freq = IoRead32 (0x580);
+  Pll = IoRead32 (R_NVIDIA_MCP89_DDR_PLL);
 
   DEBUG ((
     DEBUG_INFO,
-    "OCCPU: Selecting freq by %u from %Lu %Lu %Lu %Lu %Lu\n",
-    Freq,
+    "OCCPU: Selecting FSB freq by PLL freq %u from %Lu %Lu %Lu %Lu %Lu\n",
+    Pll,
     FsbFrequency[0],
     FsbFrequency[1],
     FsbFrequency[2],
@@ -259,24 +264,24 @@ InternalSelectAppleFsbFrequency (
     FsbFrequency[4]
     ));
 
-  Freq /= 1000000;
+  Pll /= 1000000;
 
-  if (Freq == 16) {
+  if (Pll == 16) {
     return FsbFrequency[0];
   }
-  if (Freq >= 1063 && Freq <= 1069) {
+  if (Pll >= 1063 && Pll <= 1069) {
     return FsbFrequency[0];
   }
-  if (Freq >= 530 && Freq <= 536) {
+  if (Pll >= 530 && Pll <= 536) {
     return FsbFrequency[1];
   }
-  if (Freq >= 797 && Freq <= 803) {
+  if (Pll >= 797 && Pll <= 803) {
     return FsbFrequency[2];
   }
-  if (Freq >= 663 && Freq <= 669) {
+  if (Pll >= 663 && Pll <= 669) {
     return FsbFrequency[3];
   }
-  if (Freq >= 1330 && Freq <= 1336) {
+  if (Pll >= 1330 && Pll <= 1336) {
     return FsbFrequency[4];
   }
   return 0 /* Invalid */;
@@ -299,6 +304,10 @@ InternalCalculateTSCFromApplePlatformInfo (
   APPLE_PLATFORM_INFO_DATABASE_PROTOCOL  *PlatformInfo;
   UINT32                                 Size;
   UINT64                                 *FsbFreqs;
+  UINT32                                 Un44;
+  UINT32                                 Un78;
+  UINT64                                 Dividend;
+  UINT32                                 Divisor;
 
   if (Recalculate) {
     ObtainedFreqs = FALSE;
@@ -315,26 +324,25 @@ InternalCalculateTSCFromApplePlatformInfo (
       NULL,
       (VOID **) &PlatformInfo
       );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
-      return 0;
-    }
-
-    Status = OcReadApplePlatformFirstData (
-      PlatformInfo,
-      &gAppleFsbFrequencyPlatformInfoGuid,
-      &Size,
-      &FsbFreq
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
-      Status = OcReadApplePlatformData (
+    if (!EFI_ERROR (Status)) {
+      Status = OcReadApplePlatformFirstData (
         PlatformInfo,
         &gAppleFsbFrequencyPlatformInfoGuid,
-        &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
         &Size,
         &FsbFreq
         );
+
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency first data - %r, trying HOB method\n", Status));
+        Status = OcReadApplePlatformData (
+          PlatformInfo,
+          &gAppleFsbFrequencyPlatformInfoGuid,
+          &gAppleFsbFrequencyPlatformInfoIndexHobGuid,
+          &Size,
+          &FsbFreq
+          );
+      }
+
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using HOB method - %r, trying legacy\n", Status));
         Status = OcReadApplePlatformFirstDataAlloc (
@@ -343,21 +351,56 @@ InternalCalculateTSCFromApplePlatformInfo (
           &Size,
           (VOID **) &FsbFreqs
           );
-        if (EFI_ERROR (Status)) {
-          DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using legacy method - %r\n", Status));
-          return 0;
-        }
+        if (!EFI_ERROR (Status)) {
+          if (Size >= sizeof (UINT64) && Size % sizeof (UINT64) == 0) {
+            FsbFreq = InternalSelectAppleFsbFrequency (FsbFreqs, Size / sizeof (UINT64));
+          } else {
+            DEBUG ((DEBUG_INFO, "OCCPU: Invalid FSBFrequency list size %u - %r\n", Size, Status));
+            Status = EFI_INVALID_PARAMETER;
+          }
 
-        if (Size < sizeof (UINT64) || Size % sizeof (UINT64) != 0) {
-          DEBUG ((DEBUG_INFO, "OCCPU: Invalid FSBFrequency list size %u - %r\n", Size, Status));
           FreePool (FsbFreqs);
-          return 0;
         }
-
-        FsbFreq = InternalSelectAppleFsbFrequency (FsbFreqs, Size / sizeof (UINT64));
-
-        FreePool (FsbFreqs);
       }
+    } else {
+      DEBUG ((DEBUG_VERBOSE, "OCCPU: Failed to locate ApplePlatformInfo protocol - %r\n", Status));
+    }
+
+    //
+    // This is not necessarily Apple, but keep it here for the time being.
+    // Should work on more or less any MCP79 device.
+    //
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "OCCPU: Failed to get FSBFrequency data using Apple Platform Info - %r\n", Status));
+      
+      if (MmioRead16 (B_NVIDIA_MCP_MC_BASE) == V_NVIDIA_MCP_MC_VENDOR) {
+        Un44 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN44);
+        Un78 = MmioRead32 (B_NVIDIA_MCP_MC_BASE + R_NVIDIA_MCP_MC_UN78);
+
+        Dividend = NVIDIA_MCP79_GET_FSB_FREQUENCY_DIVIDEND (Un44, Un78);
+        Divisor  = NVIDIA_MCP79_GET_FSB_FREQUENCY_DIVISOR (Un44, Un78);
+
+        DEBUG ((
+          DEBUG_INFO,
+          "OCCPU: Found nForce MCP MC 0x%08X (UN44 0x%08X, UN78 0x%08X, DVD 0x%016Lx, DIV 0x%08X)\n",
+          MmioRead32 (B_NVIDIA_MCP_MC_BASE),
+          Un44,
+          Un78,
+          Dividend,
+          Divisor
+          ));
+
+        if (Divisor != 0) {
+          FsbFreq = DivU64x32 (Dividend, Divisor);
+          if (FsbFreq != 0) {
+            Status = EFI_SUCCESS;
+          }
+        }
+      }
+    }
+
+    if (EFI_ERROR (Status)) {
+      return 0;
     }
 
     TscFreq = InternalConvertAppleFSBToTSCFrequency (FsbFreq);

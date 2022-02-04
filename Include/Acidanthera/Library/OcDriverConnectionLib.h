@@ -39,6 +39,22 @@ OcUnblockUnmountedPartitions (
   );
 
 /**
+  Disconnects all graphics drivers attached to PCI I/O protcols.
+**/
+VOID
+OcDisconnectGraphicsDrivers (
+  VOID
+  );
+
+/**
+  Disconnects all HDA controllers attached to PCI I/O protcols.
+**/
+VOID
+OcDisconnectHdaControllers (
+  VOID
+  );
+
+/**
   Disconnect effectively all drivers attached at handle.
 
   @param[in] Controller    Handle to disconnect the drivers from.

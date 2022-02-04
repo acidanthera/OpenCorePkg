@@ -1,0 +1,31 @@
+## @file
+#  FrameBufferBltLib - Library to perform blt operations on a frame buffer.
+#
+#  Copyright (c) 2006 - 2016, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcBlitLib
+  FILE_GUID                      = C857ECE4-F54F-43B8-AEFA-F63B2AAD8367
+  MODULE_TYPE                    = UEFI_DRIVER
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = OcBlitLib
+
+[Sources.common]
+  BlitBufferToVideo.c
+  BlitInternal.h
+  BlitVideoToBuffer.c
+  OcBlitLib.c
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugLib
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec

@@ -203,21 +203,27 @@ AsciiPropertyIsLegal (
 
 BOOLEAN
 AsciiUefiDriverIsLegal (
-  IN  CONST CHAR8  *Driver
+  IN  CONST CHAR8  *Driver,
+  IN  CONST UINTN  DriverIndex
   )
 {
   UINTN  Index;
   UINTN  DriverLength;
 
-  //
-  // If an EFI driver does not contain .efi suffix,
-  // then it must be illegal.
-  //
-  if (!OcAsciiEndsWith (Driver, ".efi", TRUE)) {
+  DriverLength = AsciiStrLen (Driver);
+  if (DriverLength == 0) {
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path value is missing!\n", DriverIndex));
     return FALSE;
   }
 
-  DriverLength = AsciiStrLen (Driver);
+  //
+  // If an EFI driver does not have .efi suffix,
+  // then it must be illegal.
+  //
+  if (!OcAsciiEndsWith (Driver, ".efi", TRUE)) {
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path does not end with \"%a\"!\n", DriverIndex, ".efi"));
+    return FALSE;
+  }
 
   for (Index = 0; Index < DriverLength; ++Index) {
     //
@@ -235,6 +241,7 @@ AsciiUefiDriverIsLegal (
     //
     // Disallowed characters matched.
     //
+    DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u].Path contains illegal character!\n", DriverIndex));
     return FALSE;
   }
 
@@ -314,17 +321,22 @@ BOOLEAN
 DataHasProperMasking (
   IN  CONST VOID   *Data,
   IN  CONST VOID   *Mask,
-  IN  UINTN        Size
+  IN  UINTN        DataSize,
+  IN  UINTN        MaskSize
   )
 {
   CONST UINT8  *ByteData;
   CONST UINT8  *ByteMask;
   UINTN        Index;
 
-  ByteData = Data;
-  ByteMask = Mask;
+  if (DataSize != MaskSize) {
+    return FALSE;
+  }
 
-  for (Index = 0; Index < Size; ++Index) {
+  ByteData = (CONST UINT8 *) Data;
+  ByteMask = (CONST UINT8 *) Mask;
+
+  for (Index = 0; Index < DataSize; ++Index) {
     //
     // Mask should only be set when corresponding bits on Data are inactive.
     //
@@ -384,7 +396,7 @@ ValidatePatch (
         FindSize
         ));
       ++ErrorCount;
-    } else if (!DataHasProperMasking (Find, Mask, FindSize)) {
+    } else if (!DataHasProperMasking (Find, Mask, FindSize, MaskSize)) {
       //
       // If Mask is set without corresponding bits being active for Find, then error.
       //
@@ -412,7 +424,7 @@ ValidatePatch (
         ReplaceSize
         ));
       ++ErrorCount;
-    } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize)) {
+    } else if (!DataHasProperMasking (Replace, ReplaceMask, ReplaceSize, ReplaceMaskSize)) {
       //
       // If ReplaceMask is set without corresponding bits being active for Replace, then error.
       //

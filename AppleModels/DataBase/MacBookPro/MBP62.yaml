@@ -162,6 +162,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2010
   - 2011
-CloverSerialNumber: "CK132A91AGW"
 MinimumOSVersion: "10.6.3"
 MaximumOSVersion: "10.13.6"

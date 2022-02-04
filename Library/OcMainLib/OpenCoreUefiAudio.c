@@ -168,6 +168,21 @@ OcAudioGetFilePath (
         case OcVoiceOverAudioFileWindows:
           BasePath = "Windows";
           break;
+        case OcVoiceOverAudioFileShutDown:
+          BasePath = "ShutDown";
+          break;
+        case OcVoiceOverAudioFileRestart:
+          BasePath = "Restart";
+          break;
+        case OcVoiceOverAudioFileDiskImage:
+          BasePath = "DiskImage";
+          break;
+        case OcVoiceOverAudioFileSIPIsDisabled:
+          BasePath = "SIPIsDisabled";
+          break;
+        case OcVoiceOverAudioFileSIPIsEnabled:
+          BasePath = "SIPIsEnabled";
+          break;
         default:
           BasePath = NULL;
           break;
@@ -481,8 +496,10 @@ OcLoadUefiAudioSupport (
   CHAR16                           *UnicodeDevicePath;
   EFI_DEVICE_PATH_PROTOCOL         *DevicePath;
   OC_AUDIO_PROTOCOL                *OcAudio;
-  UINT8                            VolumeLevel;
+  UINT8                            RawGain;
   BOOLEAN                          Muted;
+  INT8                             DecibelGain;
+  BOOLEAN                          TryConversion;
 
   if (Config->Uefi.Audio.ResetTrafficClass) {
     ResetAudioTrafficClass ();
@@ -503,8 +520,6 @@ OcLoadUefiAudioSupport (
     return;
   }
 
-  VolumeLevel = OcGetVolumeLevel (Config->Uefi.Audio.VolumeAmplifier, &Muted);
-
   DevicePath        = NULL;
   AsciiDevicePath   = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
   if (AsciiDevicePath[0] != '\0') {
@@ -524,7 +539,7 @@ OcLoadUefiAudioSupport (
   // NULL DevicePath means choose the first audio device available on the platform.
   //
 
-  OcAudio = OcAudioInstallProtocols (FALSE);
+  OcAudio = OcAudioInstallProtocols (FALSE, FALSE);
   if (OcAudio == NULL) {
     DEBUG ((DEBUG_INFO, "OC: Cannot locate OcAudio protocol\n"));
     if (DevicePath != NULL) {
@@ -533,16 +548,11 @@ OcLoadUefiAudioSupport (
     return;
   }
 
-  //
-  // Never disable sound completely, as it is vital for accessability.
-  //
   Status = OcAudio->Connect (
     OcAudio,
     DevicePath,
     Config->Uefi.Audio.AudioCodec,
-    Config->Uefi.Audio.AudioOut,
-    VolumeLevel < Config->Uefi.Audio.MinimumVolume
-      ? Config->Uefi.Audio.MinimumVolume : VolumeLevel
+    Config->Uefi.Audio.AudioOutMask
     );
 
   if (DevicePath != NULL) {
@@ -553,6 +563,43 @@ OcLoadUefiAudioSupport (
     DEBUG ((DEBUG_INFO, "OC: Audio connection failed - %r\n", Status));
     return;
   }
+
+  OcGetAmplifierGain (
+    &RawGain,
+    &DecibelGain,
+    &Muted,
+    &TryConversion
+    );
+
+  //
+  // Conversion will only be correct if current codec and channel(s)
+  // correspond to the saved raw gain parameter.
+  //
+  if (TryConversion) {
+    OcAudio->RawGainToDecibels (OcAudio, RawGain, &DecibelGain);
+  }
+
+  //
+  // Have a max. volume to limit very loud user volume during boot, as Apple do.
+  //
+  if (DecibelGain > Config->Uefi.Audio.MaximumGain) {
+    DEBUG ((
+      DEBUG_INFO,
+      "OC: Limiting gain %d dB -> %d dB\n",
+      DecibelGain,
+      Config->Uefi.Audio.MaximumGain
+      ));
+    DecibelGain = Config->Uefi.Audio.MaximumGain;
+  }
+
+  //
+  // Never disable audio assist sound completely, as it is vital for accessibility.
+  //
+  Status = OcAudio->SetDefaultGain (
+    OcAudio,
+    DecibelGain < Config->Uefi.Audio.MinimumAssistGain
+      ? Config->Uefi.Audio.MinimumAssistGain : DecibelGain
+    );
 
   Status = OcAudio->SetProvider (
     OcAudio,
@@ -572,12 +619,15 @@ OcLoadUefiAudioSupport (
 
   OcSetVoiceOverLanguage (NULL);
 
-  if (OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))
-    && VolumeLevel >= Config->Uefi.Audio.MinimumVolume && !Muted) {
+  if (!Muted
+    && DecibelGain >= Config->Uefi.Audio.MinimumAudibleGain
+    && OcShouldPlayChime (OC_BLOB_GET (&Config->Uefi.Audio.PlayChime))) {
     DEBUG ((DEBUG_INFO, "OC: Starting to play chime...\n"));
     Status = OcAudio->PlayFile (
       OcAudio,
       AppleVoiceOverAudioFileVoiceOverBoot,
+      DecibelGain,
+      TRUE,
       FALSE
       );
     DEBUG ((DEBUG_INFO, "OC: Play chime started - %r\n", Status));

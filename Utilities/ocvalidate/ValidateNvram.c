@@ -140,6 +140,13 @@ ValidateNvramKeyByGuid (
                 OC_BLOB_GET (VariableMap->Keys[VariableIndex])
                 ));
               ++ErrorCount;
+            } else {
+              //
+              // Special check for UIScale when it is valid.
+              //
+              if (AsciiStrCmp (OC_BLOB_GET (VariableMap->Keys[VariableIndex]), "UIScale") == 0) {
+                mHasNvramUIScale = TRUE;
+              }
             }
           }
         }

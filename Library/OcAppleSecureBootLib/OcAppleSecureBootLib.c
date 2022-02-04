@@ -92,6 +92,8 @@ OcAppleSecureBootBootstrapValues (
   )
 {
   EFI_STATUS  Status;
+  CHAR8       BridgeModel[16];
+  UINTN       BridgeModelSize;
 
   ASSERT (Model != NULL);
 
@@ -100,6 +102,23 @@ OcAppleSecureBootBootstrapValues (
     sizeof (mSbHardwareModel),
     "%aap",
     Model
+    );
+
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  for (BridgeModelSize = 0; mSbHardwareModel[BridgeModelSize] != '\0'; ++BridgeModelSize) {
+    BridgeModel[BridgeModelSize] = AsciiCharToUpper (mSbHardwareModel[BridgeModelSize]);
+  }
+  BridgeModel[BridgeModelSize] = '\0';
+
+  Status = gRT->SetVariable (
+    APPLE_BRIDGE_OS_HARDWARE_MODEL_VARIABLE_NAME,
+    &gAppleVendorVariableGuid,
+    EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS,
+    BridgeModelSize,
+    BridgeModel
     );
 
   if (EFI_ERROR (Status)) {
@@ -262,12 +281,12 @@ InternalReadFile (
   ASSERT (FilePath != NULL);
   ASSERT (FileSize != NULL);
 
-  Status = SafeFileOpen (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
+  Status = OcSafeFileOpen (Volume, &FileHandle, FilePath, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  Status = GetFileSize (FileHandle, &FileReadSize);
+  Status = OcGetFileSize (FileHandle, &FileReadSize);
   if (EFI_ERROR (Status)) {
     FileHandle->Close (FileHandle);
     return NULL;
@@ -279,7 +298,7 @@ InternalReadFile (
     return NULL;
   }
 
-  Status = GetFileData (
+  Status = OcGetFileData (
              FileHandle,
              0,
              FileReadSize,

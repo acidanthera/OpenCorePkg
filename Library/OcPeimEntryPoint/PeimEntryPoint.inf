@@ -1,0 +1,48 @@
+## @file
+# Module entry point library for PEIM.
+#
+# Copyright (c) 2007 - 2018, Intel Corporation. All rights reserved.<BR>
+#
+#  SPDX-License-Identifier: BSD-2-Clause-Patent
+#
+#
+##
+
+[Defines]
+  INF_VERSION                    = 0x00010005
+  BASE_NAME                      = OcPeimEntryPoint
+  MODULE_UNI_FILE                = PeimEntryPoint.uni
+  FILE_GUID                      = 796150C8-578F-4C0C-B662-441C4F1176B3
+  MODULE_TYPE                    = PEIM
+  VERSION_STRING                 = 1.0
+  LIBRARY_CLASS                  = PeimEntryPoint|PEIM
+
+#
+#  VALID_ARCHITECTURES           = IA32 X64
+#
+
+[Sources]
+  PeimEntryPoint.c
+
+[Sources.Ia32]
+  Ia32/Canary.nasm
+  Ia32/GS.nasm         | MSFT
+
+[Sources.X64]
+  X64/Canary.nasm
+  X64/GS.nasm          | MSFT
+
+[Sources.EBC, Sources.ARM, Sources.AARM64, Sources.RISCV64]
+  CanaryDummy.c
+
+[Packages]
+  MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
+
+[LibraryClasses]
+  DebugLib
+  PcdLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask            ## CONSUMES
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback   ## CONSUMES

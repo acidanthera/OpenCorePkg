@@ -174,6 +174,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2008
   - 2009
-CloverSerialNumber: "W8944T1S1AQ"
 MinimumOSVersion: "10.5.5"
 MaximumOSVersion: "10.11.6"

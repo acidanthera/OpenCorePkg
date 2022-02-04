@@ -42,7 +42,6 @@ typedef struct OC_SB_MODEL_DESC_ {
 
 STATIC CHAR8 mCryptoDigestMethod[16] = "sha2-384";
 STATIC DERImg4Environment mEnvInfo;
-STATIC CONST CHAR8 *mModelDefault = "j137";
 ///
 /// List of model mapping to board identifiers.
 /// Alphabetically sorted (!), for release order refer to the documentation.
@@ -64,7 +63,7 @@ STATIC OC_SB_MODEL_DESC mModelInformation[] = {
   { "j230k",     0x3F }, ///< MacBookAir9,1
   { "j680",      0x0B }, ///< MacBookPro15,1
   { "j780",      0x07 }, ///< MacBookPro15,3
-  { "x86legacy", 0xF0 }, ///< Generic x86 from Big Sur
+  { OC_SB_MODEL_LEGACY, 0xF0 }, ///< Generic x86 from Big Sur
 };
 
 STATIC BOOLEAN mHasDigestOverride;
@@ -159,10 +158,6 @@ OcAppleImg4GetHardwareModel (
   )
 {
   OC_SB_MODEL_DESC  *ModelInfo;
-
-  if (AsciiStrCmp (ModelRequest, OC_SB_MODEL_DEFAULT) == 0 || ModelRequest[0] == '\0') {
-    ModelRequest = mModelDefault;
-  }
 
   ModelInfo = InternalGetModelInfo (ModelRequest);
   if (ModelInfo != NULL) {
@@ -344,6 +339,7 @@ OcAppleImg4BootstrapValues (
 {
   EFI_STATUS        Status;
   OC_SB_MODEL_DESC  *SbInfo;
+  UINT8             Tmp;
 
   ASSERT (Model != NULL);
   SbInfo = InternalGetModelInfo (Model);
@@ -361,7 +357,7 @@ OcAppleImg4BootstrapValues (
   mEnvInfo.securityMode               = 1;
   mEnvInfo.effectiveProductionStatus  = TRUE;
   mEnvInfo.effectiveSecurityMode      = 1;
-  mEnvInfo.internalUseOnlyUnit        = FALSE;
+  mEnvInfo.internalUseOnlyUnit        = AsciiStrCmp (Model, OC_SB_MODEL_LEGACY) == 0;
   mEnvInfo.xugs                       = 1;
   mEnvInfo.allowMixNMatch             = FALSE;
 
@@ -390,12 +386,13 @@ OcAppleImg4BootstrapValues (
     return Status;
   }
 
+  Tmp = (UINT8) mEnvInfo.certificateEpoch;
   Status = gRT->SetVariable (
     L"CertificateEpoch",
     &gAppleSecureBootVariableGuid,
     EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.certificateEpoch),
-    &mEnvInfo.certificateEpoch
+    sizeof (Tmp),
+    &Tmp
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -478,12 +475,13 @@ OcAppleImg4BootstrapValues (
     return Status;
   }
 
+  Tmp = (UINT8) mEnvInfo.allowMixNMatch;
   Status = gRT->SetVariable (
     L"MixNMatchPreventionStatus",
     &gAppleSecureBootVariableGuid,
     EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_BOOTSERVICE_ACCESS,
-    sizeof (mEnvInfo.allowMixNMatch),
-    &mEnvInfo.allowMixNMatch
+    sizeof (Tmp),
+    &Tmp
     );
   if (EFI_ERROR (Status)) {
     return Status;
@@ -499,8 +497,6 @@ OcAppleImg4BootstrapValues (
   if (EFI_ERROR (Status)) {
     return Status;
   }
-
-  
 
   return EFI_SUCCESS;
 }

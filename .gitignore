@@ -7,6 +7,9 @@ xcshareddata
 xcuserdata
 project.xcworkspace
 *.dSYM
+*.linux
+.vscode
+.idea
 Utilities/AppleEfiSignTool/AppleEfiSignTool
 Utilities/ACPIe/ACPIe
 Utilities/acdtinfo/acdtinfo
@@ -34,11 +37,15 @@ Utilities/TestSmbios/Smbios
 Utilities/TestPeCoff/PeCoff
 *.o
 *.o.tmp
+*.d
 *.exe
 *.gcda
 *.gcno
 FUZZDICT
 COVERAGE
+*.sydr*
+sydr-fuzz.toml
+sydr-fuzz-out
 fuzz-*.log
 crash-*
 oom-*

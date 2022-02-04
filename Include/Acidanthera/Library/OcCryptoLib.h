@@ -80,13 +80,18 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_PASSWORD_MAX_LEN  32
 
 //
+// Maximum OpenCore password retries.
+//
+#define OC_PASSWORD_MAX_RETRIES  3
+
+//
 // Possible RSA algorithm types supported by OcCryptoLib
 // for RSA digital signature verification
 // PcdOcCryptoAllowedSigHashTypes MUST be kept in sync with changes!
 //
 typedef enum OC_SIG_HASH_TYPE_ {
   OcSigHashTypeSha256,
-  OcSigHashTypeSha384, 
+  OcSigHashTypeSha384,
   OcSigHashTypeSha512,
   OcSigHashTypeMax
 } OC_SIG_HASH_TYPE;
@@ -354,24 +359,30 @@ Sha384Init (
   SHA384_CONTEXT  *Context
   );
 
-VOID 
+VOID
 Sha384Update (
   SHA384_CONTEXT  *Context,
   CONST UINT8     *Data,
   UINTN           Len
   );
 
-VOID 
+VOID
 Sha384Final (
   SHA384_CONTEXT  *Context,
   UINT8           *HashDigest
   );
 
-VOID 
+VOID
 Sha384 (
   UINT8        *Hash,
   CONST UINT8  *Data,
   UINTN        Len
+  );
+
+BOOLEAN
+EFIAPI
+TryEnableAvx (
+  VOID
   );
 
 /**

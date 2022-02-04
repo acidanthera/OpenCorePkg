@@ -167,6 +167,5 @@ AppleBoardCode:
 AppleModelYear:
   - 2010
   - 2011
-CloverSerialNumber: "QP0312PBDNR"
 MinimumOSVersion: "10.6.3"
 MaximumOSVersion: "10.13.6"

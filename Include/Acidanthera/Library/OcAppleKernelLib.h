@@ -125,6 +125,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_MOJAVE_MIN           KERNEL_VERSION (18, 0, 0)
 #define KERNEL_VERSION_CATALINA_MIN         KERNEL_VERSION (19, 0, 0)
 #define KERNEL_VERSION_BIG_SUR_MIN          KERNEL_VERSION (20, 0, 0)
+#define KERNEL_VERSION_MONTEREY_MIN         KERNEL_VERSION (21, 0, 0)
 
 //
 // Maximum kernel versions for each release.
@@ -141,6 +142,7 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION_HIGH_SIERRA_MAX      (KERNEL_VERSION_MOJAVE_MIN - 1)
 #define KERNEL_VERSION_MOJAVE_MAX           (KERNEL_VERSION_CATALINA_MIN - 1)
 #define KERNEL_VERSION_CATALINA_MAX         (KERNEL_VERSION_BIG_SUR_MIN - 1)
+#define KERNEL_VERSION_BIG_SUR_MAX          (KERNEL_VERSION_MONTEREY_MIN - 1)
 
 //
 // Prelinked context used for kernel modification.
@@ -1138,7 +1140,7 @@ PatchSetApfsTimeout (
   @param CpuInfo        CPU information.
   @param Data           4 32-bit integers with CPUID data.
   @param DataMask       4 32-bit integers with CPUID enabled overrides data.
-  @param KernelVersion  Curent kernel version.
+  @param KernelVersion  Current kernel version.
 
   @return  EFI_SUCCESS on success.
 **/
@@ -1148,6 +1150,22 @@ PatchKernelCpuId (
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           *Data,
   IN     UINT32           *DataMask,
+  IN     UINT32           KernelVersion
+  );
+
+/**
+  Apply current CPU information patches.
+
+  @param Patcher        Patcher context.
+  @param CpuInfo        CPU information.
+  @param KernelVersion  Current kernel version.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatchProvideCurrentCpuInfo(
+  IN OUT PATCHER_CONTEXT  *Patcher,
+  IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           KernelVersion
   );
 

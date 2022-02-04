@@ -107,6 +107,5 @@ AppleBoardCode:
 # Note, first year is used by macserial
 AppleModelYear:
   - 2008
-CloverSerialNumber: "W864947A18X"
 MinimumOSVersion: "10.5.1"
 MaximumOSVersion: "10.7.5"

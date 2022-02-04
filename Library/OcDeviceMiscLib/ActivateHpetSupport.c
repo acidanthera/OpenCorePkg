@@ -24,6 +24,8 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDeviceMiscLib.h>
 
+#include "PciExtInternal.h"
+
 VOID
 ActivateHpetSupport (
   VOID
@@ -34,7 +36,7 @@ ActivateHpetSupport (
   EFI_HANDLE           *HandleBuffer;
   UINTN                Index;
   EFI_PCI_IO_PROTOCOL  *PciIo;
-  UINT32               ClassCode;
+  PCI_CLASSCODE        ClassCode;
   UINT32               Rcba;
   UINT32               Hptc;
 
@@ -64,18 +66,17 @@ ActivateHpetSupport (
 
     Status = PciIo->Pci.Read (
       PciIo,
-      EfiPciIoWidthUint32,
-      OFFSET_OF (PCI_DEVICE_INDEPENDENT_REGION, RevisionID),
-      1,
+      EfiPciIoWidthUint8,
+      PCI_CLASSCODE_OFFSET,
+      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
       &ClassCode
       );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    ClassCode >>= 16U; ///< Drop revision and minor codes.
-    if (ClassCode == (PCI_CLASS_BRIDGE << 8 | PCI_CLASS_BRIDGE_ISA)) {
-      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, 0xF0 /* RCBA */, 1, &Rcba);
+    if (ClassCode.BaseCode == PCI_CLASS_BRIDGE && ClassCode.SubClassCode == PCI_CLASS_BRIDGE_ISA) {
+      Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint32, PCI_BRIDGE_RCBA_OFFSET, 1, &Rcba);
       if (EFI_ERROR (Status)) {
         continue;
       }
@@ -91,21 +92,21 @@ ActivateHpetSupport (
       //
       // Disabled completely. Ignore.
       //
-      if ((Rcba & 0xFFFFC000) == 0) {
+      if ((Rcba & PCI_BRIDGE_RCBA_ADDRESS_MASK) == 0) {
         continue;
       }
 
       //
       // Disabled access. Try to enable.
       //
-      if ((Rcba & BIT0) == 0) {
-        Rcba |= BIT0;
-        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint32, 0xF0 /* RCBA */, 1, &Rcba);
+      if ((Rcba & PCI_BRIDGE_RCBA_ACCESS_ENABLE) == 0) {
+        Rcba |= PCI_BRIDGE_RCBA_ACCESS_ENABLE;
+        PciIo->Pci.Write (PciIo, EfiPciIoWidthUint32, PCI_BRIDGE_RCBA_OFFSET, 1, &Rcba);
       }
 
-      Rcba &= 0xFFFFC000;
+      Rcba &= PCI_BRIDGE_RCBA_ADDRESS_MASK;
 
-      Hptc = MmioRead32 (Rcba + 0x3404);
+      Hptc = MmioRead32 (Rcba + RCBA_HTPC_REGISTER);
 
       DEBUG ((
         DEBUG_INFO,
@@ -113,9 +114,9 @@ ActivateHpetSupport (
         Hptc
         ));
 
-      if ((Hptc & BIT7) == 0) {
-        MmioWrite32 (Rcba + 0x3404, Hptc | BIT7);
-        Hptc = MmioRead32 (Rcba + 0x3404);
+      if ((Hptc & RCBA_HTPC_HPET_ENABLE) == 0) {
+        MmioWrite32 (Rcba + RCBA_HTPC_REGISTER, Hptc | RCBA_HTPC_HPET_ENABLE);
+        Hptc = MmioRead32 (Rcba + RCBA_HTPC_REGISTER);
 
         DEBUG ((
           DEBUG_INFO,

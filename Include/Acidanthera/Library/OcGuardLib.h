@@ -31,6 +31,15 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #define OC_POT_ALIGNED(Align, Ptr) (0ULL == (((UINTN) (Ptr)) & (Align-1U)))
 #define OC_TYPE_ALIGNED(Type, Ptr) (OC_POT_ALIGNED (OC_ALIGNOF (Type), Ptr))
 
+//
+// Force member alignment for the structure.
+//
+#if (defined(__STDC__) && __STDC_VERSION__ >= 201112L) || defined(__GNUC__) || defined(__clang__)
+#define OC_ALIGNAS(Alignment) _Alignas(Alignment)
+#else
+#define OC_ALIGNAS(Alignment)
+#endif
+
 /**
  Return the result of (Multiplicand * Multiplier / Divisor).
 

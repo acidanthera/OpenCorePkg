@@ -12,7 +12,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include "ProcessorBind.h"
+#include <Base.h>
+
 #include <Library/OcMainLib.h>
 
 #include <Library/BaseLib.h>
@@ -38,6 +39,9 @@ STATIC BOOLEAN             mUse32BitKernel;
 
 STATIC CACHELESS_CONTEXT   mOcCachelessContext;
 STATIC BOOLEAN             mOcCachelessInProgress;
+
+STATIC EFI_FILE_PROTOCOL   *mCustomKernelDirectory;
+STATIC BOOLEAN             mCustomKernelDirectoryInProgress;
 
 STATIC
 VOID
@@ -328,7 +332,7 @@ OcKernelLoadAndReserveKext (
   UnicodeUefiSlashes (FullPath);
 
   if (IsForced) {
-    Kext->PlistData = ReadFileFromFile (
+    Kext->PlistData = OcReadFileFromDirectory (
       RootFile,
       FullPath,
       &Kext->PlistDataSize,
@@ -385,7 +389,7 @@ OcKernelLoadAndReserveKext (
     UnicodeUefiSlashes (FullPath);
 
     if (IsForced) {
-      Kext->ImageData = ReadFileFromFile (
+      Kext->ImageData = OcReadFileFromDirectory (
         RootFile,
         FullPath,
         &Kext->ImageDataSize,
@@ -975,7 +979,7 @@ OcKernelFuzzyMatch (
   }
   CopyMem (FileNameDir, FileName, StrnSizeS (FileName, FileNameDirLength) - sizeof (*FileName));
 
-  Status = SafeFileOpen (RootFile, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
+  Status = OcSafeFileOpen (RootFile, &FileDirectory, FileNameDir, EFI_FILE_MODE_READ, 0);
   if (EFI_ERROR (Status)) {
     FreePool (FileNameDir);
     return Status;
@@ -984,9 +988,9 @@ OcKernelFuzzyMatch (
   //
   // Search for kernelcache files, trying each one.
   //
-  DirectorySeachContextInit (&Context);
+  OcDirectorySeachContextInit (&Context);
   do {
-    Status = GetNewestFileFromDirectory (
+    Status = OcGetNewestFileFromDirectory (
       &Context,
       FileDirectory,
       L"kernelcache",
@@ -1018,7 +1022,7 @@ OcKernelFuzzyMatch (
       break;
     }
 
-    Status = SafeFileOpen (RootFile, KernelFile, FileNameCacheNew, OpenMode, Attributes);
+    Status = OcSafeFileOpen (RootFile, KernelFile, FileNameCacheNew, OpenMode, Attributes);
     if (EFI_ERROR (Status)) {
       continue;
     }
@@ -1078,6 +1082,13 @@ OcKernelFileOpen (
   UINT32             NumReservedKexts;
   UINT32             LinkedExpansion;
   UINT32             ReservedFullSize;
+  CHAR16             *NewFileName;
+  EFI_FILE_PROTOCOL  *EspNewHandle;
+
+  if (mCustomKernelDirectoryInProgress) {
+    DEBUG ((DEBUG_INFO, "OC: Skipping OpenFile hooking on ESP Kernels directory\n"));
+    return OcSafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
+  }
 
   //
   // Prevent access to cache files depending on maximum cache type allowed.
@@ -1117,7 +1128,7 @@ OcKernelFileOpen (
     return Status;
   }
 
-  Status = SafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
+  Status = OcSafeFileOpen (This, NewHandle, FileName, OpenMode, Attributes);
 
   DEBUG ((
     DEBUG_VERBOSE,
@@ -1136,6 +1147,20 @@ OcKernelFileOpen (
     && Status == EFI_NOT_FOUND
     && OpenMode == EFI_FILE_MODE_READ
     && (StrStr (FileName, L"\\kernelcache") != NULL)) {
+    //
+    // Change the target to the custom one if requested CustomKernel.
+    //
+    if (mCustomKernelDirectory != NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
+      NewFileName = OcStrrChr (FileName, L'\\');
+      if (NewFileName == NULL) {
+        NewFileName = FileName;
+      }
+      DEBUG ((DEBUG_INFO, "OC: Filename after redirection: %s\n", NewFileName));
+
+      This     = mCustomKernelDirectory;
+      FileName = NewFileName;
+    }
 
     DEBUG ((DEBUG_INFO, "OC: Trying kernelcache fuzzy matching on %s\n", FileName));
 
@@ -1171,6 +1196,29 @@ OcKernelFileOpen (
     && StrCmp (FileName, L"System\\Library\\Kernels\\kernel") != 0
     && OcStriStr (FileName, L".kext\\") == NULL
     && OcStriStr (FileName, L".im4m") == NULL) {
+    //
+    // Change the target to the custom one if requested CustomKernel.
+    //
+    if (mCustomKernelDirectory != NULL) {
+      DEBUG ((DEBUG_INFO, "OC: Redirecting %s to the custom one on ESP\n", FileName));
+      NewFileName = OcStrrChr (FileName, L'\\');
+      if (NewFileName == NULL) {
+        NewFileName = FileName;
+      }
+
+      DEBUG ((DEBUG_INFO, "OC: Filename after redirection: %s\n", NewFileName));
+
+      mCustomKernelDirectoryInProgress = TRUE;
+      Status = OcSafeFileOpen (mCustomKernelDirectory, &EspNewHandle, NewFileName, OpenMode, Attributes);
+      mCustomKernelDirectoryInProgress = FALSE;
+      if (!EFI_ERROR (Status)) {
+        (*NewHandle)->Close (*NewHandle);
+
+        This = mCustomKernelDirectory;
+        *NewHandle = EspNewHandle;
+        FileName = NewFileName;
+      }
+    }
 
     //
     // Kernel loading for fuzzy kernelcache is performed earlier.
@@ -1191,7 +1239,7 @@ OcKernelFileOpen (
         );
 
       if (Status == EFI_NOT_FOUND) {
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
         *NewHandle = NULL;
 
         return Status;
@@ -1207,10 +1255,10 @@ OcKernelFileOpen (
         && ((MaxCacheTypeAllowed == CacheTypeNone && mOcDarwinVersion <= KERNEL_VERSION_LEOPARD_MAX)
         || (MaxCacheTypeAllowed == CacheTypeMkext && mOcDarwinVersion <= KERNEL_VERSION_SNOW_LEOPARD_MAX)
         || (MaxCacheTypeAllowed == CacheTypeCacheless && mOcDarwinVersion <= KERNEL_VERSION_MAVERICKS_MAX))) {
-        DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
+        DEBUG ((DEBUG_INFO, "OC: Blocking prelinked due to ForceKernelCache=%a: %s\n", ForceCacheType, FileName));
 
         FreePool (Kernel);
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
         *NewHandle = NULL;
 
         return EFI_NOT_FOUND;
@@ -1243,12 +1291,12 @@ OcKernelFileOpen (
 
       DEBUG ((DEBUG_INFO, "OC: Prelinked status - %r\n", PrelinkedStatus));
 
-      Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+      Status = OcGetFileModificationTime (*NewHandle, &ModificationTime);
       if (EFI_ERROR (Status)) {
         ZeroMem (&ModificationTime, sizeof (ModificationTime));
       }
 
-      (*NewHandle)->Close(*NewHandle);
+      (*NewHandle)->Close (*NewHandle);
 
       //
       // Virtualise newly created kernel.
@@ -1279,8 +1327,8 @@ OcKernelFileOpen (
     // Disable mkext booting if forcing cacheless.
     //
     if (MaxCacheTypeAllowed == CacheTypeCacheless) {
-      DEBUG ((DEBUG_INFO, "OC: Blocking mkext due to ForceKernelCache=%s: %a\n", FileName, ForceCacheType));
-      (*NewHandle)->Close(*NewHandle);
+      DEBUG ((DEBUG_INFO, "OC: Blocking mkext due to ForceKernelCache=%a: %s\n", ForceCacheType, FileName));
+      (*NewHandle)->Close (*NewHandle);
       *NewHandle = NULL;
 
       return EFI_NOT_FOUND;
@@ -1332,12 +1380,12 @@ OcKernelFileOpen (
         );
       DEBUG ((DEBUG_INFO, "OC: Mkext status - %r\n", Status));
       if (!EFI_ERROR (Status)) {
-        Status = GetFileModificationTime (*NewHandle, &ModificationTime);
+        Status = OcGetFileModificationTime (*NewHandle, &ModificationTime);
         if (EFI_ERROR (Status)) {
           ZeroMem (&ModificationTime, sizeof (ModificationTime));
         }
 
-        (*NewHandle)->Close(*NewHandle);
+        (*NewHandle)->Close (*NewHandle);
 
         //
         // Virtualise newly created mkext.
@@ -1441,16 +1489,44 @@ OcLoadKernelSupport (
   IN OC_CPU_INFO         *CpuInfo
   )
 {
-  EFI_STATUS  Status;
+  EFI_STATUS         Status;
+  EFI_FILE_PROTOCOL  *Root;
 
   Status = EnableVirtualFs (gBS, OcKernelFileOpen);
 
   if (!EFI_ERROR (Status)) {
-    mOcStorage              = Storage;
-    mOcConfiguration        = Config;
-    mOcCpuInfo              = CpuInfo;
-    mOcDarwinVersion        = 0;
-    mOcCachelessInProgress  = FALSE;
+    mOcStorage                        = Storage;
+    mOcConfiguration                  = Config;
+    mOcCpuInfo                        = CpuInfo;
+    mOcDarwinVersion                  = 0;
+    mOcCachelessInProgress            = FALSE;
+    mCustomKernelDirectoryInProgress  = FALSE;
+    //
+    // Open customised Kernels if needed.
+    //
+    mCustomKernelDirectory = NULL;
+    if (mOcConfiguration->Kernel.Scheme.CustomKernel) {
+      Status = OcFindWritableOcFileSystem (&Root);
+      if (!EFI_ERROR (Status)) {
+        //
+        // Open Kernels directory.
+        //
+        Status = Root->Open (
+          Root,
+          &mCustomKernelDirectory,
+          L"Kernels",
+          EFI_FILE_MODE_READ,
+          EFI_FILE_DIRECTORY
+          );
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "OC: Unable to open Kernels folder for custom kernel - %r, falling back to normal one\n", Status));
+          mCustomKernelDirectory = NULL;
+        }
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Unable to find root writable filesystem for custom kernel - %r, falling back to normal one\n", Status));
+      }
+    }
+
     OcImageLoaderRegisterConfigure (OcKernelConfigureCapabilities);
   } else {
     DEBUG ((DEBUG_ERROR, "OC: Failed to enable vfs - %r\n", Status));

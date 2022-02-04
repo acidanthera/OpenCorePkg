@@ -26,6 +26,7 @@
   Include/Generic
   Include/Intel
   Include/Microsoft
+  Include/Nvidia
   Include/VMware
 
 [Includes.AArch64]
@@ -35,6 +36,7 @@
   # Include/Generic/AArch64
   # Include/Intel/AArch64
   # Include/Microsoft/AArch64
+  # Include/Nvidia/AArch64
   # Include/VMware/AArch64
 
 [Includes.Arm]
@@ -44,6 +46,7 @@
   # Include/Generic/Arm
   # Include/Intel/Arm
   # Include/Microsoft/Arm
+  # Include/Nvidia/Arm
   # Include/VMware/Arm
 
 [Includes.Ebc]
@@ -53,6 +56,7 @@
   # Include/Generic/Ebc
   # Include/Intel/Ebc
   # Include/Microsoft/Ebc
+  # Include/Nvidia/Ebc
   # Include/VMware/Ebc
 
 [Includes.Ia32]
@@ -62,6 +66,7 @@
   # Include/Generic/Ia32
   # Include/Intel/Ia32
   # Include/Microsoft/Ia32
+  # Include/Nvidia/Ia32
   # Include/VMware/Ia32
 
 [Includes.X64]
@@ -71,6 +76,7 @@
   # Include/Generic/X64
   # Include/Intel/X64
   # Include/Microsoft/X64
+  # Include/Nvidia/X64
   # Include/VMware/X64
 
 [Guids]
@@ -396,9 +402,6 @@
   gAppleMachinePersonalityDataRecordGuid     = { 0x2B6C7ADE, 0xC5DA, 0x474B, { 0xBA, 0x42, 0x06, 0xBD, 0xDD, 0x4E, 0x34, 0x97 }}
 
   ## Include/Apple/Guid/AppleDataHub.h
-  gAppleFsbFrequencyDataRecordGuid           = { 0xD1A04D55, 0x75B9, 0x41A3, { 0x90, 0x36, 0x8F, 0x4A, 0x26, 0x1C, 0xBB, 0xA2 }}
-
-  ## Include/Apple/Guid/AppleDataHub.h
   gAppleBoardIdDataRecordGuid                = { 0xB459BF16, 0x14ED, 0x5131, { 0x92, 0xB4, 0x5E, 0x19, 0xF0, 0x5B, 0xC0, 0xAD }}
 
   ## Include/Apple/Guid/AppleDataHub.h
@@ -469,7 +472,7 @@
   gEfiAudioDecodeProtocolGuid                = { 0xAF3F6C23, 0x8132, 0x4880, { 0xB3, 0x29, 0x04, 0x8D, 0xF7, 0x1D, 0xD8, 0x6A }}
 
   ## Include/Acidanthera/Protocol/AudioIo.h
-  gEfiAudioIoProtocolGuid                    = { 0xF05B559C, 0x1971, 0x4AF5, { 0xB2, 0xAE, 0xD6, 0x08, 0x08, 0xF7, 0x4F, 0x70 }}
+  gEfiAudioIoProtocolGuid                    = { 0x22266891, 0x2032, 0x4BAE, { 0xB7, 0xB5, 0x43, 0x74, 0xE7, 0x32, 0x09, 0x49 }}
 
   ## Include/Acidanthera/Protocol/HdaCodecInfo.h
   gEfiHdaCodecInfoProtocolGuid               = { 0x6C9CDDE1, 0xE8A5, 0x43E5, { 0xBE, 0x88, 0xDA, 0x15, 0xBC, 0x1C, 0x02, 0x50 }}
@@ -500,6 +503,9 @@
 
   ## Include/Acidanthera/Protocol/OcForceResolution.h
   gOcForceResolutionProtocolGuid             = { 0xBC7EC589, 0x2390, 0x4DA3, { 0x80, 0x25, 0x77, 0xDA, 0xD3, 0x4F, 0x36, 0x09 }}
+
+  ## Include/Acidanthera/Protocol/OcBootEntry.h
+  gOcBootEntryProtocolGuid                   = { 0x8604716E, 0xADD4, 0x45B4, { 0x84, 0x95, 0x08, 0xE3, 0x6D, 0x49, 0x7F, 0x4F }}
 
   ##  Include/AMI/Protocol/AmiPointer.h
   gAmiEfiPointerProtocolGuid                 = { 0x15A10CE7, 0xEAB5, 0x43BF, { 0x90, 0x42, 0x74, 0x43, 0x2E, 0x69, 0x63, 0x77 }}
@@ -561,11 +567,11 @@
   ## Include/Apple/Protocol/AppleDiskImage.h
   gAppleDiskImageProtocolGuid                = { 0x004B07E8, 0x0B9C, 0x427E, { 0xB0, 0xD4, 0xA4, 0x66, 0xE6, 0xE5, 0x7A, 0x62 }}
 
-  ## Include/Apple/Protocol/AppleDisplayInfo.h
-  gAppleDisplayInfoProtocolGuid              = { 0x63FAECF2, 0xE7EE, 0x4CB9, { 0x8A, 0x0C, 0x11, 0xCE, 0x5E, 0x89, 0xE3, 0x3C }}
-
   ## Include/Apple/Protocol/AppleDmgBoot.h
   gAppleDmgBootProtocolGuid                  = { 0x85290934, 0x28DC, 0x4DF5, { 0x91, 0x9A, 0x60, 0xE2, 0x8B, 0x1B, 0x94, 0x49 }}
+
+  ## Include/Apple/Protocol/AppleEg2Info.h
+  gAppleEg2InfoProtocolGuid                  = { 0x63FAECF2, 0xE7EE, 0x4CB9, { 0x8A, 0x0C, 0x11, 0xCE, 0x5E, 0x89, 0xE3, 0x3C }}
 
   ## Include/Apple/Protocol/AppleEvent.h
   gAppleEventProtocolGuid                    = { 0x33BE0EF1, 0x89C9, 0x4A6D, { 0xBB, 0x9F, 0x69, 0xDC, 0x8D, 0xD5, 0x16, 0xB9 }}
@@ -691,26 +697,49 @@
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
 
-  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot Services
+  ## event is triggered.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect itself.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect itself.<BR>
   ## @Prompt Disconnect the USB KeyBoard Driver when exitting Boot Services.
   gOpenCorePkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver|TRUE|BOOLEAN|0x00000002
 
-  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ##   FALSE - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver|TRUE|BOOLEAN|0x00000003
 
-  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect other drivers.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect other drivers.<BR>
   ## @Prompt Disconnect other drivers for the USB KeyBoard Driver to take precedence over them.
   gOpenCorePkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence|TRUE|BOOLEAN|0x00000004
+
+  ## Indicates whether audio codec setup code produces an error when no valid output bits are specified.<BR><BR>
+  ##   TRUE  - Produce an error.<BR>
+  ##   FALSE - No error, just play no sound.<BR>
+  ## @Prompt Audio codec setup code should produce an error when no valid output bits are specified.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs|TRUE|BOOLEAN|0x00000005
+
+  ## Indicates if AudioDxe will try to reset the PCI associated with the HDA controller on Exit Boot Services.<BR><BR>
+  ##   TRUE  - Register event to reset the controller on Exit Boot Services.<BR>
+  ##   FALSE - Do not reset the contoller on Exit Boot Services.<BR>
+  ## @Prompt AudioDxe will try to reset the HDA controller on Exit Boot Services.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices|TRUE|BOOLEAN|0x00000006
+
+  ## Indicates if AudioDxe will try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER
+  ## fails with access denied.<BR><BR>
+  ##   TRUE  - Use EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.<BR>
+  ##   FALSE - Do not use EFI_OPEN_PROTOCOL_GET_PROTOCOL.<BR>
+  ## @Prompt Try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|FALSE|BOOLEAN|0x00000007
+
+  ## Indicates if AudioDxe will use Pin Capabilities to identify outputs.<BR><BR>
+  ##   TRUE  - Use Pin Capabilities to identify outputs.<BR>
+  ##   FALSE - Use default device type to identify outputs.<BR>
+  ## @Prompt Use Pin Capabilities to identify audio outputs.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs|TRUE|BOOLEAN|0x00000008
 
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>
@@ -739,6 +768,12 @@
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderForceLoadDebug|FALSE|BOOLEAN|0x00000604
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderTolerantLoad|TRUE|BOOLEAN|0x00000605
   gOpenCorePkgTokenSpaceGuid.PcdImageLoaderSupportDebug|FALSE|BOOLEAN|0x00000606
+
+  ## Indicates, whether usage of TSC instead of RNG is allowed.<BR><BR>
+  ##   TRUE  - TSC is allowed.<BR>
+  ##   FALSE - TSC is NOT allowed.<BR>
+  ## @Prompt Allow usage of TSC, when RNG is not available.
+  gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|FALSE|BOOLEAN|0x00000607
 
 [LibraryClasses]
   ##  @libraryclass
@@ -790,6 +825,9 @@
   OcAudioLib|Include/Acidanthera/Library/OcAudioLib.h
 
   ##  @libraryclass
+  OcBlitLib|Include/Acidanthera/Library/OcBlitLib.h
+
+  ##  @libraryclass
   OcBootManagementLib|Include/Acidanthera/Library/OcBootManagementLib.h
 
   ##  @libraryclass
@@ -836,6 +874,9 @@
 
   ##  @libraryclass
   OcFirmwareVolumeLib|Include/Acidanthera/Library/OcFirmwareVolumeLib.h
+
+  ##  @libraryclass
+  OcFlexArrayLib|Include/Acidanthera/Library/OcFlexArrayLib.h
 
   ##  @libraryclass
   OcGuardLib|Include/Acidanthera/Library/OcGuardLib.h

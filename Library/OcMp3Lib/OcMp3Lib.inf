@@ -1,6 +1,6 @@
 ## @file
 #
-#  Component description file for OcMisclibrary.
+#  Component description file for OcMp3Lib.
 #
 #  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.<BR>
 #
@@ -52,6 +52,7 @@
   helix/hufftabs.c
   helix/imdct.c
   helix/mp3common.h
+  helix/mp3compat.h
   helix/mp3dec.h
   helix/mp3dec.c
   helix/mp3tabs.c

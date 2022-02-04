@@ -46,9 +46,9 @@ OcSmbiosDump (
     );
 
   if (!EFI_ERROR (Status)) {
-    Status = SetFileData (Root, L"EntryV1.bin", OriginalSmbios, OriginalSmbios->EntryPointLength);
+    Status = OcSetFileData (Root, L"EntryV1.bin", OriginalSmbios, OriginalSmbios->EntryPointLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V1 EP (%u bytes) - %r\n", OriginalSmbios->EntryPointLength, Status));
-    Status = SetFileData (Root, L"DataV1.bin", (VOID *) (UINTN) OriginalSmbios->TableAddress, OriginalSmbios->TableLength);
+    Status = OcSetFileData (Root, L"DataV1.bin", (VOID *) (UINTN) OriginalSmbios->TableAddress, OriginalSmbios->TableLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V1 DATA (%u bytes) - %r\n", OriginalSmbios->TableLength, Status));
   } else {
     DEBUG ((DEBUG_INFO, "OCSMB: No SMBIOS V1 - %r\n", Status));
@@ -60,9 +60,9 @@ OcSmbiosDump (
     );
 
   if (!EFI_ERROR (Status)) {
-    Status = SetFileData (Root, L"EntryV3.bin", OriginalSmbios3, OriginalSmbios3->EntryPointLength);
+    Status = OcSetFileData (Root, L"EntryV3.bin", OriginalSmbios3, OriginalSmbios3->EntryPointLength);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V3 EP (%u bytes) - %r\n", OriginalSmbios3->EntryPointLength, Status));
-    Status = SetFileData (Root, L"DataV3.bin", (VOID *) (UINTN) OriginalSmbios3->TableAddress, OriginalSmbios3->TableMaximumSize);
+    Status = OcSetFileData (Root, L"DataV3.bin", (VOID *) (UINTN) OriginalSmbios3->TableAddress, OriginalSmbios3->TableMaximumSize);
     DEBUG ((DEBUG_INFO, "OCSMB: Dumped V3 DATA (%u bytes) - %r\n", OriginalSmbios3->TableMaximumSize, Status));
   } else {
     DEBUG ((DEBUG_INFO, "OCSMB: No SMBIOS V3 - %r\n", Status));

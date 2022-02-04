@@ -206,7 +206,7 @@ OcLoadAcpiSupport (
   Status = AcpiInitContext (&Context);
 
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_ERROR, "OC: Failed to initialize ACPI support - %r", Status));
+    DEBUG ((DEBUG_ERROR, "OC: Failed to initialize ACPI support - %r\n", Status));
     return;
   }
 
@@ -239,6 +239,10 @@ OcLoadAcpiSupport (
 
   if (Config->Acpi.Quirks.NormalizeHeaders) {
     AcpiNormalizeHeaders (&Context);
+  }
+
+  if (Config->Acpi.Quirks.SyncTableIds) {
+    AcpiSyncTableIds (&Context);
   }
 
   AcpiApplyContext (&Context);

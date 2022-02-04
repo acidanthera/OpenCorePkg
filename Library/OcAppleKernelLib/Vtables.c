@@ -457,6 +457,7 @@ InternalInitializeVtableByEntriesAndRelocations (
                    Symbol
                    );
         if (!Result) {
+          DEBUG ((DEBUG_INFO, "OCAK: Failed to patch symbol %a for vtable %a\n", MachoGetSymbolName (MachoContext, Symbol), VtableName));
           return FALSE;
         }
 
@@ -835,6 +836,7 @@ InternalPatchByVtables (
                  CurrentVtable
                  );
       if (!Result) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to patch vtable for superclass %a\n", SuperClassName));
         return FALSE;
       }
 
@@ -889,6 +891,7 @@ InternalPatchByVtables (
                  CurrentVtable
                  );
       if (!Result) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to patch meta vtable for superclass %a\n", SuperClassName));
         return FALSE;
       }
 

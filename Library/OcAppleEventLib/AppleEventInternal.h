@@ -154,4 +154,29 @@ EventInputKeyFromAppleKeyCode (
   IN  BOOLEAN         Shifted
   );
 
+// InternalSetKeyBehaviour
+VOID
+InternalSetKeyBehaviour (
+  IN  BOOLEAN         CustomDelays,
+  IN  UINT16          KeyInitialDelay,
+  IN  UINT16          KeySubsequentDelay,
+  IN  BOOLEAN         GraphicsInputMirroring
+  );
+
+VOID
+InternalSetPointerPolling (
+  IN UINT32 PointerPollMin,
+  IN UINT32 PointerPollMax,
+  IN UINT32 PointerPollMask
+  );
+
+VOID
+InternalSetPointerSpeed (
+  IN UINT16 PointerSpeedDiv,
+  IN UINT16 PointerSpeedMul
+  );
+
+extern UINT32 mPointerSpeedMul;
+extern UINT32 mPointerSpeedDiv;
+
 #endif // APPLE_EVENT_INTERNAL_H_

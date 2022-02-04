@@ -66,8 +66,47 @@ STATIC KEY_STROKE_INFORMATION mKeyStrokeInfo[10];
 // mCLockChanged
 STATIC BOOLEAN mCLockChanged = FALSE;
 
+// mKeyInitialDelay
+// mKeySubsequentDelay
+// Apple implementation default values
+STATIC UINTN mKeyInitialDelay = 50;
+STATIC UINTN mKeySubsequentDelay = 5;
+
+// mGraphicsInputMirroring
+STATIC BOOLEAN mGraphicsInputMirroring = FALSE;
+
 // mAppleKeyMapAggregator
 STATIC APPLE_KEY_MAP_AGGREGATOR_PROTOCOL *mKeyMapAggregator = NULL;
+
+// InternalSetKeyBehaviour
+VOID
+InternalSetKeyBehaviour (
+  IN  BOOLEAN         CustomDelays,
+  IN  UINT16          KeyInitialDelay,
+  IN  UINT16          KeySubsequentDelay,
+  IN  BOOLEAN         GraphicsInputMirroring
+  )
+{
+  if (CustomDelays) {
+    //
+    // Zero is meaningful
+    //
+    mKeyInitialDelay    = KeyInitialDelay;
+
+    //
+    // Zero is meaningless (also div by zero expception): warn and use 1
+    //
+    if (KeySubsequentDelay == 0) {
+      KeySubsequentDelay = 1;
+      DEBUG ((DEBUG_WARN, "OCAE: Illegal KeySubsequentDelay value 0, using 1\n"));
+    }
+    mKeySubsequentDelay = KeySubsequentDelay;
+
+    DEBUG ((DEBUG_INFO, "OCAE: Using key delays %d (%d0ms) and %d (%d0ms)\n", mKeyInitialDelay, mKeyInitialDelay, mKeySubsequentDelay, mKeySubsequentDelay));
+  }
+
+  mGraphicsInputMirroring = GraphicsInputMirroring;
+}
 
 // InternalGetAppleKeyStrokes
 STATIC
@@ -492,9 +531,9 @@ InternalGetCurrentKeyStroke (
 
     if (KeyInfo != NULL) {
       AcceptStroke = (BOOLEAN)(
-                       (KeyInfo->NumberOfStrokes < (KEY_STROKE_DELAY * 10))
+                       (KeyInfo->NumberOfStrokes < mKeyInitialDelay)
                          ? (KeyInfo->NumberOfStrokes == 0)
-                         : ((KeyInfo->NumberOfStrokes % KEY_STROKE_DELAY) == 0)
+                         : (((KeyInfo->NumberOfStrokes - mKeyInitialDelay) % mKeySubsequentDelay) == 0)
                        );
 
       if (AcceptStroke) {
@@ -563,23 +602,33 @@ InternalAppleEventDataFromCurrentKeyStroke (
       &KeyCodes
       );
 
-    Mode   = EfiConsoleControlScreenGraphics;
-    Status = gBS->LocateProtocol (
-                    &gEfiConsoleControlProtocolGuid,
-                    NULL,
-                    (VOID *)&ConsoleControl
-                    );
+    if (!mGraphicsInputMirroring) {
+      //
+      // Apple OEM AppleEvent unconditionally includes this logic, but
+      // when an AppleEvent handler such as CrScreenshotDxe is active
+      // this code will run and (not entirely consistently across different
+      // firmware) may prevent keystrokes from reaching ConIn-based UEFI GUI
+      // apps such as Windows BitLocker.
+      // REF: https://github.com/acidanthera/bugtracker/issues/1716
+      //
+      Mode   = EfiConsoleControlScreenGraphics;
+      Status = gBS->LocateProtocol (
+                      &gEfiConsoleControlProtocolGuid,
+                      NULL,
+                      (VOID *)&ConsoleControl
+                      );
 
-    if (!EFI_ERROR (Status)) {
-      ConsoleControl->GetMode (ConsoleControl, &Mode, NULL, NULL);
-    }
+      if (!EFI_ERROR (Status)) {
+        ConsoleControl->GetMode (ConsoleControl, &Mode, NULL, NULL);
+      }
 
-    if (Mode == EfiConsoleControlScreenGraphics) {
-      for (Index = 0; Index < (NumberOfKeyCodes + 1); ++Index) {
-        Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &InputKey);
+      if (Mode == EfiConsoleControlScreenGraphics) {
+        for (Index = 0; Index < (NumberOfKeyCodes + 1); ++Index) {
+          Status = gST->ConIn->ReadKeyStroke (gST->ConIn, &InputKey);
 
-        if (EFI_ERROR (Status)) {
-          break;
+          if (EFI_ERROR (Status)) {
+            break;
+          }
         }
       }
     }

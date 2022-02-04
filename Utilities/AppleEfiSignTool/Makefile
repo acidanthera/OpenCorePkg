@@ -5,7 +5,7 @@
 ##
 
 PROJECT = AppleEfiSignTool
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	PeCoffDebug.o \
 	PeCoffHash.o \

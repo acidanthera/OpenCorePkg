@@ -29,6 +29,7 @@
 #
 
 [Sources]
+  OcPeCoffExtInternal.h
   OcPeCoffExtLib.c
 
 [Packages]

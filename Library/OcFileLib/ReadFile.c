@@ -30,11 +30,11 @@
 #include <Library/OcGuardLib.h>
 
 VOID *
-ReadFile (
-  IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
-  IN  CONST CHAR16                     *FilePath,
-  OUT UINT32                           *FileSize   OPTIONAL,
-  IN  UINT32                           MaxFileSize OPTIONAL
+OcReadFile (
+  IN     CONST EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
+  IN     CONST CHAR16                           *FilePath,
+     OUT       UINT32                           *FileSize OPTIONAL,
+  IN     CONST UINT32                           MaxFileSize OPTIONAL
   )
 {
   EFI_STATUS                      Status;
@@ -48,17 +48,17 @@ ReadFile (
   ASSERT (FilePath != NULL);
 
   Status = FileSystem->OpenVolume (
-    FileSystem,
+    (EFI_SIMPLE_FILE_SYSTEM_PROTOCOL *) FileSystem,
     &Volume
     );
   if (EFI_ERROR (Status)) {
     return NULL;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Volume,
     &FileHandle,
-    (CHAR16 *) FilePath,
+    FilePath,
     EFI_FILE_MODE_READ,
     0
     );
@@ -69,7 +69,7 @@ ReadFile (
     return NULL;
   }
 
-  Status = GetFileSize (
+  Status = OcGetFileSize (
     FileHandle,
     &FileReadSize
     );
@@ -82,7 +82,7 @@ ReadFile (
 
   FileBuffer = AllocatePool (FileBufferSize);
   if (FileBuffer != NULL) {
-    Status = GetFileData (
+    Status = OcGetFileData (
       FileHandle,
       0,
       FileReadSize,
@@ -106,7 +106,7 @@ ReadFile (
 }
 
 EFI_STATUS
-ReadFileSize (
+OcReadFileSize (
   IN  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *FileSystem,
   IN  CONST CHAR16                     *FilePath,
   OUT UINT32                           *Size
@@ -128,7 +128,7 @@ ReadFileSize (
     return Status;
   }
 
-  Status = SafeFileOpen (
+  Status = OcSafeFileOpen (
     Volume,
     &FileHandle,
     (CHAR16 *) FilePath,
@@ -142,7 +142,7 @@ ReadFileSize (
     return Status;
   }
 
-  Status = GetFileSize (
+  Status = OcGetFileSize (
     FileHandle,
     Size
     );
@@ -151,11 +151,11 @@ ReadFileSize (
 }
 
 VOID *
-ReadFileFromFile (
-  IN  EFI_FILE_PROTOCOL   *RootFile,
-  IN  CONST CHAR16        *FilePath,
-  OUT UINT32              *FileSize OPTIONAL,
-  IN  UINT32              MaxFileSize OPTIONAL
+OcReadFileFromDirectory (
+  IN      CONST EFI_FILE_PROTOCOL   *RootDirectory,
+  IN      CONST CHAR16              *FilePath,
+      OUT       UINT32              *FileSize OPTIONAL,
+  IN            UINT32              MaxFileSize OPTIONAL
   )
 {
   EFI_STATUS            Status;
@@ -163,13 +163,13 @@ ReadFileFromFile (
   UINT32                Size;
   UINT8                 *FileBuffer;
 
-  ASSERT (RootFile != NULL);
+  ASSERT (RootDirectory != NULL);
   ASSERT (FilePath != NULL);
 
-  Status = SafeFileOpen (
-    RootFile,
+  Status = OcSafeFileOpen (
+    RootDirectory,
     &File,
-    (CHAR16 *) FilePath,
+    FilePath,
     EFI_FILE_MODE_READ,
     0
     );
@@ -178,7 +178,7 @@ ReadFileFromFile (
     return NULL;
   }
 
-  Status = GetFileSize (File, &Size);
+  Status = OcGetFileSize (File, &Size);
   if (EFI_ERROR (Status)
     || Size >= MAX_UINT32 - 1
     || (MaxFileSize > 0 && Size > MaxFileSize)) {
@@ -192,7 +192,7 @@ ReadFileFromFile (
     return NULL;
   }
 
-  Status = GetFileData (File, 0, Size, FileBuffer);
+  Status = OcGetFileData (File, 0, Size, FileBuffer);
   File->Close (File);
   if (EFI_ERROR (Status)) {
     FreePool (FileBuffer);

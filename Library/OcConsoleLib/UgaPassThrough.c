@@ -81,8 +81,6 @@ OcUgaDrawSetMode (
   EFI_STATUS        Status;
   OC_UGA_PROTOCOL   *OcUgaDraw;
 
-  OcUgaDraw = BASE_CR (This, OC_UGA_PROTOCOL, Uga);
-
   DEBUG ((
     DEBUG_INFO,
     "OCC: OcUgaDrawSetMode %p %ux%u@%u/%u\n",
@@ -185,8 +183,6 @@ OcProvideUgaPassThrough (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCC: Failed to find handles with GOP - %r\n", Status));
-    FreePool (HandleBuffer);
-
     return Status;
   }
 

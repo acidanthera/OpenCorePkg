@@ -1,0 +1,46 @@
+## @file
+#  Linux boot entry protocol implementation.
+#
+#  Copyright (C) 2021, Mike Beaton. All rights reserved.<BR>
+#  SPDX-License-Identifier: BSD-3-Clause
+##
+
+
+[Defines]
+  INF_VERSION    = 0x00010005
+  BASE_NAME      = OpenLinuxBoot
+  ENTRY_POINT    = UefiMain
+  FILE_GUID      = B2EC4DF3-FC2C-4D24-B1D6-B2D2DE8D8172
+  MODULE_TYPE    = UEFI_DRIVER
+  VERSION_STRING = 1.0
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
+
+[Guids]
+  gEfiPartTypeUnusedGuid              ## SOMETIMES_CONSUMES
+
+[LibraryClasses]
+  OcBootManagementLib
+  DebugLib
+  OcFileLib
+  OcFlexArrayLib
+  SortLib
+  UefiBootServicesTableLib
+  UefiDriverEntryPoint
+  UefiLib
+
+[Protocols]
+  gOcBootEntryProtocolGuid            # PRODUCES
+ 
+[Sources]
+  Autodetect.c
+  GrubCfg.c
+  GrubEnv.c
+  GrubVars.c
+  LinuxBootInternal.h
+  LoaderEntry.c
+  OpenLinuxBoot.c
+  VersionCompare.c

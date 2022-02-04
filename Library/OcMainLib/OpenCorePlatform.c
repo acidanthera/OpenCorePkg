@@ -368,9 +368,15 @@ OcPlatformUpdateSmbios (
     //
     // Adopt to arbitrary hardware specifics. See description in NVRAM handling code.
     //
-    if (Config->PlatformInfo.Generic.AdviseWindows) {
-      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
-      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+    if (Config->PlatformInfo.Generic.AdviseFeatures) {
+      Data.FirmwareFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS
+        | FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM;
+      Data.FirmwareFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS
+        | FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM;
     }
 
     //
@@ -531,9 +537,15 @@ OcPlatformUpdateNvram (
     // https://github.com/acidanthera/bugtracker/issues/327
     // https://sourceforge.net/p/cloverefiboot/tickets/435
     //
-    if (Config->PlatformInfo.Generic.AdviseWindows) {
-      ExFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
-      ExFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT;
+    if (Config->PlatformInfo.Generic.AdviseFeatures) {
+      ExFeatures     |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS
+        | FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM;
+      ExFeaturesMask |= FW_FEATURE_SUPPORTS_CSM_LEGACY_MODE
+        | FW_FEATURE_SUPPORTS_UEFI_WINDOWS_BOOT
+        | FW_FEATURE_SUPPORTS_APFS
+        | FW_FEATURE_SUPPORTS_LARGE_BASESYSTEM;
     }
   }
 
@@ -839,6 +851,142 @@ OcLoadPlatformSupport (
   if (Config->PlatformInfo.UpdateNvram) {
     OcPlatformUpdateNvram (Config, UsedMacInfo);
   }
+}
+
+VOID
+OcGetLegacySecureBootECID (
+  IN  OC_GLOBAL_CONFIG    *Config,
+  OUT UINT64              *ApECID
+  )
+{
+  EFI_STATUS             Status;
+  OC_SMBIOS_TABLE        SmbiosTable;
+  EFI_GUID               Uuid;
+  UINTN                  ReadSize;
+
+  ASSERT (Config != NULL);
+  ASSERT (ApECID != NULL);
+
+  ZeroMem (&Uuid, sizeof (Uuid));
+
+  //
+  // TODO: Cache platform IDs for both interfaces: OcGetSystemId and OcLoadPlatformSupport,
+  // as currently this duplicates the code above.
+  //
+  if (Config->PlatformInfo.UpdateNvram) {
+    if (Config->PlatformInfo.Automatic) {
+      if (AsciiStrCmp (OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid), "OEM") == 0) {
+
+        Status = OcSmbiosTablePrepare (&SmbiosTable);
+        if (!EFI_ERROR (Status)) {
+          OcSmbiosExtractOemInfo (
+            &SmbiosTable,
+            mCurrentSmbiosProductName,
+            NULL,
+            &Uuid,
+            NULL,
+            NULL,
+            Config->PlatformInfo.UseRawUuidEncoding,
+            FALSE
+            );
+          OcSmbiosTableFree (&SmbiosTable);
+        }
+
+        DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from SMBIOS - %r\n", &Uuid, Status));
+      } else {
+        Status = OcAsciiStrToRawGuid (
+          OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemUuid),
+          &Uuid
+          );
+        if (EFI_ERROR (Status)) {
+          ZeroMem (&Uuid, sizeof (Uuid));
+        }
+        DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from auto config - %r\n", &Uuid, Status));
+      }
+    } else {
+      Status = OcAsciiStrToRawGuid (OC_BLOB_GET (&Config->PlatformInfo.Nvram.SystemUuid), &Uuid);
+      if (EFI_ERROR (Status)) {
+        ZeroMem (&Uuid, sizeof (Uuid));
+      }
+      DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g from manual config - %r\n", &Uuid, Status));
+    }
+  }
+
+  if (!Config->PlatformInfo.UpdateNvram || IsZeroGuid (&Uuid)) {
+    ReadSize = sizeof (Uuid);
+    Status = gRT->GetVariable (
+      L"system-id",
+      &gAppleVendorVariableGuid,
+      NULL,
+      &ReadSize,
+      &Uuid
+      );
+    if (EFI_ERROR (Status)) {
+      ZeroMem (&Uuid, sizeof (Uuid));
+    }
+    DEBUG ((DEBUG_INFO, "OC: Grabbed SB uuid %g direct from NVRAM - %r\n", &Uuid, Status));
+  }
+
+  if (IsZeroGuid (&Uuid)) {
+    DEBUG ((DEBUG_ERROR, "OC: Grabbed zero system-id for SB, this is not allowed\n"));
+    CpuDeadLoop ();
+  }
+
+  CopyMem (ApECID, &Uuid, sizeof (*ApECID));
+}
+
+CONST CHAR8 *
+OcGetDefaultSecureBootModel (
+  IN  OC_GLOBAL_CONFIG    *Config
+  )
+{
+  EFI_STATUS        Status;
+  CONST CHAR8       *Model;
+  CONST CHAR8       *Board;
+  CONST CHAR8       *SbModel;
+  OC_SMBIOS_TABLE   SmbiosTable;
+
+  //
+  // For automatic setups it is direct DB retrieval.
+  //
+  if (Config->PlatformInfo.Automatic) {
+    Model   = OC_BLOB_GET (&Config->PlatformInfo.Generic.SystemProductName);
+    SbModel = GetSecureBootModel (Model);
+    DEBUG ((DEBUG_INFO, "OC: Automatic SB model %a from model %a\n", SbModel, Model));
+    return SbModel;
+  }
+
+  //
+  // For manual setups only use the SMBIOS board identifier.
+  //
+  Board = OC_BLOB_GET (&Config->PlatformInfo.Smbios.BoardProduct);
+  if (Config->PlatformInfo.UpdateSmbios && Board[0] != '\0') {
+    SbModel = GetSecureBootModelFromBoardId (Board);
+    DEBUG ((DEBUG_INFO, "OC: Manual SB model %a from board %a\n", SbModel, Board));
+    return SbModel;
+  }
+
+  //
+  // For Mac setups without spoofing use SMBIOS.
+  //
+  Status = OcSmbiosTablePrepare (&SmbiosTable);
+  if (!EFI_ERROR (Status)) {
+    OcSmbiosExtractOemInfo (
+      &SmbiosTable,
+      mCurrentSmbiosProductName,
+      NULL,
+      NULL,
+      NULL,
+      NULL,
+      Config->PlatformInfo.UseRawUuidEncoding,
+      FALSE
+      );
+    OcSmbiosTableFree (&SmbiosTable);
+  }
+
+  SbModel = GetSecureBootModel (mCurrentSmbiosProductName);
+  DEBUG ((DEBUG_INFO, "OC: OEM SB model %a from model %a\n", SbModel, mCurrentSmbiosProductName));
+  return SbModel;
 }
 
 BOOLEAN

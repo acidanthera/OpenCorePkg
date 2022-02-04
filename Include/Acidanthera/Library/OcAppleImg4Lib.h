@@ -28,6 +28,11 @@
 #define OC_SB_MODEL_DISABLED "Disabled"
 
 /**
+  Legacy secure boot model (for all non-gibraltar models).
+**/
+#define OC_SB_MODEL_LEGACY   "x86legacy"
+
+/**
   Verify the signature of ImageBuffer against Type of its IMG4 Manifest.
 
   @param[in]  This            The pointer to the current protocol instance.
@@ -78,8 +83,7 @@ OcAppleImg4RegisterOverride (
 /**
   Obtain hardware model for secure booting from the model request.
 
-  @param[in]  ModelRequest  Raw model or configuration strings like
-                            Latest or Disabled.
+  @param[in]  ModelRequest  Raw model.
 
   @retval Model in lower case on success.
   @retval NULL  on failure

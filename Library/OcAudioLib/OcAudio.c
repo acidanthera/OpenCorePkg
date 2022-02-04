@@ -51,6 +51,26 @@ OcAudioGetCodecDevicePath (
 
 STATIC
 EFI_STATUS
+AudioIoProtocolConfirmRevision (
+  IN CONST EFI_AUDIO_IO_PROTOCOL     *AudioIo
+  )
+{
+  if (AudioIo->Revision == EFI_AUDIO_IO_PROTOCOL_REVISION) {
+    return EFI_SUCCESS;
+  }
+
+  DEBUG ((
+    DEBUG_WARN,
+    "OCAU: Incorrect audio I/O protocol revision %u != %u\n",
+    AudioIo->Revision,
+    EFI_AUDIO_IO_PROTOCOL_REVISION
+    ));
+
+  return EFI_UNSUPPORTED;
+}
+
+STATIC
+EFI_STATUS
 InternalMatchCodecDevicePath (
   IN OUT OC_AUDIO_PROTOCOL_PRIVATE   *Private,
   IN     EFI_DEVICE_PATH_PROTOCOL    *DevicePath,
@@ -97,6 +117,9 @@ InternalMatchCodecDevicePath (
       (VOID **) &Private->AudioIo
       );
     if (!EFI_ERROR (Status)) {
+      Status = AudioIoProtocolConfirmRevision (Private->AudioIo);
+    }
+    if (!EFI_ERROR (Status)) {
       Status = Private->AudioIo->GetOutputs (
         Private->AudioIo,
         &OutputPorts,
@@ -128,6 +151,9 @@ InternalMatchCodecDevicePath (
         &gEfiAudioIoProtocolGuid,
         (VOID **) &Private->AudioIo
         );
+      if (!EFI_ERROR (Status)) {
+        Status = AudioIoProtocolConfirmRevision (Private->AudioIo);
+      }
       return Status;
     }
   }
@@ -137,12 +163,27 @@ InternalMatchCodecDevicePath (
 
 EFI_STATUS
 EFIAPI
+InternalOcAudioSetDefaultGain (
+  IN OUT OC_AUDIO_PROTOCOL         *This,
+  IN     INT8                      Gain
+  )
+{
+  OC_AUDIO_PROTOCOL_PRIVATE   *Private;
+
+  Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
+
+  Private->Gain             = Gain;
+
+  return EFI_SUCCESS;
+}
+
+EFI_STATUS
+EFIAPI
 InternalOcAudioConnect (
   IN OUT OC_AUDIO_PROTOCOL         *This,
-  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN     UINT8                     CodecAddress OPTIONAL,
-  IN     UINT8                     OutputIndex  OPTIONAL,
-  IN     UINT8                     Volume
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
+  IN     UINT8                     CodecAddress     OPTIONAL,
+  IN     UINT64                    OutputIndexMask
   )
 {
   EFI_STATUS                  Status;
@@ -153,15 +194,17 @@ InternalOcAudioConnect (
 
   Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
 
-  Private->OutputIndex = OutputIndex;
-  Private->Volume      = Volume;
-
+  Private->OutputIndexMask  = OutputIndexMask;
+  
   if (DevicePath == NULL) {
     Status = gBS->LocateProtocol (
       &gEfiAudioIoProtocolGuid,
       NULL,
       (VOID **) &Private->AudioIo
       );
+    if (!EFI_ERROR (Status)) {
+      Status = AudioIoProtocolConfirmRevision (Private->AudioIo);
+    }
   } else {
     Status = gBS->LocateHandleBuffer (
       ByProtocol,
@@ -271,9 +314,43 @@ InernalOcAudioPlayFileDone (
 
 EFI_STATUS
 EFIAPI
+InternalOcAudioRawGainToDecibels (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINT8                      GainParam,
+     OUT INT8                       *Gain
+  )
+{
+  EFI_STATUS                      Status;
+  OC_AUDIO_PROTOCOL_PRIVATE       *Private;
+
+  Private = OC_AUDIO_PROTOCOL_PRIVATE_FROM_OC_AUDIO (This);
+
+  if (Private->AudioIo == NULL) {
+    DEBUG ((DEBUG_INFO, "OCAU: RawGainToDecibels has no AudioIo\n"));
+    return EFI_ABORTED;
+  }
+
+  Status = Private->AudioIo->RawGainToDecibels (
+    Private->AudioIo,
+    Private->OutputIndexMask,
+    GainParam,
+    Gain
+    );
+
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAU: RawGainToDecibels conversion failure - %r\n", Status));
+  }
+
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
 InternalOcAudioPlayFile (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     UINT32                     File,
+  IN     INT8                       Gain  OPTIONAL,
+  IN     BOOLEAN                    UseGain,
   IN     BOOLEAN                    Wait
   )
 {
@@ -336,21 +413,14 @@ InternalOcAudioPlayFile (
 
   Status = Private->AudioIo->SetupPlayback (
     Private->AudioIo,
-    Private->OutputIndex,
-    Private->Volume,
+    Private->OutputIndexMask,
+    UseGain ? Gain : Private->Gain,
     Frequency,
     Bits,
-    Channels
+    Channels,
+    Private->PlaybackDelay
     );
   if (!EFI_ERROR (Status)) {
-    //
-    // We are required to wait for some time after codec setup on some systems.
-    // REF: https://github.com/acidanthera/bugtracker/issues/971
-    //
-    if (Private->PlaybackDelay > 0) {
-      gBS->Stall (Private->PlaybackDelay);
-    }
-
     Status = Private->AudioIo->StartPlaybackAsync (
       Private->AudioIo,
       RawBuffer,
@@ -379,7 +449,7 @@ InternalOcAudioPlayFile (
 
 EFI_STATUS
 EFIAPI
-InternalOcAudioStopPlayBack (
+InternalOcAudioStopPlayback (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     BOOLEAN                    Wait
   )

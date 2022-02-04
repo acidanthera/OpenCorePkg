@@ -224,6 +224,20 @@ typedef struct {
 } EFI_MP_PROC_CONTEXT;
 
 /**
+  The function prototype for invoking a function on an Application Processor.
+
+  This definition is used by the UEFI MP Serices Protocol, and the
+  PI SMM System Table.
+
+  @param[in,out] Buffer  The pointer to private data buffer.
+**/
+typedef
+VOID
+(EFIAPI *EFI_AP_PROCEDURE)(
+  IN OUT VOID  *Buffer
+  );
+
+/**
   Functions of this type are used with the Framework MP Services Protocol and
   the  SMM Services Table to execute a procedure on enabled APs.  The context
   the AP should use durng execution is specified by Buffer.

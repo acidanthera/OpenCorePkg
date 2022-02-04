@@ -42,6 +42,7 @@
   OcConsoleLib
   OcMiscLib
   OcRtcLib
+  OcStringLib
   UefiApplicationEntryPoint
   UefiBootServicesTableLib
   UefiLib

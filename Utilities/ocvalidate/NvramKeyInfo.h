@@ -48,4 +48,9 @@ typedef struct NVRAM_GUID_MAP_ {
 extern NVRAM_GUID_MAP  mGUIDMaps[];
 extern UINTN           mGUIDMapsCount;
 
+/**
+  Special check for UIScale under NVRAM and UEFI->Output.
+**/
+extern BOOLEAN  mHasNvramUIScale;
+
 #endif // OC_USER_UTILITIES_OCVALIDATE_NVRAM_KEY_INFO_H

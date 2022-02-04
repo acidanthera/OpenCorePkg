@@ -24,18 +24,7 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcDeviceMiscLib.h>
 
-#define XHC_HCCPARAMS_OFFSET      0x10
-#define XHC_NEXT_CAPABILITY_MASK  0xFF00
-#define XHC_CAPABILITY_ID_MASK    0xFF
-#define XHC_USBCMD_OFFSET         0x0    ///< USB Command Register Offset
-#define XHC_USBSTS_OFFSET         0x4    ///< USB Status Register Offset
-#define XHC_POLL_DELAY            1000
-
-#define EHC_BAR_INDEX             0x0
-#define EHC_HCCPARAMS_OFFSET      0x8
-#define EHC_USBCMD_OFFSET         0x0    ///< USB Command Register Offset
-#define EHC_USBSTS_OFFSET         0x4    ///< USB Status Register Offset
-#define EHC_USBINT_OFFSET         0x8    ///< USB Interrupt Enable Register
+#include "PciExtInternal.h"
 
 /**
   Release XHCI USB controllers ownership.
@@ -220,6 +209,7 @@ EhciReleaseOwnership (
   INT32            TimeOut;
 
   Value = 0x0002;
+  Status = EFI_SUCCESS;
 
   PciIo->Pci.Write (
     PciIo,
@@ -231,7 +221,7 @@ EhciReleaseOwnership (
 
   Base = 0;
 
-  Status = PciIo->Pci.Read (
+  PciIo->Pci.Read (
     PciIo,
     EfiPciIoWidthUint32,
     0x10,
@@ -251,7 +241,7 @@ EhciReleaseOwnership (
   //
   OpAddr = Base + MmioRead8 (Base);
 
-  Status = PciIo->Mem.Read (
+  PciIo->Mem.Read (
     PciIo,
     EfiPciIoWidthUint32,
     EHC_BAR_INDEX,
@@ -265,7 +255,7 @@ EhciReleaseOwnership (
   //
   // Read PCI Config 32bit USBLEGSUP (eecp+0).
   //
-  Status = PciIo->Pci.Read (
+  PciIo->Pci.Read (
     PciIo,
     EfiPciIoWidthUint32,
     ExtendCap,
@@ -509,7 +499,7 @@ UhciReleaseOwnership (
 
   Base = 0;
 
-  Status = PciIo->Pci.Read(
+  PciIo->Pci.Read(
     PciIo,
     EfiPciIoWidthUint32,
     0x20,

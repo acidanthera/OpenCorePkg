@@ -4,7 +4,7 @@
 ##
 
 PROJECT = Mp3
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
 	OcMp3Lib.o \
 	bitstream.o \

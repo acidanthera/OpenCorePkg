@@ -12,14 +12,10 @@
 #include <Library/DebugLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
 #include "../GuiIo.h"
-
-struct GUI_KEY_CONTEXT_ {
-  APPLE_KEY_MAP_AGGREGATOR_PROTOCOL  *KeyMap;
-  OC_PICKER_CONTEXT                  *Context;
-};
 
 GUI_KEY_CONTEXT *
 GuiKeyConstruct (
@@ -27,49 +23,38 @@ GuiKeyConstruct (
   )
 {
   STATIC GUI_KEY_CONTEXT  mContext;
-  mContext.KeyMap  = OcAppleKeyMapInstallProtocols (FALSE);
   mContext.Context = PickerContext;
-  if (mContext.KeyMap == NULL) {
-    DEBUG ((DEBUG_WARN, "OCUI: Missing AppleKeyMapAggregator\n"));
-    return NULL;
-  }
 
   return &mContext;
 }
 
-EFI_STATUS
-EFIAPI
-GuiKeyRead (
+BOOLEAN
+GuiKeyGetEvent (
   IN OUT GUI_KEY_CONTEXT  *Context,
-  OUT    INTN             *KeyIndex,
-  OUT    BOOLEAN          *Modifier
+  OUT    GUI_KEY_EVENT    *Event
   )
 {
-
   ASSERT (Context != NULL);
+  ASSERT (Event != NULL);
 
-  *Modifier = FALSE;
-  *KeyIndex = Context->Context->GetKeyIndex (
+  Context->Context->HotKeyContext->GetKeyInfo (
     Context->Context,
-    Context->KeyMap,
-    Modifier
+    Context->KeyFilter,
+    Event
     );
-
-  //
-  // No key was pressed.
-  //
-  if (*KeyIndex == OC_INPUT_TIMEOUT) {
-    return EFI_NOT_FOUND;
+  
+  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_PICKER
+   && Context->OcModifiers != Event->OcModifiers) {
+    Context->OcModifiers = Event->OcModifiers;
+    return TRUE;
   }
 
-  //
-  // Internal key was pressed and handled.
-  //
-  if (*KeyIndex == OC_INPUT_INTERNAL) {
-    return EFI_UNSUPPORTED;
+  if (Context->KeyFilter == OC_PICKER_KEYS_FOR_TYPING
+   && Event->UnicodeChar != L'\0') {
+    return TRUE;
   }
 
-  return EFI_SUCCESS;
+  return Event->OcKeyCode != OC_INPUT_NO_ACTION;
 }
 
 VOID
@@ -82,6 +67,7 @@ GuiKeyReset (
   //
   // Flush console here?
   //
+  Context->Context->HotKeyContext->FlushTypingBuffer (Context->Context);
 }
 
 VOID
