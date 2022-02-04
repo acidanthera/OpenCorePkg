@@ -268,10 +268,8 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	@$(MKDIR) $(FUZZ_DIR)
 	@rm -rf sydr-fuzz-out
 	@cat <<- EOF > sydr-fuzz.toml
-		exit-on-time = 7200
-
 	 	[sydr]
-		args = "-s 90 -j $(FUZZ_JOBS)"
+		args = "--solving-timeout 60 -s 900 -j $(FUZZ_JOBS)"
 		target = "$(PROJECT).sydr$(SUFFIX) @@"
 		jobs = 1
 
