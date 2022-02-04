@@ -58,6 +58,8 @@ extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportArmThumb;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderForceLoadDebug;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderTolerantLoad;
 extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
+extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang[4];
+extern UINT8    _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang[6];
 
 #define _PCD_GET_MODE_32_PcdUefiLibMaxPrintBufferSize         _gPcd_FixedAtBuild_PcdUefiLibMaxPrintBufferSize
 #define _PCD_GET_MODE_BOOL_PcdUgaConsumeSupport               _gPcd_FixedAtBuild_PcdUgaConsumeSupport
@@ -73,6 +75,9 @@ extern BOOLEAN  _gPcd_FixedAtBuild_PcdImageLoaderSupportDebug;
 #define _PCD_GET_MODE_16_PcdOcCryptoAllowedSigHashTypes  \
   ((1U << OcSigHashTypeSha256) | (1U << OcSigHashTypeSha384) | (1U << OcSigHashTypeSha512))
 #define _PCD_GET_MODE_32_PcdCpuNumberOfReservedVariableMtrrs  _gPcd_FixedAtBuild_PcdCpuNumberOfReservedVariableMtrrs
+#define _PCD_GET_MODE_PTR_PcdUefiVariableDefaultLang          _gPcd_FixedAtBuild_PcdUefiVariableDefaultLang
+#define _PCD_GET_MODE_PTR_PcdUefiVariableDefaultPlatformLang  _gPcd_FixedAtBuild_PcdUefiVariableDefaultPlatformLang
+#define _PCD_GET_MODE_BOOL_PcdValidateOrderedCollection       ((BOOLEAN)0U)
 //
 // This will not be of any effect at userspace.
 //
