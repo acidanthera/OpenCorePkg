@@ -255,6 +255,7 @@ OcImageLoaderLoad (
   EFI_STATUS                   ImageStatus;
   PE_COFF_IMAGE_CONTEXT        ImageContext;
   EFI_PHYSICAL_ADDRESS         DestinationArea;
+  UINT32                       DestinationSize;
   VOID                         *DestinationBuffer;
   OC_LOADED_IMAGE_PROTOCOL     *OcLoadedImage;
   EFI_LOADED_IMAGE_PROTOCOL    *LoadedImage;
@@ -294,6 +295,21 @@ OcImageLoaderLoad (
     DEBUG ((DEBUG_INFO, "OCB: PeCoff no support for RT drivers\n"));
     return EFI_UNSUPPORTED;
   }
+
+  //
+  // FIXME: This needs to be backported as a function:
+  // https://github.com/mhaeuser/edk2/blob/2021-gsoc-secure-loader/MdePkg/Library/BaseUefiImageLib/CommonSupport.c#L19-L53
+  //
+  DestinationSize = ImageContext.SizeOfImage + ImageContext.SizeOfImageDebugAdd;
+  if (OcOverflowAddU32 (DestinationSize, ImageContext.SectionAlignment, &DestinationSize)) {
+    return RETURN_UNSUPPORTED;
+  }
+
+  if (DestinationSize >= BASE_16MB) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff prohibits files over 16M (%u)\n", DestinationSize));
+    return RETURN_UNSUPPORTED;
+  }
+
   //
   // Allocate the image destination memory.
   // FIXME: RT drivers require EfiRuntimeServicesCode.

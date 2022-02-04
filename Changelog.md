@@ -12,6 +12,7 @@ OpenCore Changelog
 - Fixed OpenLinuxBoot entry name disambiguation when `LINUX_BOOT_USE_LATEST` flag is clear
 - Updated builtin firmware versions for SMBIOS and the rest
 - Fixed crash in OpenLinuxBoot with partly (re-)installed Linux distro
+- Improved robustness in malformed PE image file parsing
 
 #### v0.7.7
 - Fixed rare crash caused by register corruption in the entry point

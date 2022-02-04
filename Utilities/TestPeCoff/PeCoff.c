@@ -178,6 +178,10 @@ PeCoffTestLoadFull (
     return RETURN_UNSUPPORTED;
   }
 
+  if (DestinationSize >= BASE_16MB) {
+    return RETURN_UNSUPPORTED;
+  }
+
   Destination = AllocatePages (EFI_SIZE_TO_PAGES (DestinationSize));
   if (Destination == NULL) {
     return RETURN_UNSUPPORTED;
