@@ -447,7 +447,7 @@ PatcherExcludePrelinkedKext (
           return EFI_NOT_FOUND;
         }
         if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
-          DEBUG ((DEBUG_INFO, "OCAK: Erasing %a from prelinked at index %u\n", Identifier, Index2));
+          DEBUG ((DEBUG_INFO, "OCAK: Erasing %a from prelinked at index %u\n", Identifier, Index));
           //
           // Erase kext.
           //
