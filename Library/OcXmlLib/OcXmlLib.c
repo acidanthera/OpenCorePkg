@@ -1617,13 +1617,6 @@ XmlNodePrepend (
   return NewNode;
 }
 
-/**
-  Remove the Index-th child node inside an XML node.
-
-  @param[in,out]  Node        Current node.
-  @param[in]      Index       Index-th child node to be removed.
-**/
-STATIC
 VOID
 XmlNodeRemoveByIndex (
   IN OUT  XML_NODE     *Node,
