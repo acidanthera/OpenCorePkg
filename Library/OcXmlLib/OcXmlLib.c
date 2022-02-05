@@ -1628,7 +1628,7 @@ XmlNodeRemoveByIndex (
   ASSERT (Index < Node->Children->NodeCount);
 
   //
-  // Free the Index-th node.
+  // Free the Index-th XML node.
   //
   XmlNodeFree (Node->Children->NodeList[Index]);
 
