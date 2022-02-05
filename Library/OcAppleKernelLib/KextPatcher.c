@@ -377,13 +377,21 @@ PatcherExcludePrelinkedKext (
   UINT64                    VirtualAddress;
   UINT64                    Size;
   UINT64                    MaxSize;
+  UINT32                    KextCount;
+  UINT32                    Index;
+  UINT32                    Index2;
+  XML_NODE                  *KextPlist;
+  UINT32                    KextPlistCount;
+  CONST CHAR8               *KextPlistKey;
+  XML_NODE                  *KextPlistValue;
+  CONST CHAR8               *KextIdentifier;
 
   ASSERT (Identifier       != NULL);
   ASSERT (PatcherContext   != NULL);
   ASSERT (PrelinkedContext != NULL);
 
   //
-  // First, zero kext memory through PatcherContext->MachContext.
+  // Zero out kext memory through PatcherContext->MachContext.
   //
   Segment    = NULL;
   AddressMax = 0;
@@ -414,10 +422,43 @@ PatcherExcludePrelinkedKext (
   ZeroMem (KextData, (UINTN) (AddressMax + MaxSize));
 
   //
-  // TODO: Erase PrelinkedContext->KextList.
+  // Find kext info to be removed in prelinked context.
   //
+  KextCount      = XmlNodeChildren (PrelinkedContext->KextList);
+  KextPlist      = NULL;
+  KextPlistKey   = NULL;
+  KextIdentifier = NULL;
+  for (Index = 0; Index < KextCount; ++Index) {
+    KextPlist = PlistNodeCast (XmlNodeChild (PrelinkedContext->KextList, Index), PLIST_NODE_TYPE_DICT);
+    if (KextPlist == NULL) {
+      continue;
+    }
 
-  return EFI_SUCCESS;
+    KextPlistCount = XmlNodeChildren (KextPlist);
+    for (Index2 = 0; Index2 < KextPlistCount; ++Index2) {
+      KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, Index2, &KextPlistValue));
+      if (KextPlistKey == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (KextPlistValue);
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+          return EFI_NOT_FOUND;
+        }
+        if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+          DEBUG ((DEBUG_INFO, "OCAK: Erasing %a from prelinked at index %u\n", Identifier, Index2));
+          //
+          // Erase kext.
+          //
+          XmlNodeRemove (PrelinkedContext->KextList, KextPlist);
+          return EFI_SUCCESS;
+        }
+      }
+    }
+  }
+
+  return EFI_NOT_FOUND;
 }
 
 EFI_STATUS
