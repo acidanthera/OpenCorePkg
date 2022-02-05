@@ -418,7 +418,7 @@ PatcherExcludePrelinkedKext (
     PatcherContext->VirtualBase,
     MaxSize
     ));
-  ZeroMem (KextData, (UINTN) (AddressMax + MaxSize));
+  ZeroMem (KextData, (UINTN) MaxSize);
 
   //
   // Find kext info to be removed in prelinked context.
