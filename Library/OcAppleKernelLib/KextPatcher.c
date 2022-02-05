@@ -399,10 +399,9 @@ PatcherExcludePrelinkedKext (
   while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
     VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
     Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
-
-    AddressMax = MAX (VirtualAddress + Size, AddressMax);
-    MaxSize    = AddressMax - PatcherContext->VirtualBase;
+    AddressMax     = MAX (VirtualAddress + Size, AddressMax);
   }
+  MaxSize    = AddressMax - PatcherContext->VirtualBase;
 
   KextData = MachoGetFilePointerByAddress (
     &PatcherContext->MachContext,
