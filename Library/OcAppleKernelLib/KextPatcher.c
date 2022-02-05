@@ -451,7 +451,7 @@ PatcherExcludePrelinkedKext (
           //
           // Erase kext.
           //
-          XmlNodeRemove (PrelinkedContext->KextList, KextPlist);
+          XmlNodeRemoveByIndex (PrelinkedContext->KextList, Index);
           return EFI_SUCCESS;
         }
       }
