@@ -279,8 +279,21 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	EOF
 	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
 
+sydr-fuzz-security: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@cat <<- EOF > sydr-fuzz.toml
+	 	[sydr]
+		args = "--security --no-invert"
+		target = "$(PROJECT).sydr$(SUFFIX) @@"
+		corpus = "sydr-fuzz-out/corpus"
+		jobs = $(FUZZ_JOBS)
+	EOF
+	sydr-fuzz -l debug security
+
 sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@$(MKDIR) sydr-fuzz-out/corpus
+	@$(MKDIR) sydr-fuzz-out/security
 	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/corpus
+	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/security
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
