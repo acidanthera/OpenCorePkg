@@ -160,49 +160,6 @@ OcAsciiSafeSPrint (
 
 /**
   Compares up to a specified length the contents of two Null-terminated ASCII
-  strings using case sensitive comparisons, and returns the difference
-  between the first mismatched ASCII characters.
-
-  This function compares the Null-terminated ASCII string FirstString to the
-  Null-terminated ASCII string SecondString using case sensitive
-  comparisons.  At most, Length ASCII characters will be compared. If Length
-  is 0, then 0 is returned. If FirstString is identical to SecondString, then 0
-  is returned. Otherwise, the value returned is the first mismatched upper case
-  ASCII character in SecondString subtracted from the first mismatched upper
-  case ASCII character in FirstString.
-
-  If Length > 0 and FirstString is NULL, then ASSERT().
-  If Length > 0 and SecondString is NULL, then ASSERT().
-  TODO
-  If PcdMaximumAsciiStringLength is not zero, and Length is greater than
-  PcdMaximumAsciiStringLength, then ASSERT().
-  If PcdMaximumAsciiStringLength is not zero, and FirstString contains more
-  than PcdMaximumAsciiStringLength ASCII characters, not including the
-  Null-terminator, then ASSERT().
-  If PcdMaximumAsciiStringLength is not zero, and SecondString contains more
-  than PcdMaximumAsciiStringLength ASCII characters, not including the
-  Null-terminator, then ASSERT().
-
-  @param[in]  FirstString   A pointer to a Null-terminated ASCII string.
-  @param[in]  SecondString  A pointer to a Null-terminated ASCII string.
-  @param[in]  Length        The maximum number of ASCII characters to compare.
-
-  @retval ==0    FirstString is identical to SecondString using case
-                 sensitive comparisons.
-  @retval others FirstString is not identical to SecondString using case
-                 sensitive comparisons.
-
-**/
-INTN
-EFIAPI
-OcAsciiStrnCmp (
-  IN CONST CHAR8   *FirstString,
-  IN CONST CHAR8   *SecondString,
-  IN UINTN         Length
-  );
-
-/**
-  Compares up to a specified length the contents of two Null-terminated ASCII
   strings using case insensitive comparisons, and returns the difference
   between the first mismatched ASCII characters.
 

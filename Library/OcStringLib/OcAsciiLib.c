@@ -219,37 +219,6 @@ OcAsciiSafeSPrint (
 
 INTN
 EFIAPI
-OcAsciiStrnCmp (
-  IN CONST CHAR8   *FirstString,
-  IN CONST CHAR8   *SecondString,
-  IN UINTN         Length
-  )
-{
-  if (Length == 0) {
-    return 0;
-  }
-
-  //
-  // ASSERT both strings are less long than PcdMaximumAsciiStringLength.
-  // Length tests are performed inside AsciiStrLen().
-  //
-  ASSERT (AsciiStrSize (FirstString)  != 0);
-  ASSERT (AsciiStrSize (SecondString) != 0);
-
-  while ((*FirstString != '\0') &&
-         (*SecondString != '\0') &&
-         (*FirstString == *SecondString) &&
-         (Length > 1)) {
-    ++FirstString;
-    ++SecondString;
-    --Length;
-  }
-
-  return *FirstString - *SecondString;
-}
-
-INTN
-EFIAPI
 OcAsciiStrniCmp (
   IN CONST CHAR8   *FirstString,
   IN CONST CHAR8   *SecondString,
@@ -267,7 +236,7 @@ OcAsciiStrniCmp (
   // ASSERT both strings are less long than PcdMaximumAsciiStringLength.
   // Length tests are performed inside AsciiStrLen().
   //
-  ASSERT (AsciiStrSize (FirstString)  != 0);
+  ASSERT (AsciiStrSize (FirstString) != 0);
   ASSERT (AsciiStrSize (SecondString) != 0);
 
   UpperFirstString  = AsciiCharToUpper (*FirstString);
@@ -276,11 +245,11 @@ OcAsciiStrniCmp (
          (*SecondString != '\0') &&
          (UpperFirstString == UpperSecondString) &&
          (Length > 1)) {
-    ++FirstString;
-    ++SecondString;
+    FirstString++;
+    SecondString++;
     UpperFirstString  = AsciiCharToUpper (*FirstString);
     UpperSecondString = AsciiCharToUpper (*SecondString);
-    --Length;
+    Length--;
   }
 
   return UpperFirstString - UpperSecondString;
