@@ -747,8 +747,17 @@ InternalDropCachedPrelinkedKext (
   }
 
   if (!Found) {
+    DEBUG ((DEBUG_INFO, "OCAK: Found no kext to drop\n"));
     return EFI_NOT_FOUND;
   }
+
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: Found kext %a (%p) from link %p to drop\n",
+    Kext->Identifier,
+    Kext,
+    Link
+    ));
 
   RemoveEntryList (Link);
   InternalFreePrelinkedKext (Kext);
