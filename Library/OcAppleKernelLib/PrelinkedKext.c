@@ -719,6 +719,43 @@ InternalCachedPrelinkedKext (
   return NewKext;
 }
 
+EFI_STATUS
+InternalDropCachedPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Identifier
+  )
+{
+  LIST_ENTRY      *Link;
+  BOOLEAN         Found;
+  PRELINKED_KEXT  *Kext;
+
+  //
+  // Find kext identifier.
+  //
+  Found = FALSE;
+  Link  = GetFirstNode (&Prelinked->PrelinkedKexts);
+  Kext  = NULL;
+  while (!IsNull (&Prelinked->PrelinkedKexts, Link)) {
+    Kext  = GET_PRELINKED_KEXT_FROM_LINK (Link);
+
+    if (AsciiStrCmp (Identifier, Kext->Identifier) == 0) {
+      Found = TRUE;
+      break;
+    }
+
+    Link = GetNextNode (&Prelinked->PrelinkedKexts, Link);
+  }
+
+  if (!Found) {
+    return EFI_NOT_FOUND;
+  }
+
+  RemoveEntryList (Link);
+  InternalFreePrelinkedKext (Kext);
+
+  return EFI_SUCCESS;
+}
+
 PRELINKED_KEXT *
 InternalCachedPrelinkedKernel (
   IN OUT PRELINKED_CONTEXT  *Prelinked
