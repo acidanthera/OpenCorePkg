@@ -450,6 +450,7 @@ PatcherExcludePrelinkedKext (
           //
           // Erase kext.
           //
+          Status = InternalDropCachedPrelinkedKext (PrelinkedContext, Identifier);
           DEBUG ((
             DEBUG_INFO,
             "OCAK: Dropping %a in prelinked kexts at index %u - %r\n",
@@ -457,11 +458,13 @@ PatcherExcludePrelinkedKext (
             Index,
             Status
             ));
-          Status = InternalDropCachedPrelinkedKext (PrelinkedContext, Identifier);
+          if (EFI_ERROR (Status)) {
+            return Status;
+          }
 
           DEBUG ((DEBUG_INFO, "OCAK: Erasing %a from prelinked kext list at index %u\n", Identifier, Index));
           XmlNodeRemoveByIndex (PrelinkedContext->KextList, Index);
-          return Status;
+          return EFI_SUCCESS;
         }
       }
     }
