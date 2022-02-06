@@ -428,6 +428,8 @@ PatcherExcludePrelinkedKext (
   KextPlist      = NULL;
   KextPlistKey   = NULL;
   KextIdentifier = NULL;
+  DEBUG ((DEBUG_INFO, "OCAK: Got %u kexts in prelinked kext list\n", KextCount));
+
   for (Index = 0; Index < KextCount; ++Index) {
     KextPlist = PlistNodeCast (XmlNodeChild (PrelinkedContext->KextList, Index), PLIST_NODE_TYPE_DICT);
     if (KextPlist == NULL) {
@@ -435,34 +437,87 @@ PatcherExcludePrelinkedKext (
     }
 
     KextPlistCount = XmlNodeChildren (KextPlist);
+    DEBUG ((DEBUG_INFO, "OCAK: Got %u entries at plist %p index %u\n", KextPlistCount, KextPlist, Index));
+
     for (Index2 = 0; Index2 < KextPlistCount; ++Index2) {
       KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, Index2, &KextPlistValue));
       if (KextPlistKey == NULL) {
         continue;
       }
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: Current key is %a under dict index %u, plist %p, plist index %u\n",
+        KextPlistKey,
+        Index2,
+        KextPlist,
+        Index
+        ));
 
       if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAK: Matched %a under dict index %u, plist %p, plist index %u\n",
+          KextPlistKey,
+          Index2,
+          KextPlist,
+          Index
+          ));
+
         KextIdentifier = XmlNodeContent (KextPlistValue);
         if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Plist value cannot be interpreted as string, or current kext identifier is null (dict index %u, plist %p, plist index %u)\n",
+            Index2,
+            KextPlist,
+            Index
+            ));
           return EFI_NOT_FOUND;
         }
+
+        DEBUG ((
+          DEBUG_INFO,
+          "OCAK: Matched kext identifier %a under dict index %u, plist %p, plist index %u\n",
+          KextIdentifier,
+          Index2,
+          KextPlist,
+          Index
+          ));
         if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Matched kext identifier %a to be erased under dict index %u, plist %p, plist index %u\n",
+            KextIdentifier,
+            Index2,
+            KextPlist,
+            Index
+            ));
+
           //
           // Erase kext.
           //
-          Status = InternalDropCachedPrelinkedKext (PrelinkedContext, Identifier);
-          DEBUG ((
-            DEBUG_INFO,
-            "OCAK: Dropping %a in prelinked kexts at index %u - %r\n",
-            Identifier,
-            Index,
-            Status
-            ));
+          Status = InternalDropCachedPrelinkedKext (PrelinkedContext, KextIdentifier);
           if (EFI_ERROR (Status)) {
+            DEBUG ((
+              DEBUG_INFO,
+              "OCAK: Failed to drop %a under dict index %u, plist %p, plist index %u - %r\n",
+              KextIdentifier,
+              Index2,
+              KextPlist,
+              Index,
+              Status
+              ));
             return Status;
           }
 
-          DEBUG ((DEBUG_INFO, "OCAK: Erasing %a from prelinked kext list at index %u\n", Identifier, Index));
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Erasing %a from prelinked kext under dict index %u, plist %p, plist index %u\n",
+            Identifier,
+            Index2,
+            KextPlist,
+            Index
+            ));
           XmlNodeRemoveByIndex (PrelinkedContext->KextList, Index);
           return EFI_SUCCESS;
         }
