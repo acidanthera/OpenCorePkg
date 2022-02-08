@@ -483,7 +483,17 @@ PatcherExcludePrelinkedKext (
           KextPlist,
           Index
           ));
-        if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+        if (AsciiStrCmp (KextIdentifier, Identifier) != 0) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Skip erasing kext %a (target %a) under dict index %u, plist %p, plist index %u",
+            KextIdentifier,
+            Identifier,
+            Index2,
+            KextPlist,
+            Index
+            ));
+        } else {
           DEBUG ((
             DEBUG_INFO,
             "OCAK: Matched kext identifier %a to be erased under dict index %u, plist %p, plist index %u\n",
