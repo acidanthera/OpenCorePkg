@@ -693,7 +693,7 @@ InternalDescribeBootEntry (
   if (BootEntry->Name == NULL) {
     //
     // Special case - installer should be clearly identified to end users but does not normally
-    // contain text label, only pre-rendered graphical label which is not available in builtin
+    // contain text label, only pre-rendered graphical label which is not usable in builtin
     // picker, or in Canopy with disk labels disabled.
     //
     if (StrStr (BootDirectoryName, L"com.apple.installer") != NULL) {
@@ -715,8 +715,9 @@ InternalDescribeBootEntry (
         } else if (StrCmp (BootEntry->Name, L"Preboot") == 0) {
           //
           // Common Big Sur beta bug failing to create .contentDetails files.
-          // Workaround it by choosing the default name following Apple BootPicker behaviour.
-          // Applies to anything on the main volume without any text labels (but specifically, to main OS).
+          // Workaround it by using the standard installed macOS system volume name.
+          // Applies to anything on the system volume without text labels (and not already
+          // handled above, such as installer).
           //
           TmpBootName = AllocateCopyPool (sizeof (L"Macintosh HD"), L"Macintosh HD");
         } else {
