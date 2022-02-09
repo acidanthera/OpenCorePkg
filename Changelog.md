@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.7.9
+- Added auto-detect `macOS Installer` volume name for use when `.disk_label` file cannot be displayed
+
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
 - Fixed AudioDxe not disabling unused channels after recent updates
