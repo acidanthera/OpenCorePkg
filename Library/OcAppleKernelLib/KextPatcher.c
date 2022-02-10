@@ -373,9 +373,10 @@ PatcherExcludePrelinkedKext (
 {
   MACH_SEGMENT_COMMAND_ANY  *Segment;
   VOID                      *KextData;
+  UINT64                    AddressMax;
   UINT64                    VirtualAddress;
   UINT64                    Size;
-  UINT64                    KextSize;
+  UINT64                    MaxSize;
 
   UINT32                    KextCount;
   UINT32                    Index;
@@ -391,18 +392,25 @@ PatcherExcludePrelinkedKext (
   ASSERT (PatcherContext   != NULL);
   ASSERT (PrelinkedContext != NULL);
 
+  Segment        = NULL;
+  VirtualAddress = 0;
+  AddressMax     = 0;
+  Size           = 0;
+  while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
+    VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+
+    if (AddressMax != 0 && AddressMax != VirtualAddress) {
+      break;
+    }
+
+    Size       = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
+    AddressMax = MAX (VirtualAddress + Size, AddressMax);
+  }
+  MaxSize = AddressMax - PatcherContext->VirtualBase;
+
   //
   // Zero out kext memory through PatcherContext->MachContext.
   //
-  Segment = MachoGetNextSegment (&PatcherContext->MachContext, NULL);
-  if (Segment == NULL) {
-    return EFI_UNSUPPORTED;
-  }
-
-  VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
-  Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
-  KextSize       = VirtualAddress + Size - PatcherContext->VirtualBase;
-
   KextData = MachoGetFilePointerByAddress (
     &PatcherContext->MachContext,
     PatcherContext->VirtualBase,
@@ -413,12 +421,12 @@ PatcherExcludePrelinkedKext (
   }
   DEBUG ((
     DEBUG_INFO,
-    "OCAK: Excluding %a - VirtualBase %Lx, KextSize %Lx\n",
+    "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
     Identifier,
     PatcherContext->VirtualBase,
-    KextSize
+    MaxSize
     ));
-  ZeroMem (KextData, (UINTN) KextSize);
+  ZeroMem (KextData, (UINTN) MaxSize);
 
   //
   // Find kext info to be removed in prelinked context.
