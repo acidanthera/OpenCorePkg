@@ -270,6 +270,25 @@ ApplyKextPatches (
     FailedToProcess = TRUE;
   }
 
+  Status = PatcherInitContextFromPrelinked (
+    &Patcher,
+    Context,
+    "com.apple.driver.Intel82574LEthernet"
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherExcludePrelinkedKext ("com.apple.driver.Intel82574LEthernet", &Patcher, Context);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] Failed to exclude com.apple.driver.Intel82574LEthernet - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] Exclude success com.apple.driver.Intel82574LEthernet\n"));
+    }
+  } else {
+    DEBUG ((DEBUG_WARN, "[FAIL] Failed to find com.apple.driver.Intel82574LEthernet - %r\n", Status));
+    FailedToProcess = TRUE;
+  }
+
   Status = PrelinkedContextApplyQuirk (Context, KernelQuirkAppleCpuPmCfgLock, KernelVersion);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[FAIL] Failed to apply KernelQuirkAppleCpuPmCfgLock - %r\n", Status));
