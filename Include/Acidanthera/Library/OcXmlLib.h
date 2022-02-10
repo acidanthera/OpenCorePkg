@@ -321,7 +321,6 @@ XmlNodeRemove (
   IN      XML_NODE     *ChildNode
   );
 
-  Unescape XML string.
 /**
   Get the root node of the plist document.
 
