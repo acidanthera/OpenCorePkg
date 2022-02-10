@@ -737,6 +737,7 @@ GuiFlushScreen (
   )
 {
   UINTN   Index;
+  UINTN   ReverseIndex;
 
   UINT64  EndTsc;
   UINT64  DeltaTsc;
@@ -770,17 +771,37 @@ GuiFlushScreen (
     GuiOverlayPointer (DrawContext);
   }
 
+  //
+  // FIXME: Reversing the blit order here has several benefits, due to the implicit
+  // old-before-new ordering which has been used when making the draw requests. The whole
+  // screen is updated in the memory buffer (by redrawing just the changing parts), then
+  // these parts are transferred one by one to the video memory.
+  // Due to lack of vsync in UEFI, any point through this transfer can be visible on screen.
+  // Reversing the blit order means:
+  //  - Combined old+new mouse pointer area can no longer show part of moving text one frame
+  //    ahead of the rest (see REF); moving text may instead 'tear' mouse, but this is
+  //    much less visible
+  //  - If mouse pointer is moving fast (old+new area is not merged), new pointer
+  //    is always added before old pointer is removed, avoiding mouse disappearing
+  //  - (A similar logic to the preceding should apply e.g. to the moving OS selector too)
+  // So reversing here gives a 'free' small but visible improvement in the display, given the
+  // current draw order; but a better full fix would be to specify explicit ordering
+  // requirements with each draw request, which would allow the best blit order to get this
+  // same improvement to be calculated independently of the order in which requests are added.
+  // REF: https://github.com/acidanthera/bugtracker/issues/1852
+  //
   for (Index = 0; Index < mNumValidDrawReqs; ++Index) {
+    ReverseIndex = mNumValidDrawReqs - Index - 1;
     GuiOutputBlt (
       mOutputContext,
       mScreenBuffer,
       EfiBltBufferToVideo,
-      mDrawRequests[Index].X,
-      mDrawRequests[Index].Y,
-      mDrawRequests[Index].X,
-      mDrawRequests[Index].Y,
-      mDrawRequests[Index].Width,
-      mDrawRequests[Index].Height,
+      mDrawRequests[ReverseIndex].X,
+      mDrawRequests[ReverseIndex].Y,
+      mDrawRequests[ReverseIndex].X,
+      mDrawRequests[ReverseIndex].Y,
+      mDrawRequests[ReverseIndex].Width,
+      mDrawRequests[ReverseIndex].Height,
       mScreenBufferDelta
       );
   }

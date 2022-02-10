@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "432.40.8.0.1"
-BIOSLegacyVersion: "IM151.88Z.F000.B00.2109162215"
-BIOSReleaseDate: "09/16/2021"
+BIOSVersion: "432.60.3.0.0"
+BIOSLegacyVersion: "IM151.88Z.F000.B00.2110271818"
+BIOSReleaseDate: "10/27/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac15,1"
 SystemVersion: "1.0"
@@ -65,13 +65,13 @@ SmcEPCI: 0xf00008
 OEMStrings: |-
   Apple ROM Version
     Model:        IM151
-    EFI Version:  432.40.8.0.1
-    Built by:     root@bb-g8-pdb133
-    Date:         Thu Sep 16 22:15:37 PDT 2021
-    Revision:     432.40.8.0.1 (B&I)
+    EFI Version:  432.60.3.0.0
+    Built by:     root@bb-g10-pdb19
+    Date:         Wed Oct 27 18:18:43 PDT 2021
+    Revision:     432.60.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.1
+    Compiler:     clang-1300.0.29.10
 Specifications:
   CPUCodename:
     - "Devil's Canyon"
@@ -152,4 +152,4 @@ AppleModelYear:
   - 2014
   - 2015
 MinimumOSVersion: "10.10.2"
-MaximumOSVersion: "11.6.1"
+MaximumOSVersion: "11.6.3"

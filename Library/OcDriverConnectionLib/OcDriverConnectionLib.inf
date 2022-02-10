@@ -35,6 +35,7 @@
 [Packages]
   MdePkg/MdePkg.dec
   OpenCorePkg/OpenCorePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
 
 [Protocols]
   gEfiPlatformDriverOverrideProtocolGuid

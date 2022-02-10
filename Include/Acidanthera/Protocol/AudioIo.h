@@ -29,12 +29,15 @@
 
 /**
   Audio I/O protocol GUID.
+  Protocol now versioned, so GUID updated from previous when non-versioned.
 **/
 #define EFI_AUDIO_IO_PROTOCOL_GUID \
-  { 0xF05B559C, 0x1971, 0x4AF5,    \
-    { 0xB2, 0xAE, 0xD6, 0x08, 0x08, 0xF7, 0x4F, 0x70 } }
+  { 0x22266891, 0x2032, 0x4BAE,    \
+    { 0xB7, 0xB5, 0x43, 0x74, 0xE7, 0x32, 0x09, 0x49 } }
 
 typedef struct EFI_AUDIO_IO_PROTOCOL_ EFI_AUDIO_IO_PROTOCOL;
+
+#define EFI_AUDIO_IO_PROTOCOL_REVISION 3
 
 /**
   Port type.
@@ -158,14 +161,41 @@ EFI_STATUS
   );
 
 /**
-  Sets up the device to play audio data.
+  Convert raw amplifier gain setting to decibel gain value; converts using the parameters of the first channel specified
+  in OutputIndexMask which has non-zero amp capabilities.
+  Note: It seems very typical - though it is certainly not required by the spec - that all amps on a codec which have
+  non-zero amp capabilities all have the same params as each other.
+
+  @param[in]  This              A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
+  @param[in]  OutputIndexMask   A mask indicating the desired outputs.
+  @param[in]  GainParam         The raw gain parameter for the amplifier.
+  @param[out] Gain              The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
+
+  @retval EFI_SUCCESS           The gain value was calculated successfully.
+  @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
+**/
+typedef
+EFI_STATUS
+(EFIAPI *EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS) (
+  IN  EFI_AUDIO_IO_PROTOCOL       *This,
+  IN  UINT64                      OutputIndexMask,
+  IN  UINT8                       GainParam,
+  OUT INT8                        *Gain
+  );
+
+/**
+  Sets up the device to play audio data. Basic caching is implemented: no actions are taken
+  the second and subsequent times that set up is called again with exactly the same paremeters. 
 
   @param[in] This               A pointer to the EFI_AUDIO_IO_PROTOCOL instance.
-  @param[in] OutputIndex        The zero-based index of the desired output.
-  @param[in] Volume             The volume (0-100) to use.
+  @param[in] OutputIndexMask    A mask indicating the desired outputs.
+  @param[in] Gain               The amplifier gain (or attentuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                is usually at at or near max available volume, but is not required to be so in the spec).
   @param[in] Bits               The width in bits of the source data.
   @param[in] Freq               The frequency of the source data.
   @param[in] Channels           The number of channels the source data contains.
+  @param[in] PlaybackDelay      The required delay before playback after a change in setup.
 
   @retval EFI_SUCCESS           The audio data was played successfully.
   @retval EFI_INVALID_PARAMETER One or more parameters are invalid.
@@ -174,11 +204,12 @@ typedef
 EFI_STATUS
 (EFIAPI *EFI_AUDIO_IO_SETUP_PLAYBACK) (
   IN EFI_AUDIO_IO_PROTOCOL        *This,
-  IN UINT8                        OutputIndex,
-  IN UINT8                        Volume,
+  IN UINT64                       OutputIndexMask,
+  IN INT8                         Gain,
   IN EFI_AUDIO_IO_PROTOCOL_FREQ   Freq,
   IN EFI_AUDIO_IO_PROTOCOL_BITS   Bits,
-  IN UINT8                        Channels
+  IN UINT8                        Channels,
+  IN UINTN                        PlaybackDelay
   );
 
 /**
@@ -245,7 +276,9 @@ EFI_STATUS
   Protocol struct.
 **/
 struct EFI_AUDIO_IO_PROTOCOL_ {
+  UINTN                               Revision;
   EFI_AUDIO_IO_GET_OUTPUTS            GetOutputs;
+  EFI_AUDIO_IO_RAW_GAIN_TO_DECIBELS   RawGainToDecibels;
   EFI_AUDIO_IO_SETUP_PLAYBACK         SetupPlayback;
   EFI_AUDIO_IO_START_PLAYBACK         StartPlayback;
   EFI_AUDIO_IO_START_PLAYBACK_ASYNC   StartPlaybackAsync;

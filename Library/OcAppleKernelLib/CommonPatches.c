@@ -1979,34 +1979,6 @@ mApfsTimeoutPatch = {
   .Limit       = 0
 };
 
-STATIC
-UINT8
-mApfsTimeoutV2Find[] = {
-  0x40, 0x42, 0x0F, 0x00
-};
-
-STATIC
-UINT8
-mApfsTimeoutV2Replace[] = {
-  0x00, 0x02, 0x00, 0x00
-};
-
-
-STATIC
-PATCHER_GENERIC_PATCH
-mApfsTimeoutV2Patch = {
-  .Comment     = DEBUG_POINTER ("ApfsTimeout V2"),
-  .Base        = "_spaceman_scan_free_blocks",
-  .Find        = mApfsTimeoutV2Find,
-  .Mask        = NULL,
-  .Replace     = mApfsTimeoutV2Replace,
-  .ReplaceMask = NULL,
-  .Size        = sizeof (mApfsTimeoutV2Find),
-  .Count       = 2,
-  .Skip        = 0,
-  .Limit       = 4096
-};
-
 VOID
 PatchSetApfsTimeout (
   IN UINT32  Timeout
@@ -2015,8 +1987,29 @@ PatchSetApfsTimeout (
   // FIXME: This is really ugly, make quirks take a context param.
   DEBUG ((DEBUG_INFO, "OCAK: Registering %u APFS timeout\n", Timeout));
   CopyMem (&mApfsTimeoutReplace[2], &Timeout, sizeof (Timeout));
-  CopyMem (&mApfsTimeoutV2Replace[0], &Timeout, sizeof (Timeout));
 }
+
+STATIC
+UINT8
+mApfsDisableTrimReplace[] = {
+  0x31, 0xC0,  ///< xor eax, eax
+  0xC3         ///< ret
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mApfsDisableTrimPatch = {
+  .Comment     = DEBUG_POINTER ("ApfsTimeout disable trim"),
+  .Base        = "_spaceman_iterate_free_extents_internal",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mApfsDisableTrimReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mApfsDisableTrimReplace),
+  .Count       = 1,
+  .Skip        = 0,
+  .Limit       = 0
+};
 
 STATIC
 EFI_STATUS
@@ -2036,23 +2029,33 @@ PatchSetApfsTrimTimeout (
     return EFI_NOT_FOUND;
   }
 
-  if (KernelVersion >= KERNEL_VERSION_MONTEREY_MIN) {
-    Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutV2Patch);
+  //
+  // Disable trim using another patch when timeout is 0.
+  //
+  if (mApfsTimeoutReplace[2] == 0) {
+    Status = PatcherApplyGenericPatch (Patcher, &mApfsDisableTrimPatch);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeoutV2 - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch ApfsDisableTrim - %r\n", Status));
     } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeoutV2\n"));
+      DEBUG ((DEBUG_INFO, "OCAK: Patch success ApfsDisableTrim\n"));
     }
-  } else {
+
+    return Status;
+  }
+
+  if (KernelVersion < KERNEL_VERSION_MONTEREY_MIN) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch SetApfsTrimTimeout - %r\n", Status));
     } else {
       DEBUG ((DEBUG_INFO, "OCAK: Patch success SetApfsTrimTimeout\n"));
     }
+
+    return Status;
   }
 
-  return Status;
+  DEBUG ((DEBUG_INFO, "OCAK: Skipping patch SetApfsTrimTimeout on macOS 12.0+\n"));
+  return EFI_SUCCESS;
 }
 
 //

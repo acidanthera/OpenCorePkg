@@ -43,6 +43,9 @@ Utilities/TestPeCoff/PeCoff
 *.gcno
 FUZZDICT
 COVERAGE
+*.sydr*
+sydr-fuzz.toml
+sydr-fuzz-out
 fuzz-*.log
 crash-*
 oom-*

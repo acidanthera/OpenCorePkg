@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "432.40.8.0.1"
-BIOSLegacyVersion: "IM143.88Z.F000.B00.2109162138"
-BIOSReleaseDate: "09/16/2021"
+BIOSVersion: "432.60.3.0.0"
+BIOSLegacyVersion: "IM143.88Z.F000.B00.2110271745"
+BIOSReleaseDate: "10/27/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac14,3"
 SystemVersion: "1.0"
@@ -75,13 +75,13 @@ SmcEPCI: 0x7A007
 OEMStrings: |-
   Apple ROM Version
     Model:        IM143
-    EFI Version:  432.40.8.0.1
-    Built by:     root@bb-g10-pdb11
-    Date:         Thu Sep 16 21:38:59 PDT 2021
-    Revision:     432.40.8.0.1 (B&I)
+    EFI Version:  432.60.3.0.0
+    Built by:     root@bb-g9-pdb140
+    Date:         Wed Oct 27 17:45:05 PDT 2021
+    Revision:     432.60.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.1
+    Compiler:     clang-1300.0.29.10
 Specifications:
   CPUCodename:
     - "Haswell"

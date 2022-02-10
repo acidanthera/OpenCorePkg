@@ -1519,11 +1519,11 @@ AcpiFadtEnableReset (
     if (EFI_ERROR (Status)) {
       return Status;
     }
-
   } else if (!((Context->Fadt->Flags & EFI_ACPI_6_2_RESET_REG_SUP) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_SLP_BUTTON) == 0
     || (Context->Fadt->Flags & EFI_ACPI_6_2_PWR_BUTTON) != 0
     || Context->Fadt->ResetReg.Address == 0
+    || Context->Fadt->ResetReg.Address == 0x64
     || Context->Fadt->ResetReg.RegisterBitWidth != 8)) {
     return EFI_SUCCESS;
   }
@@ -1535,10 +1535,17 @@ AcpiFadtEnableReset (
   Context->Fadt->Flags |= EFI_ACPI_6_2_SLP_BUTTON | EFI_ACPI_6_2_RESET_REG_SUP;
   Context->Fadt->Flags &= ~EFI_ACPI_6_2_PWR_BUTTON;
 
-  if (Context->Fadt->ResetReg.Address == 0 || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
+  //
+  // We also change keyboard controller reset (0xFE to 0x64) to 0xCF9 reset
+  // as it is known to work incorrectly at least on Dell Latitude E6410
+  // when the NVIDIA GPU is attached.
+  //
+  if (Context->Fadt->ResetReg.Address == 0
+    || Context->Fadt->ResetReg.Address == 0x64
+    || Context->Fadt->ResetReg.RegisterBitWidth != 8) {
     //
     // Resetting through port 0xCF9 is universal on Intel and AMD.
-    // But may not be the case on some laptops, which use 0xB2.
+    // But may not be the case on e.g. Dell laptops and desktops, which use 0xB2.
     //
     Context->Fadt->ResetReg.AddressSpaceId    = EFI_ACPI_6_2_SYSTEM_IO;
     Context->Fadt->ResetReg.RegisterBitWidth  = 8;

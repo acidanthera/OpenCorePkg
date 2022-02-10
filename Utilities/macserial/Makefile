@@ -5,7 +5,7 @@
 ##
 STANDALONE = 1
 PROJECT    = macserial
-PRODUCT    = $(PROJECT)$(SUFFIX)
+PRODUCT    = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS       = $(PROJECT).o
 include ../../User/Makefile
 

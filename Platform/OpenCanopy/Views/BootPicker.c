@@ -1460,11 +1460,11 @@ BootPickerEntriesSet (
     EntryName       = Entry->Name;
     EntryNameLength = StrLen (Entry->Name);
     if (Entry->IsFolder) {
-      EntryName = AllocatePool (EntryNameLength * sizeof (CHAR16) + L_STR_SIZE (L" (dmg)"));
+      EntryName = AllocatePool (EntryNameLength * sizeof (CHAR16) + L_STR_SIZE (OC_MENU_DISK_IMAGE));
       if (EntryName != NULL) {
         CopyMem (EntryName, Entry->Name, EntryNameLength * sizeof (CHAR16));
-        CopyMem (&EntryName[EntryNameLength], L" (dmg)", L_STR_SIZE (L" (dmg)"));
-        EntryNameLength += L_STR_LEN (L" (dmg)");
+        CopyMem (&EntryName[EntryNameLength], OC_MENU_DISK_IMAGE, L_STR_SIZE (OC_MENU_DISK_IMAGE));
+        EntryNameLength += L_STR_LEN (OC_MENU_DISK_IMAGE);
       } else {
         EntryName = Entry->Name;
       }

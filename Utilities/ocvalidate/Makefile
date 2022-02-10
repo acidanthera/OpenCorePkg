@@ -4,7 +4,7 @@
 ##
 
 PROJECT = ocvalidate
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o \
           OcValidateLib.o \
           KextInfo.o \

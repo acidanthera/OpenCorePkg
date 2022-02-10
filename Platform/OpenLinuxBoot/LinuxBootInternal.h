@@ -10,6 +10,13 @@
 #define OC_TRACE_GRUB_VARS DEBUG_VERBOSE
 #endif
 
+/*
+  Standard attached drives on OVMF appear as MBR, so it can be convenient when
+  debugging to allow entries with incorrect (i.e. specifies no/every drive)
+  root=... .
+*/
+//#define LINUX_ALLOW_MBR
+
 #include <Uefi.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcMiscLib.h>
@@ -54,14 +61,19 @@
 */
 #define LINUX_BOOT_USE_LATEST           BIT9
 /*
-  If set, add "ro" as initial option to all distros. Can be sepcified per
+  If set, add "ro" as initial option to all distros. Can be specified per
   FS by using argument partuuidopts:{partuuid}+=ro instead.
 */
 #define LINUX_BOOT_ADD_RO               BIT10
 /*
+  If set, add "rw" as initial option to all distros. Can be specified per
+  FS by using argument partuuidopts:{partuuid}+=rw instead.
+*/
+#define LINUX_BOOT_ADD_RW               BIT11
+/*
   TODO: Both blspec-style and autodetect can make use of grub.cfg info if this flag is set.
 */
-//#define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT11
+//#define LINUX_BOOT_ALLOW_PARSE_GRUB     BIT12
 /*
   Add root= option if missing in loader/entries *.conf options.
 */

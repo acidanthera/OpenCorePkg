@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "424.0.0.0.0"
-BIOSLegacyVersion: "MM61.88Z.F000.B00.2109131659"
-BIOSReleaseDate: "09/13/2021"
+BIOSVersion: "425.0.0.0.0"
+BIOSLegacyVersion: "MM61.88Z.F000.B00.2110261715"
+BIOSReleaseDate: "10/26/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "Macmini6,2"
 SystemVersion: "1.0"
@@ -75,10 +75,10 @@ SmcEPCI: 0x7D006
 OEMStrings: |-
   Apple ROM Version
     Model:        MM61
-    EFI Version:  424.0.0.0.0
-    Built by:     root@xapp134
-    Date:         Mon Sep 13 16:59:46 PDT 2021
-    Revision:     424 (B&I)
+    EFI Version:  425.0.0.0.0
+    Built by:     root@xapp620
+    Date:         Tue Oct 26 17:15:47 PDT 2021
+    Revision:     425 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
     Compiler:     Apple clang version 12.0.0 (clang-1200.0.30.3)

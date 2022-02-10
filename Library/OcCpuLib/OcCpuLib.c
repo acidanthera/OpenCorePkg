@@ -1163,6 +1163,34 @@ OcCpuCorrectFlexRatio (
   }
 }
 
+EFI_STATUS
+OcCpuEnableVmx (
+  VOID
+  )
+{
+  CPUID_VERSION_INFO_ECX            RegEcx;
+  MSR_IA32_FEATURE_CONTROL_REGISTER Msr;
+
+  AsmCpuid (1, 0, 0, &RegEcx.Uint32, 0);
+  if (RegEcx.Bits.VMX == 0) {
+    return EFI_UNSUPPORTED;
+  }
+
+  Msr.Uint64 = AsmReadMsr64 (MSR_IA32_FEATURE_CONTROL);
+  if (Msr.Bits.Lock != 0) {
+    return EFI_WRITE_PROTECTED;
+  }
+
+  //
+  // Unclear if pre-existing valid bits should ever be present if register is unlocked.
+  //
+  Msr.Bits.Lock                = 1;
+  Msr.Bits.EnableVmxOutsideSmx = 1;
+  AsmWriteMsr64 (MSR_IA32_FEATURE_CONTROL, Msr.Uint64);
+
+  return EFI_SUCCESS;
+}
+
 STATIC
 VOID
 EFIAPI

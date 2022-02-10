@@ -36,7 +36,7 @@ ResetAudioTrafficClass (
   EFI_HANDLE           *HandleBuffer;
   UINTN                Index;
   EFI_PCI_IO_PROTOCOL  *PciIo;
-  UINT32               ClassCode;
+  PCI_CLASSCODE        ClassCode;
   UINT8                TrafficClass;
 
   Status = gBS->LocateHandleBuffer (
@@ -65,18 +65,18 @@ ResetAudioTrafficClass (
 
     Status = PciIo->Pci.Read (
       PciIo,
-      EfiPciIoWidthUint32,
-      OFFSET_OF (PCI_DEVICE_INDEPENDENT_REGION, RevisionID),
-      1,
+      EfiPciIoWidthUint8,
+      PCI_CLASSCODE_OFFSET,
+      sizeof (PCI_CLASSCODE) / sizeof (UINT8),
       &ClassCode
       );
     if (EFI_ERROR (Status)) {
       continue;
     }
 
-    ClassCode >>= 16U; ///< Drop revision and minor codes.
-    if (ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_AUDIO)
-      || ClassCode == (PCI_CLASS_MEDIA << 8 | PCI_CLASS_MEDIA_HDA)) {
+    if (ClassCode.BaseCode == PCI_CLASS_MEDIA &&
+      (ClassCode.SubClassCode == PCI_CLASS_MEDIA_AUDIO ||
+      ClassCode.SubClassCode == PCI_CLASS_MEDIA_HDA)) {
       Status = PciIo->Pci.Read (PciIo, EfiPciIoWidthUint8, PCI_MEDIA_TCSEL_OFFSET, 1, &TrafficClass);
       if (EFI_ERROR (Status)) {
         continue;

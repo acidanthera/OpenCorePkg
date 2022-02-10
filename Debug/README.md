@@ -54,16 +54,33 @@ Note, that it does not seem to work on VMware Fusion 11 and results in freezes:
 monitor.debugOnStartGuest32 = "TRUE"
 ```
 
-To force hardware breakpoints (instead of software INT 3 breakpoints) add the following line:
+To force hardware breakpoints use the following line:
 ```
 debugStub.hideBreakpoints = "TRUE"
 ```
 
-To stall during POST for 3 seconds add the following line. Pressing any key will boot into firmware
-settings:
+Alternatively to force software INT 3 breakpoints use the following line:
+```
+debugStub.hideBreakpoints = "FALSE"
+```
+
+Depending on the version of VMware Fusion and the host macOS version, only one or other of the
+above may work to successfully single step and hit breakpoints, so you may need to try both.
+
+When setting up a virtual machine for debugging, it is useful to be able to enter UEFI firmware
+settings easily. To stall during POST for 3 seconds add the following line. Pressing any key
+during this pause will boot into firmware settings:
 ```
 bios.bootDelay = "3000"
 ```
+
+In order to test `AudioDxe.efi` in VMware Fusion, the `.vmx` file must contain the line:
+```
+sound.virtualDev = "hdaudio"
+```
+
+This is present by default in a VM set up as macOS guest, and may be added manually to a Linux guest.
+Current `AudioDxe.efi` UEFI sound quality in VMware Fusion is not representative of the quality available on real hardware.
 
 #### QEMU configuration
 
@@ -83,7 +100,9 @@ when no macOS guest booting is required.
     To build OVMF with SMM support add `-D SMM_REQUIRE=1`. To build OVMF with serial debugging
     add `-D DEBUG_ON_SERIAL_PORT=1`.
 
-    _Note_: Optionally, you may build OvmfPkg with its own build script, which is located within the OvmfPkg directory. Use e.g. `./build.sh -a X64` or  `./build.sh -a X64 -b NOOPT`; additional build arguments such as for serial debugging or SMM support may be appended to this.
+    _Note_: Optionally, you may build OvmfPkg with its own build script, which is located within the OvmfPkg directory.
+    Use e.g. `./build.sh -a X64` or  `./build.sh -a X64 -b NOOPT`; additional build arguments such as for serial debugging
+    or SMM support may be appended to this.
 
 2. Prepare launch directory with OpenCore as usual. For example, make a directory named
     `QemuRun` and `cd` to it. You should have a similar directory structure:
@@ -101,7 +120,11 @@ when no macOS guest booting is required.
 
 3. Run QEMU
     
-    The OvmfPkg build script can also start the virtual machine which it has just built, e.g. `./build.sh -a X64 qemu -drive format=raw,file=fat:rw:ESP` should be sufficient to start OpenCore; all options after `qemu` are passed directly to QEMU. Starting QEMU this way uses file `OVMF.fd` from the OVMF build directory, which is `OVMF_CODE.fd` and `OVMF_VARS.fd` combined; you may prefer to follow the second example below which specifies these files separately.
+    The OvmfPkg build script can also start the virtual machine which it has just built, e.g.
+    `./build.sh -a X64 qemu -drive format=raw,file=fat:rw:ESP` should be sufficient to start OpenCore;
+    all options after `qemu` are passed directly to QEMU. Starting QEMU this way uses file `OVMF.fd`
+    from the OVMF build directory, which is `OVMF_CODE.fd` and `OVMF_VARS.fd` combined; you may prefer
+    to follow the second example below which specifies these files separately.
 
     In the remaining examples `OVMF_BUILD` should point to the OVMF build directory, e.g.
     `$HOME/UefiWorkspace/Build/OvmfX64/NOOPT_XCODE5/FV`.
@@ -136,12 +159,21 @@ when no macOS guest booting is required.
 
     For mouse support either, a) use `Ps2MouseDxe.efi` driver, or b) pass `-usb -device usb-mouse` to QEMU and use `UsbMouseDxe.efi` driver.
 
+5. Audio support in QEMU:
+
+    QEMU flags to enable audio support in QEMU running on macOS host are `-audiodev coreaudio,id=audio0 -device ich9-intel-hda -device hda-output,audiodev=audio0`.
+      - `coreaudio` is the macOS specific hardware audio driver
+      - `intel-hda` may be used instead of `ich9-intel-hda` in order to use the QEMU Intel HDA ICH6 software driver instead of ICH9
+      - Note that current `AudioDxe.efi` UEFI sound quality in QEMU is not representative of the quality available on real hardware
+
 #### Debugger Configuration
 
 For simplicitly `efidebug.tool` performs all the necessary GDB or LLDB scripting.
 Note, this adds the `reload-uefi` command within the debugger, which you need to run after any new binary loads.
 
-The script will run and attempt to connect with reasonable defaults without additional configuration, but check `efidebug.tool` header for environment variables to configure your setup. For example, you can use `EFI_DEBUGGER` variable to force LLDB (`LLDB`) or GDB (`GDB`).
+The script will run and attempt to connect with reasonable defaults without additional configuration, but check
+`efidebug.tool` header for environment variables to configure your setup. For example, you can use `EFI_DEBUGGER`
+variable to force LLDB (`LLDB`) or GDB (`GDB`).
 
 #### GDB Configuration
 
@@ -190,7 +222,9 @@ update DataDirectory debug entry.
 
 #### IDE Source Level Debugging
 
-Once you have got command line GDB or LLDB source level debugging working, setting up IDE source level debugging (if you prefer to use it) is a matter of choosing an IDE which already knows about whichever of GDB or LLDB you will be using, and then extracting the relevant config setup which `efidebug.tool` would have applied for you.
+Once you have got command line GDB or LLDB source level debugging working, setting up IDE source level debugging (if you prefer to use it)
+is a matter of choosing an IDE which already knows about whichever of GDB or LLDB you will be using, and then extracting the relevant config
+setup which `efidebug.tool` would have applied for you.
 
 For example, this is a working setup for LLDB debugging in VS Code on macOS:
 
@@ -224,7 +258,8 @@ For example, this is a working setup for LLDB debugging in VS Code on macOS:
 
 _Note 1_: Debug type `cppdbg` is part of the standard VSCode cpp tools - you do not need to install any other marketplace LLDB tools.
 
-_Note 2_: Step `b DebugBreak` from `efidebug.tool` is ommitted from `customLaunchSetupCommands`, you need to add the breakpoint by hand in VSCode before launching your first debug session, otherwise VSCode will complain about hitting a breakpoint which it did not set.
+_Note 2_: Step `b DebugBreak` from `efidebug.tool` is ommitted from `customLaunchSetupCommands`, you need to add the breakpoint by
+hand in VSCode before launching your first debug session, otherwise VSCode will complain about hitting a breakpoint which it did not set.
 
 #### References
 

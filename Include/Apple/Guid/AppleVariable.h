@@ -139,9 +139,12 @@ typedef enum {
 #define APPLE_SYSTEM_AUDIO_VOLUME_MUTED        BIT7
 #define APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK  0x7FU
 
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MIN       (-128)
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_MAX       (127)
+
 ///
 /// System audio volume.
-/// UINT8: APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK | APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK
+/// UINT8: APPLE_SYSTEM_AUDIO_VOLUME_MUTED | APPLE_SYSTEM_AUDIO_VOLUME_VOLUME_MASK
 /// gAppleBootVariableGuid
 ///
 #define APPLE_SYSTEM_AUDIO_VOLUME_VARIABLE_NAME  L"SystemAudioVolume"
@@ -155,10 +158,10 @@ typedef enum {
 
 ///
 /// System audio volume in decibels, created by AppleHDA.kext.
-/// UINT8: SystemAudioVolume'
+/// UINT8: SystemAudioVolumeDB
 /// gAppleBootVariableGuid
 ///
-#define APPLE_SYSTEM_AUDIO_VOLUME_SAVED_VARIABLE_DB_NAME  L"SystemAudioVolumeDB"
+#define APPLE_SYSTEM_AUDIO_VOLUME_DB_VARIABLE_NAME  L"SystemAudioVolumeDB"
 
 ///
 /// System language.

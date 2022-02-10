@@ -5,6 +5,8 @@
 
 .DEFAULT_GOAL := all
 
+.ONESHELL:
+
 LCOV          ?= lcov
 GENHTML       ?= genhtml
 CC            ?= gcc
@@ -86,12 +88,16 @@ else
 	CFLAGS  += -D ENTRY_POINT=main
 endif
 
+ifeq ($(FUZZ_DIR),)
+	FUZZ_DIR = FUZZDICT
+endif
+
 ifeq ($(FUZZ_JOBS),)
 	FUZZ_JOBS = 4
 endif
 
 ifeq ($(FUZZ_MEM),)
-	FUZZ_MEM = 4096
+	FUZZ_MEM = 6144
 endif
 
 ifeq ($(COVERAGE),1)
@@ -115,6 +121,10 @@ else
 	STRIPFLAGS ?= -x
 endif
 
+ifeq ($(SYDR),1)
+	INFIX := .sydr
+endif
+
 #
 # Search Paths.
 #
@@ -136,7 +146,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# UDK implementations.
 	#
-	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o
+	OBJS    += UefiLib.o UefiLibPrint.o CpuDeadLoop.o BaseDebugPrintErrorLevelLib.o DebugLib.o PrintLib.o PrintLibInternal.o String.o SafeString.o SwapBytes16.o SwapBytes32.o LinkedList.o HighBitSet32.o HighBitSet64.o MtrrLib.o GetPowerOfTwo32.o GetPowerOfTwo64.o Cpu.o BmpSupportLib.o SafeIntLib.o X86GetInterruptState.o PciLib.o PciExpressLib.o DevicePathUtilities.o UefiDevicePathLib.o DevicePathToText.o DevicePathFromText.o BitField.o CheckSum.o UefiSortLib.o QuickSort.o UserFile.o
 	#
 	# Customised/Simplified implementations at userspace level.
 	#
@@ -227,13 +237,13 @@ endif
 # Miscellaneous implementations that do not depend on UDK.
 #
 VPATH   += $(OC_USER)/User/Library:$
-OBJS    += UserFile.o UserPseudoRandom.o
+OBJS    += UserPseudoRandom.o
 
 #
 # Directory where objects will be produced.
 # As well, OBJS will be prepended with actual paths.
 #
-OUT_DIR := $(DIST)_$(UDK_ARCH)
+OUT_DIR := $(DIST)_$(UDK_ARCH)$(INFIX)
 OBJS    := $(addprefix $(OUT_DIR)/,$(OBJS))
 
 $(OUT_DIR)/%.o: %.c
@@ -251,8 +261,39 @@ $(PRODUCT): $(OBJS)
 
 fuzz: $(PRODUCT) FORCE
 	@rm -f fuzz*.log
-	@$(MKDIR) FUZZDICT
-	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) FUZZDICT
+	@$(MKDIR) $(FUZZ_DIR)
+	UBSAN_OPTIONS='halt_on_error=1' ./$(PRODUCT) -jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)
+
+sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@$(MKDIR) $(FUZZ_DIR)
+	@rm -rf sydr-fuzz-out
+	@cat <<- EOF > sydr-fuzz.toml
+	 	[sydr]
+		args = "--solving-timeout 60 -s 900 -j $(FUZZ_JOBS)"
+		target = "$(PROJECT).sydr$(SUFFIX) @@"
+		jobs = 1
+
+		[libfuzzer]
+		path = "$(PROJECT)$(SUFFIX)"
+		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
+	EOF
+	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz -l debug run -f
+
+sydr-fuzz-security: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@cat <<- EOF > sydr-fuzz.toml
+	 	[sydr]
+		args = "--security --no-invert"
+		target = "$(PROJECT).sydr$(SUFFIX) @@"
+		corpus = "sydr-fuzz-out/corpus"
+		jobs = $(FUZZ_JOBS)
+	EOF
+	sydr-fuzz -l debug security
+
+sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
+	@$(MKDIR) sydr-fuzz-out/corpus
+	@$(MKDIR) sydr-fuzz-out/security
+	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/corpus
+	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/security
 
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
@@ -260,13 +301,13 @@ coverage: $(PRODUCT) FORCE
 	@$(MKDIR) COVERAGE
 	$(LCOV) --no-checksum --zerocounters --directory .
 	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
-	for f in FUZZDICT/*; do  ./$(PRODUCT) $$f ; done || true
+	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f ; done || true
 	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info || exit 1
 	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_tmp || exit 1
 	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info_final || exit 1
 	$(GENHTML) --branch-coverage --output-directory COVERAGE COVERAGE/trace.lcov_info_final
 
 clean: FORCE
-	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).exe
+	rm -rf $(OUT_DIR) $(PRODUCT) $(PRODUCT).sydr $(PRODUCT).exe $(PRODUCT).sydr.exe sydr-fuzz.toml
 
 FORCE:

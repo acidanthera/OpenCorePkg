@@ -4,7 +4,7 @@
 ##
 
 PROJECT = Bmf
-PRODUCT = $(PROJECT)$(SUFFIX)
+PRODUCT = $(PROJECT)$(INFIX)$(SUFFIX)
 OBJS    = $(PROJECT).o
 #
 # From OpenCanopy.

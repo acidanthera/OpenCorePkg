@@ -149,7 +149,7 @@ struct _AUDIO_IO_PRIVATE_DATA {
 
   // Audio I/O protocol.
   EFI_AUDIO_IO_PROTOCOL AudioIo;
-  UINT8 SelectedOutputIndex;
+  UINT64 SelectedOutputIndexMask;
   UINT8 SelectedInputIndex;
 
   // Codec device.
@@ -232,13 +232,22 @@ HdaCodecAudioIoGetOutputs(
 
 EFI_STATUS
 EFIAPI
+HdaCodecAudioIoRawGainToDecibels(
+  IN  EFI_AUDIO_IO_PROTOCOL *This,
+  IN  UINT64 OutputIndexMask,
+  IN  UINT8 GainParam,
+  OUT INT8 *Gain);
+
+EFI_STATUS
+EFIAPI
 HdaCodecAudioIoSetupPlayback(
   IN EFI_AUDIO_IO_PROTOCOL *This,
-  IN UINT8 OutputIndex,
-  IN UINT8 Volume,
+  IN UINT64 OutputIndexMask,
+  IN INT8 Gain,
   IN EFI_AUDIO_IO_PROTOCOL_FREQ Freq,
   IN EFI_AUDIO_IO_PROTOCOL_BITS Bits,
-  IN UINT8 Channels);
+  IN UINT8 Channels,
+  IN UINTN PlaybackDelay);
 
 EFI_STATUS
 EFIAPI
@@ -290,9 +299,17 @@ HdaCodecDisableWidgetPath(
 
 EFI_STATUS
 EFIAPI
+HdaCodecWidgetRawGainToDecibels (
+  IN     HDA_WIDGET_DEV  *HdaWidget,
+  IN     UINT8           GainParam,
+     OUT INT8            *Gain
+  );
+
+EFI_STATUS
+EFIAPI
 HdaCodecEnableWidgetPath(
   IN HDA_WIDGET_DEV *HdaWidget,
-  IN UINT8 Volume,
+  IN INT8 Gain,
   IN UINT8 StreamId,
   IN UINT16 StreamFormat);
 

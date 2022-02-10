@@ -184,7 +184,9 @@ InternalConfirmPassword (
   CONST OC_PRIVILEGE_CONTEXT *Privilege;
   GUI_PTR_POSITION           PtrPosition;
 
-  GuiPointerGetPosition (mPointerContext, &PtrPosition);
+  if (mPointerContext != NULL) {
+    GuiPointerGetPosition (mPointerContext, &PtrPosition);
+  }
 
   Privilege = Context->PickerContext->PrivilegeContext;
 
@@ -195,8 +197,10 @@ InternalConfirmPassword (
     );
   
   GuiKeyReset (mKeyContext);
-  GuiPointerReset (mPointerContext);
-  GuiPointerSetPosition (mPointerContext, &PtrPosition);
+  if (mPointerContext != NULL) {
+    GuiPointerReset (mPointerContext);
+    GuiPointerSetPosition (mPointerContext, &PtrPosition);
+  }
   DrawContext->CursorOpacity = 0xFF;
 
   SecureZeroMem (mPasswordBox.PasswordInfo.Password, mPasswordBox.PasswordInfo.PasswordLen);

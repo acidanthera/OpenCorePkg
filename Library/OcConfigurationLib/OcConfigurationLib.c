@@ -687,6 +687,7 @@ mUefiQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("ActivateHpetSupport",      OC_GLOBAL_CONFIG, Uefi.Quirks.ActivateHpetSupport),
   OC_SCHEMA_BOOLEAN_IN ("DisableSecurityPolicy",    OC_GLOBAL_CONFIG, Uefi.Quirks.DisableSecurityPolicy),
   OC_SCHEMA_BOOLEAN_IN ("EnableVectorAcceleration", OC_GLOBAL_CONFIG, Uefi.Quirks.EnableVectorAcceleration),
+  OC_SCHEMA_BOOLEAN_IN ("EnableVmx",                OC_GLOBAL_CONFIG, Uefi.Quirks.EnableVmx),
   OC_SCHEMA_INTEGER_IN ("ExitBootServicesDelay",    OC_GLOBAL_CONFIG, Uefi.Quirks.ExitBootServicesDelay),
   OC_SCHEMA_BOOLEAN_IN ("ForceOcWriteFlash",        OC_GLOBAL_CONFIG, Uefi.Quirks.ForceOcWriteFlash),
   OC_SCHEMA_BOOLEAN_IN ("ForgeUefiSupport",         OC_GLOBAL_CONFIG, Uefi.Quirks.ForgeUefiSupport),
@@ -741,6 +742,9 @@ mUefiAppleInputSchema[] = {
   OC_SCHEMA_BOOLEAN_IN  ("GraphicsInputMirroring",  OC_GLOBAL_CONFIG,  Uefi.AppleInput.GraphicsInputMirroring),
   OC_SCHEMA_INTEGER_IN  ("KeyInitialDelay",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeyInitialDelay),
   OC_SCHEMA_INTEGER_IN  ("KeySubsequentDelay",      OC_GLOBAL_CONFIG,  Uefi.AppleInput.KeySubsequentDelay),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMask",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMask),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMax",          OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMax),
+  OC_SCHEMA_INTEGER_IN  ("PointerPollMin",          OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerPollMin),
   OC_SCHEMA_INTEGER_IN  ("PointerSpeedDiv",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedDiv),
   OC_SCHEMA_INTEGER_IN  ("PointerSpeedMul",         OC_GLOBAL_CONFIG,  Uefi.AppleInput.PointerSpeedMul),
 };
@@ -750,13 +754,15 @@ OC_SCHEMA
 mUefiAudioSchema[] = {
   OC_SCHEMA_INTEGER_IN ("AudioCodec",         OC_GLOBAL_CONFIG, Uefi.Audio.AudioCodec),
   OC_SCHEMA_STRING_IN  ("AudioDevice",        OC_GLOBAL_CONFIG, Uefi.Audio.AudioDevice),
-  OC_SCHEMA_INTEGER_IN ("AudioOut",           OC_GLOBAL_CONFIG, Uefi.Audio.AudioOut),
+  OC_SCHEMA_INTEGER_IN ("AudioOutMask",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioOutMask),
   OC_SCHEMA_BOOLEAN_IN ("AudioSupport",       OC_GLOBAL_CONFIG, Uefi.Audio.AudioSupport),
-  OC_SCHEMA_INTEGER_IN ("MinimumVolume",      OC_GLOBAL_CONFIG, Uefi.Audio.MinimumVolume),
+  OC_SCHEMA_BOOLEAN_IN ("DisconnectHda",      OC_GLOBAL_CONFIG, Uefi.Audio.DisconnectHda),
+  OC_SCHEMA_INTEGER_IN ("MaximumGain",        OC_GLOBAL_CONFIG, Uefi.Audio.MaximumGain),
+  OC_SCHEMA_INTEGER_IN ("MinimumAssistGain",  OC_GLOBAL_CONFIG, Uefi.Audio.MinimumAssistGain),
+  OC_SCHEMA_INTEGER_IN ("MinimumAudibleGain", OC_GLOBAL_CONFIG, Uefi.Audio.MinimumAudibleGain),
   OC_SCHEMA_STRING_IN  ("PlayChime",          OC_GLOBAL_CONFIG, Uefi.Audio.PlayChime),
   OC_SCHEMA_BOOLEAN_IN ("ResetTrafficClass",  OC_GLOBAL_CONFIG, Uefi.Audio.ResetTrafficClass),
   OC_SCHEMA_INTEGER_IN ("SetupDelay",         OC_GLOBAL_CONFIG, Uefi.Audio.SetupDelay),
-  OC_SCHEMA_INTEGER_IN ("VolumeAmplifier",    OC_GLOBAL_CONFIG, Uefi.Audio.VolumeAmplifier),
 };
 
 STATIC
@@ -775,20 +781,21 @@ mUefiInputSchema[] = {
 STATIC
 OC_SCHEMA
 mUefiOutputSchema[] = {
-  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
-  OC_SCHEMA_STRING_IN  ("ConsoleMode",            OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
-  OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",     OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
-  OC_SCHEMA_BOOLEAN_IN ("ForceResolution",        OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
-  OC_SCHEMA_STRING_IN  ("GopPassThrough",         OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
-  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",   OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
-  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",      OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
-  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",   OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
-  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",    OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
-  OC_SCHEMA_STRING_IN  ("Resolution",             OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
-  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",    OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
-  OC_SCHEMA_STRING_IN  ("TextRenderer",           OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
-  OC_SCHEMA_INTEGER_IN ("UIScale",                OC_GLOBAL_CONFIG, Uefi.Output.UIScale),
-  OC_SCHEMA_BOOLEAN_IN ("UgaPassThrough",         OC_GLOBAL_CONFIG, Uefi.Output.UgaPassThrough),
+  OC_SCHEMA_BOOLEAN_IN ("ClearScreenOnModeSwitch",   OC_GLOBAL_CONFIG, Uefi.Output.ClearScreenOnModeSwitch),
+  OC_SCHEMA_STRING_IN  ("ConsoleMode",               OC_GLOBAL_CONFIG, Uefi.Output.ConsoleMode),
+  OC_SCHEMA_BOOLEAN_IN ("DirectGopRendering",        OC_GLOBAL_CONFIG, Uefi.Output.DirectGopRendering),
+  OC_SCHEMA_BOOLEAN_IN ("ForceResolution",           OC_GLOBAL_CONFIG, Uefi.Output.ForceResolution),
+  OC_SCHEMA_STRING_IN  ("GopPassThrough",            OC_GLOBAL_CONFIG, Uefi.Output.GopPassThrough),
+  OC_SCHEMA_BOOLEAN_IN ("IgnoreTextInGraphics",      OC_GLOBAL_CONFIG, Uefi.Output.IgnoreTextInGraphics),
+  OC_SCHEMA_BOOLEAN_IN ("ProvideConsoleGop",         OC_GLOBAL_CONFIG, Uefi.Output.ProvideConsoleGop),
+  OC_SCHEMA_BOOLEAN_IN ("ReconnectGraphicsOnConnect",OC_GLOBAL_CONFIG, Uefi.Output.ReconnectGraphicsOnConnect),
+  OC_SCHEMA_BOOLEAN_IN ("ReconnectOnResChange",      OC_GLOBAL_CONFIG, Uefi.Output.ReconnectOnResChange),
+  OC_SCHEMA_BOOLEAN_IN ("ReplaceTabWithSpace",       OC_GLOBAL_CONFIG, Uefi.Output.ReplaceTabWithSpace),
+  OC_SCHEMA_STRING_IN  ("Resolution",                OC_GLOBAL_CONFIG, Uefi.Output.Resolution),
+  OC_SCHEMA_BOOLEAN_IN ("SanitiseClearScreen",       OC_GLOBAL_CONFIG, Uefi.Output.SanitiseClearScreen),
+  OC_SCHEMA_STRING_IN  ("TextRenderer",              OC_GLOBAL_CONFIG, Uefi.Output.TextRenderer),
+  OC_SCHEMA_INTEGER_IN ("UIScale",                   OC_GLOBAL_CONFIG, Uefi.Output.UIScale),
+  OC_SCHEMA_BOOLEAN_IN ("UgaPassThrough",            OC_GLOBAL_CONFIG, Uefi.Output.UgaPassThrough),
 };
 
 STATIC

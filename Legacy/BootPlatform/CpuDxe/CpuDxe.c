@@ -194,7 +194,7 @@ Returns:
   EFI_SUCCESS           - If CPU INIT occurred. This value should never be
         seen.
   EFI_DEVICE_ERROR      - If CPU INIT failed.
-  EFI_NOT_SUPPORTED     - Requested type of CPU INIT not supported.
+  EFI_UNSUPPORTED       - Requested type of CPU INIT not supported.
 
 --*/
 {

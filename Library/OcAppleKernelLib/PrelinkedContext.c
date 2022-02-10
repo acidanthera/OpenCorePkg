@@ -25,7 +25,6 @@
 #include <Library/OcStringLib.h>
 
 #include "PrelinkedInternal.h"
-#include "ProcessorBind.h"
 
 STATIC
 UINT64

@@ -20,18 +20,41 @@ VOID
 DebugPrintDevicePath (
   IN UINTN                     ErrorLevel,
   IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL
   )
 {
   DEBUG_CODE_BEGIN ();
 
   CHAR16 *TextDevicePath;
 
-  TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+  TextDevicePath = NULL;
+  if (DevicePath != NULL) {
+    TextDevicePath = ConvertDevicePathToText (DevicePath, FALSE, FALSE);
+  }
   DEBUG ((ErrorLevel, "%a - %s\n", Message, OC_HUMAN_STRING (TextDevicePath)));
   if (TextDevicePath != NULL) {
     FreePool (TextDevicePath);
   }
+
+  DEBUG_CODE_END ();
+}
+
+VOID
+DebugPrintDevicePathForHandle (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_HANDLE                Handle       OPTIONAL
+  )
+{
+  DEBUG_CODE_BEGIN ();
+  
+  EFI_DEVICE_PATH_PROTOCOL  *DevicePath;
+
+  DevicePath = NULL;
+  if (Handle != NULL) {
+    DevicePath = DevicePathFromHandle (Handle);
+  }
+  DebugPrintDevicePath (ErrorLevel, Message, DevicePath);
 
   DEBUG_CODE_END ();
 }

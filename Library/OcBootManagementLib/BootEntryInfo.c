@@ -691,32 +691,43 @@ InternalDescribeBootEntry (
   }
 
   if (BootEntry->Name == NULL) {
-    BootEntry->Name = OcGetVolumeLabel (FileSystem);
-    if (BootEntry->Name != NULL) {
-      if (StrCmp (BootEntry->Name, L"Recovery HD") == 0
-        || StrCmp (BootEntry->Name, L"Recovery") == 0) {
-        if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
-          BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
-        }
-        Status = InternalGetAppleVersion (FileSystem, BootDirectoryName, AppleVersion);
-        if (EFI_ERROR (Status)) {
-          TmpBootName = NULL;
+    //
+    // Special case - installer should be clearly identified to end users but does not normally
+    // contain text label, only pre-rendered graphical label which is not usable in builtin
+    // picker, or in Canopy with disk labels disabled.
+    //
+    if (StrStr (BootDirectoryName, L"com.apple.installer") != NULL) {
+      BootEntry->Name = AllocateCopyPool (L_STR_SIZE (L"macOS Installer"), L"macOS Installer");
+    } else {
+      BootEntry->Name = OcGetVolumeLabel (FileSystem);
+      if (BootEntry->Name != NULL) {
+        if (StrCmp (BootEntry->Name, L"Recovery HD") == 0
+          || StrCmp (BootEntry->Name, L"Recovery") == 0) {
+          if (BootEntry->Type == OC_BOOT_UNKNOWN || BootEntry->Type == OC_BOOT_APPLE_OS) {
+            BootEntry->Type = OC_BOOT_APPLE_RECOVERY;
+          }
+          Status = InternalGetAppleVersion (FileSystem, BootDirectoryName, AppleVersion);
+          if (EFI_ERROR (Status)) {
+            TmpBootName = NULL;
+          } else {
+            TmpBootName = InternalGetAppleRecoveryName (AppleVersion);
+          }
+        } else if (StrCmp (BootEntry->Name, L"Preboot") == 0) {
+          //
+          // Common Big Sur beta bug failing to create .contentDetails files.
+          // Workaround it by using the standard installed macOS system volume name.
+          // Applies to anything on the system volume without text labels (and not already
+          // handled above, such as installer).
+          //
+          TmpBootName = AllocateCopyPool (sizeof (L"Macintosh HD"), L"Macintosh HD");
         } else {
-          TmpBootName = InternalGetAppleRecoveryName (AppleVersion);
+          TmpBootName = NULL;
         }
-      } else if (StrCmp (BootEntry->Name, L"Preboot") == 0) {
-        //
-        // Common Big Sur beta bug failing to create .contentDetails files.
-        // Workaround it by choosing the default name following Apple BootPicker behaviour.
-        //
-        TmpBootName = AllocateCopyPool (sizeof (L"Macintosh HD"), L"Macintosh HD");
-      } else {
-        TmpBootName = NULL;
-      }
 
-      if (TmpBootName != NULL) {
-        FreePool (BootEntry->Name);
-        BootEntry->Name = TmpBootName;
+        if (TmpBootName != NULL) {
+          FreePool (BootEntry->Name);
+          BootEntry->Name = TmpBootName;
+        }
       }
     }
   }
@@ -754,9 +765,6 @@ InternalDescribeBootEntry (
         break;
       case OC_BOOT_WINDOWS:
         ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_WINDOWS), OC_FLAVOUR_WINDOWS);
-        break;
-      case OC_BOOT_EXTERNAL_OS:
-        ContentFlavour = AllocateCopyPool(sizeof (OC_FLAVOUR_OTHER_OS), OC_FLAVOUR_OTHER_OS);
         break;
       case OC_BOOT_UNKNOWN:
         ContentFlavour = NULL;

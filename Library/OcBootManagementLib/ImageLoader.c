@@ -30,6 +30,7 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleSecureBootLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMachoLib.h>
@@ -77,6 +78,59 @@ STATIC OC_IMAGE_LOADER_PATCH     mImageLoaderPatch;
 STATIC OC_IMAGE_LOADER_CONFIGURE mImageLoaderConfigure;
 STATIC UINT32                    mImageLoaderCaps;
 STATIC BOOLEAN                   mImageLoaderEnabled;
+
+STATIC BOOLEAN          mProtectUefiServices;
+
+STATIC EFI_IMAGE_LOAD         mPreservedLoadImage;
+STATIC EFI_IMAGE_START        mPreservedStartImage;
+STATIC EFI_EXIT_BOOT_SERVICES mPreservedExitBootServices;
+STATIC EFI_EXIT               mPreservedExit;
+
+STATIC
+VOID
+PreserveGrubShimHooks (
+  VOID
+  )
+{
+  if (!mProtectUefiServices) {
+    return;
+  }
+  mPreservedLoadImage        = gBS->LoadImage;
+  mPreservedStartImage       = gBS->StartImage;
+  mPreservedExitBootServices = gBS->ExitBootServices;
+  mPreservedExit             = gBS->Exit;
+}
+
+//
+// REF: https://github.com/acidanthera/bugtracker/issues/1874
+//
+STATIC
+VOID
+RestoreGrubShimHooks (
+  IN CONST CHAR8 *Caller
+  )
+{
+  if (!mProtectUefiServices) {
+    return;
+  }
+  if (gBS->LoadImage        != mPreservedLoadImage ||
+      gBS->StartImage       != mPreservedStartImage ||
+      gBS->ExitBootServices != mPreservedExitBootServices ||
+      gBS->Exit             != mPreservedExit) {
+    DEBUG ((DEBUG_INFO, "OCB: Restoring trashed L:%u S:%u EBS:%u E:%u after %a\n",
+      gBS->LoadImage        != mPreservedLoadImage,
+      gBS->StartImage       != mPreservedStartImage,
+      gBS->ExitBootServices != mPreservedExitBootServices,
+      gBS->Exit             != mPreservedExit,
+      Caller
+    ));
+
+    gBS->LoadImage        = mPreservedLoadImage;
+    gBS->StartImage       = mPreservedStartImage;
+    gBS->ExitBootServices = mPreservedExitBootServices;
+    gBS->Exit             = mPreservedExit;
+  }
+}
 
 STATIC
 EFI_STATUS
@@ -201,6 +255,7 @@ OcImageLoaderLoad (
   EFI_STATUS                   ImageStatus;
   PE_COFF_IMAGE_CONTEXT        ImageContext;
   EFI_PHYSICAL_ADDRESS         DestinationArea;
+  UINT32                       DestinationSize;
   VOID                         *DestinationBuffer;
   OC_LOADED_IMAGE_PROTOCOL     *OcLoadedImage;
   EFI_LOADED_IMAGE_PROTOCOL    *LoadedImage;
@@ -240,6 +295,21 @@ OcImageLoaderLoad (
     DEBUG ((DEBUG_INFO, "OCB: PeCoff no support for RT drivers\n"));
     return EFI_UNSUPPORTED;
   }
+
+  //
+  // FIXME: This needs to be backported as a function:
+  // https://github.com/mhaeuser/edk2/blob/2021-gsoc-secure-loader/MdePkg/Library/BaseUefiImageLib/CommonSupport.c#L19-L53
+  //
+  DestinationSize = ImageContext.SizeOfImage + ImageContext.SizeOfImageDebugAdd;
+  if (OcOverflowAddU32 (DestinationSize, ImageContext.SectionAlignment, &DestinationSize)) {
+    return RETURN_UNSUPPORTED;
+  }
+
+  if (DestinationSize >= BASE_16MB) {
+    DEBUG ((DEBUG_INFO, "OCB: PeCoff prohibits files over 16M (%u)\n", DestinationSize));
+    return RETURN_UNSUPPORTED;
+  }
+
   //
   // Allocate the image destination memory.
   // FIXME: RT drivers require EfiRuntimeServicesCode.
@@ -446,7 +516,7 @@ InternalDirectExit (
   // If the image has been started, verify this image can exit.
   //
   if (ImageHandle != mCurrentImageHandle) {
-    DEBUG ((DEBUG_LOAD|DEBUG_ERROR, "Exit: Image is not exitable image\n"));
+    DEBUG ((DEBUG_LOAD|DEBUG_ERROR, "OCB: Image is not exitable image\n"));
     gBS->RestoreTPL (OldTpl);
     return EFI_INVALID_PARAMETER;
   }
@@ -818,6 +888,7 @@ InternalEfiLoadImage (
       Status = EFI_UNSUPPORTED;
     }
   } else {
+    PreserveGrubShimHooks ();
     Status = mOriginalEfiLoadImage (
       BootPolicy,
       ParentImageHandle,
@@ -826,6 +897,7 @@ InternalEfiLoadImage (
       SourceSize,
       ImageHandle
       );
+    RestoreGrubShimHooks ("LoadImage");
   }
 
   if (AllocatedBuffer != NULL) {
@@ -900,7 +972,11 @@ InternalEfiStartImage (
     }
   }
 
-  return mOriginalEfiStartImage (ImageHandle, ExitDataSize, ExitData);
+  PreserveGrubShimHooks ();
+  Status = mOriginalEfiStartImage (ImageHandle, ExitDataSize, ExitData);
+  RestoreGrubShimHooks ("StartImage");
+
+  return Status;
 }
 
 STATIC
@@ -965,14 +1041,20 @@ InternalEfiExit (
       );
   }
 
-  return mOriginalEfiExit (ImageHandle, ExitStatus, ExitDataSize, ExitData);
+  PreserveGrubShimHooks ();
+  Status = mOriginalEfiExit (ImageHandle, ExitStatus, ExitDataSize, ExitData);
+  RestoreGrubShimHooks ("Exit");
+  
+  return Status;
 }
 
 VOID
 OcImageLoaderInit (
-  VOID
+  IN     CONST BOOLEAN ProtectUefiServices
   )
 {
+  mProtectUefiServices = ProtectUefiServices;
+
   mOriginalEfiLoadImage   = gBS->LoadImage;
   mOriginalEfiStartImage  = gBS->StartImage;
   mOriginalEfiUnloadImage = gBS->UnloadImage;

@@ -12,7 +12,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Library/OcMainLib.h>
 #include <Uefi.h>
 
 #include <Guid/OcVariable.h>
@@ -22,6 +21,8 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/OcBootstrap.h>
 #include <Protocol/SimpleFileSystem.h>
 #include <Protocol/VMwareDebug.h>
+
+#include <Library/OcMainLib.h>
 
 #include <Library/DebugLib.h>
 #include <Library/OcDebugLogLib.h>

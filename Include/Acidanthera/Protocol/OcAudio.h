@@ -19,7 +19,7 @@
 #include <Protocol/AppleVoiceOver.h>
 #include <Protocol/DevicePath.h>
 
-#define OC_AUDIO_PROTOCOL_REVISION  0x020000
+#define OC_AUDIO_PROTOCOL_REVISION  0x050000
 
 //
 // OC_AUDIO_PROTOCOL_GUID
@@ -116,11 +116,10 @@ STATIC_ASSERT (OcVoiceOverAudioFileIndexMax - OcVoiceOverAudioFileIndexBase == 9
 /**
   Connect to Audio I/O.
 
-  @param[in,out] This         Audio protocol instance.
-  @param[in]     DevicePath   Controller device path, optional.
-  @param[in]     CodecAddress Codec address, optional.
-  @param[in]     OutputIndex  Output index, optional.
-  @param[in]     Volume       Raw volume level from 0 to 100.
+  @param[in,out] This             Audio protocol instance.
+  @param[in]     DevicePath       Controller device path, optional.
+  @param[in]     CodecAddress     Codec address, optional.
+  @param[in]     OutputIndexMask  Output index mask.
 
   @retval EFI_SUCESS on success.
   @retval EFI_NOT_FOUND when missing.
@@ -130,10 +129,25 @@ typedef
 EFI_STATUS
 (EFIAPI* OC_AUDIO_CONNECT) (
   IN OUT OC_AUDIO_PROTOCOL         *This,
-  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL,
-  IN     UINT8                     CodecAddress OPTIONAL,
-  IN     UINT8                     OutputIndex  OPTIONAL,
-  IN     UINT8                     Volume
+  IN     EFI_DEVICE_PATH_PROTOCOL  *DevicePath      OPTIONAL,
+  IN     UINT8                     CodecAddress     OPTIONAL,
+  IN     UINT64                    OutputIndexMask
+  );
+
+/**
+  Set Audio I/O default gain.
+
+  @param[in,out] This             Audio protocol instance.
+  @param[in]     Gain             The amplifier gain (or attenuation if negative) in dB to use, relative to 0 dB level (0 dB
+                                  is usually at at or near max available volume, but is not required to be so in the spec).
+
+  @retval EFI_SUCESS on success.
+**/
+typedef
+EFI_STATUS
+(EFIAPI* OC_AUDIO_SET_DEFAULT_GAIN) (
+  IN OUT OC_AUDIO_PROTOCOL         *This,
+  IN     INT8                      Gain
   );
 
 /**
@@ -198,10 +212,30 @@ EFI_STATUS
   );
 
 /**
+  Convert raw amplifier gain setting to decibel gain value; converts using the parameters of the first
+  channel specified for sound on the current codec which has non-zero amp capabilities.
+
+  @param[in,out] This         Audio protocol instance.
+  @param[in]     GainParam    Raw codec gain param.
+  @param[out]    Gain         The amplifier gain (or attenuation if negative) in dB to use, relative to 0 dB level.
+
+  @retval EFI_SUCCESS on successful conversion.
+**/
+typedef
+EFI_STATUS
+(EFIAPI* OC_AUDIO_RAW_GAIN_TO_DECIBELS) (
+  IN OUT OC_AUDIO_PROTOCOL          *This,
+  IN     UINT8                      GainParam,
+     OUT INT8                       *Gain
+  );
+
+/**
   Play file.
 
   @param[in,out] This         Audio protocol instance.
   @param[in]     File         File to play.
+  @param[in]     Gain         The amplifier gain (or attenuation if negative) in dB to use, relative to 0 dB level.
+  @param[in]     UseGain      If TRUE use provided volume level, otherwise use stored global volume level.
   @param[in]     Wait         Wait for completion of the previous track.
 
   @retval EFI_SUCCESS on successful playback startup.
@@ -211,6 +245,8 @@ EFI_STATUS
 (EFIAPI* OC_AUDIO_PLAY_FILE) (
   IN OUT OC_AUDIO_PROTOCOL          *This,
   IN     UINT32                     File,
+  IN     INT8                       Gain  OPTIONAL,
+  IN     BOOLEAN                    UseGain,
   IN     BOOLEAN                    Wait
   );
 
@@ -248,12 +284,14 @@ UINTN
 // Includes a revision for debugging reasons.
 //
 struct OC_AUDIO_PROTOCOL_ {
-  UINTN                   Revision;
-  OC_AUDIO_CONNECT        Connect;
-  OC_AUDIO_SET_PROVIDER   SetProvider;
-  OC_AUDIO_PLAY_FILE      PlayFile;
-  OC_AUDIO_STOP_PLAYBACK  StopPlayback;
-  OC_AUDIO_SET_DELAY      SetDelay;
+  UINTN                         Revision;
+  OC_AUDIO_CONNECT              Connect;
+  OC_AUDIO_RAW_GAIN_TO_DECIBELS RawGainToDecibels;
+  OC_AUDIO_SET_DEFAULT_GAIN     SetDefaultGain;
+  OC_AUDIO_SET_PROVIDER         SetProvider;
+  OC_AUDIO_PLAY_FILE            PlayFile;
+  OC_AUDIO_STOP_PLAYBACK        StopPlayback;
+  OC_AUDIO_SET_DELAY            SetDelay;
 };
 
 extern EFI_GUID gOcAudioProtocolGuid;

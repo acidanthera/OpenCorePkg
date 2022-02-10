@@ -296,6 +296,8 @@ PrintWidget (
   )
 {
   UINT32      Index;
+  UINT8       VrefCaps;
+  UINT8       VrefCtrl;
   
   //
   // Node header and widget capabilities.
@@ -428,6 +430,22 @@ PrintWidget (
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_DISPLAYPORT) {
       OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " DP");
     }
+    VrefCaps = HDA_PARAMETER_PIN_CAPS_VREF (HdaWidget->PinCapabilities);
+    if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_HIZ) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_HIZ");
+    }
+    if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_GRD) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_GRD");
+    }
+    if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_50) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_50");
+    }
+    if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_80) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_80");
+    }
+    if (VrefCaps & HDA_PARAMETER_PIN_CAPS_VREF_100) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_100");
+    }
     OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
 
     if (HdaWidget->PinCapabilities & HDA_PARAMETER_PIN_CAPS_EAPD) {
@@ -472,9 +490,6 @@ PrintWidget (
       );
 
     OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "Pin-ctls: 0x%2X:", HdaWidget->DefaultPinControl);
-    if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_VREF_EN) {
-      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF");
-    }
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_IN_EN) {
       OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " IN");
     }
@@ -483,6 +498,18 @@ PrintWidget (
     }
     if (HdaWidget->DefaultPinControl & HDA_PIN_WIDGET_CONTROL_HP_EN) {
       OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " HP");
+    }
+    VrefCtrl = HDA_PIN_WIDGET_CONTROL_VREF (HdaWidget->DefaultPinControl);
+    if (VrefCtrl == HDA_PIN_WIDGET_CONTROL_VREF_HIZ) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_HIZ");
+    } else if (VrefCtrl == HDA_PIN_WIDGET_CONTROL_VREF_GRD) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_GRD");
+    } else if (VrefCtrl == HDA_PIN_WIDGET_CONTROL_VREF_50) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_50");
+    } else  if (VrefCtrl == HDA_PIN_WIDGET_CONTROL_VREF_80) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_80");
+    } else if (VrefCtrl == HDA_PIN_WIDGET_CONTROL_VREF_100) {
+      OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, " VREF_100");
     }
     OcAsciiPrintBuffer (AsciiBuffer, AsciiBufferSize, "\n");
   }

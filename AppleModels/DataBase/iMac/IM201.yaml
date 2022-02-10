@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "1715.40.15.0.0"
-BIOSLegacyVersion: "IM201.88Z.F000.B00.2110032038"
-BIOSReleaseDate: "10/03/2021"
+BIOSVersion: "1715.81.2.0.0"
+BIOSLegacyVersion: "IM201.88Z.F000.B00.2201062105"
+BIOSReleaseDate: "01/06/2022"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "iMac20,1"
 SystemVersion: "1.0"
@@ -16,8 +16,7 @@ BoardManufacturer: "Apple Inc."
 #  "Mac-smthelse"
 BoardProduct: "Mac-CFF7D910A743CAAF"
 BoardVersion: "iMac20,1"
-# FIXME:
-BoardRevision: 0x1
+BoardRevision: 0x3
 BoardAssetTag: ""
 BoardType: 0xA
 BoardLocationInChassis: ""
@@ -25,16 +24,11 @@ ChassisManufacturer: "Apple Inc."
 ChassisType: 0xD
 ChassisVersion: "Mac-CFF7D910A743CAAF"
 ChassisAssetTag: ""
-# FIXME:
 PlatformFeature: 0x20
-# FIXME:
-FirmwareFeatures: 0xFD8FF576
-# FIXME:
-FirmwareFeaturesMask: 0xFFDFFF7F
-# FIXME:
-ExtendedFirmwareFeatures: 0x00000008FD8FF576
-# FIXME:
-ExtendedFirmwareFeaturesMask: 0x00000008FFDFFF7F
+FirmwareFeatures: 0xFFB3F066
+FirmwareFeaturesMask: 0xFFFFFFFF
+ExtendedFirmwareFeatures: 0x00000008FFB3F066
+ExtendedFirmwareFeaturesMask: 0x00000008FFFFFFFF
 MemoryFormFactor: 0x9
 # FIXME: Correct this one
 ProcessorType:
@@ -54,17 +48,17 @@ SmcPlatform:
   - 0x00
 OEMStrings: |-
   Apple ROM Version
-    BIOS ID:      IM201.88Z.F000.B00.2110032038
+    BIOS ID:      IM201.88Z.F000.B00.2201062105
     Model:        IM201
-    EFI Version:  1715.40.15.0.0
-    Built by:     root@bb-g9-pdb19
-    Date:         Sun Oct  3 20:38:20 2021
-    Revision:     1715.40.15 (B&I)
+    EFI Version:  1715.81.2.0.0
+    Built by:     root@bb-g9-pdb99
+    Date:         Thu Jan  6 21:05:00 2022
+    Revision:     1715.81.2 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, RELEASE
-    Compiler:     clang-1300.0.29.1
-    UUID:         AE228DDB-6348-33A7-9676-34589F59DDA4
-    UUID:         18D36883-460E-3808-B747-E572E2BFA3DD
+    Compiler:     clang-1300.0.29.10
+    UUID:         13C51BE6-5189-3928-BBCC-7B599B46B014
+    UUID:         CFB42554-9B86-3045-847E-2F6F542BC6B7
 Specifications:
   CPUCodename:
     - "Comet Lake"
@@ -99,11 +93,13 @@ AppleModelCode:
   - "PN7C"
 # Note, first board code is used by macserial
 AppleBoardCode:
+  - "PHC1"
   - "PHCD"
 # Note, first year is used by macserial
 AppleModelYear:
   - 2020
   - 2021
+  - 2022
 MinimumOSVersion: "10.15.6"
 MaximumOSVersion: null
 AppleModelId: "J185"

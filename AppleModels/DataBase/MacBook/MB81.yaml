@@ -1,7 +1,7 @@
 BIOSVendor: "Apple Inc."
-BIOSVersion: "428.40.10.0.0"
-BIOSLegacyVersion: "MB81.88Z.F000.B00.2109250543"
-BIOSReleaseDate: "09/25/2021"
+BIOSVersion: "428.60.3.0.0"
+BIOSLegacyVersion: "MB81.88Z.F000.B00.2110271823"
+BIOSReleaseDate: "10/27/2021"
 SystemManufacturer: "Apple Inc."
 SystemProductName: "MacBook8,1"
 SystemVersion: "1.0"
@@ -76,13 +76,13 @@ SmcEPCI: 0xF0E007
 OEMStrings: |-
   Apple ROM Version
     Model:        MB81
-    EFI Version:  428.40.10.0.0
-    Built by:     root@bb-g8-pdb17
-    Date:         Sat Sep 25 05:43:10 PDT 2021
-    Revision:     428.40.10 (B&I)
+    EFI Version:  428.60.3.0.0
+    Built by:     root@bb-g8-pdb109
+    Date:         Wed Oct 27 18:23:38 PDT 2021
+    Revision:     428.60.3 (B&I)
     ROM Version:  F000_B00
     Build Type:   Official Build, Release
-    Compiler:     clang-1300.0.29.1
+    Compiler:     clang-1300.0.29.10
 Specifications:
   CPUCodename:
     - "Broadwell"
@@ -163,4 +163,4 @@ AppleModelYear:
   - 2015
   - 2016
 MinimumOSVersion: "10.10.2"
-MaximumOSVersion: "11.6.1"
+MaximumOSVersion: "11.6.3"

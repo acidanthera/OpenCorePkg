@@ -298,6 +298,19 @@ XmlNodePrepend (
   );
 
 /**
+  Unescape XML string.
+
+  @param[in]  String  Escaped string to be converted to unescaped.
+
+  @return     Unescaped XML string that must be freed manually,
+              or NULL on memory allocation failure.
+**/
+CONST CHAR8 *
+XmlUnescapeString (
+  IN      CONST CHAR8  *String
+  );
+
+/**
   Get the root node of the plist document.
 
   @param[in]  Document  A pointer to the plist document.

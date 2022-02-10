@@ -472,7 +472,7 @@
   gEfiAudioDecodeProtocolGuid                = { 0xAF3F6C23, 0x8132, 0x4880, { 0xB3, 0x29, 0x04, 0x8D, 0xF7, 0x1D, 0xD8, 0x6A }}
 
   ## Include/Acidanthera/Protocol/AudioIo.h
-  gEfiAudioIoProtocolGuid                    = { 0xF05B559C, 0x1971, 0x4AF5, { 0xB2, 0xAE, 0xD6, 0x08, 0x08, 0xF7, 0x4F, 0x70 }}
+  gEfiAudioIoProtocolGuid                    = { 0x22266891, 0x2032, 0x4BAE, { 0xB7, 0xB5, 0x43, 0x74, 0xE7, 0x32, 0x09, 0x49 }}
 
   ## Include/Acidanthera/Protocol/HdaCodecInfo.h
   gEfiHdaCodecInfoProtocolGuid               = { 0x6C9CDDE1, 0xE8A5, 0x43E5, { 0xBE, 0x88, 0xDA, 0x15, 0xBC, 0x1C, 0x02, 0x50 }}
@@ -697,26 +697,43 @@
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcNvramInitDevicePropertyDatabase|FALSE|BOOLEAN|0x00000001
 
-  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects itself when the Exit Boot Services
+  ## event is triggered.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect itself.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect itself.<BR>
   ## @Prompt Disconnect the USB KeyBoard Driver when exitting Boot Services.
   gOpenCorePkgTokenSpaceGuid.PcdEnableDisconnectOnExitBootServicesInUsbKbDriver|TRUE|BOOLEAN|0x00000002
 
-  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver registers a Apple KeyMap Database protocol installation notify.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ##   FALSE - USB KeyBoard Driver will registers a protocol installation notify.<BR>
   ## @Prompt Register a protocol installation notify for Apple KeyMap Database when not found initially.
   gOpenCorePkgTokenSpaceGuid.PcdNotifyAppleKeyMapDbInUsbKbDriver|TRUE|BOOLEAN|0x00000003
 
-  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.
-  ## Services event is triggered.<BR><BR>
+  ## Indicates if USB KeyBoard Driver disconnects other drivers to take precedence.<BR><BR>
   ##   TRUE  - USB KeyBoard Driver will disconnect other drivers.<BR>
   ##   FALSE - USB KeyBoard Driver will not disconnect other drivers.<BR>
   ## @Prompt Disconnect other drivers for the USB KeyBoard Driver to take precedence over them.
   gOpenCorePkgTokenSpaceGuid.PcdUsbKbDriverTakePrecedence|TRUE|BOOLEAN|0x00000004
+
+  ## Indicates whether audio codec setup code produces an error when no valid output bits are specified.<BR><BR>
+  ##   TRUE  - Produce an error.<BR>
+  ##   FALSE - No error, just play no sound.<BR>
+  ## @Prompt Audio codec setup code should produce an error when no valid output bits are specified.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs|TRUE|BOOLEAN|0x00000005
+
+  ## Indicates if AudioDxe will try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER
+  ## fails with access denied.<BR><BR>
+  ##   TRUE  - Use EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.<BR>
+  ##   FALSE - Do not use EFI_OPEN_PROTOCOL_GET_PROTOCOL.<BR>
+  ## @Prompt Try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerTryProtocolGetMode|FALSE|BOOLEAN|0x00000007
+
+  ## Indicates if AudioDxe will use Pin Capabilities to identify outputs.<BR><BR>
+  ##   TRUE  - Use Pin Capabilities to identify outputs.<BR>
+  ##   FALSE - Use default device type to identify outputs.<BR>
+  ## @Prompt Use Pin Capabilities to identify audio outputs.
+  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerUsePinCapsForOutputs|TRUE|BOOLEAN|0x00000008
 
 [PcdsFixedAtBuild]
   ## Defines the Console Control initialization mode set on entry.<BR><BR>

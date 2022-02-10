@@ -18,6 +18,9 @@
 
 #include <Protocol/AppleEvent.h>
 
+#define POINTER_POLL_DEFAULT    0
+#define POINTER_POLL_ALL_MASK   (UINT32)(-1)
+
 /**
   Install and initialise Apple Event protocol.
 
@@ -33,6 +36,9 @@
   @param[in] GraphicsInputMirroring If true, disable Apple default behaviour which can
                                     prevent keyboard input reaching non-Apple GUI UEFI apps.
                                     OC builtin AppleEvent only.
+  @param[in] PointerPollMin         Pointer polling minimal period in ms.
+  @param[in] PointerPollMax         Pointer polling maximum period in ms.
+  @param[in] PointerPollMask        Pointer polling mask to choose polled handles.
   @param[in] PointerSpeedDiv        Pointer speed divisor. If zero, warn and use 1.
   @param[in] PointerSpeedMul        Pointer speed multiplier.
 
@@ -46,6 +52,9 @@ OcAppleEventInstallProtocol (
   IN UINT16   KeyInitialDelay,
   IN UINT16   KeySubsequentDelay,
   IN BOOLEAN  GraphicsInputMirroring,
+  IN UINT32   PointerPollMin,
+  IN UINT32   PointerPollMax,
+  IN UINT32   PointerPollMask,
   IN UINT16   PointerSpeedDiv,
   IN UINT16   PointerSpeedMul
   );

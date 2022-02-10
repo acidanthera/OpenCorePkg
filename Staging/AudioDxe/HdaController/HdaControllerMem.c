@@ -23,9 +23,11 @@
  */
 
 #include "HdaController.h"
+#include "Library/OcHdaDevicesLib.h"
+#include "Library/OcMiscLib.h"
 #include <IndustryStandard/HdaRegisters.h>
 
-BOOLEAN
+EFI_STATUS
 HdaControllerInitRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer,
   IN HDA_CONTROLLER_DEV *HdaDev,
@@ -43,6 +45,8 @@ HdaControllerInitRingBuffer (
 
   UINTN                 BufferSizeActual;
 
+  UINT16                RintCnt;
+
   ASSERT (HdaRingBuffer != NULL);
   ASSERT (HdaDev != NULL);
 
@@ -53,7 +57,7 @@ HdaControllerInitRingBuffer (
     Offset          = HDA_REG_RIRB_BASE;
     EntrySize       = HDA_RIRB_ENTRY_SIZE;
   } else {
-    return FALSE;
+    return EFI_INVALID_PARAMETER;
   }
 
   HdaRingBuffer->HdaDev = HdaDev;
@@ -65,7 +69,7 @@ HdaControllerInitRingBuffer (
   //
   Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_SIZE, 1, &HdaRingSize);
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return Status;
   }
 
   //
@@ -84,7 +88,7 @@ HdaControllerInitRingBuffer (
     //
     // Unsupported size.
     //
-    return FALSE;
+    return EFI_UNSUPPORTED;
   }
 
   HdaRingBuffer->Buffer   = NULL;
@@ -96,8 +100,7 @@ HdaControllerInitRingBuffer (
   Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
     EFI_SIZE_TO_PAGES (HdaRingBuffer->BufferSize), &HdaRingBuffer->Buffer, 0);
   if (EFI_ERROR (Status)) {
-    HdaControllerCleanupRingBuffer (HdaRingBuffer);
-    return FALSE;
+    return Status;
   }
   ZeroMem (HdaRingBuffer->Buffer, HdaRingBuffer->BufferSize);
 
@@ -107,17 +110,19 @@ HdaControllerInitRingBuffer (
   BufferSizeActual = HdaRingBuffer->BufferSize;
   Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, HdaRingBuffer->Buffer,
     &BufferSizeActual, &HdaRingBuffer->PhysAddr, &HdaRingBuffer->Mapping);
-  if (EFI_ERROR (Status) || BufferSizeActual != HdaRingBuffer->BufferSize) {
-    HdaControllerCleanupRingBuffer (HdaRingBuffer);
-    return FALSE;
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+  if (BufferSizeActual != HdaRingBuffer->BufferSize) {
+    return EFI_NO_MAPPING;
   }
 
   //
   // Ensure ring buffer is stopped.
   //
-  if (!HdaControllerSetRingBufferState (HdaRingBuffer, FALSE)) {
-    HdaControllerCleanupRingBuffer (HdaRingBuffer);
-    return FALSE;
+  Status = HdaControllerSetRingBufferState (HdaRingBuffer, FALSE, Type);
+  if (EFI_ERROR (Status)) {
+    return Status;
   }
 
   //
@@ -126,8 +131,7 @@ HdaControllerInitRingBuffer (
   HdaRingLowerBaseAddr = (UINT32)HdaRingBuffer->PhysAddr;
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_BASE, 1, &HdaRingLowerBaseAddr);
   if (EFI_ERROR (Status)) {
-    HdaControllerCleanupRingBuffer (HdaRingBuffer);
-    return FALSE;
+    return Status;
   }
 
   //
@@ -137,28 +141,43 @@ HdaControllerInitRingBuffer (
     HdaRingUpperBaseAddr = (UINT32)(HdaRingBuffer->PhysAddr >> 32);
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_UBASE, 1, &HdaRingUpperBaseAddr);
     if (EFI_ERROR (Status)) {
-      HdaControllerCleanupRingBuffer (HdaRingBuffer);
-      return FALSE;
+      return Status;
     }
   }
 
   //
   // Reset ring buffer.
   //
-  if (!HdaControllerResetRingBuffer (HdaRingBuffer)) {
-    HdaControllerCleanupRingBuffer (HdaRingBuffer);
-    return FALSE;
+  Status = HdaControllerResetRingBuffer (HdaRingBuffer);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((
+      DEBUG_WARN,
+      "HDA: Reset %a - %r\n",
+      HdaRingBuffer->Type == HDA_RING_BUFFER_TYPE_CORB ? "CORB" : "RIRB",
+      Status
+      ));
+    return Status;
+  }
+
+  if (HdaRingBuffer->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_QEMU_1) {
+    RintCnt = 0x1;
+    Status = PciIo->Mem.Write(PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_RINTCNT, 1, &RintCnt);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   HdaRingBuffer->EntryCount = (UINT32)(HdaRingBuffer->BufferSize / EntrySize);
   DEBUG ((DEBUG_VERBOSE, "HDA controller ring buffer allocated @ 0x%p (0x%p) (%u entries)\n",
     HdaRingBuffer->Buffer, HdaRingBuffer->PhysAddr, HdaRingBuffer->EntryCount));
-  return TRUE;
+
+  return EFI_SUCCESS;
 }
 
 VOID
 HdaControllerCleanupRingBuffer (
-  IN HDA_RING_BUFFER    *HdaRingBuffer
+  IN HDA_RING_BUFFER      *HdaRingBuffer,
+  IN HDA_RING_BUFFER_TYPE Type
   )
 {
   EFI_PCI_IO_PROTOCOL   *PciIo;
@@ -177,7 +196,7 @@ HdaControllerCleanupRingBuffer (
   //
   // Unmap and free ring buffer.
   //
-  HdaControllerSetRingBufferState (HdaRingBuffer, FALSE);
+  HdaControllerSetRingBufferState (HdaRingBuffer, FALSE, Type);
   if (HdaRingBuffer->Mapping != NULL) {
     PciIo->Unmap (PciIo, HdaRingBuffer->Mapping);
   }
@@ -194,15 +213,17 @@ HdaControllerCleanupRingBuffer (
   HdaRingBuffer->HdaDev         = NULL;
 }
 
-BOOLEAN
+EFI_STATUS
 HdaControllerSetRingBufferState (
-  IN HDA_RING_BUFFER    *HdaRingBuffer,
-  IN BOOLEAN            Enable
+  IN HDA_RING_BUFFER      *HdaRingBuffer,
+  IN BOOLEAN              Enable,
+  IN HDA_RING_BUFFER_TYPE Type
   )
 {
   EFI_STATUS            Status;
   EFI_PCI_IO_PROTOCOL   *PciIo;
   UINT32                Offset;
+  UINT8                 CtlFlags;
   UINT8                 HdaRingCtl;
   UINT64                Tmp;
 
@@ -213,7 +234,7 @@ HdaControllerSetRingBufferState (
   } else if (HdaRingBuffer->Type == HDA_RING_BUFFER_TYPE_RIRB) {
     Offset = HDA_REG_RIRB_BASE;
   } else {
-    return FALSE;
+    return EFI_INVALID_PARAMETER;
   }
 
   //
@@ -221,29 +242,39 @@ HdaControllerSetRingBufferState (
   //
   Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_CTL, 1, &HdaRingCtl);
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return Status;
   }
 
+  CtlFlags = HDA_OFFSET_RING_CTL_RUN;
+  if (HdaRingBuffer->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_QEMU_1) {
+    CtlFlags |= HDA_REG_RIRBCTL_RINTCTL;
+  }
+  
   if (Enable) {
-    HdaRingCtl |= HDA_OFFSET_RING_CTL_RUN;
+    HdaRingCtl |= CtlFlags;
   }
   else {
-    HdaRingCtl &= ~HDA_OFFSET_RING_CTL_RUN;
+    HdaRingCtl &= ~CtlFlags;
   }
+
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_CTL, 1, &HdaRingCtl);
   if (EFI_ERROR (Status)) {
-    return FALSE;
+    return Status;
   }
 
   //
-  // Wait for bit to cycle indicating the ring buffer has started.
+  // Wait for bit to cycle indicating the ring buffer has stopped/started.
   //
   Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, Offset + HDA_OFFSET_RING_CTL, HDA_OFFSET_RING_CTL_RUN,
-    Enable ? HDA_OFFSET_RING_CTL_RUN : 0, MS_TO_NANOSECOND (50), &Tmp);
-  return !EFI_ERROR (Status);
+    Enable ? HDA_OFFSET_RING_CTL_RUN : 0, MS_TO_NANOSECONDS (50), &Tmp);
+  if (EFI_ERROR (Status)) {
+    return Status;
+  }
+
+  return EFI_SUCCESS;
 }
 
-BOOLEAN
+EFI_STATUS
 HdaControllerResetRingBuffer (
   IN HDA_RING_BUFFER    *HdaRingBuffer
   )
@@ -265,16 +296,22 @@ HdaControllerResetRingBuffer (
     HdaRingPointer = 0;
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBWP, 1, &HdaRingPointer);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
     }
 
     //
-    // Set reset bit in read pointer register.
+    // Set reset bit in read pointer register, and per spec wait for bit to set.
     //
     HdaRingPointer = HDA_REG_CORBRP_RST;
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, 1, &HdaRingPointer);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
+    }
+    if (!(HdaRingBuffer->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_CORB_NO_POLL_RESET)) {
+      Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, HDA_REG_CORBRP_RST, HDA_REG_CORBRP_RST, MS_TO_NANOSECONDS (50), &HdaRingPointerPollResult);
+      if (EFI_ERROR (Status)) {
+        return Status;
+      }
     }
 
     //
@@ -283,35 +320,33 @@ HdaControllerResetRingBuffer (
     HdaRingPointer = 0;
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, 1, &HdaRingPointer);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
     }
-    Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, HDA_REG_CORBRP_RST, 0, 50000000, &HdaRingPointerPollResult); // 50000000 = 50 ms
+    Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_CORBRP, HDA_REG_CORBRP_RST, 0, MS_TO_NANOSECONDS (50), &HdaRingPointerPollResult);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
     }
-
   } else if (HdaRingBuffer->Type == HDA_RING_BUFFER_TYPE_RIRB) {
     //
     // RIRB requires only the reset bit be set.
     //
     Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_RIRBWP, 1, &HdaRingPointer);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
     }
     HdaRingPointer |= HDA_REG_RIRBWP_RST;
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint16, PCI_HDA_BAR, HDA_REG_RIRBWP, 1, &HdaRingPointer);
     if (EFI_ERROR (Status)) {
-      return FALSE;
+      return Status;
     }
-
   } else {
-    return FALSE;
+    return EFI_INVALID_PARAMETER;
   }
 
-  return TRUE;
+  return EFI_SUCCESS;
 }
 
-BOOLEAN
+EFI_STATUS
 HdaControllerInitStreams (
   IN HDA_CONTROLLER_DEV *HdaDev
   )
@@ -353,8 +388,7 @@ HdaControllerInitStreams (
   HdaDev->StreamsCount    = OutputStreamsCount + BidirStreamsCount;
   HdaDev->Streams         = AllocateZeroPool (sizeof (HDA_STREAM) * HdaDev->StreamsCount);
   if (HdaDev->Streams == NULL) {
-    HdaControllerCleanupStreams (HdaDev);
-    return FALSE;
+    return EFI_OUT_OF_RESOURCES;
   }
   DEBUG ((DEBUG_VERBOSE, "AudioDxe: Total output-capable streams: %u\n", HdaDev->StreamsCount));
 
@@ -365,13 +399,18 @@ HdaControllerInitStreams (
     HdaStream->IsBidirectional  = Index + OutputStreamsOffset >= BidirStreamsOffset;
 
     //
+    // Set this once Index is valid and before doing anything which requires cleanup.
+    //
+    HdaStream->HasIndex         = TRUE;
+
+    //
     // Initialize polling timer.
     //
     Status = gBS->CreateEvent (EVT_TIMER | EVT_NOTIFY_SIGNAL, TPL_NOTIFY,
       (EFI_EVENT_NOTIFY)HdaControllerStreamOutputPollTimerHandler, HdaStream, &HdaStream->PollTimer);
     if (EFI_ERROR (Status)) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      HdaStream->PollTimer = NULL;
+      return Status;
     }
 
     //
@@ -380,8 +419,7 @@ HdaControllerInitStreams (
     Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData, EFI_SIZE_TO_PAGES (HDA_BDL_SIZE),
       (VOID**)&HdaStream->BufferList, 0);
     if (EFI_ERROR (Status)) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return Status;
     }
     ZeroMem (HdaStream->BufferList, HDA_BDL_SIZE);
 
@@ -392,13 +430,11 @@ HdaControllerInitStreams (
     Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, HdaStream->BufferList, &PciLengthActual,
       &HdaStream->BufferListPhysAddr, &HdaStream->BufferListMapping);
     if (EFI_ERROR (Status) || PciLengthActual != HDA_BDL_SIZE) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return Status;
     }
 
     if (!HdaControllerResetStream (HdaStream)) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return EFI_UNSUPPORTED;
     }
 
     //
@@ -407,8 +443,7 @@ HdaControllerInitStreams (
     Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData, EFI_SIZE_TO_PAGES (HDA_STREAM_BUF_SIZE),
       (VOID**)&HdaStream->BufferData, 0);
     if (EFI_ERROR (Status)) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return Status;
     }
     ZeroMem (HdaStream->BufferData, HDA_STREAM_BUF_SIZE);
 
@@ -419,8 +454,7 @@ HdaControllerInitStreams (
     Status = PciIo->Map(PciIo, EfiPciIoOperationBusMasterCommonBuffer, HdaStream->BufferData, &PciLengthActual,
       &HdaStream->BufferDataPhysAddr, &HdaStream->BufferDataMapping);
     if (EFI_ERROR (Status) || PciLengthActual != HDA_STREAM_BUF_SIZE) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return Status;
     }
 
     //
@@ -442,8 +476,7 @@ HdaControllerInitStreams (
   Status = PciIo->AllocateBuffer (PciIo, AllocateAnyPages, EfiBootServicesData,
     EFI_SIZE_TO_PAGES (HdaDev->DmaPositionsSize), (VOID**)&HdaDev->DmaPositions, 0);
   if (EFI_ERROR(Status)) {
-    HdaControllerCleanupStreams (HdaDev);
-    return FALSE;
+    return Status;
   }
   ZeroMem (HdaDev->DmaPositions, HdaDev->DmaPositionsSize);
 
@@ -452,8 +485,7 @@ HdaControllerInitStreams (
   Status = PciIo->Map (PciIo, EfiPciIoOperationBusMasterCommonBuffer, HdaDev->DmaPositions,
     &PciLengthActual, &HdaDev->DmaPositionsPhysAddr, &HdaDev->DmaPositionsMapping);
   if (EFI_ERROR (Status) || PciLengthActual != HdaDev->DmaPositionsSize) {
-    HdaControllerCleanupStreams (HdaDev);
-    return FALSE;
+    return Status;
   }
 
   //
@@ -462,8 +494,7 @@ HdaControllerInitStreams (
   LowerBaseAddr = ((UINT32)HdaDev->DmaPositionsPhysAddr) | HDA_REG_DPLBASE_EN;
   Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_DPLBASE, 1, &LowerBaseAddr);
   if (EFI_ERROR (Status)) {
-    HdaControllerCleanupStreams (HdaDev);
-    return FALSE;
+    return Status;
   }
 
   //
@@ -473,12 +504,11 @@ HdaControllerInitStreams (
     UpperBaseAddr = (UINT32)(HdaDev->DmaPositionsPhysAddr >> 32);
     Status = PciIo->Mem.Write (PciIo, EfiPciIoWidthUint32, PCI_HDA_BAR, HDA_REG_DPUBASE, 1, &UpperBaseAddr);
     if (EFI_ERROR (Status)) {
-      HdaControllerCleanupStreams (HdaDev);
-      return FALSE;
+      return Status;
     }
   }
 
-  return TRUE;
+  return EFI_SUCCESS;
 }
 
 BOOLEAN
@@ -517,10 +547,12 @@ HdaControllerResetStream (
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
-  Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNCTL1 (HdaStream->Index),
-    HDA_REG_SDNCTL1_SRST, HDA_REG_SDNCTL1_SRST, MS_TO_NANOSECOND (100), &Tmp);
-  if (EFI_ERROR (Status)) {
-    return FALSE;
+  if (!(HdaStream->HdaDev->Quirks & HDA_CONTROLLER_QUIRK_QEMU_2)) {
+    Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNCTL1 (HdaStream->Index),
+      HDA_REG_SDNCTL1_SRST, HDA_REG_SDNCTL1_SRST, MS_TO_NANOSECONDS (100), &Tmp);
+    if (EFI_ERROR (Status)) {
+      return FALSE;
+    }
   }
   Status = PciIo->Mem.Read (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNCTL1 (HdaStream->Index), 1, &HdaStreamCtl1);
   if (EFI_ERROR (Status)) {
@@ -536,7 +568,7 @@ HdaControllerResetStream (
     return FALSE;
   }
   Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNCTL1 (HdaStream->Index),
-    HDA_REG_SDNCTL1_SRST, 0, MS_TO_NANOSECOND (100), &Tmp);
+    HDA_REG_SDNCTL1_SRST, 0, MS_TO_NANOSECONDS (100), &Tmp);
   if (EFI_ERROR (Status)) {
     return FALSE;
   }
@@ -628,9 +660,19 @@ HdaControllerCleanupStreams (
       HdaStream = &HdaDev->Streams[Index];
 
       //
+      // Is stream at a stage where it can be torn down safely?
+      //
+      if (!HdaStream->HasIndex) {
+        break;
+      }
+
+      //
       // Close poll timer and disable stream.
       //
-      gBS->CloseEvent (HdaStream->PollTimer);
+      if (HdaStream->PollTimer != NULL) {
+        gBS->CloseEvent (HdaStream->PollTimer);
+        HdaStream->PollTimer = NULL;
+      }
       HdaControllerSetStreamState (HdaStream, FALSE);
       HdaControllerSetStreamId (HdaStream, 0);
 
@@ -746,7 +788,7 @@ HdaControllerSetStreamState (
     return FALSE;
   }
   Status = PciIo->PollMem (PciIo, EfiPciIoWidthUint8, PCI_HDA_BAR, HDA_REG_SDNCTL1 (HdaStream->Index),
-    HDA_REG_SDNCTL1_RUN, HdaStreamCtl1 & HDA_REG_SDNCTL1_RUN, MS_TO_NANOSECOND (10), &Tmp);
+    HDA_REG_SDNCTL1_RUN, HdaStreamCtl1 & HDA_REG_SDNCTL1_RUN, MS_TO_NANOSECONDS (10), &Tmp);
   return !EFI_ERROR (Status);
 }
 
