@@ -193,11 +193,13 @@ OcGetLegacySecureBootECID (
   Obtain default Secure Boot hardware model.
 
   @param[in]  Config   Configuration.
+  @param[in]  CpuInfo  CPU information.
   @return Apple Secure Boot model.
 **/
 CONST CHAR8 *
 OcGetDefaultSecureBootModel (
-  IN  OC_GLOBAL_CONFIG    *Config
+  IN  OC_GLOBAL_CONFIG    *Config,
+  IN  OC_CPU_INFO         *CpuInfo
   );
 
 /**

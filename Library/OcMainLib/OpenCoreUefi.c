@@ -445,9 +445,11 @@ OcReinstallProtocols (
   }
 }
 
+STATIC
 VOID
 OcLoadAppleSecureBoot (
-  IN OC_GLOBAL_CONFIG  *Config
+  IN OC_GLOBAL_CONFIG  *Config,
+  IN OC_CPU_INFO       *CpuInfo
   )
 {
   EFI_STATUS                  Status;
@@ -459,7 +461,7 @@ OcLoadAppleSecureBoot (
 
   SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
   if (AsciiStrCmp (SecureBootModel, OC_SB_MODEL_DEFAULT) == 0 || SecureBootModel[0] == '\0') {
-    SecureBootModel = OcGetDefaultSecureBootModel (Config);
+    SecureBootModel = OcGetDefaultSecureBootModel (Config, CpuInfo);
   }
 
   RealSecureBootModel = OcAppleImg4GetHardwareModel (SecureBootModel);
@@ -842,7 +844,7 @@ OcLoadUefiSupport (
 
   OcImageLoaderInit (Config->Booter.Quirks.ProtectUefiServices);
 
-  OcLoadAppleSecureBoot (Config);
+  OcLoadAppleSecureBoot (Config, CpuInfo);
 
   OcLoadUefiInputSupport (Config);
 
