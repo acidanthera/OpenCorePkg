@@ -371,12 +371,12 @@ PatcherExcludePrelinkedKext (
   IN OUT PRELINKED_CONTEXT      *PrelinkedContext
   )
 {
-  MACH_SEGMENT_COMMAND_ANY  *Segment;
-  VOID                      *KextData;
-  UINT64                    AddressMax;
-  UINT64                    VirtualAddress;
-  UINT64                    Size;
-  UINT64                    MaxSize;
+  // MACH_SEGMENT_COMMAND_ANY  *Segment;
+  // VOID                      *KextData;
+  // UINT64                    AddressMax;
+  // UINT64                    VirtualAddress;
+  // UINT64                    Size;
+  // UINT64                    MaxSize;
   UINT32                    KextCount;
   UINT32                    Index;
   UINT32                    Index2;
@@ -394,32 +394,32 @@ PatcherExcludePrelinkedKext (
   //
   // Zero out kext memory through PatcherContext->MachContext.
   //
-  Segment    = NULL;
-  AddressMax = 0;
-  MaxSize    = 0;
-  while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
-    VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
-    Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
-    AddressMax     = MAX (VirtualAddress + Size, AddressMax);
-  }
-  MaxSize    = AddressMax - PatcherContext->VirtualBase;
+  // Segment    = NULL;
+  // AddressMax = 0;
+  // MaxSize    = 0;
+  // while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
+  //   VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+  //   Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
+  //   AddressMax     = MAX (VirtualAddress + Size, AddressMax);
+  // }
+  // MaxSize    = AddressMax - PatcherContext->VirtualBase;
 
-  KextData = MachoGetFilePointerByAddress (
-    &PatcherContext->MachContext,
-    PatcherContext->VirtualBase,
-    NULL
-    );
-  if (KextData == NULL) {
-    return EFI_UNSUPPORTED;
-  }
-  DEBUG ((
-    DEBUG_INFO,
-    "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
-    Identifier,
-    PatcherContext->VirtualBase,
-    MaxSize
-    ));
-  ZeroMem (KextData, (UINTN) MaxSize);
+  // KextData = MachoGetFilePointerByAddress (
+  //   &PatcherContext->MachContext,
+  //   PatcherContext->VirtualBase,
+  //   NULL
+  //   );
+  // if (KextData == NULL) {
+  //   return EFI_UNSUPPORTED;
+  // }
+  // DEBUG ((
+  //   DEBUG_INFO,
+  //   "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
+  //   Identifier,
+  //   PatcherContext->VirtualBase,
+  //   MaxSize
+  //   ));
+  // ZeroMem (KextData, (UINTN) MaxSize);
 
   //
   // Find kext info to be removed in prelinked context.
