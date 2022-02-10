@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Tue Jan 11 11:01:53 2022
-%DIF ADD ../Configuration.tex        Fri Jan 21 10:22:04 2022
+%DIF DEL PreviousConfiguration.tex   Wed Feb  9 09:37:10 2022
+%DIF ADD ../Configuration.tex        Wed Feb  9 23:42:58 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -154,7 +154,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7\DIFdelbegin \DIFdel{.7}\DIFdelend \DIFaddbegin \DIFadd{.8}\DIFaddend )
+       Reference Manual (0.7\DIFdelbegin \DIFdel{.8}\DIFdelend \DIFaddbegin \DIFadd{.9}\DIFaddend )
 
        \vspace{0.2in}
 
@@ -3320,37 +3320,36 @@ the default boot entry choice will remain changed until the next manual reconfig
   option. Therefore, for significant implementation updates, such as was the case with OpenCore 0.6.4,
   an NVRAM reset should be executed with \texttt{Bootstrap} disabled, after which it can be re-enabled.
 
-  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby if any boot
+  \emph{Note 3}: Some versions of Intel Visual BIOS (e.g. on Intel NUC) have an unfortunate bug whereby if any boot
   option is added referring to a path on a USB drive, from then on that is the only boot option which will be shown
   when any USB drive is inserted. If OpenCore is started from a USB drive on this firmware with
-  }\texttt{\DIFadd{LauncherOption}} \DIFadd{set to }\texttt{\DIFadd{Full}} \DIFadd{or }\texttt{\DIFadd{Short}}\DIFadd{, this applies and only the OpenCore boot entry will be
+  \texttt{LauncherOption} set to \texttt{Full} or \texttt{Short}, this applies and only the OpenCore boot entry will be
   seen afterwards, when any other USB is inserted (this highly non-standard BIOS behaviour affects other software as well).
-  The best way to avoid this is to leave }\texttt{\DIFadd{LauncherOption}} \DIFadd{set to }\texttt{\DIFadd{Disabled}} \DIFadd{or }\texttt{\DIFadd{System}} \DIFadd{on any
+  The best way to avoid this is to leave \texttt{LauncherOption} set to \texttt{Disabled} or \texttt{System} on any
   version of OpenCore which will be started from a USB drive on this firmware. If the problem has already
   occurred the quickest reliable fix is:
-  }\begin{itemize}
+  \begin{itemize}
   \tightlist
-    \DIFaddend \item \DIFaddbegin \DIFadd{Enable the system UEFI Shell in Intel Visual BIOS
-    }\item \DIFadd{With power off, insert an OpenCore USB
-    }\item \DIFadd{Power up and select the system UEFI Shell
-    }\item \DIFadd{Since the system shell does not include }\texttt{\DIFadd{bcfg}}\DIFadd{, use the system shell to start OpenCore's OpenShell
-    (e.g. by entering the command }\texttt{\DIFadd{FS2:\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenShell.efi}} \DIFadd{,
-    but you will need to work out which drive is correct for OpenCore and modify the drive number }\texttt{\DIFadd{FS\#:}} \DIFadd{accordingly)
-    }\item \DIFadd{Within OpenShell, use }\texttt{\DIFadd{bcfg boot dump}} \DIFadd{to display the NVRAM boot options and then use }\texttt{\DIFadd{bcfg boot rm \#}}
-    \DIFadd{(where }\texttt{\DIFadd{\#}} \DIFadd{is the number of the OpenCore boot entry) to remove the OpenCore entry
-  }\end{itemize}
-  \DIFadd{It is alternatively possible to start OpenShell directly from the OpenCore boot menu, if you have
-  a working configured OpenCore for the system. In that case, and if OpenCore has }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{enabled, it will be
-  necessary to run the command }\texttt{\DIFadd{\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenControl.efi disable}}
-  \DIFadd{before using }\texttt{\DIFadd{bcfg}}\DIFadd{. (After }\texttt{\DIFadd{OpenControl disable}}\DIFadd{, it is necessary to either reboot or run }\texttt{\DIFadd{OpenControl restore}}\DIFadd{,
+    \item Enable the system UEFI Shell in Intel Visual BIOS
+    \item With power off, insert an OpenCore USB
+    \item Power up and select the system UEFI Shell
+    \item Since the system shell does not include \texttt{bcfg}, use the system shell to start OpenCore's OpenShell
+    (e.g. by entering the command \texttt{FS2:\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenShell.efi} ,
+    but you will need to work out which drive is correct for OpenCore and modify the drive number \texttt{FS\#:} accordingly)
+    \item Within OpenShell, use \texttt{bcfg boot dump} to display the NVRAM boot options and then use \texttt{bcfg boot rm \#}
+    (where \texttt{\#} is the number of the OpenCore boot entry) to remove the OpenCore entry
+  \end{itemize}
+  It is alternatively possible to start OpenShell directly from the OpenCore boot menu, if you have
+  a working configured OpenCore for the system. In that case, and if OpenCore has \texttt{RequestBootVarRouting} enabled, it will be
+  necessary to run the command \texttt{\textbackslash EFI\textbackslash OC\textbackslash Tools\textbackslash OpenControl.efi disable}
+  before using \texttt{bcfg}. (After \texttt{OpenControl disable}, it is necessary to either reboot or run \texttt{OpenControl restore},
   before booting an operating system.)
-  It is also possible to use }\texttt{\DIFadd{efibootmgr}} \DIFadd{within Linux to remove the offending entry, if you have a working
-  version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with }\texttt{\DIFadd{RequestBootVarRouting}} \DIFadd{disabled
+  It is also possible to use \texttt{efibootmgr} within Linux to remove the offending entry, if you have a working
+  version of Linux on the machine. Linux must be started either not via OpenCore, or via OpenCore with \texttt{RequestBootVarRouting} disabled
   for this to work.
-  }
 
 \item
-  \DIFaddend \texttt{LauncherPath}\\
+  \texttt{LauncherPath}\\
   \textbf{Type}: \texttt{plist\ string}\\
   \textbf{Failsafe}: \texttt{Default}\\
   \textbf{Description}: Launch path for the \texttt{LauncherOption} property.
@@ -3403,13 +3402,13 @@ the default boot entry choice will remain changed until the next manual reconfig
     OpenCore picker behaviour for that drive of selecting the appropriate icon depending
     on whether the drive is internal or external. \medskip
 
-  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, \DIFdelbegin \DIFdel{provides }\DIFdelend \DIFaddbegin \DIFadd{use }\DIFaddend custom
+  \item \texttt{0x0002} --- \texttt{OC\_ATTR\_USE\_DISK\_LABEL\_FILE}, use custom
     prerendered titles for boot entries from \texttt{.disk\_label} (\texttt{.disk\_label\_2x})
     file next to the bootloader for all filesystems.
-    \DIFdelbegin \DIFdel{Prerendered }\DIFdelend \DIFaddbegin \DIFadd{These }\DIFaddend labels can be generated via the \texttt{disklabel} utility or the
-    \texttt{bless \DIFaddbegin \DIFadd{-}{}\DIFadd{-folder \{FOLDER\_PATH\} -}{}\DIFadd{-label \{LABEL\_TEXT\}}\DIFaddend } command.
-    When \DIFaddbegin \DIFadd{prerendered labels are }\DIFaddend disabled or missing, \DIFaddbegin \DIFadd{use }\DIFaddend label text in \DIFdelbegin \DIFdel{(}\DIFdelend \texttt{.contentDetails}
-    \DIFaddbegin \DIFadd{(}\DIFaddend or \texttt{.disk\_label.contentDetails}) \DIFdelbegin \DIFdel{will be rendered }\DIFdelend \DIFaddbegin \DIFadd{file next to bootloader }\DIFaddend if present instead, otherwise
+    These labels can be generated via the \texttt{disklabel} utility or the
+    \texttt{bless -{}-folder \{FOLDER\_PATH\} -{}-label \{LABEL\_TEXT\}} command.
+    When prerendered labels are disabled or missing, use label text in \texttt{.contentDetails}
+    (or \texttt{.disk\_label.contentDetails}) file next to bootloader if present instead, otherwise
     the entry name itself will be rendered.
   \item \texttt{0x0004} --- \texttt{OC\_ATTR\_USE\_GENERIC\_LABEL\_IMAGE}, provides predefined
     label images for boot entries without custom entries. This may however give less detail for
@@ -3436,11 +3435,11 @@ the default boot entry choice will remain changed until the next manual reconfig
     \begin{itemize}
     \tightlist
       \item For a Tool the value is read from \texttt{Flavour} field.
-      \item For an automatically discovered entry\DIFaddbegin \DIFadd{, including for boot entry protocol entries such as those
-      generated by the OpenLinuxBoot driver, }\DIFaddend it is read from the \texttt{.contentFlavour}
+      \item For an automatically discovered entry, including for boot entry protocol entries such as those
+      generated by the OpenLinuxBoot driver, it is read from the \texttt{.contentFlavour}
       file next to the bootloader, if present.
-      \item For a custom entry \DIFaddbegin \DIFadd{specified in the }\texttt{\DIFadd{Entries}} \DIFadd{section }\DIFaddend it is read from the \texttt{.contentFlavour} file next to the
-      bootloader if \texttt{Flavour} is \texttt{Auto}, otherwise \DIFaddbegin \DIFadd{it is }\DIFaddend specified via the \texttt{Flavour}
+      \item For a custom entry specified in the \texttt{Entries} section it is read from the \texttt{.contentFlavour} file next to the
+      bootloader if \texttt{Flavour} is \texttt{Auto}, otherwise it is specified via the \texttt{Flavour}
       value itself.
       \item If read flavour is \texttt{Auto} or there is no \texttt{.contentFlavour}, entry
       flavour is chosen based on the entry type (e.g. Windows automatically gets Windows flavour).
@@ -3943,43 +3942,27 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   entry for disabling and enabling System Integrity Protection in OpenCore picker.
 
   This will toggle Apple NVRAM variable \texttt{csr-active-config} between \texttt{0} for
-  SIP Enabled and a practical default value for SIP Disabled\DIFdelbegin \DIFdel{(currently }\texttt{\DIFdel{0x26F}}%DIFAUXCMD
-\DIFdel{)}\DIFdelend .
+  SIP Enabled and a practical default value for SIP Disabled.
 
   \emph{Note 1}: It is strongly recommended not to make a habit of running macOS with
   SIP disabled. Use of this boot option may make it easier to quickly disable SIP
   protection when genuinely needed - it should be re-enabled again afterwards.
 
-  \emph{Note 2}: OpenCore uses \texttt{\DIFdelbegin \DIFdel{0x26F}\DIFdelend \DIFaddbegin \DIFadd{0x27F}\DIFaddend } \DIFdelbegin \DIFdel{even though }\DIFdelend \DIFaddbegin \DIFadd{while }\DIFaddend \texttt{csrutil disable} on \DIFdelbegin \DIFdel{Big Sur
-  }\DIFdelend \DIFaddbegin \DIFadd{macOS Big Sur
-  and Monterey }\DIFaddend sets \texttt{0x7F}.
-  \DIFdelbegin \DIFdel{To explain the choice:
-  }\DIFdelend \begin{itemize}
+  \emph{Note 2}: OpenCore uses \texttt{0x27F} while \texttt{csrutil disable} on macOS Big Sur
+  and Monterey sets \texttt{0x7F}.
+  \begin{itemize}
   \tightlist
-  \item \DIFdelbegin \texttt{\DIFdel{csrutil disable -}%DIFDELCMD < {}%%%
-\DIFdel{-no-internal}} %DIFAUXCMD
-\DIFdel{actually sets }\texttt{\DIFdel{0x6F}}%DIFAUXCMD
-\DIFdel{, and this is
-  preferable because }\texttt{\DIFdel{CSR\_ALLOW\_APPLE\_INTERNAL}} %DIFAUXCMD
-\DIFdel{(}\texttt{\DIFdel{0x10}}%DIFAUXCMD
-\DIFdel{) prevents updates
-  (unless you are running an internal build of macOS).
-  }%DIFDELCMD < \item %%%
-\item %DIFAUXCMD
-\DIFdelend \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
-  where you do need to have SIP disabled \DIFaddbegin \DIFadd{anyway}\DIFaddend , as it allows installing unsigned kexts without
+  \item \texttt{CSR\_ALLOW\_UNAPPROVED\_KEXTS} (\texttt{0x200}) is generally useful, in the case
+  where you do need to have SIP disabled anyway, as it allows installing unsigned kexts without
   manual approval in System Preferences.
-  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not \DIFdelbegin \DIFdel{practical as it prevents
-  incremental (non-full) }\DIFdelend \DIFaddbegin \DIFadd{included, as it is
-  very easy when using it to inadvertently break OS seal and prevent incremental }\DIFaddend OTA updates.
+  \item \texttt{CSR\_ALLOW\_UNAUTHENTICATED\_ROOT} (\texttt{0x800}) is not included, as it is
+  very easy when using it to inadvertently break OS seal and prevent incremental OTA updates.
   \end{itemize}
 
   \emph{Note3}: For any other value which you may need to use, it is possible to
   configure \texttt{CsrUtil.efi} as a \texttt{TextMode} \texttt{Tools} entry to configure a
-  different value, e.g. use \texttt{toggle\ \DIFdelbegin \DIFdel{0x6F}\DIFdelend \DIFaddbegin \DIFadd{0x77}\DIFaddend } in \texttt{Arguments} to toggle the
-  SIP disabled value set by default \DIFdelbegin \DIFdel{by }\texttt{\DIFdel{csrutil disable -}%DIFDELCMD < {}%%%
-\DIFdel{-no-internal}} %DIFAUXCMD
-\DIFdel{in Big Sur}\DIFdelend \DIFaddbegin \DIFadd{in macOS Catalina}\DIFaddend .
+  different value, e.g. use \texttt{toggle\ 0x77} in \texttt{Arguments} to toggle the
+  SIP disabled value set by default in macOS Catalina.
 
 \item
   \texttt{ApECID}\\
@@ -6426,41 +6409,32 @@ failure (typically halting with a black screen) of the Linux kernel, due to a fi
 firmware released after 2017. When present and not mitigated by this quirk, this affects booting
 via OpenCore with or without OpenLinuxBoot.
 
-After installing OpenLinuxBoot, it is recommended to compare the \DIFdelbegin \DIFdel{Linux boot options (shown with }\texttt{\DIFdel{cat /proc/cmdline}}%DIFAUXCMD
-\DIFdel{) seen when booting via OpenLinuxBoot and via the distro's original bootloader.
-}\DIFdelend \DIFaddbegin \DIFadd{options shown in the OpenCore debug
+After installing OpenLinuxBoot, it is recommended to compare the options shown in the OpenCore debug
 log when booting (or attempting to boot) a given distro against the options seen using the shell command
-}\texttt{\DIFadd{cat /proc/cmdline}} \DIFadd{when the same distro has been booted via its native bootloader.
+\texttt{cat /proc/cmdline} when the same distro has been booted via its native bootloader.
 In general (for safety and security of the running distro) these options should match, and if they do not
-it is recommended to use the driver arguments below (in particular }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RO}}\DIFadd{,
-}\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RW}}\DIFadd{, }\texttt{\DIFadd{partuuidopts}} \DIFadd{and }\texttt{\DIFadd{autoopts}}\DIFadd{) to modify the options as required.
+it is recommended to use the driver arguments below (in particular \texttt{LINUX\_BOOT\_ADD\_RO},
+\texttt{LINUX\_BOOT\_ADD\_RW}, \texttt{partuuidopts} and \texttt{autoopts}) to modify the options as required.
 Note however that the following differences are normal and do not need to be fixed:
-}\begin{itemize}
+\begin{itemize}
 \tightlist
   \item
-  \DIFaddend If the default bootloader is GRUB \DIFdelbegin \DIFdel{, expect }\DIFdelend \DIFaddbegin \DIFadd{then }\DIFaddend the options generated by OpenLinuxBoot \DIFdelbegin \DIFdel{not to
-}\DIFdelend \DIFaddbegin \DIFadd{will not }\DIFaddend contain a
-  \texttt{BOOT\_IMAGE=...} value where the GRUB options do, and \DIFdelbegin \DIFdel{to }\DIFdelend \DIFaddbegin \DIFadd{will }\DIFaddend contain an \texttt{initrd=...}
-  value \DIFdelbegin \DIFdel{while }\DIFdelend \DIFaddbegin \DIFadd{where }\DIFaddend the GRUB options do not.
-  \DIFdelbegin \DIFdel{All remaining options should match (option order does not matter) -- perhaps excluding less }\DIFdelend \DIFaddbegin \item
-  \DIFadd{OpenLinuxBoot uses }\texttt{\DIFadd{PARTUUID}} \DIFadd{rather than filesystem }\texttt{\DIFadd{UUID}} \DIFadd{to identify the location
-  of }\texttt{\DIFadd{initrd}}\DIFadd{, this is by design as UEFI filesystem drivers do not make Linux filesystem
-  }\texttt{\DIFadd{UUID}} \DIFadd{values available.
-  }\item
-  \DIFadd{Less }\DIFaddend important graphics handover options (such as \DIFaddbegin \DIFadd{discussed }\DIFaddend in the Ubuntu example
-  given in \texttt{autoopts} below) \DIFdelbegin \DIFdel{. If they do not , it is recommended
-to manually add the missing options, e.g. with }\texttt{\DIFdel{partuuidopts:\{partuuid\}+=\{opts\}}} %DIFAUXCMD
-\DIFdel{to target a specific
-distro (or just with }\texttt{\DIFdel{autoopts+=\{opts\}}}%DIFAUXCMD
-\DIFdel{, which applies to all installed distros, if only one distro is in use).
-}\DIFdelend \DIFaddbegin \DIFadd{will not match exactly, this is not important as long
+  If the default bootloader is GRUB then the options generated by OpenLinuxBoot will not contain a
+  \texttt{BOOT\_IMAGE=...} value where the GRUB options do, and will contain an \texttt{initrd=...}
+  value where the GRUB options do not.
+  \item
+  OpenLinuxBoot uses \texttt{PARTUUID} rather than filesystem \texttt{UUID} to identify the location
+  of \texttt{initrd}, this is by design as UEFI filesystem drivers do not make Linux filesystem
+  \texttt{UUID} values available.
+  \item
+  Less important graphics handover options (such as discussed in the Ubuntu example
+  given in \texttt{autoopts} below) will not match exactly, this is not important as long
   as distro boots successfully.
-}\end{itemize}
-\DIFaddend 
+\end{itemize}
 
 If using OpenLinuxBoot with Secure Boot, users may wish to use the \texttt{shim-to-cert.tool} included in OpenCore
-utilities, which can be used to extract the \DIFdelbegin \DIFdel{required public key to validate }\DIFdelend \DIFaddbegin \DIFadd{public key needed to boot }\DIFaddend a distro's kernels directly, \DIFaddbegin \DIFadd{as done when using OpenCore
-with OpenLinuxBoot, }\DIFaddend rather than via \DIFaddbegin \DIFadd{GRUB }\DIFaddend shim. For non-GRUB distros, the required public key must be found by user research.
+utilities, which can be used to extract the public key needed to boot a distro's kernels directly, as done when using OpenCore
+with OpenLinuxBoot, rather than via GRUB shim. For non-GRUB distros, the required public key must be found by user research.
 
 \subsubsection{Configuration}
 
@@ -6516,28 +6490,26 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 	  \emph{Note}: This option is recommended on all systems. \medskip
 
 	  \item \texttt{0x00000400} (bit \texttt{10}) --- \texttt{LINUX\_BOOT\_ADD\_RO},
-	  This option applies to autodetected Linux only (i.e. \DIFdelbegin \DIFdel{to Debian-style distrubutions, }\DIFdelend not to BLSpec \DIFdelbegin \DIFdel{and
-    }\DIFdelend \DIFaddbegin \DIFadd{or
-    }\DIFaddend Fedora-style distributions \DIFdelbegin \DIFdel{with }\DIFdelend \DIFaddbegin \DIFadd{which have }\DIFaddend \texttt{/loader/entries/*.conf} files).
-    Some \DIFdelbegin \DIFdel{distrubtions }\DIFdelend \DIFaddbegin \DIFadd{distributions }\DIFaddend run a filesystem check on loading which requires the root
-    filesystem to initially be mounted read-only via the \texttt{ro} kernel option\DIFaddbegin \DIFadd{, which requires this
-    option to be added to the autodetected options}\DIFaddend . Set this bit to add this
+	  This option applies to autodetected Linux only (i.e. not to BLSpec or
+    Fedora-style distributions which have \texttt{/loader/entries/*.conf} files).
+    Some distributions run a filesystem check on loading which requires the root
+    filesystem to initially be mounted read-only via the \texttt{ro} kernel option, which requires this
+    option to be added to the autodetected options. Set this bit to add this
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it.
-    \DIFdelbegin \DIFdel{To }\DIFdelend \DIFaddbegin \DIFadd{When there are multiple distros and it is required to }\DIFaddend specify this option for specific distros only, use
-    \texttt{partuuidopts:\{partuuid\}+=ro} \DIFdelbegin \DIFdel{instead of }\DIFdelend \DIFaddbegin \DIFadd{to manually add the option where required, instead of using }\DIFaddend this flag.
+    When there are multiple distros and it is required to specify this option for specific distros only, use
+    \texttt{partuuidopts:\{partuuid\}+=ro} to manually add the option where required, instead of using this flag.
 
-	  \item \DIFaddbegin \texttt{\DIFadd{0x00000800}} \DIFadd{(bit }\texttt{\DIFadd{11}}\DIFadd{) --- }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RW}}\DIFadd{,
-	  Like }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RO}}\DIFadd{, this option applies to autodetected Linux only. It is not
-    required for most distros (which usually require either }\texttt{\DIFadd{ro}} \DIFadd{or nothing to be added to
+	  \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{LINUX\_BOOT\_ADD\_RW},
+	  Like \texttt{LINUX\_BOOT\_ADD\_RO}, this option applies to autodetected Linux only. It is not
+    required for most distros (which usually require either \texttt{ro} or nothing to be added to
     detected boot options), but is required on some Arch-derived distros, e.g. EndeavourOS.
     When there are multiple distros and it is required to specify this option for specific distros only, use
-    }\texttt{\DIFadd{partuuidopts:\{partuuid\}+=rw}} \DIFadd{to manually add the option where required, instead of using this flag.
-    If this option and }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RO}} \DIFadd{are both specified, only this option is applied
-    and }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RO}} \DIFadd{is ignored.
-}
+    \texttt{partuuidopts:\{partuuid\}+=rw} to manually add the option where required, instead of using this flag.
+    If this option and \texttt{LINUX\_BOOT\_ADD\_RO} are both specified, only this option is applied
+    and \texttt{LINUX\_BOOT\_ADD\_RO} is ignored.
 
-	  \item \DIFaddend \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
+	  \item \texttt{0x00002000} (bit \texttt{13}) --- \texttt{LINUX\_BOOT\_ALLOW\_CONF\_AUTO\_ROOT},
 	  In some instances of \texttt{BootLoaderSpecByDefault} in combination with \texttt{ostree}, the
     \texttt{/loader/entries/*.conf} files do not specify a required \texttt{root=...} kernel
     option -- it is added by GRUB. If this bit is set and this situation is detected, then
@@ -6553,9 +6525,9 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \end{itemize} \medskip
 
 	Flag values can be specified in hexadecimal beginning with \texttt{0x} or in decimal,
-  e.g. \texttt{flags=0x80} or \texttt{flags=128}\DIFaddbegin \DIFadd{. It is also possible to specify flags to
-  add or remove, using syntax such as }\texttt{\DIFadd{flags+=0xC000}} \DIFadd{to add all debugging
-  options or }\texttt{\DIFadd{flags-=0x400}} \DIFadd{to remove the }\texttt{\DIFadd{LINUX\_BOOT\_ADD\_RO}} \DIFadd{option}\DIFaddend . \medskip
+  e.g. \texttt{flags=0x80} or \texttt{flags=128}. It is also possible to specify flags to
+  add or remove, using syntax such as \texttt{flags+=0xC000} to add all debugging
+  options or \texttt{flags-=0x400} to remove the \texttt{LINUX\_BOOT\_ADD\_RO} option. \medskip
 
 	\item \texttt{partuuidopts:\{partuuid\}[+]="\{options\}"} - Default: not set. \medskip
 
@@ -6625,7 +6597,11 @@ with the boot menu.
 
 High Definition Audio support driver in UEFI firmware for most Intel and some other analog audio controllers.
 
-\subsubsection{Configuration}
+\DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: AudioDxe is a staging driver, refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{\DIFadd{acidanthera/bugtracker\#740}}
+\DIFadd{for known issues.
+}
+
+\DIFaddend \subsubsection{Configuration}
 
 Most UEFI audio configuration is handled via the \hyperref[uefiaudioprops]{\texttt{UEFI Audio Properties}}
 section, but if required the following additonal configuration options (which are needed to produce sound
@@ -6678,10 +6654,22 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
 
   Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
   in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}.
-\end{itemize}
+\DIFdelbegin %DIFDELCMD < \end{itemize}
+%DIFDELCMD < %%%
+\DIFdelend 
 
-\emph{Note}: AudioDxe is a staging driver, refer to \href{https://github.com/acidanthera/bugtracker/issues/740}{acidanthera/bugtracker\#740}
-for known issues.
+	\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: AudioDxe is a staging driver, refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{\DIFdel{acidanthera/bugtracker\#740}}
+%DIFAUXCMD
+\DIFdel{for known issues. }\DIFdelend \DIFaddbegin \item \texttt{\DIFadd{-}{}\DIFadd{-restore-nosnoop}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+
+  \DIFadd{AudioDxe clears the Intel HDA No Snoop Enable (NSNPEN) bit. On some systems, this change must
+  be reversed on exit in order to avoid breaking sound in Windows. If so, this flag should
+  be added to AudioDxe driver arguments.
+  Not enabled by default, since restoring the flag can prevent sound from working in macOS on
+  some other systems. }\medskip
+\end{itemize}
+\DIFaddend 
 
 \subsection{Properties}\label{uefiprops}
 

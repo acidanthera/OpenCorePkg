@@ -17,8 +17,9 @@
 #include <UserFile.h>
 #include <UserMemory.h>
 
-STATIC UINT8 PcdValidHashes = MAX_UINT8;
-UINTN HashDependency;
+STATIC UINT64 mHashesMask = MAX_UINT64;
+STATIC UINTN mHashIndex = 0;
+STATIC UINTN mHashDependency;
 
 BOOLEAN
 HashUpdate (
@@ -31,15 +32,21 @@ HashUpdate (
 
   (VOID) HashContext;
 
-  for (UINTN i = 0; i < DataLength; i++)
-    HashDependency += D[i];
+  BOOLEAN p;
 
-  if (PcdValidHashes > 0) {
-    PcdValidHashes--;
-    return TRUE;
+  for (UINTN i = 0; i < DataLength; i++)
+    mHashDependency += D[i];
+
+  if ((mHashesMask & (1ULL << mHashIndex)) != 0) {
+    p = TRUE;
+  } else {
+    p = FALSE;
   }
 
-  return FALSE;
+  ++mHashIndex;
+  mHashIndex &= 63U;
+
+  return p;
 }
 
 STATIC
@@ -116,7 +123,8 @@ PeCoffTestLoad (
 }
 
 static void loadConfig(const uint8_t *data, size_t size) {
-  HashDependency = 0;
+  mHashDependency = 0;
+  mHashIndex = 0;
   UINT32 Off = sizeof(UINT8);
   UINT32 LastByte = data[size - Off];
   PcdGetBool(PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
@@ -136,11 +144,11 @@ static void loadConfig(const uint8_t *data, size_t size) {
     memcpy(&mPageAllocationMask, &data[size - Off], sizeof(UINT64));
   else
     mPageAllocationMask = MAX_UINT64;
-  Off += sizeof(UINT8);
+  Off += sizeof(UINT64);
   if (size >= Off)
-    PcdValidHashes = data[size - Off];
+    memcpy(&mHashesMask, &data[size - Off], sizeof(UINT64));
   else
-    PcdValidHashes = MAX_UINT8;
+    mHashesMask = MAX_UINT64;
 }
 
 RETURN_STATUS
