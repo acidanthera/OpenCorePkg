@@ -69,14 +69,10 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install nasm uuid-dev libssl-dev iasl
-          file="clang+llvm-13.0.0-x86_64-linux-gnu-ubuntu-20.04"
-          suf=".tar.xz"
-          curl -LO "https://github.com/llvm/llvm-project/releases/download/llvmorg-13.0.0/${file}${suf}" || exit 1
-          sum=$(shasum -a 256 "${file}${suf}" | cut -f1 -d' ')
-          expsum="2c2fb857af97f41a5032e9ecadf7f78d3eff389a5cd3c9ec620d24f134ceb3c8"
-          if [ "$sum" != "$expsum" ]; then echo "Invalid checksum $sum" ; exit 1 ; fi
-          tar -xf "${file}${suf}" || exit 1
-          echo "$(pwd)/${file}/bin" >> $GITHUB_PATH
+          wget https://apt.llvm.org/llvm.sh
+          chmod +x llvm.sh
+          sudo ./llvm.sh 13
+          echo "/usr/lib/llvm-13/bin" >> $GITHUB_PATH
 
       - name: CI Bootstrap
         run: |
@@ -91,11 +87,11 @@ jobs:
           name: Linux CLANGPDB-GCC5 Artifacts
           path: Binaries/*.zip
 
-  build-linux-clang38:
-    name: Build Linux CLANG38
+  build-linux-clangdwarf:
+    name: Build Linux CLANGDWARF
     runs-on: ubuntu-latest
     env:
-      TOOLCHAINS: CLANG38
+      TOOLCHAINS: CLANGDWARF
     steps:
       - uses: actions/checkout@v2
 
@@ -125,7 +121,7 @@ jobs:
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v2
         with:
-          name: Linux CLANG38 Artifacts
+          name: Linux CLANGDWARF Artifacts
           path: Binaries/*.zip
 
   build-windows:
