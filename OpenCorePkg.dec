@@ -722,12 +722,6 @@
   ## @Prompt Audio codec setup code should produce an error when no valid output bits are specified.
   gOpenCorePkgTokenSpaceGuid.PcdAudioCodecErrorOnNoOutputs|TRUE|BOOLEAN|0x00000005
 
-  ## Indicates if AudioDxe will try to reset the PCI associated with the HDA controller on Exit Boot Services.<BR><BR>
-  ##   TRUE  - Register event to reset the controller on Exit Boot Services.<BR>
-  ##   FALSE - Do not reset the contoller on Exit Boot Services.<BR>
-  ## @Prompt AudioDxe will try to reset the HDA controller on Exit Boot Services.
-  gOpenCorePkgTokenSpaceGuid.PcdAudioControllerResetPciOnExitBootServices|TRUE|BOOLEAN|0x00000006
-
   ## Indicates if AudioDxe will try EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER
   ## fails with access denied.<BR><BR>
   ##   TRUE  - Use EFI_OPEN_PROTOCOL_GET_PROTOCOL if EFI_OPEN_PROTOCOL_BY_DRIVER fails.<BR>

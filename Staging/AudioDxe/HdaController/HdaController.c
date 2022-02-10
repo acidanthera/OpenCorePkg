@@ -362,9 +362,10 @@ HdaControllerExitBootServicesHandler (
 
   //
   // Restore No Snoop Enable bit at Exit Boot Services to avoid breaking in-OS sound in Windows with some firmware.
-  // Note: Windows sound is fine even without this on many systems where AudioDxe disables No Snoop.
+  // Windows sound is fine even without this on many systems where AudioDxe disables No Snoop, and doing this
+  // (even though it should only be restoring the previous value) breaks macOS sound on some systems.
   // REF: https://github.com/acidanthera/bugtracker/issues/1909
-  // REF: https://github.com/acidanthera/bugtracker/issues/740#issuecomment-998762564
+  // REF: https://github.com/acidanthera/bugtracker/issues/1945
   // REF: Intel I/O Controller Hub 9 (ICH9) Family Datasheet (DEVC - Device Conrol Register/NSNPEN)
   //
   HdaControllerRestoreNoSnoopEn (HdaControllerDev);
@@ -415,8 +416,10 @@ HdaControllerReset (
     return EFI_SUCCESS;
   }
 
-  if (PcdGetBool (PcdAudioControllerResetPciOnExitBootServices)
-    && HdaControllerDev->ExitBootServicesEvent == NULL) {
+  //
+  // Currently restore NSNPEN is the only functionality needed at ExitBootServices.
+  //
+  if (gRestoreNoSnoop && HdaControllerDev->ExitBootServicesEvent == NULL) {
     Status = gBS->CreateEvent (
       EVT_SIGNAL_EXIT_BOOT_SERVICES,
       TPL_CALLBACK,

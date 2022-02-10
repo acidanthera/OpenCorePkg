@@ -87,7 +87,8 @@ extern EFI_AUDIO_DECODE_PROTOCOL   gEfiAudioDecodeProtocol;
 //
 // Stored parsed config.
 //
-extern UINTN	gGpioSetupStageMask;
-extern UINTN	gGpioPinMask;
+extern UINTN	 gGpioSetupStageMask;
+extern UINTN	 gGpioPinMask;
+extern BOOLEAN gRestoreNoSnoop;
 
 #endif // EFI_AUDIODXE_H
