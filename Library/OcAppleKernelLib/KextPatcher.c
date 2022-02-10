@@ -371,13 +371,12 @@ PatcherExcludePrelinkedKext (
   IN OUT PRELINKED_CONTEXT      *PrelinkedContext
   )
 {
-  UINT32                    SegmentIndex;
   MACH_SEGMENT_COMMAND_ANY  *Segment;
   VOID                      *KextData;
-  UINT64                    AddressMax;
   UINT64                    VirtualAddress;
   UINT64                    Size;
-  UINT64                    MaxSize;
+  UINT64                    KextSize;
+
   UINT32                    KextCount;
   UINT32                    Index;
   UINT32                    Index2;
@@ -395,26 +394,14 @@ PatcherExcludePrelinkedKext (
   //
   // Zero out kext memory through PatcherContext->MachContext.
   //
-  SegmentIndex = 0;
-  Segment    = NULL;
-  AddressMax = 0;
-  MaxSize    = 0;
-  while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
-    VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
-    Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
-    AddressMax     = MAX (VirtualAddress + Size, AddressMax);
-
-    DEBUG ((
-      DEBUG_INFO,
-      "OCAK: [%u] VirtualAddress %Lx | Size %Lx | AddressMax %Lx\n",
-      SegmentIndex,
-      VirtualAddress,
-      Size,
-      AddressMax
-      ));
-    ++SegmentIndex;
+  Segment = MachoGetNextSegment (&PatcherContext->MachContext, NULL);
+  if (Segment == NULL) {
+    return EFI_UNSUPPORTED;
   }
-  MaxSize    = AddressMax - PatcherContext->VirtualBase;
+
+  VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+  Size           = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
+  KextSize       = VirtualAddress + Size - PatcherContext->VirtualBase;
 
   KextData = MachoGetFilePointerByAddress (
     &PatcherContext->MachContext,
@@ -426,12 +413,12 @@ PatcherExcludePrelinkedKext (
   }
   DEBUG ((
     DEBUG_INFO,
-    "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx (no zeroing)\n",
+    "OCAK: Excluding %a - VirtualBase %Lx, KextSize %Lx\n",
     Identifier,
     PatcherContext->VirtualBase,
-    MaxSize
+    KextSize
     ));
-  // ZeroMem (KextData, (UINTN) MaxSize);
+  ZeroMem (KextData, (UINTN) KextSize);
 
   //
   // Find kext info to be removed in prelinked context.
