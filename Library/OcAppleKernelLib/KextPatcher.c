@@ -456,15 +456,6 @@ PatcherExcludePrelinkedKext (
         }
 
         if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
-          DEBUG ((
-            DEBUG_INFO,
-            "OCAK: Matched kext identifier %a to be erased under dict index %u, plist %p, plist index %u\n",
-            KextIdentifier,
-            Index2,
-            KextPlist,
-            Index
-            ));
-
           //
           // Erase kext.
           //

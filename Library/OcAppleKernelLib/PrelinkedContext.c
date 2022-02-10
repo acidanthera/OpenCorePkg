@@ -1269,18 +1269,5 @@ PrelinkedContextBlock (
     return Status;
   }
 
-  Status = Exclude ? PatcherExcludePrelinkedKext (Identifier, &Patcher, Context) : PatcherBlockKext (&Patcher);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((
-      DEBUG_INFO,
-      "OCAK: Failed to %a kext %a (Patcher %p, Context %p) - %r",
-      Exclude ? "exclude" : "block",
-      Identifier,
-      Patcher,
-      Context,
-      Status
-      ));
-  }
-
-  return Status;
+  return Exclude ? PatcherExcludePrelinkedKext (Identifier, &Patcher, Context) : PatcherBlockKext (&Patcher);
 }
