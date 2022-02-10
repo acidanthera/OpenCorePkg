@@ -937,7 +937,8 @@ OcGetLegacySecureBootECID (
 
 CONST CHAR8 *
 OcGetDefaultSecureBootModel (
-  IN  OC_GLOBAL_CONFIG    *Config
+  IN  OC_GLOBAL_CONFIG    *Config,
+  IN OC_CPU_INFO          *CpuInfo
   )
 {
   EFI_STATUS        Status;
@@ -945,6 +946,15 @@ OcGetDefaultSecureBootModel (
   CONST CHAR8       *Board;
   CONST CHAR8       *SbModel;
   OC_SMBIOS_TABLE   SmbiosTable;
+
+  //
+  // Make sure hypervisor secure boot model is x86legacy.
+  // macOS 11.x will not install otherwise.
+  //
+  if (CpuInfo->Hypervisor) {
+    DEBUG ((DEBUG_INFO, "OC: Hypervisor SB model is x86legacy\n"));
+    return "x86legacy";
+  }
 
   //
   // For automatic setups it is direct DB retrieval.
