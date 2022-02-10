@@ -3,6 +3,8 @@ OpenCore Changelog
 #### v0.7.9
 - Added auto-detect `macOS Installer` volume name for use when `.disk_label` file cannot be displayed
 - Added `--restore-nosnoop` flag to AudioDxe, making v0.7.7 fix for Windows sound opt-in
+- Added new method to disable trim when `SetApfsTrimTimeout` is set to zero
+- Fixed `SetApfsTrimTimeout` on macOS 12 (only works when set to zero)
 
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
