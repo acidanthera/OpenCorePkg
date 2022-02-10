@@ -677,6 +677,8 @@ int wrap_main(int argc, char** argv) {
   Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize, FALSE);
 
   if (!EFI_ERROR (Status)) {
+    ApplyKextPatches (&Context);
+    
     Status = PrelinkedInjectPrepare (&Context, LinkedExpansion, ReservedExeSize);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[FAIL] Prelink inject prepare error %r\n", Status));
@@ -765,8 +767,6 @@ int wrap_main(int argc, char** argv) {
     ASSERT (Context.PrelinkedSize - Context.KextsFileOffset <= ReservedExeSize);
 
     Status = PrelinkedInjectComplete (&Context);
-
-    ApplyKextPatches (&Context);
 
     UserWriteFile("out.bin", Prelinked, Context.PrelinkedSize);
 
