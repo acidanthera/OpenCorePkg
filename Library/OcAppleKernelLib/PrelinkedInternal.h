@@ -199,6 +199,15 @@ InternalCachedPrelinkedKext (
   );
 
 /**
+  Drops cached PRELINKED_KEXT from PRELINKED_CONTEXT.
+**/
+EFI_STATUS
+InternalDropCachedPrelinkedKext (
+  IN OUT PRELINKED_CONTEXT  *Prelinked,
+  IN     CONST CHAR8        *Identifier
+  );
+
+/**
   Gets cached kernel PRELINKED_KEXT from PRELINKED_CONTEXT.
 **/
 PRELINKED_KEXT *

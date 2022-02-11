@@ -288,6 +288,7 @@ mKernelBlockSchemaEntry[] = {
   OC_SCHEMA_STRING_IN    ("Identifier",     OC_KERNEL_BLOCK_ENTRY, Identifier),
   OC_SCHEMA_STRING_IN    ("MaxKernel",      OC_KERNEL_BLOCK_ENTRY, MaxKernel),
   OC_SCHEMA_STRING_IN    ("MinKernel",      OC_KERNEL_BLOCK_ENTRY, MinKernel),
+  OC_SCHEMA_STRING_IN    ("Strategy",       OC_KERNEL_BLOCK_ENTRY, Strategy),
 };
 
 STATIC

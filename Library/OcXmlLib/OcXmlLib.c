@@ -1617,6 +1617,59 @@ XmlNodePrepend (
   return NewNode;
 }
 
+VOID
+XmlNodeRemoveByIndex (
+  IN OUT  XML_NODE     *Node,
+  IN      UINT32       Index
+  )
+{
+  ASSERT (Node != NULL);
+  ASSERT (Node->Children != NULL);
+  ASSERT (Index < Node->Children->NodeCount);
+
+  //
+  // Free the Index-th XML node.
+  //
+  XmlNodeFree (Node->Children->NodeList[Index]);
+
+  //
+  // Overwrite the Index-th node with remaining nodes.
+  //
+  CopyMem (
+    &Node->Children->NodeList[Index],
+    &Node->Children->NodeList[Index+1],
+    (Node->Children->NodeCount - 1 - Index) * sizeof (XML_NODE)
+    );
+
+  //
+  // Drop the last entry as the node above has been removed.
+  //
+  ZeroMem (&Node->Children->NodeList[Node->Children->NodeCount-1], sizeof (XML_NODE));
+  --Node->Children->NodeCount;
+}
+
+VOID
+XmlNodeRemove (
+  IN OUT  XML_NODE     *Node,
+  IN      XML_NODE     *ChildNode
+  )
+{
+  UINT32  Index;
+
+  ASSERT (Node != NULL);
+  ASSERT (Node->Children != NULL);
+  ASSERT (ChildNode != NULL);
+
+  for (Index = 0; CompareMem (Node->Children->NodeList[Index], ChildNode, sizeof (XML_NODE)) != 0; ++Index) {
+    //
+    // Locate ChildNode inside Node.
+    //
+  }
+  ASSERT (Index < Node->Children->NodeCount);
+
+  XmlNodeRemoveByIndex (Node, Index);
+}
+
 CONST CHAR8 *
 XmlUnescapeString (
   IN      CONST CHAR8  *String

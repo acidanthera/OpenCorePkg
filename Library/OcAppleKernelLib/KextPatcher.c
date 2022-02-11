@@ -365,6 +365,140 @@ PatcherApplyGenericPatch (
 }
 
 EFI_STATUS
+PatcherExcludePrelinkedKext (
+  IN     CONST CHAR8            *Identifier,
+  IN OUT PATCHER_CONTEXT        *PatcherContext,
+  IN OUT PRELINKED_CONTEXT      *PrelinkedContext
+  )
+{
+  MACH_SEGMENT_COMMAND_ANY  *Segment;
+  VOID                      *KextData;
+  UINT64                    AddressMax;
+  UINT64                    VirtualAddress;
+  UINT64                    Size;
+  UINT64                    MaxSize;
+
+  UINT32                    KextCount;
+  UINT32                    Index;
+  UINT32                    Index2;
+  XML_NODE                  *KextPlist;
+  UINT32                    KextPlistCount;
+  CONST CHAR8               *KextPlistKey;
+  XML_NODE                  *KextPlistValue;
+  CONST CHAR8               *KextIdentifier;
+  EFI_STATUS                Status;
+
+  ASSERT (Identifier       != NULL);
+  ASSERT (PatcherContext   != NULL);
+  ASSERT (PrelinkedContext != NULL);
+
+  Segment        = NULL;
+  VirtualAddress = 0;
+  AddressMax     = 0;
+  Size           = 0;
+  while ((Segment = MachoGetNextSegment (&PatcherContext->MachContext, Segment)) != NULL) {
+    VirtualAddress = PatcherContext->Is32Bit ? Segment->Segment32.VirtualAddress : Segment->Segment64.VirtualAddress;
+
+    if (AddressMax != 0 && AddressMax != VirtualAddress) {
+      break;
+    }
+
+    Size       = PatcherContext->Is32Bit ? Segment->Segment32.Size : Segment->Segment64.Size;
+    AddressMax = MAX (VirtualAddress + Size, AddressMax);
+  }
+  MaxSize = AddressMax - PatcherContext->VirtualBase;
+
+  //
+  // Zero out kext memory through PatcherContext->MachContext.
+  //
+  KextData = MachoGetFilePointerByAddress (
+    &PatcherContext->MachContext,
+    PatcherContext->VirtualBase,
+    NULL
+    );
+  if (KextData == NULL) {
+    return EFI_UNSUPPORTED;
+  }
+  DEBUG ((
+    DEBUG_INFO,
+    "OCAK: Excluding %a - VirtualBase %Lx, MaxSize %Lx\n",
+    Identifier,
+    PatcherContext->VirtualBase,
+    MaxSize
+    ));
+  ZeroMem (KextData, (UINTN) MaxSize);
+
+  //
+  // Find kext info to be removed in prelinked context.
+  //
+  KextCount      = XmlNodeChildren (PrelinkedContext->KextList);
+  KextPlist      = NULL;
+  KextPlistKey   = NULL;
+  KextIdentifier = NULL;
+
+  for (Index = 0; Index < KextCount; ++Index) {
+    KextPlist = PlistNodeCast (XmlNodeChild (PrelinkedContext->KextList, Index), PLIST_NODE_TYPE_DICT);
+    if (KextPlist == NULL) {
+      continue;
+    }
+
+    KextPlistCount = PlistDictChildren (KextPlist);
+    for (Index2 = 0; Index2 < KextPlistCount; ++Index2) {
+      KextPlistKey = PlistKeyValue (PlistDictChild (KextPlist, Index2, &KextPlistValue));
+      if (KextPlistKey == NULL) {
+        continue;
+      }
+
+      if (AsciiStrCmp (KextPlistKey, INFO_BUNDLE_IDENTIFIER_KEY) == 0) {
+        KextIdentifier = XmlNodeContent (KextPlistValue);
+        if (PlistNodeCast (KextPlistValue, PLIST_NODE_TYPE_STRING) == NULL || KextIdentifier == NULL) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Plist value cannot be interpreted as string, or current kext identifier is null (dict index %u, plist %p, plist index %u)\n",
+            Index2,
+            KextPlist,
+            Index
+            ));
+          return EFI_NOT_FOUND;
+        }
+
+        if (AsciiStrCmp (KextIdentifier, Identifier) == 0) {
+          //
+          // Erase kext.
+          //
+          Status = InternalDropCachedPrelinkedKext (PrelinkedContext, KextIdentifier);
+          if (EFI_ERROR (Status)) {
+            DEBUG ((
+              DEBUG_INFO,
+              "OCAK: Failed to drop %a under dict index %u, plist %p, plist index %u - %r\n",
+              KextIdentifier,
+              Index2,
+              KextPlist,
+              Index,
+              Status
+              ));
+            return Status;
+          }
+
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Erasing %a from prelinked kext under dict index %u, plist %p, plist index %u\n",
+            Identifier,
+            Index2,
+            KextPlist,
+            Index
+            ));
+          XmlNodeRemoveByIndex (PrelinkedContext->KextList, Index);
+          return EFI_SUCCESS;
+        }
+      }
+    }
+  }
+
+  return EFI_NOT_FOUND;
+}
+
+EFI_STATUS
 PatcherBlockKext (
   IN OUT PATCHER_CONTEXT        *Context
   )

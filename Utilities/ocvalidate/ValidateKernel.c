@@ -324,6 +324,7 @@ CheckKernelBlock (
   CONST CHAR8       *MaxKernel;
   CONST CHAR8       *MinKernel;
   CONST CHAR8       *Identifier;
+  CONST CHAR8       *Strategy;
 
   ErrorCount        = 0;
   UserKernel        = &Config->Kernel;
@@ -334,6 +335,7 @@ CheckKernelBlock (
     Identifier      = OC_BLOB_GET (&UserKernel->Block.Values[Index]->Identifier);
     MaxKernel       = OC_BLOB_GET (&UserKernel->Block.Values[Index]->MaxKernel);
     MinKernel       = OC_BLOB_GET (&UserKernel->Block.Values[Index]->MinKernel);
+    Strategy        = OC_BLOB_GET (&UserKernel->Block.Values[Index]->Strategy);
     
     //
     // Sanitise strings.
@@ -368,6 +370,12 @@ CheckKernelBlock (
     }
     if (MinKernel[0] != '\0' && OcParseDarwinVersion (MinKernel) == 0) {
       DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->MinKernel (currently set to %a) is borked!\n", Index, MinKernel));
+      ++ErrorCount;
+    }
+
+    if (AsciiStrCmp (Strategy, "Disable") != 0
+      && AsciiStrCmp (Strategy, "Exclude") != 0) {
+      DEBUG ((DEBUG_WARN, "Kernel->Block[%u]->Strategy is borked (Can only be Disable or Exclude)!\n", Index));
       ++ErrorCount;
     }
   }
