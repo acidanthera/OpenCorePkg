@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Feb 10 15:29:05 2022
-%DIF ADD ../Configuration.tex        Thu Feb 10 19:56:56 2022
+%DIF DEL PreviousConfiguration.tex   Fri Feb 11 00:24:26 2022
+%DIF ADD ../Configuration.tex        Fri Feb 11 10:54:55 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2235,7 +2235,32 @@ blocking.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{Strategy}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Disable}} \DIFadd{(Forcibly make the kernel driver kmod startup code return failure)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Determines the behaviour of kernel driver blocking.
+}
+
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Disable}} \DIFadd{--- Forcibly make the kernel driver kmod startup code return failure.
+    }\item \texttt{\DIFadd{Exclude}} \DIFadd{--- Remove the kernel driver from the kernel cache by dropping plist entry and filling in zeroes.
+  }\end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: It is risky to }\texttt{\DIFadd{Exclude}} \DIFadd{a kext that is a dependency of others.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: At this moment }\texttt{\DIFadd{Exclude}} \DIFadd{is only applied to }\texttt{\DIFadd{prelinkedkernel}} \DIFadd{and newer mechanisms.
+  }
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: In most cases strategy }\texttt{\DIFadd{Exclude}} \DIFadd{requires the new kext to be injected as a replacement.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Emulate Properties}\label{kernelpropsemu}
 

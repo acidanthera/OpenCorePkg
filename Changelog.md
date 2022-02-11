@@ -7,6 +7,7 @@ OpenCore Changelog
 - Fixed `SetApfsTrimTimeout` on macOS 12 (only works when set to zero)
 - Added script to build qemu recovery images to macrecovery
 - Fixed selecting `SecureBootModel` on hypervisors (should be `x86legacy`)
+- Added kext blocking `Strategy` for prelinked and newer
 
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
