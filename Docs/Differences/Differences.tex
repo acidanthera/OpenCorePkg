@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Feb 11 00:24:26 2022
-%DIF ADD ../Configuration.tex        Fri Feb 11 10:54:55 2022
+%DIF DEL PreviousConfiguration.tex   Thu Feb 10 18:56:25 2022
+%DIF ADD ../Configuration.tex        Fri Feb 11 23:24:07 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -4012,8 +4012,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Secure Boot.
 
   To start using personalised Apple Secure Boot, the operating system must be
-  reinstalled or personalised. Unless the operating system is personalised,
-  macOS DMG recovery cannot be loaded. In cases where DMG recovery is missing,
+  reinstalled or personalised. \DIFdelbegin \DIFdel{Unless }\DIFdelend \DIFaddbegin \DIFadd{Until }\DIFaddend the operating system is personalised,
+  \DIFaddbegin \DIFadd{only }\DIFaddend macOS DMG recovery \DIFdelbegin \DIFdel{cannot }\DIFdelend \DIFaddbegin \DIFadd{can }\DIFaddend be loaded. In cases where DMG recovery is missing,
   it can be downloaded by using the \texttt{macrecovery} utility and saved in
   \texttt{com.apple.recovery.boot} as explained in the
   \hyperref[reinstallmacos]{Tips and Tricks} section. Note that
