@@ -2187,8 +2187,13 @@ blocking.
     \tightlist
     \item \texttt{Disable} --- Forcibly make the kernel driver kmod startup code return failure.
     \item \texttt{Exclude} --- Remove the kernel driver from the kernel cache by dropping plist entry and filling in zeroes.
-    \emph{Note}: It is risky to \texttt{Exclude} a kext that is a dependency of others.
   \end{itemize}
+
+  \emph{Note}: It is risky to \texttt{Exclude} a kext that is a dependency of others.
+
+  \emph{Note 2}: At this moment \texttt{Exclude} is only applied to \texttt{prelinkedkernel} and newer mechanisms.
+  
+  \emph{Note 3}: In most cases strategy \texttt{Exclude} requires the new kext to be injected as a replacement.
 
 \end{enumerate}
 
