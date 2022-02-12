@@ -2721,6 +2721,8 @@ blocking.
   \tightlist
   \item For Microsoft Hyper-V it provides the correct TSC and FSB values
     to the kernel, as well as disables CPU topology validation (10.8+).
+  \item For KVM and other hypervisors it provides precomputed MSR 35h
+    values solving kernel panic with \texttt{-cpu host}.
   \item For Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
     with the supplemental required changes (10.14+).

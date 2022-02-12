@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Sat Feb 12 00:03:53 2022
-%DIF ADD ../Configuration.tex        Sat Feb 12 00:03:53 2022
+%DIF DEL PreviousConfiguration.tex   Thu Feb 10 18:56:25 2022
+%DIF ADD ../Configuration.tex        Sat Feb 12 04:35:26 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2786,7 +2786,9 @@ blocking.
   \tightlist
   \item For Microsoft Hyper-V it provides the correct TSC and FSB values
     to the kernel, as well as disables CPU topology validation (10.8+).
-  \item For Intel CPUs it adds support for asymmetrical SMP systems
+  \item For \DIFaddbegin \DIFadd{KVM and other hypervisors it provides precomputed MSR 35h
+    values solving kernel panic with }\texttt{\DIFadd{-cpu host}}\DIFadd{.
+  }\item \DIFadd{For }\DIFaddend Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
     with the supplemental required changes (10.14+).
   \end{itemize}
