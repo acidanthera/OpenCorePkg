@@ -204,9 +204,6 @@ PE/COFF images with DWARF debug information via LLD linker. LLVM 9.0 or
 newer with working dead code stripping in LLD is required for this to work
 ([LLD patches](https://bugs.llvm.org/show_bug.cgi?id=45273)).
 
-*Installation*: After applying `ClangDwarf.patch` hack onto EDK II `CLANGPDB`
-toolchain will behave as if it was `CLANGDWARF`.
-
 For debugging support it may be necessary to set `EFI_SYMBOL_PATH`
 environment variable to `:`-separated list of paths with `.debug` files,
 for example:
