@@ -1215,7 +1215,7 @@ mProvideCurrentCpuInfoTopologyCorePerPackageV2Patch = {
 
 STATIC
 EFI_STATUS
-PatchProvideCurrentCpuInfoForAmpCpu (
+PatchProvideCurrentCpuInfoMSR35h (
   IN OUT PATCHER_CONTEXT  *Patcher,
   IN     OC_CPU_INFO      *CpuInfo,
   IN     UINT32           KernelVersion
@@ -1223,6 +1223,7 @@ PatchProvideCurrentCpuInfoForAmpCpu (
 {
   EFI_STATUS  Status;
   UINT32      CoreThreadCount;
+  BOOLEAN     IsAmpCpu;
 
   //
   // TODO: We can support older, just there is no real need.
@@ -1233,8 +1234,20 @@ PatchProvideCurrentCpuInfoForAmpCpu (
     return EFI_SUCCESS;
   }
 
-  CoreThreadCount =
-    (((UINT32) CpuInfo->ThreadCount) << 16U) | ((UINT32) CpuInfo->ThreadCount);
+  IsAmpCpu = (CpuInfo->ThreadCount % CpuInfo->CoreCount) != 0;
+
+  //
+  // Provide real values for normal CPUs.
+  // Provide Thread=Thread for AMP (ADL) CPUs.
+  //
+  if (IsAmpCpu) {
+    CoreThreadCount =
+      (((UINT32) CpuInfo->ThreadCount) << 16U) | ((UINT32) CpuInfo->ThreadCount);
+  } else {
+    CoreThreadCount =
+      (((UINT32) CpuInfo->CoreCount) << 16U) | ((UINT32) CpuInfo->ThreadCount);
+  }
+
   CopyMem (
     &mProvideCurrentCpuInfoTopologyCoreCountReplace[1],
     &CoreThreadCount,
@@ -1248,7 +1261,7 @@ PatchProvideCurrentCpuInfoForAmpCpu (
 
   DEBUG ((DEBUG_INFO, "OCAK: Patching MSR 35h to %08x - %r\n", CoreThreadCount, Status));
 
-  if (EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status) || !IsAmpCpu) {
     return Status;
   }
 
@@ -1318,9 +1331,8 @@ PatchProvideCurrentCpuInfo (
 
   ASSERT (Patcher != NULL);
 
-  if (!CpuInfo->Hypervisor && CpuInfo->Vendor[0] == CPUID_VENDOR_INTEL) {
-    return PatchProvideCurrentCpuInfoForAmpCpu (Patcher, CpuInfo, KernelVersion);
-  }
+  Status = EFI_SUCCESS;
+  Status |= PatchProvideCurrentCpuInfoMSR35h (Patcher, CpuInfo, KernelVersion);
 
   Start = ((UINT8 *) MachoGetMachHeader (&Patcher->MachContext));
 
@@ -1337,7 +1349,6 @@ PatchProvideCurrentCpuInfo (
   //
   // Pull required symbols.
   //
-  Status = EFI_SUCCESS;
   Status |= PatcherGetSymbolAddress (Patcher, "_tsc_init",        (UINT8 **) &TscInitFunc);
   Status |= PatcherGetSymbolAddress (Patcher, "_tmrCvt",          (UINT8 **) &TmrCvtFunc);
 

@@ -887,13 +887,15 @@ PrelinkedContextApplyQuirk (
 
   @param[in,out] Context         Prelinked context.
   @param[in]     Identifier      Kext bundle identifier.
+  @param[in]     Exclude         TRUE to exclude kext from prelinked.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 PrelinkedContextBlock (
   IN OUT PRELINKED_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   );
 
 /**
@@ -1076,6 +1078,22 @@ PatcherApplyGenericPatch (
   );
 
 /**
+  Exclude kext from prelinked.
+
+  @param[in]      Identifier        Kext identifier to be excluded.
+  @param[in,out]  PatcherContext    Patcher context.
+  @param[in,out]  PrelinkedContext  Prelinked context.
+
+  @return  EFI_SUCCESS on success.
+**/
+EFI_STATUS
+PatcherExcludePrelinkedKext (
+  IN     CONST CHAR8            *Identifier,
+  IN OUT PATCHER_CONTEXT        *PatcherContext,
+  IN OUT PRELINKED_CONTEXT      *PrelinkedContext
+  );
+
+/**
   Block kext from loading.
 
   @param[in,out] Context         Patcher context.
@@ -1253,13 +1271,15 @@ CachelessContextAddQuirk (
 
   @param[in,out] Context         Cacheless context.
   @param[in]     Identifier      Kext bundle identifier.
+  @param[in]     Exclude         TRUE to exclude kext from cacheless context.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 CachelessContextBlock (
   IN OUT CACHELESS_CONTEXT      *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   );
 
 /**
@@ -1468,13 +1488,15 @@ MkextContextApplyQuirk (
 
   @param[in,out] Context         Mkext context.
   @param[in]     Identifier      Kext bundle identifier.
+  @param[in]     Exclude         TRUE to exclude kext from mkext.
 
   @return  EFI_SUCCESS on success.
 **/
 EFI_STATUS
 MkextContextBlock (
   IN OUT MKEXT_CONTEXT          *Context,
-  IN     CONST CHAR8            *Identifier
+  IN     CONST CHAR8            *Identifier,
+  IN     BOOLEAN                Exclude
   );
 
 /**

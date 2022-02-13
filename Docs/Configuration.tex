@@ -2175,6 +2175,26 @@ blocking.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
+\item
+  \texttt{Strategy}\\
+  \textbf{Type}: \texttt{plist\ string}\\
+  \textbf{Failsafe}: \texttt{Disable} (Forcibly make the kernel driver kmod startup code return failure)\\
+  \textbf{Description}: Determines the behaviour of kernel driver blocking.
+
+  Valid values:
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{Disable} --- Forcibly make the kernel driver kmod startup code return failure.
+    \item \texttt{Exclude} --- Remove the kernel driver from the kernel cache by dropping plist entry and filling in zeroes.
+  \end{itemize}
+
+  \emph{Note}: It is risky to \texttt{Exclude} a kext that is a dependency of others.
+
+  \emph{Note 2}: At this moment \texttt{Exclude} is only applied to \texttt{prelinkedkernel} and newer mechanisms.
+  
+  \emph{Note 3}: In most cases strategy \texttt{Exclude} requires the new kext to be injected as a replacement.
+
 \end{enumerate}
 
 \subsection{Emulate Properties}\label{kernelpropsemu}
@@ -2701,6 +2721,8 @@ blocking.
   \tightlist
   \item For Microsoft Hyper-V it provides the correct TSC and FSB values
     to the kernel, as well as disables CPU topology validation (10.8+).
+  \item For KVM and other hypervisors it provides precomputed MSR 35h
+    values solving kernel panic with \texttt{-cpu host}.
   \item For Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
     with the supplemental required changes (10.14+).
@@ -2748,7 +2770,7 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  As of macOS 12.0, it is no longer possible to set trim timeout for APFS filesystems.
+  On macOS 12+, it is no longer possible to set trim timeout for APFS filesystems.
   However, trim can be disabled when the timeout value is set to \texttt{0}.
 
 \item
@@ -3939,8 +3961,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Secure Boot.
 
   To start using personalised Apple Secure Boot, the operating system must be
-  reinstalled or personalised. Unless the operating system is personalised,
-  macOS DMG recovery cannot be loaded. In cases where DMG recovery is missing,
+  reinstalled or personalised. Until the operating system is personalised,
+  only macOS DMG recovery can be loaded. In cases where DMG recovery is missing,
   it can be downloaded by using the \texttt{macrecovery} utility and saved in
   \texttt{com.apple.recovery.boot} as explained in the
   \hyperref[reinstallmacos]{Tips and Tricks} section. Note that

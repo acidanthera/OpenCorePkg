@@ -298,6 +298,30 @@ XmlNodePrepend (
   );
 
 /**
+  Remove the Index-th child node inside an XML node.
+
+  @param[in,out]  Node        Current node.
+  @param[in]      Index       Index-th child node to be removed.
+**/
+VOID
+XmlNodeRemoveByIndex (
+  IN OUT  XML_NODE     *Node,
+  IN      UINT32       Index
+  );
+
+/**
+  Remove the child node from the current node.
+
+  @param[in,out]  Node        Current node.
+  @param[in]      ChildNode   Child node to be removed.
+**/
+VOID
+XmlNodeRemove (
+  IN OUT  XML_NODE     *Node,
+  IN      XML_NODE     *ChildNode
+  );
+
+/**
   Unescape XML string.
 
   @param[in]  String  Escaped string to be converted to unescaped.

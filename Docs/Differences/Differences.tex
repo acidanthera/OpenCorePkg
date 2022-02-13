@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Feb 10 15:29:05 2022
-%DIF ADD ../Configuration.tex        Thu Feb 10 19:56:56 2022
+%DIF DEL PreviousConfiguration.tex   Thu Feb 10 18:56:25 2022
+%DIF ADD ../Configuration.tex        Sat Feb 12 04:35:26 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -2235,7 +2235,32 @@ blocking.
 
   \emph{Note}: Refer to the \hyperlink{kernmatch}{\texttt{Add\ MaxKernel} description} for matching logic.
 
-\end{enumerate}
+\DIFaddbegin \item
+  \texttt{\DIFadd{Strategy}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ string}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{Disable}} \DIFadd{(Forcibly make the kernel driver kmod startup code return failure)}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Determines the behaviour of kernel driver blocking.
+}
+
+  \DIFadd{Valid values:
+}
+
+  \begin{itemize}
+    \tightlist
+    \item \texttt{\DIFadd{Disable}} \DIFadd{--- Forcibly make the kernel driver kmod startup code return failure.
+    }\item \texttt{\DIFadd{Exclude}} \DIFadd{--- Remove the kernel driver from the kernel cache by dropping plist entry and filling in zeroes.
+  }\end{itemize}
+
+  \emph{\DIFadd{Note}}\DIFadd{: It is risky to }\texttt{\DIFadd{Exclude}} \DIFadd{a kext that is a dependency of others.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: At this moment }\texttt{\DIFadd{Exclude}} \DIFadd{is only applied to }\texttt{\DIFadd{prelinkedkernel}} \DIFadd{and newer mechanisms.
+  }
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: In most cases strategy }\texttt{\DIFadd{Exclude}} \DIFadd{requires the new kext to be injected as a replacement.
+}
+
+\DIFaddend \end{enumerate}
 
 \subsection{Emulate Properties}\label{kernelpropsemu}
 
@@ -2761,7 +2786,9 @@ blocking.
   \tightlist
   \item For Microsoft Hyper-V it provides the correct TSC and FSB values
     to the kernel, as well as disables CPU topology validation (10.8+).
-  \item For Intel CPUs it adds support for asymmetrical SMP systems
+  \item For \DIFaddbegin \DIFadd{KVM and other hypervisors it provides precomputed MSR 35h
+    values solving kernel panic with }\texttt{\DIFadd{-cpu host}}\DIFadd{.
+  }\item \DIFadd{For }\DIFaddend Intel CPUs it adds support for asymmetrical SMP systems
     (e.g. Intel Alder Lake) by patching core count to thread count along
     with the supplemental required changes (10.14+).
   \end{itemize}
@@ -2808,7 +2835,7 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  \DIFaddbegin \DIFadd{As of macOS 12.0, it is no longer possible to set trim timeout for APFS filesystems.
+  \DIFaddbegin \DIFadd{On macOS 12+, it is no longer possible to set trim timeout for APFS filesystems.
   However, trim can be disabled when the timeout value is set to }\texttt{\DIFadd{0}}\DIFadd{.
 }
 
@@ -3987,8 +4014,8 @@ nvram 4D1FDA02-38C7-4A6A-9CC6-4BCCA8B30102:boot-log |
   Secure Boot.
 
   To start using personalised Apple Secure Boot, the operating system must be
-  reinstalled or personalised. Unless the operating system is personalised,
-  macOS DMG recovery cannot be loaded. In cases where DMG recovery is missing,
+  reinstalled or personalised. \DIFdelbegin \DIFdel{Unless }\DIFdelend \DIFaddbegin \DIFadd{Until }\DIFaddend the operating system is personalised,
+  \DIFaddbegin \DIFadd{only }\DIFaddend macOS DMG recovery \DIFdelbegin \DIFdel{cannot }\DIFdelend \DIFaddbegin \DIFadd{can }\DIFaddend be loaded. In cases where DMG recovery is missing,
   it can be downloaded by using the \texttt{macrecovery} utility and saved in
   \texttt{com.apple.recovery.boot} as explained in the
   \hyperref[reinstallmacos]{Tips and Tricks} section. Note that
