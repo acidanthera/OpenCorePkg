@@ -14,6 +14,19 @@
 
 #define INITIAL_NUM_ITEMS (8)
 
+VOID
+OcFlexArrayFreePointerItem (
+  IN  VOID  *Item
+  )
+{
+  ASSERT (Item != NULL);
+
+  if (*(VOID **) Item != NULL) {
+    FreePool (*(VOID **) Item);
+    *(VOID **) Item = NULL;
+  }
+}
+
 OC_FLEX_ARRAY *
 OcFlexArrayInit (
   IN     CONST UINTN                        ItemSize,
@@ -35,6 +48,14 @@ OcFlexArrayInit (
   return FlexArray;
 }
 
+/**
+  Retrieve the Index-th item in a flex array.
+
+  @param[in]  FlexArray  A pointer to the flex array.
+  @param[in]  Index      The Index-th item to be retrieved in FlexArray.
+
+  @return  The Index-th item in FlexArray.
+**/
 STATIC
 VOID *
 InternalFlexArrayItemAt (
@@ -42,7 +63,7 @@ InternalFlexArrayItemAt (
   IN     CONST UINTN                        Index
   )
 {
-  VOID *Item;
+  VOID  *Item;
 
   ASSERT (FlexArray != NULL);
   ASSERT (Index < FlexArray->Count);
@@ -53,6 +74,13 @@ InternalFlexArrayItemAt (
   return Item;
 }
 
+/**
+  Add an item in a flex array.
+
+  @param[in,out]  FlexArray  A pointer to the flex array.
+
+  @return  The added item.
+**/
 STATIC
 VOID *
 InternalFlexArrayAddItem (
@@ -83,7 +111,11 @@ InternalFlexArrayAddItem (
       if (OcOverflowMulUN (FlexArray->AllocatedCount * FlexArray->ItemSize, 2, &NewSize)) {
         return NULL;
       }
-      TmpBuffer = ReallocatePool (FlexArray->AllocatedCount * FlexArray->ItemSize, NewSize, FlexArray->Items);
+      TmpBuffer = ReallocatePool (
+        FlexArray->AllocatedCount * FlexArray->ItemSize,
+        NewSize,
+        FlexArray->Items
+        );
       if (TmpBuffer == NULL) {
         return NULL;
       }
@@ -119,8 +151,8 @@ OcFlexArrayAddItem (
 
 VOID *
 OcFlexArrayInsertItem (
-  IN OUT       OC_FLEX_ARRAY                *FlexArray,
-  IN     CONST UINTN                        InsertIndex
+  IN OUT  OC_FLEX_ARRAY                *FlexArray,
+  IN      CONST UINTN                  InsertIndex
   )
 {
   VOID    *Item;
@@ -199,8 +231,8 @@ OcFlexArrayFree (
 
 VOID
 OcFlexArrayDiscardItem (
-  IN OUT       OC_FLEX_ARRAY       *FlexArray,
-  IN     CONST BOOLEAN             FreeItem
+  IN OUT  OC_FLEX_ARRAY       *FlexArray,
+  IN      CONST BOOLEAN       FreeItem
   )
 {
   DEBUG ((OC_TRACE_FLEX, "FLEX: Discard %p %u\n", FlexArray, FreeItem));
@@ -238,17 +270,5 @@ OcFlexArrayFreeContainer (
     }
     FreePool (*FlexArray);
     *FlexArray = NULL;
-  }
-}
-
-VOID
-OcFlexArrayFreePointerItem (
-  IN VOID *Item
-  )
-{
-  ASSERT (Item != NULL);
-  if (*(VOID **)Item != NULL) {
-    FreePool (*(VOID **)Item);
-    *(VOID **)Item = NULL;
   }
 }
