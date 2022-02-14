@@ -195,11 +195,11 @@ OcAsciiStringBufferFreeContainer (
 }
 
 VOID
-OcAsciiStringBufferFree (
+OcAsciiStringBufferFreeContainer (
   IN OUT  OC_STRING_BUFFER    **StringBuffer
   )
 {
-  CHAR8  *Result;
+  CHAR8 *Result;
 
   Result = OcAsciiStringBufferFreeContainer (StringBuffer);
   if (Result != NULL) {
