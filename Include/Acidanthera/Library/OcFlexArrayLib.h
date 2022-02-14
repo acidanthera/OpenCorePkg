@@ -196,8 +196,8 @@ OcAsciiStringBufferInit (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppend (
-  IN OUT       OC_STRING_BUFFER    *Buffer,
-  IN     CONST CHAR8               *AppendString    OPTIONAL
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *AppendString    OPTIONAL
   );
 
 /**
@@ -214,9 +214,9 @@ OcAsciiStringBufferAppend (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppendN (
-  IN OUT       OC_STRING_BUFFER    *Buffer,
-  IN     CONST CHAR8               *AppendString,   OPTIONAL
-  IN     CONST UINTN             Length
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *AppendString,   OPTIONAL
+  IN      CONST UINTN         Length
   );
 
 
@@ -234,8 +234,8 @@ OcAsciiStringBufferAppendN (
 EFI_STATUS
 EFIAPI
 OcAsciiStringBufferSPrint (
-  IN OUT            OC_STRING_BUFFER    *Buffer,
-  IN  CONST CHAR8   *FormatString,
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *FormatString,
   ...
   );
 
