@@ -357,6 +357,8 @@ global ASM_PFX(TryEnableAvx)
 ASM_PFX(TryEnableAvx):
   ; Detect CPUID.1:ECX.XSAVE[bit 26] = 1 (CR4.OSXSAVE can be set to 1).
   ; Detect CPUID.1:ECX.AVX[bit 28] = 1 (AVX instructions supported).
+
+  push rbx
   mov eax, 1          ; Feature Information
   cpuid               ; result in EAX, EBX, ECX, EDX
   and ecx, 014000000H
@@ -379,6 +381,7 @@ noAVX:
   xor rax, rax
   mov byte [rel ASM_PFX(mIsAvxEnabled)], 0
 done:
+  pop rbx
   ret
 
 ; #######################################################################
