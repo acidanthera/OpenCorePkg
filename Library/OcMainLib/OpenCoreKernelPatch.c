@@ -413,7 +413,7 @@ OcKernelBlockKexts (
 
     Exclude = AsciiStrCmp (Strategy, "Exclude") == 0;
     //
-    // TODO: Implement prelinked exclusion first, then cacheless and mkext.
+    // TODO: Implement cacheless and mkext exclusion if possible.
     //
     if (CacheType == CacheTypeCacheless) {
       Status = CachelessContextBlock (Context, Target, Exclude);
@@ -427,8 +427,9 @@ OcKernelBlockKexts (
 
     DEBUG ((
       EFI_ERROR (Status) ? DEBUG_WARN : DEBUG_INFO,
-      "OC: %a blocker result %u for %a (%a) - %r\n",
+      "OC: %a blocker (%a) result %u for %a (%a) - %r\n",
       PRINT_KERNEL_CACHE_TYPE (CacheType),
+      Exclude ? "Exclude" : "Disable",
       Index,
       Target,
       Comment,
