@@ -302,6 +302,7 @@ CheckUefiDrivers (
   OC_UEFI_DRIVER_ENTRY         *DriverEntry;
   CONST CHAR8                  *Comment;
   CONST CHAR8                  *Driver;
+  UINTN                        DriverSumSize;
   BOOLEAN                      HasOpenRuntimeEfiDriver;
   BOOLEAN                      HasOpenUsbKbDxeEfiDriver;
   UINT32                       IndexOpenUsbKbDxeEfiDriver;
@@ -335,8 +336,15 @@ CheckUefiDrivers (
     //
     // Check the length of path relative to OC directory.
     //
-    if (StrLen (OPEN_CORE_UEFI_DRIVER_PATH) + AsciiStrSize (Driver) > OC_STORAGE_SAFE_PATH_MAX) {
-      DEBUG ((DEBUG_WARN, "UEFI->Drivers[%u] is too long (should not exceed %u)!\n", Index, OC_STORAGE_SAFE_PATH_MAX));
+    DriverSumSize = L_STR_LEN (OPEN_CORE_UEFI_DRIVER_PATH) + AsciiStrSize (Driver);
+    if (DriverSumSize > OC_STORAGE_SAFE_PATH_MAX) {
+      DEBUG ((
+        DEBUG_WARN,
+        "UEFI->Drivers[%u] (length %u) is too long (should not exceed %u)!\n",
+        Index,
+        AsciiStrLen (Driver),
+        OC_STORAGE_SAFE_PATH_MAX - L_STR_LEN (OPEN_CORE_UEFI_DRIVER_PATH)
+        ));
       ++ErrorCount;
     }
     
