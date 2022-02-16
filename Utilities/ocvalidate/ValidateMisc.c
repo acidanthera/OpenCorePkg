@@ -256,7 +256,7 @@ CheckMiscBoot (
   //
   // There is one missing '\\' after the concatenation of PickerVariant and ExtAppleRecv10_15.icns (which has the longest length). Append one.
   //
-  if (StrLen (OPEN_CORE_IMAGE_PATH) + AsciiStrLen (PickerVariant) + 1 + AsciiStrSize ("ExtAppleRecv10_15.icns") > OC_STORAGE_SAFE_PATH_MAX) {
+  if (L_STR_LEN (OPEN_CORE_IMAGE_PATH) + AsciiStrLen (PickerVariant) + 1 + L_STR_SIZE ("ExtAppleRecv10_15.icns") > OC_STORAGE_SAFE_PATH_MAX) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant is too long (should not exceed %u)!\n", OC_STORAGE_SAFE_PATH_MAX));
     ++ErrorCount;
   }
@@ -307,7 +307,7 @@ CheckMiscDebug (
   DisplayLevel        = UserMisc->Debug.DisplayLevel;
   AllowedDisplayLevel = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
   if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel is has unknown bits set!\n"));
+    DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel has unknown bits set!\n"));
     ++ErrorCount;
   }
   HaltLevel           = DisplayLevel;
@@ -372,7 +372,7 @@ ValidateFlavour (
         ++ErrorCount;
       } else {
         AsciiStrnCpyS (FlavourCopy, OC_MAX_CONTENT_FLAVOUR_SIZE, Start, End - Start);
-        if (OcAsciiStartsWith(FlavourCopy, "Ext", TRUE)) {
+        if (OcAsciiStartsWith (FlavourCopy, "Ext", TRUE)) {
           DEBUG ((DEBUG_WARN, "Flavour names within Misc->%a[%u]->Flavour cannot begin with \"Ext\"!\n", EntryType, Index));
           ++ErrorCount;
         }
@@ -442,7 +442,7 @@ CheckMiscEntries (
       ++ErrorCount;
     }
 
-    ErrorCount += ValidateFlavour("Entries", Index, Flavour);
+    ErrorCount += ValidateFlavour ("Entries", Index, Flavour);
   }
 
   //
@@ -624,7 +624,7 @@ CheckMiscTools (
       ++ErrorCount;
     }
 
-    ErrorCount += ValidateFlavour("Tools", Index, Flavour);
+    ErrorCount += ValidateFlavour ("Tools", Index, Flavour);
   }
 
   //
