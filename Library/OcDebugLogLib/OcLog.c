@@ -140,6 +140,58 @@ GetLogPath (
   return LogPath;
 }
 
+STATIC
+EFI_STATUS
+GetLogPrefix (
+  IN   CONST CHAR8  *FormatString,
+  OUT  CHAR8        *Prefix
+  )
+{
+  UINTN    MaxLength;
+  UINTN    Index;
+  CHAR8    Curr;
+
+  ASSERT (FormatString != NULL);
+  ASSERT (Prefix != NULL);
+
+  //
+  // If FormatString just starts with colon, it must be illegal.
+  //
+  if (*FormatString == ':') {
+    return EFI_NOT_FOUND;
+  }
+
+  MaxLength = MIN (AsciiStrLen (FormatString), OC_LOG_PREFIX_CHAR_MAX);
+  for (Index = 1; Index < MaxLength; ++Index) {
+    Curr = FormatString[Index];
+
+    //
+    // Match the first occurrence of colon.
+    //
+    if (Curr == ':') {
+      break;
+    }
+
+    //
+    // Except for colon, a valid prefix must be either 0-9, or uppercase letter.
+    //
+    if (!(IsAsciiNumber (Curr) || (Curr >= 'A' && Curr <= 'Z'))) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  //
+  // If Index went through the end, then ':' was not found.
+  //
+  if (Index == MaxLength) {
+    return EFI_NOT_FOUND;
+  }
+
+  CopyMem (Prefix, FormatString, Index);
+  Prefix[Index] = '\0';
+  return EFI_SUCCESS;
+}
+
 EFI_STATUS
 EFIAPI
 OcLogAddEntry  (
