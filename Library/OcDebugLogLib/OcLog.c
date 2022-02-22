@@ -39,9 +39,9 @@
 #include "OcLogInternal.h"
 
 typedef enum {
-  OcLogFilterModeNoFilter  = 0,
-  OcLogFilterModePositive  = 1,
-  OcLogFilterModeNegative  = 2
+  OcLogFilterModeNoFilter,
+  OcLogFilterModePositive,
+  OcLogFilterModeNegative
 } OC_LOG_FILTER_MODE;
 
 STATIC
