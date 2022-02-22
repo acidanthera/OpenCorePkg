@@ -490,17 +490,8 @@ OcLogAddEntry (
   //
   // Filter log.
   //
-  if (Private->FlexFilters != NULL) {
-    for (Index = 0; Index < Private->FlexFilters->Count; ++Index) {
-      IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
-      //
-      // Drop the filter on unknown mode.
-      //
-      if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
-        Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
-      }
-    }
-  } else {
+  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
+  if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
     Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
   }
 
