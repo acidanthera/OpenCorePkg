@@ -1091,7 +1091,7 @@
 			<integer>0</integer>
 			<key>DisplayLevel</key>
 			<integer>2147483650</integer>
-			<key>LogModule</key>
+			<key>LogModules</key>
 			<string>*</string>
 			<key>SerialInit</key>
 			<false/>
