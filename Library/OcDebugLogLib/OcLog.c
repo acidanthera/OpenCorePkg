@@ -495,7 +495,7 @@ OcLogAddEntry (
       //
       // Drop the filter on unknown mode.
       //
-      if (!IsFiltered || (IsFiltered && FilterMode == OcLogFilterModePositive)) {
+      if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
         Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
       }
     }
