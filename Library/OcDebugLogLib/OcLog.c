@@ -692,6 +692,7 @@ OcConfigureLogProtocol (
         LogModuleCopy = AllocateCopyPool (AsciiStrSize (LogModule), LogModule);
         if (LogModuleCopy != NULL) {
           FlexFilters = OcStringSplit (LogModuleCopy, L',', FALSE);
+          FreePool (LogModuleCopy);
         }
       }
       Private->FlexFilters = FlexFilters;
