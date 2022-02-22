@@ -39,9 +39,9 @@
 #include "OcLogInternal.h"
 
 typedef enum {
-  OcLogFilterModeUnknown  = 0,
-  OcLogFilterModePositive = 1,
-  OcLogFilterModeNegative = 2
+  OcLogFilterModeNoFilter  = 0,
+  OcLogFilterModePositive  = 1,
+  OcLogFilterModeNegative  = 2
 } OC_LOG_FILTER_MODE;
 
 STATIC
@@ -215,6 +215,7 @@ IsPrefixFiltered (
   ASSERT (FilterMode != NULL);
 
   if (FlexFilters == NULL) {
+    *FilterMode = OcLogFilterModeNoFilter;
     return FALSE;
   }
 
@@ -234,10 +235,10 @@ IsPrefixFiltered (
   } else if ((*Value)[0] == '-') {
     *FilterMode = OcLogFilterModeNegative;
   } else {
-    *FilterMode = OcLogFilterModeUnknown;
+    *FilterMode = OcLogFilterModeNoFilter;
   }
 
-  if (*FilterMode == OcLogFilterModeUnknown) {
+  if (*FilterMode == OcLogFilterModeNoFilter) {
     return FALSE;
   }
 
