@@ -43,7 +43,7 @@ OcAsciiStringBufferAppend (
 
   @retval         EFI_SUCCESS           The buffer was extended successfully.
   @retval         EFI_OUT_OF_RESOURCES  The extension failed due to the lack of resources.
-  @retval         EFI_UNSUPPORTED       The buffer has no size (This theoretically may never happen).
+  @retval         EFI_UNSUPPORTED       The buffer has no size.
 **/
 STATIC
 EFI_STATUS
