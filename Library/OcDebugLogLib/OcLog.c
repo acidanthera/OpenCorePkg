@@ -38,6 +38,12 @@
 
 #include "OcLogInternal.h"
 
+typedef enum {
+  OcLogFilterModeUnknown  = 0,
+  OcLogFilterModePositive = 1,
+  OcLogFilterModeNegative = 2
+} OC_LOG_FILTER_MODE;
+
 STATIC
 CHAR8 *
 GetTiming  (
@@ -192,18 +198,76 @@ GetLogPrefix (
   return EFI_SUCCESS;
 }
 
+STATIC
+BOOLEAN
+IsPrefixFiltered (
+  IN   CONST CHAR8          *FormatString,
+  IN   CONST OC_FLEX_ARRAY  *FlexFilters,
+  OUT  OC_LOG_FILTER_MODE   *FilterMode
+  )
+{
+  UINTN       Index;
+  CHAR8       Prefix[OC_LOG_PREFIX_CHAR_MAX + 1];
+  EFI_STATUS  Status;
+  CHAR8       **Value;
+
+  ASSERT (FormatString != NULL);
+  ASSERT (FilterMode != NULL);
+
+  if (FlexFilters == NULL) {
+    return FALSE;
+  }
+
+  Status = GetLogPrefix (FormatString, Prefix);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCL: Failed to get log prefix - %r\n", Status));
+    return FALSE;
+  }
+
+  //
+  // Determine filter mode and process Index 0.
+  //
+  Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, 0);
+  ASSERT (Value != NULL);
+  if ((*Value)[0] == '+') {
+    *FilterMode = OcLogFilterModePositive;
+  } else if ((*Value)[0] == '-') {
+    *FilterMode = OcLogFilterModeNegative;
+  } else {
+    *FilterMode = OcLogFilterModeUnknown;
+  }
+
+  if (*FilterMode == OcLogFilterModeUnknown) {
+    return FALSE;
+  }
+
+  if (AsciiStrCmp (Prefix, &(*(*Value + 1))) == 0) {
+    return TRUE;
+  }
+
+  for (Index = 1; Index < FlexFilters->Count; ++Index) {
+    Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, Index);
+    ASSERT (Value != NULL);
+
+    if (AsciiStrCmp (Prefix, *Value) == 0) {
+      return TRUE;
+    }
+  }
+
+  return FALSE;
+}
+
+STATIC
 EFI_STATUS
-EFIAPI
-OcLogAddEntry  (
-  IN OC_LOG_PROTOCOL    *OcLog,
-  IN UINTN              ErrorLevel,
-  IN CONST CHAR8        *FormatString,
-  IN VA_LIST            Marker
+InternalOcLogAddEntry (
+  IN OC_LOG_PRIVATE_DATA  *Private,
+  IN OC_LOG_PROTOCOL      *OcLog,
+  IN UINTN                ErrorLevel,
+  IN CONST CHAR8          *FormatString,
+  IN VA_LIST              Marker
   )
 {
   EFI_STATUS                  Status;
-
-  OC_LOG_PRIVATE_DATA         *Private;
   UINT32                      Attributes;
   UINT32                      TimingLength;
   UINT32                      LineLength;
@@ -211,15 +275,6 @@ OcLogAddEntry  (
   UINT32                      KeySize;
   UINT32                      DataSize;
   UINT32                      TotalSize;
-
-  Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
-
-  if ((OcLog->Options & OC_LOG_ENABLE) == 0) {
-    //
-    // Silently ignore when disabled.
-    //
-    return EFI_SUCCESS;
-  }
 
   AsciiVSPrint (
     Private->LineBuffer,
@@ -399,6 +454,58 @@ OcLogAddEntry  (
     }
   }
 
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+OcLogAddEntry (
+  IN OC_LOG_PROTOCOL    *OcLog,
+  IN UINTN              ErrorLevel,
+  IN CONST CHAR8        *FormatString,
+  IN VA_LIST            Marker
+  )
+{
+  EFI_STATUS                  Status;
+
+  OC_LOG_PRIVATE_DATA         *Private;
+
+  CHAR8                       *FormatCopy;
+  UINTN                       Index;
+  BOOLEAN                     IsFiltered;
+  OC_LOG_FILTER_MODE          FilterMode;
+
+  ASSERT (OcLog != NULL);
+  ASSERT (FormatString != NULL);
+
+  Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
+
+  if ((OcLog->Options & OC_LOG_ENABLE) == 0) {
+    //
+    // Silently ignore when disabled.
+    //
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Filter log.
+  //
+  FormatCopy = AllocateCopyPool (AsciiStrSize (FormatString), FormatString);
+  ASSERT (FormatCopy != NULL);
+  if (Private->FlexFilters != NULL) {
+    for (Index = 0; Index < Private->FlexFilters->Count; ++Index) {
+      IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
+      //
+      // Drop the filter on unknown mode.
+      //
+      if (!IsFiltered || (IsFiltered && FilterMode == OcLogFilterModePositive)) {
+        Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
+      }
+    }
+  } else {
+    Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
+  }
+
   if ((ErrorLevel & OcLog->HaltLevel) != 0
     && AsciiStrnCmp (FormatString, "\nASSERT_RETURN_ERROR", L_STR_LEN ("\nASSERT_RETURN_ERROR")) != 0
     && AsciiStrnCmp (FormatString, "\nASSERT_EFI_ERROR", L_STR_LEN ("\nASSERT_EFI_ERROR")) != 0) {
@@ -480,6 +587,7 @@ InternalGetOcLog (
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS                   Options,
+  IN CONST CHAR8                      *LogModule,
   IN UINT32                           DisplayDelay,
   IN UINTN                            DisplayLevel,
   IN UINTN                            HaltLevel,
@@ -494,6 +602,11 @@ OcConfigureLogProtocol (
   EFI_HANDLE            Handle;
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
+
+  CHAR8                 *LogModuleCopy;
+  OC_FLEX_ARRAY         *FlexFilters;
+
+  ASSERT (LogModule != NULL);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
     LogRoot = NULL;
@@ -573,6 +686,18 @@ OcConfigureLogProtocol (
       Private->OcLog.HaltLevel    = HaltLevel;
       Private->OcLog.FileSystem   = LogRoot;
       Private->OcLog.FilePath     = LogPath;
+
+      //
+      // Write filters into Private.
+      //
+      FlexFilters = NULL;
+      if (AsciiStrCmp (LogModule, "*") != 0 && AsciiStrCmp (LogModule, "") != 0) {
+        LogModuleCopy = AllocateCopyPool (AsciiStrSize (LogModule), LogModule);
+        ASSERT (LogModuleCopy != NULL);
+        FlexFilters   = OcStringSplit (LogModuleCopy, L',', FALSE);
+        ASSERT (FlexFilters != NULL);
+      }
+      Private->FlexFilters = FlexFilters;
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (
