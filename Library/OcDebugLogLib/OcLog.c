@@ -584,7 +584,7 @@ InternalGetOcLog (
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS                   Options,
-  IN CONST CHAR8                      *LogModule,
+  IN CONST CHAR8                      *LogModules,
   IN UINT32                           DisplayDelay,
   IN UINTN                            DisplayLevel,
   IN UINTN                            HaltLevel,
@@ -600,10 +600,10 @@ OcConfigureLogProtocol (
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
 
-  CHAR8                 *LogModuleCopy;
+  CHAR8                 *LogModulesCopy;
   OC_FLEX_ARRAY         *FlexFilters;
 
-  ASSERT (LogModule != NULL);
+  ASSERT (LogModules != NULL);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
     LogRoot = NULL;
@@ -688,11 +688,11 @@ OcConfigureLogProtocol (
       // Write filters into Private.
       //
       FlexFilters = NULL;
-      if (AsciiStrCmp (LogModule, "*") != 0 && AsciiStrCmp (LogModule, "") != 0) {
-        LogModuleCopy = AllocateCopyPool (AsciiStrSize (LogModule), LogModule);
-        if (LogModuleCopy != NULL) {
-          FlexFilters = OcStringSplit (LogModuleCopy, L',', FALSE);
-          FreePool (LogModuleCopy);
+      if (AsciiStrCmp (LogModules, "*") != 0 && AsciiStrCmp (LogModules, "") != 0) {
+        LogModulesCopy = AllocateCopyPool (AsciiStrSize (LogModules), LogModules);
+        if (LogModulesCopy != NULL) {
+          FlexFilters = OcStringSplit (LogModulesCopy, L',', FALSE);
+          FreePool (LogModulesCopy);
         }
       }
       Private->FlexFilters = FlexFilters;

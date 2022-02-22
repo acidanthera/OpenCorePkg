@@ -406,7 +406,7 @@ OcMiscEarlyInit (
   EFI_TIME                  BootTime;
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
-  CHAR8                     *AsciiLogModule;
+  CHAR8                     *AsciiLogModules;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -474,10 +474,10 @@ OcMiscEarlyInit (
     SerialPortInitialize ();
   }
 
-  AsciiLogModule = OC_BLOB_GET (&Config->Misc.Debug.LogModule);
+  AsciiLogModules = OC_BLOB_GET (&Config->Misc.Debug.LogModules);
   OcConfigureLogProtocol (
     Config->Misc.Debug.Target,
-    AsciiLogModule,
+    AsciiLogModules,
     Config->Misc.Debug.DisplayDelay,
     (UINTN) Config->Misc.Debug.DisplayLevel,
     (UINTN) Config->Misc.Security.HaltLevel,
