@@ -48,6 +48,7 @@
   MemoryAllocationLib
   OcCpuLib
   OcDataHubLib
+  OcFlexArrayLib
   SerialPortLib
   UefiRuntimeServicesTableLib
 
