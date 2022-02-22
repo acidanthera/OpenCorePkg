@@ -241,7 +241,7 @@ IsPrefixFiltered (
     return FALSE;
   }
 
-  if (AsciiStrCmp (Prefix, &(*(*Value + 1))) == 0) {
+  if (AsciiStrCmp (Prefix, &((*Value)[1])) == 0) {
     return TRUE;
   }
 
