@@ -406,7 +406,7 @@ OcMiscEarlyInit (
   EFI_TIME                  BootTime;
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
-  CHAR8                     *AsciiLogModules;
+  CONST CHAR8               *AsciiLogModules;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
