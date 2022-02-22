@@ -470,7 +470,6 @@ OcLogAddEntry (
 
   OC_LOG_PRIVATE_DATA         *Private;
 
-  CHAR8                       *FormatCopy;
   UINTN                       Index;
   BOOLEAN                     IsFiltered;
   OC_LOG_FILTER_MODE          FilterMode;
@@ -490,8 +489,6 @@ OcLogAddEntry (
   //
   // Filter log.
   //
-  FormatCopy = AllocateCopyPool (AsciiStrSize (FormatString), FormatString);
-  ASSERT (FormatCopy != NULL);
   if (Private->FlexFilters != NULL) {
     for (Index = 0; Index < Private->FlexFilters->Count; ++Index) {
       IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
