@@ -40,7 +40,7 @@
   OC_LOG_FILE)
 
 ///
-/// Maximum possible number of characters of log prefix before colon.
+/// Maximum possible number of characters of log prefix including colon.
 ///
 #define OC_LOG_PREFIX_CHAR_MAX  8U
 
