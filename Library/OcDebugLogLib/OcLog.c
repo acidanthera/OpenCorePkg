@@ -592,7 +592,6 @@ OcConfigureLogProtocol (
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
 
-  CHAR8                 *LogModulesCopy;
   OC_FLEX_ARRAY         *FlexFilters;
 
   ASSERT (LogModules != NULL);
@@ -681,11 +680,7 @@ OcConfigureLogProtocol (
       //
       FlexFilters = NULL;
       if (AsciiStrCmp (LogModules, "*") != 0 && AsciiStrCmp (LogModules, "") != 0) {
-        LogModulesCopy = AllocateCopyPool (AsciiStrSize (LogModules), LogModules);
-        if (LogModulesCopy != NULL) {
-          FlexFilters = OcStringSplit (LogModulesCopy, L',', FALSE);
-          FreePool (LogModulesCopy);
-        }
+        FlexFilters = OcStringSplit (LogModules, L',', FALSE);
       }
       Private->FlexFilters = FlexFilters;
 
