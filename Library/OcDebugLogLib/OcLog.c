@@ -221,15 +221,22 @@ IsPrefixFiltered (
 
   Status = GetLogPrefix (FormatString, Prefix);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCL: Failed to get log prefix - %r\n", Status));
+    *FilterMode = OcLogFilterModeNoFilter;
     return FALSE;
   }
 
+  Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, 0);
+  ASSERT (Value != NULL);
+  //
+  // One mere symbol? This is borked. 
+  //
+  if (AsciiStrLen (*Value) <= 1) {
+    *FilterMode = OcLogFilterModeNoFilter;
+    return FALSE;
+  }
   //
   // Determine filter mode and process Index 0.
   //
-  Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, 0);
-  ASSERT (Value != NULL);
   if ((*Value)[0] == '+') {
     *FilterMode = OcLogFilterModePositive;
   } else if ((*Value)[0] == '-') {
@@ -241,7 +248,9 @@ IsPrefixFiltered (
   if (*FilterMode == OcLogFilterModeNoFilter) {
     return FALSE;
   }
-
+  //
+  // &((*Value)[1]) means the real prefix after '+' or '-' symbol.
+  //
   if (AsciiStrCmp (Prefix, &((*Value)[1])) == 0) {
     return TRUE;
   }
@@ -260,7 +269,7 @@ IsPrefixFiltered (
 
 STATIC
 EFI_STATUS
-InternalOcLogAddEntry (
+InternalLogAddEntry (
   IN OC_LOG_PRIVATE_DATA  *Private,
   IN OC_LOG_PROTOCOL      *OcLog,
   IN UINTN                ErrorLevel,
@@ -468,9 +477,7 @@ OcLogAddEntry (
   )
 {
   EFI_STATUS                  Status;
-
   OC_LOG_PRIVATE_DATA         *Private;
-
   BOOLEAN                     IsFiltered;
   OC_LOG_FILTER_MODE          FilterMode;
 
@@ -492,7 +499,7 @@ OcLogAddEntry (
   Status = EFI_SUCCESS;
   IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
   if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
-    Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
+    Status = InternalLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
   }
 
   if ((ErrorLevel & OcLog->HaltLevel) != 0
