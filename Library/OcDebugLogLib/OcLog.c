@@ -471,7 +471,6 @@ OcLogAddEntry (
 
   OC_LOG_PRIVATE_DATA         *Private;
 
-  UINTN                       Index;
   BOOLEAN                     IsFiltered;
   OC_LOG_FILTER_MODE          FilterMode;
 
@@ -490,6 +489,7 @@ OcLogAddEntry (
   //
   // Filter log.
   //
+  Status = EFI_SUCCESS;
   IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
   if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
     Status = InternalOcLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
