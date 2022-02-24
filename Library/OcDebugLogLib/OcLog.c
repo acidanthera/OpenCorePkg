@@ -214,13 +214,6 @@ IsPrefixFiltered (
     return FALSE;
   }
 
-  //
-  // Do not filter if not blacklisting (i.e. with '+' symbol or no symbol).
-  //
-  if (!BlacklistFiltering) {
-    return FALSE;
-  }
-
   Status = GetLogPrefix (FormatString, Prefix);
   if (EFI_ERROR (Status)) {
     return FALSE;
@@ -231,7 +224,11 @@ IsPrefixFiltered (
     ASSERT (Value != NULL);
 
     if (AsciiStrCmp (Prefix, *Value) == 0) {
-      return TRUE;
+      //
+      // Upon matching, return TRUE (i.e. not to print logs)
+      // if blacklisted.
+      //
+      return BlacklistFiltering;
     }
   }
 
