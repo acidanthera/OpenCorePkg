@@ -207,10 +207,16 @@ IsPrefixFiltered (
 
   ASSERT (FormatString != NULL);
 
+  //
+  // Do not filter without filters, of course.
+  //
   if (FlexFilters == NULL) {
     return FALSE;
   }
 
+  //
+  // Do not filter if not blacklisting (i.e. with '+' symbol or no symbol).
+  //
   if (!BlacklistFiltering) {
     return FALSE;
   }
@@ -650,15 +656,14 @@ OcConfigureLogProtocol (
       Private->FlexFilters = NULL;
       Private->BlacklistFiltering = FALSE;
       if (*LogModules != '*' && *LogModules != '\0') {
+        //
+        // Default to positive filtering without symbol.
+        //
         if (*LogModules == '+') {
           ++LogModules;
         } else if (*LogModules == '-') {
           Private->BlacklistFiltering = TRUE;
           ++LogModules;
-        } else {
-          //
-          // Default to positive filtering without symbol.
-          //
         }
 
         Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
