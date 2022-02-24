@@ -197,7 +197,7 @@ BOOLEAN
 IsPrefixFiltered (
   IN   CONST CHAR8          *FormatString,
   IN   CONST OC_FLEX_ARRAY  *FlexFilters    OPTIONAL,
-  IN   OC_LOG_FILTER_MODE   FilterMode
+  IN   BOOLEAN              BlacklistFiltering
   )
 {
   UINTN       Index;
@@ -211,7 +211,7 @@ IsPrefixFiltered (
     return FALSE;
   }
 
-  if (FilterMode == OcLogFilterModeNoFilter || FilterMode == OcLogFilterModePositive) {
+  if (!BlacklistFiltering) {
     return FALSE;
   }
 
@@ -461,7 +461,7 @@ OcLogAddEntry (
   // Filter log.
   //
   Status = EFI_SUCCESS;
-  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, Private->FilterMode);
+  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, Private->BlacklistFiltering);
   if (!IsFiltered) {
     Status = InternalLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
   }
@@ -648,17 +648,20 @@ OcConfigureLogProtocol (
       // Write filters into Private.
       //
       Private->FlexFilters = NULL;
-      Private->FilterMode = OcLogFilterModeNoFilter;
+      Private->BlacklistFiltering = FALSE;
       if (*LogModules != '*' && *LogModules != '\0') {
         if (*LogModules == '+') {
-          Private->FilterMode = OcLogFilterModePositive;
-          Private->FlexFilters = OcStringSplit (&LogModules[1], L',', FALSE);
+          ++LogModules;
         } else if (*LogModules == '-') {
-          Private->FilterMode = OcLogFilterModeNegative;
-          Private->FlexFilters = OcStringSplit (&LogModules[1], L',', FALSE);
+          Private->BlacklistFiltering = TRUE;
+          ++LogModules;
         } else {
-          Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
+          //
+          // Default to positive filtering without symbol.
+          //
         }
+
+        Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
       }
 
       Handle = NULL;
