@@ -38,12 +38,6 @@
 
 #include "OcLogInternal.h"
 
-typedef enum {
-  OcLogFilterModeNoFilter,
-  OcLogFilterModePositive,
-  OcLogFilterModeNegative
-} OC_LOG_FILTER_MODE;
-
 STATIC
 CHAR8 *
 GetTiming  (
@@ -202,8 +196,8 @@ STATIC
 BOOLEAN
 IsPrefixFiltered (
   IN   CONST CHAR8          *FormatString,
-  IN   CONST OC_FLEX_ARRAY  *FlexFilters,
-  OUT  OC_LOG_FILTER_MODE   *FilterMode
+  IN   CONST OC_FLEX_ARRAY  *FlexFilters    OPTIONAL,
+  IN   OC_LOG_FILTER_MODE   FilterMode
   )
 {
   UINTN       Index;
@@ -212,50 +206,21 @@ IsPrefixFiltered (
   CHAR8       **Value;
 
   ASSERT (FormatString != NULL);
-  ASSERT (FilterMode != NULL);
 
   if (FlexFilters == NULL) {
-    *FilterMode = OcLogFilterModeNoFilter;
+    return FALSE;
+  }
+
+  if (FilterMode == OcLogFilterModeNoFilter || FilterMode == OcLogFilterModePositive) {
     return FALSE;
   }
 
   Status = GetLogPrefix (FormatString, Prefix);
   if (EFI_ERROR (Status)) {
-    *FilterMode = OcLogFilterModeNoFilter;
     return FALSE;
   }
 
-  Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, 0);
-  ASSERT (Value != NULL);
-  //
-  // One mere symbol? This is borked. 
-  //
-  if (AsciiStrLen (*Value) <= 1) {
-    *FilterMode = OcLogFilterModeNoFilter;
-    return FALSE;
-  }
-  //
-  // Determine filter mode and process Index 0.
-  //
-  if ((*Value)[0] == '+') {
-    *FilterMode = OcLogFilterModePositive;
-  } else if ((*Value)[0] == '-') {
-    *FilterMode = OcLogFilterModeNegative;
-  } else {
-    *FilterMode = OcLogFilterModeNoFilter;
-  }
-
-  if (*FilterMode == OcLogFilterModeNoFilter) {
-    return FALSE;
-  }
-  //
-  // &((*Value)[1]) means the real prefix after '+' or '-' symbol.
-  //
-  if (AsciiStrCmp (Prefix, &((*Value)[1])) == 0) {
-    return TRUE;
-  }
-
-  for (Index = 1; Index < FlexFilters->Count; ++Index) {
+  for (Index = 0; Index < FlexFilters->Count; ++Index) {
     Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, Index);
     ASSERT (Value != NULL);
 
@@ -479,7 +444,6 @@ OcLogAddEntry (
   EFI_STATUS                  Status;
   OC_LOG_PRIVATE_DATA         *Private;
   BOOLEAN                     IsFiltered;
-  OC_LOG_FILTER_MODE          FilterMode;
 
   ASSERT (OcLog != NULL);
   ASSERT (FormatString != NULL);
@@ -497,8 +461,8 @@ OcLogAddEntry (
   // Filter log.
   //
   Status = EFI_SUCCESS;
-  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, &FilterMode);
-  if (!IsFiltered || FilterMode == OcLogFilterModePositive) {
+  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, Private->FilterMode);
+  if (!IsFiltered) {
     Status = InternalLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
   }
 
@@ -599,8 +563,6 @@ OcConfigureLogProtocol (
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
 
-  OC_FLEX_ARRAY         *FlexFilters;
-
   ASSERT (LogModules != NULL);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
@@ -685,11 +647,19 @@ OcConfigureLogProtocol (
       //
       // Write filters into Private.
       //
-      FlexFilters = NULL;
-      if (AsciiStrCmp (LogModules, "*") != 0 && AsciiStrCmp (LogModules, "") != 0) {
-        FlexFilters = OcStringSplit (LogModules, L',', FALSE);
+      Private->FlexFilters = NULL;
+      Private->FilterMode = OcLogFilterModeNoFilter;
+      if (*LogModules != '*' && *LogModules != '\0') {
+        if (*LogModules == '+') {
+          Private->FilterMode = OcLogFilterModePositive;
+          Private->FlexFilters = OcStringSplit (&LogModules[1], L',', FALSE);
+        } else if (*LogModules == '-') {
+          Private->FilterMode = OcLogFilterModeNegative;
+          Private->FlexFilters = OcStringSplit (&LogModules[1], L',', FALSE);
+        } else {
+          Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
+        }
       }
-      Private->FlexFilters = FlexFilters;
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (

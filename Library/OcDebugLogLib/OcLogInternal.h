@@ -31,6 +31,12 @@
 #define OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS(a) \
   (CR (a, OC_LOG_PRIVATE_DATA, OcLog, OC_LOG_PRIVATE_DATA_SIGNATURE))
 
+typedef enum {
+  OcLogFilterModeNoFilter,
+  OcLogFilterModePositive,
+  OcLogFilterModeNegative
+} OC_LOG_FILTER_MODE;
+
 typedef struct {
   UINT64                 Signature;
   UINT64                 TscFrequency;
@@ -47,6 +53,7 @@ typedef struct {
   CHAR16                 *LogFilePathName;
   EFI_DATA_HUB_PROTOCOL  *DataHub;
   OC_FLEX_ARRAY          *FlexFilters;
+  OC_LOG_FILTER_MODE     FilterMode;
   OC_LOG_PROTOCOL        OcLog;
 } OC_LOG_PRIVATE_DATA;
 
