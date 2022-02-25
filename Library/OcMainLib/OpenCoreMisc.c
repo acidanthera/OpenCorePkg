@@ -475,6 +475,7 @@ OcMiscEarlyInit (
 
   OcConfigureLogProtocol (
     Config->Misc.Debug.Target,
+    OC_BLOB_GET (&Config->Misc.Debug.LogModules),
     Config->Misc.Debug.DisplayDelay,
     (UINTN) Config->Misc.Debug.DisplayLevel,
     (UINTN) Config->Misc.Security.HaltLevel,

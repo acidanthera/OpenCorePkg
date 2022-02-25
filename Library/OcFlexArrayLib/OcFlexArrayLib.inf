@@ -16,12 +16,13 @@
 # VALID_ARCHITECTURES = IA32 X64
 
 [Packages]
-  OpenCorePkg/OpenCorePkg.dec
   MdePkg/MdePkg.dec
+  OpenCorePkg/OpenCorePkg.dec
 
 [LibraryClasses]
   BaseLib
 
 [Sources]
-  FlexArray.c
   AsciiStringBuffer.c
+  FlexArray.c
+  FlexString.c

@@ -140,18 +140,112 @@ GetLogPath (
   return LogPath;
 }
 
+STATIC
 EFI_STATUS
-EFIAPI
-OcLogAddEntry  (
-  IN OC_LOG_PROTOCOL    *OcLog,
-  IN UINTN              ErrorLevel,
-  IN CONST CHAR8        *FormatString,
-  IN VA_LIST            Marker
+GetLogPrefix (
+  IN   CONST CHAR8  *FormatString,
+  OUT  CHAR8        *Prefix
+  )
+{
+  UINTN    MaxLength;
+  UINTN    Index;
+  CHAR8    Curr;
+
+  ASSERT (FormatString != NULL);
+  ASSERT (Prefix != NULL);
+
+  //
+  // If FormatString just starts with colon, it must be illegal.
+  //
+  if (*FormatString == ':') {
+    return EFI_NOT_FOUND;
+  }
+
+  MaxLength = MIN (AsciiStrLen (FormatString), OC_LOG_PREFIX_CHAR_MAX);
+  for (Index = 1; Index < MaxLength; ++Index) {
+    Curr = FormatString[Index];
+
+    //
+    // Match the first occurrence of colon.
+    //
+    if (Curr == ':') {
+      break;
+    }
+
+    //
+    // Except for colon, a valid prefix must be either 0-9, or uppercase letter.
+    //
+    if (!(IsAsciiNumber (Curr) || (Curr >= 'A' && Curr <= 'Z'))) {
+      return EFI_NOT_FOUND;
+    }
+  }
+
+  //
+  // If Index went through the end, then ':' was not found.
+  //
+  if (Index == MaxLength) {
+    return EFI_NOT_FOUND;
+  }
+
+  CopyMem (Prefix, FormatString, Index);
+  Prefix[Index] = '\0';
+  return EFI_SUCCESS;
+}
+
+STATIC
+BOOLEAN
+IsPrefixFiltered (
+  IN   CONST CHAR8          *FormatString,
+  IN   CONST OC_FLEX_ARRAY  *FlexFilters    OPTIONAL,
+  IN   BOOLEAN              BlacklistFiltering
+  )
+{
+  UINTN       Index;
+  CHAR8       Prefix[OC_LOG_PREFIX_CHAR_MAX + 1];
+  EFI_STATUS  Status;
+  CHAR8       **Value;
+
+  ASSERT (FormatString != NULL);
+
+  //
+  // Do not filter without filters, of course.
+  //
+  if (FlexFilters == NULL) {
+    return FALSE;
+  }
+
+  Status = GetLogPrefix (FormatString, Prefix);
+  if (EFI_ERROR (Status)) {
+    return FALSE;
+  }
+
+  for (Index = 0; Index < FlexFilters->Count; ++Index) {
+    Value = (CHAR8 **) OcFlexArrayItemAt (FlexFilters, Index);
+    ASSERT (Value != NULL);
+
+    if (AsciiStrCmp (Prefix, *Value) == 0) {
+      //
+      // Upon matching, return TRUE (i.e. not to print logs)
+      // if blacklisted.
+      //
+      return BlacklistFiltering;
+    }
+  }
+
+  return FALSE;
+}
+
+STATIC
+EFI_STATUS
+InternalLogAddEntry (
+  IN OC_LOG_PRIVATE_DATA  *Private,
+  IN OC_LOG_PROTOCOL      *OcLog,
+  IN UINTN                ErrorLevel,
+  IN CONST CHAR8          *FormatString,
+  IN VA_LIST              Marker
   )
 {
   EFI_STATUS                  Status;
-
-  OC_LOG_PRIVATE_DATA         *Private;
   UINT32                      Attributes;
   UINT32                      TimingLength;
   UINT32                      LineLength;
@@ -159,15 +253,6 @@ OcLogAddEntry  (
   UINT32                      KeySize;
   UINT32                      DataSize;
   UINT32                      TotalSize;
-
-  Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
-
-  if ((OcLog->Options & OC_LOG_ENABLE) == 0) {
-    //
-    // Silently ignore when disabled.
-    //
-    return EFI_SUCCESS;
-  }
 
   AsciiVSPrint (
     Private->LineBuffer,
@@ -347,6 +432,43 @@ OcLogAddEntry  (
     }
   }
 
+  return Status;
+}
+
+EFI_STATUS
+EFIAPI
+OcLogAddEntry (
+  IN OC_LOG_PROTOCOL    *OcLog,
+  IN UINTN              ErrorLevel,
+  IN CONST CHAR8        *FormatString,
+  IN VA_LIST            Marker
+  )
+{
+  EFI_STATUS                  Status;
+  OC_LOG_PRIVATE_DATA         *Private;
+  BOOLEAN                     IsFiltered;
+
+  ASSERT (OcLog != NULL);
+  ASSERT (FormatString != NULL);
+
+  Private = OC_LOG_PRIVATE_DATA_FROM_OC_LOG_THIS (OcLog);
+
+  if ((OcLog->Options & OC_LOG_ENABLE) == 0) {
+    //
+    // Silently ignore when disabled.
+    //
+    return EFI_SUCCESS;
+  }
+
+  //
+  // Filter log.
+  //
+  Status = EFI_SUCCESS;
+  IsFiltered = IsPrefixFiltered (FormatString, Private->FlexFilters, Private->BlacklistFiltering);
+  if (!IsFiltered) {
+    Status = InternalLogAddEntry (Private, OcLog, ErrorLevel, FormatString, Marker);
+  }
+
   if ((ErrorLevel & OcLog->HaltLevel) != 0
     && AsciiStrnCmp (FormatString, "\nASSERT_RETURN_ERROR", L_STR_LEN ("\nASSERT_RETURN_ERROR")) != 0
     && AsciiStrnCmp (FormatString, "\nASSERT_EFI_ERROR", L_STR_LEN ("\nASSERT_EFI_ERROR")) != 0) {
@@ -428,6 +550,7 @@ InternalGetOcLog (
 EFI_STATUS
 OcConfigureLogProtocol (
   IN OC_LOG_OPTIONS                   Options,
+  IN CONST CHAR8                      *LogModules,
   IN UINT32                           DisplayDelay,
   IN UINTN                            DisplayLevel,
   IN UINTN                            HaltLevel,
@@ -442,6 +565,8 @@ OcConfigureLogProtocol (
   EFI_HANDLE            Handle;
   EFI_FILE_PROTOCOL     *LogRoot;
   CHAR16                *LogPath;
+
+  ASSERT (LogModules != NULL);
 
   if ((Options & (OC_LOG_FILE | OC_LOG_ENABLE)) == (OC_LOG_FILE | OC_LOG_ENABLE)) {
     LogRoot = NULL;
@@ -521,6 +646,25 @@ OcConfigureLogProtocol (
       Private->OcLog.HaltLevel    = HaltLevel;
       Private->OcLog.FileSystem   = LogRoot;
       Private->OcLog.FilePath     = LogPath;
+
+      //
+      // Write filters into Private.
+      //
+      Private->FlexFilters = NULL;
+      Private->BlacklistFiltering = FALSE;
+      if (*LogModules != '*' && *LogModules != '\0') {
+        //
+        // Default to positive filtering without symbol.
+        //
+        if (*LogModules == '+') {
+          ++LogModules;
+        } else if (*LogModules == '-') {
+          Private->BlacklistFiltering = TRUE;
+          ++LogModules;
+        }
+
+        Private->FlexFilters = OcStringSplit (LogModules, L',', FALSE);
+      }
 
       Handle = NULL;
       Status = gBS->InstallProtocolInterface (

@@ -39,6 +39,11 @@
   OC_LOG_VARIABLE | OC_LOG_NONVOLATILE | \
   OC_LOG_FILE)
 
+///
+/// Maximum possible number of characters of log prefix including colon.
+///
+#define OC_LOG_PREFIX_CHAR_MAX  8U
+
 typedef UINT32 OC_LOG_OPTIONS;
 
 /**

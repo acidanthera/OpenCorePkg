@@ -15,6 +15,8 @@
 #ifndef OC_LOG_INTERNAL_H
 #define OC_LOG_INTERNAL_H
 
+#include <Library/OcFlexArrayLib.h>
+
 #include <Protocol/OcLog.h>
 #include <Protocol/DataHub.h>
 
@@ -44,6 +46,8 @@ typedef struct {
   UINT32                 LogCounter;
   CHAR16                 *LogFilePathName;
   EFI_DATA_HUB_PROTOCOL  *DataHub;
+  OC_FLEX_ARRAY          *FlexFilters;
+  BOOLEAN                BlacklistFiltering;
   OC_LOG_PROTOCOL        OcLog;
 } OC_LOG_PRIVATE_DATA;
 

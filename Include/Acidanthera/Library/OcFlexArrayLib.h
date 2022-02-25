@@ -14,9 +14,9 @@
 #include <Library/OcStringLib.h>
 #include <Protocol/ApplePlatformInfoDatabase.h>
 
-/*
+/**
   Forward declaration of OC_FLEX_ARRAY structure.
-*/
+**/
 typedef struct OC_FLEX_ARRAY_ OC_FLEX_ARRAY;
 
 /**
@@ -27,7 +27,7 @@ typedef struct OC_FLEX_ARRAY_ OC_FLEX_ARRAY;
 typedef
 VOID
 (* OC_FLEX_ARRAY_FREE_ITEM) (
-  IN VOID *Item
+  IN  VOID  *Item
   );
 
 /**
@@ -40,7 +40,7 @@ VOID
 **/
 VOID
 OcFlexArrayFreePointerItem (
-  IN VOID *Item
+  IN  VOID  *Item
   );
 
 /**
@@ -51,7 +51,7 @@ OcFlexArrayFreePointerItem (
                                 OcFlexArrayFree; may be NULL if there is nothing
                                 pointed to by pool items which needs freeing.
 
-  @retval Non-null              Flex array was created.
+  @retval Non-NULL              Flex array was created.
   @retval NULL                  Out of memory.
 **/
 OC_FLEX_ARRAY *
@@ -65,7 +65,7 @@ OcFlexArrayInit (
 
   @param[in,out]  FlexArray     Flex array to modify.
 
-  @retval Non-null              Address of item created.
+  @retval Non-NULL              Address of item created.
   @retval NULL                  Out of memory, in which case FlexArray->Items will be set
                                 to NULL, but FlexArray itself will still be allocated.
 **/
@@ -75,31 +75,19 @@ OcFlexArrayAddItem (
   );
 
 /**
-  Discard last item on flex array, optionally calling item free method.
-
-  @param[in,out]  FlexArray     Flex array to modify.
-  @param[in]      FreeItem      Whether to call item free method.
-**/
-VOID
-OcFlexArrayDiscardItem (
-  IN OUT       OC_FLEX_ARRAY       *FlexArray,
-  IN     CONST BOOLEAN             FreeItem
-  );
-
-/**
   Insert new item at position in flex array, resizing array if necessary. New item memory is zeroed.
 
   @param[in,out]  FlexArray     Flex array to modify.
   @param[in]      InsertIndex   Index at which to insert; must be less than or equal to current item count.
 
-  @retval Non-null              Address of item created.
+  @retval Non-NULL              Address of item created.
   @retval NULL                  Out of memory, in which case FlexArray->Items will be set
                                 to NULL, but FlexArray itself will still be allocated.
 **/
 VOID *
 OcFlexArrayInsertItem (
-  IN OUT       OC_FLEX_ARRAY       *FlexArray,
-  IN     CONST UINTN               InsertIndex
+  IN OUT  OC_FLEX_ARRAY                *FlexArray,
+  IN      CONST UINTN                  InsertIndex
   );
 
 /**
@@ -108,7 +96,7 @@ OcFlexArrayInsertItem (
   @param[in,out]  FlexArray     Flex array to access.
   @param[in,out]  Index         Index of item to return.
 
-  @retval Non-null              Item.
+  @retval Non-NULL              Item.
   @retval NULL                  Out-of-range item requested. This also ASSERTs.
 **/
 VOID *
@@ -125,6 +113,18 @@ OcFlexArrayItemAt (
 VOID
 OcFlexArrayFree (
   IN OUT       OC_FLEX_ARRAY      **FlexArray
+  );
+
+/**
+  Discard last item on flex array, optionally calling item free method.
+
+  @param[in,out]  FlexArray     Flex array to modify.
+  @param[in]      FreeItem      Whether to call item free method.
+**/
+VOID
+OcFlexArrayDiscardItem (
+  IN OUT  OC_FLEX_ARRAY       *FlexArray,
+  IN      CONST BOOLEAN       FreeItem
   );
 
 /**
@@ -176,7 +176,7 @@ typedef struct OC_STRING_BUFFER_ OC_STRING_BUFFER;
 /**
   Initialize string buffer.
 
-  @retval Non-null                  Buffer was created.
+  @retval Non-NULL                  Buffer was created.
   @retval NULL                      Out of memory.
 **/
 OC_STRING_BUFFER *
@@ -196,8 +196,8 @@ OcAsciiStringBufferInit (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppend (
-  IN OUT       OC_STRING_BUFFER    *Buffer,
-  IN     CONST CHAR8               *AppendString    OPTIONAL
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *AppendString    OPTIONAL
   );
 
 /**
@@ -214,9 +214,9 @@ OcAsciiStringBufferAppend (
 **/
 EFI_STATUS
 OcAsciiStringBufferAppendN (
-  IN OUT       OC_STRING_BUFFER    *Buffer,
-  IN     CONST CHAR8               *AppendString,   OPTIONAL
-  IN     CONST UINTN             Length
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *AppendString,   OPTIONAL
+  IN      CONST UINTN         Length
   );
 
 
@@ -234,8 +234,8 @@ OcAsciiStringBufferAppendN (
 EFI_STATUS
 EFIAPI
 OcAsciiStringBufferSPrint (
-  IN OUT            OC_STRING_BUFFER    *Buffer,
-  IN  CONST CHAR8   *FormatString,
+  IN OUT  OC_STRING_BUFFER    *Buffer,
+  IN      CONST CHAR8         *FormatString,
   ...
   );
 
@@ -275,5 +275,21 @@ struct OC_STRING_BUFFER_ {
   UINTN                           StringLength;
   UINTN                           BufferSize;
 };
+
+/**
+  Split string by delimiter.
+
+  @param[in]  String     A Null-terminated string. 
+  @param[in]  Delim      Delimiter to search in String.
+  @param[in]  IsUnicode  Are option names and values Unicode or ASCII?
+
+  @return  A flex array containing splitted string.
+**/
+OC_FLEX_ARRAY *
+OcStringSplit (
+  IN  CONST VOID     *String,
+  IN  CONST CHAR16   Delim,
+  IN  CONST BOOLEAN  IsUnicode
+  );
 
 #endif // OC_FLEX_ARRAY_LIB_H
