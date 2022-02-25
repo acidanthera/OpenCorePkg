@@ -10,6 +10,7 @@ OpenCore Changelog
 - Added kext blocking `Strategy` for prelinked and newer
 - Added global MSR 35h fix to `ProvideCurrentCpuInfo`, allowing `-cpu host` in KVM
 - Fixed potential memory corruption with AVX acceleration enabled
+- Added `LogModules` for positive and negative log filtering by modules
 
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
