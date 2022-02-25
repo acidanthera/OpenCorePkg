@@ -3712,11 +3712,17 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
     \item \texttt{+} --- Positive filtering: Only present selected modules.
     \item \texttt{-} --- Negative filtering: Exclude selected modules.
   \end{itemize}
-  When multiple ones are selected, comma (\texttt{,}) should be used as the splitter (e.g. \texttt{+OCCPU,OCB,OCA} or \texttt{-OCCPU,OCB,OCA}).
+  When multiple ones are selected, comma (\texttt{,}) should be used as the splitter.
+  For instance, \texttt{+OCCPU,OCA,OCB} means \emph{only} \texttt{OCCPU}, \texttt{OCA}, \texttt{OCB} being printed,
+  while \texttt{-OCCPU,OCA,OCB} indicates these modules being filtered out (i.e. \emph{not} logged).
+  When no symbol is specified, positive filtering (\texttt{+}) will be used.
   \texttt{*} indicates all modules being logged.
 
-  \emph{Note}: Acronyms of libraries can be found in the
+  \emph{Note 1}: Acronyms of libraries can be found in the
   \hyperref[oc-mod-libs]{\texttt{Libraries}} section below.
+
+  \emph{Note 2}: Messages printed before the configuration of log protocol
+  cannot be filtered.
 
 \item
   \texttt{SerialInit}\\
