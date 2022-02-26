@@ -21,10 +21,11 @@
 
 #include <Protocol/OcBootEntry.h>
 
-UINTN gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE);
+UINTN gLinuxBootFlags = LINUX_BOOT_ALL & ~(LINUX_BOOT_ADD_DEBUG_INFO | LINUX_BOOT_LOG_VERBOSE | LINUX_BOOT_ADD_RW);
+
+OC_FLEX_ARRAY     *mParsedLoadOptions;
 
 OC_PICKER_CONTEXT *gPickerContext;
-OC_FLEX_ARRAY     *gParsedLoadOptions;
 OC_FLEX_ARRAY     *gLoaderEntries;
 EFI_GUID          gPartuuid;
 CHAR8             *gFileSystemType;
@@ -237,17 +238,16 @@ OcGetLinuxBootEntries (
   // if no /loader/entries/*.conf files are present, but also if there
   // are only unusable files in there.
   //
-  if (EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status)
+    && (gLinuxBootFlags & LINUX_BOOT_ALLOW_AUTODETECT) != 0) {
     //
     // Auto-detect vmlinuz and initrd files on own root filesystem (Debian-like).
     //
-    if ((gLinuxBootFlags & LINUX_BOOT_ALLOW_AUTODETECT) != 0) {
-      Status = AutodetectLinux (
-        RootDirectory,
-        Entries,
-        NumEntries
-        );
-    }
+    Status = InternalAutodetectLinux (
+      RootDirectory,
+      Entries,
+      NumEntries
+      );
   }
 
   RootDirectory->Close (RootDirectory);
@@ -285,17 +285,31 @@ UefiMain (
     return Status;
   }
 
-  Status = OcParseLoadOptions (LoadedImage, &gParsedLoadOptions);
+  //
+  // Keep mParsedLoadOptions kicking around, as all found options link into its memory.
+  //
+  Status = OcParseLoadOptions (LoadedImage, &mParsedLoadOptions);
   if (!EFI_ERROR (Status)) {
     AddBootFlags = 0;
     RemoveBootFlags = 0;
-    OcParsedVarsGetInt (gParsedLoadOptions, L"flags",  &gLinuxBootFlags, TRUE);
-    OcParsedVarsGetInt (gParsedLoadOptions, L"flags+", &AddBootFlags,    TRUE);
-    OcParsedVarsGetInt (gParsedLoadOptions, L"flags-", &RemoveBootFlags, TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags",  &gLinuxBootFlags, TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags+", &AddBootFlags,    TRUE);
+    OcParsedVarsGetInt (mParsedLoadOptions, L"flags-", &RemoveBootFlags, TRUE);
     gLinuxBootFlags |= AddBootFlags;
     gLinuxBootFlags &= ~RemoveBootFlags;
-  } else if (Status != EFI_NOT_FOUND) {
-    return Status;
+  } else {
+    if (Status != EFI_NOT_FOUND) {
+      return Status;
+    }
+    ASSERT (mParsedLoadOptions == NULL);
+  }
+
+  if ((gLinuxBootFlags & LINUX_BOOT_ALLOW_AUTODETECT) != 0) {
+    Status = InternalPreloadAutoOpts (mParsedLoadOptions);
+
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
   }
 
   Status = gBS->InstallMultipleProtocolInterfaces (

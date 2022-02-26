@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Fri Feb 11 00:24:26 2022
-%DIF ADD ../Configuration.tex        Fri Feb 25 23:37:24 2022
+%DIF DEL PreviousConfiguration.tex   Thu Feb 10 01:48:29 2022
+%DIF ADD ../Configuration.tex        Sun Feb 27 08:57:52 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -118,7 +118,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -6475,7 +6475,7 @@ log when booting (or attempting to boot) a given distro against the options seen
 \texttt{cat /proc/cmdline} when the same distro has been booted via its native bootloader.
 In general (for safety and security of the running distro) these options should match, and if they do not
 it is recommended to use the driver arguments below (in particular \texttt{LINUX\_BOOT\_ADD\_RO},
-\texttt{LINUX\_BOOT\_ADD\_RW}, \texttt{partuuidopts} and \texttt{autoopts}) to modify the options as required.
+\texttt{LINUX\_BOOT\_ADD\_RW}, \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts:\{PARTUUID\}}\DIFaddend } and \texttt{autoopts}) to modify the options as required.
 Note however that the following differences are normal and do not need to be fixed:
 \begin{itemize}
 \tightlist
@@ -6503,9 +6503,17 @@ The default parameter values should work well with no changes under most circums
 options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
+\tightlist
+	\item \texttt{flags} - Default: all flags \DIFdelbegin \DIFdel{except }\texttt{\DIFdel{LINUX\_BOOT\_ADD\_DEBUG\_INFO}} %DIFAUXCMD
+\DIFdelend \DIFaddbegin \DIFadd{are set except the following:
+  }\begin{itemize}
   \tightlist
-	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} and
-  \texttt{LINUX\_BOOT\_LOG\_VERBOSE} are set. \medskip
+    \item \texttt{\DIFadd{LINUX\_BOOT\_ADD\_RW}}\DIFadd{,
+    }\item \texttt{\DIFadd{LINUX\_BOOT\_LOG\_VERBOSE}} \DIFaddend and
+    \DIFdelbegin \texttt{\DIFdel{LINUX\_BOOT\_LOG\_VERBOSE}} %DIFAUXCMD
+\DIFdel{are set . }\DIFdelend \DIFaddbegin \item \texttt{\DIFadd{LINUX\_BOOT\_ADD\_DEBUG\_INFO}}\DIFadd{.
+  }\end{itemize}
+  \DIFaddend \medskip
 
 	Available flags are: \medskip
 
@@ -6559,14 +6567,14 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it.
     When there are multiple distros and it is required to specify this option for specific distros only, use
-    \texttt{partuuidopts:\{partuuid\}+=ro} to manually add the option where required, instead of using this flag.
+    \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend :\{\DIFdelbegin \DIFdel{partuuid}\DIFdelend \DIFaddbegin \DIFadd{PARTUUID}\DIFaddend \}+=ro} to manually add the option where required, instead of using this flag.
 
 	  \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{LINUX\_BOOT\_ADD\_RW},
 	  Like \texttt{LINUX\_BOOT\_ADD\_RO}, this option applies to autodetected Linux only. It is not
     required for most distros (which usually require either \texttt{ro} or nothing to be added to
     detected boot options), but is required on some Arch-derived distros, e.g. EndeavourOS.
     When there are multiple distros and it is required to specify this option for specific distros only, use
-    \texttt{partuuidopts:\{partuuid\}+=rw} to manually add the option where required, instead of using this flag.
+    \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend :\{\DIFdelbegin \DIFdel{partuuid}\DIFdelend \DIFaddbegin \DIFadd{PARTUUID}\DIFaddend \}+=rw} to manually add the option where required, instead of using this flag.
     If this option and \texttt{LINUX\_BOOT\_ADD\_RO} are both specified, only this option is applied
     and \texttt{LINUX\_BOOT\_ADD\_RO} is ignored.
 
@@ -6590,12 +6598,12 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   add or remove, using syntax such as \texttt{flags+=0xC000} to add all debugging
   options or \texttt{flags-=0x400} to remove the \texttt{LINUX\_BOOT\_ADD\_RO} option. \medskip
 
-	\item \texttt{partuuidopts:\{partuuid\}[+]="\{options\}"} - Default: not set. \medskip
+	\item \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend :\{\DIFdelbegin \DIFdel{partuuid}\DIFdelend \DIFaddbegin \DIFadd{PARTUUID}\DIFaddend \}[+]="\{options\}"} - Default: not set. \medskip
 
-  Allows specifying kernel options for a given partition only. If specified with \texttt{+=} then
-  these are used in addition to autodetected options, if specified with \texttt{=} they are used instead.
-  Used for autodetected Linux only. Values specified here are never used for entries created from
-  \texttt{/loader/entries/*.conf} files.
+  Allows \DIFaddbegin \DIFadd{manually }\DIFaddend specifying kernel options \DIFaddbegin \DIFadd{to use in autodetect mode }\DIFaddend for a given partition only. If specified
+  with \texttt{+=} then these are used in addition to \DIFaddbegin \DIFadd{any }\DIFaddend autodetected options, if specified with \texttt{=}
+  they are used instead. Used for autodetected Linux only. Values specified here are never used for entries created
+  from \texttt{/loader/entries/*.conf} files.
   \medskip
 
   \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
@@ -6603,15 +6611,15 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is not the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
 
-	Typically this option should not be needed in the latter case, but in case it is, to find out the unique
-  partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+	Typically this option should not be needed \DIFdelbegin \DIFdel{in the latter case}\DIFdelend \DIFaddbegin \DIFadd{for }\texttt{\DIFadd{/loader/entries}} \DIFadd{distros}\DIFaddend , but in case it is \DIFdelbegin \DIFdel{, }\DIFdelend to find out the
+  unique partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
   for more advanced scenarios, it is possible to examine how the distro's partitions are mounted using the
   Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
 	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
   for autodetected Linux only. The value here is never used for entries created from
-  \texttt{/loader/entries/*.conf} files. \texttt{partuuidopts} may be more suitable where there are multiple
+  \texttt{/loader/entries/*.conf} files. \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts:\{PARTUUID\}}\DIFaddend } may be more suitable where there are multiple
   distros, but \texttt{autoopts} with no PARTUUID required is more convenient for just one distro.
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
   with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
@@ -6635,8 +6643,13 @@ boot \texttt{\{boot\}/vmlinuz*} kernel files directly. It links these automatica
 kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files.
 This applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
 
-When autodetecting, OpenLinuxBoot looks in \texttt{/etc/default/grub} for kernel boot options and
-\texttt{/etc/os-release} for the distro name.
+When autodetecting \DIFaddbegin \DIFadd{in }\texttt{\DIFadd{/boot}} \DIFadd{as part of the root filesystem}\DIFaddend , OpenLinuxBoot looks in \texttt{/etc/default/grub}
+for kernel boot options and \texttt{/etc/os-release} for the distro name. \DIFaddbegin \DIFadd{When autodetecting in a standalone boot
+partition (i.e. when }\texttt{\DIFadd{/boot}} \DIFadd{has its own mount point), OpenLinuxBoot cannot autodetect kernel arguments and
+all kernel arguments except }\texttt{\DIFadd{initrd=...}} \DIFadd{must be fully specified by hand using }\texttt{\DIFadd{autoopts=...}} \DIFadd{or
+}\texttt{\DIFadd{autoopts:\{partuuid\}=...}} \DIFadd{(}\texttt{\DIFadd{+=}} \DIFadd{variants of these options will not work, as these only add additional
+arguments).
+}\DIFaddend 
 
 BootLoaderSpecByDefault (but not pure Boot Loader Specification) can expand GRUB variables
 in the \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.
