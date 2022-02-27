@@ -231,10 +231,10 @@ OcLoadDrivers (
           ));
         gBS->UnloadImage (ImageHandle);
         FreePool (Driver);
-        FreePool ((CHAR8 *)UnescapedArguments);
+        FreePool ((CHAR8 *) UnescapedArguments);
         continue;
       }
-      FreePool ((CHAR8 *)UnescapedArguments);
+      FreePool ((CHAR8 *) UnescapedArguments);
     }
 
     Status = gBS->StartImage (
