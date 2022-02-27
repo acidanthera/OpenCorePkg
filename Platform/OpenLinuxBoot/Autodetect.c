@@ -25,6 +25,7 @@
 #define GRUB_DEFAULT_FILE     L"\\etc\\default\\grub"
 #define OS_RELEASE_FILE       L"\\etc\\os-release"
 #define AUTODETECT_DIR        L"\\boot"
+#define ROOT_DIR              L"\\"
 #define ROOT_FS_FILE          L"\\bin\\sh"
 
 STATIC
@@ -58,6 +59,26 @@ OC_FLEX_ARRAY
 STATIC
 CHAR8
 *mEtcDefaultGrubFileContents;
+
+STATIC
+OC_FLEX_ARRAY
+*mPerPartuuidAutoOpts;
+
+STATIC
+CHAR16
+*mCurrentPartuuidAutoOpts;
+
+STATIC
+CHAR16
+*mCurrentPartuuidAutoOptsPlus;
+
+STATIC
+CHAR16
+*mGlobalAutoOpts;
+
+STATIC
+CHAR16
+*mGlobalAutoOptsPlus;
 
 STATIC
 EFI_STATUS
@@ -129,15 +150,18 @@ CreateAsciiRelativePath (
   )
 {
   UINTN           Size;
+  BOOLEAN         UseDir;
 
-  Size  = DirectoryPathLength + FilePathLength + 2;
+  UseDir = !(DirectoryPathLength == 1 && DirectoryPath[0] == L'\\');
+
+  Size  = (UseDir ? DirectoryPathLength : 0) + FilePathLength + 2;
   *Dest = AllocatePool (Size);
 
   if (*Dest == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
 
-  AsciiSPrint (*Dest, Size, "%s\\%s", DirectoryPath, FilePath);
+  AsciiSPrint (*Dest, Size, "%s\\%s", UseDir ? DirectoryPath : L"", FilePath);
 
   return EFI_SUCCESS;
 }
@@ -210,26 +234,31 @@ AutodetectTitle (
 STATIC
 EFI_STATUS
 LoadOsRelease (
-  IN     CONST EFI_FILE_PROTOCOL        *RootDirectory
+  IN     CONST EFI_FILE_PROTOCOL        *RootDirectory,
+  IN     CONST BOOLEAN                  IsStandaloneBoot
   )
 {
   EFI_STATUS        Status;
-  BOOLEAN           ReadRequired;
+  BOOLEAN           TryReading;
 
   mEtcOsReleaseOptions        = NULL;
   mEtcOsReleaseFileContents   = NULL;
   mPrettyName                 = NULL;
 
-  ReadRequired = (mDiskLabel == NULL);
+  TryReading = (mDiskLabel == NULL);
 
   DEBUG_CODE_BEGIN ();
-  ReadRequired = TRUE;
+  TryReading = TRUE;
   DEBUG_CODE_END ();
+
+  if (IsStandaloneBoot) {
+    TryReading = FALSE;
+  }
 
   //
   // Load distro name from /etc/os-release.
   //
-  if (ReadRequired) {
+  if (TryReading) {
     mEtcOsReleaseFileContents = OcReadFileFromDirectory (RootDirectory, OS_RELEASE_FILE, NULL, 0);
     if (mEtcOsReleaseFileContents == NULL) {
       DEBUG ((DEBUG_WARN, "LNX: %s not found\n", OS_RELEASE_FILE));
@@ -265,13 +294,18 @@ LoadOsRelease (
 STATIC
 EFI_STATUS
 LoadDefaultGrub (
-  IN CONST EFI_FILE_PROTOCOL *RootDirectory
+  IN     CONST EFI_FILE_PROTOCOL        *RootDirectory,
+  IN     CONST BOOLEAN                  IsStandaloneBoot
   )
 {
   EFI_STATUS        Status;
 
   mEtcDefaultGrubOptions      = NULL;
   mEtcDefaultGrubFileContents = NULL;
+
+  if (IsStandaloneBoot) {
+    return EFI_SUCCESS;
+  }
 
   //
   // Load kernel options from /etc/default/grub.
@@ -426,135 +460,186 @@ InsertRootOption (
   return CreateRootPartuuid (NewOption);
 }
 
-//
-// TODO: Options for rescue versions. Would it be better e.g. just to add "ro" and nothing else?
-// However on some installs (e.g. where modules to load are specified in the kernel opts) this
-// would not boot at all.
-// Maybe upgrade to partuuidopts:{partuuid}r="...": user options for rescue kernels on specified partuuid?
-//
 STATIC
-EFI_STATUS
-AutodetectBootOptions (
-  IN     CONST BOOLEAN                  IsRescue,
-  IN           OC_FLEX_ARRAY            *Options
-)
+VOID
+GetCurrentPartuuidAutoOpts (
+  VOID
+  )
 {
-  EFI_STATUS        Status;
   UINTN             Index;
-  UINTN             InsertIndex;
-  UINTN             OptionCount;
-  OC_PARSED_VAR     *Option;
-  EFI_GUID          Guid;
-  CHAR8             *AsciiStrValue;
-  CHAR8             *GrubVarName;
-  BOOLEAN           FoundOptions;
-  BOOLEAN           PlusOpts;
-  CHAR8             *AddRxOption;
+  AUTOOPTS          *AutoOpts;
 
-  OptionCount = 0;
-  if (gParsedLoadOptions != NULL) {
-    OptionCount = gParsedLoadOptions->Count;
-  }
+  mCurrentPartuuidAutoOpts     = NULL;
+  mCurrentPartuuidAutoOptsPlus = NULL;
 
-  FoundOptions = FALSE;
-
-  //
-  // Look for user-specified options for this partuuid.
-  // Remember that although args are ASCII in the OC config file, they are
-  // Unicode by the time they get passed as UEFI LoadOptions.
-  //
-  for (Index = 0; Index < OptionCount; Index++) {
-    Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
-    //
-    // partuuidopts:{partuuid}[+]="...": user options for specified partuuid.
-    //
-    if (OcUnicodeStartsWith (Option->Unicode.Name, L"partuuidopts:", TRUE)) {
-      if (Option->Unicode.Value == NULL) {
-        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
-        continue;
-      }
-
-      Status = StrToGuid (&Option->Unicode.Name[L_STR_LEN (L"partuuidopts:")], &Guid);
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "LNX: Cannot parse partuuid from %s - %r\n", Option->Unicode.Name, Status));
-        continue;
-      }
-
-      if (CompareMem (&gPartuuid, &Guid, sizeof (EFI_GUID)) != 0) {
-        DEBUG ((
-          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: No match partuuidopts:%g != %g\n",
-          &Guid,
-          &gPartuuid
-          ));
+  for (Index = 0; Index < mPerPartuuidAutoOpts->Count; Index++) {
+    AutoOpts = OcFlexArrayItemAt (mPerPartuuidAutoOpts, Index);
+    if (CompareMem (&gPartuuid, &AutoOpts->Guid, sizeof (EFI_GUID)) == 0) {
+      if (AutoOpts->PlusOpts) {
+        mCurrentPartuuidAutoOptsPlus = AutoOpts->Opts;
       } else {
-        PlusOpts = OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE);
-
-        DEBUG ((
-          (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-          "LNX: Using partuuidopts%a=\"%s\"\n",
-          PlusOpts ? "+" : "",
-          Option->Unicode.Value
-          ));
-
-        Status = AddOption (Options, Option->Unicode.Value, TRUE);
-        if (EFI_ERROR (Status)) {
-          return Status;
-        }
-
-        if (!PlusOpts) {
-          return EFI_SUCCESS;
-        }
-
-        FoundOptions = TRUE;
+        mCurrentPartuuidAutoOpts     = AutoOpts->Opts;
       }
     }
   }
+}
+
+EFI_STATUS
+InternalPreloadAutoOpts (
+  IN           OC_FLEX_ARRAY            *Options
+  )
+{
+  EFI_STATUS        Status;
+  UINTN             Index;
+  OC_PARSED_VAR     *Option;
+  AUTOOPTS          *AutoOpts;
+
+  mGlobalAutoOpts     = NULL;
+  mGlobalAutoOptsPlus = NULL;
+
+  mPerPartuuidAutoOpts = OcFlexArrayInit (sizeof (AUTOOPTS), NULL);
+  if (mPerPartuuidAutoOpts == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
+  if (Options == NULL) {
+    return EFI_SUCCESS;
+  }
 
   //
-  // Use global defaults, if user has defined any.
+  // Look for autoopts.
+  // Remember that although args are ASCII in the OC config file, they are
+  // Unicode by the time they get passed as UEFI LoadOptions.
   //
-  for (Index = 0; Index < OptionCount; Index++) {
-    Option = OcFlexArrayItemAt (gParsedLoadOptions, Index);
+  for (Index = 0; Index < Options->Count; Index++) {
+    Option = OcFlexArrayItemAt (Options, Index);
     //
-    // Don't use autoopts if partition specific partuuidopts already found.
+    // autoopts:{partuuid}[+]="...": user options for specified partuuid.
     //
-    if (!FoundOptions && StrCmp (Option->Unicode.Name, L"autoopts") == 0) {
+    if (OcUnicodeStartsWith (Option->Unicode.Name, L"autoopts:", TRUE)) {
       if (Option->Unicode.Value == NULL) {
         DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
         continue;
       }
 
-      DEBUG ((
-        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-        "LNX: Using %s=\"%s\"\n",
-        Option->Unicode.Name,
-        Option->Unicode.Value
-        ));
+      AutoOpts = OcFlexArrayAddItem (mPerPartuuidAutoOpts);
 
-      Status = AddOption (Options, Option->Unicode.Value, TRUE);
-      return Status;
+      Status = StrToGuid (&Option->Unicode.Name[L_STR_LEN (L"autoopts:")], &AutoOpts->Guid);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "LNX: Cannot parse partuuid from %s - %r\n", Option->Unicode.Name, Status));
+        OcFlexArrayDiscardItem (mPerPartuuidAutoOpts, FALSE);
+        continue;
+      }
+
+      AutoOpts->Opts = Option->Unicode.Value;
+      AutoOpts->PlusOpts = OcUnicodeEndsWith (Option->Unicode.Name, L"+", FALSE);
+    } else if (StrCmp (Option->Unicode.Name, L"autoopts") == 0) {
+      if (Option->Unicode.Value == NULL) {
+        DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
+        continue;
+      }
+
+      mGlobalAutoOpts = Option->Unicode.Value;
     } else if (StrCmp (Option->Unicode.Name, L"autoopts+") == 0) {
       if (Option->Unicode.Value == NULL) {
         DEBUG ((DEBUG_WARN, "LNX: Missing value for %s\n", Option->Unicode.Name));
         continue;
       }
 
-      DEBUG ((
-        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
-        "LNX: Using %s=\"%s\"\n",
-        Option->Unicode.Name,
-        Option->Unicode.Value
-        ));
-
-      Status = AddOption (Options, Option->Unicode.Value, TRUE);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
-
-      FoundOptions = TRUE;
+      mGlobalAutoOptsPlus = Option->Unicode.Value;
     }
   }
+
+  return EFI_SUCCESS;
+}
+
+//
+// TODO: Options for rescue versions. Would it be better e.g. just to add "ro" and nothing else?
+// However on some installs (e.g. where modules to load are specified in the kernel opts) this
+// would not boot at all.
+// Maybe upgrade to autoopts:{partuuid}r="...": user options for rescue kernels on specified partuuid?
+//
+STATIC
+EFI_STATUS
+AutodetectBootOptions (
+  IN     CONST BOOLEAN                  IsRescue,
+  IN     CONST BOOLEAN                  IsStandaloneBoot,
+  IN           OC_FLEX_ARRAY            *Options
+)
+{
+  EFI_STATUS        Status;
+  UINTN             Index;
+  UINTN             InsertIndex;
+  CHAR8             *AsciiStrValue;
+  CHAR8             *GrubVarName;
+  BOOLEAN           FoundOptions;
+  CHAR8             *AddRxOption;
+
+  FoundOptions = FALSE;
+
+  //
+  // Do we have user-specified options for this partuuid?
+  //
+  if (mCurrentPartuuidAutoOpts) {
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Using autoopts:%g%a=\"%s\"\n",
+      &gPartuuid,
+      "",
+      mCurrentPartuuidAutoOpts
+      ));
+    Status = AddOption (Options, mCurrentPartuuidAutoOpts, TRUE);
+    return Status;
+  }
+  
+  if (mCurrentPartuuidAutoOptsPlus) {
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Using autoopts:%g%a=\"%s\"\n",
+      &gPartuuid,
+      "+",
+      mCurrentPartuuidAutoOptsPlus
+      ));
+    Status = AddOption (Options, mCurrentPartuuidAutoOptsPlus, TRUE);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+    FoundOptions = TRUE;
+  }
+  
+  //
+  // Don't use autoopts if partition specific autoopts:{partuuid} already found.
+  //
+  if (!FoundOptions && mGlobalAutoOpts) {
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Using autoopts%a=\"%s\"\n",
+      "",
+      mGlobalAutoOpts
+      ));
+
+    Status = AddOption (Options, mGlobalAutoOpts, TRUE);
+    return Status;
+  } else if (mGlobalAutoOptsPlus) {
+    DEBUG ((
+      (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+      "LNX: Using autoopts%a=\"%s\"\n",
+      "+",
+      mGlobalAutoOptsPlus
+      ));
+
+    Status = AddOption (Options, mGlobalAutoOptsPlus, TRUE);
+    if (EFI_ERROR (Status)) {
+      return Status;
+    }
+
+    FoundOptions = TRUE;
+  }
+
+  //
+  // Should only have attempted to detect kernels on standalone boot partition if we had full user options.
+  //
+  ASSERT (!IsStandaloneBoot);
 
   //
   // Code only reaches here and below if has been nothing or only += options above.
@@ -661,7 +746,8 @@ AutodetectBootOptions (
 STATIC
 EFI_STATUS
 GenerateEntriesForVmlinuzFiles (
-  IN     CHAR16                   *DirectoryPath
+  IN     CHAR16                   *DirectoryPath,
+  IN     CONST BOOLEAN            IsStandaloneBoot
   )
 {
   EFI_STATUS                      Status;
@@ -780,7 +866,7 @@ GenerateEntriesForVmlinuzFiles (
     //
     // Add all options.
     //
-    Status = AutodetectBootOptions (IsRescue, Entry->Options);
+    Status = AutodetectBootOptions (IsRescue, IsStandaloneBoot, Entry->Options);
     if (EFI_ERROR (Status)) {
       return Status;
     }
@@ -791,42 +877,35 @@ GenerateEntriesForVmlinuzFiles (
 
 STATIC
 EFI_STATUS
-InternalAutodetectLinux (
+AutodetectLinuxAtDirectory (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  IN   EFI_FILE_PROTOCOL        *VmlinuzDirectory,
+  IN   CHAR16                   *AutodetectDir,
+  IN   CONST BOOLEAN            IsStandaloneBoot,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
   )
 {
   EFI_STATUS                      Status;
-  EFI_FILE_PROTOCOL               *VmlinuzDirectory;
   EFI_FILE_PROTOCOL               *RootFsFile;
-
-  //
-  // For now we are only searching in /boot.
-  // vmlinuz files in / should not require autodetect, as
-  // they should be accompanied by /loader/entries (Fedora-style),
-  // and vmlinuz files in /boot not accompanied by /loader/entries
-  // is Debian-style, so it seems sensible to wait to see what
-  // else there is rather than speculatively adding directories.
-  //
-  Status = OcSafeFileOpen (RootDirectory, &VmlinuzDirectory, AUTODETECT_DIR, EFI_FILE_MODE_READ, 0);
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
 
   mVmlinuzFiles = NULL;
   mInitrdFiles  = NULL;
 
-  Status = OcSafeFileOpen (RootDirectory, &RootFsFile, ROOT_FS_FILE, EFI_FILE_MODE_READ, 0);
-  if (!EFI_ERROR (Status)) {
-    Status = OcEnsureDirectoryFile (RootFsFile, FALSE);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", ROOT_FS_FILE, "file", Status));
+  Status = EFI_SUCCESS;
+
+  if (!IsStandaloneBoot) {
+    Status = OcSafeFileOpen (RootDirectory, &RootFsFile, ROOT_FS_FILE, EFI_FILE_MODE_READ, 0);
+    if (!EFI_ERROR (Status)) {
+      Status = OcEnsureDirectoryFile (RootFsFile, FALSE);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_WARN, "LNX: %s found but not a %a - %r\n", ROOT_FS_FILE, "file", Status));
+      }
+      RootFsFile->Close (RootFsFile);
     }
-    RootFsFile->Close (RootFsFile);
-  }
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "LNX: Does not appear to be root filesystem - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "LNX: AutodetectLinux not root fs - %r\n", Status));
+    }
   }
 
   if (!EFI_ERROR (Status)) {
@@ -866,12 +945,12 @@ InternalAutodetectLinux (
       Status = EFI_OUT_OF_RESOURCES;
     } else {
       LoadAppleDiskLabel (VmlinuzDirectory);
-      Status = LoadOsRelease (RootDirectory);
+      Status = LoadOsRelease (RootDirectory, IsStandaloneBoot);
       if (!EFI_ERROR (Status)) {
-        Status = LoadDefaultGrub (RootDirectory);
+        Status = LoadDefaultGrub (RootDirectory, IsStandaloneBoot);
       }
       if (!EFI_ERROR (Status)) {
-        Status = GenerateEntriesForVmlinuzFiles (AUTODETECT_DIR);
+        Status = GenerateEntriesForVmlinuzFiles (AutodetectDir, IsStandaloneBoot);
       }
       FreeEtcFiles ();
     }
@@ -895,25 +974,70 @@ InternalAutodetectLinux (
     OcFlexArrayFree (&mInitrdFiles);
   }
 
-  VmlinuzDirectory->Close (VmlinuzDirectory);
   return Status;
 }
 
+STATIC
 EFI_STATUS
-AutodetectLinux (
+DoAutodetectLinux (
   IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  IN   EFI_FILE_PROTOCOL        *VmlinuzDirectory,
+  IN   CHAR16                   *AutodetectDir,
+  IN   CONST BOOLEAN            IsStandaloneBoot,
   OUT  OC_PICKER_ENTRY          **Entries,
   OUT  UINTN                    *NumEntries
   )
 {
   EFI_STATUS                      Status;
 
-  Status = InternalAutodetectLinux (RootDirectory, Entries, NumEntries);
+  Status = AutodetectLinuxAtDirectory (RootDirectory, VmlinuzDirectory, AutodetectDir, IsStandaloneBoot, Entries, NumEntries);
 
   DEBUG ((
     (EFI_ERROR (Status) && Status != EFI_NOT_FOUND) ? DEBUG_WARN : DEBUG_INFO,
-    "LNX: AutodetectLinux - %r\n",
-    Status));
+    "LNX: AutodetectLinux %s - %r\n",
+    AutodetectDir,
+    Status
+    ));
+
+  return Status;
+}
+
+EFI_STATUS
+InternalAutodetectLinux (
+  IN   EFI_FILE_PROTOCOL        *RootDirectory,
+  OUT  OC_PICKER_ENTRY          **Entries,
+  OUT  UINTN                    *NumEntries
+  )
+{
+  EFI_STATUS                      Status;
+  EFI_FILE_PROTOCOL               *VmlinuzDirectory;
+
+  GetCurrentPartuuidAutoOpts ();
+
+  //
+  // Autodetect at /boot if present.
+  //
+  Status = OcSafeFileOpen (RootDirectory, &VmlinuzDirectory, AUTODETECT_DIR, EFI_FILE_MODE_READ, 0);
+  if (!EFI_ERROR (Status)) {
+    Status = DoAutodetectLinux (RootDirectory, VmlinuzDirectory, AUTODETECT_DIR, FALSE, Entries, NumEntries);
+    VmlinuzDirectory->Close (VmlinuzDirectory);
+  }
+
+  //
+  // Try to autodetect kernels at / only if detecting at /boot failed and we have full user-specified
+  // options, since we can't autodetect any options on standalone /boot (unless we parse grub.cfg for
+  // boot entries, and even then not all standalone boot setups have it).
+  //
+  if (EFI_ERROR (Status)) {
+    if (mCurrentPartuuidAutoOpts != NULL || (mGlobalAutoOpts != NULL && mCurrentPartuuidAutoOptsPlus == NULL)) {
+      Status = DoAutodetectLinux (RootDirectory, RootDirectory, ROOT_DIR, TRUE, Entries, NumEntries);
+    } else {
+      DEBUG ((
+        (gLinuxBootFlags & LINUX_BOOT_LOG_VERBOSE) == 0 ? DEBUG_VERBOSE : DEBUG_INFO,
+        "LNX: Not trying to autodetect kernel on possible standalone /boot partition without full autoopts\n"
+        ));
+    }
+  }
 
   return Status;
 }

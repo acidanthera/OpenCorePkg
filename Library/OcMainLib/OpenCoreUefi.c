@@ -104,6 +104,7 @@ OcLoadDrivers (
   CONST CHAR8                 *DriverComment;
   CHAR8                       *DriverFileName;
   CONST CHAR8                 *DriverArguments;
+  CONST CHAR8                 *UnescapedArguments;
 
   DriversToConnectIterator = NULL;
   if (DriversToConnect != NULL) {
@@ -208,7 +209,19 @@ OcLoadDrivers (
         FreePool (Driver);
         continue;
       }
-      if (!OcAppendArgumentsToLoadedImage (LoadedImage, &DriverArguments, 1, TRUE)) {
+      UnescapedArguments = XmlUnescapeString (DriverArguments);
+      if (UnescapedArguments == NULL) {
+        DEBUG ((
+          DEBUG_ERROR,
+          "OC: Cannot unescape arguments for driver %a at %u\n",
+          DriverFileName,
+          Index
+          ));
+        gBS->UnloadImage (ImageHandle);
+        FreePool (Driver);
+        continue;
+      }
+      if (!OcAppendArgumentsToLoadedImage (LoadedImage, &UnescapedArguments, 1, TRUE)) {
         DEBUG ((
           DEBUG_ERROR,
           "OC: Unable to apply arguments to driver %a at %u - %r!\n",
@@ -218,8 +231,10 @@ OcLoadDrivers (
           ));
         gBS->UnloadImage (ImageHandle);
         FreePool (Driver);
+        FreePool ((CHAR8 *) UnescapedArguments);
         continue;
       }
+      FreePool ((CHAR8 *) UnescapedArguments);
     }
 
     Status = gBS->StartImage (

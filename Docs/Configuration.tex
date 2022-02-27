@@ -6405,7 +6405,7 @@ log when booting (or attempting to boot) a given distro against the options seen
 \texttt{cat /proc/cmdline} when the same distro has been booted via its native bootloader.
 In general (for safety and security of the running distro) these options should match, and if they do not
 it is recommended to use the driver arguments below (in particular \texttt{LINUX\_BOOT\_ADD\_RO},
-\texttt{LINUX\_BOOT\_ADD\_RW}, \texttt{partuuidopts} and \texttt{autoopts}) to modify the options as required.
+\texttt{LINUX\_BOOT\_ADD\_RW}, \texttt{autoopts:\{PARTUUID\}} and \texttt{autoopts}) to modify the options as required.
 Note however that the following differences are normal and do not need to be fixed:
 \begin{itemize}
 \tightlist
@@ -6433,9 +6433,15 @@ The default parameter values should work well with no changes under most circums
 options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 \begin{itemize}
+\tightlist
+	\item \texttt{flags} - Default: all flags are set except the following:
+  \begin{itemize}
   \tightlist
-	\item \texttt{flags} - Default: all flags except \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO} and
-  \texttt{LINUX\_BOOT\_LOG\_VERBOSE} are set. \medskip
+    \item \texttt{LINUX\_BOOT\_ADD\_RW},
+    \item \texttt{LINUX\_BOOT\_LOG\_VERBOSE} and
+    \item \texttt{LINUX\_BOOT\_ADD\_DEBUG\_INFO}.
+  \end{itemize}
+  \medskip
 
 	Available flags are: \medskip
 
@@ -6489,14 +6495,14 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
     option on autodetected distros; should be harmless but very slightly slow down boot time (due to requried
     remount as read-write) on distros which do not require it.
     When there are multiple distros and it is required to specify this option for specific distros only, use
-    \texttt{partuuidopts:\{partuuid\}+=ro} to manually add the option where required, instead of using this flag.
+    \texttt{autoopts:\{PARTUUID\}+=ro} to manually add the option where required, instead of using this flag.
 
 	  \item \texttt{0x00000800} (bit \texttt{11}) --- \texttt{LINUX\_BOOT\_ADD\_RW},
 	  Like \texttt{LINUX\_BOOT\_ADD\_RO}, this option applies to autodetected Linux only. It is not
     required for most distros (which usually require either \texttt{ro} or nothing to be added to
     detected boot options), but is required on some Arch-derived distros, e.g. EndeavourOS.
     When there are multiple distros and it is required to specify this option for specific distros only, use
-    \texttt{partuuidopts:\{partuuid\}+=rw} to manually add the option where required, instead of using this flag.
+    \texttt{autoopts:\{PARTUUID\}+=rw} to manually add the option where required, instead of using this flag.
     If this option and \texttt{LINUX\_BOOT\_ADD\_RO} are both specified, only this option is applied
     and \texttt{LINUX\_BOOT\_ADD\_RO} is ignored.
 
@@ -6520,12 +6526,12 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   add or remove, using syntax such as \texttt{flags+=0xC000} to add all debugging
   options or \texttt{flags-=0x400} to remove the \texttt{LINUX\_BOOT\_ADD\_RO} option. \medskip
 
-	\item \texttt{partuuidopts:\{partuuid\}[+]="\{options\}"} - Default: not set. \medskip
+	\item \texttt{autoopts:\{PARTUUID\}[+]="\{options\}"} - Default: not set. \medskip
 
-  Allows specifying kernel options for a given partition only. If specified with \texttt{+=} then
-  these are used in addition to autodetected options, if specified with \texttt{=} they are used instead.
-  Used for autodetected Linux only. Values specified here are never used for entries created from
-  \texttt{/loader/entries/*.conf} files.
+  Allows manually specifying kernel options to use in autodetect mode for a given partition only. If specified
+  with \texttt{+=} then these are used in addition to any autodetected options, if specified with \texttt{=}
+  they are used instead. Used for autodetected Linux only. Values specified here are never used for entries created
+  from \texttt{/loader/entries/*.conf} files.
   \medskip
 
   \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
@@ -6533,15 +6539,15 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
   \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is not the same for
   Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
 
-	Typically this option should not be needed in the latter case, but in case it is, to find out the unique
-  partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+	Typically this option should not be needed for \texttt{/loader/entries} distros, but in case it is to find out the
+  unique partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
   for more advanced scenarios, it is possible to examine how the distro's partitions are mounted using the
   Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
 	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
   for autodetected Linux only. The value here is never used for entries created from
-  \texttt{/loader/entries/*.conf} files. \texttt{partuuidopts} may be more suitable where there are multiple
+  \texttt{/loader/entries/*.conf} files. \texttt{autoopts:\{PARTUUID\}} may be more suitable where there are multiple
   distros, but \texttt{autoopts} with no PARTUUID required is more convenient for just one distro.
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
   with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
@@ -6565,8 +6571,12 @@ boot \texttt{\{boot\}/vmlinuz*} kernel files directly. It links these automatica
 kernel version in the filename -- to their associated \texttt{\{boot\}/init*} ramdisk files.
 This applies to most Debian-related distros, including Debian itself, Ubuntu and variants.
 
-When autodetecting, OpenLinuxBoot looks in \texttt{/etc/default/grub} for kernel boot options and
-\texttt{/etc/os-release} for the distro name.
+When autodetecting in \texttt{/boot} as part of the root filesystem, OpenLinuxBoot looks in \texttt{/etc/default/grub}
+for kernel boot options and \texttt{/etc/os-release} for the distro name. When autodetecting in a standalone boot
+partition (i.e. when \texttt{/boot} has its own mount point), OpenLinuxBoot cannot autodetect kernel arguments and
+all kernel arguments except \texttt{initrd=...} must be fully specified by hand using \texttt{autoopts=...} or
+\texttt{autoopts:\{partuuid\}=...} (\texttt{+=} variants of these options will not work, as these only add additional
+arguments).
 
 BootLoaderSpecByDefault (but not pure Boot Loader Specification) can expand GRUB variables
 in the \texttt{*.conf} files -- and this is used in practice in certain distros such as CentOS.

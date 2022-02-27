@@ -37,7 +37,7 @@ typedef enum PARSE_VARS_STATE_ {
 #define SHIFT_TOKEN(pos, token, offset) do { \
   CopyMem ((UINT8 *)(token) + (offset), (token), (UINT8 *)(pos) - (UINT8 *)(token)); \
   (token) = (UINT8 *)(token) + (offset); \
-  (pos)   = (UINT8 *)(token) + (offset); \
+  (pos)   = (UINT8 *)(pos) + (offset); \
 } while (0)
 
 VOID
@@ -516,6 +516,7 @@ OcParseVars (
           State = PARSE_VARS_SHELL_EXPANSION;
         } else if (Ch == L'\\') {
           SHIFT_TOKEN (Pos, Value, IsUnicode ? sizeof (CHAR16) : sizeof (CHAR8));
+          Ch = IsUnicode ? *((CHAR16 *) Pos) : *((CHAR8 *) Pos);
         } else if (
           (State == PARSE_VARS_VALUE && (OcIsSpace (Ch) || Ch == CHAR_NULL)) ||
           (State == PARSE_VARS_QUOTED_VALUE && Ch == '"')) {
