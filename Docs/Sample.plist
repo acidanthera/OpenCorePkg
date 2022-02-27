@@ -1242,6 +1242,10 @@
 				<string>-v keepsyms=1</string>
 				<key>csr-active-config</key>
 				<data>AAAAAA==</data>
+				<key>#INFO (prev-lang:kbd) -1</key>
+				<string>en-US:ABC(252), set 656E2D55 533A3235 32</string>
+				<key>#INFO (prev-lang:kbd) -2</key>
+				<string>ja-JP:KANA(16384), set 6A612D4A 503A3136 333834</string>
 				<key>prev-lang:kbd</key>
 				<data>cnUtUlU6MjUy</data>
 				<key>run-efi-updater</key>
