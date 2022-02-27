@@ -21,7 +21,7 @@
 
 #include <Library/OcAfterBootCompatLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcMemoryLib.h>
 
 #include <Protocol/LoadedImage.h>

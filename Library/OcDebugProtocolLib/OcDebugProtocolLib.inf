@@ -18,8 +18,8 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcDebugLogLib
-  FILE_GUID       = 85E15002-397B-441B-AC5C-BF952B0E7331
+  BASE_NAME       = OcDebugProtocolLib
+  FILE_GUID       = 1A9C36A7-36F8-47D6-A028-A92D17127096
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
   LIBRARY_CLASS   = DebugLib 
@@ -59,8 +59,5 @@
 
 [Sources]
   OcAppleLog.c
-  OcDebugLogLib.c
   OcLog.c
   OcLogInternal.h
-  DebugPrint.c
-  DebugHelp.c

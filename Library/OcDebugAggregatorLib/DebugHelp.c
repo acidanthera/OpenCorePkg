@@ -34,7 +34,7 @@ DebugBreak (
 
 VOID
 WaitForKeyPress (
-  CONST CHAR16 *Message
+  IN  CONST CHAR16 *Message
   )
 {
   EFI_STATUS        Status;

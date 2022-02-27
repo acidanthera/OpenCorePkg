@@ -37,7 +37,8 @@
   BaseRngLib|MdePkg/Library/BaseRngLib/BaseRngLib.inf
   BcfgCommandLib|ShellPkg/Library/UefiShellBcfgCommandLib/UefiShellBcfgCommandLib.inf
   CpuLib|MdePkg/Library/BaseCpuLib/BaseCpuLib.inf
-  DebugLib|OpenCorePkg/Library/OcDebugLogLib/OcDebugLogLib.inf
+  DebugLib|OpenCorePkg/Library/OcDebugAggregatorLib/OcDebugAggregatorLib.inf
+  DebugLib|OpenCorePkg/Library/OcDebugProtocolLib/OcDebugProtocolLib.inf
   DxeServicesLib|MdePkg/Library/DxeServicesLib/DxeServicesLib.inf
   MtrrLib|UefiCpuPkg/Library/MtrrLib/MtrrLib.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
@@ -222,7 +223,8 @@
   OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
   OpenCorePkg/Library/OcDataHubLib/OcDataHubLib.inf
   OpenCorePkg/Library/OcDebugSerialLib/OcDebugSerialLib.inf
-  OpenCorePkg/Library/OcDebugLogLib/OcDebugLogLib.inf
+  OpenCorePkg/Library/OcDebugAggregatorLib/OcDebugAggregatorLib.inf
+  OpenCorePkg/Library/OcDebugProtocolLib/OcDebugProtocolLib.inf
   OpenCorePkg/Library/OcDebugNullLib/OcDebugNullLib.inf
   OpenCorePkg/Library/OcDeviceMiscLib/OcDeviceMiscLib.inf
   OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf

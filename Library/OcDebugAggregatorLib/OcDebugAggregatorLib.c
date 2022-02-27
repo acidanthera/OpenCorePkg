@@ -25,17 +25,37 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include "OcLogInternal.h"
+STATIC
+OC_LOG_PROTOCOL *
+InternalGetOcLog (
+  VOID
+  )
+{
+  EFI_STATUS  Status;
+
+  STATIC OC_LOG_PROTOCOL *mInternalOcLog = NULL;
+
+  if (mInternalOcLog == NULL) {
+    Status = gBS->LocateProtocol (
+      &gOcLogProtocolGuid,
+      NULL,
+      (VOID **) &mInternalOcLog
+      );
+
+    if (EFI_ERROR (Status) || mInternalOcLog->Revision != OC_LOG_REVISION) {
+      mInternalOcLog = NULL;
+    }
+  }
+
+  return mInternalOcLog;
+}
 
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.
-
   If any bit in ErrorLevel is also set in DebugPrintErrorLevelLib function
   GetDebugPrintErrorLevel (), then print the message specified by Format and the
   associated variable argument list to the debug output device.
-
   If Format is NULL, then ASSERT().
-
   @param  ErrorLevel  The error level of the debug message.
   @param  Format      Format string for the debug message to print.
   @param  ...         A variable argument list whose contents are accessed
@@ -68,7 +88,6 @@ DebugPrint (
 
   VA_END (Marker);
 }
-
 
 /**
   Prints an assert message containing a filename, line number, and description.
