@@ -17,10 +17,10 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/BaseMemoryLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcDebugLogLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDevicePathLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiLib.h>
