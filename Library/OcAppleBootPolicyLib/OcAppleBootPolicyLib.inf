@@ -55,9 +55,10 @@
   DebugLib
   DevicePathLib
   MemoryAllocationLib
-  PrintLib
-  UefiBootServicesTableLib
-  OcGuardLib
+  OcDebugAggregatorLib
   OcFileLib
+  OcGuardLib
   OcStringLib
   OcXmlLib
+  PrintLib
+  UefiBootServicesTableLib

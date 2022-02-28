@@ -22,7 +22,7 @@
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcCryptoLib.h>
 #include <Library/OcDevicePathLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcRtcLib.h>
 #include <Library/UefiLib.h>
 #include <Library/UefiRuntimeServicesTableLib.h>

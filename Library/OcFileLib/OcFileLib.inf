@@ -43,6 +43,8 @@
 [LibraryClasses]
   BaseLib
   DevicePathLib
+  OcDebugAggregatorLib
+  OcDebugProtocolLib
   OcDevicePathLib
   OcGuardLib
   MemoryAllocationLib

@@ -13,7 +13,6 @@
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcFileLib.h>
-#include <Library/OcDebugLogLib.h>
 
 VOID
 LocateBootEntryProtocolHandles (

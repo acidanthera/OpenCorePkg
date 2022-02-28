@@ -25,30 +25,7 @@
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-STATIC
-OC_LOG_PROTOCOL *
-InternalGetOcLog (
-  VOID
-  )
-{
-  EFI_STATUS  Status;
-
-  STATIC OC_LOG_PROTOCOL *mInternalOcLog = NULL;
-
-  if (mInternalOcLog == NULL) {
-    Status = gBS->LocateProtocol (
-      &gOcLogProtocolGuid,
-      NULL,
-      (VOID **) &mInternalOcLog
-      );
-
-    if (EFI_ERROR (Status) || mInternalOcLog->Revision != OC_LOG_REVISION) {
-      mInternalOcLog = NULL;
-    }
-  }
-
-  return mInternalOcLog;
-}
+#include "OcLogInternal.h"
 
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.

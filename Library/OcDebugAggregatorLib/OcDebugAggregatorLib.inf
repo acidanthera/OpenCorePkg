@@ -59,6 +59,4 @@
 
 [Sources]
   DebugHelp.c
-  DebugPrint.c
-  OcDebugAggregatorLib.c
-  
+  DebugPrint.c  

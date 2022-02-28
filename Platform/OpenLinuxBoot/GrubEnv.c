@@ -6,7 +6,6 @@
 **/
 
 #include <Library/BaseLib.h>
-#include <Library/OcDebugLogLib.h>
 #include "LinuxBootInternal.h"
 
 /*

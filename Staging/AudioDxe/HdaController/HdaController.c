@@ -27,7 +27,7 @@
 
 #include <Library/OcGuardLib.h>
 #include <Library/OcDeviceMiscLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcHdaDevicesLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>

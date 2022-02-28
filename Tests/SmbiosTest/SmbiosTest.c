@@ -24,7 +24,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcMiscLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcAppleBootPolicyLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcCpuLib.h>

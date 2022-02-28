@@ -6,7 +6,7 @@
 **/
 
 #include <Uefi.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcBootManagementLib.h>
 #include <Library/UefiApplicationEntryPoint.h>

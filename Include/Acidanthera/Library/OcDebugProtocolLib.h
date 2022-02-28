@@ -43,6 +43,20 @@
 #endif
 
 /**
+  Prints via gST->ConOut without any pool allocations.
+  Otherwise equivalent to Print.
+  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
+
+  @param[in]  Format  Formatted string.
+**/
+VOID
+EFIAPI
+OcPrintScreen (
+  IN  CONST CHAR16   *Format,
+  ...
+  );
+
+/**
   Install or update the OcLog protocol with specified options.
 
   @param[in] Options        Logging options.

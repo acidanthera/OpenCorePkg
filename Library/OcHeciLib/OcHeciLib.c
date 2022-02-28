@@ -10,7 +10,7 @@
 
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcHeciLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

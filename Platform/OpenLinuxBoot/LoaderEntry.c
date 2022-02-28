@@ -12,7 +12,6 @@
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugLogLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcFlexArrayLib.h>
 #include <Library/OcStringLib.h>

@@ -24,7 +24,8 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugLogLib.h>
+#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcDebugProtocolLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcMemoryLib.h>
@@ -528,7 +529,7 @@ OcAllocatePages (
         // Called from boot.efi.
         // New perf data, it can be reallocated multiple times.
         //
-        OcAppleDebugLogPerfAllocated ((VOID *)(UINTN) *Memory, EFI_PAGES_TO_SIZE (NumberOfPages));
+        OcAppleDebugLogPerfAllocated ((VOID *) (UINTN) *Memory, EFI_PAGES_TO_SIZE (NumberOfPages));
       }
     }
   }

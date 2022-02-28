@@ -13,7 +13,6 @@
 #include <Uefi.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
 

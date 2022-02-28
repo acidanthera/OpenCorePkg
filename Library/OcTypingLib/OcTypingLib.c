@@ -10,7 +10,6 @@
 #include <Library/MemoryAllocationLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 #include <Library/OcAppleEventLib.h>
-#include <Library/OcDebugLogLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcTypingLib.h>

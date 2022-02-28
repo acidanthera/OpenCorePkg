@@ -59,5 +59,6 @@
 
 [Sources]
   OcAppleLog.c
+  OcDebugProtocolLib.c
   OcLog.c
   OcLogInternal.h

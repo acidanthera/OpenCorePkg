@@ -29,20 +29,6 @@
   ((TextDevicePath) == NULL ? L"<nil>" : (TextDevicePath)[0] == '\0' ? L"<empty>" : (TextDevicePath))
 
 /**
-  Prints via gST->ConOut without any pool allocations.
-  Otherwise equivalent to Print.
-  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
-
-  @param[in]  Format  Formatted string.
-**/
-VOID
-EFIAPI
-OcPrintScreen (
-  IN  CONST CHAR16   *Format,
-  ...
-  );
-
-/**
   Dummy function that debuggers may break on.
 **/
 VOID
