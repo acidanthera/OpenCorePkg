@@ -19,75 +19,79 @@
 #include <Protocol/OcLog.h>
 #include <Protocol/AppleDebugLog.h>
 
-#define OC_HEX_LOWER(x) "0123456789ABCDEF"[((UINT32) (x) & 0x0FU)]
-#define OC_HEX_UPPER(x) "0123456789ABCDEF"[((UINT32) (x) & 0xF0U) >> 4U]
-
 /**
-  Expand device path to human readable string.
-**/
-#define OC_HUMAN_STRING(TextDevicePath) \
-  ((TextDevicePath) == NULL ? L"<nil>" : (TextDevicePath)[0] == '\0' ? L"<empty>" : (TextDevicePath))
+  Prints via gST->ConOut without any pool allocations.
+  Otherwise equivalent to Print.
+  Note: EFIAPI must be present for VA_ARGS forwarding (causes bugs with gcc).
 
-/**
-  Dummy function that debuggers may break on.
+  @param[in]  Format  Formatted string.
 **/
 VOID
-DebugBreak (
-  VOID
+EFIAPI
+OcPrintScreen (
+  IN  CONST CHAR16   *Format,
+  ...
   );
 
 /**
-  Wait for user input after printing message.
+  Install or update the OcLog protocol with specified options.
 
-  @param[in] Message   Message to print.
+  @param[in] Options        Logging options.
+  @param[in] DisplayDelay   Delay in microseconds after each log entry.
+  @param[in] DisplayLevel   Console visible error level.
+  @param[in] HaltLevel      Error level causing CPU halt.
+  @param[in] LogPrefixPath  Log path (without timestamp).
+  @param[in] LogFileSystem  Log filesystem, optional.
+
+  Note: If LogFileSystem is specified, and it is not writable, then
+  the first writable file system is chosen.
+
+  @retval EFI_SUCCESS  The entry point is executed successfully.
 **/
-VOID
-WaitForKeyPress (
-  IN  CONST CHAR16 *Message
+EFI_STATUS
+OcConfigureLogProtocol (
+  IN OC_LOG_OPTIONS                   Options,
+  IN CONST CHAR8                      *LogModules,
+  IN UINT32                           DisplayDelay,
+  IN UINTN                            DisplayLevel,
+  IN UINTN                            HaltLevel,
+  IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
   );
 
 /**
-  Print Device Path to log.
+  Install and initialise the Apple Debug Log protocol.
 
-  @param[in] ErrorLevel  Debug error level.
-  @param[in] Message     Prefixed message.
-  @param[in] DevicePath  Device path to print.
+  @param[in] Reinstall  Replace any installed protocol.
+
+  @returns Installed or located protocol.
+  @retval NULL  There was an error locating or installing the protocol.
 **/
-VOID
-DebugPrintDevicePath (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL
+APPLE_DEBUG_LOG_PROTOCOL *
+OcAppleDebugLogInstallProtocol (
+  IN BOOLEAN  Reinstall
   );
 
 /**
-  Print Device Path corresponding to EFI Handle to log.
+  Configure Apple Debug Log protocol.
 
-  @param[in] ErrorLevel  Debug error level.
-  @param[in] Message     Prefixed message.
-  @param[in] Handle      Handle corresponding to Device path to print.
+  @param[in] Enable  Enable logging to OcLog.
 **/
 VOID
-DebugPrintDevicePathForHandle (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN EFI_HANDLE                Handle       OPTIONAL
+OcAppleDebugLogConfigure (
+  IN BOOLEAN  Enable
   );
 
 /**
-  Print hex dump to log.
+  Configure Apple performance log location.
 
-  @param[in] ErrorLevel  Debug error level.
-  @param[in] Message     Prefixed message.
-  @param[in] Bytes       Byte sequence.
-  @param[in] Size        Byte sequence size.
+  @param[in,out]  PerfBuffer       Performance buffer location.
+  @param[in]      PerfBufferSize   Performance buffer size.
 **/
 VOID
-DebugPrintHexDump (
-  IN UINTN                     ErrorLevel,
-  IN CONST CHAR8               *Message,
-  IN UINT8                     *Bytes,
-  IN UINTN                     Size
+OcAppleDebugLogPerfAllocated (
+  IN OUT VOID  *PerfBuffer,
+  IN     UINTN  PerfBufferSize
   );
 
 #endif // OC_DEBUG_AGGREGATOR_LIB_H

@@ -15,7 +15,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcDebugProtocolLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/PrintLib.h>

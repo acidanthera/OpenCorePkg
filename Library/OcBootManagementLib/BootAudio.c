@@ -31,7 +31,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCryptoLib.h>
-#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcDebugProtocolLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcTimerLib.h>

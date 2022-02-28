@@ -21,7 +21,7 @@ SPDX-License-Identifier: BSD-2-Clause-Patent
 
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcDebugProtocolLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>

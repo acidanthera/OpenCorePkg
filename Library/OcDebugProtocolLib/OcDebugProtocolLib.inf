@@ -58,7 +58,6 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel
 
 [Sources]
-  OcAppleLog.c
+  DebugHelp.c
+  DebugPrint.c
   OcDebugProtocolLib.c
-  OcLog.c
-  OcLogInternal.h
