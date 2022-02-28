@@ -7,8 +7,8 @@
 
 #include <Uefi.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcFlexArrayLib.h>
 #include <Library/OcGuardLib.h>
 

@@ -28,7 +28,6 @@
 #include <Library/OcMiscLib.h>
 #include <Library/BaseLib.h>
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcDebugProtocolLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/MemoryAllocationLib.h>

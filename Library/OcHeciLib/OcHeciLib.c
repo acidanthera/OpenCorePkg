@@ -9,8 +9,8 @@
 #include <PiDxe.h>
 
 #include <Library/BaseMemoryLib.h>
+#include <Library/DebugLib.h>
 #include <Library/OcHeciLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 

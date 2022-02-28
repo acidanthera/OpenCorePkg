@@ -19,7 +19,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Protocol/AppleRamDisk.h>
 
 #include <Library/BaseMemoryLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcDebugProtocolLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcAppleRamDiskLib.h>

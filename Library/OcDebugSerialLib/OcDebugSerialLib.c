@@ -19,7 +19,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcLogAggregatorLib.h>
 #include <Library/PrintLib.h>
 #include <Library/PcdLib.h>
 #include <Library/BaseMemoryLib.h>

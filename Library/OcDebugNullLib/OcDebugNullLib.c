@@ -1,5 +1,5 @@
 /** @file
-  Null OcDebugLogLib instance.
+  Null OcDebugProtocolLib instance.
 
   Copyright (C) 2020, Goldfish64. All rights reserved.
 
@@ -20,7 +20,6 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcDebugProtocolLib.h>
 
 /**

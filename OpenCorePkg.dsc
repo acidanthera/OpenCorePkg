@@ -78,7 +78,6 @@
   OcCpuLib|OpenCorePkg/Library/OcCpuLib/OcCpuLib.inf
   OcCryptoLib|OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
   OcDataHubLib|OpenCorePkg/Library/OcDataHubLib/OcDataHubLib.inf
-  OcDebugAggregatorLib|OpenCorePkg/Library/OcDebugAggregatorLib/OcDebugAggregatorLib.inf
   OcDebugProtocolLib|OpenCorePkg/Library/OcDebugProtocolLib/OcDebugProtocolLib.inf
   OcDeviceMiscLib|OpenCorePkg/Library/OcDeviceMiscLib/OcDeviceMiscLib.inf
   OcDevicePathLib|OpenCorePkg/Library/OcDevicePathLib/OcDevicePathLib.inf
@@ -95,6 +94,7 @@
   OcHeciLib|OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
   OcHiiDatabaseLocalLib|OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OcInputLib|OpenCorePkg/Library/OcInputLib/OcInputLib.inf
+  OcLogAggregatorLib|OpenCorePkg/Library/OcLogAggregatorLib/OcLogAggregatorLib.inf
   OcMachoLib|OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OcMacInfoLib|OpenCorePkg/Library/OcMacInfoLib/OcMacInfoLib.inf
   OcMainLib|OpenCorePkg/Library/OcMainLib/OcMainLib.inf
@@ -224,7 +224,6 @@
   OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
   OpenCorePkg/Library/OcDataHubLib/OcDataHubLib.inf
   OpenCorePkg/Library/OcDebugSerialLib/OcDebugSerialLib.inf
-  OpenCorePkg/Library/OcDebugAggregatorLib/OcDebugAggregatorLib.inf
   OpenCorePkg/Library/OcDebugProtocolLib/OcDebugProtocolLib.inf
   OpenCorePkg/Library/OcDebugNullLib/OcDebugNullLib.inf
   OpenCorePkg/Library/OcDeviceMiscLib/OcDeviceMiscLib.inf
@@ -242,6 +241,7 @@
   OpenCorePkg/Library/OcHeciLib/OcHeciLib.inf
   OpenCorePkg/Library/OcHiiDatabaseLib/OcHiiDatabaseLocalLib.inf
   OpenCorePkg/Library/OcInputLib/OcInputLib.inf
+  OpenCorePkg/Library/OcLogAggregatorLib/OcLogAggregatorLib.inf
   OpenCorePkg/Library/OcMachoLib/OcMachoLib.inf
   OpenCorePkg/Library/OcMainLib/OcMainLib.inf
   OpenCorePkg/Library/OcMemoryLib/OcMemoryLib.inf

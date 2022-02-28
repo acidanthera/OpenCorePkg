@@ -29,9 +29,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcBootManagementLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCpuLib.h>
-#include <Library/OcDebugAggregatorLib.h>
 #include <Library/OcDebugProtocolLib.h>
 #include <Library/OcDeviceMiscLib.h>
+#include <Library/OcLogAggregatorLib.h>
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVariableLib.h>

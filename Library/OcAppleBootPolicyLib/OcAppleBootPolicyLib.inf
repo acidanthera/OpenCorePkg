@@ -55,7 +55,6 @@
   DebugLib
   DevicePathLib
   MemoryAllocationLib
-  OcDebugAggregatorLib
   OcFileLib
   OcGuardLib
   OcStringLib

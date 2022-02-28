@@ -24,7 +24,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugAggregatorLib.h>
+#include <Library/OcLogAggregatorLib.h>
 #include <Library/OcDebugProtocolLib.h>
 #include <Library/OcDevicePathLib.h>
 #include <Library/OcDeviceMiscLib.h>

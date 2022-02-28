@@ -846,7 +846,7 @@
   OcDataHubLib|Include/Acidanthera/Library/OcDataHubLib.h
 
   ##  @libraryclass
-  OcDebugAggregatorLib|Include/Acidanthera/Library/OcDebugAggregatorLib.h
+  OcLogAggregatorLib|Include/Acidanthera/Library/OcLogAggregatorLib.h
 
   ##  @libraryclass
   OcDebugProtocolLib|Include/Acidanthera/Library/OcDebugProtocolLib.h
