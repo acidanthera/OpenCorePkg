@@ -17,6 +17,7 @@
 
 #include <Library/UefiLib.h>
 #include <Library/BaseMemoryLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcMemoryLib.h>
 
 PAGE_MAP_AND_DIRECTORY_POINTER  *

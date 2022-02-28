@@ -12,6 +12,7 @@
 
 #include <Library/BaseLib.h>
 #include <Library/MemoryAllocationLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcTimerLib.h>
 #include <Library/OcAppleKeyMapLib.h>
 #include <Library/OcBootManagementLib.h>

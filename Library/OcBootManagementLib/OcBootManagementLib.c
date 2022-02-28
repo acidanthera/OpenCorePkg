@@ -22,6 +22,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/OcConsoleLib.h>
 #include <Library/OcCryptoLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/DevicePathLib.h>
 #include <Library/OcGuardLib.h>
 #include <Library/OcTimerLib.h>
