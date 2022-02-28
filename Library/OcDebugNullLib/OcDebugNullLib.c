@@ -20,7 +20,7 @@
 #include <Library/BaseLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DevicePathLib.h>
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.

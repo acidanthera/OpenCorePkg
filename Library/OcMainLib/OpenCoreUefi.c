@@ -37,7 +37,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcCpuLib.h>
 #include <Library/OcDataHubLib.h>
 #include <Library/OcLogAggregatorLib.h>
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcDeviceMiscLib.h>
 #include <Library/OcDevicePropertyLib.h>
 #include <Library/OcDriverConnectionLib.h>

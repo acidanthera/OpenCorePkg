@@ -27,7 +27,7 @@
 #include <Library/OcDevicePathLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 
 EFI_DEVICE_PATH_PROTOCOL *
 AppendFileNameDevicePath (

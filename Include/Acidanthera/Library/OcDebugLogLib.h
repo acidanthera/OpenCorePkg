@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_DEBUG_PROTOCOL_LIB_H
-#define OC_DEBUG_PROTOCOL_LIB_H
+#ifndef OC_DEBUG_LOG_LIB_H
+#define OC_DEBUG_LOG_LIB_H
 
 #include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
@@ -113,4 +113,4 @@ DebugPrintHexDump (
   IN UINTN                     Size
   );
 
-#endif // OC_DEBUG_PROTOCOL_LIB_H
+#endif // OC_DEBUG_LOG_LIB_H

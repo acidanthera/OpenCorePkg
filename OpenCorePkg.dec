@@ -849,7 +849,7 @@
   OcLogAggregatorLib|Include/Acidanthera/Library/OcLogAggregatorLib.h
 
   ##  @libraryclass
-  OcDebugProtocolLib|Include/Acidanthera/Library/OcDebugProtocolLib.h
+  OcDebugProtocolLib|Include/Acidanthera/Library/OcDebugLogLib.h
 
   ##  @libraryclass
   OcDeviceMiscLib|Include/Acidanthera/Library/OcDeviceMiscLib.h

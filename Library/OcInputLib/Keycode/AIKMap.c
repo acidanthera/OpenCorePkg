@@ -14,7 +14,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 #include "AIKTranslate.h"
 
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 
 #define AIK_DEBUG_STR DEBUG_POINTER
 

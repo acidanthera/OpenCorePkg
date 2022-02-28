@@ -22,7 +22,7 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/OcBootManagementLib.h>
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcDeviceTreeLib.h>
 #include <Library/OcMachoLib.h>
 #include <Library/OcMemoryLib.h>

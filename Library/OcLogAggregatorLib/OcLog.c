@@ -25,7 +25,7 @@
 #include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/OcDataHubLib.h>
-#include <Library/OcDebugProtocolLib.h>
+#include <Library/OcDebugLogLib.h>
 #include <Library/OcFileLib.h>
 #include <Library/OcMiscLib.h>
 #include <Library/OcStringLib.h>
