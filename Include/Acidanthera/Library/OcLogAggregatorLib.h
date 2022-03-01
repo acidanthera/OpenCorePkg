@@ -12,8 +12,8 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#ifndef OC_DEBUG_AGGREGATOR_LIB_H
-#define OC_DEBUG_AGGREGATOR_LIB_H
+#ifndef OC_LOG_AGGREGATOR_LIB_H
+#define OC_LOG_AGGREGATOR_LIB_H
 
 #include <Library/DebugLib.h>
 #include <Protocol/OcLog.h>
@@ -94,4 +94,4 @@ OcPrintScreen (
   ...
   );
 
-#endif // OC_DEBUG_AGGREGATOR_LIB_H
+#endif // OC_LOG_AGGREGATOR_LIB_H
