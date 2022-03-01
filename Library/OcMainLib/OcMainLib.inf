@@ -73,7 +73,6 @@
   OcConfigurationLib
   OcConsoleLib
   OcDataHubLib
-  OcDebugProtocolLib
   OcDeviceMiscLib
   OcDevicePathLib
   OcDevicePropertyLib
