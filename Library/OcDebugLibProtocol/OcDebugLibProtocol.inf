@@ -18,7 +18,7 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcDebugProtocolLib
+  BASE_NAME       = OcDebugLibProtocol
   FILE_GUID       = 1A9C36A7-36F8-47D6-A028-A92D17127096
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
@@ -60,4 +60,4 @@
 [Sources]
   DebugHelp.c
   DebugPrint.c
-  OcDebugProtocolLib.c
+  OcDebugLibProtocol.c
