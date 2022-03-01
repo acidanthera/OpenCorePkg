@@ -112,7 +112,7 @@
   # To save size, use NULL library for DebugLib and ReportStatusCodeLib.
   # If need status code output, do library instance overriden.
   #
-  DebugLib|OpenCorePkg/Library/OcDebugNullLib/OcDebugNullLib.inf
+  DebugLib|OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
   DebugPrintErrorLevelLib|MdePkg/Library/BaseDebugPrintErrorLevelLib/BaseDebugPrintErrorLevelLib.inf
   ReportStatusCodeLib|MdePkg/Library/BaseReportStatusCodeLibNull/BaseReportStatusCodeLibNull.inf
 
