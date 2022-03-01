@@ -6528,29 +6528,33 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 	\item \texttt{autoopts:\{PARTUUID\}[+]="\{options\}"} - Default: not set. \medskip
 
-  Allows manually specifying kernel options to use in autodetect mode for a given partition only. If specified
-  with \texttt{+=} then these are used in addition to any autodetected options, if specified with \texttt{=}
-  they are used instead. Used for autodetected Linux only. Values specified here are never used for entries created
-  from \texttt{/loader/entries/*.conf} files.
+  Allows manually specifying kernel options to use in autodetect mode for a given partition only.
+  Replace the text \texttt{\{PARTUUID\}} with the specific partition UUID on which the kernels are stored
+  (in normal layout, the partition which contains \texttt{/boot}),
+  e.g. \texttt{autoopts:11223344-5566-7788-99aa-bbccddeeff00+="vt.handoff=7"}.
+  If specified with \texttt{+=} then these options are used in addition to any autodetected options, if specified
+  with \texttt{=} they are used instead. Used for autodetected Linux only -- values specified here are never
+  used for entries created from \texttt{/loader/entries/*.conf} files.
   \medskip
 
-  \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
+  \emph{Note}: The \texttt{PARTUUID} value to be specified here is typically the same as the \texttt{PARTUUID}
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
-  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is not the same for
-  Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
-
-	Typically this option should not be needed for \texttt{/loader/entries} distros, but in case it is to find out the
-  unique partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+  \texttt{cat /proc/cmdline}). Alternatively, and
   for more advanced scenarios, it is possible to examine how the distro's partitions are mounted using the
   Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
-	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
-  for autodetected Linux only. The value here is never used for entries created from
-  \texttt{/loader/entries/*.conf} files. \texttt{autoopts:\{PARTUUID\}} may be more suitable where there are multiple
-  distros, but \texttt{autoopts} with no PARTUUID required is more convenient for just one distro.
+	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. \medskip
+  
+  Allows manually specifying kernel options to use in autodetect mode. The alternative format \texttt{autoopts:\{PARTUUID\}}
+  is more suitable where there are multiple distros, but \texttt{autoopts} with no PARTUUID required may be more
+  convenient for just one distro.
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
-  with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
+  with \texttt{=} they are used instead. Used for autodetected Linux only -- values specified here are never
+  used for entries created from \texttt{/loader/entries/*.conf} files.
+  \medskip
+
+  As example usage, it is possible to use \texttt{+=} format to add
   a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
   (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text

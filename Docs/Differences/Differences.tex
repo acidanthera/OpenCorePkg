@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Feb 10 01:48:29 2022
-%DIF ADD ../Configuration.tex        Sun Feb 27 08:57:52 2022
+%DIF ADD ../Configuration.tex        Tue Mar  1 18:58:52 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6600,29 +6600,44 @@ options for the driver may be specified in \texttt{UEFI/Drivers/Arguments}:
 
 	\item \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts}\DIFaddend :\{\DIFdelbegin \DIFdel{partuuid}\DIFdelend \DIFaddbegin \DIFadd{PARTUUID}\DIFaddend \}[+]="\{options\}"} - Default: not set. \medskip
 
-  Allows \DIFaddbegin \DIFadd{manually }\DIFaddend specifying kernel options \DIFaddbegin \DIFadd{to use in autodetect mode }\DIFaddend for a given partition only. If specified
-  with \texttt{+=} then these are used in addition to \DIFaddbegin \DIFadd{any }\DIFaddend autodetected options, if specified with \texttt{=}
-  they are used instead. Used for autodetected Linux only. Values specified here are never used for entries created
-  from \texttt{/loader/entries/*.conf} files.
+  Allows \DIFaddbegin \DIFadd{manually }\DIFaddend specifying kernel options \DIFaddbegin \DIFadd{to use in autodetect mode }\DIFaddend for a given partition only.
+  \DIFaddbegin \DIFadd{Replace the text }\texttt{\DIFadd{\{PARTUUID\}}} \DIFadd{with the specific partition UUID on which the kernels are stored
+  (in normal layout, the partition which contains }\texttt{\DIFadd{/boot}}\DIFadd{),
+  e.g. }\texttt{\DIFadd{autoopts:11223344-5566-7788-99aa-bbccddeeff00+="vt.handoff=7"}}\DIFadd{.
+  }\DIFaddend If specified with \texttt{+=} then these \DIFaddbegin \DIFadd{options }\DIFaddend are used in addition to \DIFaddbegin \DIFadd{any }\DIFaddend autodetected options, if specified
+  with \texttt{=} they are used instead. Used for autodetected Linux only \DIFdelbegin \DIFdel{. Values }\DIFdelend \DIFaddbegin \DIFadd{-- values }\DIFaddend specified here are never
+  used for entries created from \texttt{/loader/entries/*.conf} files.
   \medskip
 
-  \emph{Note}: The \texttt{partuuid} value to be specified here is typically the same as the \texttt{PARTUUID}
+  \emph{Note}: The \texttt{\DIFdelbegin \DIFdel{partuuid}\DIFdelend \DIFaddbegin \DIFadd{PARTUUID}\DIFaddend } value to be specified here is typically the same as the \texttt{PARTUUID}
   seen in \texttt{root=PARTUUID=...} in the Linux kernel boot options (view using
-  \texttt{cat /proc/cmdline}) for autodetected Debian-style distros, but is not the same for
-  Fedora-style distros booted from \texttt{/loader/entries/*.conf} files. \medskip
+  \texttt{cat /proc/cmdline})\DIFdelbegin \DIFdel{for autodetected Debian-style distros, but is not the same for
+  Fedora-style distros booted from }\texttt{\DIFdel{/loader/entries/*.conf}} %DIFAUXCMD
+\DIFdel{files. }%DIFDELCMD < \medskip
+%DIFDELCMD < 
 
-	Typically this option should not be needed \DIFdelbegin \DIFdel{in the latter case}\DIFdelend \DIFaddbegin \DIFadd{for }\texttt{\DIFadd{/loader/entries}} \DIFadd{distros}\DIFaddend , but in case it is \DIFdelbegin \DIFdel{, }\DIFdelend to find out the
-  unique partition uuid to use look for \texttt{LNX:} entries in the OpenCore debug log file. Alternatively, and
+%DIFDELCMD < 	%%%
+\DIFdel{Typically this option should not be needed in the latter case, but in case it is, to find out the unique
+  partition uuid to use look for }\texttt{\DIFdel{LNX:}} %DIFAUXCMD
+\DIFdel{entries in the OpenCore debug log file. }\DIFdelend \DIFaddbegin \DIFadd{. }\DIFaddend Alternatively, and
   for more advanced scenarios, it is possible to examine how the distro's partitions are mounted using the
   Linux \texttt{mount} command, and then find out the partuuid of relevant mounted partitions by examining the
   output of \texttt{ls -l /dev/disk/by-partuuid}. \medskip
 
-	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. The kernel options to use
-  for autodetected Linux only. The value here is never used for entries created from
-  \texttt{/loader/entries/*.conf} files. \texttt{\DIFdelbegin \DIFdel{partuuidopts}\DIFdelend \DIFaddbegin \DIFadd{autoopts:\{PARTUUID\}}\DIFaddend } may be more suitable where there are multiple
-  distros, but \texttt{autoopts} with no PARTUUID required is more convenient for just one distro.
+	\item \texttt{autoopts[+]="\{options\}"} - Default: None specified. \DIFdelbegin \DIFdel{The }\DIFdelend \DIFaddbegin \medskip
+
+  \DIFadd{Allows manually specifying }\DIFaddend kernel options to use \DIFdelbegin \DIFdel{for autodetected Linux only. The value here is never used for entries created from
+  }\texttt{\DIFdel{/loader/entries/*.conf}} %DIFAUXCMD
+\DIFdel{files. }\texttt{\DIFdel{partuuidopts}} %DIFAUXCMD
+\DIFdel{may be }\DIFdelend \DIFaddbegin \DIFadd{in autodetect mode. The alternative format }\texttt{\DIFadd{autoopts:\{PARTUUID\}}}
+  \DIFadd{is }\DIFaddend more suitable where there are multiple distros, but \texttt{autoopts} with no PARTUUID required \DIFdelbegin \DIFdel{is }\DIFdelend \DIFaddbegin \DIFadd{may be }\DIFaddend more
+  convenient for just one distro.
   If specified with \texttt{+=} then these are used in addition to autodetected options, if specified
-  with \texttt{=} they are used instead. As example usage, it is possible to use \texttt{+=} format to add
+  with \texttt{=} they are used instead. \DIFaddbegin \DIFadd{Used for autodetected Linux only -- values specified here are never
+  used for entries created from }\texttt{\DIFadd{/loader/entries/*.conf}} \DIFadd{files.
+  }\medskip
+
+  \DIFaddend As example usage, it is possible to use \texttt{+=} format to add
   a \texttt{vt.handoff} options, such as \texttt{autopts+="vt.handoff=7"} or \texttt{autopts+="vt.handoff=3"}
   (check \texttt{cat /proc/cmdline} when booted via the distro's default bootloader) on Ubuntu and related distros,
   in order to add the \texttt{vt.handoff} option to the auto-detected GRUB defaults, and avoid a flash of text
