@@ -60,4 +60,4 @@
 [Sources]
   OcLogInternal.h
   OcAppleLog.c
-  OcLog.c  
+  OcLog.c
