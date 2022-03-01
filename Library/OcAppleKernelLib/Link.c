@@ -819,6 +819,7 @@ InternalRelocateRelocation (
   Length     = Relocation->Size;
   Type       = (UINT8) Relocation->Type;
   PcRelative = (Relocation->PcRelative != 0);
+  PairTarget = 0;
 
   InvalidPcRel        = FALSE;
   ScatteredRelocation = NULL;
@@ -843,10 +844,10 @@ InternalRelocateRelocation (
   }
 
   InstructionPtr = MachoGetFilePointerByAddress (
-                     &Kext->Context.MachContext,
-                     (RelocationBase + Address),
-                     &MaxSize
-                     );
+    &Kext->Context.MachContext,
+    (RelocationBase + Address),
+    &MaxSize
+    );
   if ((InstructionPtr == NULL) || (MaxSize < ((Length != 3) ? 4U : 8U))) {
     return MAX_UINTN;
   }
@@ -860,21 +861,23 @@ InternalRelocateRelocation (
   Vtable = NULL;
   if (ScatteredRelocation == NULL) {
     Result = InternalCalculateTargets (
-              Context,
-              Kext,
-              LoadAddress,
-              Relocation,
-              NextRelocation,
-              &Target,
-              &PairTarget,
-              &Vtable
-              );
+      Context,
+      Kext,
+      LoadAddress,
+      Relocation,
+      NextRelocation,
+      &Target,
+      &PairTarget,
+      &Vtable
+      );
     if (!Result) {
       return MAX_UINTN;
     }
   }
 
+  //
   // Length == 2
+  //
   if (Length != 3) {
     CopyMem (&Instruction32, InstructionPtr, sizeof (Instruction32));
 
@@ -961,7 +964,7 @@ InternalRelocateRelocation (
         case MachX8664RelocBranch:
         {
           InvalidPcRel = !PcRelative;
-          Adjustment += LinkPc;
+          Adjustment  += LinkPc;
           break;
         }
 
@@ -971,7 +974,7 @@ InternalRelocateRelocation (
         case MachX8664RelocSigned4:
         {
           InvalidPcRel = !PcRelative;
-          Adjustment += (IsNormalLocal ? LoadAddress : LinkPc);
+          Adjustment  += (IsNormalLocal ? LoadAddress : LinkPc);
           break;
         }
 
@@ -979,16 +982,16 @@ InternalRelocateRelocation (
         case MachX8664RelocGotLoad:
         {
           InvalidPcRel = !PcRelative;
-          Adjustment += LinkPc;
-          Target      = PairTarget;
-          IsPair      = TRUE;
+          Adjustment  += LinkPc;
+          Target       = PairTarget;
+          IsPair       = TRUE;
           break;
         }
 
         case MachX8664RelocSubtractor:
         {
-          InvalidPcRel = PcRelative;
-          Instruction32 = (INT32)(Target - PairTarget);
+          InvalidPcRel  = PcRelative;
+          Instruction32 = (INT32) (Target - PairTarget);
           IsPair        = TRUE;
           break;
         }
@@ -1001,10 +1004,10 @@ InternalRelocateRelocation (
 
       if (PcRelative) {
         Result = InternalCalculateDisplacementIntel64 (
-                  Target,
-                  Adjustment,
-                  &Instruction32
-                  );
+          Target,
+          Adjustment,
+          &Instruction32
+          );
         if (!Result) {
           return MAX_UINTN;
         }
@@ -1023,14 +1026,14 @@ InternalRelocateRelocation (
     switch (Type) {
       case MachX8664RelocUnsigned:
       {
-        InvalidPcRel = PcRelative;
+        InvalidPcRel   = PcRelative;
         Instruction64 += Target;
         break;
       }
 
       case MachX8664RelocSubtractor:
       {
-        InvalidPcRel = PcRelative;
+        InvalidPcRel  = PcRelative;
         Instruction64 = (Target - PairTarget);
         IsPair        = TRUE;
         break;
