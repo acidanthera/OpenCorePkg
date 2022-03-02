@@ -26,8 +26,8 @@ VPATH   = ../../Platform/OpenCanopy:$\
           ../../Library/OcBootManagementLib:$\
           ../../Library/OcAppleBootPolicyLib:$\
           ../../Library/OcDevicePathLib:$\
+          ../../Library/OcDebugLibProtocol:$\
           ../../Library/OcStringLib:$\
-          ../../Library/OcDebugLogLib:$\
           ../../Library/OcFileLib:$\
           ../../Library/OcStorageLib:$\
           ../../Library/OcTemplateLib:$\

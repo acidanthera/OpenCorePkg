@@ -1,6 +1,7 @@
 /** @file
-  Copyright (C) 2016 - 2018, The HermitCrabs Lab. All rights reserved.
-  Copyright (c) 2006 - 2015, Intel Corporation. All rights reserved.
+  Null OcDebugProtocolLib instance.
+
+  Copyright (C) 2020, Goldfish64. All rights reserved.
 
   All rights reserved.
 
@@ -13,19 +14,13 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
+
 #include <Uefi.h>
 
-#include <Protocol/OcLog.h>
-
 #include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
-#include <Library/DebugPrintErrorLevelLib.h>
-#include <Library/PcdLib.h>
-#include <Library/PrintLib.h>
-#include <Library/UefiBootServicesTableLib.h>
-
-#include "OcLogInternal.h"
+#include <Library/DevicePathLib.h>
+#include <Library/OcDebugLogLib.h>
 
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.
@@ -49,24 +44,6 @@ DebugPrint (
   ...
   )
 {
-  VA_LIST          Marker;
-  CHAR16           Buffer[256];
-  OC_LOG_PROTOCOL  *OcLog;
-
-  ASSERT (Format != NULL);
-
-  OcLog = InternalGetOcLog ();
-
-  VA_START (Marker, Format);
-
-  if (OcLog != NULL) {
-    OcLog->AddEntry (OcLog, ErrorLevel, Format, Marker);
-  } else if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
-    UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
-    gST->ConOut->OutputString (gST->ConOut, Buffer);
-  }
-
-  VA_END (Marker);
 }
 
 
@@ -101,26 +78,6 @@ DebugAssert (
   IN CONST CHAR8  *Description
   )
 {
-  //
-  // Generate the ASSERT() message and log it
-  //
-  DebugPrint (
-    DEBUG_ERROR,
-    "ASSERT [%a] %a(%d): %a\n",
-    gEfiCallerBaseName,
-    FileName,
-    LineNumber,
-    Description
-    );
-
-  //
-  // Generate a Breakpoint, DeadLoop, or NOP based on PCD settings
-  //
-  if ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_ASSERT_BREAKPOINT_ENABLED) != 0) {
-    CpuBreakpoint ();
-  } else if ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_ASSERT_DEADLOOP_ENABLED) != 0) {
-    CpuDeadLoop ();
-  }
 }
 
 
@@ -145,15 +102,7 @@ DebugClearMemory (
   IN  UINTN  Length
   )
 {
-  //
-  // If Buffer is NULL, then ASSERT().
-  //
-  ASSERT (Buffer != NULL);
-
-  //
-  // SetMem() checks for the the ASSERT() condition on Length and returns Buffer
-  //
-  return SetMem (Buffer, Length, PcdGet8 (PcdDebugClearMemoryValue));
+  return Buffer;
 }
 
 
@@ -173,7 +122,7 @@ DebugAssertEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_ASSERT_ENABLED) != 0);
+  return FALSE;
 }
 
 
@@ -193,7 +142,7 @@ DebugPrintEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_PRINT_ENABLED) != 0);
+  return FALSE;
 }
 
 
@@ -213,7 +162,7 @@ DebugCodeEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_DEBUG_CODE_ENABLED) != 0);
+  return FALSE;
 }
 
 
@@ -233,7 +182,7 @@ DebugClearMemoryEnabled (
   VOID
   )
 {
-  return (BOOLEAN) ((PcdGet8 (PcdDebugPropertyMask) & DEBUG_PROPERTY_CLEAR_MEMORY_ENABLED) != 0);
+  return FALSE;
 }
 
 
@@ -252,7 +201,7 @@ DebugPrintLevelEnabled (
   IN  CONST UINTN        ErrorLevel
   )
 {
-  return (BOOLEAN) ((ErrorLevel & PcdGet32 (PcdFixedDebugPrintErrorLevel)) != 0);
+  return FALSE;
 }
 
 /**
@@ -269,19 +218,89 @@ OcPrintScreen (
   ...
   )
 {
-  CHAR16 Buffer[1024];
-  VA_LIST Marker;
+}
 
-  VA_START (Marker, Format);
-  UnicodeVSPrint (Buffer, sizeof (Buffer), Format, Marker);
-  VA_END (Marker);
+VOID
+#if defined(__GNUC__) || defined(__clang__)
+__attribute__ ((noinline))
+#endif
+DebugBreak (
+  VOID
+  )
+{
+  //
+  // This function has no code, debuggers may break on it.
+  //
+}
 
-  //
-  // It is safe to call gST->ConOut->OutputString, because in crtitical areas
-  // AptioMemoryFix is responsible for overriding gBS->AllocatePool with its own
-  // implementation that uses a custom allocator.
-  //
-  if (gST->ConOut) {
-    gST->ConOut->OutputString (gST->ConOut, Buffer);
-  }
+VOID
+WaitForKeyPress (
+  CONST CHAR16 *Message
+  )
+{
+}
+
+VOID
+DebugPrintDevicePath (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_DEVICE_PATH_PROTOCOL  *DevicePath  OPTIONAL
+  )
+{
+}
+
+VOID
+DebugPrintDevicePathForHandle (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN EFI_HANDLE                Handle       OPTIONAL
+  )
+{
+}
+
+VOID
+DebugPrintHexDump (
+  IN UINTN                     ErrorLevel,
+  IN CONST CHAR8               *Message,
+  IN UINT8                     *Bytes,
+  IN UINTN                     Size
+  )
+{
+}
+
+APPLE_DEBUG_LOG_PROTOCOL *
+OcAppleDebugLogInstallProtocol (
+  IN BOOLEAN  Reinstall
+  )
+{
+  return NULL;
+}
+
+VOID
+OcAppleDebugLogConfigure (
+  IN BOOLEAN  Enable
+  )
+{
+}
+
+VOID
+OcAppleDebugLogPerfAllocated (
+  IN OUT VOID  *PerfBuffer,
+  IN     UINTN  PerfBufferSize
+  )
+{
+}
+
+EFI_STATUS
+OcConfigureLogProtocol (
+  IN OC_LOG_OPTIONS                   Options,
+  IN CONST CHAR8                      *LogModules,
+  IN UINT32                           DisplayDelay,
+  IN UINTN                            DisplayLevel,
+  IN UINTN                            HaltLevel,
+  IN CONST CHAR16                     *LogPrefixPath  OPTIONAL,
+  IN EFI_SIMPLE_FILE_SYSTEM_PROTOCOL  *LogFileSystem  OPTIONAL
+  )
+{
+  return EFI_UNSUPPORTED;
 }

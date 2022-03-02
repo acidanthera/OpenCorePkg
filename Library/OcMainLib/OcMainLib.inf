@@ -80,6 +80,7 @@
   OcFirmwareVolumeLib
   OcGuardLib
   OcHashServicesLib
+  OcLogAggregatorLib
   OcMachoLib
   OcMiscLib
   OcOSInfoLib

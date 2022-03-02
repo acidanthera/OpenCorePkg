@@ -18,8 +18,8 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcDebugLogLib
-  FILE_GUID       = 85E15002-397B-441B-AC5C-BF952B0E7331
+  BASE_NAME       = OcLogAggregatorLib
+  FILE_GUID       = 2D7559C7-CB17-426A-927D-69BBCD270A9A
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
   LIBRARY_CLASS   = DebugLib 
@@ -58,9 +58,6 @@
   gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel
 
 [Sources]
-  OcAppleLog.c
-  OcDebugLogLib.c
-  OcLog.c
   OcLogInternal.h
-  DebugPrint.c
-  DebugHelp.c
+  OcAppleLog.c
+  OcLog.c

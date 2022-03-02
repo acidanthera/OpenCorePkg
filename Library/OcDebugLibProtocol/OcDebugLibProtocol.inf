@@ -1,0 +1,63 @@
+## @file
+#
+#  Component description file for Debug Library using the OcLog protocol.
+#
+#  Copyright (C) 2016, The HermitCrabs Lab. All rights reserved.<BR>
+#
+# All rights reserved.
+#
+# This program and the accompanying materials
+# are licensed and made available under the terms and conditions of the BSD License
+# which accompanies this distribution.  The full text of the license may be found at
+# http://opensource.org/licenses/bsd-license.php
+#
+# THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
+# WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
+#
+##
+
+[Defines]
+  INF_VERSION     = 0x00010005
+  BASE_NAME       = OcDebugLibProtocol
+  FILE_GUID       = 1A9C36A7-36F8-47D6-A028-A92D17127096
+  MODULE_TYPE     = BASE
+  VERSION_STRING  = 1.0
+  LIBRARY_CLASS   = DebugLib 
+
+# VALID_ARCHITECTURES = IA32 X64 IPF EBC
+
+[Packages]
+  OpenCorePkg/OpenCorePkg.dec
+  MdePkg/MdePkg.dec
+  UefiCpuPkg/UefiCpuPkg.dec
+
+[Guids]
+  gEfiMiscSubClassGuid
+  gOcVendorVariableGuid
+  gApplePlatformProducerNameGuid
+
+[Protocols]
+  gOcLogProtocolGuid
+  gAppleDebugLogProtocolGuid
+
+[LibraryClasses]
+  BaseLib
+  BaseMemoryLib
+  DebugPrintErrorLevelLib
+  DevicePathLib
+  MemoryAllocationLib
+  OcCpuLib
+  OcDataHubLib
+  OcFlexArrayLib
+  SerialPortLib
+  UefiRuntimeServicesTableLib
+
+[Pcd]
+  gEfiMdePkgTokenSpaceGuid.PcdDebugClearMemoryValue
+  gEfiMdePkgTokenSpaceGuid.PcdDebugPropertyMask
+  gEfiMdePkgTokenSpaceGuid.PcdFixedDebugPrintErrorLevel
+
+[Sources]
+  DebugHelp.c
+  DebugPrint.c
+  OcDebugLibProtocol.c
