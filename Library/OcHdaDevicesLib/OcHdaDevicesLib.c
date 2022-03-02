@@ -224,6 +224,7 @@ STATIC HDA_CODEC_LIST_ENTRY mHdaCodecList[] = {
   ///
   /// Conexant.
   ///
+  { HDA_CODEC (CONEXANT, 0x2008),       0x0000, "Conexant CX8200" },
   { HDA_CODEC (CONEXANT, 0x5045),       0x0000, "Conexant CX20549 (Venice)" },
   { HDA_CODEC (CONEXANT, 0x5047),       0x0000, "Conexant CX20551 (Waikiki)" },
   { HDA_CODEC (CONEXANT, 0x5051),       0x0000, "Conexant CX20561 (Hermosa)" },
@@ -241,6 +242,7 @@ STATIC HDA_CODEC_LIST_ENTRY mHdaCodecList[] = {
   { HDA_CODEC (CONEXANT, 0x50AC),       0x0000, "Conexant CX20652" },
   { HDA_CODEC (CONEXANT, 0x50B8),       0x0000, "Conexant CX20664" },
   { HDA_CODEC (CONEXANT, 0x50B9),       0x0000, "Conexant CX20665" },
+  { HDA_CODEC (CONEXANT, 0x50F4),       0x0000, "Conexant CX20724" },
   { HDA_CODEC (CONEXANT, 0xFFFF),       0x0000, "Conexant (Unknown)" },
   ///
   /// Creative.
