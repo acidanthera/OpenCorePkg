@@ -242,6 +242,8 @@ STATIC HDA_CODEC_LIST_ENTRY mHdaCodecList[] = {
   { HDA_CODEC (CONEXANT, 0x50B8),       0x0000, "Conexant CX20664" },
   { HDA_CODEC (CONEXANT, 0x50B9),       0x0000, "Conexant CX20665" },
   { HDA_CODEC (CONEXANT, 0xFFFF),       0x0000, "Conexant (Unknown)" },
+  { HDA_CODEC (CONEXANT, 0x50F4), 0x0000, "Conexant CX20724" },
+  { HDA_CODEC (CONEXANT, 0x2008), 0x0000, "Conexant CX8200" },
   ///
   /// Creative.
   ///
