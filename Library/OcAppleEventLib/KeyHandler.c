@@ -419,6 +419,10 @@ InternalGetCurrentKeyStroke (
 
   DEBUG ((DEBUG_VERBOSE, "InternalGetCurrentKeyStroke\n"));
 
+  if (NumberOfKeyCodes == NULL || KeyCodes == NULL || Key == NULL) {
+    return EFI_INVALID_PARAMETER;
+  }
+
   if (mModifiers != Modifiers) {
     for (Index = 0; Index < ARRAY_SIZE (mKeyStrokeInfo); ++Index) {
       mKeyStrokeInfo[Index].CurrentStroke = FALSE;
