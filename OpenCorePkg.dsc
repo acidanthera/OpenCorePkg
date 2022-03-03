@@ -222,7 +222,7 @@
   OpenCorePkg/Library/OcCpuLib/OcCpuLib.inf
   OpenCorePkg/Library/OcCryptoLib/OcCryptoLib.inf
   OpenCorePkg/Library/OcDataHubLib/OcDataHubLib.inf
-  OpenCorePkg/Library/OcDebugSerialLib/OcDebugSerialLib.inf
+  OpenCorePkg/Library/OcDebugLibSerial/OcDebugLibSerial.inf
   OpenCorePkg/Library/OcDebugLibProtocol/OcDebugLibProtocol.inf
   OpenCorePkg/Library/OcDebugLibNull/OcDebugLibNull.inf
   OpenCorePkg/Library/OcDeviceMiscLib/OcDeviceMiscLib.inf
