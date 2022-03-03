@@ -14,10 +14,10 @@ Signed-off-by: Vitaly Cheptsov <vit9696@protonmail.com>
  1 file changed, 7 insertions(+), 1 deletion(-)
 
 diff --git a/MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.c b/MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.c
-index 86fe9d954f..5892508aef 100644
+index 1070516b35..a79713cad6 100644
 --- a/MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.c
 +++ b/MdeModulePkg/Bus/Ata/AtaAtapiPassThru/AtaAtapiPassThru.c
-@@ -620,7 +620,7 @@ AtaAtapiPassThruSupported (
+@@ -625,7 +625,7 @@ AtaAtapiPassThruSupported (
      return EFI_UNSUPPORTED;
    }
  
@@ -26,17 +26,17 @@ index 86fe9d954f..5892508aef 100644
      return EFI_SUCCESS;
    }
  
-@@ -1208,6 +1208,12 @@ EnumerateAttachedDevice (
-         goto Done;
+@@ -1226,6 +1226,12 @@ EnumerateAttachedDevice (
        }
+ 
        break;
-+    case PCI_CLASS_MASS_STORAGE_RAID :
++    case PCI_CLASS_MASS_STORAGE_RAID:
 +      Instance->AtaPassThruMode.Attributes &= ~EFI_ATA_PASS_THRU_ATTRIBUTES_PHYSICAL;
 +      Instance->ExtScsiPassThruMode.Attributes &= ~EFI_EXT_SCSI_PASS_THRU_ATTRIBUTES_PHYSICAL;
 +      //
 +      // Fall through to AHCI
 +      //
-     case PCI_CLASS_MASS_STORAGE_SATADPA :
+     case PCI_CLASS_MASS_STORAGE_SATADPA:
        //
        // The ATA controller is working at AHCI mode
 -- 
