@@ -18,7 +18,7 @@
 
 [Defines]
   INF_VERSION     = 0x00010005
-  BASE_NAME       = OcDebugSerialLib
+  BASE_NAME       = OcDebugLibSerial
   FILE_GUID       = 8F70EE5B-D935-4C37-AEF6-BE02920AF30C
   MODULE_TYPE     = BASE
   VERSION_STRING  = 1.0
@@ -28,7 +28,7 @@
 # VALID_ARCHITECTURES = IA32 X64 EBC
 
 [Sources]
-  OcDebugSerialLib.c
+  OcDebugLibSerial.c
 
 [Packages]
   OpenCorePkg/OpenCorePkg.dec
