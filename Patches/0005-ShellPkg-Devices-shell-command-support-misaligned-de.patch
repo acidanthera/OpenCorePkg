@@ -9,7 +9,7 @@ Subject: [PATCH] ShellPkg: Devices shell command support misaligned device
  1 file changed, 27 insertions(+)
 
 diff --git a/ShellPkg/Application/Shell/ShellProtocol.c b/ShellPkg/Application/Shell/ShellProtocol.c
-index 509eb60e40..c95c18e32a 100644
+index 509eb60e40..25f33166e6 100644
 --- a/ShellPkg/Application/Shell/ShellProtocol.c
 +++ b/ShellPkg/Application/Shell/ShellProtocol.c
 @@ -598,6 +598,25 @@ EfiShellGetDevicePathFromFilePath (
@@ -38,7 +38,15 @@ index 509eb60e40..c95c18e32a 100644
  /**
    Gets the name of the device specified by the device handle.
  
-@@ -783,7 +802,14 @@ EfiShellGetDeviceName (
+@@ -655,6 +674,7 @@ EfiShellGetDeviceName (
+   EFI_HANDLE                    *ParentControllerBuffer;
+   UINTN                         ParentDriverCount;
+   EFI_HANDLE                    *ParentDriverBuffer;
++  BOOLEAN                       NeedsRealign;
+ 
+   if ((BestDeviceName == NULL) ||
+       (DeviceHandle   == NULL)
+@@ -783,7 +803,14 @@ EfiShellGetDeviceName (
      //
      if (DeviceNameToReturn != NULL) {
        ASSERT (BestDeviceName != NULL);
