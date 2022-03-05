@@ -14,6 +14,7 @@ OpenCore Changelog
 - Renamed OpenLinuxBoot driver argument from `partuuidopts:{PARTUUID}` to `autoopts:{PARTUUID}`
 - Supported booting Linux from stand-alone `/boot` partition without `/loader/entries` files (user must specify full kernel boot options)
 - Handled XML entities in driver arguments
+- Updated underlying EDK II package to edk2-stable202202
 
 #### v0.7.8
 - Updated ocvalidate to warn about insecure `DmgLoading` with secure `SecureBootModel` (already disallowed in runtime)
