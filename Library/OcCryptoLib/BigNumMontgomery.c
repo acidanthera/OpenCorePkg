@@ -162,6 +162,7 @@ BigNumCalculateMontParams (
   UINTN           SizeRSqr;
   OC_BN_NUM_WORDS NumWordsRSqr;
   OC_BN_WORD      *RSqr;
+  VOID            *Memory;
 
   ASSERT (RSqrMod != NULL);
   ASSERT (NumWords > 0);
@@ -209,7 +210,13 @@ BigNumCalculateMontParams (
   // 2 * NumBits cannot overflow as per above.
   //
   BigNumOrWord (RSqr, NumWordsRSqr, 1, 2 * NumBits);
-  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N);
+
+  Memory = AllocatePool (2 * NumWordsRSqr * OC_BN_WORD_SIZE);
+  if (Memory == NULL) {
+    return 0;
+  }
+  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Memory);
+  FreePool (Memory);
 
   FreePool (RSqr);
 

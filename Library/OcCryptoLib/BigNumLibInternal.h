@@ -95,17 +95,16 @@ BigNumOrWord (
   @param[in]     A             The dividend.
   @param[in]     NumWordsA     The number of Words of A.
   @param[in]     B             The divisor.
-
-  @returns  Whether the operation was completes successfully.
-
+  @param[in]     Memory        Scratch buffer 2 * NumWordsA * OC_BN_WORD_SIZE.
 **/
-BOOLEAN
+VOID
 BigNumMod (
   IN OUT OC_BN_WORD        *Result,
   IN     OC_BN_NUM_WORDS   NumWordsRest,
   IN     CONST OC_BN_WORD  *A,
   IN     OC_BN_NUM_WORDS   NumWordsA,
-  IN     CONST OC_BN_WORD  *B
+  IN     CONST OC_BN_WORD  *B,
+  IN     VOID              *Memory
   );
 
 /**
