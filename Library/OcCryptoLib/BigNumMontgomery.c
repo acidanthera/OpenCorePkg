@@ -159,10 +159,11 @@ BigNumCalculateMontParams (
 {
   OC_BN_WORD      N0Inv;
   UINT32          NumBits;
-  UINTN           SizeRSqr;
+  UINTN           SizeScratch;
   OC_BN_NUM_WORDS NumWordsRSqr;
+  OC_BN_NUM_WORDS NumWordsMod;
+  OC_BN_WORD      *Scratch;
   OC_BN_WORD      *RSqr;
-  VOID            *Memory;
 
   ASSERT (RSqrMod != NULL);
   ASSERT (NumWords > 0);
@@ -189,15 +190,18 @@ BigNumCalculateMontParams (
   // overflow.
   //
   NumWordsRSqr = (OC_BN_NUM_WORDS)(1 + 2 * NumWords);
-  SizeRSqr     = NumWordsRSqr * OC_BN_WORD_SIZE;
-  if (SizeRSqr > OC_BN_MAX_SIZE) {
+  NumWordsMod  = 2 * NumWordsRSqr;
+  SizeScratch  = (NumWordsRSqr + NumWordsMod) * OC_BN_WORD_SIZE;
+  if (SizeScratch > OC_BN_MAX_SIZE) {
     return 0;
   }
 
-  RSqr = AllocatePool (SizeRSqr);
-  if (RSqr == NULL) {
+  Scratch = AllocatePool (SizeScratch);
+  if (Scratch == NULL) {
     return 0;
   }
+
+  RSqr = Scratch + NumWordsMod;
 
   //
   // Calculate Montgomery's R^2 mod N.
@@ -208,14 +212,9 @@ BigNumCalculateMontParams (
   //
   BigNumOrWord (RSqr, NumWordsRSqr, 1, 2 * NumBits);
 
-  Memory = AllocatePool (2 * NumWordsRSqr * OC_BN_WORD_SIZE);
-  if (Memory == NULL) {
-    return 0;
-  }
-  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Memory);
-  FreePool (Memory);
+  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Scratch);
 
-  FreePool (RSqr);
+  FreePool (Scratch);
 
   return N0Inv;
 }
