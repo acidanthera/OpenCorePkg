@@ -565,12 +565,11 @@ BigNumMod (
   IN     CONST OC_BN_WORD  *A,
   IN     OC_BN_NUM_WORDS   NumWordsA,
   IN     CONST OC_BN_WORD  *B,
-  IN     VOID              *Memory
+  IN     OC_BN_WORD        *ModTmp
   )
 {
   INTN            CmpResult;
 
-  OC_BN_WORD      *ModTmp;
   OC_BN_NUM_BITS  SigBitsModTmp;
   OC_BN_NUM_WORDS SigWordsModTmp;
 
@@ -601,7 +600,6 @@ BigNumMod (
     "An overflow verification must be added"
     );
 
-  ModTmp         = Memory;
   BigDiv         = &ModTmp[SigWordsModTmp];
   SigWordsBigDiv = SigWordsModTmp;
   //
