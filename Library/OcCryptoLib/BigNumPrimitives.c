@@ -602,7 +602,7 @@ BigNumMod (
     "An overflow verification must be added"
     );
 
-  Memory = AllocatePool (2 * SigWordsModTmp * OC_BN_WORD_SIZE);
+  Memory = AllocatePool (2 * NumWordsA * OC_BN_WORD_SIZE);
   if (Memory == NULL) {
     return FALSE;
   }
