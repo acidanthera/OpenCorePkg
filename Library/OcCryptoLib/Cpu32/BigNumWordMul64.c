@@ -10,10 +10,6 @@ THE PROGRAM IS DISTRIBUTED UNDER THE BSD LICENSE ON AN "AS IS" BASIS,
 WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
-#include <Base.h>
-
-#include <Library/DebugLib.h>
-#include <Library/OcGuardLib.h>
 
 #include "../BigNumLib.h"
 

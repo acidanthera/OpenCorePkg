@@ -31,6 +31,7 @@
 [Sources]
   Aes.c
   ChaCha.c
+  CryptoInternal.h
   Md5.c
   RsaDigitalSign.c
   Sha1.c
@@ -41,13 +42,14 @@
   BigNumLibInternal.h
   BigNumPrimitives.c
   BigNumMontgomery.c
+  Sha2Internal.h
 
 [Sources.Ia32]
-  Ia32/BigNumWordMul64.c
-  Sha512AvxDummy.c
+  Cpu32/BigNumWordMul64.c
+  Sha512AccelDummy.c
 
 [Sources.X64]
-  X64/BigNumWordMul64.c
+  Cpu64/BigNumWordMul64.c
   X64/Sha512Avx.nasm
 
 [FixedPcd]

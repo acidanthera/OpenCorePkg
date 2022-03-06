@@ -17,7 +17,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef BIG_NUM_LIB_H
 #define BIG_NUM_LIB_H
 
-#include <Library/OcMiscLib.h>
+#include "CryptoInternal.h"
 
 ///
 /// A BIGNUM word. This is at best an integer of the platform's natural size

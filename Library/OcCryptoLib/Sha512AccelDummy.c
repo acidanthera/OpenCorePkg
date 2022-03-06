@@ -10,27 +10,30 @@
   WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 **/
 
-#include <Library/DebugLib.h>
+#include "Sha2Internal.h"
 
-extern BOOLEAN mIsAvxEnabled;
-
+#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
 VOID
 EFIAPI
-Sha512TransformAvx (
+Sha512TransformAccel (
   IN OUT UINT64      *State,
   IN     CONST UINT8 *Data,
   IN     UINTN       BlockNb
   )
 {
+  (VOID) State;
+  (VOID) Data;
+  (VOID) BlockNb;
   ASSERT (FALSE);
 }
+#endif
 
 BOOLEAN
 EFIAPI
-TryEnableAvx (
+TryEnableAccel (
   VOID
   )
 {
-  mIsAvxEnabled = FALSE;
+  mIsAccelEnabled = FALSE;
   return FALSE;
 }

@@ -854,7 +854,7 @@ OcLoadUefiSupport (
   EFI_HANDLE            *HandleBuffer;
   UINTN                 HandleCount;
   EFI_EVENT             Event;
-  BOOLEAN               AvxEnabled;
+  BOOLEAN               AccelEnabled;
 
   OcReinstallProtocols (Config);
 
@@ -920,8 +920,8 @@ OcLoadUefiSupport (
   }
 
   if (Config->Uefi.Quirks.EnableVectorAcceleration) {
-    AvxEnabled = TryEnableAvx ();
-    DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AvxEnabled));
+    AccelEnabled = TryEnableAccel ();
+    DEBUG ((DEBUG_INFO, "OC: AVX enabled - %u\n", AccelEnabled));
   }
 
   if (Config->Uefi.Quirks.ResizeGpuBars >= 0

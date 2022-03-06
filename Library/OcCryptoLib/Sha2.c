@@ -30,13 +30,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
               This implementation uses little endian byte order.
 **/
 
-#ifdef EFIAPI
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#endif
-
-#include <Library/OcCryptoLib.h>
-
+#include "Sha2Internal.h"
 
 #define UNPACK64(x, str)                         \
   do {                                           \
@@ -91,8 +85,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
           + SHA512_SIG0(W[Index - 15]) + W[Index - 16];     \
   } while(0)
 
-GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN mIsAvxEnabled;
+GLOBAL_REMOVE_IF_UNREFERENCED BOOLEAN mIsAccelEnabled;
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
 STATIC CONST UINT32 SHA256_K[64] = {
   0x428A2F98, 0x71374491, 0xB5C0FBCF, 0xE9B5DBA5, 0x3956C25B, 0x59F111F1, 0x923F82A4, 0xAB1C5ED5,
   0xD807AA98, 0x12835B01, 0x243185BE, 0x550C7DC3, 0x72BE5D74, 0x80DEB1FE, 0x9BDC06A7, 0xC19BF174,
@@ -103,8 +98,9 @@ STATIC CONST UINT32 SHA256_K[64] = {
   0x19A4C116, 0x1E376C08, 0x2748774C, 0x34B0BCB5, 0x391C0CB3, 0x4ED8AA4A, 0x5B9CCA4F, 0x682E6FF3,
   0x748F82EE, 0x78A5636F, 0x84C87814, 0x8CC70208, 0x90BEFFFA, 0xA4506CEB, 0xBEF9A3F7, 0xC67178F2
 };
+#endif
 
-
+#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
 CONST UINT64 SHA512_K[80] = {
   0x428a2f98d728ae22ULL, 0x7137449123ef65cdULL, 0xb5c0fbcfec4d3b2fULL,
   0xe9b5dba58189dbbcULL, 0x3956c25bf348b538ULL, 0x59f111f1b605d019ULL,
@@ -134,7 +130,9 @@ CONST UINT64 SHA512_K[80] = {
   0x431d67c49c100d4cULL, 0x4cc5d4becb3e42b6ULL, 0x597f299cfc657e2aULL,
   0x5fcb6fab3ad6faecULL, 0x6c44198c4a475817ULL
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
 //
 // Sha 256 Init State
 //
@@ -142,7 +140,9 @@ STATIC CONST UINT32 SHA256_H0[8] = {
   0x6a09e667, 0xbb67ae85, 0x3c6ef372, 0xa54ff53a,
   0x510e527f, 0x9b05688c, 0x1f83d9ab, 0x5be0cd19
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
 //
 // Sha 384 Init State
 //
@@ -152,7 +152,9 @@ STATIC CONST UINT64 SHA384_H0[8] = {
   0x67332667ffc00b31ULL, 0x8eb44a8768581511ULL,
   0xdb0c2e0d64f98fa7ULL, 0x47b5481dbefa4fa4ULL
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
 //
 // Sha 512 Init State
 //
@@ -162,7 +164,9 @@ STATIC CONST UINT64 SHA512_H0[8] = {
   0x510e527fade682d1ULL, 0x9b05688c2b3e6c1fULL,
   0x1f83d9abfb41bd6bULL, 0x5be0cd19137e2179ULL
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
 //
 // Sha 256 functions
 //
@@ -319,19 +323,12 @@ Sha256 (
   Sha256Final (&Ctx, Hash);
   ZeroMem (&Ctx, sizeof (Ctx));
 }
+#endif
 
-
+#if defined(OC_CRYPTO_SUPPORTS_SHA384) || defined(OC_CRYPTO_SUPPORTS_SHA512)
 //
-// Sha 512 functions
+// Sha 384 & 512 common functions
 //
-VOID
-EFIAPI
-Sha512TransformAvx (
-  IN OUT UINT64      *State,
-  IN     CONST UINT8 *Data,
-  IN     UINTN       BlockNb
-  );
-
 VOID
 Sha512Transform (
   IN OUT UINT64      *State,
@@ -401,7 +398,12 @@ Sha512Transform (
     }
   }
 }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
+//
+// Sha 512 functions
+//
 VOID
 Sha512Init (
   SHA512_CONTEXT  *Context
@@ -451,9 +453,9 @@ Sha512Update (
 
   ShiftedMsg = Data + RemLen;
 
-  if (mIsAvxEnabled) {
-    Sha512TransformAvx (Context->State, Context->Block, 1);
-    Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
+  if (mIsAccelEnabled) {
+    Sha512TransformAccel (Context->State, Context->Block, 1);
+    Sha512TransformAccel (Context->State, ShiftedMsg, BlockNb);
   } else {
     Sha512Transform (Context->State, Context->Block, 1);
     Sha512Transform (Context->State, ShiftedMsg, BlockNb);
@@ -487,8 +489,8 @@ Sha512Final (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  if (mIsAvxEnabled) {
-    Sha512TransformAvx (Context->State, Context->Block, BlockNb);
+  if (mIsAccelEnabled) {
+    Sha512TransformAccel (Context->State, Context->Block, BlockNb);
   } else {
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
@@ -512,8 +514,9 @@ Sha512 (
   Sha512Final (&Ctx, Hash);
   ZeroMem (&Ctx, sizeof (Ctx));
 }
+#endif
 
-
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
 //
 // Sha 384 functions
 //
@@ -556,9 +559,9 @@ Sha384Update (
 
   ShiftedMsg = Data + RemLen;
 
-  if (mIsAvxEnabled) {
-    Sha512TransformAvx (Context->State, Context->Block, 1);
-    Sha512TransformAvx (Context->State, ShiftedMsg, BlockNb);
+  if (mIsAccelEnabled) {
+    Sha512TransformAccel (Context->State, Context->Block, 1);
+    Sha512TransformAccel (Context->State, ShiftedMsg, BlockNb);
   } else {
     Sha512Transform (Context->State, Context->Block, 1);
     Sha512Transform (Context->State, ShiftedMsg, BlockNb);
@@ -593,8 +596,8 @@ Sha384Final (
   Context->Block[Context->Length] = 0x80;
   UNPACK64 (LenB, Context->Block + PmLen - 8);
 
-  if (mIsAvxEnabled) {
-    Sha512TransformAvx (Context->State, Context->Block, BlockNb);
+  if (mIsAccelEnabled) {
+    Sha512TransformAccel (Context->State, Context->Block, BlockNb);
   } else {
     Sha512Transform (Context->State, Context->Block, BlockNb);
   }
@@ -618,3 +621,4 @@ Sha384 (
   Sha384Final (&Ctx, Hash);
   SecureZeroMem (&Ctx, sizeof (Ctx));
 }
+#endif

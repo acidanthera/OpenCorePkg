@@ -31,15 +31,6 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Base.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/OcCryptoLib.h>
-#include <Library/OcGuardLib.h>
-
 #include "BigNumLibInternal.h"
 
 #define OC_BN_MAX_VAL  ((OC_BN_WORD)0U - 1U)

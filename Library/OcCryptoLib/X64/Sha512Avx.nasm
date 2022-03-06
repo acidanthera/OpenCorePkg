@@ -20,7 +20,7 @@
 BITS 64
 
 extern ASM_PFX(SHA512_K)
-extern ASM_PFX(mIsAvxEnabled)
+extern ASM_PFX(mIsAccelEnabled)
 
 section .rodata
 align 16
@@ -349,12 +349,12 @@ section .text
 %endmacro
 
 ; #######################################################################
-; BOOLEAN TryEnableAvx ()
+; BOOLEAN TryEnableAccel ()
 ; To run in QEMU use options: -enable-kvm -cpu Penryn,+avx,+xsave,+xsaveopt
 ; #######################################################################
 align 8
-global ASM_PFX(TryEnableAvx)
-ASM_PFX(TryEnableAvx):
+global ASM_PFX(TryEnableAccel)
+ASM_PFX(TryEnableAccel):
   ; Detect CPUID.1:ECX.XSAVE[bit 26] = 1 (CR4.OSXSAVE can be set to 1).
   ; Detect CPUID.1:ECX.AVX[bit 28] = 1 (AVX instructions supported).
 
@@ -375,17 +375,17 @@ ASM_PFX(TryEnableAvx):
   ; XSETBV must be executed at privilege level 0 or in real-address mode.
   xsetbv
   mov rax, 1
-  mov byte [rel ASM_PFX(mIsAvxEnabled)], 1
+  mov byte [rel ASM_PFX(mIsAccelEnabled)], 1
   jmp done
 noAVX:
   xor rax, rax
-  mov byte [rel ASM_PFX(mIsAvxEnabled)], 0
+  mov byte [rel ASM_PFX(mIsAccelEnabled)], 0
 done:
   pop rbx
   ret
 
 ; #######################################################################
-;  void Sha512TransformAvx(sha512_state *state, const u8 *data, int blocks)
+;  void Sha512TransformAccel(sha512_state *state, const u8 *data, int blocks)
 ;  Purpose: Updates the SHA512 digest stored at "state" with the message
 ;  stored in "data".
 ;  The size of the message pointed to by "data" must be an integer multiple
@@ -393,8 +393,8 @@ done:
 ;  "blocks" is the message length in SHA512 blocks
 ; #######################################################################
 align 8
-global ASM_PFX(Sha512TransformAvx)
-ASM_PFX(Sha512TransformAvx):
+global ASM_PFX(Sha512TransformAccel)
+ASM_PFX(Sha512TransformAccel):
   test msglen, msglen
   je nowork
 

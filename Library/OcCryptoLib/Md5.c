@@ -27,8 +27,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
           This implementation uses little endian byte order.
 *********************************************************************/
 
-#include <Library/BaseMemoryLib.h>
-#include <Library/OcCryptoLib.h>
+#include "CryptoInternal.h"
 
 #define ROTLEFT(A,B) ((A << B) | (A >> (32 - B)))
 
@@ -45,6 +44,9 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
                             A = B + ROTLEFT(A,S); } while (0)
 #define II(A,B,C,D,M,S,T) do { A += I(B,C,D) + M + T; \
                             A = B + ROTLEFT(A,S); } while (0)
+
+#ifdef OC_CRYPTO_SUPPORTS_MD5
+
 VOID
 Md5Transform (
   MD5_CONTEXT  *Ctx,
@@ -235,3 +237,5 @@ Md5 (
   Md5Final (&Ctx,Hash);
   SecureZeroMem (&Ctx, sizeof (Ctx));
 }
+
+#endif

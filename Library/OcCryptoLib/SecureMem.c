@@ -11,9 +11,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Base.h>
-
-#include <Library/DebugLib.h>
+#include "CryptoInternal.h"
 
 INTN
 SecureCompareMem (

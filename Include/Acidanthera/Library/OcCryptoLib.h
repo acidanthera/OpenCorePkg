@@ -19,13 +19,22 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #ifndef OC_CRYPTO_LIB_H
 #define OC_CRYPTO_LIB_H
 
-#include <Library/OcGuardLib.h>
-
 //
 // Default to 128-bit key length for AES.
 //
 #ifndef CONFIG_AES_KEY_SIZE
 #define CONFIG_AES_KEY_SIZE 16
+#endif
+
+//
+// Set supported hashes to all by default.
+//
+#ifndef CONFIG_HAS_SUPPORTED_HASHES
+#define OC_CRYPTO_SUPPORTS_SHA256 1
+#define OC_CRYPTO_SUPPORTS_SHA384 1
+#define OC_CRYPTO_SUPPORTS_SHA512 1
+#define OC_CRYPTO_SUPPORTS_SHA1   1
+#define OC_CRYPTO_SUPPORTS_MD5    1
 #endif
 
 //
@@ -381,7 +390,7 @@ Sha384 (
 
 BOOLEAN
 EFIAPI
-TryEnableAvx (
+TryEnableAccel (
   VOID
   );
 

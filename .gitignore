@@ -43,7 +43,7 @@ Utilities/TestPeCoff/PeCoff
 *.gcda
 *.gcno
 FUZZDICT
-COVERAGE
+COVERAGE*
 *.sydr*
 sydr-fuzz.toml
 sydr-fuzz-out

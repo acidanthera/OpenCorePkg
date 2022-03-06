@@ -19,35 +19,32 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <Base.h>
-
-#include <Library/BaseLib.h>
-#include <Library/BaseMemoryLib.h>
-#include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
-#include <Library/OcCryptoLib.h>
-#include <Library/OcGuardLib.h>
-#include <Library/PcdLib.h>
-
 #include "BigNumLib.h"
 
 //
 // RFC 3447, 9.2 EMSA-PKCS1-v1_5, Notes 1.
 //
+
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
 STATIC CONST UINT8 mPkcsDigestEncodingPrefixSha256[] = {
   0x30, 0x31, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04,
   0x02, 0x01, 0x05, 0x00, 0x04, 0x20
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
 STATIC CONST UINT8 mPkcsDigestEncodingPrefixSha384[] = {
   0x30, 0x41, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04,
   0x02, 0x02, 0x05, 0x00, 0x04, 0x30
 };
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
 STATIC CONST UINT8 mPkcsDigestEncodingPrefixSha512[] = {
   0x30, 0x51, 0x30, 0x0d, 0x06, 0x09, 0x60, 0x86, 0x48, 0x01, 0x65, 0x03, 0x04,
   0x02, 0x03, 0x05, 0x00, 0x04, 0x40
 };
+#endif
 
 /**
   Returns whether the RSA modulus size is allowed.
@@ -104,26 +101,32 @@ SigVerifyShaHashBySize (
   ASSERT (HashSize <= sizeof (DataDigest));
 
   switch (HashSize) {
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
     case SHA512_DIGEST_SIZE:
     {
       Hashtype = OcSigHashTypeSha512;
       Sha512 (DataDigest, Data, DataSize);
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
     case SHA384_DIGEST_SIZE:
     {
       Hashtype = OcSigHashTypeSha384;
       Sha384 (DataDigest, Data, DataSize);
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
     case SHA256_DIGEST_SIZE:
     {
       Hashtype = OcSigHashTypeSha256;
       Sha256 (DataDigest, Data, DataSize);
       break;
     }
+#endif
 
     default:
     {
@@ -208,6 +211,8 @@ RsaVerifySigHashFromProcessed (
   }
 
   switch (Algorithm) {
+
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
     case OcSigHashTypeSha256:
     {
       ASSERT (HashSize == SHA256_DIGEST_SIZE);
@@ -216,7 +221,9 @@ RsaVerifySigHashFromProcessed (
       PaddingSize = sizeof (mPkcsDigestEncodingPrefixSha256);
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
     case OcSigHashTypeSha384:
     {
       ASSERT (HashSize == SHA384_DIGEST_SIZE);
@@ -225,7 +232,9 @@ RsaVerifySigHashFromProcessed (
       PaddingSize = sizeof (mPkcsDigestEncodingPrefixSha384);
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
     case OcSigHashTypeSha512:
     {
       ASSERT (HashSize == SHA512_DIGEST_SIZE);
@@ -234,6 +243,7 @@ RsaVerifySigHashFromProcessed (
       PaddingSize = sizeof (mPkcsDigestEncodingPrefixSha512);
       break;
     }
+#endif
 
     default:
     {
@@ -424,26 +434,33 @@ RsaVerifySigDataFromProcessed (
     );
 
   switch (Algorithm) {
+
+#ifdef OC_CRYPTO_SUPPORTS_SHA256
     case OcSigHashTypeSha256:
     {
       Sha256 (Hash, Data, DataSize);
       HashSize = SHA256_DIGEST_SIZE;
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA384
     case OcSigHashTypeSha384:
     {
       Sha384 (Hash, Data, DataSize);
       HashSize = SHA384_DIGEST_SIZE;
       break;
     }
+#endif
 
+#ifdef OC_CRYPTO_SUPPORTS_SHA512
     case OcSigHashTypeSha512:
     {
       Sha512 (Hash, Data, DataSize);
       HashSize = SHA512_DIGEST_SIZE;
       break;
     }
+#endif
 
     default:
     {

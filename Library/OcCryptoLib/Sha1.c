@@ -27,10 +27,11 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
               This implementation uses little endian byte order.
 *********************************************************************/
 
-#include <Library/BaseMemoryLib.h>
-#include <Library/OcCryptoLib.h>
+#include "CryptoInternal.h"
 
 #define ROTLEFT(a, b) ((a << b) | (a >> (32 - b)))
+
+#ifdef OC_CRYPTO_SUPPORTS_SHA1
 
 VOID
 Sha1Transform (
@@ -196,3 +197,5 @@ Sha1 (
   Sha1Final (&Ctx,Hash);
   SecureZeroMem (&Ctx, sizeof (Ctx));
 }
+
+#endif

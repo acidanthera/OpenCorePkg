@@ -174,7 +174,7 @@ ifneq ($(STANDALONE),1)
 	#
 	# OcCryptoLib targets.
 	#
-	OBJS    += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AvxDummy.o
+	OBJS    += RsaDigitalSign.o BigNumMontgomery.o BigNumPrimitives.o BigNumWordMul64.o Sha2.o SecureMem.o Sha512AccelDummy.o
 	#
 	# OcMachoLib targets.
 	#
@@ -223,7 +223,7 @@ ifneq ($(STANDALONE),1)
 				$(OC_USER)/Library/OcXmlLib:$\
 				$(OC_USER)/Library/OcStringLib:$\
 				$(OC_USER)/Library/OcCryptoLib:$\
-				$(OC_USER)/Library/OcCryptoLib/$(UDK_ARCH):$\
+				$(OC_USER)/Library/OcCryptoLib/Cpu32:$\
 				$(OC_USER)/Library/OcMachoLib:$\
 				$(OC_USER)/Library/OcAppleKeysLib:$\
 				$(OC_USER)/Library/OcCpuLib:$\

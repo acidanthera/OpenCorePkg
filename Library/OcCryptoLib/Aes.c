@@ -62,8 +62,7 @@ NOTE:   String length must be evenly divisible by 16byte (str_len % 16 == 0)
 
 **/
 
-#include <Library/BaseMemoryLib.h>
-#include <Library/OcCryptoLib.h>
+#include "CryptoInternal.h"
 
 //
 // The number of columns comprising a state in AES (Nb). This is a CONSTant in AES. Value=4
