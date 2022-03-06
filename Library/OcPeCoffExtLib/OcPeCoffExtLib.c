@@ -387,6 +387,7 @@ PeCoffVerifyAppleSignature (
   APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
   UINT32                          SecDirOffset;
   UINT32                          SignedFileSize;
+  VOID                            *Scratch;
 
   ImageStatus = PeCoffInitializeContext (
     &ImageContext,
@@ -440,6 +441,15 @@ PeCoffVerifyAppleSignature (
     &Hash[0]
     );
 
+  Scratch = AllocatePool (
+    RSA_SCRATCH_BUFFER_SIZE (
+      SignatureContext.PublicKey->Hdr.NumQwords * sizeof (UINT64)
+      )
+    );
+  if (Scratch == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   //
   // Verify signature
   //
@@ -449,8 +459,12 @@ PeCoffVerifyAppleSignature (
     sizeof (SignatureContext.Signature),
     &Hash[0],
     sizeof (Hash),
-    OcSigHashTypeSha256
+    OcSigHashTypeSha256,
+    Scratch
     );
+
+  FreePool (Scratch);
+
   if (!Success) {
     return EFI_SECURITY_VIOLATION;
   }

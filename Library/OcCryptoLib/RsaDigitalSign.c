@@ -154,6 +154,7 @@ SigVerifyShaHashBySize (
   @param[in] Hash           The Hash digest of the signed data.
   @param[in] HashSize       Size, in bytes, of Hash.
   @param[in] Algorithm      The RSA algorithm used.
+  @param[in] Scratch        Scratch buffer 3xModulo.
 
   @returns  Whether the signature has been successfully verified as valid.
 
@@ -170,7 +171,8 @@ RsaVerifySigHashFromProcessed (
   IN UINTN             SignatureSize,
   IN CONST UINT8       *Hash,
   IN UINTN             HashSize,
-  IN OC_SIG_HASH_TYPE  Algorithm
+  IN OC_SIG_HASH_TYPE  Algorithm,
+  IN OC_BN_WORD        *Scratch
   )
 {
   BOOLEAN     Result;
@@ -178,7 +180,6 @@ RsaVerifySigHashFromProcessed (
 
   UINTN       ModulusSize;
 
-  VOID        *Memory;
   OC_BN_WORD  *EncryptedSigNum;
   OC_BN_WORD  *DecryptedSigNum;
   OC_BN_WORD  *PowScratchNum;
@@ -267,15 +268,9 @@ RsaVerifySigHashFromProcessed (
     return FALSE;
   }
 
-  Memory = AllocatePool (3 * ModulusSize);
-  if (Memory == NULL) {
-    DEBUG ((DEBUG_INFO, "OCCR: Memory allocation failure\n"));
-    return FALSE;
-  }
-
-  EncryptedSigNum = Memory;
-  DecryptedSigNum = (OC_BN_WORD *)((UINTN)EncryptedSigNum + ModulusSize);
-  PowScratchNum   = (OC_BN_WORD *)((UINTN)DecryptedSigNum + ModulusSize);
+  EncryptedSigNum = Scratch;
+  DecryptedSigNum = EncryptedSigNum + NumWords;
+  PowScratchNum   = DecryptedSigNum + NumWords;
 
   BigNumParseBuffer (
     EncryptedSigNum,
@@ -295,7 +290,6 @@ RsaVerifySigHashFromProcessed (
              PowScratchNum
              );
   if (!Result) {
-    FreePool (Memory);
     return FALSE;
   }
   //
@@ -335,12 +329,10 @@ RsaVerifySigHashFromProcessed (
   //
   DigestSize = PaddingSize + HashSize;
   if (SignatureSize < DigestSize + 11) {
-    FreePool (Memory);
     return FALSE;
   }
 
   if (Signature[0] != 0x00 || Signature[1] != 0x01) {
-    FreePool (Memory);
     return FALSE;
   }
   //
@@ -351,13 +343,11 @@ RsaVerifySigHashFromProcessed (
   //
   for (Index = 2; Index < SignatureSize - DigestSize - 3 + 2; ++Index) {
     if (Signature[Index] != 0xFF) {
-      FreePool (Memory);
       return FALSE;
     }
   }
 
   if (Signature[Index] != 0x00) {
-    FreePool (Memory);
     return FALSE;
   }
 
@@ -365,7 +355,6 @@ RsaVerifySigHashFromProcessed (
 
   CmpResult = CompareMem (&Signature[Index], Padding, PaddingSize);
   if (CmpResult != 0) {
-    FreePool (Memory);
     return FALSE;
   }
 
@@ -373,7 +362,6 @@ RsaVerifySigHashFromProcessed (
 
   CmpResult = CompareMem (&Signature[Index], Hash, HashSize);
   if (CmpResult != 0) {
-    FreePool (Memory);
     return FALSE;
   }
   //
@@ -381,7 +369,6 @@ RsaVerifySigHashFromProcessed (
   //
   ASSERT (Index + HashSize == SignatureSize);
 
-  FreePool (Memory);
   return TRUE;
 }
 
@@ -400,6 +387,7 @@ RsaVerifySigHashFromProcessed (
   @param[in] Data           The signed data to verify.
   @param[in] DataSize       Size, in bytes, of Data.
   @param[in] Algorithm      The RSA algorithm used.
+  @param[in] Scratch        Scratch buffer 3xModulo.
 
   @returns  Whether the signature has been successfully verified as valid.
 
@@ -416,7 +404,8 @@ RsaVerifySigDataFromProcessed (
   IN UINTN             SignatureSize,
   IN CONST UINT8       *Data,
   IN UINTN             DataSize,
-  IN OC_SIG_HASH_TYPE  Algorithm
+  IN OC_SIG_HASH_TYPE  Algorithm,
+  IN OC_BN_WORD        *Scratch
   )
 {
   UINT8 Hash[OC_MAX_SHA_DIGEST_SIZE];
@@ -485,9 +474,12 @@ RsaVerifySigDataFromProcessed (
            SignatureSize,
            Hash,
            HashSize,
-           Algorithm
+           Algorithm,
+           Scratch
            );
 }
+
+#ifndef OC_CRYPTO_STATIC_MEMORY_ALLOCATION
 
 BOOLEAN
 RsaVerifySigDataFromData (
@@ -505,9 +497,10 @@ RsaVerifySigDataFromData (
   OC_BN_NUM_WORDS ModulusNumWords;
 
   VOID            *Memory;
-  VOID            *Scratch;
+  VOID            *Mont;
   OC_BN_WORD      *N;
   OC_BN_WORD      *RSqrMod;
+  VOID            *Scratch;
 
   OC_BN_WORD      N0Inv;
   BOOLEAN         Result;
@@ -542,12 +535,18 @@ RsaVerifySigDataFromData (
 
   N       = (OC_BN_WORD *)Memory;
   RSqrMod = (OC_BN_WORD *)((UINTN)N + ModulusSize);
-  Scratch = (UINT8 *)Memory + 2 * ModulusSize;
+  Mont    = (UINT8 *)Memory + 2 * ModulusSize;
 
   BigNumParseBuffer (N, ModulusNumWords, Modulus, ModulusSize);
 
-  N0Inv = BigNumCalculateMontParams (RSqrMod, ModulusNumWords, N, Scratch);
+  N0Inv = BigNumCalculateMontParams (RSqrMod, ModulusNumWords, N, Mont);
   if (N0Inv == 0) {
+    FreePool (Memory);
+    return FALSE;
+  }
+
+  Scratch = AllocatePool (RSA_SCRATCH_BUFFER_SIZE (ModulusSize));
+  if (Scratch == NULL) {
     FreePool (Memory);
     return FALSE;
   }
@@ -562,12 +561,16 @@ RsaVerifySigDataFromData (
              SignatureSize,
              Data,
              DataSize,
-             Algorithm
+             Algorithm,
+             Scratch
              );
 
+  FreePool (Scratch);
   FreePool (Memory);
   return Result;
 }
+
+#endif
 
 BOOLEAN
 RsaVerifySigHashFromKey (
@@ -576,7 +579,8 @@ RsaVerifySigHashFromKey (
   IN UINTN                    SignatureSize,
   IN CONST UINT8              *Hash,
   IN UINTN                    HashSize,
-  IN OC_SIG_HASH_TYPE         Algorithm
+  IN OC_SIG_HASH_TYPE         Algorithm,
+  IN VOID                     *Scratch
   )
 {
   ASSERT (Key != NULL);
@@ -603,7 +607,8 @@ RsaVerifySigHashFromKey (
            SignatureSize,
            Hash,
            HashSize,
-           Algorithm
+           Algorithm,
+           Scratch
            );
 }
 
@@ -614,7 +619,8 @@ RsaVerifySigDataFromKey (
   IN UINTN                    SignatureSize,
   IN CONST UINT8              *Data,
   IN UINTN                    DataSize,
-  IN OC_SIG_HASH_TYPE         Algorithm
+  IN OC_SIG_HASH_TYPE         Algorithm,
+  IN VOID                     *Scratch
   )
 {
   ASSERT (Key != NULL);
@@ -641,6 +647,7 @@ RsaVerifySigDataFromKey (
            SignatureSize,
            Data,
            DataSize,
-           Algorithm
+           Algorithm,
+           Scratch
            );
 }

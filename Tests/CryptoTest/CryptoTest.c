@@ -47,14 +47,28 @@ TestRsa2048Sha256Verify (
     SIGNED_DATA_LEN
     );
 
+  CONST OC_RSA_PUBLIC_KEY *PubKey =
+    (CONST OC_RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey;
+
+  void *Scratch = AllocatePool (
+      RSA_SCRATCH_BUFFER_SIZE (PubKey->Hdr.NumQwords * sizeof (UINT64))
+    );
+
+  if (Scratch == NULL) {
+    return EFI_OUT_OF_RESOURCES;
+  }
+
   SignatureVerified = RsaVerifySigHashFromKey (
-    (CONST OC_RSA_PUBLIC_KEY *) Rsa2048Sha256Sample.PublicKey,
+    PubKey,
     Rsa2048Sha256Sample.Signature,
     sizeof (Rsa2048Sha256Sample.Signature),
     DataSha256Hash,
     sizeof (DataSha256Hash),
-    OcSigHashTypeSha256
+    OcSigHashTypeSha256,
+    Scratch
     );
+
+  FreePool (Scratch);
 
   if (SignatureVerified) {
     Status = EFI_SUCCESS;
