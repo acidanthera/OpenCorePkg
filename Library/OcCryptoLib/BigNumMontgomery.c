@@ -154,15 +154,14 @@ OC_BN_WORD
 BigNumCalculateMontParams (
   IN OUT OC_BN_WORD        *RSqrMod,
   IN     OC_BN_NUM_WORDS   NumWords,
-  IN     CONST OC_BN_WORD  *N
+  IN     CONST OC_BN_WORD  *N,
+  IN     OC_BN_WORD        *Scratch
   )
 {
   OC_BN_WORD      N0Inv;
   UINT32          NumBits;
-  UINTN           SizeScratch;
   OC_BN_NUM_WORDS NumWordsRSqr;
   OC_BN_NUM_WORDS NumWordsMod;
-  OC_BN_WORD      *Scratch;
   OC_BN_WORD      *RSqr;
 
   ASSERT (RSqrMod != NULL);
@@ -191,15 +190,6 @@ BigNumCalculateMontParams (
   //
   NumWordsRSqr = (OC_BN_NUM_WORDS)(1 + 2 * NumWords);
   NumWordsMod  = 2 * NumWordsRSqr;
-  SizeScratch  = (NumWordsRSqr + NumWordsMod) * OC_BN_WORD_SIZE;
-  if (SizeScratch > OC_BN_MAX_SIZE) {
-    return 0;
-  }
-
-  Scratch = AllocatePool (SizeScratch);
-  if (Scratch == NULL) {
-    return 0;
-  }
 
   RSqr = Scratch + NumWordsMod;
 
@@ -213,8 +203,6 @@ BigNumCalculateMontParams (
   BigNumOrWord (RSqr, NumWordsRSqr, 1, 2 * NumBits);
 
   BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Scratch);
-
-  FreePool (Scratch);
 
   return N0Inv;
 }

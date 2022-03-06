@@ -32,15 +32,21 @@ int verifyRsa (CONST OC_RSA_PUBLIC_KEY *PublicKey, char *Name)
   UINTN ModulusSize = PublicKey->Hdr.NumQwords * sizeof (UINT64);
 
   OC_BN_WORD *RSqrMod = malloc(ModulusSize);
-  if (RSqrMod == NULL) {
+  OC_BN_WORD *Scratch = malloc(
+    BIG_NUM_MONT_PARAMS_SCRATCH_SIZE(ModulusSize / OC_BN_WORD_SIZE)
+    );
+  if (RSqrMod == NULL || Scratch == NULL) {
     printf ("memory allocation error!\n");
+    free(RSqrMod);
+    free(Scratch);
     return -1;
   }
 
   N0Inv = BigNumCalculateMontParams (
             RSqrMod,
             ModulusSize / OC_BN_WORD_SIZE,
-            (CONST OC_BN_WORD *) PublicKey->Data
+            (CONST OC_BN_WORD *) PublicKey->Data,
+            Scratch
             );
 
   printf (
@@ -56,6 +62,7 @@ int verifyRsa (CONST OC_RSA_PUBLIC_KEY *PublicKey, char *Name)
     (unsigned long long) PublicKey->Hdr.N0Inv
     );
 
+  free(Scratch);
   free(RSqrMod);
   return 0;
 }
