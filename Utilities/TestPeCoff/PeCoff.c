@@ -6,6 +6,7 @@
 #include "../Include/Uefi.h"
 
 #include <Library/OcPeCoffLib.h>
+#include <Library/OcGuardLib.h>
 #include <Library/MemoryAllocationLib.h>
 #include <Library/DebugLib.h>
 #include <Library/UefiBootServicesTableLib.h>
