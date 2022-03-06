@@ -178,7 +178,7 @@ BigNumCalculateMontParams (
     return 0;
   }
 
-  NumBits = BigNumSignificantBits (N, NumWords);
+  NumBits = NumWords * OC_BN_WORD_SIZE * OC_CHAR_BIT;
 
   STATIC_ASSERT (
     OC_BN_MAX_SIZE * OC_CHAR_BIT <= ((MAX_UINTN - 1) / 2) - (OC_CHAR_BIT - 1),
@@ -186,13 +186,10 @@ BigNumCalculateMontParams (
     );
   //
   // Considering NumBits can at most be MAX_UINT16 * OC_CHAR_BIT, this cannot
-  // overflow. OC_CHAR_BIT-1 is added to achieve rounding towards the next Byte
-  // boundary.
+  // overflow.
   //
-  SizeRSqr = ALIGN_VALUE (
-               ((2 * (NumBits + 1) + (OC_CHAR_BIT - 1)) / OC_CHAR_BIT),
-               OC_BN_WORD_SIZE
-               );
+  NumWordsRSqr = (OC_BN_NUM_WORDS)(1 + 2 * NumWords);
+  SizeRSqr     = NumWordsRSqr * OC_BN_WORD_SIZE;
   if (SizeRSqr > OC_BN_MAX_SIZE) {
     return 0;
   }
@@ -201,7 +198,7 @@ BigNumCalculateMontParams (
   if (RSqr == NULL) {
     return 0;
   }
-  NumWordsRSqr = (OC_BN_NUM_WORDS)(SizeRSqr / OC_BN_WORD_SIZE);
+
   //
   // Calculate Montgomery's R^2 mod N.
   //
