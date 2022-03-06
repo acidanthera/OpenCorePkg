@@ -181,6 +181,7 @@ RsaVerifySigHashFromProcessed (
   VOID        *Memory;
   OC_BN_WORD  *EncryptedSigNum;
   OC_BN_WORD  *DecryptedSigNum;
+  OC_BN_WORD  *PowScratchNum;
 
   CONST UINT8 *Padding;
   UINTN       PaddingSize;
@@ -266,7 +267,7 @@ RsaVerifySigHashFromProcessed (
     return FALSE;
   }
 
-  Memory = AllocatePool (2 * ModulusSize);
+  Memory = AllocatePool (3 * ModulusSize);
   if (Memory == NULL) {
     DEBUG ((DEBUG_INFO, "OCCR: Memory allocation failure\n"));
     return FALSE;
@@ -274,6 +275,7 @@ RsaVerifySigHashFromProcessed (
 
   EncryptedSigNum = Memory;
   DecryptedSigNum = (OC_BN_WORD *)((UINTN)EncryptedSigNum + ModulusSize);
+  PowScratchNum   = (OC_BN_WORD *)((UINTN)DecryptedSigNum + ModulusSize);
 
   BigNumParseBuffer (
     EncryptedSigNum,
@@ -289,7 +291,8 @@ RsaVerifySigHashFromProcessed (
              Exponent,
              N,
              N0Inv,
-             RSqrMod
+             RSqrMod,
+             PowScratchNum
              );
   if (!Result) {
     FreePool (Memory);

@@ -113,6 +113,7 @@ BigNumCalculateMontParams (
   @param[in]     N         The modulus.
   @param[in]     N0Inv     The Montgomery Inverse of N.
   @param[in]     RSqrMod   Montgomery's R^2 mod N.
+  @param[in]     ATmp      Scratch buffer of NumWords.
 
   @returns  Whether the operation was completes successfully.
 
@@ -125,7 +126,8 @@ BigNumPowMod (
   IN     UINT32            B,
   IN     CONST OC_BN_WORD  *N,
   IN     OC_BN_WORD        N0Inv,
-  IN     CONST OC_BN_WORD  *RSqrMod
+  IN     CONST OC_BN_WORD  *RSqrMod,
+  IN     OC_BN_WORD        *ATmp
   );
 
 #endif // BIG_NUM_LIB_H

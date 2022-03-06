@@ -557,11 +557,10 @@ BigNumPowMod (
   IN     UINT32            B,
   IN     CONST OC_BN_WORD  *N,
   IN     OC_BN_WORD        N0Inv,
-  IN     CONST OC_BN_WORD  *RSqrMod
+  IN     CONST OC_BN_WORD  *RSqrMod,
+  IN     OC_BN_WORD        *ATmp
   )
 {
-  OC_BN_WORD *ATmp;
-
   UINTN      Index;
 
   ASSERT (Result != NULL);
@@ -578,11 +577,6 @@ BigNumPowMod (
     return FALSE;
   }
 
-  ATmp = AllocatePool ((UINTN)NumWords * OC_BN_WORD_SIZE);
-  if (ATmp == NULL) {
-    DEBUG ((DEBUG_INFO, "OCCR: Memory allocation failure in ModPow\n"));
-    return FALSE;
-  }
   //
   // Convert A into the Montgomery Domain.
   // ATmp = MM (A, R^2 mod N)
@@ -637,6 +631,5 @@ BigNumPowMod (
     BigNumSub (Result, NumWords, Result, N);
   }
 
-  FreePool (ATmp);
   return TRUE;
 }
