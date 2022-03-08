@@ -166,7 +166,7 @@ OcBufferEarlyLog (
     // Store logs into buffer.
     //
     while (*Buffer != CHAR_NULL) {
-      *mLogWalker++ = *Buffer++;
+      *mLogWalker++ = (UINT8) *Buffer++;
     }
     *mLogWalker++ = CHAR_NULL;
 
