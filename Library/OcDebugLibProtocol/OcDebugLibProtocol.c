@@ -155,7 +155,7 @@ OcBufferEarlyLog (
   // The size of ErrorLevel and that of Buffer string including null terminator should not overflow.
   // The current position (mLogWalker) has been moved to the right side for the same purpose.
   //
-  if ((sizeof (ErrorLevel) + StrLen (Buffer) + 1) <= (mLogBuffer + OC_LOG_BUFFER_SIZE - mLogWalker)) {
+  if ((UINTN) (sizeof (ErrorLevel) + StrLen (Buffer) + 1) <= (UINTN) (mLogBuffer + OC_LOG_BUFFER_SIZE - mLogWalker)) {
     //
     // Store ErrorLevel into buffer.
     //
