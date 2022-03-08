@@ -206,7 +206,7 @@ DebugPrint (
 
   OcLog = InternalGetOcLog ();
   IsBufferEarlyLogEnabled = PcdGetBool (PcdDebugLibProtocolBufferEarlyLog);
-  ShouldPrintConsole = ErrorLevel & GetDebugPrintErrorLevel () != 0;
+  ShouldPrintConsole = (ErrorLevel & GetDebugPrintErrorLevel ()) != 0;
 
   VA_START (Marker, Format);
 
