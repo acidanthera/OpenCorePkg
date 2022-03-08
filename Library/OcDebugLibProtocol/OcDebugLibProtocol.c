@@ -211,10 +211,7 @@ DebugPrint (
   } else {
     UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
 
-    //
-    // TODO: Add pcd.
-    //
-    if (TRUE) {
+    if (PcdGetBool (PcdDebugLibProtocolBufferEarlyLog)) {
       OcBufferEarlyLog (ErrorLevel, Buffer);
     }
 

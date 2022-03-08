@@ -769,6 +769,8 @@
   ## @Prompt Allow usage of TSC, when RNG is not available.
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|FALSE|BOOLEAN|0x00000607
 
+  gOpenCorePkgTokenSpaceGuid.PcdDebugLibProtocolBufferEarlyLog|TRUE|BOOLEAN|0x00000608
+
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Acidanthera/Library/OcAcpiLib.h
