@@ -30,57 +30,76 @@ latexbuild() {
   done
 }
 
-cd "$(dirname "$0")" || abort "Wrong directory"
+builddocs() {
+  latexbuild Configuration
 
-if [ "$(which latexdiff)" = "" ]; then
-  abort "latexdiff is missing, check your TeX Live installation"
-fi
+  cd Differences || abort "Unable to process annotations"
+  rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
+  latexdiff --allow-spaces -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
+    > Differences.tex || \
+    abort "Unable to differentiate"
+  latexbuild Differences -interaction=nonstopmode
 
-if [ "$(which pdflatex)" = "" ]; then
-  abort "pdflatex is missing, check your TeX Live installation"
-fi
+  cd ../Errata || abort "Unable to process annotations"
+  latexbuild Errata
 
-latexbuild Configuration
+  cd .. || abort "Unable to cd back to Docs directory"
 
-cd Differences || abort "Unable to process annotations"
-rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
-latexdiff --allow-spaces -s ONLYCHANGEDPAGE PreviousConfiguration.tex ../Configuration.tex \
-  > Differences.tex || \
-  abort "Unable to differentiate"
-latexbuild Differences -interaction=nonstopmode
+  err=0
+  if [ "$(which md5)" != "" ]; then
+    HASH=$(md5 Configuration.tex | cut -f4 -d' ')
+    err=$?
+  elif [ "$(which openssl)" != "" ]; then
+    HASH=$(openssl md5 Configuration.tex | cut -f2 -d' ')
+    err=$?
+  else
+    abort "No md5 hasher found!"
+  fi
 
-cd ../Errata || abort "Unable to process annotations"
-latexbuild Errata
+  if [ $err -ne 0 ]; then
+    abort "Failed to calculate built configuration hash!"
+  fi
 
-cd .. || abort "Unable to cd back to Docs directory"
-
-err=0
-if [ "$(which md5)" != "" ]; then
-  HASH=$(md5 Configuration.tex | cut -f4 -d' ')
-  err=$?
-elif [ "$(which openssl)" != "" ]; then
-  HASH=$(openssl md5 Configuration.tex | cut -f2 -d' ')
-  err=$?
-else
-  abort "No md5 hasher found!"
-fi
-
-if [ $err -ne 0 ]; then
-  abort "Failed to calculate built configuration hash!"
-fi
-
-if [ -f "Configuration.md5" ]; then
-  OLDHASH=$(cat "Configuration.md5")
-else
   OLDHASH=""
-fi
+  if [ -f "Configuration.md5" ]; then
+    OLDHASH=$(cat "Configuration.md5")
+  fi
 
-echo "$HASH" > "Configuration.md5"
-if [ "$HASH" != "$OLDHASH" ]; then
-  echo "Configuration hash ${HASH} is different from ${OLDHASH}."
-  echo "You forgot to rebuild documentation (Configuration.pdf)!"
-  echo "Please run ./Docs/BuildDocs.tool."
-  exit 1
-fi
+  echo "$HASH" > "Configuration.md5"
+  if [ "$HASH" != "$OLDHASH" ]; then
+    echo "Configuration hash ${HASH} is different from ${OLDHASH}."
+    echo "You forgot to rebuild documentation (Configuration.pdf)!"
+    echo "Please run ./Docs/BuildDocs.tool."
+    exit 1
+  fi
+}
+
+main() {
+  if [ "$(which latexdiff)" = "" ]; then
+    abort "latexdiff is missing, check your TeX Live installation"
+  fi
+
+  if [ "$(which pdflatex)" = "" ]; then
+    abort "pdflatex is missing, check your TeX Live installation"
+  fi
+
+  cd "$(dirname "$0")" || abort "Wrong directory"
+
+  case "$1" in
+    -b|--bump-version )
+      cd Differences || abort "Unable to enter Differences directory"
+      rm -f PreviousConfiguration.tex
+      cp ../Configuration.tex PreviousConfiguration.tex
+      cd .. || abort "Unable to enter parent directory"
+      builddocs
+    ;;
+
+    * )
+      builddocs
+    ;;
+  esac
+}
+
+main "$@"
 
 exit 0
