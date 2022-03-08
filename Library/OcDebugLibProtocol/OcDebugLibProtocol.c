@@ -199,23 +199,27 @@ DebugPrint (
   VA_LIST          Marker;
   CHAR16           Buffer[256];
   OC_LOG_PROTOCOL  *OcLog;
+  BOOLEAN          IsBufferEarlyLogEnabled;
+  BOOLEAN          ShouldPrintConsole;
 
   ASSERT (Format != NULL);
 
   OcLog = InternalGetOcLog ();
+  IsBufferEarlyLogEnabled = PcdGetBool (PcdDebugLibProtocolBufferEarlyLog);
+  ShouldPrintConsole = ErrorLevel & GetDebugPrintErrorLevel () != 0;
 
   VA_START (Marker, Format);
 
   if (OcLog != NULL) {
     OcLog->AddEntry (OcLog, ErrorLevel, Format, Marker);
-  } else {
+  } else if (IsBufferEarlyLogEnabled || ShouldPrintConsole) {
     UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
 
-    if (PcdGetBool (PcdDebugLibProtocolBufferEarlyLog)) {
+    if (IsBufferEarlyLogEnabled) {
       OcBufferEarlyLog (ErrorLevel, Buffer);
     }
 
-    if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
+    if (ShouldPrintConsole) {
       gST->ConOut->OutputString (gST->ConOut, Buffer);
     }
   }
