@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Tue Mar  1 19:05:37 2022
-%DIF ADD ../Configuration.tex        Wed Mar  2 13:08:02 2022
+%DIF ADD ../Configuration.tex        Tue Mar  8 14:27:39 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -6744,24 +6744,24 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
 
   Values for driver parameters can be specified in hexadecimal beginning with \texttt{0x} or
   in decimal, e.g. \texttt{-{}-gpio-pins=0x12} or \texttt{-{}-gpio-pins=18}.
-\DIFdelbegin %DIFDELCMD < \end{itemize}
-%DIFDELCMD < %%%
-\DIFdelend 
+\DIFaddbegin 
 
-	\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
-\DIFdel{: AudioDxe is a staging driver, refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{\DIFdel{acidanthera/bugtracker\#740}}
-%DIFAUXCMD
-\DIFdel{for known issues. }\DIFdelend \DIFaddbegin \item \texttt{\DIFadd{-}{}\DIFadd{-restore-nosnoop}} \DIFadd{- Boolean flag, enabled if present. }\medskip
+	\item \texttt{\DIFadd{-}{}\DIFadd{-restore-nosnoop}} \DIFadd{- Boolean flag, enabled if present. }\medskip
 
   \DIFadd{AudioDxe clears the Intel HDA No Snoop Enable (NSNPEN) bit. On some systems, this change must
   be reversed on exit in order to avoid breaking sound in Windows. If so, this flag should
   be added to AudioDxe driver arguments.
   Not enabled by default, since restoring the flag can prevent sound from working in macOS on
   some other systems. }\medskip
-\end{itemize}
-\DIFaddend 
+\DIFaddend \end{itemize}
 
-\subsection{Properties}\label{uefiprops}
+\DIFdelbegin \emph{\DIFdel{Note}}%DIFAUXCMD
+\DIFdel{: AudioDxe is a staging driver, refer to }\href{https://github.com/acidanthera/bugtracker/issues/740}{\DIFdel{acidanthera/bugtracker\#740}}
+%DIFAUXCMD
+\DIFdel{for known issues. }%DIFDELCMD < 
+
+%DIFDELCMD < %%%
+\DIFdelend \subsection{Properties}\label{uefiprops}
 
 \begin{enumerate}
 \item
@@ -8086,7 +8086,10 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   \texttt{EnableVectorAcceleration}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
+  \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms\DIFaddbegin \DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: This option may cause issues on certain laptop firmwares, including Lenovo}\DIFaddend .
 
   \item
   \texttt{EnableVmx}\\
