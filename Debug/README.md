@@ -16,7 +16,7 @@ The general approach is as follows:
 
 #### Preparing Source Code
 
-To get started, the compilation environment should be set up. Such commands can be found in `Docs/Configuratio.pdf`, section `3.3 Contribution`.
+To get started, the compilation environment should be set up. Such commands can be found in `Docs/Configuration.pdf`, section `3.3 Contribution`.
 
 By default EDK II optimises produced binaries, so to build a "real" debug binary one should target
 `NOOPT`. Do be aware that it strongly affects resulting binary size:
