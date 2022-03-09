@@ -769,6 +769,12 @@
   ## @Prompt Allow usage of TSC, when RNG is not available.
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|FALSE|BOOLEAN|0x00000607
 
+  ## Indicates, whether early logs before the arrival of log protocol should be saved.<BR><BR>
+  ##   TRUE  - Save early logs.<BR>
+  ##   FALSE - Do not save early logs.<BR>
+  ## @Prompt Allow saving early logs when log protocol has not yet arrived.
+  gOpenCorePkgTokenSpaceGuid.PcdDebugLibProtocolBufferEarlyLog|TRUE|BOOLEAN|0x00000608
+
 [LibraryClasses]
   ##  @libraryclass
   OcAcpiLib|Include/Acidanthera/Library/OcAcpiLib.h

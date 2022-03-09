@@ -21,9 +21,19 @@
 #include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
 #include <Library/DebugPrintErrorLevelLib.h>
+#include <Library/MemoryAllocationLib.h>
 #include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
+
+#define OC_LOG_BUFFER_SIZE (2 * EFI_PAGE_SIZE)
+
+STATIC EFI_EVENT  mLogProtocolArrivedNotifyEvent;
+STATIC VOID       *mLogProtocolArrivedNotifyRegistration;
+
+STATIC UINT8      *mLogBuffer   = NULL;
+STATIC UINT8      *mLogWalker   = NULL;
+STATIC UINTN      mLogCount     = 0;
 
 STATIC
 OC_LOG_PROTOCOL *
@@ -50,6 +60,138 @@ InternalGetOcLog (
   return mInternalOcLog;
 }
 
+STATIC
+VOID
+EFIAPI
+LogProtocolArrivedNotify (
+  IN EFI_EVENT  Event,
+  IN VOID       *Context
+  )
+{
+  UINTN            Index;
+  EFI_STATUS       Status;
+  OC_LOG_PROTOCOL  *OcLog;
+  CHAR8            *Walker;
+  UINTN            ErrorLevel;
+  OC_LOG_OPTIONS   CurrLogOpt;
+
+  //
+  // Event arrives. Close it.
+  //
+  gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
+
+  Status = gBS->LocateProtocol (
+    &gOcLogProtocolGuid,
+    NULL,
+    (VOID **) &OcLog
+    );
+
+  if (EFI_ERROR (Status) || OcLog->Revision != OC_LOG_REVISION) {
+    return;
+  }
+
+  Walker = (CHAR8 *) mLogBuffer;
+  for (Index = 0; Index < mLogCount; ++Index) {
+    //
+    // Set ErrorLevel.
+    //
+    CopyMem (&ErrorLevel, Walker, sizeof (ErrorLevel));
+    Walker += sizeof (ErrorLevel);
+
+    //
+    // Print debug message without onscreen, as it is done by OutputString.
+    //
+    CurrLogOpt = OcLog->Options;
+    OcLog->Options &= ~OC_LOG_CONSOLE;
+    DebugPrint (ErrorLevel, "%a", Walker);
+    //
+    // Restore original value.
+    //
+    OcLog->Options = CurrLogOpt;
+
+    //
+    // Skip message chars.
+    //
+    while (*Walker != '\0') {
+      ++Walker;
+    }
+    //
+    // Matched '\0'. Go to the next message.
+    //
+    ++Walker;
+  }
+
+  FreePool (mLogBuffer);
+  mLogBuffer = NULL;
+}
+
+STATIC
+VOID
+OcBufferEarlyLog (
+  IN  UINTN         ErrorLevel,
+  IN  CONST CHAR16  *Buffer
+  )
+{
+  EFI_STATUS  Status;
+
+  if (mLogBuffer == NULL) {
+    mLogBuffer = AllocatePool (OC_LOG_BUFFER_SIZE);
+    if (mLogBuffer == NULL) {
+      return;
+    }
+
+    mLogWalker = mLogBuffer;
+
+    //
+    // Notify when log protocol arrives.
+    //
+    Status = gBS->CreateEvent (
+      EVT_NOTIFY_SIGNAL,
+      TPL_NOTIFY,
+      LogProtocolArrivedNotify,
+      NULL,
+      &mLogProtocolArrivedNotifyEvent
+      );
+
+    if (!EFI_ERROR (Status)) {
+      Status = gBS->RegisterProtocolNotify (
+        &gOcLogProtocolGuid,
+        mLogProtocolArrivedNotifyEvent,
+        &mLogProtocolArrivedNotifyRegistration
+        );
+
+      if (EFI_ERROR (Status)) {
+        gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
+      }
+    }
+  }
+
+  //
+  // The size of ErrorLevel and that of Buffer string including null terminator should not overflow.
+  // The current position (mLogWalker) has been moved to the right side for the same purpose.
+  //
+  if ((sizeof (ErrorLevel) + StrLen (Buffer) + 1) <= (UINTN) (mLogBuffer + OC_LOG_BUFFER_SIZE - mLogWalker)) {
+    //
+    // Store ErrorLevel into buffer.
+    //
+    CopyMem (mLogWalker, &ErrorLevel, sizeof (ErrorLevel));
+    mLogWalker += sizeof (ErrorLevel);
+
+    //
+    // Store logs into buffer.
+    //
+    while (*Buffer != CHAR_NULL) {
+      *mLogWalker++ = (UINT8) *Buffer++;
+    }
+    *mLogWalker++ = CHAR_NULL;
+
+    //
+    // Increment number of messages.
+    //
+    ++mLogCount;
+  }
+}
+
 /**
   Prints a debug message to the debug output device if the specified error level is enabled.
   If any bit in ErrorLevel is also set in DebugPrintErrorLevelLib function
@@ -72,18 +214,29 @@ DebugPrint (
   VA_LIST          Marker;
   CHAR16           Buffer[256];
   OC_LOG_PROTOCOL  *OcLog;
+  BOOLEAN          IsBufferEarlyLogEnabled;
+  BOOLEAN          ShouldPrintConsole;
 
   ASSERT (Format != NULL);
 
   OcLog = InternalGetOcLog ();
+  IsBufferEarlyLogEnabled = PcdGetBool (PcdDebugLibProtocolBufferEarlyLog);
+  ShouldPrintConsole = (ErrorLevel & GetDebugPrintErrorLevel ()) != 0;
 
   VA_START (Marker, Format);
 
   if (OcLog != NULL) {
     OcLog->AddEntry (OcLog, ErrorLevel, Format, Marker);
-  } else if ((ErrorLevel & GetDebugPrintErrorLevel ()) != 0) {
+  } else if (IsBufferEarlyLogEnabled || ShouldPrintConsole) {
     UnicodeVSPrintAsciiFormat (Buffer, sizeof (Buffer), Format, Marker);
-    gST->ConOut->OutputString (gST->ConOut, Buffer);
+
+    if (IsBufferEarlyLogEnabled) {
+      OcBufferEarlyLog (ErrorLevel, Buffer);
+    }
+
+    if (ShouldPrintConsole) {
+      gST->ConOut->OutputString (gST->ConOut, Buffer);
+    }
   }
 
   VA_END (Marker);
