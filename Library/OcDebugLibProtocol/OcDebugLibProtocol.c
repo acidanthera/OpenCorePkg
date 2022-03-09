@@ -73,6 +73,7 @@ LogProtocolArrivedNotify (
   OC_LOG_PROTOCOL  *OcLog;
   CHAR8            *Walker;
   UINTN            ErrorLevel;
+  OC_LOG_OPTIONS   CurrLogOpt;
 
   Status = gBS->LocateProtocol (
     &gOcLogProtocolGuid,
@@ -92,7 +93,16 @@ LogProtocolArrivedNotify (
     CopyMem (&ErrorLevel, Walker, sizeof (ErrorLevel));
     Walker += sizeof (ErrorLevel);
 
+    //
+    // Print debug message without onscreen, as it is done by OutputString.
+    //
+    CurrLogOpt = OcLog->Options;
+    OcLog->Options &= ~OC_LOG_CONSOLE;
     DebugPrint (ErrorLevel, "%a", Walker);
+    //
+    // Restore original value.
+    //
+    OcLog->Options = CurrLogOpt;
 
     //
     // Skip message chars.
