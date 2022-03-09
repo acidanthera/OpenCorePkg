@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.8.0
+- Added support for early log preservation
+
 #### v0.7.9
 - Added auto-detect `macOS Installer` volume name for use when `.disk_label` file cannot be displayed
 - Added `--restore-nosnoop` flag to AudioDxe, making v0.7.7 fix for Windows sound opt-in
