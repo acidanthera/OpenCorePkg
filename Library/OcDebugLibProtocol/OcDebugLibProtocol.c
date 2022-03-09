@@ -75,6 +75,11 @@ LogProtocolArrivedNotify (
   UINTN            ErrorLevel;
   OC_LOG_OPTIONS   CurrLogOpt;
 
+  //
+  // Event arrives. Close it.
+  //
+  gBS->CloseEvent (mLogProtocolArrivedNotifyEvent);
+
   Status = gBS->LocateProtocol (
     &gOcLogProtocolGuid,
     NULL,
