@@ -75,12 +75,14 @@ builddocs() {
 }
 
 bumpversion() {
-  local ocver=$(grep OPEN_CORE_VERSION ../Include/Acidanthera/Library/OcMainLib.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
+  local ocver
+  ocver=$(grep OPEN_CORE_VERSION ../Include/Acidanthera/Library/OcMainLib.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ocver" = "" ]; then
     abort "Invalid OpenCore version"
   fi
 
-  local docver=$(grep -w 'Reference Manual' ./Configuration.tex | sed -e 's/(//g' -e 's/)//g' | awk '{print $3}')
+  local docver
+  docver=$(grep -w 'Reference Manual' ./Configuration.tex | sed -e 's/(//g' -e 's/)//g' | awk '{print $3}')
   if [ "$docver" = "" ]; then
     abort "Invalid document version"
   fi
