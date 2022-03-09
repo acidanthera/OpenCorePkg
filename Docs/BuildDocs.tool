@@ -74,6 +74,30 @@ builddocs() {
   fi
 }
 
+bumpversion() {
+  local ocver=$(grep OPEN_CORE_VERSION ../Include/Acidanthera/Library/OcMainLib.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
+  if [ "$ocver" = "" ]; then
+    abort "Invalid OpenCore version"
+  fi
+
+  local docver=$(grep -w 'Reference Manual' ./Configuration.tex | sed -e 's/(//g' -e 's/)//g' | awk '{print $3}')
+  if [ "$docver" = "" ]; then
+    abort "Invalid document version"
+  fi
+
+  if [ "$ocver" = "$docver" ]; then
+    abort "No need to bump version"
+  fi
+
+  echo "Bumping version from $docver to $ocver"
+  cd Differences || abort "Unable to enter Differences directory"
+  rm -f PreviousConfiguration.tex
+  cp ../Configuration.tex PreviousConfiguration.tex || abort "Failed to copy PreviousConfiguration.tex"
+  cd .. || abort "Unable to enter parent directory"
+  perl -pi -e "s/\($docver\)/\($ocver\)/" ./Configuration.tex || abort "Failed to patch Configuration.tex"
+  builddocs
+}
+
 main() {
   if [ "$(which latexdiff)" = "" ]; then
     abort "latexdiff is missing, check your TeX Live installation"
@@ -87,11 +111,7 @@ main() {
 
   case "$1" in
     -b|--bump-version )
-      cd Differences || abort "Unable to enter Differences directory"
-      rm -f PreviousConfiguration.tex
-      cp ../Configuration.tex PreviousConfiguration.tex
-      cd .. || abort "Unable to enter parent directory"
-      builddocs
+      bumpversion
     ;;
 
     * )
