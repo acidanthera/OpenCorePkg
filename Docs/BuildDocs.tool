@@ -5,6 +5,16 @@ abort() {
   exit 1
 }
 
+prompt() {
+  echo "$1"
+  read -rp "Enter [Y]es to continue: " v
+  if [ "$v" != "Y" ] && [ "$v" != "y" ]; then
+    return 0
+  fi
+
+  return 1
+}
+
 latexbuild() {
   # Perform file cleanup.
   rm -f ./*.aux ./*.log ./*.out ./*.pdf ./*.toc
@@ -74,30 +84,31 @@ builddocs() {
   fi
 }
 
-bumpversion() {
-  local ocver
+checkver() {
   ocver=$(grep OPEN_CORE_VERSION ../Include/Acidanthera/Library/OcMainLib.h | sed 's/.*"\(.*\)".*/\1/' | grep -E '^[0-9.]+$')
   if [ "$ocver" = "" ]; then
     abort "Invalid OpenCore version"
   fi
 
-  local docver
   docver=$(grep -w 'Reference Manual' ./Configuration.tex | sed -e 's/(//g' -e 's/)//g' | awk '{print $3}')
   if [ "$docver" = "" ]; then
     abort "Invalid document version"
   fi
 
   if [ "$ocver" = "$docver" ]; then
-    abort "No need to bump version"
+    return 0
   fi
 
+  return 1
+}
+
+bumpversion() {
   echo "Bumping version from $docver to $ocver"
   cd Differences || abort "Unable to enter Differences directory"
   rm -f PreviousConfiguration.tex
   cp ../Configuration.tex PreviousConfiguration.tex || abort "Failed to copy PreviousConfiguration.tex"
   cd .. || abort "Unable to enter parent directory"
   perl -pi -e "s/Reference Manual \($docver\)/Reference Manual \($ocver\)/g" ./Configuration.tex || abort "Failed to patch Configuration.tex"
-  builddocs
 }
 
 main() {
@@ -111,15 +122,22 @@ main() {
 
   cd "$(dirname "$0")" || abort "Wrong directory"
 
-  case "$1" in
-    -b|--bump-version )
+  checkver
+  if [ $? = 1 ]; then
+    echo "Current Configuration.tex/pdf version: $docver"
+    echo "Current OC Header version: $ocver"
+    prompt "Bump version to $ocver?"
+    if [ $? = 0 ]; then
+      prompt "Still build docs?"
+      if [ $? = 0 ]; then
+        exit 1
+      fi
+    else
       bumpversion
-    ;;
+    fi
+  fi
 
-    * )
-      builddocs
-    ;;
-  esac
+  builddocs
 }
 
 main "$@"
