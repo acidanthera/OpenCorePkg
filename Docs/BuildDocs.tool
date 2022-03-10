@@ -96,7 +96,7 @@ bumpversion() {
   rm -f PreviousConfiguration.tex
   cp ../Configuration.tex PreviousConfiguration.tex || abort "Failed to copy PreviousConfiguration.tex"
   cd .. || abort "Unable to enter parent directory"
-  perl -pi -e "s/\($docver\)/\($ocver\)/" ./Configuration.tex || abort "Failed to patch Configuration.tex"
+  perl -pi -e "s/Reference Manual \($docver\)/Reference Manual \($ocver\)/g" ./Configuration.tex || abort "Failed to patch Configuration.tex"
   builddocs
 }
 
