@@ -2773,6 +2773,9 @@ blocking.
   On macOS 12+, it is no longer possible to set trim timeout for APFS filesystems.
   However, trim can be disabled when the timeout value is set to \texttt{0}.
 
+  \emph{Note}: System Information may still report \texttt{TRIM Support: Yes} with this
+  option set to \texttt{0}. Yet, this is false positive and trim is de facto disabled.
+
 \item
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
