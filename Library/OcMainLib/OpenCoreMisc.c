@@ -35,6 +35,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVariableLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -472,6 +473,12 @@ OcMiscEarlyInit (
 
   if (Config->Misc.Debug.SerialInit) {
     SerialPortInitialize ();
+
+    //
+    // PCD tests.
+    //
+    // Status = PcdSet8S (PcdSerialRegisterAccessWidth, 100);
+    Status = PcdSetBoolS (PcdSerialUseMmio, FALSE);
   }
 
   OcConfigureLogProtocol (
