@@ -490,9 +490,9 @@ OcMiscEarlyInit (
     PatchPcdSet8 (PcdSerialFifoControl, 0x00U);
     PatchPcdSet32 (PcdSerialClockRate, 0U);
 
-    UINT8  PatchPcdSetPtr[4]  = { 0x12, 0, 0, 0xFF };
-    UINTN  PatchPcdSetPtrSize = 4U;
-    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PatchPcdSetPtrSize, PatchPcdSetPtr);
+    UINT8  PcdSerialPciDeviceInfoNewValue[4]  = { 0x12, 0, 0, 0xFF };
+    UINTN  PcdSerialPciDeviceInfoNewValueSize = 4U;
+    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PcdSerialPciDeviceInfoNewValueSize, PcdSerialPciDeviceInfoNewValue);
     PatchPcdSet32 (PcdSerialExtendedTxFifoSize, 0U);
     PatchPcdSet32 (PcdSerialRegisterStride, 2U);
   }
