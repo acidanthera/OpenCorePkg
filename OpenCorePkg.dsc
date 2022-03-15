@@ -326,6 +326,20 @@
 !endif
   gOpenCorePkgTokenSpaceGuid.PcdCanaryAllowRdtscFallback|TRUE
 
+[PcdsPatchableInModule]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth|8
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseHardwareFlowControl|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialDetectCable|FALSE
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase|0x03F8
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate|115200
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl|0x03
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl|0x07
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate|1843200
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo|{0xFF}
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize|64
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
+
 [BuildOptions]
   # While there are no PCDs as of now, there at least are some custom macros.
   DEFINE OCPKG_BUILD_OPTIONS_GEN = -D DISABLE_NEW_DEPRECATED_INTERFACES $(OCPKG_BUILD_OPTIONS) -D OC_TARGET_$(TARGET)=1

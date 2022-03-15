@@ -477,8 +477,24 @@ OcMiscEarlyInit (
     //
     // PCD tests.
     //
-    // Status = PcdSet8S (PcdSerialRegisterAccessWidth, 100);
-    Status = PcdSetBoolS (PcdSerialUseMmio, FALSE);
+    // Keys: https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
+    // Values: https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1202
+    //
+    PatchPcdSet8 (PcdSerialRegisterAccessWidth, 32U);
+    PatchPcdSetBool (PcdSerialUseMmio, TRUE);
+    PatchPcdSetBool (PcdSerialUseHardwareFlowControl, TRUE);
+    PatchPcdSetBool (PcdSerialDetectCable, TRUE);
+    PatchPcdSet64 (PcdSerialRegisterBase, 0U);
+    PatchPcdSet32 (PcdSerialBaudRate, 50U);
+    PatchPcdSet8 (PcdSerialLineControl, 0x00U);
+    PatchPcdSet8 (PcdSerialFifoControl, 0x00U);
+    PatchPcdSet32 (PcdSerialClockRate, 0U);
+
+    UINT8  PatchPcdSetPtr[4]  = { 0x12, 0, 0, 0xFF };
+    UINTN  PatchPcdSetPtrSize = 4U;
+    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PatchPcdSetPtrSize, PatchPcdSetPtr);
+    PatchPcdSet32 (PcdSerialExtendedTxFifoSize, 0U);
+    PatchPcdSet32 (PcdSerialRegisterStride, 2U);
   }
 
   OcConfigureLogProtocol (
