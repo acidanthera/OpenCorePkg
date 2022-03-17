@@ -2761,17 +2761,17 @@ blocking.
 
   One way to workaround the problem is to increase the timeout to an extremely
   high value, which at the cost of slow boot times (extra minutes) will
-  ensure that all the blocks are trimmed. Set this option to a high value,
-  such as \texttt{4294967295}, to ensure that all blocks are trimmed.
+  ensure that all the blocks are trimmed. Setting this option to a high value,
+  such as \texttt{4294967295} (a.k.a. \texttt{-1}) ensures that all blocks are trimmed.
   Alternatively, use over-provisioning, if supported, or create
   a dedicated unmapped partition where the reserve blocks can be found
-  by the controller. Conversely, the trim operation can be disabled by
-  setting a very low timeout value. e.g. \texttt{999}. Refer to this
+  by the controller. Conversely, the trim operation can be mostly disabled by
+  setting a very low timeout value, while \texttt{0} entirely disables it. Refer to this
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS 12+, it is no longer possible to set trim timeout for APFS filesystems.
-  However, trim can be disabled when the timeout value is set to \texttt{0}.
+  On macOS 12+, it is no longer possible to specify trim timeout for APFS filesystems.
+  However, it can be disabled by setting \texttt{0}.
 
   \emph{Note}: System Information may still report \texttt{TRIM Support: Yes} with this
   option set to \texttt{0}. Yet, this is false positive and trim is de facto disabled.
