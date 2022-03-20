@@ -583,6 +583,10 @@ typedef enum {
   // Set custom APFS trim timeout.
   //
   KernelQuirkSetApfsTrimTimeout,
+  //
+  // Enable Aquantia AQtion AQC-107s support.
+  //
+  KernelQuirkForceAquantiaEthernet,
 
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;

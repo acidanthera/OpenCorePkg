@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Wed Mar  9 13:03:27 2022
-%DIF ADD ../Configuration.tex        Sun Mar 20 14:02:15 2022
+%DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
+%DIF ADD ../Configuration.tex        Sun Mar 20 12:27:38 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -122,7 +122,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF LISTINGS PREAMBLE %DIF PREAMBLE
+%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -2712,7 +2712,19 @@ blocking.
   typically have compatible AHCI controllers.
 
 \item
-  \texttt{ForceSecureBootScheme}\\
+  \DIFaddbegin \texttt{\DIFadd{ForceAquantiaEthernet}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.15.4}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable Aquantia AQtion AQC-107s based 10GbE network cards support.
+}
+
+  \DIFadd{This option enables Aquantia AQtion AQC-107s based 10GbE network cards support, 
+  which used to work natively before macOS 10.15.4.
+}
+
+\item
+  \DIFaddend \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 11\\

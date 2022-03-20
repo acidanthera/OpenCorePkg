@@ -256,6 +256,10 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkExtendBTFeatureFlags, CacheType, DarwinVersion, Context, NULL);
     }
 
+    if (Config->Kernel.Quirks.ForceAquantiaEthernet) {
+      OcKernelApplyQuirk (KernelQuirkForceAquantiaEthernet, CacheType, DarwinVersion, Context, NULL);
+    }
+
     if (Config->Kernel.Quirks.ForceSecureBootScheme) {
       OcKernelApplyQuirk (KernelQuirkForceSecureBootScheme, CacheType, DarwinVersion, Context, NULL);
     }
