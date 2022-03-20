@@ -2657,6 +2657,9 @@ blocking.
   This option enables Aquantia AQtion AQC-107s based 10GbE network cards support,
   which used to work natively before macOS 10.15.4.
 
+  \emph{Note}: When this option is enabled, \texttt{DisableIoMapper} must be disabled and
+  \texttt{VT-d} must be enabled in BIOS. Otherwise, network cards will not function correctly.
+
 \item
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
