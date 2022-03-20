@@ -70,7 +70,7 @@ InternalRsaModulusSizeIsAllowed (
 
 /**
   Returns whether the signature hashing algorithm is allowed.
-  
+
   @param[in]  Type  The signature hashing algorithm type.
 
 **/
@@ -316,7 +316,7 @@ RsaVerifySigHashFromProcessed (
   //
   // 5. Concatenate PS, the DER encoding T, and other padding to form the
   //    encoded message EM as
-  // 
+  //
   //     EM = 0x00 || 0x01 || PS || 0x00 || T.
   //
 
