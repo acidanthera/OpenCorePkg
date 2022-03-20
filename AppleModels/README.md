@@ -13,9 +13,7 @@ output anything and return zero code.
 To install PyYAML on macOS use the following commands:
 
 ```
-curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py
-sudo -H python get-pip.py
-sudo -H pip install pyyaml
+sudo -H python3 -m pip install pyyaml
 ```
 
 ## Unpacking firmware

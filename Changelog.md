@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.0
 - Added support for early log preservation
+- Switched to Python 3 in scripts (use `python /path/to/script` to force Python 2)
 
 #### v0.7.9
 - Added auto-detect `macOS Installer` volume name for use when `.disk_label` file cannot be displayed

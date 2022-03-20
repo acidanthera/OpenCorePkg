@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Thu Mar 17 14:39:28 2022
+%DIF DEL PreviousConfiguration.tex   Wed Mar  9 13:03:27 2022
+%DIF ADD ../Configuration.tex        Sun Mar 20 14:02:15 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -47,7 +47,11 @@
   captionpos=b,
   basicstyle=\ttfamily\normalsize,
   keepspaces=true,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python},
+%DIF 47c47
+%DIF <   morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python},
+%DIF -------
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python3}, %DIF > 
+%DIF -------
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -118,7 +122,7 @@
 %DIF HYPERREF PREAMBLE %DIF PREAMBLE
 \providecommand{\DIFadd}[1]{\texorpdfstring{\DIFaddtex{#1}}{#1}} %DIF PREAMBLE
 \providecommand{\DIFdel}[1]{\texorpdfstring{\DIFdeltex{#1}}{}} %DIF PREAMBLE
-%DIF COLORLISTINGS PREAMBLE %DIF PREAMBLE
+%DIF LISTINGS PREAMBLE %DIF PREAMBLE
 \RequirePackage{listings} %DIF PREAMBLE
 \RequirePackage{color} %DIF PREAMBLE
 \lstdefinelanguage{DIFcode}{ %DIF PREAMBLE
@@ -3723,10 +3727,13 @@ the default boot entry choice will remain changed until the next manual reconfig
   Starting with macOS Catalina, kernel panics are stored in JSON format and thus
   need to be preprocessed before passing to \texttt{kpdescribe.sh}:
 
-\begin{lstlisting}[label=kpanic, style=ocbash]
+\DIFmodbegin
+\begin{lstlisting}[label=kpanic, style=ocbash,alsolanguage=DIFcode]
 cat Kernel.panic | grep macOSProcessedStackshotData |
-  python -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
+%DIF <   python -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
+%DIF >   python3 -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
 \end{lstlisting}
+\DIFmodend
 
 \item
   \texttt{DisableWatchDog}\\

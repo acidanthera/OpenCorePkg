@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 """
 Validates schema files (e.g. OcConfigurationLib.c) for being sorted.

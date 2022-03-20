@@ -44,7 +44,7 @@
   captionpos=b,
   basicstyle=\ttfamily\normalsize,
   keepspaces=true,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python3},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -3662,7 +3662,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 
 \begin{lstlisting}[label=kpanic, style=ocbash]
 cat Kernel.panic | grep macOSProcessedStackshotData |
-  python -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
+  python3 -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
 \end{lstlisting}
 
 \item
