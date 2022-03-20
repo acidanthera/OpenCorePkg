@@ -1936,7 +1936,7 @@ PatchAquantiaEthernet (
   //
   // This patch is not required before macOS 10.15.4.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, 0, KERNEL_VERSION (19, 4, 0))) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (19, 4, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet before %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
