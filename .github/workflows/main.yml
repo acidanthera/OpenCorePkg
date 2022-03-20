@@ -165,7 +165,7 @@ jobs:
       - name: Install Dependencies
         run: |
           brew install shellcheck
-          pip2 install pyyaml
+          python3 -m pip install pyyaml
         env:
           HOMEBREW_NO_INSTALL_CLEANUP: 1
 
