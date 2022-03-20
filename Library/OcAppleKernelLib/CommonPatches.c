@@ -1891,35 +1891,82 @@ PatchLegacyCommpage (
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFind[] = {
+mAquantiaEthernetPatchFindV1[] = {
   0x41, 0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 0
   0xE9                                             ///< jmp
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplace[] = {
+mAquantiaEthernetPatchReplaceV1[] = {
   0x41, 0xC7, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 1
   0xE9                                             ///< jmp
 };
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchMask[] = {
+mAquantiaEthernetPatchMaskV1[] = {
   0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
   0xFF
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAquantiaEthernetPatch = {
-  .Comment = DEBUG_POINTER ("ForceAquantiaEthernet"),
+mAquantiaEthernetPatchV1 = {
+  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetV1"),
   .Base    = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
-  .Find    = mAquantiaEthernetPatchFind,
-  .Mask    = mAquantiaEthernetPatchMask,
-  .Replace = mAquantiaEthernetPatchReplace,
-  .ReplaceMask = mAquantiaEthernetPatchMask,
-  .Size    = sizeof (mAquantiaEthernetPatchFind),
+  .Find    = mAquantiaEthernetPatchFindV1,
+  .Mask    = mAquantiaEthernetPatchMaskV1,
+  .Replace = mAquantiaEthernetPatchReplaceV1,
+  .ReplaceMask = mAquantiaEthernetPatchMaskV1,
+  .Size    = sizeof (mAquantiaEthernetPatchFindV1),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchFindV2[] = {
+  0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
+  0x0F, 0x84, 0x00, 0x00, 0x00, 0x00,  ///< je unsupported
+  0x83, 0x7D                           ///< LBL:
+};
+
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchFindMaskV2[] = {
+  0xFF, 0xFF, 0x00, 0x00,
+  0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
+  0xFF, 0xFF
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchReplaceV2[] = {
+  0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
+  0xEB, 0x04, 0x90, 0x90, 0x90, 0x90,  ///< jmp LBL
+  0x83, 0x7D                           ///< LBL:
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchReplaceMaskV2[] = {
+  0xFF, 0xFF, 0x00, 0x00,
+  0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
+  0xFF, 0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mAquantiaEthernetPatchV2 = {
+  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetV2"),
+  .Base    = "__ZN27AppleEthernetAquantiaAqtion5startEP9IOService",
+  .Find    = mAquantiaEthernetPatchFindV2,
+  .Mask    = mAquantiaEthernetPatchFindMaskV2,
+  .Replace = mAquantiaEthernetPatchReplaceV2,
+  .ReplaceMask = mAquantiaEthernetPatchReplaceMaskV2,
+  .Size    = sizeof (mAquantiaEthernetPatchFindV2),
   .Count   = 1,
   .Skip    = 0
 };
@@ -1932,6 +1979,7 @@ PatchAquantiaEthernet (
   )
 {
   EFI_STATUS   Status;
+  EFI_STATUS   Status2;
   
   //
   // This patch is not required before macOS 10.15.4.
@@ -1945,14 +1993,26 @@ PatchAquantiaEthernet (
     return EFI_NOT_FOUND;
   }
 
-  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatch);
+  //
+  // In most cases either patch will work fine.
+  // However, it does not harm if applying both.
+  // Thanks to Mieze and Shikumo for the patches.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV1);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v1 - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v1\n"));
   }
 
-  return Status;
+  Status2 = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV2);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v2 - %r\n", Status2));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v2\n"));
+  }
+
+  return !EFI_ERROR (Status) || !EFI_ERROR (Status2);
 }
 
 STATIC
