@@ -1979,7 +1979,10 @@ PatchAquantiaEthernet (
   )
 {
   EFI_STATUS   Status;
-  EFI_STATUS   Status2;
+
+  //
+  // FIXME: Check whether any patches are required before 10.15.4.
+  //
   
   //
   // This patch is not required before macOS 10.15.4.
@@ -1995,9 +1998,16 @@ PatchAquantiaEthernet (
 
   //
   // In most cases either patch will work fine.
-  // However, it does not harm if applying both.
+  // However, patch V2 by Shikumo is preferred.
   // Thanks to Mieze and Shikumo for the patches.
   //
+  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV2);
+  if (!EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v2\n"));
+    return Status;
+  }
+
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v2 - %r, trying v1\n", Status));
   Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV1);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v1 - %r\n", Status));
@@ -2005,14 +2015,7 @@ PatchAquantiaEthernet (
     DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v1\n"));
   }
 
-  Status2 = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV2);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v2 - %r\n", Status2));
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v2\n"));
-  }
-
-  return !EFI_ERROR (Status) || !EFI_ERROR (Status2);
+  return Status;
 }
 
 STATIC
