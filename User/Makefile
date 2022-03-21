@@ -93,11 +93,11 @@ ifeq ($(FUZZ_DIR),)
 endif
 
 ifeq ($(FUZZ_JOBS),)
-	FUZZ_JOBS = 4
+	FUZZ_JOBS = 2
 endif
 
 ifeq ($(FUZZ_MEM),)
-	FUZZ_MEM = 6144
+	FUZZ_MEM = 8192
 endif
 
 ifeq ($(COVERAGE),1)
@@ -269,7 +269,7 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	@rm -rf sydr-fuzz-out
 	@cat <<- EOF > sydr-fuzz.toml
 		[sydr]
-		args = "--solving-timeout 60 -s 900 -j $(FUZZ_JOBS)"
+		args = "--solving-timeout 60 -s 900 -j $(FUZZ_JOBS) -m $(FUZZ_MEM)"
 		target = "$(PROJECT).sydr$(SUFFIX) @@"
 		jobs = $(FUZZ_JOBS)
 
