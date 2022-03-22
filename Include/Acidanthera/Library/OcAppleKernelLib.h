@@ -21,16 +21,16 @@
 #include <Library/OcXmlLib.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define PRELINK_KERNEL_IDENTIFIER "__kernel__"
+#define PRELINK_KERNEL_IDENTIFIER     "__kernel__"
 #define PRELINK_KPI_IDENTIFIER_PREFIX "com.apple.kpi."
 
-#define PRELINK_INFO_SEGMENT  "__PRELINK_INFO"
-#define PRELINK_INFO_SECTION  "__info"
-#define PRELINK_TEXT_SEGMENT  "__PRELINK_TEXT"
-#define PRELINK_TEXT_SECTION  "__text"
-#define PRELINK_STATE_SEGMENT "__PRELINK_STATE"
-#define PRELINK_STATE_SECTION_KERNEL "__kernel"
-#define PRELINK_STATE_SECTION_KEXTS  "__kexts"
+#define PRELINK_INFO_SEGMENT          "__PRELINK_INFO"
+#define PRELINK_INFO_SECTION          "__info"
+#define PRELINK_TEXT_SEGMENT          "__PRELINK_TEXT"
+#define PRELINK_TEXT_SECTION          "__text"
+#define PRELINK_STATE_SEGMENT         "__PRELINK_STATE"
+#define PRELINK_STATE_SECTION_KERNEL  "__kernel"
+#define PRELINK_STATE_SECTION_KEXTS   "__kexts"
 
 
 #define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
@@ -529,7 +529,7 @@ typedef enum {
   //
   KernelQuirkDisableRtcChecksum,
   //
-  // Apply dummy power management patches to AppleIntelCpuPowerManagement in macOS.
+  // Apply dummy power management patches to AppleIntelCPUPowerManagement in macOS.
   //
   KernelQuirkDummyPowerManagement,
   //
@@ -541,6 +541,14 @@ typedef enum {
   //
   KernelQuirkExternalDiskIcons,
   //
+  // Enable Aquantia AQtion AQC-107s support.
+  //
+  KernelQuirkForceAquantiaEthernet,
+  //
+  // Force SecureBoot support for all CPUs.
+  //
+  KernelQuirkForceSecureBootScheme,
+  //
   // Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
   //
   KernelQuirkIncreasePciBarSize,
@@ -549,20 +557,28 @@ typedef enum {
   //
   KernelQuirkLapicKernelPanic,
   //
+  // Replace the 64-bit commpage bcopy implementation with one that does not use SSSE3.
+  //
+  KernelQuirkLegacyCommpage,
+  //
   // Apply kernel patches to remove kext dumping in the panic log.
   //
   KernelQuirkPanicNoKextDump,
-  //
-  // Replaces the 64-bit commpage bcopy implementation with one that does not use SSSE3.
-  //
-  KernelQuirkLegacyCommpage,
   //
   // Disable power state change timeout kernel panic (10.15+).
   //
   KernelQuirkPowerTimeoutKernelPanic,
   //
+  // Remove kernel __LINKEDIT jetisson.
+  //
+  KernelQuirkSegmentJettison,
+  //
+  // Set custom APFS trim timeout.
+  //
+  KernelQuirkSetApfsTrimTimeout,
+  //
   // Apply vendor patches to IOAHCIFamily kext to enable native features for third-party drives,
-  //   such as TRIM on SSDs or hibernation support on 10.15.
+  // such as TRIM on SSDs or hibernation support on 10.15.
   //
   KernelQuirkThirdPartyDrives,
   //
@@ -571,32 +587,21 @@ typedef enum {
   KernelQuirkXhciPortLimit1,
   KernelQuirkXhciPortLimit2,
   KernelQuirkXhciPortLimit3,
-  //
-  // Remove kernel __LINKEDIT jetisson.
-  //
-  KernelQuirkSegmentJettison,
-  //
-  // Force SecureBoot support for all CPUs.
-  //
-  KernelQuirkForceSecureBootScheme,
-  //
-  // Set custom APFS trim timeout.
-  //
-  KernelQuirkSetApfsTrimTimeout,
-  //
-  // Enable Aquantia AQtion AQC-107s support.
-  //
-  KernelQuirkForceAquantiaEthernet,
-
+  
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;
 
-//
-// Kernel quirk patch function.
-//
+/**
+  Kernel quirk patch function.
+
+  @param[in,out]  Patcher        A pointer to the patcher context.
+  @param[in]      KernelVersion  Kernel version to be matched.
+
+  @return  EFI_SUCCESS when the patch is successfully applied.
+**/
 typedef
 EFI_STATUS
-(KERNEL_QUIRK_PATCH_FUNCTION)(
+(KERNEL_QUIRK_PATCH_FUNCTION) (
   IN OUT PATCHER_CONTEXT    *Patcher,
   IN     UINT32             KernelVersion
   );
