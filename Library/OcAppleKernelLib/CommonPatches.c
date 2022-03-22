@@ -560,7 +560,7 @@ mRemoveUsbLimitV1Patch = {
   .Size        = sizeof (mRemoveUsbLimitV1Replace),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = 8192
+  .Limit       = EFI_PAGE_SIZE * 2
 };
 
 STATIC
