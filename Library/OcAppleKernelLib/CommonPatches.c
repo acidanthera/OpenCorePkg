@@ -176,7 +176,7 @@ mXcpmCfgLockRelPatch = {
   .Size        = sizeof (mXcpmCfgLockRelFind),
   .Count       = 2,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -206,7 +206,7 @@ mXcpmCfgLockDbgPatch = {
   .Size        = sizeof (mXcpmCfgLockDbgFind),
   .Count       = 2,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -482,7 +482,7 @@ PatchAppleXcpmForceBoost (
   }
 
   Start   = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
-  Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2;
+  Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
   Start  += EFI_PAGE_SIZE;
   Current = Start;
 
@@ -560,7 +560,7 @@ mRemoveUsbLimitV1Patch = {
   .Size        = sizeof (mRemoveUsbLimitV1Replace),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE * 2
+  .Limit       = 8192
 };
 
 STATIC
@@ -587,7 +587,7 @@ mRemoveUsbLimitV2Patch = {
   .Size        = sizeof (mRemoveUsbLimitV2Replace),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -614,7 +614,7 @@ mRemoveUsbLimitIoP1Patch = {
   .Size        = sizeof (mRemoveUsbLimitIoP1Replace),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -1002,7 +1002,7 @@ mIncreasePciBarSizePatch = {
   .Size        = sizeof (mIncreasePciBarSizePatchFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -1029,7 +1029,7 @@ mIncreasePciBarSizeLegacyPatch = {
   .Size        = sizeof (mIncreasePciBarSizePatchLegacyFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -1292,7 +1292,7 @@ mLapicKernelPanicMasterPatch = {
   .Size    = sizeof (mLapicKernelPanicMasterPatchFind),
   .Count   = 1,
   .Skip    = 0,
-  .Limit   = EFI_PAGE_SIZE
+  .Limit   = 4096
 };
 
 STATIC
@@ -1408,7 +1408,7 @@ mPowerStateTimeoutPanicInlinePatch = {
   .Size        = sizeof (mPowerStateTimeoutPanicInlineFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
