@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Sun Mar 20 17:31:15 2022
+%DIF ADD ../Configuration.tex        Tue Mar 22 16:40:30 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2723,8 +2723,9 @@ blocking.
   which used to work natively before macOS 10.15.4.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: When this option is enabled, }\texttt{\DIFadd{DisableIoMapper}} \DIFadd{must be disabled and
-  }\texttt{\DIFadd{VT-d}} \DIFadd{must be enabled in BIOS. Otherwise, network cards will not function correctly.
+  \emph{\DIFadd{Note}}\DIFadd{: In order for Aquantia cards to properly function,
+  }\texttt{\DIFadd{DisableIoMapper}} \DIFadd{must be disabled, }\texttt{\DIFadd{DMAR}} \DIFadd{ACPI table must not be dropped,
+  and }\texttt{\DIFadd{VT-d}} \DIFadd{must be enabled in BIOS.
 }
 
 \item
