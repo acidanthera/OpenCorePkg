@@ -227,7 +227,7 @@ PatchAppleXcpmCfgLock (
   //
   // XCPM is not available before macOS 10.8.5.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (12, 5, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -351,7 +351,7 @@ PatchAppleXcpmExtraMsrs (
   //
   // XCPM is not available before macOS 10.8.5.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (12, 5, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -476,7 +476,7 @@ PatchAppleXcpmForceBoost (
   //
   // XCPM is not available before macOS 10.8.5.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (12, 5, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmForceBoost on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -626,13 +626,11 @@ PatchUsbXhciPortLimit1 (
 {
   EFI_STATUS  Status;
 
-  
-
   //
   // On 10.14.4 and newer IOUSBHostFamily also needs limit removal.
   // Thanks to ydeng discovering this.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (18, 5, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOJAVE, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -1956,7 +1954,7 @@ PatchAquantiaEthernet (
   //
   // This patch is not required before macOS 10.15.4.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (19, 4, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_CATALINA, 4, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet before %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
