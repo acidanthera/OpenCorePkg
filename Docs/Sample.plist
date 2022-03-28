@@ -1156,6 +1156,20 @@
 			<key>Vault</key>
 			<string>Secure</string>
 		</dict>
+		<key>Serial</key>
+		<dict>
+			<key>Keys</key>
+			<array>
+				<dict>
+					<key>DevicePath</key>
+					<string>PciRoot(0x0)/Pci(0x9,0x0)/Pci(0x0,0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)</string>
+					<key>Init</key>
+					<false/>
+					<key>PcdSerialPciDeviceInfo</key>
+					<data>EgAA/w==</data>
+				</dict>
+			</array>
+		</dict>
 		<key>Tools</key>
 		<array>
 			<dict>
