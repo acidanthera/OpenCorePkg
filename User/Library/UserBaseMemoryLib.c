@@ -100,13 +100,13 @@ AllocatePool (
 
   if ((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) {
     // UEFI guarantees 8-byte alignment.
-    p = malloc ((AllocationSize + 7U) & ~7U);
+    p = malloc ((AllocationSize + 7ULL) & ~7ULL);
   } else {
     p = NULL;
   }
 
   ++mPoolAllocationIndex;
-  mPoolAllocationIndex &= 63U;
+  mPoolAllocationIndex &= 63ULL;
 
   DEBUG ((
     DEBUG_POOL,
@@ -114,7 +114,7 @@ AllocatePool (
     (UINT32) AllocationSize,
     p
     ));
-  ASSERT (((UINTN)p & 7U) == 0);
+  ASSERT (((UINTN)p & 7ULL) == 0);
   if (p != NULL) {
     ++mPoolAllocations;
   }
