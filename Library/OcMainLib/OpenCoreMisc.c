@@ -471,30 +471,27 @@ OcMiscEarlyInit (
     gBS->SetWatchdogTimer (0, 0, 0, NULL);
   }
 
-  if (Config->Misc.Debug.SerialInit) {
+  if (Config->Misc.Serial.Init) {
     SerialPortInitialize ();
 
     //
-    // PCD tests.
+    // Update PCD values.
     //
     // Keys: https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
     // Values: https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1202
     //
-    PatchPcdSet8 (PcdSerialRegisterAccessWidth, 32U);
-    PatchPcdSetBool (PcdSerialUseMmio, TRUE);
-    PatchPcdSetBool (PcdSerialUseHardwareFlowControl, TRUE);
-    PatchPcdSetBool (PcdSerialDetectCable, TRUE);
-    PatchPcdSet64 (PcdSerialRegisterBase, 0U);
-    PatchPcdSet32 (PcdSerialBaudRate, 50U);
-    PatchPcdSet8 (PcdSerialLineControl, 0x00U);
-    PatchPcdSet8 (PcdSerialFifoControl, 0x00U);
-    PatchPcdSet32 (PcdSerialClockRate, 0U);
-
-    UINT8  PcdSerialPciDeviceInfoNewValue[4]  = { 0x12, 0, 0, 0xFF };
-    UINTN  PcdSerialPciDeviceInfoNewValueSize = 4U;
-    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PcdSerialPciDeviceInfoNewValueSize, PcdSerialPciDeviceInfoNewValue);
-    PatchPcdSet32 (PcdSerialExtendedTxFifoSize, 0U);
-    PatchPcdSet32 (PcdSerialRegisterStride, 2U);
+    PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
+    PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.UseMmio);
+    PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.UseHardwareFlowControl);
+    PatchPcdSetBool (PcdSerialDetectCable, Config->Misc.Serial.DetectCable);
+    PatchPcdSet64 (PcdSerialRegisterBase, Config->Misc.Serial.RegisterBase);
+    PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.BaudRate);
+    PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.LineControl);
+    PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
+    PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
+    PatchPcdSetPtr (PcdSerialPciDeviceInfo, (UINTN *) &Config->Misc.Serial.PciDeviceInfo.Size, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
+    PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
+    PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
   }
 
   OcConfigureLogProtocol (
