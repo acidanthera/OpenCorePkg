@@ -1158,17 +1158,34 @@
 		</dict>
 		<key>Serial</key>
 		<dict>
-			<key>Keys</key>
-			<array>
-				<dict>
-					<key>DevicePath</key>
-					<string>PciRoot(0x0)/Pci(0x9,0x0)/Pci(0x0,0x0)/Pci(0x1,0x0)/Pci(0x0,0x0)</string>
-					<key>Init</key>
-					<false/>
-					<key>PcdSerialPciDeviceInfo</key>
-					<data>EgAA/w==</data>
-				</dict>
-			</array>
+			<key>BaudRate</key>
+			<integer>115200</integer>
+			<key>ClockRate</key>
+			<integer>1843200</integer>
+			<key>DetectCable</key>
+			<false/>
+			<key>ExtendedTxFifoSize</key>
+			<integer>64</integer>
+			<key>FifoControl</key>
+			<data>Bw==</data>
+			<key>Init</key>
+			<false/>
+			<key>LineControl</key>
+			<data>Aw==</data>
+			<key>PciDevice</key>
+			<string>Pci(0x9,0x0,0x0)/Pci(0x0,0x0,0x0)/Pci(0x1,0x0,0x0)/Pci(0x0,0x0,0x0)</string>
+			<key>PciDeviceInfo</key>
+			<data>/w==</data>
+			<key>RegisterAccessWidth</key>
+			<data>CA==</data>
+			<key>RegisterBase</key>
+			<integer>0</integer>
+			<key>RegisterStride</key>
+			<integer>1</integer>
+			<key>UseHardwareFlowControl</key>
+			<false/>
+			<key>UseMmio</key>
+			<false/>
 		</dict>
 		<key>Tools</key>
 		<array>
