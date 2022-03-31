@@ -631,7 +631,7 @@ CheckMiscSerial (
   // https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743
   //
   PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
-  if (PciDeviceInfoSize <= 41U) {
+  if (PciDeviceInfoSize > 41U) {
     DEBUG ((DEBUG_WARN, "Size of Misc->Serial->RegisterAccessWidth cannot exceed 41!\n"));
     ++ErrorCount;
   }
