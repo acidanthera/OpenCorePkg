@@ -419,7 +419,7 @@ typedef enum {
   _(UINT8                       , FifoControl              ,      , 7                                , ()) \
   _(BOOLEAN                     , Init                     ,      , FALSE                            , ()) \
   _(UINT8                       , LineControl              ,      , 3                                , ()) \
-  _(OC_DATA                     , PciDeviceInfo            ,      , OC_DATA_CONSTR ({0xFF}, _, __)     , OC_DESTR (OC_DATA)   ) \
+  _(OC_DATA                     , PciDeviceInfo            ,      , OC_DATA_CONSTR ({0xFF}, _, __)   , OC_DESTR (OC_DATA)) \
   _(UINT8                       , RegisterAccessWidth      ,      , 8                                , ()) \
   _(UINT64                      , RegisterBase             ,      , 0x03F8                           , ()) \
   _(UINT32                      , RegisterStride           ,      , 1                                , ()) \
