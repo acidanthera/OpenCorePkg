@@ -1177,7 +1177,7 @@
 			<key>RegisterAccessWidth</key>
 			<integer>8</integer>
 			<key>RegisterBase</key>
-			<integer>0</integer>
+			<integer>1016</integer>
 			<key>RegisterStride</key>
 			<integer>1</integer>
 			<key>UseHardwareFlowControl</key>
