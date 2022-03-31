@@ -472,8 +472,6 @@ OcMiscEarlyInit (
   }
 
   if (Config->Misc.Serial.Init) {
-    SerialPortInitialize ();
-
     //
     // Update PCD values.
     //
@@ -492,6 +490,8 @@ OcMiscEarlyInit (
     PatchPcdSetPtr (PcdSerialPciDeviceInfo, (UINTN *) &Config->Misc.Serial.PciDeviceInfo.Size, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
     PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
     PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
+
+    SerialPortInitialize ();
   }
 
   OcConfigureLogProtocol (
