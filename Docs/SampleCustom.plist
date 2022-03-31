@@ -1172,8 +1172,6 @@
 			<false/>
 			<key>LineControl</key>
 			<data>Aw==</data>
-			<key>PciDevice</key>
-			<string>Pci(0x9,0x0,0x0)/Pci(0x0,0x0,0x0)/Pci(0x1,0x0,0x0)/Pci(0x0,0x0,0x0)</string>
 			<key>PciDeviceInfo</key>
 			<data>/w==</data>
 			<key>RegisterAccessWidth</key>
