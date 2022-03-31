@@ -646,7 +646,11 @@ CheckMiscSerial (
     DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->RegisterAccessWidth must be 0xFF!\n"));
     ++ErrorCount;
   }
-  if ((PciDeviceInfoSize - sizeof (0xFFU)) % 4 != 0) {
+  if (PciDeviceInfoSize == 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth cannot be empty (use 0xFF instead)!\n"));
+    ++ErrorCount;
+  }
+  if (PciDeviceInfoSize > 0 && (PciDeviceInfoSize - sizeof (0xFFU)) % 4 != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth must be divisible by 4 excluding the last 0xFF!\n"));
   }
   if (PciDeviceInfoSize > 41U) {
