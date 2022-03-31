@@ -614,6 +614,7 @@ CheckMiscSerial (
   OC_MISC_CONFIG    *UserMisc;
   UINT32            RegisterAccessWidth;
   UINT32            BaudRate;
+  CONST UINT8       *PciDeviceInfo;
   UINT32            PciDeviceInfoSize;
 
   ErrorCount        = 0;
@@ -636,9 +637,15 @@ CheckMiscSerial (
 
   //
   // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1393
   // https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743
   //
+  PciDeviceInfo = OC_BLOB_GET (&UserMisc->Serial.PciDeviceInfo);
   PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
+  if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
+    DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->RegisterAccessWidth must be 0xFF!\n"));
+    ++ErrorCount;
+  }
   if (PciDeviceInfoSize > 41U) {
     DEBUG ((DEBUG_WARN, "Size of Misc->Serial->RegisterAccessWidth cannot exceed 41!\n"));
     ++ErrorCount;
