@@ -408,6 +408,7 @@ OcMiscEarlyInit (
   EFI_TIME                  BootTime;
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
+  UINTN                     PciDeviceInfoSize;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -484,7 +485,8 @@ OcMiscEarlyInit (
     PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.LineControl);
     PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
     PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
-    PatchPcdSetPtr (PcdSerialPciDeviceInfo, (UINTN *) &Config->Misc.Serial.PciDeviceInfo.Size, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
+    PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
+    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
     PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
     PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
 
