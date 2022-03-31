@@ -408,8 +408,6 @@ OcMiscEarlyInit (
   EFI_TIME                  BootTime;
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
-  UINTN                     Index;
-  BOOLEAN                   IsBaudRateOk;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -480,41 +478,16 @@ OcMiscEarlyInit (
     // Keys: https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
     // Values: https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1202
     //
-    if (Config->Misc.Serial.RegisterAccessWidth == 8U || Config->Misc.Serial.RegisterAccessWidth == 32U) {
-      PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
-    }
+    PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
     PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.UseMmio);
     PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.UseHardwareFlowControl);
     PatchPcdSetBool (PcdSerialDetectCable, Config->Misc.Serial.DetectCable);
     PatchPcdSet64 (PcdSerialRegisterBase, Config->Misc.Serial.RegisterBase);
-
-    IsBaudRateOk = FALSE;
-    STATIC UINT32  AllowedBaudRate[] = {
-      921600U, 460800U, 230400U, 115200U,
-      57600U, 38400U, 19200U, 9600U, 7200U, 
-      4800U, 3600U, 2400U, 2000U, 1800U,
-      1200U, 600U, 300U, 150U, 134U, 
-      110U, 75U, 50U
-    };
-    for (Index = 0; Index < ARRAY_SIZE (AllowedBaudRate); ++Index) {
-      if (Config->Misc.Serial.BaudRate == AllowedBaudRate[Index]) {
-        IsBaudRateOk = TRUE;
-        break;
-      }
-    }
-    if (IsBaudRateOk) {
-      PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.BaudRate);
-    }
+    PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.BaudRate);
     PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.LineControl);
     PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
     PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
-    if (Config->Misc.Serial.PciDeviceInfo.Size <= 41U) {
-      PatchPcdSetPtr (
-        PcdSerialPciDeviceInfo,
-        (UINTN *) &Config->Misc.Serial.PciDeviceInfo.Size,
-        OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo)
-        );
-    }
+    PatchPcdSetPtr (PcdSerialPciDeviceInfo, (UINTN *) &Config->Misc.Serial.PciDeviceInfo.Size, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
     PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
     PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
 
