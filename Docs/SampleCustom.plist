@@ -1167,15 +1167,15 @@
 			<key>ExtendedTxFifoSize</key>
 			<integer>64</integer>
 			<key>FifoControl</key>
-			<data>Bw==</data>
+			<integer>7</integer>
 			<key>Init</key>
 			<false/>
 			<key>LineControl</key>
-			<data>Aw==</data>
+			<integer>3</integer>
 			<key>PciDeviceInfo</key>
 			<data>/w==</data>
 			<key>RegisterAccessWidth</key>
-			<data>CA==</data>
+			<integer>8</integer>
 			<key>RegisterBase</key>
 			<integer>0</integer>
 			<key>RegisterStride</key>
