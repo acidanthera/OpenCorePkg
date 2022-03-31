@@ -18,6 +18,7 @@
 #include <Library/DebugLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcBootManagementLib.h>
+#include <Library/PcdLib.h>
 
 /**
   ACPI section
@@ -407,7 +408,10 @@ typedef enum {
   OC_DECLARE (OC_MISC_TOOLS_ARRAY)
 
 #define OC_MISC_SERIAL_FIELDS(_, __) \
-  _(UINT32                      , BaudRate                 ,      , 115200     , ()) \
+  //
+  // TODO: Call pcd getters & Fix build
+  //
+  _(UINT32                      , BaudRate                 ,      , PcdGet8 (PcdSerialRegisterAccessWidth)     , ()) \
   _(UINT32                      , ClockRate                ,      , 1843200    , ()) \
   _(BOOLEAN                     , DetectCable              ,      , FALSE      , ()) \
   _(UINT32                      , ExtendedTxFifoSize       ,      , 64         , ()) \

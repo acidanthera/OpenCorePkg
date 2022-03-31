@@ -33,7 +33,25 @@
 
 [Packages]
   MdePkg/MdePkg.dec
+  MdeModulePkg/MdeModulePkg.dec
   OpenCorePkg/OpenCorePkg.dec
+
+[Guids]
+  gEfiMdeModulePkgTokenSpaceGuid
+
+[Pcd]
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth     ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio                 ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseHardwareFlowControl  ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialDetectCable             ## SOMETIMES_CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase            ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate                ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl             ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl             ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate               ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo           ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize      ## CONSUMES
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride          ## CONSUMES
 
 [LibraryClasses]
   BaseLib
