@@ -475,9 +475,6 @@ OcMiscEarlyInit (
     //
     // Update PCD values.
     //
-    // Keys: https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
-    // Values: https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1202
-    //
     PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
     PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.UseMmio);
     PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.UseHardwareFlowControl);
