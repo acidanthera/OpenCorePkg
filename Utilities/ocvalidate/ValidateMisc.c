@@ -574,6 +574,10 @@ ValidateBaudRate (
 {
   UINTN  Index;
 
+  //
+  // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1223
+  //
   STATIC UINT32  AllowedBaudRate[] = {
     921600U, 460800U, 230400U, 115200U,
     57600U, 38400U, 19200U, 9600U, 7200U, 
@@ -615,6 +619,10 @@ CheckMiscSerial (
   ErrorCount        = 0;
   UserMisc          = &Config->Misc;
 
+  //
+  // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1199-L1200
+  //
   RegisterAccessWidth = UserMisc->Serial.RegisterAccessWidth;
   if (RegisterAccessWidth != 8U && RegisterAccessWidth != 32U) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth can only be 8 or 32!\n"));
