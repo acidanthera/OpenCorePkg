@@ -78,6 +78,12 @@ Utility to validate whether a `config.plist` matches requirements and convention
 - DmgLoading: Only `Disabled`, `Signed`, or `Any` are accepted.
 - Vault: Only `Optional`, `Basic`, or `Secure` are accepted.
 - SecureBootModel: Only `Default`, `Disabled`, `j137`, `j680`, `j132`, `j174`, `j140k`, `j780`, `j213`, `j140a`, `j152f`, `j160`, `j230k`, `j214k`, `j223`, `j215`, `j185`, `j185f`, or `x86legacy` are accepted.
+#### Serial
+- RegisterAccessWidth: Only `8` or `32` are accepted.
+- BaudRate: Only `921600`, `460800`, `230400`, `115200`, `57600`, `38400`, `19200`, `9600`, `7200`, `4800`, `3600`, `2400`, `2000`, `1800`, `1200`, `600`, `300`, `150`, `134`, `110`, `75`, or `50` are accepted.
+- PciDeviceInfo: The last byte must be `0xFF`.
+- PciDeviceInfo: Excluding the last byte `0xFF`, the rest must be divisible by 4.
+- PciDeviceInfo: Maximum allowed size is 41.
 
 ### NVRAM
 - Requirements here all follow Global Rules. In addition, the following keys and values are checked:
