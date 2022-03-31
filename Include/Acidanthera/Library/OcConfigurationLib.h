@@ -407,11 +407,28 @@ typedef enum {
   OC_ARRAY (OC_MISC_TOOLS_ENTRY, _, __)
   OC_DECLARE (OC_MISC_TOOLS_ARRAY)
 
+#define OC_MISC_SERIAL_FIELDS(_, __) \
+  _(UINT32                      , BaudRate                 ,      , 115200     , ()) \
+  _(UINT32                      , ClockRate                ,      , 1843200    , ()) \
+  _(BOOLEAN                     , DetectCable              ,      , FALSE      , ()) \
+  _(UINT32                      , ExtendedTxFifoSize       ,      , 64         , ()) \
+  _(UINT8                       , FifoControl              ,      , 7          , ()) \
+  _(BOOLEAN                     , Init                     ,      , FALSE      , ()) \
+  _(UINT8                       , LineControl              ,      , 3          , ()) \
+  _(OC_DATA                     , PciDeviceInfo            ,      , OC_EDATA_CONSTR (_, __)     , OC_DESTR (OC_DATA)   ) \
+  _(UINT8                       , RegisterAccessWidth      ,      , 8          , ()) \
+  _(UINT64                      , RegisterBase             ,      , 0x03F8     , ()) \
+  _(UINT32                      , RegisterStride           ,      , 1          , ()) \
+  _(BOOLEAN                     , UseHardwareFlowControl   ,      , FALSE      , ()) \
+  _(BOOLEAN                     , UseMmio                  ,      , FALSE      , ())
+  OC_DECLARE (OC_MISC_SERIAL)
+
 #define OC_MISC_CONFIG_FIELDS(_, __) \
   _(OC_MISC_BLESS_ARRAY        , BlessOverride   ,     , OC_CONSTR2 (OC_MISC_BLESS_ARRAY, _, __)  , OC_DESTR (OC_MISC_BLESS_ARRAY)) \
   _(OC_MISC_BOOT               , Boot            ,     , OC_CONSTR2 (OC_MISC_BOOT, _, __)         , OC_DESTR (OC_MISC_BOOT)) \
   _(OC_MISC_DEBUG              , Debug           ,     , OC_CONSTR2 (OC_MISC_DEBUG, _, __)        , OC_DESTR (OC_MISC_DEBUG)) \
   _(OC_MISC_SECURITY           , Security        ,     , OC_CONSTR2 (OC_MISC_SECURITY, _, __)     , OC_DESTR (OC_MISC_SECURITY)) \
+  _(OC_MISC_SERIAL             , Serial          ,     , OC_CONSTR2 (OC_MISC_SERIAL, _, __)       , OC_DESTR (OC_MISC_SERIAL)) \
   _(OC_MISC_TOOLS_ARRAY        , Entries         ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY)) \
   _(OC_MISC_TOOLS_ARRAY        , Tools           ,     , OC_CONSTR2 (OC_MISC_TOOLS_ARRAY, _, __)  , OC_DESTR (OC_MISC_TOOLS_ARRAY))
   OC_DECLARE (OC_MISC_CONFIG)
