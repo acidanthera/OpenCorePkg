@@ -486,7 +486,11 @@ OcMiscEarlyInit (
     PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
     PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
     PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
-    PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
+    if (PciDeviceInfoSize <= OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
+      PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
+    } else {
+      DEBUG ((DEBUG_INFO, "OC: Skipping setting PcdSerialPciDeviceInfo with borked size %u\n", PciDeviceInfoSize));
+    }
     PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
     PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
 

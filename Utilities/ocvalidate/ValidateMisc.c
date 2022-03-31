@@ -638,7 +638,6 @@ CheckMiscSerial (
   //
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1393
-  // https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743
   //
   PciDeviceInfo = OC_BLOB_GET (&UserMisc->Serial.PciDeviceInfo);
   PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
@@ -646,8 +645,8 @@ CheckMiscSerial (
     DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->RegisterAccessWidth must be 0xFF!\n"));
     ++ErrorCount;
   }
-  if (PciDeviceInfoSize > 41U) {
-    DEBUG ((DEBUG_WARN, "Size of Misc->Serial->RegisterAccessWidth cannot exceed 41!\n"));
+  if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
+    DEBUG ((DEBUG_WARN, "Size of Misc->Serial->RegisterAccessWidth cannot exceed %u!\n", OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE));
     ++ErrorCount;
   } else if (PciDeviceInfoSize == 0) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth cannot be empty (use 0xFF instead)!\n"));

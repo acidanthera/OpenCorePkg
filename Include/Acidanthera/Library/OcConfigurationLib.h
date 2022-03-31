@@ -408,6 +408,12 @@ typedef enum {
 
 ///
 /// Reference:
+/// https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743
+///
+#define OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE 41U
+
+///
+/// Reference:
 /// https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
 /// https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec
 ///
