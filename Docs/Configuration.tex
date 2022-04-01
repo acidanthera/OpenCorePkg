@@ -3157,7 +3157,11 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Serial}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Update the PCD values listed in
+  \textbf{Description}: Configure PCD values required by \texttt{BaseSerialPortLib16550}
+  for serial ports to properly function. Values are listed and described in the
+  \hyperref[miscserialprops]{Serial Properties} section below.
+
+  This section overrides the PCD values listed in
   \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{BaseSerialPortLib16550.inf}.
   Refer to \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec} for the explanations of each key.
 
@@ -4416,28 +4420,36 @@ rm vault.pub
   \texttt{BaudRate}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{115200}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate}
+  \textbf{Description}: Set the baud rate for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{ClockRate}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1843200}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate}
+  \textbf{Description}: Set the clock rate for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{ExtendedTxFifoSize}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{64}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize}
+  \textbf{Description}: Set the extended transmit FIFO size for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{FifoControl}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x07}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl}
+  \textbf{Description}: Configure serial port FIFO Control settings.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
@@ -4450,28 +4462,24 @@ rm vault.pub
   (any) debug logging. Serial port configuration is defined via PCDs at compile time
   in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID.
 
-  Default values as found in \texttt{MdeModulePkg.dec} are as follows:
-
-  \begin{itemize}
-  \tightlist
-    \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
-    \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
-  \end{itemize}
-
   Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
 
 \item
   \texttt{LineControl}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x07}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl}
+  \textbf{Description}: Configure serial port Line Control settings.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{PciDeviceInfo}\\
   \textbf{Type}: \texttt{plist\ data}\\
   \textbf{Failsafe}: \texttt{0xFF}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}
+  \textbf{Description}: Set PCI serial device information.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
@@ -4485,28 +4493,36 @@ rm vault.pub
   \texttt{RegisterBase}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x03F8}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase}
+  \textbf{Description}: 
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{RegisterStride}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{1}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride}
+  \textbf{Description}: Set the base address of serial port registers.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{UseHardwareFlowControl}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseHardwareFlowControl}
+  \textbf{Description}: Enable serial port hardware flow control.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseHardwareFlowControl}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{UseMmio}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio}
+  \textbf{Description}: Indicate whether the serial port registers are in MMIO space.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \end{enumerate}
