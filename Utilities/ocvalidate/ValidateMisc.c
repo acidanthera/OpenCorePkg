@@ -578,7 +578,7 @@ ValidateBaudRate (
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1223
   //
-  STATIC UINT32  AllowedBaudRate[] = {
+  STATIC CONST UINT32 AllowedBaudRate[] = {
     921600U, 460800U, 230400U, 115200U,
     57600U, 38400U, 19200U, 9600U, 7200U, 
     4800U, 3600U, 2400U, 2000U, 1800U,
@@ -641,17 +641,16 @@ CheckMiscSerial (
   //
   PciDeviceInfo = OC_BLOB_GET (&UserMisc->Serial.PciDeviceInfo);
   PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
-  if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
-    DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->RegisterAccessWidth must be 0xFF!\n"));
-    ++ErrorCount;
-  }
   if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
     DEBUG ((DEBUG_WARN, "Size of Misc->Serial->RegisterAccessWidth cannot exceed %u!\n", OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE));
     ++ErrorCount;
   } else if (PciDeviceInfoSize == 0) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth cannot be empty (use 0xFF instead)!\n"));
     ++ErrorCount;
-  } else if ((PciDeviceInfoSize - sizeof (0xFFU)) % 4 != 0) {
+  } else if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
+    DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->RegisterAccessWidth must be 0xFF!\n"));
+    ++ErrorCount;
+  } else if ((PciDeviceInfoSize - 1) % 4 != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth must be divisible by 4 excluding the last 0xFF!\n"));
   }
 
