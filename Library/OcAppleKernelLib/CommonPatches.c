@@ -23,19 +23,30 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcStringLib.h>
 #include <Library/UefiLib.h>
 
-STATIC CONST UINT8 mMovEcxE2[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00 // mov ecx, 0E2h
+STATIC
+CONST UINT8
+mMovEcxE2[] = {
+  0xB9, 0xE2, 0x00, 0x00, 0x00  ///< mov ecx, 0xE2
 };
+STATIC_ASSERT (sizeof (mMovEcxE2) == 5, "Unsupported mMovEcxE2");
 
-STATIC CONST UINT8 mMovCxE2[] = {
-  0x66, 0xB9, 0xE2, 0x00 // mov cx, 0E2h
+STATIC
+CONST UINT8
+mMovCxE2[] = {
+  0x66, 0xB9, 0xE2, 0x00        ///< mov cx, 0xE2
 };
+STATIC_ASSERT (sizeof (mMovCxE2) == 4, "Unsupported mMovCxE2");
 
-STATIC CONST UINT8 mWrmsr[] = {
-  0x0F, 0x30 // wrmsr
+STATIC
+CONST UINT8
+mWrmsr[] = {
+  0x0F, 0x30                    ///< wrmsr
 };
+STATIC_ASSERT (sizeof (mWrmsr) == 2, "Unsupported mWrmsr");
 
-STATIC CONST UINTN mWrmsrMaxDistance = 32;
+STATIC
+CONST UINTN
+mWrmsrMaxDistance = 32;
 
 STATIC
 EFI_STATUS
@@ -49,33 +60,29 @@ PatchAppleCpuPmCfgLock (
   UINT8   *WalkerEnd;
   UINT8   *WalkerTmp;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Count = 0;
   Walker = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
   WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mWrmsrMaxDistance;
 
   //
-  // Thx to Clover developers for the approach.
+  // Thanks to Clover developers for the approach.
   //
   while (Walker < WalkerEnd) {
     //
-    // Match (e)cx 0E2h assignment.
+    // Match (e)cx E2h assignment.
     //
     if (Walker[0] == mMovEcxE2[0]
       && Walker[1] == mMovEcxE2[1]
       && Walker[2] == mMovEcxE2[2]
       && Walker[3] == mMovEcxE2[3]
       && Walker[4] == mMovEcxE2[4]) {
-      STATIC_ASSERT (sizeof (mMovEcxE2) == 5, "Unsupported mMovEcxE2");
       Walker += sizeof (mMovEcxE2);
     } else if (Walker[0] == mMovCxE2[0]
       && Walker[1] == mMovCxE2[1]
       && Walker[2] == mMovCxE2[2]
       && Walker[3] == mMovCxE2[3]) {
-      STATIC_ASSERT (sizeof (mMovCxE2) == 4, "Unsupported mMovCxE2");
       Walker += sizeof (mMovCxE2);
     } else {
       ++Walker;
@@ -87,7 +94,6 @@ PatchAppleCpuPmCfgLock (
     while (Walker < WalkerTmp) {
       if (Walker[0] == mWrmsr[0]
         && Walker[1] == mWrmsr[1]) {
-        STATIC_ASSERT (sizeof (mWrmsr) == 2, "Unsupported mWrmsr");
         ++Count;
         //
         // Patch matched wrmsr with nop.
@@ -97,7 +103,7 @@ PatchAppleCpuPmCfgLock (
         break;
       }
 
-      if ((Walker[0] == 0xC9 && Walker[1] == 0xC3) ///< leave; ret
+      if ((Walker[0] == 0xC9 && Walker[1] == 0xC3)     ///< leave; ret
         || (Walker[0] == 0x5D && Walker[1] == 0xC3)) { ///< pop rbp; ret
         //
         // Stop searching upon matching return sequences.
@@ -145,15 +151,17 @@ typedef struct XCPM_MSR_RECORD_ {
 #pragma pack(pop)
 
 STATIC
-UINT8
+CONST UINT8
 mXcpmCfgLockRelFind[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x0F, 0x30 // mov ecx, 0xE2 ; wrmsr
+  0xB9, 0xE2, 0x00, 0x00, 0x00,  ///< mov ecx, 0xE2
+  0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
-UINT8
+CONST UINT8
 mXcpmCfgLockRelReplace[] = {
-  0xB9, 0xE2, 0x00, 0x00, 0x00, 0x90, 0x90 // mov ecx, 0xE2 ; nop
+  0xB9, 0xE2, 0x00, 0x00, 0x00,  ///< mov ecx, 0xE2
+  0x90, 0x90                     ///< nop
 };
 
 STATIC
@@ -172,15 +180,18 @@ mXcpmCfgLockRelPatch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mXcpmCfgLockDbgFind[] = {
-  0xBF, 0xE2, 0x00, 0x00, 0x00, 0xE8 // mov edi, 0xE2 ; call (wrmsr64)
+  0xBF, 0xE2, 0x00, 0x00, 0x00,  ///< mov edi, 0xE2
+  0xE8                           ///< call (wrmsr64)
 };
 
 STATIC
-UINT8
+CONST UINT8
 mXcpmCfgLockDbgReplace[] = {
-  0xEB, 0x08, 0x90, 0x90, 0x90, 0xE8 // jmp LBL ; nop; nop; nop; call (wrmsr64); LBL:
+  0xEB, 0x08,                    ///< jmp LBL        ; Skip the 3x nops and 5x call
+  0x90, 0x90, 0x90,              ///< nop
+  0xE8                           ///< call (wrmsr64) ; Skipped by jmp LBL
 };
 
 STATIC
@@ -213,7 +224,10 @@ PatchAppleXcpmCfgLock (
 
   ASSERT (Patcher != NULL);
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+  //
+  // XCPM is not available before macOS 10.8.5.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmCfgLock on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -224,63 +238,55 @@ PatchAppleXcpmCfgLock (
   Replacements = 0;
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_core_scope_msrs", (UINT8 **) &Record);
-  if (!EFI_ERROR (Status)) {
-    while (Record < Last) {
-      if (Record->xcpm_msr_num == 0xE2) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Replacing _xcpm_core_scope_msrs data %u %u\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus
-          ));
-        Record->xcpm_msr_applicable_cpus = 0;
-        ++Replacements;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Not matching _xcpm_core_scope_msrs data %u %u\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus
-          ));
-        break;
-      }
-      ++Record;
-    }
-
-    //
-    // Now the HWP patch at _xcpm_idle() for Release XNU.
-    //
-    Status = PatcherApplyGenericPatch (
-      Patcher,
-      &mXcpmCfgLockRelPatch
-      );
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to locate _xcpm_idle release patch - %r, trying dbg\n", Status));
-      Status = PatcherApplyGenericPatch (
-        Patcher,
-        &mXcpmCfgLockDbgPatch
-        );
-      if (EFI_ERROR (Status)) {
-        DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_idle patches - %r\n", Status));
-      }
-    }
-  } else {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_core_scope_msrs - %r\n", Status));
+    return EFI_NOT_FOUND;
   }
 
-  return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
+  while (Record < Last) {
+    if (Record->xcpm_msr_num != 0xE2) {
+      break;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: Zeroing _xcpm_core_scope_msrs 0x%X applicable CPUs (%u)\n",
+      Record->xcpm_msr_num,
+      Record->xcpm_msr_applicable_cpus
+      ));
+    Record->xcpm_msr_applicable_cpus = 0;
+    ++Replacements;
+
+    ++Record;
+  }
+
+  //
+  // Now the HWP patch at _xcpm_idle() for Release XNU.
+  //
+  Status = PatcherApplyGenericPatch (Patcher, &mXcpmCfgLockRelPatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply _xcpm_idle release patch - %r, trying dbg\n", Status));
+    Status = PatcherApplyGenericPatch (Patcher, &mXcpmCfgLockDbgPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to apply dbg _xcpm_cst_control_evaluate patches - %r\n", Status));
+    }
+  }
+
+  return (Replacements > 0 && !EFI_ERROR (Status)) ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
 STATIC
-UINT8
+CONST UINT8
 mMiscPwrMgmtRelFind[] = {
-  0xB9, 0xAA, 0x01, 0x00, 0x00, 0x0F, 0x30 // mov ecx, 0x1aa; wrmsr
+  0xB9, 0xAA, 0x01, 0x00, 0x00,  ///< mov ecx, 0x1AA
+  0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
-UINT8
+CONST UINT8
 mMiscPwrMgmtRelReplace[] = {
-  0xB9, 0xAA, 0x01, 0x00, 0x00, 0x90, 0x90 // mov ecx, 0x1aa; nop
+  0xB9, 0xAA, 0x01, 0x00, 0x00,  ///< mov ecx, 0x1AA
+  0x90, 0x90                     ///< nop
 };
 
 STATIC
@@ -299,25 +305,23 @@ mMiscPwrMgmtRelPatch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mMiscPwrMgmtDbgFind[] = {
-  0xBF, 0xAA, 0x01, 0x00, 0x00, 0xE8 // mov edi, 0x1AA ; call (wrmsr64)
+  0xBF, 0xAA, 0x01, 0x00, 0x00,  ///< mov edi, 0x1AA
+  0xE8                           ///< call (wrmsr64)
 };
 
 STATIC
-UINT8
+CONST UINT8
 mMiscPwrMgmtDbgReplace[] = {
-  0xEB, 0x08, 0x90, 0x90, 0x90, 0xE8 // jmp LBL ; nop; nop; nop; call (wrmsr64); LBL:
+  0xEB, 0x08,                    ///< jmp LBL        ; Skip the 3x nops and 5x call
+  0x90, 0x90, 0x90,              ///< nop
+  0xE8                           ///< call (wrmsr64) ; Skipped by jmp LBL
 };
 
 STATIC
 PATCHER_GENERIC_PATCH
 mMiscPwrMgmtDbgPatch = {
-  //
-  // NOTE: This substitution is going to take place
-  //       at both _xcpm_hwp_enable()
-  //       and _xcpm_enable_hw_coordination() (which is inlined in Release XNU).
-  //
   .Comment     = DEBUG_POINTER ("MiscPwrMgmtDbg"),
   .Base        = NULL,
   .Find        = mMiscPwrMgmtDbgFind,
@@ -344,7 +348,10 @@ PatchAppleXcpmExtraMsrs (
 
   ASSERT (Patcher != NULL);
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+  //
+  // XCPM is not available before macOS 10.8.5.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmExtraMsrs on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
@@ -355,115 +362,102 @@ PatchAppleXcpmExtraMsrs (
   Replacements = 0;
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_pkg_scope_msrs", (UINT8 **) &Record);
-  if (!EFI_ERROR (Status)) {
-    while (Record < Last) {
-      //
-      // Most Record->xcpm_msr_applicable_cpus has
-      // 0xDC or 0xDE in its lower 16-bit and thus here we
-      // AND 0xFF0000FDU in order to match both. (The result will be 0xDC)
-      //
-      if ((Record->xcpm_msr_applicable_cpus & 0xFF0000FDU) == 0xDC) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Replacing _xcpm_pkg_scope_msrs data %u %u\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus
-          ));
-        Record->xcpm_msr_applicable_cpus = 0;
-        ++Replacements;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Not matching _xcpm_pkg_scope_msrs data %u %u\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus
-          ));
-        break;
-      }
-      ++Record;
-    }
-  } else {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_pkg_scope_msrs - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  while (Record < Last) {
+    //
+    // Most Record->xcpm_msr_applicable_cpus has
+    // 0xDC or 0xDE in its lower 16-bit and thus here we
+    // AND 0xFF0000FDU in order to match both. (The result will be 0xDC)
+    //
+    if ((Record->xcpm_msr_applicable_cpus & 0xFF0000FDU) != 0xDC) {
+      break;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: Zeroing _xcpm_pkg_scope_msrs 0x%X applicable CPUs (%u)\n",
+      Record->xcpm_msr_num,
+      Record->xcpm_msr_applicable_cpus
+      ));
+    Record->xcpm_msr_applicable_cpus = 0;
+    ++Replacements;
+    
+    ++Record;
   }
 
   Status = PatcherGetSymbolAddress (Patcher, "_xcpm_SMT_scope_msrs", (UINT8 **) &Record);
-  if (!EFI_ERROR (Status)) {
-    while (Record < Last) {
-      if (Record->xcpm_msr_flag_p == NULL) {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Replacing _xcpm_SMT_scope_msrs data %u %u\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus
-          ));
-        Record->xcpm_msr_applicable_cpus = 0;
-        ++Replacements;
-      } else {
-        DEBUG ((
-          DEBUG_INFO,
-          "OCAK: Not matching _xcpm_SMT_scope_msrs data %u %u %p\n",
-          Record->xcpm_msr_num,
-          Record->xcpm_msr_applicable_cpus,
-          Record->xcpm_msr_flag_p
-          ));
-        break;
-      }
-      ++Record;
-    }
-  } else {
+  if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "OCAK: Failed to locate _xcpm_SMT_scope_msrs - %r\n", Status));
+    return EFI_NOT_FOUND;
+  }
+
+  while (Record < Last) {
+    if (Record->xcpm_msr_flag_p != NULL) {
+      break;
+    }
+
+    DEBUG ((
+      DEBUG_INFO,
+      "OCAK: Zeroing _xcpm_SMT_scope_msrs data 0x%X applicable CPUs (%u)\n",
+      Record->xcpm_msr_num,
+      Record->xcpm_msr_applicable_cpus
+      ));
+    Record->xcpm_msr_applicable_cpus = 0;
+    ++Replacements;
+
+    ++Record;
   }
 
   //
-  // Now patch writes to MSR_MISC_PWR_MGMT
+  // Now patch writes to MSR_MISC_PWR_MGMT.
   //
   Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtRelPatch);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r, trying dbg\n", Status));
     Status = PatcherApplyGenericPatch (Patcher, &mMiscPwrMgmtDbgPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r\n", Status));
+    }
   }
 
-  if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patched writes to MSR_MISC_PWR_MGMT\n"));
-    ++Replacements;
-  } else {
-    DEBUG ((DEBUG_WARN, "OCAK: Failed to patch writes to MSR_MISC_PWR_MGMT - %r\n", Status));
-  }
-
-  return Replacements > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
+  return (Replacements > 0 && !EFI_ERROR (Status)) ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
 STATIC
-UINT8
+CONST UINT8
 mPerfCtrlFind1[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
-  0x0F, 0x30                    ///< wrmsr
+  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
+  0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPerfCtrlFind2[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
-  0x31, 0xD2,                   ///< xor edx, edx
-  0x0F, 0x30                    ///< wrmsr
+  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
+  0x31, 0xD2,                    ///< xor edx, edx
+  0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPerfCtrlFind3[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
-  0x4C, 0x89, 0xF0,             ///< mov rax, r14
-  0x0F, 0x30                    ///< wrmsr
+  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
+  0x4C, 0x89, 0xF0,              ///< mov rax, r14
+  0x0F, 0x30                     ///< wrmsr
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPerfCtrlMax[] = {
-  0xB9, 0x99, 0x01, 0x00, 0x00, ///< mov ecx, 199h
-  0x31, 0xD2,                   ///< xor edx, edx
-  0xB8, 0x00, 0xFF, 0x00, 0x00, ///< mov eax, 0xFF00
-  0x0F, 0x30,                   ///< wrmsr
-  0xC3                          ///< ret
+  0xB9, 0x99, 0x01, 0x00, 0x00,  ///< mov ecx, 0x199
+  0x31, 0xD2,                    ///< xor edx, edx
+  0xB8, 0x00, 0xFF, 0x00, 0x00,  ///< mov eax, 0xFF00
+  0x0F, 0x30,                    ///< wrmsr
+  0xC3                           ///< ret
 };
 
 STATIC
@@ -479,17 +473,23 @@ PatchAppleXcpmForceBoost (
 
   ASSERT (Patcher != NULL);
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
+  //
+  // XCPM is not available before macOS 10.8.5.
+  //
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping XcpmForceBoost on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
   Start   = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
-  Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE*2;
+  Last    = Start + MachoGetFileSize (&Patcher->MachContext) - EFI_PAGE_SIZE * 2;
   Start  += EFI_PAGE_SIZE;
   Current = Start;
 
   while (Current < Last) {
+    //
+    // Compare <mov ecx, 0x199> in common.
+    //
     if (Current[0] == mPerfCtrlFind1[0]
       && Current[1] == mPerfCtrlFind1[1]
       && Current[2] == mPerfCtrlFind1[2]
@@ -513,6 +513,9 @@ PatchAppleXcpmForceBoost (
   Current -= 4;
 
   while (Current >= Start) {
+    //
+    // Locate the beginning.
+    //
     if (Current[0] == 0x55
       && Current[1] == 0x48
       && Current[2] == 0x89
@@ -534,15 +537,15 @@ PatchAppleXcpmForceBoost (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitV1Find[] = {
-  0xff, 0xff, 0x10
+  0xFF, 0xFF, 0x10
 };
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitV1Replace[] = {
-  0xff, 0xff, 0x40
+  0xFF, 0xFF, 0x40
 };
 
 STATIC
@@ -561,15 +564,15 @@ mRemoveUsbLimitV1Patch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitV2Find[] = {
-  0x0f, 0x0f, 0x83
+  0x0F, 0x0F, 0x83
 };
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitV2Replace[] = {
-  0x40, 0x0f, 0x83
+  0x40, 0x0F, 0x83
 };
 
 STATIC
@@ -588,15 +591,15 @@ mRemoveUsbLimitV2Patch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitIoP1Find[] = {
-  0x0f, 0x0f, 0x87
+  0x0F, 0x0F, 0x87
 };
 
 STATIC
 UINT8
 mRemoveUsbLimitIoP1Replace[] = {
-  0x40, 0x0f, 0x87
+  0x40, 0x0F, 0x87
 };
 
 STATIC
@@ -627,13 +630,9 @@ PatchUsbXhciPortLimit1 (
   // On 10.14.4 and newer IOUSBHostFamily also needs limit removal.
   // Thanks to ydeng discovering this.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (18, 5, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_MOJAVE, 5, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping port patch IOUSBHostFamily on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   Status = PatcherApplyGenericPatch (Patcher, &mRemoveUsbLimitIoP1Patch);
@@ -655,13 +654,11 @@ PatchUsbXhciPortLimit2 (
 {
   EFI_STATUS  Status;
 
+  ASSERT (Patcher != NULL);
+
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_HIGH_SIERRA_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping modern port patch AppleUSBXHCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -717,13 +714,11 @@ PatchUsbXhciPortLimit3 (
 {
   EFI_STATUS  Status;
 
+  ASSERT (Patcher != NULL);
+
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_EL_CAPITAN_MIN, KERNEL_VERSION_HIGH_SIERRA_MAX)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping legacy port patch AppleUSBXHCIPCI on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -749,13 +744,13 @@ PatchUsbXhciPortLimit3 (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIBlockStoragePatchV1Find[] = {
-  0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00
+  0x41, 0x50, 0x50, 0x4C, 0x45, 0x20, 0x53, 0x53, 0x44, 0x00  ///< "APPLE SSD\0"
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIBlockStoragePatchV1Replace[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
@@ -775,13 +770,13 @@ mIOAHCIBlockStoragePatchV1 = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIBlockStoragePatchV2Find[] = {
-  0x41, 0x50, 0x50, 0x4C, 0x45, 0x00
+  0x41, 0x50, 0x50, 0x4C, 0x45, 0x00  ///< "APPLE\0"
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIBlockStoragePatchV2Replace[] = {
   0x00, 0x00, 0x00, 0x00, 0x00, 0x00
 };
@@ -809,9 +804,7 @@ PatchThirdPartyDriveSupport (
 {
   EFI_STATUS       Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIBlockStoragePatchV1);
   if (EFI_ERROR (Status)) {
@@ -845,15 +838,15 @@ PatchThirdPartyDriveSupport (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIPortPatchFind[] = {
-  0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+  0x45, 0x78, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C  ///< "External"
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIOAHCIPortPatchReplace[] = {
-  0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C
+  0x49, 0x6E, 0x74, 0x65, 0x72, 0x6E, 0x61, 0x6C  ///< "Internal"
 };
 
 STATIC
@@ -879,9 +872,7 @@ PatchForceInternalDiskIcons (
 {
   EFI_STATUS          Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, &mIOAHCIPortPatch);
   if (EFI_ERROR (Status)) {
@@ -894,15 +885,15 @@ PatchForceInternalDiskIcons (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mAppleIoMapperPatchFind[] = {
-  0x44, 0x4D, 0x41, 0x52, 0x00 // DMAR\0
+  0x44, 0x4D, 0x41, 0x52, 0x00  ///< "DMAR\0"
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleIoMapperPatchReplace[] = {
-  0x52, 0x41, 0x4D, 0x44, 0x00 // RAMD\0
+  0x52, 0x41, 0x4D, 0x44, 0x00  ///< "RAMD\0"
 };
 
 STATIC
@@ -928,9 +919,7 @@ PatchAppleIoMapperSupport (
 {
   EFI_STATUS          Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping AppleIoMapper patch on %u\n", KernelVersion));
@@ -948,9 +937,10 @@ PatchAppleIoMapperSupport (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mAppleDummyCpuPmPatchReplace[] = {
-  0xB8, 0x01, 0x00, 0x00, 0x00, 0xC3 // mov eax, 1 ; ret
+  0xB8, 0x01, 0x00, 0x00, 0x00,  ///< mov eax, 1
+  0xC3                           ///< ret
 };
 
 STATIC
@@ -976,9 +966,7 @@ PatchDummyPowerManagement (
 {
   EFI_STATUS          Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, &mAppleDummyCpuPmPatch);
   if (EFI_ERROR (Status)) {
@@ -1014,7 +1002,7 @@ mIncreasePciBarSizePatch = {
   .Size        = sizeof (mIncreasePciBarSizePatchFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -1041,7 +1029,7 @@ mIncreasePciBarSizeLegacyPatch = {
   .Size        = sizeof (mIncreasePciBarSizePatchLegacyFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = EFI_PAGE_SIZE
+  .Limit       = 4096
 };
 
 STATIC
@@ -1053,9 +1041,7 @@ PatchIncreasePciBarSize (
 {
   EFI_STATUS          Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_YOSEMITE_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping com.apple.iokit.IOPCIFamily IncreasePciBarSize on %u\n", KernelVersion));
@@ -1081,13 +1067,13 @@ PatchIncreasePciBarSize (
 STATIC
 CONST UINT8
 mCustomSmbiosGuidPatchFind[] = {
-  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x31
+  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x31   ///< "EB9D2D31"
 };
 
 STATIC
 CONST UINT8
 mCustomSmbiosGuidPatchReplace[] = {
-  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x35
+  0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x35   ///< "EB9D2D35"
 };
 
 STATIC
@@ -1113,9 +1099,7 @@ PatchCustomSmbiosGuid (
 {
   EFI_STATUS          Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, &mCustomSmbiosGuidPatch);
   if (!EFI_ERROR (Status)) {
@@ -1130,13 +1114,13 @@ PatchCustomSmbiosGuid (
 STATIC
 CONST UINT8
 mPanicKextDumpPatchFind[] = {
-  0x00, 0x25, 0x2E, 0x2A, 0x73, 0x00 ///< \0%.*s\0
+  0x00, 0x25, 0x2E, 0x2A, 0x73, 0x00  ///< "\0%.*s\0"
 };
 
 STATIC
 CONST UINT8
 mPanicKextDumpPatchReplace[] = {
-  0x00, 0x00, 0x2E, 0x2A, 0x73, 0x00
+  0x00, 0x00, 0x2E, 0x2A, 0x73, 0x00  ///< "\0\0.*s\0"
 };
 
 STATIC
@@ -1187,7 +1171,7 @@ PatchPanicKextDump (
     return EFI_NOT_FOUND;
   }
 
-  *Record = 0xC3;
+  *Record = 0xC3;  ///< ret
 
   //
   // This one is for 10.13~10.14 release kernels, which do dumping inline.
@@ -1200,16 +1184,14 @@ PatchPanicKextDump (
     DEBUG ((DEBUG_INFO, "OCAK: Patch success kext dump\n"));
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 STATIC
 CONST UINT8
 mLapicKernelPanicPatchFind[] = {
-  // mov eax, gs:1Ch or gs:18h on 10.15.4+ or gs:20h on 11.0.
-  0x65, 0x8B, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00,
-  // cmp eax, cs:_master_cpu <- address masked out
-  0x3B, 0x00, 0x00, 0x00, 0x00, 0x00
+  0x65, 0x8B, 0x04, 0x25, 0x00, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch or gs:18h on 10.15.4+ or gs:20h on 11.0.
+  0x3B, 0x00, 0x00, 0x00, 0x00, 0x00               ///< cmp eax, cs:_master_cpu <- address masked out
 };
 
 STATIC
@@ -1222,10 +1204,8 @@ mLapicKernelPanicPatchMask[] = {
 STATIC
 CONST UINT8
 mLapicKernelPanicPatchReplace[] = {
-  // xor eax, eax
-  0x31, 0xC0,
-  // nop further
-  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90
+  0x31, 0xC0,                                                             ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
 };
 
 STATIC
@@ -1246,12 +1226,9 @@ mLapicKernelPanicPatch = {
 STATIC
 CONST UINT8
 mLapicKernelPanicPatchLegacyFind[] = {
-  // mov eax, gs:1Ch on 10.9.5 and 14h on 10.8.5.
-  0x65, 0x8B, 0x04, 0x25, 0x10, 0x00, 0x00, 0x00,
-  // lea rcx, _master_cpu
-  0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
-  // cmp eax, [rcx]
-  0x00, 0x00
+  0x65, 0x8B, 0x04, 0x25, 0x10, 0x00, 0x00, 0x00,  ///< mov eax, gs:1Ch on 10.9.5 and 14h on 10.8.5.
+  0x48, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,        ///< lea rcx, _master_cpu
+  0x00, 0x00                                       ///< cmp eax, [rcx]
 };
 
 STATIC
@@ -1265,10 +1242,8 @@ mLapicKernelPanicPatchLegacyMask[] = {
 STATIC
 CONST UINT8
 mLapicKernelPanicPatchLegacyReplace[] = {
-  // xor eax, eax
-  0x31, 0xC0,
-  // nop further
-  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90
+  0x31, 0xC0,                                                                               ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
 };
 
 STATIC
@@ -1287,23 +1262,22 @@ mLapicKernelPanicLegacyPatch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mLapicKernelPanicMasterPatchFind[] = {
-  // cmp cs:_debug_boot_arg, 0 <- address masked out
-  0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+  0x83, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00  ///< cmp cs:_debug_boot_arg, 0 <- address masked out
 };
 
 STATIC
-UINT8
+CONST UINT8
 mLapicKernelPanicMasterPatchMask[] = {
   0xFF, 0x00, 0x00, 0x00, 0x00, 0xFF, 0xFF
 };
 
 STATIC
-UINT8
+CONST UINT8
 mLapicKernelPanicMasterPatchReplace[] = {
-  // xor eax, eax ; nop further
-  0x31, 0xC0, 0x90, 0x90, 0x90, 0x90, 0x90
+  0x31, 0xC0,                   ///< xor eax, eax
+  0x90, 0x90, 0x90, 0x90, 0x90  ///< nop
 };
 
 STATIC
@@ -1367,17 +1341,16 @@ PatchLapicKernelPanic (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mPowerStateTimeoutPanicFind[] = {
-  // com.apple\0
-  0x63, 0x6F, 0x6D, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00
+  0x63, 0x6F, 0x6D, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00  ///< "com.apple\0"
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPowerStateTimeoutPanicReplace[] = {
   // not.apple\0
-  0x6E, 0x6F, 0x74, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00
+  0x6E, 0x6F, 0x74, 0x2E, 0x61, 0x70, 0x70, 0x6C, 0x65, 0x00  ///< "not.apple\0"
 };
 
 STATIC
@@ -1396,7 +1369,7 @@ mPowerStateTimeoutPanicMasterPatch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPowerStateTimeoutPanicInlineFind[] = {
   0x80, 0x00, 0x01, 0x6F,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
   0x75, 0x00,              ///< jnz short fail
@@ -1405,7 +1378,7 @@ mPowerStateTimeoutPanicInlineFind[] = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mPowerStateTimeoutPanicInlineMask[] = {
   0xFF, 0x00, 0xFF, 0xFF,  ///< cmp byte ptr [rax+1], 6Fh ; 'o'
   0xFF, 0x00,              ///< jnz short fail
@@ -1415,7 +1388,7 @@ mPowerStateTimeoutPanicInlineMask[] = {
 
 
 STATIC
-UINT8
+CONST UINT8
 mPowerStateTimeoutPanicInlineReplace[] = {
   0x80, 0x00, 0x01, 0x6E,  ///< cmp byte ptr [rax+1], 6Eh ; 'n'
   0x75, 0x00,              ///< jnz short fail
@@ -1435,7 +1408,7 @@ mPowerStateTimeoutPanicInlinePatch = {
   .Size        = sizeof (mPowerStateTimeoutPanicInlineFind),
   .Count       = 1,
   .Skip        = 0,
-  .Limit       = 0x1000
+  .Limit       = 4096
 };
 
 STATIC
@@ -1487,37 +1460,37 @@ PatchPowerStateTimeout (
 //
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchFind32[] = {
   0xC7, 0x00, 0x00, 0x00, 0x58, 0x00, 0x00, 0x00
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchMask32[] = {
   0xFF, 0x00, 0x00, 0x00, 0xFE, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchReplace32[] = {
   0xC7, 0x00, 0x00, 0x00, 0xFF, 0xFF, 0x00, 0x00
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchFind64[] = {
   0xBE, 0x58, 0x00, 0x00, 0x00
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchMask64[] = {
   0xFF, 0xFE, 0xFF, 0xFF, 0xFF
 };
 
 STATIC
-UINT8
+CONST UINT8
 mAppleRtcChecksumPatchReplace64[] = {
   0xBE, 0xFF, 0xFF, 0x00, 0x00
 };
@@ -1561,9 +1534,7 @@ PatchAppleRtcChecksum (
 {
   EFI_STATUS Status;
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
+  ASSERT (Patcher != NULL);
 
   Status = PatcherApplyGenericPatch (Patcher, Patcher->Is32Bit ? &mAppleRtcChecksumPatch32 : &mAppleRtcChecksumPatch64);
   if (EFI_ERROR (Status)) {
@@ -1620,11 +1591,13 @@ PatchSegmentJettison (
   //
   // Find the call to _ml_static_mfree.
   //
-  Diff = (UINT32)((UINTN)StaticMfree - (UINTN)RemoveBs - 5);
+  // NOTE: One call instruction takes 5 bytes.
+  //
+  Diff = (UINT32) ((UINTN) StaticMfree - (UINTN) RemoveBs - 5);
 
   CurrFreeCall = NULL;
   for (Index = 0; Index < EFI_PAGE_SIZE; ++Index) {
-    if (RemoveBs[0] == 0xE8
+    if (RemoveBs[0] == 0xE8  ///< call
       && CompareMem (&RemoveBs[1], &Diff, sizeof (Diff)) == 0) {
       CurrFreeCall = RemoveBs;
       DEBUG ((
@@ -1662,10 +1635,10 @@ PatchSegmentJettison (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mBTFeatureFlagsReplace[] = {
-  0x55,            // push rbp
-  0x83, 0xCE, 0x0F // or esi, 0x0F
+  0x55,             ///< push rbp
+  0x83, 0xCE, 0x0F  ///< or esi, 0x0F
 };
 
 STATIC
@@ -1703,34 +1676,25 @@ PatchBTFeatureFlags (
   IN     UINT32             KernelVersion
   )
 {
-  EFI_STATUS Status;
+  EFI_STATUS  Status;
 
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, KERNEL_VERSION_BIG_SUR_MAX)) {
+  ASSERT (Patcher != NULL);
+
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOUNTAIN_LION_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping BTFeatureFlags on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
 
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
-  }
-
-  Status = PatcherApplyGenericPatch (
-    Patcher,
-    &mBTFeatureFlagsPatchV1
-    );
+  Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV1);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v1 - %r, trying v2\n", Status));
-    Status = PatcherApplyGenericPatch (
-      Patcher,
-      &mBTFeatureFlagsPatchV2
-      );
+    Status = PatcherApplyGenericPatch (Patcher,&mBTFeatureFlagsPatchV2);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v2 - %r\n", Status));
-      return EFI_NOT_FOUND;
     }
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 //
@@ -1793,7 +1757,9 @@ typedef union {
 #define COMM_PAGE_BCOPY       0xFFFF0780
 #define kHasSupplementalSSE3  0x00000100
 
-STATIC CONST UINT8 mAsmLegacyBcopy64[] = {
+STATIC
+CONST UINT8
+mAsmLegacyBcopy64[] = {
   #include "LegacyBcopy.h"
 };
 
@@ -1932,7 +1898,6 @@ mAquantiaEthernetPatchFindV2[] = {
   0x83, 0x7D                           ///< LBL:
 };
 
-
 STATIC
 CONST UINT8
 mAquantiaEthernetPatchFindMaskV2[] = {
@@ -1980,6 +1945,8 @@ PatchAquantiaEthernet (
 {
   EFI_STATUS   Status;
 
+  ASSERT (Patcher != NULL);
+
   //
   // FIXME: Check whether any patches are required before 10.15.4.
   //
@@ -1987,13 +1954,9 @@ PatchAquantiaEthernet (
   //
   // This patch is not required before macOS 10.15.4.
   //
-  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (19, 4, 0), 0)) {
+  if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_CATALINA, 4, 0), 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet before %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -2031,13 +1994,11 @@ PatchForceSecureBootScheme (
   UINT8        *HybridAp;
   UINT32       Diff;
 
+  ASSERT (Patcher != NULL);
+
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_BIG_SUR_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping sb scheme on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -2090,7 +2051,7 @@ mApfsTimeoutFind[] = {
 STATIC
 UINT8
 mApfsTimeoutReplace[] = {
-  0x48, 0x3D, 0x00, 0x00, 0x00, 0x00
+  0x48, 0x3D, 0x00, 0x00, 0x00, 0x00  ///< To be set by PatchSetApfsTimeout()
 };
 
 STATIC
@@ -2113,7 +2074,9 @@ PatchSetApfsTimeout (
   IN UINT32  Timeout
   )
 {
+  //
   // FIXME: This is really ugly, make quirks take a context param.
+  //
   DEBUG ((DEBUG_INFO, "OCAK: Registering %u APFS timeout\n", Timeout));
   CopyMem (&mApfsTimeoutReplace[2], &Timeout, sizeof (Timeout));
 }
@@ -2149,13 +2112,11 @@ PatchSetApfsTrimTimeout (
 {
   EFI_STATUS  Status;
 
+  ASSERT (Patcher != NULL);
+
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION_MOJAVE_MIN, 0)) {
     DEBUG ((DEBUG_INFO, "OCAK: Skipping apfs timeout on %u\n", KernelVersion));
     return EFI_SUCCESS;
-  }
-
-  if (Patcher == NULL) {
-    return EFI_NOT_FOUND;
   }
 
   //
@@ -2191,30 +2152,30 @@ PatchSetApfsTrimTimeout (
 // Quirks table.
 //
 KERNEL_QUIRK gKernelQuirks[] = {
-  [KernelQuirkAppleCpuPmCfgLock] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
-  [KernelQuirkAppleXcpmCfgLock] = { NULL, PatchAppleXcpmCfgLock },
-  [KernelQuirkAppleXcpmExtraMsrs] = { NULL, PatchAppleXcpmExtraMsrs },
-  [KernelQuirkAppleXcpmForceBoost] = { NULL, PatchAppleXcpmForceBoost },
-  [KernelQuirkCustomSmbiosGuid1] = { "com.apple.driver.AppleSMBIOS", PatchCustomSmbiosGuid },
-  [KernelQuirkCustomSmbiosGuid2] = { "com.apple.driver.AppleACPIPlatform", PatchCustomSmbiosGuid },
-  [KernelQuirkDisableIoMapper] = { "com.apple.iokit.IOPCIFamily", PatchAppleIoMapperSupport },
-  [KernelQuirkDisableRtcChecksum] = { "com.apple.driver.AppleRTC", PatchAppleRtcChecksum },
-  [KernelQuirkDummyPowerManagement] = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement },
-  [KernelQuirkExternalDiskIcons] = { "com.apple.driver.AppleAHCIPort", PatchForceInternalDiskIcons },
-  [KernelQuirkIncreasePciBarSize] = { "com.apple.iokit.IOPCIFamily", PatchIncreasePciBarSize },
-  [KernelQuirkLapicKernelPanic] = { NULL, PatchLapicKernelPanic },
-  [KernelQuirkPanicNoKextDump] = { NULL, PatchPanicKextDump },
-  [KernelQuirkPowerTimeoutKernelPanic] = { NULL, PatchPowerStateTimeout },
-  [KernelQuirkThirdPartyDrives] = { "com.apple.iokit.IOAHCIBlockStorage", PatchThirdPartyDriveSupport },
-  [KernelQuirkXhciPortLimit1] = { "com.apple.iokit.IOUSBHostFamily", PatchUsbXhciPortLimit1 },
-  [KernelQuirkXhciPortLimit2] = { "com.apple.driver.usb.AppleUSBXHCI", PatchUsbXhciPortLimit2 },
-  [KernelQuirkXhciPortLimit3] = { "com.apple.driver.usb.AppleUSBXHCIPCI", PatchUsbXhciPortLimit3 },
-  [KernelQuirkSegmentJettison] = { NULL, PatchSegmentJettison },
-  [KernelQuirkExtendBTFeatureFlags] = { "com.apple.iokit.IOBluetoothFamily", PatchBTFeatureFlags },
-  [KernelQuirkLegacyCommpage] = { NULL, PatchLegacyCommpage },
-  [KernelQuirkForceSecureBootScheme] = { "com.apple.security.AppleImage4", PatchForceSecureBootScheme },
-  [KernelQuirkSetApfsTrimTimeout] = { "com.apple.filesystems.apfs", PatchSetApfsTrimTimeout },
-  [KernelQuirkForceAquantiaEthernet] = { "com.apple.driver.AppleEthernetAquantiaAqtion", PatchAquantiaEthernet },
+  [KernelQuirkAppleCpuPmCfgLock]       = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchAppleCpuPmCfgLock }, 
+  [KernelQuirkAppleXcpmCfgLock]        = { NULL,                                            PatchAppleXcpmCfgLock },
+  [KernelQuirkAppleXcpmExtraMsrs]      = { NULL,                                            PatchAppleXcpmExtraMsrs },
+  [KernelQuirkAppleXcpmForceBoost]     = { NULL,                                            PatchAppleXcpmForceBoost },
+  [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid },
+  [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid },
+  [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport },
+  [KernelQuirkDisableRtcChecksum]      = { "com.apple.driver.AppleRTC",                     PatchAppleRtcChecksum },
+  [KernelQuirkDummyPowerManagement]    = { "com.apple.driver.AppleIntelCPUPowerManagement", PatchDummyPowerManagement },
+  [KernelQuirkExtendBTFeatureFlags]    = { "com.apple.iokit.IOBluetoothFamily",             PatchBTFeatureFlags },
+  [KernelQuirkExternalDiskIcons]       = { "com.apple.driver.AppleAHCIPort",                PatchForceInternalDiskIcons },
+  [KernelQuirkForceAquantiaEthernet]   = { "com.apple.driver.AppleEthernetAquantiaAqtion",  PatchAquantiaEthernet },
+  [KernelQuirkForceSecureBootScheme]   = { "com.apple.security.AppleImage4",                PatchForceSecureBootScheme },
+  [KernelQuirkIncreasePciBarSize]      = { "com.apple.iokit.IOPCIFamily",                   PatchIncreasePciBarSize },
+  [KernelQuirkLapicKernelPanic]        = { NULL,                                            PatchLapicKernelPanic },
+  [KernelQuirkLegacyCommpage]          = { NULL,                                            PatchLegacyCommpage },
+  [KernelQuirkPanicNoKextDump]         = { NULL,                                            PatchPanicKextDump },
+  [KernelQuirkPowerTimeoutKernelPanic] = { NULL,                                            PatchPowerStateTimeout },
+  [KernelQuirkSegmentJettison]         = { NULL,                                            PatchSegmentJettison },
+  [KernelQuirkSetApfsTrimTimeout]      = { "com.apple.filesystems.apfs",                    PatchSetApfsTrimTimeout },
+  [KernelQuirkThirdPartyDrives]        = { "com.apple.iokit.IOAHCIBlockStorage",            PatchThirdPartyDriveSupport },
+  [KernelQuirkXhciPortLimit1]          = { "com.apple.iokit.IOUSBHostFamily",               PatchUsbXhciPortLimit1 },
+  [KernelQuirkXhciPortLimit2]          = { "com.apple.driver.usb.AppleUSBXHCI",             PatchUsbXhciPortLimit2 },
+  [KernelQuirkXhciPortLimit3]          = { "com.apple.driver.usb.AppleUSBXHCIPCI",          PatchUsbXhciPortLimit3 },  
 };
 
 EFI_STATUS

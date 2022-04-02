@@ -21,16 +21,16 @@
 #include <Library/OcXmlLib.h>
 #include <Protocol/SimpleFileSystem.h>
 
-#define PRELINK_KERNEL_IDENTIFIER "__kernel__"
+#define PRELINK_KERNEL_IDENTIFIER     "__kernel__"
 #define PRELINK_KPI_IDENTIFIER_PREFIX "com.apple.kpi."
 
-#define PRELINK_INFO_SEGMENT  "__PRELINK_INFO"
-#define PRELINK_INFO_SECTION  "__info"
-#define PRELINK_TEXT_SEGMENT  "__PRELINK_TEXT"
-#define PRELINK_TEXT_SECTION  "__text"
-#define PRELINK_STATE_SEGMENT "__PRELINK_STATE"
-#define PRELINK_STATE_SECTION_KERNEL "__kernel"
-#define PRELINK_STATE_SECTION_KEXTS  "__kexts"
+#define PRELINK_INFO_SEGMENT          "__PRELINK_INFO"
+#define PRELINK_INFO_SECTION          "__info"
+#define PRELINK_TEXT_SEGMENT          "__PRELINK_TEXT"
+#define PRELINK_TEXT_SECTION          "__text"
+#define PRELINK_STATE_SEGMENT         "__PRELINK_STATE"
+#define PRELINK_STATE_SECTION_KERNEL  "__kernel"
+#define PRELINK_STATE_SECTION_KEXTS   "__kexts"
 
 
 #define PRELINK_INFO_DICTIONARY_KEY               "_PrelinkInfoDictionary"
@@ -110,22 +110,40 @@ typedef enum KERNEL_CACHE_TYPE_ {
 #define KERNEL_VERSION(A, B, C) ((A) * 10000 + (B) * 100 + (C))
 
 //
+// Darwin versions for each release.
+//
+#define KERNEL_VERSION_TIGER          8
+#define KERNEL_VERSION_LEOPARD        9
+#define KERNEL_VERSION_SNOW_LEOPARD   10
+#define KERNEL_VERSION_LION           11
+#define KERNEL_VERSION_MOUNTAIN_LION  12
+#define KERNEL_VERSION_MAVERICKS      13
+#define KERNEL_VERSION_YOSEMITE       14
+#define KERNEL_VERSION_EL_CAPITAN     15
+#define KERNEL_VERSION_SIERRA         16
+#define KERNEL_VERSION_HIGH_SIERRA    17
+#define KERNEL_VERSION_MOJAVE         18
+#define KERNEL_VERSION_CATALINA       19
+#define KERNEL_VERSION_BIG_SUR        20
+#define KERNEL_VERSION_MONTEREY       21
+
+//
 // Minimum kernel versions for each release.
 //
-#define KERNEL_VERSION_TIGER_MIN            KERNEL_VERSION (8, 0, 0)
-#define KERNEL_VERSION_LEOPARD_MIN          KERNEL_VERSION (9, 0, 0)
-#define KERNEL_VERSION_SNOW_LEOPARD_MIN     KERNEL_VERSION (10, 0, 0)
-#define KERNEL_VERSION_LION_MIN             KERNEL_VERSION (11, 0, 0)
-#define KERNEL_VERSION_MOUNTAIN_LION_MIN    KERNEL_VERSION (12, 0, 0)
-#define KERNEL_VERSION_MAVERICKS_MIN        KERNEL_VERSION (13, 0, 0)
-#define KERNEL_VERSION_YOSEMITE_MIN         KERNEL_VERSION (14, 0, 0)
-#define KERNEL_VERSION_EL_CAPITAN_MIN       KERNEL_VERSION (15, 0, 0)
-#define KERNEL_VERSION_SIERRA_MIN           KERNEL_VERSION (16, 0, 0)
-#define KERNEL_VERSION_HIGH_SIERRA_MIN      KERNEL_VERSION (17, 0, 0)
-#define KERNEL_VERSION_MOJAVE_MIN           KERNEL_VERSION (18, 0, 0)
-#define KERNEL_VERSION_CATALINA_MIN         KERNEL_VERSION (19, 0, 0)
-#define KERNEL_VERSION_BIG_SUR_MIN          KERNEL_VERSION (20, 0, 0)
-#define KERNEL_VERSION_MONTEREY_MIN         KERNEL_VERSION (21, 0, 0)
+#define KERNEL_VERSION_TIGER_MIN            KERNEL_VERSION (KERNEL_VERSION_TIGER, 0, 0)
+#define KERNEL_VERSION_LEOPARD_MIN          KERNEL_VERSION (KERNEL_VERSION_LEOPARD, 0, 0)
+#define KERNEL_VERSION_SNOW_LEOPARD_MIN     KERNEL_VERSION (KERNEL_VERSION_SNOW_LEOPARD, 0, 0)
+#define KERNEL_VERSION_LION_MIN             KERNEL_VERSION (KERNEL_VERSION_LION, 0, 0)
+#define KERNEL_VERSION_MOUNTAIN_LION_MIN    KERNEL_VERSION (KERNEL_VERSION_MOUNTAIN_LION, 0, 0)
+#define KERNEL_VERSION_MAVERICKS_MIN        KERNEL_VERSION (KERNEL_VERSION_MAVERICKS, 0, 0)
+#define KERNEL_VERSION_YOSEMITE_MIN         KERNEL_VERSION (KERNEL_VERSION_YOSEMITE, 0, 0)
+#define KERNEL_VERSION_EL_CAPITAN_MIN       KERNEL_VERSION (KERNEL_VERSION_EL_CAPITAN, 0, 0)
+#define KERNEL_VERSION_SIERRA_MIN           KERNEL_VERSION (KERNEL_VERSION_SIERRA, 0, 0)
+#define KERNEL_VERSION_HIGH_SIERRA_MIN      KERNEL_VERSION (KERNEL_VERSION_HIGH_SIERRA, 0, 0)
+#define KERNEL_VERSION_MOJAVE_MIN           KERNEL_VERSION (KERNEL_VERSION_MOJAVE, 0, 0)
+#define KERNEL_VERSION_CATALINA_MIN         KERNEL_VERSION (KERNEL_VERSION_CATALINA, 0, 0)
+#define KERNEL_VERSION_BIG_SUR_MIN          KERNEL_VERSION (KERNEL_VERSION_BIG_SUR, 0, 0)
+#define KERNEL_VERSION_MONTEREY_MIN         KERNEL_VERSION (KERNEL_VERSION_MONTEREY, 0, 0)
 
 //
 // Maximum kernel versions for each release.
@@ -529,7 +547,7 @@ typedef enum {
   //
   KernelQuirkDisableRtcChecksum,
   //
-  // Apply dummy power management patches to AppleIntelCpuPowerManagement in macOS.
+  // Apply dummy power management patches to AppleIntelCPUPowerManagement in macOS.
   //
   KernelQuirkDummyPowerManagement,
   //
@@ -541,6 +559,14 @@ typedef enum {
   //
   KernelQuirkExternalDiskIcons,
   //
+  // Enable Aquantia AQtion AQC-107s support.
+  //
+  KernelQuirkForceAquantiaEthernet,
+  //
+  // Force SecureBoot support for all CPUs.
+  //
+  KernelQuirkForceSecureBootScheme,
+  //
   // Apply PCI bar size patches to IOPCIFamily kext for compatibility with select configuration.
   //
   KernelQuirkIncreasePciBarSize,
@@ -549,20 +575,28 @@ typedef enum {
   //
   KernelQuirkLapicKernelPanic,
   //
+  // Replace the 64-bit commpage bcopy implementation with one that does not use SSSE3.
+  //
+  KernelQuirkLegacyCommpage,
+  //
   // Apply kernel patches to remove kext dumping in the panic log.
   //
   KernelQuirkPanicNoKextDump,
-  //
-  // Replaces the 64-bit commpage bcopy implementation with one that does not use SSSE3.
-  //
-  KernelQuirkLegacyCommpage,
   //
   // Disable power state change timeout kernel panic (10.15+).
   //
   KernelQuirkPowerTimeoutKernelPanic,
   //
+  // Remove kernel __LINKEDIT jetisson.
+  //
+  KernelQuirkSegmentJettison,
+  //
+  // Set custom APFS trim timeout.
+  //
+  KernelQuirkSetApfsTrimTimeout,
+  //
   // Apply vendor patches to IOAHCIFamily kext to enable native features for third-party drives,
-  //   such as TRIM on SSDs or hibernation support on 10.15.
+  // such as TRIM on SSDs or hibernation support on 10.15.
   //
   KernelQuirkThirdPartyDrives,
   //
@@ -571,32 +605,21 @@ typedef enum {
   KernelQuirkXhciPortLimit1,
   KernelQuirkXhciPortLimit2,
   KernelQuirkXhciPortLimit3,
-  //
-  // Remove kernel __LINKEDIT jetisson.
-  //
-  KernelQuirkSegmentJettison,
-  //
-  // Force SecureBoot support for all CPUs.
-  //
-  KernelQuirkForceSecureBootScheme,
-  //
-  // Set custom APFS trim timeout.
-  //
-  KernelQuirkSetApfsTrimTimeout,
-  //
-  // Enable Aquantia AQtion AQC-107s support.
-  //
-  KernelQuirkForceAquantiaEthernet,
-
+  
   KernelQuirkMax
 } KERNEL_QUIRK_NAME;
 
-//
-// Kernel quirk patch function.
-//
+/**
+  Kernel quirk patch function.
+
+  @param[in,out]  Patcher        A pointer to the patcher context.
+  @param[in]      KernelVersion  Kernel version to be matched.
+
+  @return  EFI_SUCCESS when the patch is successfully applied.
+**/
 typedef
 EFI_STATUS
-(KERNEL_QUIRK_PATCH_FUNCTION)(
+(KERNEL_QUIRK_PATCH_FUNCTION) (
   IN OUT PATCHER_CONTEXT    *Patcher,
   IN     UINT32             KernelVersion
   );
