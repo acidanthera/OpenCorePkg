@@ -336,7 +336,7 @@
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl|0x03
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl|0x07
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate|1843200
-  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo|{0xFF}
+  gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo|{0xFF,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0}
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize|64
   gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride|1
 
