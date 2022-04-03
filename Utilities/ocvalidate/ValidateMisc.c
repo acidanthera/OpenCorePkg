@@ -647,12 +647,16 @@ CheckMiscSerial (
   } else if (PciDeviceInfoSize == 0) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->PciDeviceInfo cannot be empty (use 0xFF instead)!\n"));
     ++ErrorCount;
-  } else if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
-    DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->PciDeviceInfo must be 0xFF!\n"));
-    ++ErrorCount;
-  } else if ((PciDeviceInfoSize - 1) % 4 != 0) {
-    DEBUG ((DEBUG_WARN, "Misc->Serial->PciDeviceInfo must be divisible by 4 excluding the last 0xFF!\n"));
-    ++ErrorCount;
+  } else {
+    if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
+      DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->PciDeviceInfo must be 0xFF!\n"));
+      ++ErrorCount;
+    }
+
+    if ((PciDeviceInfoSize - 1) % 4 != 0) {
+      DEBUG ((DEBUG_WARN, "Misc->Serial->PciDeviceInfo must be divisible by 4 excluding the last 0xFF!\n"));
+      ++ErrorCount;
+    }
   }
 
   return ErrorCount;
