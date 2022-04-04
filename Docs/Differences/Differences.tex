@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Mon Apr  4 13:04:33 2022
+%DIF ADD ../Configuration.tex        Mon Apr  4 20:16:05 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2843,7 +2843,7 @@ blocking.
   One way to workaround the problem is to increase the timeout to an extremely
   high value, which at the cost of slow boot times (extra minutes) will
   ensure that all the blocks are trimmed. \DIFdelbegin \DIFdel{Set }\DIFdelend \DIFaddbegin \DIFadd{Setting }\DIFaddend this option to a high value,
-  such as \texttt{4294967295} \DIFdelbegin \DIFdel{, to ensure }\DIFdelend \DIFaddbegin \DIFadd{(a.k.a. }\texttt{\DIFadd{-1}}\DIFadd{) ensures }\DIFaddend that all blocks are trimmed.
+  such as \texttt{4294967295} \DIFdelbegin \DIFdel{, to ensure }\DIFdelend \DIFaddbegin \DIFadd{ensures }\DIFaddend that all blocks are trimmed.
   Alternatively, use over-provisioning, if supported, or create
   a dedicated unmapped partition where the reserve blocks can be found
   by the controller. Conversely, the trim operation can be \DIFaddbegin \DIFadd{mostly }\DIFaddend disabled by
@@ -2852,10 +2852,14 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS \DIFdelbegin \DIFdel{12+}\DIFdelend \DIFaddbegin \DIFadd{12.0 and above}\DIFaddend , it is no longer possible to \DIFdelbegin \DIFdel{set trim timeoutfor APFS filesystems}\DIFdelend \DIFaddbegin \DIFadd{specify trim timeout}\DIFaddend .
+  \DIFdelbegin \DIFdel{On macOS 12+}\DIFdelend \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: The failsafe value }\texttt{\DIFadd{-1}} \DIFadd{indicates that this patch will not be applied,
+  such that }\texttt{\DIFadd{apfs.kext}} \DIFadd{will remain untouched.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: On macOS 12.0 and above}\DIFaddend , it is no longer possible to \DIFdelbegin \DIFdel{set trim timeoutfor APFS filesystems}\DIFdelend \DIFaddbegin \DIFadd{specify trim timeout}\DIFaddend .
   However, \DIFdelbegin \DIFdel{trim }\DIFdelend \DIFaddbegin \DIFadd{it }\DIFaddend can be disabled \DIFdelbegin \DIFdel{when the timeout value is set to }\DIFdelend \DIFaddbegin \DIFadd{by setting }\DIFaddend \texttt{0}.
 
-  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Trim operations are }\emph{\DIFadd{only}} \DIFadd{affected at booting phase when the startup volume is mounted.
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: Trim operations are }\emph{\DIFadd{only}} \DIFadd{affected at booting phase when the startup volume is mounted.
   Either specifying timeout, or completely disabling trim with }\texttt{\DIFadd{0}}\DIFadd{, will not affect normal macOS running.
 }
 

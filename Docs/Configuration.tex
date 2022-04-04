@@ -2776,7 +2776,7 @@ blocking.
   One way to workaround the problem is to increase the timeout to an extremely
   high value, which at the cost of slow boot times (extra minutes) will
   ensure that all the blocks are trimmed. Setting this option to a high value,
-  such as \texttt{4294967295} (a.k.a. \texttt{-1}) ensures that all blocks are trimmed.
+  such as \texttt{4294967295} ensures that all blocks are trimmed.
   Alternatively, use over-provisioning, if supported, or create
   a dedicated unmapped partition where the reserve blocks can be found
   by the controller. Conversely, the trim operation can be mostly disabled by
@@ -2784,10 +2784,13 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS 12.0 and above, it is no longer possible to specify trim timeout.
+  \emph{Note}: The failsafe value \texttt{-1} indicates that this patch will not be applied,
+  such that \texttt{apfs.kext} will remain untouched.
+
+  \emph{Note 2}: On macOS 12.0 and above, it is no longer possible to specify trim timeout.
   However, it can be disabled by setting \texttt{0}.
 
-  \emph{Note}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
+  \emph{Note 3}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
   Either specifying timeout, or completely disabling trim with \texttt{0}, will not affect normal macOS running.
 
 \item

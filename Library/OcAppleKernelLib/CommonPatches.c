@@ -2137,8 +2137,6 @@ PatchSetApfsTrimTimeout (
   }
 
   //
-  // FIXME: This is wrong! At least from 11.6.1, mApfsTimeoutPatch cannot be applied anymore.
-  //
   // It is only possible to specify trim timeout value from 10.14 to 11.x.
   // Starting at 12.0 this is no longer possible.
   //
@@ -2153,7 +2151,7 @@ PatchSetApfsTrimTimeout (
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Skipping SetApfsTrimTimeout on macOS 12.0+, set 0 to disable trim instead\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: Skipping SetApfsTrimTimeout on macOS 12.0+\n"));
   return EFI_SUCCESS;
 }
 
