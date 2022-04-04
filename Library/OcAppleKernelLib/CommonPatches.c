@@ -2045,20 +2045,22 @@ PatchForceSecureBootScheme (
 STATIC
 UINT8
 mApfsTimeoutFind[] = {
-  0x48, 0x3D, 0x7F, 0x96, 0x98, 0x00
+  0x48, 0x3D, 0x7F, 0x96, 0x98, 0x00  ///< cmp rax, 9999999d
 };
+STATIC_ASSERT (sizeof (mApfsTimeoutFind) == 6, "Unsupported mApfsTimeoutFind");
 
 STATIC
 UINT8
 mApfsTimeoutReplace[] = {
-  0x48, 0x3D, 0x00, 0x00, 0x00, 0x00  ///< To be set by PatchSetApfsTimeout()
+  0x48, 0x3D, 0x00, 0x00, 0x00, 0x00  ///< cmp rax, <new_timeout> ; To be set by PatchSetApfsTimeout()
 };
+STATIC_ASSERT (sizeof (mApfsTimeoutReplace) == 6, "Unsupported mApfsTimeoutReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
 mApfsTimeoutPatch = {
   .Comment     = DEBUG_POINTER ("ApfsTimeout"),
-  .Base        = NULL,
+  .Base        = "_nx_mount_trim_thread",
   .Find        = mApfsTimeoutFind,
   .Mask        = NULL,
   .Replace     = mApfsTimeoutReplace,
@@ -2122,7 +2124,8 @@ PatchSetApfsTrimTimeout (
   //
   // Disable trim using another patch when timeout is 0.
   //
-  if (mApfsTimeoutReplace[2] == 0) {
+  if (mApfsTimeoutReplace[2] == 0 && mApfsTimeoutReplace[3] == 0
+    && mApfsTimeoutReplace[4] == 0 && mApfsTimeoutReplace[5] == 0) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsDisableTrimPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch ApfsDisableTrim - %r\n", Status));
@@ -2133,6 +2136,12 @@ PatchSetApfsTrimTimeout (
     return Status;
   }
 
+  //
+  // FIXME: This is wrong! At least from 11.6.1, mApfsTimeoutPatch cannot be applied anymore.
+  //
+  // It is only possible to specify trim timeout value from 10.14 to 11.x.
+  // Starting at 12.0 this is no longer possible.
+  //
   if (KernelVersion < KERNEL_VERSION_MONTEREY_MIN) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsTimeoutPatch);
     if (EFI_ERROR (Status)) {
@@ -2144,7 +2153,7 @@ PatchSetApfsTrimTimeout (
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Skipping patch SetApfsTrimTimeout on macOS 12.0+\n"));
+  DEBUG ((DEBUG_INFO, "OCAK: Skipping SetApfsTrimTimeout on macOS 12.0+, set 0 to disable trim instead\n"));
   return EFI_SUCCESS;
 }
 
