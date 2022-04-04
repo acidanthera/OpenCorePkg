@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Tue Mar 22 16:40:30 2022
+%DIF ADD ../Configuration.tex        Mon Apr  4 13:04:33 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2852,15 +2852,14 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS 12+, it is no longer possible to \DIFdelbegin \DIFdel{set }\DIFdelend \DIFaddbegin \DIFadd{specify }\DIFaddend trim timeout for APFS filesystems.
-  However, \DIFdelbegin \DIFdel{trim }\DIFdelend \DIFaddbegin \DIFadd{it }\DIFaddend can be disabled \DIFdelbegin \DIFdel{when the timeout value is }\DIFdelend \DIFaddbegin \DIFadd{by setting }\texttt{\DIFadd{0}}\DIFadd{.
+  On macOS \DIFdelbegin \DIFdel{12+}\DIFdelend \DIFaddbegin \DIFadd{12.0 and above}\DIFaddend , it is no longer possible to \DIFdelbegin \DIFdel{set trim timeoutfor APFS filesystems}\DIFdelend \DIFaddbegin \DIFadd{specify trim timeout}\DIFaddend .
+  However, \DIFdelbegin \DIFdel{trim }\DIFdelend \DIFaddbegin \DIFadd{it }\DIFaddend can be disabled \DIFdelbegin \DIFdel{when the timeout value is set to }\DIFdelend \DIFaddbegin \DIFadd{by setting }\DIFaddend \texttt{0}.
+
+  \DIFaddbegin \emph{\DIFadd{Note}}\DIFadd{: Trim operations are }\emph{\DIFadd{only}} \DIFadd{affected at booting phase when the startup volume is mounted.
+  Either specifying timeout, or completely disabling trim with }\texttt{\DIFadd{0}}\DIFadd{, will not affect normal macOS running.
 }
 
-  \emph{\DIFadd{Note}}\DIFadd{: System Information may still report }\texttt{\DIFadd{TRIM Support: Yes}} \DIFadd{with this
-  option }\DIFaddend set to \texttt{0}. \DIFaddbegin \DIFadd{Yet, this is false positive and trim is de facto disabled.
-}\DIFaddend 
-
-\item
+\DIFaddend \item
   \texttt{ThirdPartyDrives}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

@@ -2784,11 +2784,11 @@ blocking.
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS 12+, it is no longer possible to specify trim timeout for APFS filesystems.
+  On macOS 12.0 and above, it is no longer possible to specify trim timeout.
   However, it can be disabled by setting \texttt{0}.
 
-  \emph{Note}: System Information may still report \texttt{TRIM Support: Yes} with this
-  option set to \texttt{0}. Yet, this is false positive and trim is de facto disabled.
+  \emph{Note}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
+  Either specifying timeout, or completely disabling trim with \texttt{0}, will not affect normal macOS running.
 
 \item
   \texttt{ThirdPartyDrives}\\
