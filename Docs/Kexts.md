@@ -59,7 +59,7 @@ Kexts
 | [AAAMouSSE.kext](https://forums.macrumors.com/threads/mp3-1-others-sse-4-2-emulation-to-enable-amd-metal-driver.2206682/) | 16.0.0 (10.12) | — | — |
 | [AppleMCEReporterDisabler.kext](https://github.com/acidanthera/bugtracker/issues/424#issuecomment-535624313) | — | — | — |
 | [AsusSMC.kext](https://github.com/hieplpvip/AsusSMC) | — | — | — |
-| [CPUFriend.kext](https://github.com/acidanthera/CPUFriend) | 15.0.0 (10.11) | — | — |
+| [CPUFriend.kext](https://github.com/acidanthera/CPUFriend) | 10.0.0 (10.6) | — | — |
 | [HWPEnabler.kext](https://github.com/headkaze/HWPEnable) | — | — | — |
 | [OpcodeEmulator.kext](https://www.insanelymac.com/forum/topic/329704-opcode-emulator-opemu-plug-in-project/) | — | — | — |
 | [telemetrap.kext](https://forums.macrumors.com/posts/28447707) | 18.0.0 (10.14) | — | — |
