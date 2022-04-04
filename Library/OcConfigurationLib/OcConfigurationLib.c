@@ -51,6 +51,7 @@ OC_ARRAY_STRUCTORS (OC_MISC_BLESS_ARRAY)
 OC_STRUCTORS       (OC_MISC_BOOT, ())
 OC_STRUCTORS       (OC_MISC_DEBUG, ())
 OC_STRUCTORS       (OC_MISC_SECURITY, ())
+OC_STRUCTORS       (OC_MISC_SERIAL, ())
 OC_STRUCTORS       (OC_MISC_TOOLS_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_MISC_TOOLS_ARRAY)
 OC_STRUCTORS       (OC_MISC_CONFIG, ())
@@ -428,7 +429,6 @@ mMiscConfigurationDebugSchema[] = {
   OC_SCHEMA_INTEGER_IN ("DisplayDelay",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayDelay),
   OC_SCHEMA_INTEGER_IN ("DisplayLevel",     OC_GLOBAL_CONFIG, Misc.Debug.DisplayLevel),
   OC_SCHEMA_STRING_IN  ("LogModules",       OC_GLOBAL_CONFIG, Misc.Debug.LogModules),
-  OC_SCHEMA_BOOLEAN_IN ("SerialInit",       OC_GLOBAL_CONFIG, Misc.Debug.SerialInit),
   OC_SCHEMA_BOOLEAN_IN ("SysReport",        OC_GLOBAL_CONFIG, Misc.Debug.SysReport),
   OC_SCHEMA_INTEGER_IN ("Target",           OC_GLOBAL_CONFIG, Misc.Debug.Target)
 };
@@ -451,6 +451,24 @@ mMiscConfigurationSecuritySchema[] = {
   OC_SCHEMA_INTEGER_IN ("ScanPolicy",           OC_GLOBAL_CONFIG, Misc.Security.ScanPolicy),
   OC_SCHEMA_STRING_IN  ("SecureBootModel",      OC_GLOBAL_CONFIG, Misc.Security.SecureBootModel),
   OC_SCHEMA_STRING_IN  ("Vault",                OC_GLOBAL_CONFIG, Misc.Security.Vault),
+};
+
+STATIC
+OC_SCHEMA
+mMiscConfigurationSerialSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("BaudRate",               OC_GLOBAL_CONFIG, Misc.Serial.BaudRate),
+  OC_SCHEMA_INTEGER_IN ("ClockRate",              OC_GLOBAL_CONFIG, Misc.Serial.ClockRate),
+  OC_SCHEMA_BOOLEAN_IN ("DetectCable",            OC_GLOBAL_CONFIG, Misc.Serial.DetectCable),
+  OC_SCHEMA_INTEGER_IN ("ExtendedTxFifoSize",     OC_GLOBAL_CONFIG, Misc.Serial.ExtendedTxFifoSize),
+  OC_SCHEMA_INTEGER_IN ("FifoControl",            OC_GLOBAL_CONFIG, Misc.Serial.FifoControl),
+  OC_SCHEMA_BOOLEAN_IN ("Init",                   OC_GLOBAL_CONFIG, Misc.Serial.Init),
+  OC_SCHEMA_INTEGER_IN ("LineControl",            OC_GLOBAL_CONFIG, Misc.Serial.LineControl),
+  OC_SCHEMA_DATA_IN    ("PciDeviceInfo",          OC_GLOBAL_CONFIG, Misc.Serial.PciDeviceInfo),
+  OC_SCHEMA_INTEGER_IN ("RegisterAccessWidth",    OC_GLOBAL_CONFIG, Misc.Serial.RegisterAccessWidth),
+  OC_SCHEMA_INTEGER_IN ("RegisterBase",           OC_GLOBAL_CONFIG, Misc.Serial.RegisterBase),
+  OC_SCHEMA_INTEGER_IN ("RegisterStride",         OC_GLOBAL_CONFIG, Misc.Serial.RegisterStride),
+  OC_SCHEMA_BOOLEAN_IN ("UseHardwareFlowControl", OC_GLOBAL_CONFIG, Misc.Serial.UseHardwareFlowControl),
+  OC_SCHEMA_BOOLEAN_IN ("UseMmio",                OC_GLOBAL_CONFIG, Misc.Serial.UseMmio),
 };
 
 STATIC
@@ -496,6 +514,7 @@ mMiscConfigurationSchema[] = {
   OC_SCHEMA_DICT       ("Debug",            mMiscConfigurationDebugSchema),
   OC_SCHEMA_ARRAY_IN   ("Entries",          OC_GLOBAL_CONFIG, Misc.Entries, &mMiscEntriesSchema),
   OC_SCHEMA_DICT       ("Security",         mMiscConfigurationSecuritySchema),
+  OC_SCHEMA_DICT       ("Serial",           mMiscConfigurationSerialSchema),
   OC_SCHEMA_ARRAY_IN   ("Tools",            OC_GLOBAL_CONFIG, Misc.Tools, &mMiscToolsSchema),
 };
 

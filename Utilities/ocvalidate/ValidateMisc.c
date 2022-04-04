@@ -567,6 +567,102 @@ CheckMiscSecurity (
 }
 
 STATIC
+BOOLEAN
+ValidateBaudRate (
+  IN  UINT32  BaudRate
+  )
+{
+  UINTN  Index;
+
+  //
+  // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1223
+  //
+  STATIC CONST UINT32 AllowedBaudRate[] = {
+    921600U, 460800U, 230400U, 115200U,
+    57600U, 38400U, 19200U, 9600U, 7200U, 
+    4800U, 3600U, 2400U, 2000U, 1800U,
+    1200U, 600U, 300U, 150U, 134U, 
+    110U, 75U, 50U
+  };
+
+  for (Index = 0; Index < ARRAY_SIZE (AllowedBaudRate); ++Index) {
+    if (BaudRate == AllowedBaudRate[Index]) {
+      return TRUE;
+    }
+  }
+
+  DEBUG ((DEBUG_WARN, "Misc->Serial->BaudRate is borked!\n"));
+  DEBUG ((DEBUG_WARN, "Accepted BaudRate values:\n"));
+  for (Index = 0; Index < ARRAY_SIZE (AllowedBaudRate); ++Index) {
+    DEBUG ((DEBUG_WARN, "%u, ", AllowedBaudRate[Index]));
+    if (Index != 0 && Index % 5 == 0) {
+      DEBUG ((DEBUG_WARN, "\n"));
+    }
+  }
+  DEBUG ((DEBUG_WARN, "\n"));
+  return FALSE;
+}
+
+STATIC
+UINT32
+CheckMiscSerial (
+  IN  OC_GLOBAL_CONFIG  *Config
+  )
+{
+  UINT32            ErrorCount;
+  OC_MISC_CONFIG    *UserMisc;
+  UINT32            RegisterAccessWidth;
+  UINT32            BaudRate;
+  CONST UINT8       *PciDeviceInfo;
+  UINT32            PciDeviceInfoSize;
+
+  ErrorCount        = 0;
+  UserMisc          = &Config->Misc;
+
+  //
+  // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1199-L1200
+  //
+  RegisterAccessWidth = UserMisc->Serial.RegisterAccessWidth;
+  if (RegisterAccessWidth != 8U && RegisterAccessWidth != 32U) {
+    DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth can only be 8 or 32!\n"));
+    ++ErrorCount;
+  }
+
+  BaudRate = UserMisc->Serial.BaudRate;
+  if (!ValidateBaudRate (BaudRate)) {
+    ++ErrorCount;
+  }
+
+  //
+  // Reference:
+  // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1393
+  //
+  PciDeviceInfo = OC_BLOB_GET (&UserMisc->Serial.PciDeviceInfo);
+  PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
+  if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
+    DEBUG ((DEBUG_WARN, "Size of Misc->Serial->PciDeviceInfo cannot exceed %u!\n", OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE));
+    ++ErrorCount;
+  } else if (PciDeviceInfoSize == 0) {
+    DEBUG ((DEBUG_WARN, "Misc->Serial->PciDeviceInfo cannot be empty (use 0xFF instead)!\n"));
+    ++ErrorCount;
+  } else {
+    if (PciDeviceInfo[PciDeviceInfoSize - 1] != 0xFFU) {
+      DEBUG ((DEBUG_WARN, "Last byte of Misc->Serial->PciDeviceInfo must be 0xFF!\n"));
+      ++ErrorCount;
+    }
+
+    if ((PciDeviceInfoSize - 1) % 4 != 0) {
+      DEBUG ((DEBUG_WARN, "Misc->Serial->PciDeviceInfo must be divisible by 4 excluding the last 0xFF!\n"));
+      ++ErrorCount;
+    }
+  }
+
+  return ErrorCount;
+}
+
+STATIC
 UINT32
 CheckMiscTools (
   IN  OC_GLOBAL_CONFIG  *Config
@@ -662,6 +758,7 @@ CheckMisc (
     &CheckMiscDebug,
     &CheckMiscEntries,
     &CheckMiscSecurity,
+    &CheckMiscSerial,
     &CheckMiscTools
   };
 

@@ -35,6 +35,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcSmbiosLib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVariableLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/SerialPortLib.h>
 #include <Library/UefiBootServicesTableLib.h>
@@ -407,6 +408,7 @@ OcMiscEarlyInit (
   EFI_TIME                  BootTime;
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
+  UINTN                     PciDeviceInfoSize;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -470,8 +472,35 @@ OcMiscEarlyInit (
     gBS->SetWatchdogTimer (0, 0, 0, NULL);
   }
 
-  if (Config->Misc.Debug.SerialInit) {
-    SerialPortInitialize ();
+  if (Config->Misc.Serial.Init) {
+    //
+    // Validate the size of PciDeviceInfo. Abort on error.
+    //
+    PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
+    if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
+      DEBUG ((DEBUG_INFO, "OC: Aborting serial port init with borked PciDeviceInfo size %u\n", PciDeviceInfoSize));
+    } else {
+      //
+      // Update PCD values.
+      //
+      PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
+      PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
+      PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.UseMmio);
+      PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.UseHardwareFlowControl);
+      PatchPcdSetBool (PcdSerialDetectCable, Config->Misc.Serial.DetectCable);
+      PatchPcdSet64 (PcdSerialRegisterBase, Config->Misc.Serial.RegisterBase);
+      PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.BaudRate);
+      PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.LineControl);
+      PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
+      PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
+      PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
+      PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
+
+      //
+      // Initialize serial port.
+      //
+      SerialPortInitialize ();
+    }
   }
 
   OcConfigureLogProtocol (
