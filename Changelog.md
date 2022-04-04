@@ -5,6 +5,7 @@ OpenCore Changelog
 - Switched to Python 3 in scripts (use `python /path/to/script` to force Python 2)
 - Added `ForceAquantiaEthernet` for Aquantia AQtion AQC-107s based 10GbE network cards support, thx @Mieze and @Shikumo
 - Updated builtin firmware versions for SMBIOS and the rest
+- Added `Misc` -> `Serial` section to customise serial port properties
 
 #### v0.7.9
 - Added auto-detect `macOS Installer` volume name for use when `.disk_label` file cannot be displayed
