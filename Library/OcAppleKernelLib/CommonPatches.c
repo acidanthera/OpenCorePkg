@@ -1065,6 +1065,20 @@ PatchIncreasePciBarSize (
 }
 
 STATIC
+EFI_STATUS
+PatchCustomPCISerialDevice (
+  IN OUT PATCHER_CONTEXT    *Patcher,
+  IN     UINT32             KernelVersion
+  )
+{
+  EFI_STATUS  Status;
+
+  Status = EFI_SUCCESS;
+
+  return Status;
+}
+
+STATIC
 CONST UINT8
 mCustomSmbiosGuidPatchFind[] = {
   0x45, 0x42, 0x39, 0x44, 0x32, 0x44, 0x33, 0x31   ///< "EB9D2D31"
@@ -2163,6 +2177,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkAppleXcpmCfgLock]        = { NULL,                                            PatchAppleXcpmCfgLock },
   [KernelQuirkAppleXcpmExtraMsrs]      = { NULL,                                            PatchAppleXcpmExtraMsrs },
   [KernelQuirkAppleXcpmForceBoost]     = { NULL,                                            PatchAppleXcpmForceBoost },
+  [KernelQuirkCustomPCISerialDevice]   = { NULL,                                            PatchCustomPCISerialDevice },
   [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid },
   [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid },
   [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport },
