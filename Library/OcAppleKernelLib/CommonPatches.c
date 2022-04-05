@@ -1065,6 +1065,60 @@ PatchIncreasePciBarSize (
 }
 
 STATIC
+UINT8
+mPciSerialDeviceRangeFind[] = {
+  0x66, 0xBA, 0xF8, 0x03
+};
+
+STATIC
+UINT8
+mPciSerialDeviceRangeFindMask[] = {
+  0xFF, 0xFF, 0xF8, 0xFF
+};
+
+STATIC
+UINT8
+mPciSerialDeviceRangeReplace[] = {
+  0xFF, 0xFF, 0x08, 0x20
+};
+
+STATIC
+UINT8
+mPciSerialDeviceRangeReplaceMask[] = {
+  0xFF, 0xFF, 0xF8, 0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mCustomPciSerialDevicePatch = {
+  .Comment     = DEBUG_POINTER ("CustomPciSerialDevice"),
+  .Base        = NULL,
+  .Find        = mPciSerialDeviceRangeFind,
+  .Mask        = mPciSerialDeviceRangeFindMask,
+  .Replace     = mPciSerialDeviceRangeReplace,
+  .ReplaceMask = mPciSerialDeviceRangeReplaceMask,
+  .Size        = sizeof (mPciSerialDeviceRangeFind),
+  .Count       = 0,
+  .Skip        = 0,
+  .Limit       = 0
+};
+
+VOID
+PatchSetPciSerialDeviceRange (
+  IN  UINT16  Range
+  )
+{
+  //
+  // FIXME: This is really ugly, make quirks take a context param.
+  //
+  DEBUG ((DEBUG_INFO, "OCAK: Registering %u PCI serial device range\n", Range));
+  //
+  // TODO: Properly build up the patch (find/mask/repl/replmask).
+  //
+  CopyMem (&mPciSerialDeviceRangeReplace[2], &Range, sizeof (Range));
+}
+
+STATIC
 EFI_STATUS
 PatchCustomPciSerialDevice (
   IN OUT PATCHER_CONTEXT    *Patcher,
@@ -1073,7 +1127,14 @@ PatchCustomPciSerialDevice (
 {
   EFI_STATUS  Status;
 
-  Status = EFI_SUCCESS;
+  ASSERT (Patcher != NULL);
+
+  Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePatch);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevice - %r\n", Status));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success CustomPciSerialDevice\n"));
+  }
 
   return Status;
 }

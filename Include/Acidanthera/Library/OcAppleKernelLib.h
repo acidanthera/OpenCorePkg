@@ -1165,6 +1165,16 @@ PatchSetApfsTimeout (
   );
 
 /**
+  Set PCI serial device range for KernelQuirkCustomPciSerialDevice quirk.
+
+  @param[in]  Range   PCI serial device range.
+**/
+VOID
+PatchSetPciSerialDeviceRange (
+  IN  UINT16  Range
+  );
+
+/**
   Apply modification to CPUID 1.
 
   @param Patcher        Patcher context.
