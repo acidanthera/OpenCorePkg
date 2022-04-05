@@ -284,7 +284,7 @@
   _(BOOLEAN                     , AppleXcpmCfgLock            ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmExtraMsrs          ,     , FALSE  , ()) \
   _(BOOLEAN                     , AppleXcpmForceBoost         ,     , FALSE  , ()) \
-  _(BOOLEAN                     , CustomPCISerialDevice       ,     , FALSE  , ()) \
+  _(BOOLEAN                     , CustomPciSerialDevice       ,     , FALSE  , ()) \
   _(BOOLEAN                     , CustomSmbiosGuid            ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableIoMapper             ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableLinkeditJettison     ,     , FALSE  , ()) \
