@@ -251,7 +251,7 @@ OcKernelApplyPatches (
       //
       // TODO: Properly set the value. Do we need a getter as well?
       //
-      PatchSetPciSerialDeviceRange (0U);
+      PatchSetPciSerialDeviceRange (GetSerialRegisterBase ());
       OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, Context, NULL);
     }
 

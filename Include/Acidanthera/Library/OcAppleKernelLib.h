@@ -1171,7 +1171,7 @@ PatchSetApfsTimeout (
 **/
 VOID
 PatchSetPciSerialDeviceRange (
-  IN  UINT16  Range
+  IN  UINTN  Range
   );
 
 /**

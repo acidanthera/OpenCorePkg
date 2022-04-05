@@ -1105,7 +1105,7 @@ mCustomPciSerialDevicePatch = {
 
 VOID
 PatchSetPciSerialDeviceRange (
-  IN  UINT16  Range
+  IN  UINTN  Range
   )
 {
   //
@@ -1113,9 +1113,11 @@ PatchSetPciSerialDeviceRange (
   //
   DEBUG ((DEBUG_INFO, "OCAK: Registering %u PCI serial device range\n", Range));
   //
+  // FIXME: Only copying two bytes for now.
+  //
   // TODO: Properly build up the patch (find/mask/repl/replmask).
   //
-  CopyMem (&mPciSerialDeviceRangeReplace[2], &Range, sizeof (Range));
+  CopyMem (&mPciSerialDeviceRangeReplace[2], &Range, 2);
 }
 
 STATIC
