@@ -56,17 +56,15 @@ CheckACPIAdd (
 {
   UINT32          ErrorCount;
   UINT32          Index;
-  OC_ACPI_CONFIG  *UserAcpi;
   CONST CHAR8     *Path;
   CONST CHAR8     *Comment;
   UINTN           AcpiAddSumSize;
 
   ErrorCount      = 0;
-  UserAcpi        = &Config->Acpi;
 
-  for (Index = 0; Index < UserAcpi->Add.Count; ++Index) {
-    Path          = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Path);
-    Comment       = OC_BLOB_GET (&UserAcpi->Add.Values[Index]->Comment);
+  for (Index = 0; Index < Config->Acpi.Add.Count; ++Index) {
+    Path          = OC_BLOB_GET (&Config->Acpi.Add.Values[Index]->Path);
+    Comment       = OC_BLOB_GET (&Config->Acpi.Add.Values[Index]->Comment);
 
     //
     // Sanitise strings.
@@ -106,9 +104,9 @@ CheckACPIAdd (
   // Check duplicated entries in ACPI->Add.
   //
   ErrorCount += FindArrayDuplication (
-    UserAcpi->Add.Values,
-    UserAcpi->Add.Count,
-    sizeof (UserAcpi->Add.Values[0]),
+    Config->Acpi.Add.Values,
+    Config->Acpi.Add.Count,
+    sizeof (Config->Acpi.Add.Values[0]),
     ACPIAddHasDuplication
     );
 
@@ -123,14 +121,12 @@ CheckACPIDelete (
 {
   UINT32          ErrorCount;
   UINT32          Index;
-  OC_ACPI_CONFIG  *UserAcpi;
   CONST CHAR8     *Comment;
 
   ErrorCount      = 0;
-  UserAcpi        = &Config->Acpi;
 
-  for (Index = 0; Index < UserAcpi->Delete.Count; ++Index) {
-    Comment       = OC_BLOB_GET (&UserAcpi->Delete.Values[Index]->Comment);
+  for (Index = 0; Index < Config->Acpi.Delete.Count; ++Index) {
+    Comment       = OC_BLOB_GET (&Config->Acpi.Delete.Values[Index]->Comment);
 
     //
     // Sanitise strings.
@@ -157,7 +153,6 @@ CheckACPIPatch (
 {
   UINT32          ErrorCount;
   UINT32          Index;
-  OC_ACPI_CONFIG  *UserAcpi;
   CONST CHAR8     *Comment;
   CONST UINT8     *Find;
   UINT32          FindSize;
@@ -169,18 +164,17 @@ CheckACPIPatch (
   UINT32          ReplaceMaskSize;
  
   ErrorCount      = 0;
-  UserAcpi        = &Config->Acpi;
 
-  for (Index = 0; Index < UserAcpi->Patch.Count; ++Index) {
-    Comment         = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->Comment);
-    Find            = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->Find);
-    FindSize        = UserAcpi->Patch.Values[Index]->Find.Size;
-    Replace         = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->Replace);
-    ReplaceSize     = UserAcpi->Patch.Values[Index]->Replace.Size;
-    Mask            = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->Mask);
-    MaskSize        = UserAcpi->Patch.Values[Index]->Mask.Size;
-    ReplaceMask     = OC_BLOB_GET (&UserAcpi->Patch.Values[Index]->ReplaceMask);
-    ReplaceMaskSize = UserAcpi->Patch.Values[Index]->ReplaceMask.Size;
+  for (Index = 0; Index < Config->Acpi.Patch.Count; ++Index) {
+    Comment         = OC_BLOB_GET (&Config->Acpi.Patch.Values[Index]->Comment);
+    Find            = OC_BLOB_GET (&Config->Acpi.Patch.Values[Index]->Find);
+    FindSize        = Config->Acpi.Patch.Values[Index]->Find.Size;
+    Replace         = OC_BLOB_GET (&Config->Acpi.Patch.Values[Index]->Replace);
+    ReplaceSize     = Config->Acpi.Patch.Values[Index]->Replace.Size;
+    Mask            = OC_BLOB_GET (&Config->Acpi.Patch.Values[Index]->Mask);
+    MaskSize        = Config->Acpi.Patch.Values[Index]->Mask.Size;
+    ReplaceMask     = OC_BLOB_GET (&Config->Acpi.Patch.Values[Index]->ReplaceMask);
+    ReplaceMaskSize = Config->Acpi.Patch.Values[Index]->ReplaceMask.Size;
 
     //
     // Sanitise strings.

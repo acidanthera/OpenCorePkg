@@ -149,7 +149,6 @@ CheckBlessOverride (
   UINT32              ErrorCount;
   UINT32              Index;
   UINTN               Index2;
-  OC_MISC_CONFIG      *UserMisc;
   CONST CHAR8         *BlessOverrideEntry;
   STATIC CONST CHAR8  *DisallowedBlessOverrideValues[] = {
     "\\EFI\\Microsoft\\Boot\\bootmgfw.efi",
@@ -157,10 +156,9 @@ CheckBlessOverride (
   };
 
   ErrorCount          = 0;
-  UserMisc            = &Config->Misc;
 
-  for (Index = 0; Index < UserMisc->BlessOverride.Count; ++Index) {
-    BlessOverrideEntry = OC_BLOB_GET (UserMisc->BlessOverride.Values[Index]);
+  for (Index = 0; Index < Config->Misc.BlessOverride.Count; ++Index) {
+    BlessOverrideEntry = OC_BLOB_GET (Config->Misc.BlessOverride.Values[Index]);
 
     //
     // &DisallowedBlessOverrideValues[][1] means no first '\\'.
@@ -185,8 +183,6 @@ CheckMiscBoot (
   )
 {
   UINT32                ErrorCount;
-  OC_MISC_CONFIG        *UserMisc;
-  OC_UEFI_CONFIG        *UserUefi;
   UINT32                ConsoleAttributes;
   CONST CHAR8           *HibernateMode;
   UINT32                PickerAttributes;
@@ -204,16 +200,14 @@ CheckMiscBoot (
   CONST CHAR8           *LauncherPath;
 
   ErrorCount        = 0;
-  UserMisc          = &Config->Misc;
-  UserUefi          = &Config->Uefi;
 
-  ConsoleAttributes = UserMisc->Boot.ConsoleAttributes;
+  ConsoleAttributes = Config->Misc.Boot.ConsoleAttributes;
   if ((ConsoleAttributes & ~0x7FU) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->ConsoleAttributes has unknown bits set!\n"));
     ++ErrorCount;
   }
 
-  HibernateMode     = OC_BLOB_GET (&UserMisc->Boot.HibernateMode);
+  HibernateMode     = OC_BLOB_GET (&Config->Misc.Boot.HibernateMode);
   if (AsciiStrCmp (HibernateMode, "None") != 0
     && AsciiStrCmp (HibernateMode, "Auto") != 0
     && AsciiStrCmp (HibernateMode, "RTC") != 0
@@ -222,22 +216,22 @@ CheckMiscBoot (
     ++ErrorCount;
   }
 
-  PickerAttributes  = UserMisc->Boot.PickerAttributes;
+  PickerAttributes  = Config->Misc.Boot.PickerAttributes;
   if ((PickerAttributes & ~OC_ATTR_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAttributes has unknown bits set!\n"));
     ++ErrorCount;
   }
 
   HasOpenCanopyEfiDriver = FALSE;
-  for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    DriverEntry = UserUefi->Drivers.Values[Index];
+  for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
+    DriverEntry = Config->Uefi.Drivers.Values[Index];
     Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
     if (DriverEntry->Enabled && AsciiStrCmp (Driver, "OpenCanopy.efi") == 0) {
       HasOpenCanopyEfiDriver = TRUE;
     }
   }
-  PickerMode        = OC_BLOB_GET (&UserMisc->Boot.PickerMode);
+  PickerMode        = OC_BLOB_GET (&Config->Misc.Boot.PickerMode);
   if (AsciiStrCmp (PickerMode, "Builtin") != 0
     && AsciiStrCmp (PickerMode, "External") != 0
     && AsciiStrCmp (PickerMode, "Apple") != 0) {
@@ -248,7 +242,7 @@ CheckMiscBoot (
     ++ErrorCount;
   }
 
-  PickerVariant     = OC_BLOB_GET (&UserMisc->Boot.PickerVariant);
+  PickerVariant     = OC_BLOB_GET (&Config->Misc.Boot.PickerVariant);
   if (PickerVariant[0] == '\0') {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerVariant cannot be empty!\n"));
     ++ErrorCount;
@@ -270,8 +264,8 @@ CheckMiscBoot (
     ++ErrorCount;
   }
 
-  IsPickerAudioAssistEnabled = UserMisc->Boot.PickerAudioAssist;
-  IsAudioSupportEnabled      = UserUefi->Audio.AudioSupport;
+  IsPickerAudioAssistEnabled = Config->Misc.Boot.PickerAudioAssist;
+  IsAudioSupportEnabled      = Config->Uefi.Audio.AudioSupport;
   if (IsPickerAudioAssistEnabled && !IsAudioSupportEnabled) {
     DEBUG ((DEBUG_WARN, "Misc->Boot->PickerAudioAssist is enabled, but UEFI->Audio->AudioSupport is not enabled altogether!\n"));
     ++ErrorCount;
@@ -300,7 +294,6 @@ CheckMiscDebug (
   ) 
 {
   UINT32              ErrorCount;
-  OC_MISC_CONFIG      *UserMisc;
   UINT64              DisplayLevel;
   UINT64              AllowedDisplayLevel;
   UINT64              HaltLevel;
@@ -308,12 +301,11 @@ CheckMiscDebug (
   UINT32              Target;
 
   ErrorCount          = 0;
-  UserMisc            = &Config->Misc;
 
   //
   // FIXME: Check whether DisplayLevel only supports values within AllowedDisplayLevel, or all possible levels in DebugLib.h?
   //
-  DisplayLevel        = UserMisc->Debug.DisplayLevel;
+  DisplayLevel        = Config->Misc.Debug.DisplayLevel;
   AllowedDisplayLevel = DEBUG_WARN | DEBUG_INFO | DEBUG_VERBOSE | DEBUG_ERROR;
   if ((DisplayLevel & ~AllowedDisplayLevel) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->DisplayLevel has unknown bits set!\n"));
@@ -326,7 +318,7 @@ CheckMiscDebug (
     ++ErrorCount;
   }
 
-  Target              = UserMisc->Debug.Target;
+  Target              = Config->Misc.Debug.Target;
   if ((Target & ~OC_LOG_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Debug->Target has unknown bits set!\n"));
     ++ErrorCount;
@@ -400,7 +392,6 @@ CheckMiscEntries (
 {
   UINT32            ErrorCount;
   UINT32            Index;
-  OC_MISC_CONFIG    *UserMisc;
   CONST CHAR8       *Arguments;
   CONST CHAR8       *Comment;
   CONST CHAR8       *AsciiName;
@@ -409,14 +400,13 @@ CheckMiscEntries (
   CONST CHAR8       *Flavour;
 
   ErrorCount        = 0;
-  UserMisc          = &Config->Misc;
 
-  for (Index = 0; Index < UserMisc->Entries.Count; ++Index) {
-    Arguments       = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Arguments);
-    Comment         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Comment);
-    AsciiName       = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Name);
-    Path            = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Path);
-    Flavour         = OC_BLOB_GET (&UserMisc->Entries.Values[Index]->Flavour);
+  for (Index = 0; Index < Config->Misc.Entries.Count; ++Index) {
+    Arguments       = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Arguments);
+    Comment         = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Comment);
+    AsciiName       = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Name);
+    Path            = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Path);
+    Flavour         = OC_BLOB_GET (&Config->Misc.Entries.Values[Index]->Flavour);
 
     //
     // Sanitise strings.
@@ -458,9 +448,9 @@ CheckMiscEntries (
   // Check duplicated entries in Entries.
   //
   ErrorCount += FindArrayDuplication (
-    UserMisc->Entries.Values,
-    UserMisc->Entries.Count,
-    sizeof (UserMisc->Entries.Values[0]),
+    Config->Misc.Entries.Values,
+    Config->Misc.Entries.Count,
+    sizeof (Config->Misc.Entries.Values[0]),
     MiscEntriesHasDuplication
     );
 
@@ -475,8 +465,6 @@ CheckMiscSecurity (
 {
   UINT32            ErrorCount;
   UINT32            Index;
-  OC_KERNEL_CONFIG  *UserKernel;
-  OC_MISC_CONFIG    *UserMisc;
   BOOLEAN           IsAuthRestartEnabled;
   BOOLEAN           HasVSMCKext;
   CONST CHAR8       *AsciiDmgLoading;
@@ -487,22 +475,20 @@ CheckMiscSecurity (
   CONST CHAR8       *SecureBootModel;
 
   ErrorCount        = 0;
-  UserKernel        = &Config->Kernel;
-  UserMisc          = &Config->Misc;
 
   HasVSMCKext = FALSE;
-  for (Index = 0; Index < UserKernel->Add.Count; ++Index) {
-    if (AsciiStrCmp (OC_BLOB_GET (&UserKernel->Add.Values[Index]->BundlePath), mKextInfo[INDEX_KEXT_VSMC].KextBundlePath) == 0) {
+  for (Index = 0; Index < Config->Kernel.Add.Count; ++Index) {
+    if (AsciiStrCmp (OC_BLOB_GET (&Config->Kernel.Add.Values[Index]->BundlePath), mKextInfo[INDEX_KEXT_VSMC].KextBundlePath) == 0) {
       HasVSMCKext = TRUE;
     }
   }
-  IsAuthRestartEnabled = UserMisc->Security.AuthRestart;
+  IsAuthRestartEnabled = Config->Misc.Security.AuthRestart;
   if (IsAuthRestartEnabled && !HasVSMCKext) {
     DEBUG ((DEBUG_WARN, "Misc->Security->AuthRestart is enabled, but VirtualSMC is not loaded at Kernel->Add!\n"));
     ++ErrorCount;
   }
 
-  AsciiDmgLoading = OC_BLOB_GET (&UserMisc->Security.DmgLoading);
+  AsciiDmgLoading = OC_BLOB_GET (&Config->Misc.Security.DmgLoading);
   if (AsciiStrCmp (AsciiDmgLoading, "Disabled") != 0
     && AsciiStrCmp (AsciiDmgLoading, "Signed") != 0
     && AsciiStrCmp (AsciiDmgLoading, "Any") != 0) {
@@ -510,13 +496,13 @@ CheckMiscSecurity (
     ++ErrorCount;
   }
 
-  ExposeSensitiveData = UserMisc->Security.ExposeSensitiveData;
+  ExposeSensitiveData = Config->Misc.Security.ExposeSensitiveData;
   if ((ExposeSensitiveData & ~OCS_EXPOSE_ALL_BITS) != 0) {
     DEBUG ((DEBUG_WARN, "Misc->Security->ExposeSensitiveData has unknown bits set!\n"));
     ++ErrorCount;
   }
 
-  AsciiVault = OC_BLOB_GET (&UserMisc->Security.Vault);
+  AsciiVault = OC_BLOB_GET (&Config->Misc.Security.Vault);
   if (AsciiStrCmp (AsciiVault, "Optional") != 0
     && AsciiStrCmp (AsciiVault, "Basic") != 0
     && AsciiStrCmp (AsciiVault, "Secure") != 0) {
@@ -524,7 +510,7 @@ CheckMiscSecurity (
     ++ErrorCount;
   }
 
-  ScanPolicy        = UserMisc->Security.ScanPolicy;
+  ScanPolicy        = Config->Misc.Security.ScanPolicy;
   AllowedScanPolicy = OC_SCAN_FILE_SYSTEM_LOCK | OC_SCAN_DEVICE_LOCK | OC_SCAN_DEVICE_BITS | OC_SCAN_FILE_SYSTEM_BITS;
   //
   // ScanPolicy can be zero (failsafe value), skipping such.
@@ -549,7 +535,7 @@ CheckMiscSecurity (
   //
   // Validate SecureBootModel.
   //
-  SecureBootModel = OC_BLOB_GET (&UserMisc->Security.SecureBootModel);
+  SecureBootModel = OC_BLOB_GET (&Config->Misc.Security.SecureBootModel);
   if (!ValidateSecureBootModel (SecureBootModel)) {
     DEBUG ((DEBUG_WARN, "Misc->Security->SecureBootModel is borked!\n"));
     ++ErrorCount;
@@ -611,26 +597,24 @@ CheckMiscSerial (
   )
 {
   UINT32            ErrorCount;
-  OC_MISC_CONFIG    *UserMisc;
   UINT32            RegisterAccessWidth;
   UINT32            BaudRate;
   CONST UINT8       *PciDeviceInfo;
   UINT32            PciDeviceInfoSize;
 
   ErrorCount        = 0;
-  UserMisc          = &Config->Misc;
 
   //
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1199-L1200
   //
-  RegisterAccessWidth = UserMisc->Serial.RegisterAccessWidth;
+  RegisterAccessWidth = Config->Misc.Serial.RegisterAccessWidth;
   if (RegisterAccessWidth != 8U && RegisterAccessWidth != 32U) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth can only be 8 or 32!\n"));
     ++ErrorCount;
   }
 
-  BaudRate = UserMisc->Serial.BaudRate;
+  BaudRate = Config->Misc.Serial.BaudRate;
   if (!ValidateBaudRate (BaudRate)) {
     ++ErrorCount;
   }
@@ -639,8 +623,8 @@ CheckMiscSerial (
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1393
   //
-  PciDeviceInfo = OC_BLOB_GET (&UserMisc->Serial.PciDeviceInfo);
-  PciDeviceInfoSize = UserMisc->Serial.PciDeviceInfo.Size;
+  PciDeviceInfo = OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo);
+  PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
   if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
     DEBUG ((DEBUG_WARN, "Size of Misc->Serial->PciDeviceInfo cannot exceed %u!\n", OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE));
     ++ErrorCount;
@@ -670,7 +654,6 @@ CheckMiscTools (
 {
   UINT32            ErrorCount;
   UINT32            Index;
-  OC_MISC_CONFIG    *UserMisc;
   CONST CHAR8       *Arguments;
   CONST CHAR8       *Comment;
   CONST CHAR8       *AsciiName;
@@ -679,14 +662,13 @@ CheckMiscTools (
   CONST CHAR8       *Flavour;
 
   ErrorCount        = 0;
-  UserMisc          = &Config->Misc;
 
-  for (Index = 0; Index < UserMisc->Tools.Count; ++Index) {
-    Arguments       = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Arguments);
-    Comment         = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Comment);
-    AsciiName       = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Name);
-    Path            = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Path);
-    Flavour         = OC_BLOB_GET (&UserMisc->Tools.Values[Index]->Flavour);
+  for (Index = 0; Index < Config->Misc.Tools.Count; ++Index) {
+    Arguments       = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Arguments);
+    Comment         = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Comment);
+    AsciiName       = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Name);
+    Path            = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Path);
+    Flavour         = OC_BLOB_GET (&Config->Misc.Tools.Values[Index]->Flavour);
 
     //
     // Sanitise strings.
@@ -736,9 +718,9 @@ CheckMiscTools (
   // Check duplicated entries in Tools.
   //
   ErrorCount += FindArrayDuplication (
-    UserMisc->Tools.Values,
-    UserMisc->Tools.Count,
-    sizeof (UserMisc->Tools.Values[0]),
+    Config->Misc.Tools.Values,
+    Config->Misc.Tools.Count,
+    sizeof (Config->Misc.Tools.Values[0]),
     MiscToolsHasDuplication
     );
 

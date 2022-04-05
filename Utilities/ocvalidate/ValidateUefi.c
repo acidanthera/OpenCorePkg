@@ -120,20 +120,16 @@ CheckUefiAPFS (
   )
 {
   UINT32                   ErrorCount;
-  OC_UEFI_CONFIG           *UserUefi;
-  OC_MISC_CONFIG           *UserMisc;
   BOOLEAN                  IsEnableJumpstartEnabled;
   UINT32                   ScanPolicy;
 
   ErrorCount               = 0;
-  UserUefi                 = &Config->Uefi;
-  UserMisc                 = &Config->Misc;
 
   //
   // If FS restrictions is enabled but APFS FS scanning is disabled, it is an error.
   //
-  IsEnableJumpstartEnabled = UserUefi->Apfs.EnableJumpstart;
-  ScanPolicy               = UserMisc->Security.ScanPolicy;
+  IsEnableJumpstartEnabled = Config->Uefi.Apfs.EnableJumpstart;
+  ScanPolicy               = Config->Misc.Security.ScanPolicy;
   if (IsEnableJumpstartEnabled
     && (ScanPolicy & OC_SCAN_FILE_SYSTEM_LOCK) != 0
     && (ScanPolicy & OC_SCAN_ALLOW_FS_APFS) == 0) {
@@ -151,15 +147,11 @@ CheckUefiAppleInput (
   )
 {
   UINT32          ErrorCount;
-  OC_UEFI_CONFIG  *UserUefi;
   CONST CHAR8     *AppleEvent;
 
   ErrorCount      = 0;
-  UserUefi        = &Config->Uefi;
 
-  ErrorCount      = 0;
-
-  AppleEvent = OC_BLOB_GET (&UserUefi->AppleInput.AppleEvent);
+  AppleEvent = OC_BLOB_GET (&Config->Uefi.AppleInput.AppleEvent);
   if (AsciiStrCmp (AppleEvent, "Auto") != 0
     && AsciiStrCmp (AppleEvent, "Builtin") != 0
     && AsciiStrCmp (AppleEvent, "OEM") != 0) {
@@ -167,13 +159,13 @@ CheckUefiAppleInput (
     ++ErrorCount;
   }
 
-  if (UserUefi->Input.KeySupport && UserUefi->AppleInput.CustomDelays) {
-    if (UserUefi->AppleInput.KeyInitialDelay != 0
-      && UserUefi->AppleInput.KeyInitialDelay < UserUefi->Input.KeyForgetThreshold) {
+  if (Config->Uefi.Input.KeySupport && Config->Uefi.AppleInput.CustomDelays) {
+    if (Config->Uefi.AppleInput.KeyInitialDelay != 0
+      && Config->Uefi.AppleInput.KeyInitialDelay < Config->Uefi.Input.KeyForgetThreshold) {
       DEBUG ((DEBUG_WARN, "KeyInitialDelay is enabled in KeySupport mode, is non-zero and is less than the KeyForgetThreshold value (will result in uncontrolled key repeats)!\n"));
       ++ErrorCount;
     }
-    if (UserUefi->AppleInput.KeySubsequentDelay < UserUefi->Input.KeyForgetThreshold) {
+    if (Config->Uefi.AppleInput.KeySubsequentDelay < Config->Uefi.Input.KeyForgetThreshold) {
       DEBUG ((DEBUG_WARN, "KeySubsequentDelay is enabled in KeySupport mode and is less than the KeyForgetThreshold value (will result in uncontrolled key repeats)!\n"));
       ++ErrorCount;
     }
@@ -223,19 +215,17 @@ CheckUefiAudio (
   )
 {
   UINT32                   ErrorCount;
-  OC_UEFI_CONFIG           *UserUefi;
   BOOLEAN                  IsAudioSupportEnabled;
   UINT64                   AudioOutMask;
   CONST CHAR8              *AsciiAudioDevicePath;
   CONST CHAR8              *AsciiPlayChime;
 
   ErrorCount               = 0;
-  UserUefi                 = &Config->Uefi;
 
-  IsAudioSupportEnabled    = UserUefi->Audio.AudioSupport;
-  AudioOutMask             = UserUefi->Audio.AudioOutMask;
-  AsciiAudioDevicePath     = OC_BLOB_GET (&UserUefi->Audio.AudioDevice);
-  AsciiPlayChime           = OC_BLOB_GET (&UserUefi->Audio.PlayChime);
+  IsAudioSupportEnabled    = Config->Uefi.Audio.AudioSupport;
+  AudioOutMask             = Config->Uefi.Audio.AudioOutMask;
+  AsciiAudioDevicePath     = OC_BLOB_GET (&Config->Uefi.Audio.AudioDevice);
+  AsciiPlayChime           = OC_BLOB_GET (&Config->Uefi.Audio.PlayChime);
   if (IsAudioSupportEnabled) {
     if (AudioOutMask == 0) {
       DEBUG ((DEBUG_WARN, "UEFI->Audio->AudioOutMask is zero when AudioSupport is enabled, no sound will play!\n"));
@@ -243,7 +233,7 @@ CheckUefiAudio (
     }
 
     ErrorCount += CheckUefiGain (
-      UserUefi->Audio.MaximumGain,
+      Config->Uefi.Audio.MaximumGain,
       "MaximumGain",
       0,
       NULL
@@ -251,23 +241,23 @@ CheckUefiAudio (
 
     // No operational reason for MinimumAssistGain <= MaximumGain, but is safer to ensure non-deafening sound levels.
     ErrorCount += CheckUefiGain (
-      UserUefi->Audio.MinimumAssistGain,
+      Config->Uefi.Audio.MinimumAssistGain,
       "MinimumAssistGain",
-      UserUefi->Audio.MaximumGain,
+      Config->Uefi.Audio.MaximumGain,
       "MaximumGain"
       );
 
     ErrorCount += CheckUefiGain (
-      UserUefi->Audio.MinimumAudibleGain,
+      Config->Uefi.Audio.MinimumAudibleGain,
       "MinimumAudibleGain",
-      UserUefi->Audio.MinimumAssistGain,
+      Config->Uefi.Audio.MinimumAssistGain,
       "MinimumAssistGain"
       );
 
     ErrorCount += CheckUefiGain (
-      UserUefi->Audio.MinimumAudibleGain,
+      Config->Uefi.Audio.MinimumAudibleGain,
       "MinimumAudibleGain",
-      UserUefi->Audio.MaximumGain,
+      Config->Uefi.Audio.MaximumGain,
       "MaximumGain"
       );
 
@@ -297,7 +287,6 @@ CheckUefiDrivers (
   )
 {
   UINT32                       ErrorCount;
-  OC_UEFI_CONFIG               *UserUefi;
   UINT32                       Index;
   OC_UEFI_DRIVER_ENTRY         *DriverEntry;
   CONST CHAR8                  *Comment;
@@ -317,7 +306,6 @@ CheckUefiDrivers (
   BOOLEAN                      IsConnectDriversEnabled;
 
   ErrorCount                   = 0;
-  UserUefi                     = &Config->Uefi;
 
   HasOpenRuntimeEfiDriver      = FALSE;
   HasOpenUsbKbDxeEfiDriver     = FALSE;
@@ -328,8 +316,8 @@ CheckUefiDrivers (
   IndexHfsEfiDriver            = 0;
   HasAudioDxeEfiDriver         = FALSE;
   IndexAudioDxeEfiDriver       = 0;
-  for (Index = 0; Index < UserUefi->Drivers.Count; ++Index) {
-    DriverEntry = UserUefi->Drivers.Values[Index];
+  for (Index = 0; Index < Config->Uefi.Drivers.Count; ++Index) {
+    DriverEntry = Config->Uefi.Drivers.Values[Index];
     Comment     = OC_BLOB_GET (&DriverEntry->Comment);
     Driver      = OC_BLOB_GET (&DriverEntry->Path);
 
@@ -393,13 +381,13 @@ CheckUefiDrivers (
   // Check duplicated Drivers.
   //
   ErrorCount += FindArrayDuplication (
-    UserUefi->Drivers.Values,
-    UserUefi->Drivers.Count,
-    sizeof (UserUefi->Drivers.Values[0]),
+    Config->Uefi.Drivers.Values,
+    Config->Uefi.Drivers.Count,
+    sizeof (Config->Uefi.Drivers.Values[0]),
     UefiDriverHasDuplication
     );
 
-  IsRequestBootVarRoutingEnabled = UserUefi->Quirks.RequestBootVarRouting;
+  IsRequestBootVarRoutingEnabled = Config->Uefi.Quirks.RequestBootVarRouting;
   if (IsRequestBootVarRoutingEnabled) {
     if (!HasOpenRuntimeEfiDriver) {
       DEBUG ((DEBUG_WARN, "UEFI->Quirks->RequestBootVarRouting is enabled, but OpenRuntime.efi is not loaded at UEFI->Drivers!\n"));
@@ -407,7 +395,7 @@ CheckUefiDrivers (
     }
   }
 
-  IsKeySupportEnabled = UserUefi->Input.KeySupport;
+  IsKeySupportEnabled = Config->Uefi.Input.KeySupport;
   if (IsKeySupportEnabled) {
     if (HasOpenUsbKbDxeEfiDriver) {
       DEBUG ((DEBUG_WARN, "OpenUsbKbDxe.efi at UEFI->Drivers[%u] should NEVER be used together with UEFI->Input->KeySupport!\n", IndexOpenUsbKbDxeEfiDriver));
@@ -430,7 +418,7 @@ CheckUefiDrivers (
     ++ErrorCount;
   }
 
-  IsConnectDriversEnabled = UserUefi->ConnectDrivers;
+  IsConnectDriversEnabled = Config->Uefi.ConnectDrivers;
   if (!IsConnectDriversEnabled) {
     if (HasHfsEfiDriver) {
       DEBUG ((DEBUG_WARN, "HFS+ filesystem driver is loaded at UEFI->Drivers[%u], but UEFI->ConnectDrivers is not enabled!\n", IndexHfsEfiDriver));
@@ -452,22 +440,20 @@ CheckUefiInput (
   )
 {
   UINT32          ErrorCount;
-  OC_UEFI_CONFIG  *UserUefi;
   BOOLEAN         IsPointerSupportEnabled;
   CONST CHAR8     *PointerSupportMode;
   CONST CHAR8     *KeySupportMode;
 
   ErrorCount      = 0;
-  UserUefi        = &Config->Uefi;
 
-  IsPointerSupportEnabled = UserUefi->Input.PointerSupport;
-  PointerSupportMode      = OC_BLOB_GET (&UserUefi->Input.PointerSupportMode);
+  IsPointerSupportEnabled = Config->Uefi.Input.PointerSupport;
+  PointerSupportMode      = OC_BLOB_GET (&Config->Uefi.Input.PointerSupportMode);
   if (IsPointerSupportEnabled && AsciiStrCmp (PointerSupportMode, "ASUS") != 0) {
     DEBUG ((DEBUG_WARN, "UEFI->Input->PointerSupport is enabled, but PointerSupportMode is not ASUS!\n"));
     ++ErrorCount;
   }
 
-  KeySupportMode = OC_BLOB_GET (&UserUefi->Input.KeySupportMode);
+  KeySupportMode = OC_BLOB_GET (&Config->Uefi.Input.KeySupportMode);
   if (AsciiStrCmp (KeySupportMode, "Auto") != 0
     && AsciiStrCmp (KeySupportMode, "V1") != 0
     && AsciiStrCmp (KeySupportMode, "V2") != 0
@@ -486,7 +472,6 @@ CheckUefiOutput (
   )
 {
   UINT32               ErrorCount;
-  OC_UEFI_CONFIG       *UserUefi;
   CONST CHAR8          *TextRenderer;
   CONST CHAR8          *GopPassThrough;
   BOOLEAN              IsTextRendererSystem;
@@ -504,14 +489,13 @@ CheckUefiOutput (
   BOOLEAN              HasUefiOutputUIScale;
 
   ErrorCount           = 0;
-  UserUefi             = &Config->Uefi;
   IsTextRendererSystem = FALSE;
   HasUefiOutputUIScale = FALSE;
 
   //
   // Sanitise strings.
   //
-  TextRenderer = OC_BLOB_GET (&UserUefi->Output.TextRenderer);
+  TextRenderer = OC_BLOB_GET (&Config->Uefi.Output.TextRenderer);
   if (AsciiStrCmp (TextRenderer, "BuiltinGraphics") != 0
     && AsciiStrCmp (TextRenderer, "BuiltinText") != 0
     && AsciiStrCmp (TextRenderer, "SystemGraphics") != 0
@@ -527,32 +511,32 @@ CheckUefiOutput (
   }
 
   if (!IsTextRendererSystem) {
-    IsClearScreenOnModeSwitchEnabled = UserUefi->Output.ClearScreenOnModeSwitch;
+    IsClearScreenOnModeSwitchEnabled = Config->Uefi.Output.ClearScreenOnModeSwitch;
     if (IsClearScreenOnModeSwitchEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->ClearScreenOnModeSwitch is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
 
-    IsIgnoreTextInGraphicsEnabled    = UserUefi->Output.IgnoreTextInGraphics;
+    IsIgnoreTextInGraphicsEnabled    = Config->Uefi.Output.IgnoreTextInGraphics;
     if (IsIgnoreTextInGraphicsEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->IgnoreTextInGraphics is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
 
-    IsReplaceTabWithSpaceEnabled     = UserUefi->Output.ReplaceTabWithSpace;
+    IsReplaceTabWithSpaceEnabled     = Config->Uefi.Output.ReplaceTabWithSpace;
     if (IsReplaceTabWithSpaceEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->ReplaceTabWithSpace is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
 
-    IsSanitiseClearScreenEnabled     = UserUefi->Output.SanitiseClearScreen;
+    IsSanitiseClearScreenEnabled     = Config->Uefi.Output.SanitiseClearScreen;
     if (IsSanitiseClearScreenEnabled) {
       DEBUG ((DEBUG_WARN, "UEFI->Output->SanitiseClearScreen is enabled on non-System TextRenderer (currently %a)!\n", TextRenderer));
       ++ErrorCount;
     }
   }
 
-  GopPassThrough = OC_BLOB_GET (&UserUefi->Output.GopPassThrough);
+  GopPassThrough = OC_BLOB_GET (&Config->Uefi.Output.GopPassThrough);
   if (AsciiStrCmp (GopPassThrough, "Enabled") != 0
     && AsciiStrCmp (GopPassThrough, "Disabled") != 0
     && AsciiStrCmp (GopPassThrough, "Apple") != 0) {
@@ -563,7 +547,7 @@ CheckUefiOutput (
   //
   // Parse Output->ConsoleMode by calling OpenCore libraries.
   //
-  ConsoleMode = OC_BLOB_GET (&UserUefi->Output.ConsoleMode);
+  ConsoleMode = OC_BLOB_GET (&Config->Uefi.Output.ConsoleMode);
   OcParseConsoleMode (
     ConsoleMode,
     &UserWidth,
@@ -580,7 +564,7 @@ CheckUefiOutput (
   //
   // Parse Output->Resolution by calling OpenCore libraries.
   //
-  Resolution = OC_BLOB_GET (&UserUefi->Output.Resolution);
+  Resolution = OC_BLOB_GET (&Config->Uefi.Output.Resolution);
   OcParseScreenResolution (
     Resolution,
     &UserWidth,
@@ -595,7 +579,7 @@ CheckUefiOutput (
     ++ErrorCount;
   }
 
-  UIScale = UserUefi->Output.UIScale;
+  UIScale = Config->Uefi.Output.UIScale;
   if (UIScale < -1 || UIScale > 2) {
     DEBUG ((DEBUG_WARN, "UEFI->Output->UIScale is borked (Can only be between -1 and 2)!\n"));
     ++ErrorCount;
@@ -621,12 +605,10 @@ CheckUefiQuirks (
   )
 {
   UINT32          ErrorCount;
-  OC_UEFI_CONFIG  *UserUefi;
   INT8            ResizeGpuBars;
 
   ErrorCount      = 0;
-  UserUefi        = &Config->Uefi;
-  ResizeGpuBars   = UserUefi->Quirks.ResizeGpuBars;
+  ResizeGpuBars   = Config->Uefi.Quirks.ResizeGpuBars;
 
   if (ResizeGpuBars < -1 || ResizeGpuBars > 19) {
     DEBUG ((DEBUG_WARN, "UEFI->Quirks->ResizeGpuBars is borked (Can only be between -1 and 19)!\n"));
@@ -644,21 +626,19 @@ CheckUefiReservedMemory (
 {
   UINT32          ErrorCount;
   UINT32          Index;
-  OC_UEFI_CONFIG  *UserUefi;
   CONST CHAR8     *AsciiReservedMemoryType;
   UINT64          ReservedMemoryAddress;
   UINT64          ReservedMemorySize;
 
   ErrorCount      = 0;
-  UserUefi        = &Config->Uefi;
 
   //
   // Validate ReservedMemory[N].
   //
-  for (Index = 0; Index < UserUefi->ReservedMemory.Count; ++Index) {
-    AsciiReservedMemoryType = OC_BLOB_GET (&UserUefi->ReservedMemory.Values[Index]->Type);
-    ReservedMemoryAddress   = UserUefi->ReservedMemory.Values[Index]->Address;
-    ReservedMemorySize      = UserUefi->ReservedMemory.Values[Index]->Size;
+  for (Index = 0; Index < Config->Uefi.ReservedMemory.Count; ++Index) {
+    AsciiReservedMemoryType = OC_BLOB_GET (&Config->Uefi.ReservedMemory.Values[Index]->Type);
+    ReservedMemoryAddress   = Config->Uefi.ReservedMemory.Values[Index]->Address;
+    ReservedMemorySize      = Config->Uefi.ReservedMemory.Values[Index]->Size;
 
     if (!ValidateReservedMemoryType (AsciiReservedMemoryType)) {
       DEBUG ((DEBUG_WARN, "UEFI->ReservedMemory[%u]->Type is borked!\n", Index));
@@ -682,9 +662,9 @@ CheckUefiReservedMemory (
   // Now overlapping check amongst Address and Size.
   //
   ErrorCount += FindArrayDuplication (
-    UserUefi->ReservedMemory.Values,
-    UserUefi->ReservedMemory.Count,
-    sizeof (UserUefi->ReservedMemory.Values[0]),
+    Config->Uefi.ReservedMemory.Values,
+    Config->Uefi.ReservedMemory.Count,
+    sizeof (Config->Uefi.ReservedMemory.Values[0]),
     UefiReservedMemoryHasOverlap
     );
 
