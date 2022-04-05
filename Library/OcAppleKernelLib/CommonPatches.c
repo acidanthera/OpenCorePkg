@@ -1066,7 +1066,7 @@ PatchIncreasePciBarSize (
 
 STATIC
 EFI_STATUS
-PatchCustomPCISerialDevice (
+PatchCustomPciSerialDevice (
   IN OUT PATCHER_CONTEXT    *Patcher,
   IN     UINT32             KernelVersion
   )
@@ -2177,7 +2177,7 @@ KERNEL_QUIRK gKernelQuirks[] = {
   [KernelQuirkAppleXcpmCfgLock]        = { NULL,                                            PatchAppleXcpmCfgLock },
   [KernelQuirkAppleXcpmExtraMsrs]      = { NULL,                                            PatchAppleXcpmExtraMsrs },
   [KernelQuirkAppleXcpmForceBoost]     = { NULL,                                            PatchAppleXcpmForceBoost },
-  [KernelQuirkCustomPCISerialDevice]   = { NULL,                                            PatchCustomPCISerialDevice },
+  [KernelQuirkCustomPCISerialDevice]   = { NULL,                                            PatchCustomPciSerialDevice },
   [KernelQuirkCustomSmbiosGuid1]       = { "com.apple.driver.AppleSMBIOS",                  PatchCustomSmbiosGuid },
   [KernelQuirkCustomSmbiosGuid2]       = { "com.apple.driver.AppleACPIPlatform",            PatchCustomSmbiosGuid },
   [KernelQuirkDisableIoMapper]         = { "com.apple.iokit.IOPCIFamily",                   PatchAppleIoMapperSupport },

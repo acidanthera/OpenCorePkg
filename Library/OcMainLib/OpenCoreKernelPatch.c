@@ -247,11 +247,11 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);     
     }
 
-    if (Config->Kernel.Quirks.CustomPCISerialDevice) {
+    if (Config->Kernel.Quirks.CustomPciSerialDevice) {
       //
       // TODO
       //
-      OcKernelApplyQuirk (KernelQuirkCustomPCISerialDevice, CacheType, DarwinVersion, Context, NULL);
+      OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, Context, NULL);
     }
 
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {

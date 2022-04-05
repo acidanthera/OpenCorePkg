@@ -536,7 +536,7 @@ typedef enum {
   //
   // Apply range change patch for customised PCI serial device to XNU.
   //
-  KernelQuirkCustomPCISerialDevice,
+  KernelQuirkCustomPciSerialDevice,
   //
   // Apply custom AppleSMBIOS kext GUID patch for Custom UpdateSMBIOSMode.
   //
