@@ -606,19 +606,19 @@ typedef struct {
 } BOOT_FILE_DATA;
 
 typedef struct {
-  UINT32 Vcn;
-  UINT32 Lcn;
+  UINT64 Vcn;
+  UINT64 Lcn;
 } UNIT_ELEMENT;
 
 typedef struct {
   EFI_FS        *FileSystem;
-  INT32         Head;
-  INT32         Tail;
+  UINT8         Head;
+  UINT8         Tail;
   UNIT_ELEMENT  Elements[16];
-  UINT32        CurrentVcn;
+  UINT64        CurrentVcn;
   UINT8         *Cluster;
-  UINT32        ClusterOffset;
-  UINT32        SavedPosition;
+  UINT64        ClusterOffset;
+  UINT64        SavedPosition;
   UINT8         *ClearTextBlock;
 } COMPRESSED;
 

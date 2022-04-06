@@ -13,12 +13,6 @@ extern UINT64 mFileRecordSize;
 extern UINT64 mSectorSize;
 extern UINT64 mClusterSize;
 
-#ifdef FUZZ_DISK_READ
-extern UINTN mFuzzOffset;
-extern UINTN mFuzzSize;
-extern CONST UINT8 *mFuzzPointer;
-#endif
-
 EFI_STATUS
 EFIAPI
 DiskRead (
@@ -28,7 +22,6 @@ DiskRead (
   IN OUT VOID *Buffer
   )
 {
-#ifndef FUZZ_DISK_READ
   EFI_STATUS         Status;
   EFI_BLOCK_IO_MEDIA *Media;
 
@@ -49,14 +42,6 @@ DiskRead (
     DEBUG((DEBUG_INFO, "NTFS: Could not read disk at address %08x\n", Offset));
     return Status;
   }
-#else
-  if ((mFuzzSize - mFuzzOffset) < Size) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-  CopyMem (Buffer, mFuzzPointer, Size);
-  mFuzzPointer += Size;
-  mFuzzOffset += Size;
-#endif
 
   return EFI_SUCCESS;
 }
@@ -313,7 +298,7 @@ ReadField (
   // So we must check the most significant bit.
   //
   if (Signed && FieldSize && (Run[FieldSize - 1] & 0x80)) {
-    Value = -1;
+    Value = (UINT64) (-1);
   }
 
   CopyMem (&Value, Run, FieldSize);
@@ -437,7 +422,7 @@ GetLcn (
   if (Vcn >= Runlist->NextVcn) {
     Status = ReadRunListElement (Runlist);
     if (EFI_ERROR(Status)) {
-      return -1;
+      return (UINT64) (-1);
     }
 
     return Runlist->CurrentLcn;
@@ -461,8 +446,8 @@ ReadClusters (
   UINT64     Index;
   UINT64     ClustersTotal;
   UINT64     Cluster;
-  INT32      OffsetInsideCluster;
-  INT32      Size;
+  UINT64     OffsetInsideCluster;
+  UINT64     Size;
 
   OffsetInsideCluster = Offset & (mClusterSize - 1);
   Size = mClusterSize;

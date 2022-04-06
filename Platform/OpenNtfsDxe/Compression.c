@@ -159,7 +159,7 @@ DecompressBlock (
 {
   EFI_STATUS   Status;
   UINT16       BlockParameters;
-  UINT16       BlockLength;
+  UINT64       BlockLength;
   UINT8        TagsByte;
   UINT8        Tokens;
   UINT16       ClearTextPointer;
@@ -538,8 +538,8 @@ Decompress (
   EFI_STATUS   Status;
   UINT64       Vcn;
   UINT64       Target;
-  UINT32       SpareBytes;
-  UINT32       Residual;
+  UINT64       SpareBytes;
+  UINT64       Residual;
   UINT64       BlocksPerCluster;
   UINT64       ClustersPerBlock;
 

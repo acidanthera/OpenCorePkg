@@ -1,6 +1,6 @@
 ## @file
 #
-#  INF file for NTFS driver.
+#  New Technologies File System (NTFS) read-only driver.
 #
 #  Copyright (c) 2022, Mikhail Krichanov. All rights reserved.
 #  SPDX-License-Identifier: BSD-3-Clause

@@ -168,9 +168,9 @@ NtfsDirHook (
 
   Info->Size = sizeof(*Info) + StrnLenS(Info->FileName, MAX_PATH) * sizeof(CHAR16);
 
-  Mtime = DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
+  Mtime = (INT32) (DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
     - 86400ULL * 365 * (1970 - 1601)
-    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100);
+    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100));
 
   NtfsTimeToEfiTime(Mtime, &Time);
   CopyMem(&Info->CreateTime, &Time, sizeof(Time));
@@ -202,9 +202,9 @@ NtfsDirIter (
   }
 
   File->IsDir = (BOOLEAN) ((FileType & FSHELP_TYPE_MASK) == FSHELP_DIR);
-  File->Mtime = DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
+  File->Mtime = (INT32) (DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
     - 86400ULL * 365 * (1970 - 1601)
-    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100);
+    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100));
   FreeFile (Node);
 
   return EFI_SUCCESS;
@@ -435,14 +435,14 @@ FsHelpFindFile (
   IN  FSHELP_FILETYPE  Type
   )
 {
-  EFI_STATUS Status;
-  FSHELP_CTX Context = {
-    .Path         = Path,
-    .RootNode     = RootNode,
-    .SymlinkDepth = 0,
-    .CurrentNode  = NULL
-  };
+  EFI_STATUS      Status;
+  FSHELP_CTX      Context;
   FSHELP_FILETYPE FoundType;
+
+  Context.Path         = Path;
+  Context.RootNode     = RootNode;
+  Context.SymlinkDepth = 0;
+  Context.CurrentNode  = NULL;
 
   if ((Path == NULL) || (Path[0] != L'/')) {
     DEBUG((DEBUG_INFO, "NTFS: Invalid file name `%s'\n", Path));
