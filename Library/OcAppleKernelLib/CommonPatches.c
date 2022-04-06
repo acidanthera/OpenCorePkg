@@ -1069,18 +1069,21 @@ UINT8
 mSerialDevicePortFind[] = {
   0x66, 0xBA, 0xF8, 0x03  ///< mov dx, 0x03F[8-9A-F]
 };
+STATIC_ASSERT (sizeof (mSerialDevicePortFind) == 4, "Unsupported mSerialDevicePortFind");
 
 STATIC
 UINT8
 mSerialDevicePortMask[] = {
   0xFF, 0xFF, 0xF8, 0xFF
 };
+STATIC_ASSERT (sizeof (mSerialDevicePortMask) == 4, "Unsupported mSerialDevicePortMask");
 
 STATIC
 UINT8
 mSerialDevicePortReplace[] = {
   0x66, 0xBA, 0x00, 0x00  ///< mov dx, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
 };
+STATIC_ASSERT (sizeof (mSerialDevicePortReplace) == 4, "Unsupported mSerialDevicePortReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
@@ -1090,30 +1093,33 @@ mCustomPciSerialDevicePortPatch = {
   .Find        = mSerialDevicePortFind,
   .Mask        = mSerialDevicePortMask,
   .Replace     = mSerialDevicePortReplace,
-  .ReplaceMask = NULL,
+  .ReplaceMask = mSerialDevicePortMask,
   .Size        = sizeof (mSerialDevicePortFind),
   .Count       = 0,
   .Skip        = 0,
-  .Limit       = 0
+  .Limit       = 1024
 };
 
 STATIC
 UINT8
 mSerialDeviceMmioFind[] = {
-  0x00, 0x00, 0x40, 0x03, 0xFE  ///< mov whatever, 0xFE034000
+  0x00, 0x40, 0x03, 0xFE  ///< mov whatever, 0xFE0340xx
 };
+STATIC_ASSERT (sizeof (mSerialDeviceMmioFind) == 4, "Unsupported mSerialDeviceMmioFind");
 
 STATIC
 UINT8
 mSerialDeviceMmioMask[] = {
-  0x00, 0xFF, 0xFF, 0xFF, 0xFF
+  0x00, 0xFF, 0xFF, 0xFF
 };
+STATIC_ASSERT (sizeof (mSerialDeviceMmioMask) == 4, "Unsupported mSerialDeviceMmioMask");
 
 STATIC
 UINT8
 mSerialDeviceMmioReplace[] = {
-  0x00, 0x00, 0x00, 0x00, 0x00  ///< mov whatever, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
+  0x00, 0x00, 0x00, 0x00  ///< mov whatever, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
 };
+STATIC_ASSERT (sizeof (mSerialDeviceMmioReplace) == 4, "Unsupported mSerialDeviceMmioReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
@@ -1127,7 +1133,7 @@ mCustomPciSerialDeviceMmioPatch = {
   .Size        = sizeof (mSerialDeviceMmioFind),
   .Count       = 0,
   .Skip        = 0,
-  .Limit       = 0
+  .Limit       = 1024
 };
 
 VOID
@@ -1148,7 +1154,7 @@ PatchSetPciSerialDeviceRegisterBase (
     CopyMem (&mSerialDevicePortReplace[2], &RegisterBase, sizeof (UINT16));
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device MMIO address %X\n", RegisterBase));
-    CopyMem (&mSerialDeviceMmioReplace[1], &RegisterBase, sizeof (UINT32));
+    CopyMem (mSerialDeviceMmioReplace, &RegisterBase, sizeof (UINT32));
   }
 }
 
@@ -1174,8 +1180,8 @@ PatchCustomPciSerialDevice (
     return Status;
   }
 
-  if (mSerialDeviceMmioReplace[1] != 0x00 && mSerialDeviceMmioReplace[2] != 0x00
-    && mSerialDeviceMmioReplace[3] != 0x00 && mSerialDeviceMmioReplace[4] != 0x00) {
+  if (mSerialDeviceMmioReplace[0] != 0x00 && mSerialDeviceMmioReplace[1] != 0x00
+    && mSerialDeviceMmioReplace[2] != 0x00 && mSerialDeviceMmioReplace[3] != 0x00) {
     Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDeviceMmioPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDeviceMmio - %r\n", Status));
