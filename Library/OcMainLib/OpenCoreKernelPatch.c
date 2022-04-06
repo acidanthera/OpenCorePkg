@@ -259,16 +259,6 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkIncreasePciBarSize, CacheType, DarwinVersion, Context, NULL);     
     }
 
-    if (Config->Kernel.Quirks.CustomPciSerialDevice) {
-      RegisterBase = GetSerialRegisterBase ();
-      if (RegisterBase != 0) {
-        PatchSetPciSerialDeviceRegisterBase (RegisterBase);
-        OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, Context, NULL);
-      } else {
-        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero!\n"));
-      }
-    }
-
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
       OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid1, CacheType, DarwinVersion, Context, NULL);
       OcKernelApplyQuirk (KernelQuirkCustomSmbiosGuid2, CacheType, DarwinVersion, Context, NULL);
@@ -322,6 +312,16 @@ OcKernelApplyPatches (
 
     if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
       OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, DarwinVersion, NULL, &KernelPatcher);
+    }
+
+    if (Config->Kernel.Quirks.CustomPciSerialDevice) {
+      RegisterBase = GetSerialRegisterBase ();
+      if (RegisterBase != 0) {
+        PatchSetPciSerialDeviceRegisterBase (RegisterBase);
+        OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero!\n"));
+      }
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {
