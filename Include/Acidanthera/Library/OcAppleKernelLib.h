@@ -534,7 +534,7 @@ typedef enum {
   //
   KernelQuirkAppleXcpmForceBoost,
   //
-  // Apply range change patch for customised PCI serial device to XNU.
+  // Apply regiser base change patch for customised PCI serial device to XNU.
   //
   KernelQuirkCustomPciSerialDevice,
   //
@@ -1165,13 +1165,13 @@ PatchSetApfsTimeout (
   );
 
 /**
-  Set PCI serial device range for KernelQuirkCustomPciSerialDevice quirk.
+  Set PCI serial device regiser base for KernelQuirkCustomPciSerialDevice quirk.
 
-  @param[in]  Range   PCI serial device range.
+  @param[in]  RegisterBase   PCI serial device regiser base.
 **/
 VOID
-PatchSetPciSerialDeviceRange (
-  IN  UINTN  Range
+PatchSetPciSerialDeviceRegisterBase (
+  IN  UINTN  RegisterBase
   );
 
 /**
