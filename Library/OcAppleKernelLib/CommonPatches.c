@@ -1138,17 +1138,17 @@ PatchSetPciSerialDeviceRegisterBase (
   //
   // FIXME: This is really ugly, make quirks take a context param.
   //
-  if (Range > MAX_UINT32) {
+  if (RegisterBase > MAX_UINT32) {
     DEBUG ((DEBUG_INFO, "OCAK: Aborting registering borked serial device MMIO address\n"));
     return;
   }
 
-  if (Range <= MAX_UINT16) {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device port %u\n", Range));
-    CopyMem (&mSerialDevicePortReplace[2], &Range, sizeof (UINT16));
+  if (RegisterBase <= MAX_UINT16) {
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device port %u\n", RegisterBase));
+    CopyMem (&mSerialDevicePortReplace[2], &RegisterBase, sizeof (UINT16));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device MMIO address %X\n", Range));
-    CopyMem (&mSerialDeviceMmioReplace[1], &Range, sizeof (UINT32));
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device MMIO address %X\n", RegisterBase));
+    CopyMem (&mSerialDeviceMmioReplace[1], &RegisterBase, sizeof (UINT32));
   }
 }
 
@@ -1163,7 +1163,7 @@ PatchCustomPciSerialDevice (
 
   ASSERT (Patcher != NULL);
 
-  if (mSerialDevicePortReplace[3] != 0x00 && mSerialDevicePortReplace[4] != 0x00) {
+  if (mSerialDevicePortReplace[2] != 0x00 && mSerialDevicePortReplace[3] != 0x00) {
     Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePortPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevicePort - %r\n", Status));
