@@ -1169,7 +1169,7 @@ PatchCustomPciSerialDevice (
 
   ASSERT (Patcher != NULL);
 
-  if (mSerialDevicePortReplace[2] != 0x00 && mSerialDevicePortReplace[3] != 0x00) {
+  if (!IsZeroBuffer (mSerialDevicePortReplace, sizeof (UINT16))) {
     Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePortPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevicePort - %r\n", Status));
@@ -1180,8 +1180,7 @@ PatchCustomPciSerialDevice (
     return Status;
   }
 
-  if (mSerialDeviceMmioReplace[0] != 0x00 && mSerialDeviceMmioReplace[1] != 0x00
-    && mSerialDeviceMmioReplace[2] != 0x00 && mSerialDeviceMmioReplace[3] != 0x00) {
+  if (!IsZeroBuffer (mSerialDeviceMmioReplace, sizeof (UINT32))) {
     Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDeviceMmioPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDeviceMmio - %r\n", Status));
