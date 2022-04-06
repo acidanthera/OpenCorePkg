@@ -13,10 +13,10 @@
 #define BLOCK_LENGTH_BITS   0xFFF
 #define UNIT_MASK           0xF
 
-extern UINTN mFileRecordSize;
-extern UINTN mSectorSize;
-extern UINTN mClusterSize;
-extern UINTN BufferSize;
+extern UINTN  mFileRecordSize;
+extern UINTN  mSectorSize;
+extern UINTN  mClusterSize;
+extern UINT64 BufferSize;
 
 STATIC
 EFI_STATUS
@@ -484,7 +484,7 @@ ReadCompressedBlock (
           Status = DiskRead (
             Runlist->Unit.FileSystem,
             Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * mClusterSize,
-            ClearTextClusters * mClusterSize,
+            (UINTN) (ClearTextClusters * mClusterSize),
             Buffer
             );
           if (EFI_ERROR (Status)) {
@@ -509,7 +509,7 @@ ReadCompressedBlock (
           Status = DiskRead (
             Runlist->Unit.FileSystem,
             (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
-            SpareClusters * mClusterSize,
+            (UINTN) (SpareClusters * mClusterSize),
             Buffer
             );
           if (EFI_ERROR (Status)) {
