@@ -82,7 +82,7 @@ EFIAPI
 DiskRead (
   IN EFI_FS   *FileSystem,
   IN UINT64   Offset,
-  IN UINT64   Size,
+  IN UINTN    Size,
   IN OUT VOID *Buffer
   );
 
@@ -100,7 +100,7 @@ ReadAttr (
   IN  NTFS_ATTR *NtfsAttr,
   OUT UINT8     *Dest,
   IN  UINT64    Offset,
-  IN  UINT64    Length
+  IN  UINTN     Length
   );
 
 EFI_STATUS
@@ -110,22 +110,13 @@ ReadData (
   IN  UINT8     *pa,
   OUT UINT8     *Dest,
   IN  UINT64    Offset,
-  IN  UINT64    Length
+  IN  UINTN     Length
   );
 
 EFI_STATUS
 EFIAPI
 ReadRunListElement (
   IN OUT RUNLIST  *Runlist
-  );
-
-EFI_STATUS
-EFIAPI
-ReadClusters (
-  IN  RUNLIST *Runlist,
-  IN  UINT64  Offset,
-  IN  UINT64  Length,
-  OUT UINT8   *Dest
   );
 
 EFI_STATUS

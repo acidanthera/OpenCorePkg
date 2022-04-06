@@ -212,7 +212,7 @@ FileReadDir (
     FreePool(TmpFile);
   }
 
-  *Size = Info->Size;
+  *Size = (UINTN) Info->Size;
   File->DirIndex++;
 
   // DEBUG((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex-1, Info->FileName,
@@ -237,7 +237,7 @@ Read (
    File->RootFile.DataAttributeSize - File->Offset : 0;
 
   if (*Size > Remaining) {
-    *Size = Remaining;
+    *Size = (UINTN) Remaining;
   }
 
   BaseMftRecord = &File->RootFile;

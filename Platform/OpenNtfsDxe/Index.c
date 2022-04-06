@@ -9,9 +9,9 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINT64 mFileRecordSize;
-extern UINT64 mIndexRecordSize;
-UINT64        BufferSize;
+extern UINTN mFileRecordSize;
+extern UINTN mIndexRecordSize;
+UINT64       BufferSize;
 
 STATIC
 VOID
@@ -158,7 +158,7 @@ NtfsDirHook (
     Info->FileName,
     MAX_PATH,
     Name,
-    (Info->Size - sizeof(EFI_FILE_INFO)) / sizeof (CHAR16)
+    (UINTN) ((Info->Size - sizeof(EFI_FILE_INFO)) / sizeof (CHAR16))
     );
   if (EFI_ERROR(Status)) {
     DEBUG((DEBUG_INFO, "NTFS: Could not copy string.\n"));
@@ -496,6 +496,7 @@ IterateDir (
   UINT8               *BitMap;
   UINTN               BitMapLen;
   UINT8               Bit;
+  UINTN               Number;
 
   if (!Dir->InodeRead) {
     Status = InitFile (Dir, Dir->Inode);
@@ -593,7 +594,7 @@ IterateDir (
         (CompareMem ((UINT8 *) Non + Non->NameOffset, L"$I30", 8) == 0)) {
       BitMapLen = (Non->NonResFlag == 0) ?
                   ((ATTR_HEADER_RES *)Non)->InfoLength :
-                  Non->AllocatedSize;
+                  (UINTN) Non->AllocatedSize;
 
       if (BitMapLen > MAX_FILE_SIZE) {
         DEBUG((DEBUG_INFO, "NTFS: (IterateDir) File is too huge.\n"));
@@ -627,7 +628,7 @@ IterateDir (
           FreePool (BitMap);
           return Status;
         }
-        BitMapLen = Non->RealSize;
+        BitMapLen = (UINTN) Non->RealSize;
       }
 
       BitIndex = BitMap;
@@ -674,12 +675,12 @@ IterateDir (
     }
 
     Bit = 1;
-    for (UINT64 i = 0; i < (UINT64)BitMapLen * 8; i++) {
+    for (Number = 0; Number < (BitMapLen * 8); Number++) {
       if ((*BitIndex & Bit) != 0) {
         Status = ReadAttr (
           &Attr,
           (UINT8 *)IndexRecord,
-          i * mIndexRecordSize,
+          Number * mIndexRecordSize,
           mIndexRecordSize
           );
         if (EFI_ERROR(Status)) {

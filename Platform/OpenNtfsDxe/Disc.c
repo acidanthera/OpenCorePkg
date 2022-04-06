@@ -9,10 +9,10 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-UINT64 mFileRecordSize;
-UINT64 mIndexRecordSize;
-UINT64 mSectorSize;
-UINT64 mClusterSize;
+UINTN mFileRecordSize;
+UINTN mIndexRecordSize;
+UINTN mSectorSize;
+UINTN mClusterSize;
 
 EFI_STATUS
 NtfsDir (
@@ -91,7 +91,7 @@ NtfsMount (
 {
   EFI_STATUS         Status;
   BOOT_FILE_DATA     Boot;
-  UINT64             Size;
+  UINTN              Size;
   EFI_NTFS_FILE      *RootFile;
 
   Status = DiskRead (FileSystem, 0, sizeof (BOOT_FILE_DATA), &Boot);
@@ -108,16 +108,16 @@ NtfsMount (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  mSectorSize = (UINT64) Boot.BytesPerSector;
-  mClusterSize = (UINT64) Boot.SectorsPerCluster * mSectorSize;
+  mSectorSize  = (UINTN) Boot.BytesPerSector;
+  mClusterSize = (UINTN) Boot.SectorsPerCluster * mSectorSize;
 
   if (Boot.MftRecordClusters > 0) {
-    Size = (UINT64) Boot.MftRecordClusters * mClusterSize;
+    Size = (UINTN) Boot.MftRecordClusters * mClusterSize;
   } else if (-Boot.MftRecordClusters >= 31) {
     DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #2) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
-    Size = LShiftU64 (1ULL, -Boot.MftRecordClusters);
+    Size = (UINTN) LShiftU64 (1ULL, -Boot.MftRecordClusters);
   }
 
   mFileRecordSize = Size;
@@ -127,12 +127,12 @@ NtfsMount (
   }
 
   if (Boot.IndexRecordClusters > 0) {
-    Size = (UINT64) Boot.IndexRecordClusters * mClusterSize;
+    Size = (UINTN) Boot.IndexRecordClusters * mClusterSize;
   } else if (-Boot.IndexRecordClusters >= 31) {
     DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #3) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
-    Size = LShiftU64 (1ULL, -Boot.IndexRecordClusters);
+    Size = (UINTN) LShiftU64 (1ULL, -Boot.IndexRecordClusters);
   }
 
   mIndexRecordSize = Size;
@@ -541,12 +541,12 @@ FindAttr (
         return NULL;
       }
 
-      Attr->NonResAttrList = AllocateZeroPool (NonRes->RealSize);
+      Attr->NonResAttrList = AllocateZeroPool ((UINTN) NonRes->RealSize);
       if (Attr->NonResAttrList == NULL) {
         return NULL;
       }
 
-      Status = ReadData (Attr, AttrStart, Attr->NonResAttrList, 0, NonRes->RealSize);
+      Status = ReadData (Attr, AttrStart, Attr->NonResAttrList, 0, (UINTN) NonRes->RealSize);
       if (EFI_ERROR(Status)) {
         DEBUG((DEBUG_INFO, "NTFS: Failed to read non-resident attribute list\n"));
         return NULL;

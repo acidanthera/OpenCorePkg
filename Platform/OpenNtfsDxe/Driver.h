@@ -617,7 +617,7 @@ typedef struct {
   UNIT_ELEMENT  Elements[16];
   UINT64        CurrentVcn;
   UINT8         *Cluster;
-  UINT64        ClusterOffset;
+  UINTN         ClusterOffset;
   UINT64        SavedPosition;
   UINT8         *ClearTextBlock;
 } COMPRESSED;

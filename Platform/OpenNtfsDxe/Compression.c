@@ -13,10 +13,10 @@
 #define BLOCK_LENGTH_BITS   0xFFF
 #define UNIT_MASK           0xF
 
-extern UINT64 mFileRecordSize;
-extern UINT64 mSectorSize;
-extern UINT64 mClusterSize;
-extern UINT64 BufferSize;
+extern UINTN mFileRecordSize;
+extern UINTN mSectorSize;
+extern UINTN mClusterSize;
+extern UINTN BufferSize;
 
 STATIC
 EFI_STATUS
@@ -159,7 +159,7 @@ DecompressBlock (
 {
   EFI_STATUS   Status;
   UINT16       BlockParameters;
-  UINT64       BlockLength;
+  UINTN        BlockLength;
   UINT8        TagsByte;
   UINT8        Tokens;
   UINT16       ClearTextPointer;
@@ -170,7 +170,7 @@ DecompressBlock (
   UINT16       Delta;
   UINT16       Dshift;
   UINT16       BackReference;
-  UINT64       SpareBytes;
+  UINTN        SpareBytes;
 
   Status = GetTwoDataRunBytes (Clusters, &BlockParameters);
   if (EFI_ERROR (Status)) {
@@ -372,7 +372,7 @@ ReadCompressedBlock (
 {
   EFI_STATUS   Status;
   UINTN        SpareBlocks;
-  UINTN        SpareClusters;
+  UINT64       SpareClusters;
   UINT64       BlocksPerCluster = 0;
   UINT64       ClustersPerBlock = 0;
   UINT64       ClearTextClusters;
@@ -419,9 +419,9 @@ ReadCompressedBlock (
     }
 
     if (mClusterSize >= COMPRESSION_BLOCK) {
-      SpareBlocks = (16 - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster;
+      SpareBlocks = (UINTN) ((16 - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
     } else {
-      SpareBlocks = DivU64x64Remainder (16 - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
+      SpareBlocks = (UINTN) DivU64x64Remainder (16 - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
     }
 
     if (SpareBlocks > BlocksTotal) {
@@ -538,14 +538,14 @@ Decompress (
   EFI_STATUS   Status;
   UINT64       Vcn;
   UINT64       Target;
-  UINT64       SpareBytes;
-  UINT64       Residual;
+  UINTN        SpareBytes;
+  UINTN        Residual;
   UINT64       BlocksPerCluster;
   UINT64       ClustersPerBlock;
 
   if (Runlist->Unit.ClearTextBlock != NULL) {
     if ((Offset & (~(COMPRESSION_BLOCK - 1))) == Runlist->Unit.SavedPosition) {
-      Residual = COMPRESSION_BLOCK - (Offset - Runlist->Unit.SavedPosition);
+      Residual = (UINTN) (COMPRESSION_BLOCK - (Offset - Runlist->Unit.SavedPosition));
       if (Residual > Length) {
         Residual = Length;
       }
@@ -591,14 +591,14 @@ Decompress (
       Status = ReadCompressedBlock (
         Runlist,
         NULL,
-        (Vcn - Runlist->TargetVcn) * BlocksPerCluster
+        (UINTN) ((Vcn - Runlist->TargetVcn) * BlocksPerCluster)
         );
     } else {
       ClustersPerBlock = DivU64x64Remainder (COMPRESSION_BLOCK, mClusterSize, NULL);
       Status = ReadCompressedBlock (
         Runlist,
         NULL,
-        DivU64x64Remainder (Vcn - Runlist->TargetVcn, ClustersPerBlock, NULL)
+        (UINTN) DivU64x64Remainder (Vcn - Runlist->TargetVcn, ClustersPerBlock, NULL)
         );
     }
 
@@ -621,7 +621,7 @@ Decompress (
 
     Runlist->Unit.SavedPosition = Target;
 
-    Residual = Offset % COMPRESSION_BLOCK;
+    Residual = (UINTN) (Offset % COMPRESSION_BLOCK);
     SpareBytes = COMPRESSION_BLOCK - Residual;
     if (SpareBytes > Length) {
       SpareBytes = Length;

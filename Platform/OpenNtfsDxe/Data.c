@@ -9,16 +9,109 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINT64 mFileRecordSize;
-extern UINT64 mSectorSize;
-extern UINT64 mClusterSize;
+extern UINTN mFileRecordSize;
+extern UINTN mSectorSize;
+extern UINTN mClusterSize;
+
+STATIC
+UINT64
+GetLcn (
+  IN RUNLIST *Runlist,
+  IN UINT64  Vcn
+  )
+{
+  EFI_STATUS     Status;
+  UINT64         Delta;
+
+  if (Vcn >= Runlist->NextVcn) {
+    Status = ReadRunListElement (Runlist);
+    if (EFI_ERROR(Status)) {
+      return (UINT64) (-1);
+    }
+
+    return Runlist->CurrentLcn;
+  } else {
+    Delta = Vcn - Runlist->CurrentVcn;
+
+    return Runlist->IsSparse ? 0 : (Runlist->CurrentLcn + Delta);
+  }
+}
+
+STATIC
+EFI_STATUS
+ReadClusters (
+  IN  RUNLIST *Runlist,
+  IN  UINT64  Offset,
+  IN  UINTN   Length,
+  OUT UINT8   *Dest
+  )
+{
+  EFI_STATUS Status;
+  UINT64     Index;
+  UINT64     ClustersTotal;
+  UINT64     Cluster;
+  UINT64     OffsetInsideCluster;
+  UINTN      Size;
+
+  OffsetInsideCluster = Offset & (mClusterSize - 1);
+  Size = mClusterSize;
+  ClustersTotal = DivU64x64Remainder (Length + Offset + mClusterSize - 1, mClusterSize, NULL);
+
+  for (Index = Runlist->TargetVcn; Index < ClustersTotal; Index++) {
+    Cluster = GetLcn (Runlist, Index);
+    if (Cluster == (UINT64)(-1)) {
+      return EFI_DEVICE_ERROR;
+    }
+
+    Cluster = Cluster * mClusterSize;
+
+    if (Index == (ClustersTotal - 1)) {
+      Size = (UINTN) ((Length + Offset) & (mClusterSize - 1));
+
+      if (Size == 0) {
+        Size = mClusterSize;
+      }
+
+      if (Index != Runlist->TargetVcn) {
+        OffsetInsideCluster = 0;
+      }
+    }
+
+    if (Index == Runlist->TargetVcn) {
+      Size -= (UINTN) OffsetInsideCluster;
+    }
+
+    if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1))) {
+      Size = mClusterSize;
+      OffsetInsideCluster = 0;
+    }
+
+    if (Cluster != 0) {
+      Status = DiskRead (
+        Runlist->Unit.FileSystem,
+        Cluster + OffsetInsideCluster,
+        Size,
+        Dest
+        );
+      if (EFI_ERROR(Status)) {
+        return Status;
+      }
+    } else {
+      SetMem (Dest, Size, 0);
+    }
+
+    Dest += Size;
+  }
+
+  return EFI_SUCCESS;
+}
 
 EFI_STATUS
 EFIAPI
 DiskRead (
   IN EFI_FS   *FileSystem,
   IN UINT64   Offset,
-  IN UINT64   Size,
+  IN UINTN    Size,
   IN OUT VOID *Buffer
   )
 {
@@ -76,7 +169,7 @@ ReadAttr (
   IN  NTFS_ATTR *Attr,
   OUT UINT8     *Dest,
   IN  UINT64    Offset,
-  IN  UINT64    Length
+  IN  UINTN     Length
   )
 {
   EFI_STATUS       Status;
@@ -146,7 +239,7 @@ ReadData (
   IN  UINT8     *AttrStart,
   OUT UINT8     *Dest,
   IN  UINT64    Offset,
-  IN  UINT64    Length
+  IN  UINTN     Length
   )
 {
   EFI_STATUS         Status;
@@ -404,99 +497,6 @@ ReadRunListElement (
     Runlist->IsSparse = TRUE;
   } else {
     Runlist->IsSparse = FALSE;
-  }
-
-  return EFI_SUCCESS;
-}
-
-STATIC
-UINT64
-GetLcn (
-  IN RUNLIST *Runlist,
-  IN UINT64  Vcn
-  )
-{
-  EFI_STATUS     Status;
-  UINT64         Delta;
-
-  if (Vcn >= Runlist->NextVcn) {
-    Status = ReadRunListElement (Runlist);
-    if (EFI_ERROR(Status)) {
-      return (UINT64) (-1);
-    }
-
-    return Runlist->CurrentLcn;
-  } else {
-    Delta = Vcn - Runlist->CurrentVcn;
-
-    return Runlist->IsSparse ? 0 : (Runlist->CurrentLcn + Delta);
-  }
-}
-
-EFI_STATUS
-EFIAPI
-ReadClusters (
-  IN  RUNLIST *Runlist,
-  IN  UINT64  Offset,
-  IN  UINT64  Length,
-  OUT UINT8   *Dest
-  )
-{
-  EFI_STATUS Status;
-  UINT64     Index;
-  UINT64     ClustersTotal;
-  UINT64     Cluster;
-  UINT64     OffsetInsideCluster;
-  UINT64     Size;
-
-  OffsetInsideCluster = Offset & (mClusterSize - 1);
-  Size = mClusterSize;
-  ClustersTotal = DivU64x64Remainder (Length + Offset + mClusterSize - 1, mClusterSize, NULL);
-
-  for (Index = Runlist->TargetVcn; Index < ClustersTotal; Index++) {
-    Cluster = GetLcn (Runlist, Index);
-    if (Cluster == (UINT64)(-1)) {
-      return EFI_DEVICE_ERROR;
-    }
-
-    Cluster = Cluster * mClusterSize;
-
-    if (Index == (ClustersTotal - 1)) {
-      Size = (Length + Offset) & (mClusterSize - 1);
-
-      if (Size == 0) {
-        Size = mClusterSize;
-      }
-
-      if (Index != Runlist->TargetVcn) {
-        OffsetInsideCluster = 0;
-      }
-    }
-
-    if (Index == Runlist->TargetVcn) {
-      Size -= OffsetInsideCluster;
-    }
-
-    if ((Index != Runlist->TargetVcn) && (Index != (ClustersTotal - 1))) {
-      Size = mClusterSize;
-      OffsetInsideCluster = 0;
-    }
-
-    if (Cluster != 0) {
-      Status = DiskRead (
-        Runlist->Unit.FileSystem,
-        Cluster + OffsetInsideCluster,
-        Size,
-        Dest
-        );
-      if (EFI_ERROR(Status)) {
-        return Status;
-      }
-    } else {
-      SetMem (Dest, Size, 0);
-    }
-
-    Dest += Size;
   }
 
   return EFI_SUCCESS;

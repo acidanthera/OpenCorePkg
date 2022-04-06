@@ -9,7 +9,7 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINT64 mFileRecordSize;
+extern UINTN mFileRecordSize;
 
 STATIC
 EFI_STATUS
