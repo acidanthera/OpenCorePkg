@@ -1069,21 +1069,18 @@ CONST UINT8
 mSerialDevicePmioFind[] = {
   0x66, 0xBA, 0xF8, 0x03  ///< mov dx, 0x03F[8-9A-F]
 };
-STATIC_ASSERT (sizeof (mSerialDevicePmioFind) == 4, "Unsupported mSerialDevicePmioFind");
 
 STATIC
 CONST UINT8
 mSerialDevicePmioMask[] = {
   0xFF, 0xFF, 0xF8, 0xFF
 };
-STATIC_ASSERT (sizeof (mSerialDevicePmioMask) == 4, "Unsupported mSerialDevicePmioMask");
 
 STATIC
 UINT8
 mSerialDevicePmioReplace[] = {
   0x66, 0xBA, 0x00, 0x00  ///< mov dx, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
 };
-STATIC_ASSERT (sizeof (mSerialDevicePmioReplace) == 4, "Unsupported mSerialDevicePmioReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
@@ -1105,21 +1102,24 @@ CONST UINT8
 mSerialDeviceMmioFind[] = {
   0x00, 0x40, 0x03, 0xFE  ///< mov whatever, 0xFE0340xx
 };
-STATIC_ASSERT (sizeof (mSerialDeviceMmioFind) == 4, "Unsupported mSerialDeviceMmioFind");
+//
+// 0xFE0340xx is a 32-bit literal.
+//
+STATIC_ASSERT (sizeof (mSerialDeviceMmioFind) == sizeof (UINT32), "Unsupported mSerialDeviceMmioFind");
 
 STATIC
 CONST UINT8
 mSerialDeviceMmioMask[] = {
   0x00, 0xFF, 0xFF, 0xFF
 };
-STATIC_ASSERT (sizeof (mSerialDeviceMmioMask) == 4, "Unsupported mSerialDeviceMmioMask");
+STATIC_ASSERT (sizeof (mSerialDeviceMmioMask) == sizeof (UINT32), "Unsupported mSerialDeviceMmioMask");
 
 STATIC
 UINT8
 mSerialDeviceMmioReplace[] = {
   0x00, 0x00, 0x00, 0x00  ///< mov whatever, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
 };
-STATIC_ASSERT (sizeof (mSerialDeviceMmioReplace) == 4, "Unsupported mSerialDeviceMmioReplace");
+STATIC_ASSERT (sizeof (mSerialDeviceMmioReplace) == sizeof (UINT32), "Unsupported mSerialDeviceMmioReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
