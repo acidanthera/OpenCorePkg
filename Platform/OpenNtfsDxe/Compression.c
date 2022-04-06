@@ -27,7 +27,7 @@ GetNextCluster (
   EFI_STATUS   Status;
 
   if (Clusters->Head >= Clusters->Tail) {
-    DEBUG((DEBUG_INFO, "NTFS: Compression block overflown\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Compression block overflown\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -41,10 +41,10 @@ GetNextCluster (
     return Status;
   }
 
-  Clusters->CurrentVcn++;
+  ++Clusters->CurrentVcn;
 
   if (Clusters->CurrentVcn >= Clusters->Elements[Clusters->Head].Vcn) {
-    Clusters->Head++;
+    ++Clusters->Head;
   }
 
   Clusters->ClusterOffset = 0;
@@ -60,6 +60,9 @@ GetDataRunByte (
   )
 {
   EFI_STATUS   Status;
+
+  ASSERT (Clusters != NULL);
+  ASSERT (Result   != NULL);
 
   if (Clusters->ClusterOffset >= mClusterSize) {
     Status = GetNextCluster (Clusters);
@@ -81,8 +84,11 @@ GetTwoDataRunBytes (
   )
 {
   EFI_STATUS   Status;
-  UINT8        ByteLow  = 0;
-  UINT8        ByteHigh = 0;
+  UINT8        ByteLow;
+  UINT8        ByteHigh;
+
+  ASSERT (Clusters != NULL);
+  ASSERT (Result   != NULL);
 
   Status = GetDataRunByte (Clusters, &ByteLow);
   if (EFI_ERROR (Status)) {
@@ -94,7 +100,7 @@ GetTwoDataRunBytes (
     return Status;
   }
 
-  *Result = (((UINT16) ByteHigh) << 8) + ByteLow;
+  *Result = (((UINT16) ByteHigh) << 8U) + ByteLow;
 
   return EFI_SUCCESS;
 }
@@ -172,6 +178,9 @@ DecompressBlock (
   UINT16       BackReference;
   UINTN        SpareBytes;
 
+  ASSERT (Clusters != NULL);
+  ASSERT (Dest     != NULL);
+
   Status = GetTwoDataRunBytes (Clusters, &BlockParameters);
   if (EFI_ERROR (Status)) {
     return Status;
@@ -186,7 +195,7 @@ DecompressBlock (
       TagsByte         = 0;
       while (BlockLength > 0) {
         if (ClearTextPointer > COMPRESSION_BLOCK) {
-          DEBUG((DEBUG_INFO, "NTFS: Compression block too large\n"));
+          DEBUG ((DEBUG_INFO, "NTFS: Compression block too large\n"));
           return EFI_VOLUME_CORRUPTED;
         }
 
@@ -197,13 +206,13 @@ DecompressBlock (
           }
 
           Tokens = 8;
-          BlockLength--;
-          if (BlockLength <= 0) {
+          --BlockLength;
+          if (BlockLength == 0) {
             break;
           }
         }
 
-        if ((TagsByte & 1) == 1) {
+        if ((TagsByte & 1U) == 1) {
           //
           // Back-reference
           //
@@ -215,33 +224,33 @@ DecompressBlock (
           BlockLength -= 2;
 
           if (ClearTextPointer == 0) {
-            DEBUG((DEBUG_INFO, "NTFS: Nontext window empty\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: Nontext window empty\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           Lmask = BLOCK_LENGTH_BITS;
           Dshift = 12;
           for (Index = ClearTextPointer - 1; Index >= 0x10; Index >>= 1) {
-            Lmask >>= 1;
-            Dshift--;
+            Lmask >>= 1U;
+            --Dshift;
           }
 
           Delta = BackReference >> Dshift;
           Length = (BackReference & Lmask) + 3;
 
           if ((Delta > (ClearTextPointer - 1)) || (Length >= COMPRESSION_BLOCK)) {
-            DEBUG((DEBUG_INFO, "NTFS: Invalid back-reference.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: Invalid back-reference.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           if (BufferSize < Length) {
-            DEBUG((DEBUG_INFO, "NTFS: (DecompressBlock #1) Buffer overflow.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #1) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
-          for (Index = 0; Index < Length; Index++) {
+          for (Index = 0; Index < Length; ++Index) {
             Dest[ClearTextPointer] = Dest[ClearTextPointer - Delta - 1];
-            ClearTextPointer++;
+            ++ClearTextPointer;
           }
 
           BufferSize -= Length;
@@ -255,24 +264,24 @@ DecompressBlock (
           }
 
           if (BufferSize == 0) {
-            DEBUG((DEBUG_INFO, "NTFS: (DecompressBlock #2) Buffer overflow.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           Dest[ClearTextPointer++] = PlainText;
 
-          BlockLength--;
-          BufferSize--;
+          --BlockLength;
+          --BufferSize;
         }
 
-        TagsByte >>= 1;
-        Tokens--;
+        TagsByte >>= 1U;
+        --Tokens;
       }
 
       return EFI_SUCCESS;
     } else {
       if (BlockLength != COMPRESSION_BLOCK) {
-        DEBUG((DEBUG_INFO, "NTFS: Invalid compression block size %d\n", BlockLength));
+        DEBUG ((DEBUG_INFO, "NTFS: Invalid compression block size %d\n", BlockLength));
         return EFI_VOLUME_CORRUPTED;
       }
     }
@@ -286,7 +295,7 @@ DecompressBlock (
 
     if ((Dest != NULL) && (SpareBytes != 0)) {
       if (BufferSize < SpareBytes) {
-        DEBUG((DEBUG_INFO, "NTFS: (DecompressBlock #3) Buffer overflow.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #3) Buffer overflow.\n"));
         return EFI_VOLUME_CORRUPTED;
       }
 
@@ -373,9 +382,15 @@ ReadCompressedBlock (
   EFI_STATUS   Status;
   UINTN        SpareBlocks;
   UINT64       SpareClusters;
-  UINT64       BlocksPerCluster = 0;
-  UINT64       ClustersPerBlock = 0;
+  UINT64       BlocksPerCluster;
+  UINT64       ClustersPerBlock;
   UINT64       ClearTextClusters;
+
+  ASSERT (Runlist != NULL);
+  ASSERT (Buffer  != NULL);
+
+  BlocksPerCluster = 0;
+  ClustersPerBlock = 0;
 
   BufferSize = BlocksTotal * COMPRESSION_BLOCK;
 
@@ -388,7 +403,7 @@ ReadCompressedBlock (
   while (BlocksTotal != 0) {
     if ((Runlist->TargetVcn & UNIT_MASK) == 0)  {
       if ((Runlist->Unit.Head != Runlist->Unit.Tail) && (Runlist->IsSparse == FALSE)) {
-        DEBUG((DEBUG_INFO, "NTFS: Invalid compression block\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: Invalid compression block\n"));
         return EFI_VOLUME_CORRUPTED;
       }
 
@@ -409,7 +424,7 @@ ReadCompressedBlock (
 
         Runlist->Unit.Elements[Runlist->Unit.Tail].Vcn = Runlist->NextVcn;
         Runlist->Unit.Elements[Runlist->Unit.Tail].Lcn = Runlist->CurrentLcn + Runlist->NextVcn - Runlist->CurrentVcn;
-        Runlist->Unit.Tail++;
+        ++Runlist->Unit.Tail;
 
         Status = ReadRunListElement (Runlist);
         if (EFI_ERROR (Status)) {
@@ -439,7 +454,7 @@ ReadCompressedBlock (
       if (Runlist->Unit.Tail == 0) {
         if (Buffer != NULL) {
           if (BufferSize < (SpareBlocks * COMPRESSION_BLOCK)) {
-            DEBUG((DEBUG_INFO, "NTFS: (ReadCompressedBlock #1) Buffer overflow.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #1) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
@@ -458,7 +473,7 @@ ReadCompressedBlock (
             Buffer += COMPRESSION_BLOCK;
           }
 
-          SpareBlocks--;
+          --SpareBlocks;
         }
       }
     } else {
@@ -477,7 +492,7 @@ ReadCompressedBlock (
         Runlist->TargetVcn += ClearTextClusters;
         if (Buffer != NULL) {
           if (BufferSize < (ClearTextClusters * mClusterSize)) {
-            DEBUG((DEBUG_INFO, "NTFS: (ReadCompressedBlock #2) Buffer overflow.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
@@ -496,13 +511,13 @@ ReadCompressedBlock (
         }
 
         SpareClusters -= ClearTextClusters;
-        Runlist->Unit.Head++;
+        ++Runlist->Unit.Head;
       }
 
       if (SpareClusters != 0) {
         if (Buffer != NULL) {
           if (BufferSize < (SpareClusters * mClusterSize)) {
-            DEBUG((DEBUG_INFO, "NTFS: (ReadCompressedBlock #3) Buffer overflow.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #3) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
@@ -543,8 +558,11 @@ Decompress (
   UINT64       BlocksPerCluster;
   UINT64       ClustersPerBlock;
 
+  ASSERT (Runlist != NULL);
+  ASSERT (Dest    != NULL);
+
   if (Runlist->Unit.ClearTextBlock != NULL) {
-    if ((Offset & (~(COMPRESSION_BLOCK - 1))) == Runlist->Unit.SavedPosition) {
+    if ((Offset & (~(COMPRESSION_BLOCK - 1U))) == Runlist->Unit.SavedPosition) {
       Residual = (UINTN) (COMPRESSION_BLOCK - (Offset - Runlist->Unit.SavedPosition));
       if (Residual > Length) {
         Residual = Length;
@@ -569,7 +587,10 @@ Decompress (
   }
 
   Vcn = Runlist->TargetVcn;
-  Runlist->TargetVcn &= ~0xFULL; // A compression unit consists of 16 clusters.
+  //
+  // A compression unit consists of 16 clusters.
+  //
+  Runlist->TargetVcn &= ~0xFULL;
   while (Runlist->NextVcn <= Runlist->TargetVcn) {
     Status = ReadRunListElement (Runlist);
     if (EFI_ERROR (Status)) {
@@ -609,7 +630,7 @@ Decompress (
     }
   }
 
-  if (Offset % COMPRESSION_BLOCK) {
+  if ((Offset % COMPRESSION_BLOCK) != 0) {
     Target = Runlist->TargetVcn * mClusterSize;
 
     Status = ReadCompressedBlock (Runlist, Runlist->Unit.ClearTextBlock, 1);
