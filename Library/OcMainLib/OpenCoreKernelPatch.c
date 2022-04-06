@@ -94,6 +94,7 @@ OcKernelApplyPatches (
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
   BOOLEAN                IsKernelPatch;
+  UINTN                  RegisterBase;
 
   IsKernelPatch = Context == NULL;
 
@@ -259,11 +260,13 @@ OcKernelApplyPatches (
     }
 
     if (Config->Kernel.Quirks.CustomPciSerialDevice) {
-      //
-      // TODO: Properly set the value. Do we need a getter as well?
-      //
-      PatchSetPciSerialDeviceRegisterBase (GetSerialRegisterBase ());
-      OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, Context, NULL);
+      RegisterBase = GetSerialRegisterBase ();
+      if (RegisterBase != 0) {
+        PatchSetPciSerialDeviceRegisterBase (RegisterBase);
+        OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, Context, NULL);
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero!\n"));
+      }
     }
 
     if (Config->Kernel.Quirks.CustomSmbiosGuid) {
