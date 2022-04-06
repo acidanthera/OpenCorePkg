@@ -979,13 +979,13 @@ PatchDummyPowerManagement (
 }
 
 STATIC
-UINT8
+CONST UINT8
 mIncreasePciBarSizePatchFind[] = {
   0x00, 0x00, 0x00, 0x40
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIncreasePciBarSizePatchReplace[] = {
   0x00, 0x00, 0x00, 0x80
 };
@@ -1006,13 +1006,13 @@ mIncreasePciBarSizePatch = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIncreasePciBarSizePatchLegacyFind[] = {
   0x01, 0x00, 0x00, 0x40
 };
 
 STATIC
-UINT8
+CONST UINT8
 mIncreasePciBarSizePatchLegacyReplace[] = {
   0x01, 0x00, 0x00, 0x80
 };
@@ -1065,50 +1065,50 @@ PatchIncreasePciBarSize (
 }
 
 STATIC
-UINT8
-mSerialDevicePortFind[] = {
+CONST UINT8
+mSerialDevicePmioFind[] = {
   0x66, 0xBA, 0xF8, 0x03  ///< mov dx, 0x03F[8-9A-F]
 };
-STATIC_ASSERT (sizeof (mSerialDevicePortFind) == 4, "Unsupported mSerialDevicePortFind");
+STATIC_ASSERT (sizeof (mSerialDevicePmioFind) == 4, "Unsupported mSerialDevicePmioFind");
 
 STATIC
-UINT8
-mSerialDevicePortMask[] = {
+CONST UINT8
+mSerialDevicePmioMask[] = {
   0xFF, 0xFF, 0xF8, 0xFF
 };
-STATIC_ASSERT (sizeof (mSerialDevicePortMask) == 4, "Unsupported mSerialDevicePortMask");
+STATIC_ASSERT (sizeof (mSerialDevicePmioMask) == 4, "Unsupported mSerialDevicePmioMask");
 
 STATIC
 UINT8
-mSerialDevicePortReplace[] = {
+mSerialDevicePmioReplace[] = {
   0x66, 0xBA, 0x00, 0x00  ///< mov dx, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
 };
-STATIC_ASSERT (sizeof (mSerialDevicePortReplace) == 4, "Unsupported mSerialDevicePortReplace");
+STATIC_ASSERT (sizeof (mSerialDevicePmioReplace) == 4, "Unsupported mSerialDevicePmioReplace");
 
 STATIC
 PATCHER_GENERIC_PATCH
-mCustomPciSerialDevicePortPatch = {
-  .Comment     = DEBUG_POINTER ("CustomPciSerialDevicePort"),
+mCustomPciSerialDevicePmioPatch = {
+  .Comment     = DEBUG_POINTER ("CustomPciSerialDevicePmio"),
   .Base        = "_serial_init",
-  .Find        = mSerialDevicePortFind,
-  .Mask        = mSerialDevicePortMask,
-  .Replace     = mSerialDevicePortReplace,
-  .ReplaceMask = mSerialDevicePortMask,
-  .Size        = sizeof (mSerialDevicePortFind),
+  .Find        = mSerialDevicePmioFind,
+  .Mask        = mSerialDevicePmioMask,
+  .Replace     = mSerialDevicePmioReplace,
+  .ReplaceMask = mSerialDevicePmioMask,
+  .Size        = sizeof (mSerialDevicePmioFind),
   .Count       = 0,
   .Skip        = 0,
   .Limit       = 1024
 };
 
 STATIC
-UINT8
+CONST UINT8
 mSerialDeviceMmioFind[] = {
   0x00, 0x40, 0x03, 0xFE  ///< mov whatever, 0xFE0340xx
 };
 STATIC_ASSERT (sizeof (mSerialDeviceMmioFind) == 4, "Unsupported mSerialDeviceMmioFind");
 
 STATIC
-UINT8
+CONST UINT8
 mSerialDeviceMmioMask[] = {
   0x00, 0xFF, 0xFF, 0xFF
 };
@@ -1144,17 +1144,14 @@ PatchSetPciSerialDeviceRegisterBase (
   //
   // FIXME: This is really ugly, make quirks take a context param.
   //
-  if (RegisterBase > MAX_UINT32) {
-    DEBUG ((DEBUG_INFO, "OCAK: Aborting registering borked serial device MMIO address\n"));
-    return;
-  }
-
   if (RegisterBase <= MAX_UINT16) {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device port %u\n", RegisterBase));
-    CopyMem (&mSerialDevicePortReplace[2], &RegisterBase, sizeof (UINT16));
-  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %u\n", RegisterBase));
+    CopyMem (&mSerialDevicePmioReplace[2], &RegisterBase, sizeof (UINT16));
+  } else if (RegisterBase <= MAX_UINT32) {
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device MMIO address %X\n", RegisterBase));
     CopyMem (mSerialDeviceMmioReplace, &RegisterBase, sizeof (UINT32));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Aborting registering borked serial device\n"));
   }
 }
 
@@ -1169,29 +1166,22 @@ PatchCustomPciSerialDevice (
 
   ASSERT (Patcher != NULL);
 
-  if (!IsZeroBuffer (mSerialDevicePortReplace, sizeof (UINT16))) {
-    Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePortPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevicePort - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success CustomPciSerialDevicePort\n"));
-    }
-
-    return Status;
-  }
-
-  if (!IsZeroBuffer (mSerialDeviceMmioReplace, sizeof (UINT32))) {
+  if (!IsZeroBuffer (&mSerialDevicePmioReplace[2], sizeof (UINT16))) {
+    Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePmioPatch);
+  } else if (!IsZeroBuffer (mSerialDeviceMmioReplace, sizeof (UINT32))) {
     Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDeviceMmioPatch);
-    if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDeviceMmio - %r\n", Status));
-    } else {
-      DEBUG ((DEBUG_INFO, "OCAK: Patch success CustomPciSerialDeviceMmio\n"));
-    }
-
-    return Status;
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Aborting applying CustomPciSerialDevice with borked serial device\n"));
+    Status = EFI_INVALID_PARAMETER;
   }
 
-  return EFI_NOT_FOUND;
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevice - %r\n"));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success CustomPciSerialDevice\n"));
+  }
+
+  return Status;
 }
 
 STATIC
