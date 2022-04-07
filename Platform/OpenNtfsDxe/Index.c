@@ -273,7 +273,7 @@ ListFile (
         return EFI_VOLUME_CORRUPTED;
       }
 
-      Filename = AllocateZeroPool((AttrFileName->FilenameLen + 1) * sizeof (CHAR16));
+      Filename = AllocateZeroPool ((AttrFileName->FilenameLen + 1) * sizeof (CHAR16));
       if (Filename == NULL) {
         DEBUG ((DEBUG_INFO, "failed to allocate buffer for Filename\n"));
         FreePool (DirFile);

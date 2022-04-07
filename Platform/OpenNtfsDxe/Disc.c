@@ -23,7 +23,13 @@ NtfsDir (
   )
 {
   EFI_STATUS   Status;
-  NTFS_FILE    *Dir = NULL;
+  NTFS_FILE    *Dir;
+
+  ASSERT (FileSystem != NULL);
+  ASSERT (Path != NULL);
+  ASSERT (File != NULL);
+
+  Dir = NULL;
 
   CopyMem (&File->RootFile, FileSystem->RootIndex, sizeof (NTFS_FILE));
   CopyMem (&File->MftFile, FileSystem->MftStart, sizeof (NTFS_FILE));
@@ -52,7 +58,11 @@ NtfsOpen (
   )
 {
   EFI_STATUS   Status;
-  NTFS_FILE    *BaseMftRecord = NULL;
+  NTFS_FILE    *BaseMftRecord;
+
+  ASSERT (File != NULL);
+
+  BaseMftRecord = NULL;
 
   CopyMem (&File->RootFile, File->FileSystem->RootIndex, sizeof (NTFS_FILE));
   CopyMem (&File->MftFile, File->FileSystem->MftStart, sizeof (NTFS_FILE));
@@ -93,6 +103,8 @@ NtfsMount (
   BOOT_FILE_DATA     Boot;
   UINTN              Size;
   EFI_NTFS_FILE      *RootFile;
+
+  ASSERT (FileSystem != NULL);
 
   Status = DiskRead (FileSystem, 0, sizeof (BOOT_FILE_DATA), &Boot);
   if (EFI_ERROR (Status)) {
@@ -142,14 +154,15 @@ NtfsMount (
   }
 
   FileSystem->FirstMftRecord = Boot.MftLcn * mClusterSize;
-
-  /* Driver limitations */
+  //
+  // Driver limitations
+  //
   if ((mFileRecordSize > NTFS_MAX_MFT) || (mIndexRecordSize > NTFS_MAX_IDX)) {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #4) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
-  RootFile = AllocateZeroPool (sizeof (EFI_NTFS_FILE));
+  RootFile = AllocateZeroPool (sizeof (*RootFile));
   if (RootFile == NULL) {
     return EFI_OUT_OF_RESOURCES;
   }
@@ -234,6 +247,9 @@ Fixup (
   UINT64             USCounter;
   UINT8              *BufferEnd;
 
+  ASSERT (Buffer != NULL);
+  ASSERT (Magic != NULL);
+
   Record = (FILE_RECORD_HEADER *) Buffer;
 
   if (Length < sizeof (FILE_RECORD_HEADER)) {
@@ -251,13 +267,13 @@ Fixup (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (((UINT64)Record->S_Size - 1) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
+  if (((UINT64) Record->S_Size - 1) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #4) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   UpdateSequencePointer = Buffer + Record->UpdateSequenceOffset;
-  UpdateSequenceNumber = ReadUnaligned16 ((UINT16 *)UpdateSequencePointer);
+  UpdateSequenceNumber = ReadUnaligned16 ((UINT16 *) UpdateSequencePointer);
   USCounter = Record->UpdateSequenceOffset;
 
   if (Length < (mSectorSize - sizeof (UINT16))) {
@@ -276,7 +292,7 @@ Fixup (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    if (ReadUnaligned16 ((UINT16 *)Buffer) != UpdateSequenceNumber) {
+    if (ReadUnaligned16 ((UINT16 *) Buffer) != UpdateSequenceNumber) {
       DEBUG ((DEBUG_INFO, "NTFS: (Fixup #7) Record is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }

@@ -22,11 +22,7 @@ FileGetPosition (
 
   File = (EFI_NTFS_FILE *) This;
 
-  if (File->IsDir) {
-    *Position = File->DirIndex;
-  } else {
-    *Position = File->Offset;
-  }
+  *Position = File->IsDir ? File->DirIndex : File->Offset;
 
   return EFI_SUCCESS;
 }
@@ -48,10 +44,10 @@ FileSetPosition (
   if (File->IsDir) {
     if (Position != 0) {
       return EFI_INVALID_PARAMETER;
-    } else {
-      File->DirIndex = 0;
-      return EFI_SUCCESS;
     }
+
+    File->DirIndex = 0;
+    return EFI_SUCCESS;
   }
 
   FileSize = File->RootFile.DataAttributeSize;

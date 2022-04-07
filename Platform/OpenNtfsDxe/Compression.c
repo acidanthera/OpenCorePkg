@@ -663,7 +663,7 @@ Decompress (
   }
 
   Dest += (Length / COMPRESSION_BLOCK) * COMPRESSION_BLOCK;
-  Length = Length % COMPRESSION_BLOCK;
+  Length %= COMPRESSION_BLOCK;
   if (Length != 0) {
     Target = Runlist->TargetVcn * mClusterSize;
 

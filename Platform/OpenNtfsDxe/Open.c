@@ -90,7 +90,7 @@ FileOpen (
   NewFile->FileSystem = FileSystem;
   CopyMem (&NewFile->EfiFile, &FileSystem->EfiFile, sizeof (EFI_FILE_PROTOCOL));
 
-  NewFile->Path = AllocateZeroPool(StrnSizeS (CleanPath, MAX_PATH));
+  NewFile->Path = AllocateZeroPool (StrnSizeS (CleanPath, MAX_PATH));
   if (NewFile->Path == NULL) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not instantiate path\n"));
     FreePool(NewFile);
