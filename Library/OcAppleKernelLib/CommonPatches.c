@@ -1071,70 +1071,15 @@ mSerialDevicePmioFind[] = {
 };
 
 STATIC
-CONST UINT8
-mSerialDevicePmioMask[] = {
-  0xFF, 0xFF, 0xF8, 0xFF
-};
-
-STATIC
 UINT8
-mSerialDevicePmioReplace[] = {
-  0x66, 0xBA, 0x00, 0x00  ///< mov dx, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
+mSerialDevicePmioPort[] = {
+  0x00, 0x00              ///< To be set by PatchSetPciSerialDeviceRegisterBase()
 };
+STATIC_ASSERT (sizeof (mSerialDevicePmioPort) == sizeof (UINT16), "Unsupported mSerialDevicePmioPort");
 
 STATIC
-PATCHER_GENERIC_PATCH
-mCustomPciSerialDevicePmioPatch = {
-  .Comment     = DEBUG_POINTER ("CustomPciSerialDevicePmio"),
-  .Base        = "_serial_init",
-  .Find        = mSerialDevicePmioFind,
-  .Mask        = mSerialDevicePmioMask,
-  .Replace     = mSerialDevicePmioReplace,
-  .ReplaceMask = mSerialDevicePmioMask,
-  .Size        = sizeof (mSerialDevicePmioFind),
-  .Count       = 0,
-  .Skip        = 0,
-  .Limit       = 1024
-};
-
-STATIC
-CONST UINT8
-mSerialDeviceMmioFind[] = {
-  0x00, 0x40, 0x03, 0xFE  ///< mov whatever, 0xFE0340xx
-};
-//
-// 0xFE0340xx is a 32-bit literal.
-//
-STATIC_ASSERT (sizeof (mSerialDeviceMmioFind) == sizeof (UINT32), "Unsupported mSerialDeviceMmioFind");
-
-STATIC
-CONST UINT8
-mSerialDeviceMmioMask[] = {
-  0x00, 0xFF, 0xFF, 0xFF
-};
-STATIC_ASSERT (sizeof (mSerialDeviceMmioMask) == sizeof (UINT32), "Unsupported mSerialDeviceMmioMask");
-
-STATIC
-UINT8
-mSerialDeviceMmioReplace[] = {
-  0x00, 0x00, 0x00, 0x00  ///< mov whatever, whatever ; To be set by PatchSetPciSerialDeviceRegisterBase()
-};
-STATIC_ASSERT (sizeof (mSerialDeviceMmioReplace) == sizeof (UINT32), "Unsupported mSerialDeviceMmioReplace");
-
-STATIC
-PATCHER_GENERIC_PATCH
-mCustomPciSerialDeviceMmioPatch = {
-  .Comment     = DEBUG_POINTER ("CustomPciSerialDeviceMmio"),
-  .Base        = "_serial_init",
-  .Find        = mSerialDeviceMmioFind,
-  .Mask        = mSerialDeviceMmioMask,
-  .Replace     = mSerialDeviceMmioReplace,
-  .ReplaceMask = mSerialDeviceMmioMask,
-  .Size        = sizeof (mSerialDeviceMmioFind),
-  .Count       = 0,
-  .Skip        = 0,
-  .Limit       = 1024
-};
+CONST UINTN
+mInOutMaxDistance = 32;
 
 VOID
 PatchSetPciSerialDeviceRegisterBase (
@@ -1146,13 +1091,79 @@ PatchSetPciSerialDeviceRegisterBase (
   //
   if (RegisterBase <= MAX_UINT16) {
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %u\n", RegisterBase));
-    CopyMem (&mSerialDevicePmioReplace[2], &RegisterBase, sizeof (UINT16));
-  } else if (RegisterBase <= MAX_UINT32) {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device MMIO address %X\n", RegisterBase));
-    CopyMem (mSerialDeviceMmioReplace, &RegisterBase, sizeof (UINT32));
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Aborting registering borked serial device\n"));
+    CopyMem (mSerialDevicePmioPort, &RegisterBase, sizeof (UINT16));
   }
+
+  //
+  // TODO: Add proper MMIO patch.
+  //
+}
+
+STATIC
+EFI_STATUS
+PatchCustomPciSerialPmio (
+  IN OUT PATCHER_CONTEXT    *Patcher
+  )
+{
+  UINTN       Count;
+  UINT8       *Walker;
+  UINT8       *WalkerPmio;
+  BOOLEAN     FoundPmio;
+  UINT8       *WalkerEnd;
+  UINT8       *WalkerTmp;
+
+  ASSERT (Patcher != NULL);
+
+  Count     = 0;
+  Walker    = (UINT8 *) MachoGetMachHeader (&Patcher->MachContext);
+  WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mInOutMaxDistance;
+
+  while (Walker < WalkerEnd) {
+    FoundPmio = FALSE;
+
+    if (Walker[0] == mSerialDevicePmioFind[0]
+      && Walker[1] == mSerialDevicePmioFind[1]
+      && (Walker[2] & 0xF8U) == mSerialDevicePmioFind[2]
+      && Walker[3] == mSerialDevicePmioFind[3]) {
+      WalkerPmio = &Walker[2];
+
+      WalkerTmp = Walker + mInOutMaxDistance;
+      while (Walker < WalkerTmp) {
+        //
+        // Locate instruction in (0xEC) or out (0xEE).
+        //
+        if (*Walker == 0xEC || *Walker == 0xEE) {
+          FoundPmio = TRUE;
+          break;
+        }
+
+        ++Walker;
+      }
+    }
+
+    //
+    // Patch PMIO.
+    //
+    if (FoundPmio) {
+      *WalkerPmio++ = (mSerialDevicePmioPort[0] & 0xF8U);
+      *WalkerPmio   = mSerialDevicePmioPort[1];
+
+      ++Count;
+    }
+
+    //
+    // Continue searching.
+    //
+    ++Walker;
+  }
+
+  if (Count != 0) {
+    DEBUG ((DEBUG_INFO, "OCAK: Patched CustomPciSerialDevice PMIO port %u times\n", Count));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to patch CustomPciSerialDevice PMIO port!\n"));
+  }
+
+  return Count > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
 }
 
 STATIC
@@ -1164,16 +1175,14 @@ PatchCustomPciSerialDevice (
 {
   EFI_STATUS  Status;
 
-  ASSERT (Patcher != NULL);
-
-  if (!IsZeroBuffer (&mSerialDevicePmioReplace[2], sizeof (UINT16))) {
-    Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDevicePmioPatch);
-  } else if (!IsZeroBuffer (mSerialDeviceMmioReplace, sizeof (UINT32))) {
-    Status = PatcherApplyGenericPatch (Patcher, &mCustomPciSerialDeviceMmioPatch);
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Aborting applying CustomPciSerialDevice with borked serial device\n"));
-    Status = EFI_INVALID_PARAMETER;
+  Status = EFI_INVALID_PARAMETER;
+  if (!IsZeroBuffer (mSerialDevicePmioPort, sizeof (UINT16))) {
+    Status = PatchCustomPciSerialPmio (Patcher);
   }
+
+  //
+  // TODO: Check MMIO patch again.
+  //
 
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch CustomPciSerialDevice - %r\n"));
