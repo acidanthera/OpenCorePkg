@@ -244,7 +244,7 @@ enum {
    --------------------------------------------------------------------
 **/
 typedef struct {
-  CHAR8  Magic[4];
+  UINT32 Magic;
   UINT16 UpdateSequenceOffset;
   UINT16 S_Size;
   UINT64 LSN;
@@ -421,7 +421,7 @@ typedef struct {
    (a) These values are relative to 0x18
 **/
 typedef struct {
-  CHAR8  Magic[4];
+  UINT32 Magic;
   UINT16 UpdateSequenceOffset;
   UINT16 S_Size;
   UINT64 LSN;

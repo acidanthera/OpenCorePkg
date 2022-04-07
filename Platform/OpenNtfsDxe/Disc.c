@@ -257,7 +257,7 @@ Fixup (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (CompareMem (Record->Magic, Magic, 4) != 0) {
+  if (Record->Magic != *((UINT32 *) Magic)) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #2) Record is corrupted.\n"));
     return EFI_NOT_FOUND;
   }
