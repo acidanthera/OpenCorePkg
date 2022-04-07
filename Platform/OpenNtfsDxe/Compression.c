@@ -160,7 +160,7 @@ STATIC
 EFI_STATUS
 DecompressBlock (
   IN  COMPRESSED *Clusters,
-  OUT UINT8      *Dest
+  OUT UINT8      *Dest       OPTIONAL
   )
 {
   EFI_STATUS   Status;
@@ -179,7 +179,6 @@ DecompressBlock (
   UINTN        SpareBytes;
 
   ASSERT (Clusters != NULL);
-  ASSERT (Dest     != NULL);
 
   Status = GetTwoDataRunBytes (Clusters, &BlockParameters);
   if (EFI_ERROR (Status)) {
@@ -375,7 +374,7 @@ STATIC
 EFI_STATUS
 ReadCompressedBlock (
   IN  RUNLIST *Runlist,
-  OUT UINT8   *Buffer,
+  OUT UINT8   *Buffer      OPTIONAL,
   IN  UINTN   BlocksTotal
   )
 {
@@ -387,7 +386,6 @@ ReadCompressedBlock (
   UINT64       ClearTextClusters;
 
   ASSERT (Runlist != NULL);
-  ASSERT (Buffer  != NULL);
 
   BlocksPerCluster = 0;
   ClustersPerBlock = 0;

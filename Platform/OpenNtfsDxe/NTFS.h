@@ -76,7 +76,7 @@ EFIAPI
 NTFSCtlGetControllerName (
   IN EFI_COMPONENT_NAME_PROTOCOL *This,
   IN EFI_HANDLE                  Controller,
-  IN EFI_HANDLE  ChildHandle      OPTIONAL,
+  IN EFI_HANDLE                  ChildHandle      OPTIONAL,
   IN CHAR8                       *Language,
   OUT CHAR16                     **ControllerName
   );
