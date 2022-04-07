@@ -12,6 +12,7 @@
 extern UINTN mFileRecordSize;
 extern UINTN mSectorSize;
 extern UINTN mClusterSize;
+UINT64       mUnitSize;
 
 STATIC
 UINT64
@@ -327,6 +328,8 @@ ReadData (
 
   if (((NonRes->Flags & FLAG_COMPRESSED) != 0) && // ((Attr->Flags & NTFS_AF_GPOS) == 0))
       (NonRes->Type == AT_DATA)) {
+    mUnitSize = LShiftU64 (1ULL, NonRes->CompressionUnitSize);
+
     Status = Decompress (Runlist, Offset, Length, Dest);
 
     FreePool (Runlist);

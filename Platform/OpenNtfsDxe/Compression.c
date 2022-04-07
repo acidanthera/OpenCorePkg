@@ -17,6 +17,7 @@ extern UINTN  mFileRecordSize;
 extern UINTN  mSectorSize;
 extern UINTN  mClusterSize;
 extern UINT64 BufferSize;
+extern UINT64 mUnitSize;
 
 STATIC
 EFI_STATUS
@@ -278,11 +279,11 @@ DecompressBlock (
       }
 
       return EFI_SUCCESS;
-    } else {
-      if (BlockLength != COMPRESSION_BLOCK) {
-        DEBUG ((DEBUG_INFO, "NTFS: Invalid compression block size %d\n", BlockLength));
-        return EFI_VOLUME_CORRUPTED;
-      }
+    }
+
+    if (BlockLength != COMPRESSION_BLOCK) {
+      DEBUG ((DEBUG_INFO, "NTFS: Invalid compression block size %d\n", BlockLength));
+      return EFI_VOLUME_CORRUPTED;
     }
   }
 
@@ -415,7 +416,7 @@ ReadCompressedBlock (
         }
       }
 
-      while (Runlist->TargetVcn + 16 > Runlist->NextVcn) {
+      while ((Runlist->TargetVcn + mUnitSize) > Runlist->NextVcn) {
         if (Runlist->IsSparse) {
           break;
         }
@@ -432,9 +433,9 @@ ReadCompressedBlock (
     }
 
     if (mClusterSize >= COMPRESSION_BLOCK) {
-      SpareBlocks = (UINTN) ((16 - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
+      SpareBlocks = (UINTN) ((mUnitSize - (Runlist->TargetVcn & UNIT_MASK)) * BlocksPerCluster);
     } else {
-      SpareBlocks = (UINTN) DivU64x64Remainder (16 - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
+      SpareBlocks = (UINTN) DivU64x64Remainder (mUnitSize - (Runlist->TargetVcn & UNIT_MASK), ClustersPerBlock, NULL);
     }
 
     if (SpareBlocks > BlocksTotal) {
@@ -585,10 +586,7 @@ Decompress (
   }
 
   Vcn = Runlist->TargetVcn;
-  //
-  // A compression unit consists of 16 clusters.
-  //
-  Runlist->TargetVcn &= ~0xFULL;
+  Runlist->TargetVcn &= ~(mUnitSize - 1);
   while (Runlist->NextVcn <= Runlist->TargetVcn) {
     Status = ReadRunListElement (Runlist);
     if (EFI_ERROR (Status)) {
