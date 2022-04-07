@@ -25,8 +25,8 @@ GetLabel (
   *Label = NULL;
 
   Status = FsHelpFindFile (L"/$Volume", FileSystem->RootIndex, &BaseMftRecord, FSHELP_REG);
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not find $Volume file.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not find $Volume file.\n"));
     return Status;
   }
 
@@ -40,8 +40,8 @@ GetLabel (
     }
 
     Status = ReadMftRecord (BaseMftRecord->File, BaseMftRecord->FileRecord, BaseMftRecord->Inode);
-    if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "NTFS: Could not read Mft Record #%d.\n", BaseMftRecord->Inode));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "NTFS: Could not read Mft Record #%d.\n", BaseMftRecord->Inode));
       FreeFile (BaseMftRecord);
       FreePool (BaseMftRecord);
       return Status;
@@ -49,8 +49,8 @@ GetLabel (
   }
 
   Status = InitAttr (&BaseMftRecord->Attr, BaseMftRecord);
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not initialize attribute.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not initialize attribute.\n"));
     FreeFile (BaseMftRecord);
     FreePool (BaseMftRecord);
     return Status;
@@ -171,7 +171,7 @@ FileGetInfo (
     FSInfo->ReadOnly = 1;
     FSInfo->BlockSize = File->FileSystem->BlockIo->Media->BlockSize;
     if (FSInfo->BlockSize  == 0) {
-      DEBUG((DEBUG_INFO, "NTFS: Corrected Media BlockSize\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Corrected Media BlockSize\n"));
       FSInfo->BlockSize = 512;
     }
     FSInfo->VolumeSize = (File->FileSystem->BlockIo->Media->LastBlock + 1) * FSInfo->BlockSize;
@@ -196,13 +196,13 @@ FileGetInfo (
     VLInfo = (EFI_FILE_SYSTEM_VOLUME_LABEL *)Data;
 
     Status = GetLabel (File->FileSystem, &Label);
-    if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "NTFS: Could not read disk label - %r\n", Status));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "NTFS: Could not read disk label - %r\n", Status));
       return EFI_DEVICE_ERROR;
     }
 
     if (Label == NULL) {
-      DEBUG((DEBUG_INFO, "NTFS: Volume has no label\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Volume has no label\n"));
       *Len = 0;
     } else {
       if (*Len < StrSize (Label)) {

@@ -59,7 +59,7 @@ FileSetPosition (
   if (Position == 0xFFFFFFFFFFFFFFFFULL) {
     Position = FileSize;
   } else if (Position > FileSize) {
-    DEBUG((DEBUG_INFO, "NTFS: '%s': Cannot seek to #%Lx of %Lx\n", File->Path, Position, FileSize));
+    DEBUG ((DEBUG_INFO, "NTFS: '%s': Cannot seek to #%Lx of %Lx\n", File->Path, Position, FileSize));
     return EFI_UNSUPPORTED;
   }
 

@@ -39,7 +39,7 @@ FileOpen (
   AbsolutePath = (*FileName == L'\\');
 
   if (OpenMode != EFI_FILE_MODE_READ) {
-    DEBUG((DEBUG_INFO, "NTFS: File '%s' can only be opened in read-only mode\n", FileName));
+    DEBUG ((DEBUG_INFO, "NTFS: File '%s' can only be opened in read-only mode\n", FileName));
     return EFI_WRITE_PROTECTED;
   }
 
@@ -53,8 +53,8 @@ FileOpen (
     Length = 0;
   } else {
     Status = StrCpyS (Path, MAX_PATH, File->Path);
-    if (EFI_ERROR(Status)) {
-      DEBUG((DEBUG_INFO, "NTFS: Could not copy string.\n"));
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
       return Status;
     }
 
@@ -65,8 +65,8 @@ FileOpen (
   }
 
   Status = StrCpyS (&Path[Length], MAX_PATH - Length, FileName);
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not copy FileName `%s`.\n", FileName));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not copy FileName `%s`.\n", FileName));
     return Status;
   }
 
@@ -78,7 +78,7 @@ FileOpen (
 
   ZeroMem (CleanPath, MAX_PATH * sizeof (CHAR16));
   Status = RelativeToAbsolute (CleanPath, Path);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -92,7 +92,7 @@ FileOpen (
 
   NewFile->Path = AllocateZeroPool(StrnSizeS (CleanPath, MAX_PATH));
   if (NewFile->Path == NULL) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not instantiate path\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not instantiate path\n"));
     FreePool(NewFile);
     return EFI_OUT_OF_RESOURCES;
   }
@@ -109,7 +109,7 @@ FileOpen (
   NewFile->BaseName = &NewFile->Path[Index + 1];
 
   Status = NtfsDir (FileSystem, DirName, NewFile, INFO_HOOK);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool(NewFile->Path);
     FreePool(NewFile);
     return Status;
@@ -117,7 +117,7 @@ FileOpen (
 
   if (!NewFile->IsDir) {
     Status = NtfsOpen(NewFile);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       FreePool(NewFile->Path);
       FreePool(NewFile);
       return Status;
@@ -159,8 +159,8 @@ FileReadDir (
   *Index = File->DirIndex;
 
   Status = StrCpyS (Path, MAX_PATH, File->Path);
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not copy string.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
     return Status;
   }
 
@@ -179,8 +179,8 @@ FileReadDir (
     return EFI_SUCCESS;
   }
 
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Directory listing failed.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Directory listing failed.\n"));
     return Status;
   }
   //
@@ -202,8 +202,8 @@ FileReadDir (
     TmpFile->Path = Path;
 
     Status = NtfsOpen(TmpFile);
-    if (EFI_ERROR(Status)) {
-      // DEBUG((DEBUG_INFO, "NTFS: Unable to obtain the size of '%s'\n", Info->FileName));
+    if (EFI_ERROR (Status)) {
+      // DEBUG ((DEBUG_INFO, "NTFS: Unable to obtain the size of '%s'\n", Info->FileName));
     } else {
       Info->FileSize = TmpFile->RootFile.DataAttributeSize;
       Info->PhysicalSize = TmpFile->RootFile.DataAttributeSize;
@@ -215,7 +215,7 @@ FileReadDir (
   *Size = (UINTN) Info->Size;
   File->DirIndex++;
 
-  // DEBUG((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex-1, Info->FileName,
+  // DEBUG ((DEBUG_INFO, "NTFS:   Entry[%d]: '%s' %s\n", File->DirIndex-1, Info->FileName,
   //    (Info->Attribute & EFI_FILE_DIRECTORY) ? L"<DIR>" : L""));
 
   return EFI_SUCCESS;
@@ -243,7 +243,7 @@ Read (
   BaseMftRecord = &File->RootFile;
 
   Status = ReadAttr (&BaseMftRecord->Attr, Data, File->Offset, *Size);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     *Size = 0;
     return Status;
   }

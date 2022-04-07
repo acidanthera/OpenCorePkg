@@ -25,7 +25,7 @@ GetLcn (
 
   if (Vcn >= Runlist->NextVcn) {
     Status = ReadRunListElement (Runlist);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return (UINT64) (-1);
     }
 
@@ -93,7 +93,7 @@ ReadClusters (
         Size,
         Dest
         );
-      if (EFI_ERROR(Status)) {
+      if (EFI_ERROR (Status)) {
         return Status;
       }
     } else {
@@ -131,8 +131,8 @@ DiskRead (
     Size,
     Buffer
     );
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not read disk at address %08x\n", Offset));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not read disk at address %08x\n", Offset));
     return Status;
   }
 
@@ -155,8 +155,8 @@ ReadMftRecord (
     RecordNumber * mFileRecordSize,
     mFileRecordSize
     );
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not read MFT Record 0x%Lx\n", RecordNumber));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not read MFT Record 0x%Lx\n", RecordNumber));
     return Status;
   }
 
@@ -185,7 +185,7 @@ ReadAttr (
 
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
     if (Attr->Last < (Attr->Next + sizeof (ATTR_LIST_RECORD))) {
-      DEBUG((DEBUG_INFO, "NTFS: $ATTRIBUTE_LIST does not contain even a single record.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: $ATTRIBUTE_LIST does not contain even a single record.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -223,7 +223,7 @@ ReadAttr (
   if (AttrStart != NULL) {
     Status = ReadData (Attr, AttrStart, Dest, Offset, Length);
   } else {
-    DEBUG((DEBUG_INFO, "NTFS: Attribute not found\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Attribute not found\n"));
     Status = EFI_VOLUME_CORRUPTED;
   }
 
@@ -260,7 +260,7 @@ ReadData (
   // Resident Attribute
   //
   if (BufferSize < sizeof (ATTR_HEADER_RES)) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadData #1) Attribute is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadData #1) Attribute is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -268,12 +268,12 @@ ReadData (
 
   if (Res->NonResFlag == 0) {
     if ((Offset + Length) > Res->InfoLength) {
-      DEBUG((DEBUG_INFO, "NTFS: Read out of range\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Read out of range\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
     if (BufferSize < (Res->InfoOffset + Offset + Length)) {
-      DEBUG((DEBUG_INFO, "NTFS: Read out of buffer.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Read out of buffer.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -285,7 +285,7 @@ ReadData (
   // Non-Resident Attribute
   //
   if (BufferSize < sizeof (ATTR_HEADER_NONRES)) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadData #2) Attribute is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadData #2) Attribute is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -302,7 +302,7 @@ ReadData (
   if ((NonRes->DataRunsOffset > BufferSize) ||
      (NonRes->DataRunsOffset > NonRes->RealSize) ||
      (NonRes->RealSize > NonRes->AllocatedSize)) {
-    DEBUG((DEBUG_INFO, "NTFS: Non-Resident Attribute is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Non-Resident Attribute is corrupted.\n"));
     FreePool (Runlist);
     return EFI_VOLUME_CORRUPTED;
   } else {
@@ -314,13 +314,13 @@ ReadData (
 
   Runlist->TargetVcn = NonRes->StartingVCN + DivU64x64Remainder (Offset, mClusterSize, NULL);
   if (Runlist->TargetVcn < NonRes->StartingVCN) {
-    DEBUG((DEBUG_INFO, "NTFS: Overflow: StartingVCN is too large.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Overflow: StartingVCN is too large.\n"));
     FreePool (Runlist);
     return EFI_VOLUME_CORRUPTED;
   }
 
   if ((Offset + Length) > NonRes->RealSize) {
-    DEBUG((DEBUG_INFO, "NTFS: Read out of range\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Read out of range\n"));
     FreePool (Runlist);
     return EFI_VOLUME_CORRUPTED;
   }
@@ -335,7 +335,7 @@ ReadData (
 
   while (Runlist->NextVcn <= Runlist->TargetVcn) {
     Status = ReadRunListElement (Runlist);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       FreePool (Runlist);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -351,7 +351,7 @@ ReadData (
   //   if (Sector1 == ((Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
   //                  * mClusterSize) / mSectorSize) {
   //     Status = ReadRunListElement (Runlist);
-  //     if (EFI_ERROR(Status)) {
+  //     if (EFI_ERROR (Status)) {
   //       FreePool (Runlist);
   //       return EFI_VOLUME_CORRUPTED;
   //     }
@@ -428,7 +428,7 @@ ReadRunListElement (
 
   retry:
   if (BufferSize == 0) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadRunListElement #1) Runlist is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #1) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     LengthSize = ((*Run) & 0xF);
@@ -439,7 +439,7 @@ ReadRunListElement (
 
   if ((LengthSize > 8) || (OffsetSize > 8) ||
     ((LengthSize == 0) && (OffsetSize != 0))) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadRunListElement #2) Runlist is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #2) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -451,7 +451,7 @@ ReadRunListElement (
       if (Attr != NULL) {
 
         if (Attr->NonResFlag == 0) {
-          DEBUG((DEBUG_INFO, "NTFS: $DATA should be non-resident\n"));
+          DEBUG ((DEBUG_INFO, "NTFS: $DATA should be non-resident\n"));
           return EFI_VOLUME_CORRUPTED;
         }
 
@@ -461,19 +461,19 @@ ReadRunListElement (
         goto retry;
       }
     }
-    DEBUG((DEBUG_INFO, "NTFS: Run list overflown\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Run list overflown\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   Runlist->CurrentVcn = Runlist->NextVcn;
 
   if (BufferSize < LengthSize) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadRunListElement #3) Runlist is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #3) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     Runlist->NextVcn += ReadField (Run, LengthSize, FALSE);
     if (Runlist->NextVcn <= Runlist->CurrentVcn) {
-      DEBUG((DEBUG_INFO, "NTFS: (ReadRunListElement #3.1) Runlist is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #3.1) Runlist is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -482,7 +482,7 @@ ReadRunListElement (
   }
 
   if (BufferSize < OffsetSize) {
-    DEBUG((DEBUG_INFO, "NTFS: (ReadRunListElement #4) Runlist is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (ReadRunListElement #4) Runlist is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     OffsetLcn = ReadField (Run, OffsetSize, TRUE);
@@ -519,17 +519,17 @@ ReadSymlink (
   }
 
   Status = ReadMftRecord (File->File, File->FileRecord, File->Inode);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return NULL;
   }
 
   if (LocateAttr (&File->Attr, File, AT_SYMLINK) == NULL) {
-    DEBUG((DEBUG_INFO, "NTFS: no $SYMLINK in MFT 0x%Lx\n", File->Inode));
+    DEBUG ((DEBUG_INFO, "NTFS: no $SYMLINK in MFT 0x%Lx\n", File->Inode));
     return NULL;
   }
 
   Status = ReadAttr (&File->Attr, (UINT8 *) &Symlink, 0, sizeof (SYMLINK));
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return NULL;
   }
 
@@ -541,7 +541,7 @@ ReadSymlink (
       Offset = sizeof (SYMLINK) + (UINT64) Symlink.SubstituteOffset;
       break;
     default:
-      DEBUG((DEBUG_INFO, "NTFS: Symlink type invalid (%x)\n", Symlink.Type));
+      DEBUG ((DEBUG_INFO, "NTFS: Symlink type invalid (%x)\n", Symlink.Type));
       return NULL;
   }
 
@@ -551,7 +551,7 @@ ReadSymlink (
   }
 
   Status = ReadAttr (&File->Attr, (UINT8 *)Substitute, Offset, Symlink.SubstituteLength);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (Substitute);
     return NULL;
   }

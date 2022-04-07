@@ -160,8 +160,8 @@ NtfsDirHook (
     Name,
     (UINTN) ((Info->Size - sizeof(EFI_FILE_INFO)) / sizeof (CHAR16))
     );
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not copy string.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not copy string.\n"));
     FreeFile (Node);
     return Status;
   }
@@ -230,7 +230,7 @@ ListFile (
 
   while (TRUE) {
     if (BufferSize < sizeof (INDEX_ENTRY)) {
-      DEBUG((DEBUG_INFO, "NTFS: (ListFile #1) INDEX_ENTRY is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (ListFile #1) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -239,7 +239,7 @@ ListFile (
     }
 
     if (BufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME))) {
-      DEBUG((DEBUG_INFO, "NTFS: (ListFile #2) INDEX_ENTRY is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (ListFile #2) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -259,7 +259,7 @@ ListFile (
 
       DirFile = AllocateZeroPool (sizeof (NTFS_FILE));
       if (DirFile == NULL) {
-        DEBUG((DEBUG_INFO, "NTFS: Could not allocate space for DirFile\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: Could not allocate space for DirFile\n"));
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -268,7 +268,7 @@ ListFile (
       DirFile->AlteredTime = AttrFileName->AlteredTime;
 
       if (BufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME) + AttrFileName->FilenameLen * sizeof (CHAR16))) {
-        DEBUG((DEBUG_INFO, "NTFS: (ListFile #3) INDEX_ENTRY is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (ListFile #3) INDEX_ENTRY is corrupted.\n"));
         FreePool (DirFile);
         return EFI_VOLUME_CORRUPTED;
       }
@@ -311,7 +311,7 @@ ListFile (
     }
 
     if (BufferSize < IndexEntry->IndexEntryLength) {
-      DEBUG((DEBUG_INFO, "NTFS: (ListFile #4) INDEX_ENTRY is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (ListFile #4) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -353,7 +353,7 @@ FindFile (
     for (Next = Name; (*Next != L'\0') && (*Next != L'/'); Next++);
 
     if (Context->CurrentNode->Type != FSHELP_DIR) {
-      DEBUG((DEBUG_INFO, "NTFS: Not a directory\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Not a directory\n"));
       return EFI_INVALID_PARAMETER;
     }
 
@@ -378,7 +378,7 @@ FindFile (
 
     Status = IterateDir (Context->CurrentNode->Node, &IterCtx, FILE_ITER);
     FreePool (PathPart);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
 
@@ -387,19 +387,19 @@ FindFile (
     }
 
     Status = PushNode (Context, FoundNode, FoundType);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
 
     if (Context->CurrentNode->Type == FSHELP_SYMLINK) {
       if (++Context->SymlinkDepth == 8) {
-        DEBUG((DEBUG_INFO, "NTFS: Too deep nesting of symlinks\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: Too deep nesting of symlinks\n"));
         return EFI_INVALID_PARAMETER;
       }
 
       Symlink = ReadSymlink (Context->CurrentNode->Node);
       if (Symlink == NULL) {
-        DEBUG((DEBUG_INFO, "NTFS: Symlink leeds nowhere\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: Symlink leeds nowhere\n"));
         return EFI_INVALID_PARAMETER;
       }
 
@@ -408,7 +408,7 @@ FindFile (
         // Symlink is an absolute path
         //
         Status = GoToRoot (Context);
-        if (EFI_ERROR(Status)) {
+        if (EFI_ERROR (Status)) {
           return Status;
         }
       } else {
@@ -417,13 +417,13 @@ FindFile (
 
       Status = FindFile (Symlink, Context);
       FreePool (Symlink);
-      if (EFI_ERROR(Status)) {
+      if (EFI_ERROR (Status)) {
         return Status;
       }
     }
   }
 
-  DEBUG((DEBUG_INFO, "NTFS: File `%s' not found\n", IterCtx.Name));
+  DEBUG ((DEBUG_INFO, "NTFS: File `%s' not found\n", IterCtx.Name));
   return EFI_NOT_FOUND;
 }
 
@@ -445,17 +445,17 @@ FsHelpFindFile (
   Context.CurrentNode  = NULL;
 
   if ((Path == NULL) || (Path[0] != L'/')) {
-    DEBUG((DEBUG_INFO, "NTFS: Invalid file name `%s'\n", Path));
+    DEBUG ((DEBUG_INFO, "NTFS: Invalid file name `%s'\n", Path));
     return EFI_INVALID_PARAMETER;
   }
 
   Status = GoToRoot (&Context);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = FindFile ((CHAR16 *)Path, &Context);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreeStack (&Context);
     return Status;
   }
@@ -469,10 +469,10 @@ FsHelpFindFile (
   FreeStack (&Context);
 
   if ((Type == FSHELP_REG) && (FoundType != Type)) {
-    DEBUG((DEBUG_INFO, "NTFS: Not a regular file\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Not a regular file\n"));
     return EFI_VOLUME_CORRUPTED;
   } else if ((Type == FSHELP_DIR) && (FoundType != Type)) {
-    DEBUG((DEBUG_INFO, "NTFS: Not a directory\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Not a directory\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -500,7 +500,7 @@ IterateDir (
 
   if (!Dir->InodeRead) {
     Status = InitFile (Dir, Dir->Inode);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return Status;
     }
   }
@@ -509,7 +509,7 @@ IterateDir (
   BitMap = NULL;
 
   Status = InitAttr (&Attr, Dir);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
   //
@@ -518,7 +518,7 @@ IterateDir (
   while (TRUE) {
     Res = (ATTR_HEADER_RES *) FindAttr (&Attr, AT_INDEX_ROOT);
     if (Res == NULL) {
-      DEBUG((DEBUG_INFO, "NTFS: no $INDEX_ROOT\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: no $INDEX_ROOT\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -528,7 +528,7 @@ IterateDir (
     if ((BufferSize < sizeof (ATTR_HEADER_RES)) ||
         (BufferSize < (Res->NameOffset + 8)) ||
         (BufferSize < Res->InfoOffset)) {
-      DEBUG((DEBUG_INFO, "NTFS: (IterateDir #1) $INDEX_ROOT is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #1) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -551,7 +551,7 @@ IterateDir (
   }
 
   if (BufferSize < (sizeof (INDEX_ROOT) + Index->FirstEntryOffset)) {
-    DEBUG((DEBUG_INFO, "NTFS: (IterateDir #2) $INDEX_ROOT is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #2) $INDEX_ROOT is corrupted.\n"));
     FreeAttr (&Attr);
     return EFI_VOLUME_CORRUPTED;
   }
@@ -576,7 +576,7 @@ IterateDir (
   FreeAttr (&Attr);
 
   Status = InitAttr (&Attr, Dir);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -585,7 +585,7 @@ IterateDir (
 
     if ((BufferSize < sizeof (ATTR_HEADER_NONRES)) ||
         (BufferSize < (Non->NameOffset + 8))) {
-      DEBUG((DEBUG_INFO, "NTFS: (IterateDir #3) $INDEX_ROOT is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #3) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -597,7 +597,7 @@ IterateDir (
                   (UINTN) Non->AllocatedSize;
 
       if (BitMapLen > MAX_FILE_SIZE) {
-        DEBUG((DEBUG_INFO, "NTFS: (IterateDir) File is too huge.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (IterateDir) File is too huge.\n"));
         return EFI_OUT_OF_RESOURCES;
       }
 
@@ -609,7 +609,7 @@ IterateDir (
 
       if (Non->NonResFlag == 0) {
         if (BufferSize < (((ATTR_HEADER_RES *)Non)->InfoOffset + BitMapLen)) {
-          DEBUG((DEBUG_INFO, "NTFS: (IterateDir #4) $INDEX_ROOT is corrupted.\n"));
+          DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #4) $INDEX_ROOT is corrupted.\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
           return EFI_VOLUME_CORRUPTED;
@@ -622,8 +622,8 @@ IterateDir (
           );
       } else {
         Status = ReadData (&Attr, (UINT8 *) Non, BitMap, 0, BitMapLen);
-        if (EFI_ERROR(Status)) {
-          DEBUG((DEBUG_INFO, "NTFS: Failed to read non-resident $BITMAP\n"));
+        if (EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_INFO, "NTFS: Failed to read non-resident $BITMAP\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
           return Status;
@@ -644,7 +644,7 @@ IterateDir (
 
     if ((BufferSize < sizeof (ATTR_HEADER_NONRES)) ||
         (BufferSize < (Non->NameOffset + 8))) {
-      DEBUG((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -660,7 +660,7 @@ IterateDir (
   }
 
   if ((Non == NULL) && (BitIndex != NULL)) {
-    DEBUG((DEBUG_INFO, "NTFS: $BITMAP without $INDEX_ALLOCATION\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: $BITMAP without $INDEX_ALLOCATION\n"));
     FreeAttr (&Attr);
     FreePool (BitMap);
     return EFI_VOLUME_CORRUPTED;
@@ -683,7 +683,7 @@ IterateDir (
           Number * mIndexRecordSize,
           mIndexRecordSize
           );
-        if (EFI_ERROR(Status)) {
+        if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
           FreePool (IndexRecord);
@@ -691,7 +691,7 @@ IterateDir (
         }
 
         Status = Fixup ((UINT8 *)IndexRecord, mIndexRecordSize, "INDX");
-        if (EFI_ERROR(Status)) {
+        if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
           FreePool (IndexRecord);
@@ -700,7 +700,7 @@ IterateDir (
 
         if ((mIndexRecordSize < sizeof (INDEX_RECORD_HEADER)) ||
             (mIndexRecordSize < (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset))) {
-          DEBUG((DEBUG_INFO, "NTFS: $INDEX_ALLOCATION is corrupted.\n"));
+          DEBUG ((DEBUG_INFO, "NTFS: $INDEX_ALLOCATION is corrupted.\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
           FreePool (IndexRecord);
@@ -791,7 +791,7 @@ RelativeToAbsolute (
   }
 
   if (Skip > 0) {
-    DEBUG((DEBUG_INFO, "NTFS: Invalid path: root has no parent.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Invalid path: root has no parent.\n"));
     FreePool (Buffer);
     return EFI_DEVICE_ERROR;
   }

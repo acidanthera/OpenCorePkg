@@ -34,12 +34,12 @@ NtfsDir (
     &Dir,
     FSHELP_DIR
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
   Status = IterateDir (Dir, File, FunctionType);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -63,7 +63,7 @@ NtfsOpen (
     &BaseMftRecord,
     FSHELP_REG
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -73,7 +73,7 @@ NtfsOpen (
 
     if (!File->RootFile.InodeRead) {
       Status = InitFile (&File->RootFile, File->RootFile.Inode);
-      if (EFI_ERROR(Status)) {
+      if (EFI_ERROR (Status)) {
         return Status;
       }
     }
@@ -95,7 +95,7 @@ NtfsMount (
   EFI_NTFS_FILE      *RootFile;
 
   Status = DiskRead (FileSystem, 0, sizeof (BOOT_FILE_DATA), &Boot);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -104,7 +104,7 @@ NtfsMount (
   || ((Boot.SectorsPerCluster & (Boot.SectorsPerCluster - 1)) != 0)
   || (Boot.BytesPerSector == 0)
   || ((Boot.BytesPerSector & (Boot.BytesPerSector - 1)) != 0)) {
-    DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #1) BIOS Parameter Block is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #1) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -114,7 +114,7 @@ NtfsMount (
   if (Boot.MftRecordClusters > 0) {
     Size = (UINTN) Boot.MftRecordClusters * mClusterSize;
   } else if (-Boot.MftRecordClusters >= 31) {
-    DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #2) BIOS Parameter Block is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #2) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     Size = (UINTN) LShiftU64 (1ULL, -Boot.MftRecordClusters);
@@ -122,14 +122,14 @@ NtfsMount (
 
   mFileRecordSize = Size;
   if (mFileRecordSize < mSectorSize) {
-    DEBUG((DEBUG_INFO, "NTFS: File Record is smaller than Sector.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: File Record is smaller than Sector.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   if (Boot.IndexRecordClusters > 0) {
     Size = (UINTN) Boot.IndexRecordClusters * mClusterSize;
   } else if (-Boot.IndexRecordClusters >= 31) {
-    DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #3) BIOS Parameter Block is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #3) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     Size = (UINTN) LShiftU64 (1ULL, -Boot.IndexRecordClusters);
@@ -137,7 +137,7 @@ NtfsMount (
 
   mIndexRecordSize = Size;
   if (mIndexRecordSize < mSectorSize) {
-    DEBUG((DEBUG_INFO, "NTFS: Index Record is smaller than Sector.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Index Record is smaller than Sector.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -145,7 +145,7 @@ NtfsMount (
 
   /* Driver limitations */
   if ((mFileRecordSize > NTFS_MAX_MFT) || (mIndexRecordSize > NTFS_MAX_IDX)) {
-    DEBUG((DEBUG_INFO, "NTFS: (NtfsMount #4) BIOS Parameter Block is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #4) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -175,14 +175,14 @@ NtfsMount (
     mFileRecordSize,
     RootFile->MftFile.FileRecord
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (RootFile->MftFile.FileRecord);
     FreePool (RootFile);
     return Status;
   }
 
   Status = Fixup (RootFile->MftFile.FileRecord, mFileRecordSize, "FILE");
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (RootFile->MftFile.FileRecord);
     FreePool (RootFile);
     return Status;
@@ -195,7 +195,7 @@ NtfsMount (
   }
 
   Status = InitFile (&RootFile->RootFile, ROOT_FILE);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (RootFile->MftFile.FileRecord);
     FreePool (RootFile);
     return Status;
@@ -237,22 +237,22 @@ Fixup (
   Record = (FILE_RECORD_HEADER *) Buffer;
 
   if (Length < sizeof (FILE_RECORD_HEADER)) {
-    DEBUG((DEBUG_INFO, "NTFS: (Fixup #1) Record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (Fixup #1) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   if (CompareMem (Record->Magic, Magic, 4) != 0) {
-    DEBUG((DEBUG_INFO, "NTFS: (Fixup #2) Record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (Fixup #2) Record is corrupted.\n"));
     return EFI_NOT_FOUND;
   }
 
   if ((Record->UpdateSequenceOffset + sizeof (UINT16)) > Length) {
-    DEBUG((DEBUG_INFO, "NTFS: (Fixup #3) Record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (Fixup #3) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
   if (((UINT64)Record->S_Size - 1) != DivU64x64Remainder (Length, mSectorSize, NULL)) {
-    DEBUG((DEBUG_INFO, "NTFS: (Fixup #4) Record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (Fixup #4) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -261,7 +261,7 @@ Fixup (
   USCounter = Record->UpdateSequenceOffset;
 
   if (Length < (mSectorSize - sizeof (UINT16))) {
-    DEBUG((DEBUG_INFO, "NTFS: (Fixup #5) Record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (Fixup #5) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
 
@@ -272,12 +272,12 @@ Fixup (
 
     USCounter += sizeof (UINT16);
     if ((USCounter + sizeof (UINT16)) > Length) {
-      DEBUG((DEBUG_INFO, "NTFS: (Fixup #6) Record is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (Fixup #6) Record is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
     if (ReadUnaligned16 ((UINT16 *)Buffer) != UpdateSequenceNumber) {
-      DEBUG((DEBUG_INFO, "NTFS: (Fixup #7) Record is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (Fixup #7) Record is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
@@ -307,7 +307,7 @@ InitAttr (
 
   if ((AttrEnd > mFileRecordSize) || (AttrEnd > Record->RealSize) ||
      (Record->RealSize > Record->AllocatedSize)) {
-    DEBUG((DEBUG_INFO, "NTFS: (InitAttr) File record is corrupted.\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: (InitAttr) File record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   } else {
     Attr->Next = File->FileRecord + Record->AttributeOffset;
@@ -331,7 +331,7 @@ LocateAttr (
   UINT8              *AttrStart;
 
   Status = InitAttr (Attr, Mft);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return NULL;
   }
 
@@ -356,7 +356,7 @@ LocateAttr (
     FreeAttr (Attr);
 
     Status = InitAttr (Attr, Mft);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       return NULL;
     }
 
@@ -391,14 +391,14 @@ FindAttr (
       LRecord = (ATTR_LIST_RECORD *) Attr->Current;
 
       if (BufferSize < LRecord->RecordLength) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #0) $ATTRIBUTE_LIST is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #0) $ATTRIBUTE_LIST is corrupted.\n"));
         return NULL;
       }
 
       Attr->Next += LRecord->RecordLength;
       BufferSize -= LRecord->RecordLength;
       if (Attr->Next <= Attr->Current) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #1) $ATTRIBUTE_LIST is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) $ATTRIBUTE_LIST is corrupted.\n"));
         return NULL;
       }
 
@@ -410,8 +410,8 @@ FindAttr (
           //   512,
           //   Attr->ExtensionMftRecord
           //   );
-          // if (EFI_ERROR(Status)) {
-          //   DEBUG((DEBUG_INFO, "NTFS: Could not read first part of extension record.\n"));
+          // if (EFI_ERROR (Status)) {
+          //   DEBUG ((DEBUG_INFO, "NTFS: Could not read first part of extension record.\n"));
           //   return NULL;
           // }
           //
@@ -421,14 +421,14 @@ FindAttr (
           //   512,
           //   Attr->ExtensionMftRecord + 512
           //   );
-          // if (EFI_ERROR(Status)) {
-          //   DEBUG((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
+          // if (EFI_ERROR (Status)) {
+          //   DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
           //   return NULL;
           // }
           //
           // Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, "FILE");
-          // if (EFI_ERROR(Status)) {
-          //   DEBUG((DEBUG_INFO, "NTFS: Fixup failed.\n"));
+          // if (EFI_ERROR (Status)) {
+          //   DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
           //   return NULL;
           // }
         } else {
@@ -437,8 +437,8 @@ FindAttr (
             Attr->ExtensionMftRecord,
             (UINT32) LRecord->BaseFileReference
             );
-          if (EFI_ERROR(Status)) {
-            DEBUG((DEBUG_INFO, "NTFS: Could not read extension record.\n"));
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_INFO, "NTFS: Could not read extension record.\n"));
             return NULL;
           }
         }
@@ -449,13 +449,13 @@ FindAttr (
           Res = (ATTR_HEADER_RES *)((UINT8 *) FRecord + FRecord->AttributeOffset);
           BufferSize -= FRecord->AttributeOffset;
         } else {
-          DEBUG((DEBUG_INFO, "NTFS: (FindAttr #1) Extension record is corrupted.\n"));
+          DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) Extension record is corrupted.\n"));
           return NULL;
         }
 
         while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
           if (BufferSize < sizeof (ATTR_HEADER_RES)) {
-            DEBUG((DEBUG_INFO, "NTFS: (FindAttr #2) Extension record is corrupted.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) Extension record is corrupted.\n"));
             return NULL;
           }
 
@@ -465,7 +465,7 @@ FindAttr (
           }
 
           if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
-            DEBUG((DEBUG_INFO, "NTFS: (FindAttr #3) Extension record is corrupted.\n"));
+            DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) Extension record is corrupted.\n"));
             return NULL;
           } else {
             BufferSize -= Res->Length;
@@ -473,7 +473,7 @@ FindAttr (
           }
         }
 
-        DEBUG((DEBUG_INFO, "NTFS: Can\'t find 0x%X in attribute list\n", Attr->Current));
+        DEBUG ((DEBUG_INFO, "NTFS: Can\'t find 0x%X in attribute list\n", Attr->Current));
         return NULL;
       }
     }
@@ -487,12 +487,12 @@ FindAttr (
 
   while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
     if (BufferSize < sizeof (ATTR_HEADER_RES)) {
-      DEBUG((DEBUG_INFO, "NTFS: (FindAttr #1) File record is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) File record is corrupted.\n"));
       return NULL;
     }
 
     if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
-      DEBUG((DEBUG_INFO, "NTFS: (FindAttr #2) File record is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) File record is corrupted.\n"));
       return NULL;
     } else {
       BufferSize -= Res->Length;
@@ -523,7 +523,7 @@ FindAttr (
     BufferSize = mFileRecordSize - (Attr->Last - Attr->BaseMftRecord->FileRecord);
 
     if (BufferSize < sizeof (ATTR_HEADER_RES)) {
-      DEBUG((DEBUG_INFO, "NTFS: (FindAttr #3) File record is corrupted.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) File record is corrupted.\n"));
       return NULL;
     }
 
@@ -532,12 +532,12 @@ FindAttr (
       Attr->Current = (UINT8 *) NonRes;
 
       if (BufferSize < sizeof (ATTR_HEADER_NONRES)) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #4) File record is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #4) File record is corrupted.\n"));
         return NULL;
       }
 
       if (NonRes->RealSize > MAX_FILE_SIZE) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr) File is too huge.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr) File is too huge.\n"));
         return NULL;
       }
 
@@ -547,8 +547,8 @@ FindAttr (
       }
 
       Status = ReadData (Attr, AttrStart, Attr->NonResAttrList, 0, (UINTN) NonRes->RealSize);
-      if (EFI_ERROR(Status)) {
-        DEBUG((DEBUG_INFO, "NTFS: Failed to read non-resident attribute list\n"));
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "NTFS: Failed to read non-resident attribute list\n"));
         return NULL;
       }
 
@@ -561,7 +561,7 @@ FindAttr (
         Attr->Last = (UINT8 *) Res + Res->Length;
         BufferSize -= Res->InfoOffset;
       } else {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #5) File record is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #5) File record is corrupted.\n"));
         return NULL;
       }
     }
@@ -574,12 +574,12 @@ FindAttr (
       }
 
       if (BufferSize < LRecord->RecordLength) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #2) $ATTRIBUTE_LIST is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) $ATTRIBUTE_LIST is corrupted.\n"));
         return NULL;
       }
 
       if (LRecord->RecordLength == 0) {
-        DEBUG((DEBUG_INFO, "NTFS: (FindAttr #3) $ATTRIBUTE_LIST is corrupted.\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) $ATTRIBUTE_LIST is corrupted.\n"));
         return NULL;
       }
 
@@ -601,7 +601,7 @@ FindAttr (
     //     *(UINT32 *) (AttrStart + 0x10) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize);
     //     *(UINT32 *) (AttrStart + 0x14) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize + 1);
     //   } else {
-    //     DEBUG((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
+    //     DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
     //     return NULL;
     //   }
     //
@@ -617,12 +617,12 @@ FindAttr (
     //       ReadUnaligned32((UINT32 *)(AttrStart + 0x10)) * mFileRecordSize,
     //       mFileRecordSize
     //       );
-    //     if (EFI_ERROR(Status)) {
+    //     if (EFI_ERROR (Status)) {
     //       return NULL;
     //     }
     //
     //     if (ReadUnaligned16((UINT16 *)(AttrStart + 4)) == 0) {
-    //       DEBUG((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
+    //       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
     //       return NULL;
     //     }
     //
@@ -657,7 +657,7 @@ InitFile (
   }
 
   Status = ReadMftRecord (File->File, File->FileRecord, RecordNumber);
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (File->FileRecord);
     return Status;
   }
@@ -665,7 +665,7 @@ InitFile (
   Record = (FILE_RECORD_HEADER *) File->FileRecord;
 
   if ((Record->Flags & IS_IN_USE) == 0) {
-    DEBUG((DEBUG_INFO, "NTFS: MFT Record 0x%Lx is not in use\n", RecordNumber));
+    DEBUG ((DEBUG_INFO, "NTFS: MFT Record 0x%Lx is not in use\n", RecordNumber));
     FreePool (File->FileRecord);
     return EFI_VOLUME_CORRUPTED;
   }
@@ -673,7 +673,7 @@ InitFile (
   if ((Record->Flags & IS_A_DIRECTORY) == 0) {
     Attr = (ATTR_HEADER_RES *) LocateAttr (&File->Attr, File, AT_DATA);
     if (Attr == NULL) {
-      DEBUG((DEBUG_INFO, "NTFS: No $DATA in MFT Record 0x%Lx\n", RecordNumber));
+      DEBUG ((DEBUG_INFO, "NTFS: No $DATA in MFT Record 0x%Lx\n", RecordNumber));
       FreePool (File->FileRecord);
       return EFI_VOLUME_CORRUPTED;
     }
@@ -689,7 +689,7 @@ InitFile (
     }
   } else {
     Status = InitAttr (&File->Attr, File);
-    if (EFI_ERROR(Status)) {
+    if (EFI_ERROR (Status)) {
       FreePool (File->FileRecord);
       return Status;
     }

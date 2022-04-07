@@ -56,7 +56,7 @@ NTFSEntryPoint (
       EFI_OPEN_PROTOCOL_GET_PROTOCOL
       );
   if (EFI_ERROR (Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not open loaded image protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not open loaded image protocol\n"));
     return Status;
   }
 
@@ -72,7 +72,7 @@ NTFSEntryPoint (
       NULL
       );
   if (EFI_ERROR (Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not bind driver\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not bind driver\n"));
     return Status;
   }
 
@@ -99,7 +99,7 @@ UnloadNTFSDriver (
     &NoOfHandles,
     &Buffer
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
@@ -194,7 +194,7 @@ NTFSStart (
 
   Instance = AllocateZeroPool (sizeof (EFI_FS));
   if (Instance == NULL) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not allocate a new file system instance\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not allocate a new file system instance\n"));
     return EFI_OUT_OF_RESOURCES;
   }
 
@@ -203,7 +203,7 @@ NTFSStart (
 
   Instance->DevicePath = DevicePathFromHandle (Controller);
   if (Instance->DevicePath == NULL) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not get Device Path\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not get Device Path\n"));
     FreePool (Instance);
     return EFI_NO_MAPPING;
   }
@@ -222,7 +222,7 @@ NTFSStart (
     EFI_OPEN_PROTOCOL_GET_PROTOCOL
     );
   if (EFI_ERROR (Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not access BlockIO protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not access BlockIO protocol\n"));
     FreePool (Instance);
     return Status;
   }
@@ -236,7 +236,7 @@ NTFSStart (
     EFI_OPEN_PROTOCOL_BY_DRIVER
     );
   if (EFI_ERROR (Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not access DiskIO protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not access DiskIO protocol\n"));
     FreePool (Instance);
     return Status;
   }
@@ -254,8 +254,8 @@ NTFSStart (
   Instance->EfiFile.Flush       = FileFlush;
 
   Status = NtfsMount (Instance);
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not mount file system.\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not mount file system.\n"));
     FreePool (Instance);
     return Status;
   }
@@ -266,8 +266,8 @@ NTFSStart (
     &Instance->FileIoInterface,
     NULL
     );
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not install simple file system protocol\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not install simple file system protocol\n"));
     Status = gBS->CloseProtocol (
       Controller,
       &gEfiDiskIoProtocolGuid,
@@ -312,8 +312,8 @@ NTFSStop (
     Controller,
     EFI_OPEN_PROTOCOL_GET_PROTOCOL
     );
-  if (EFI_ERROR(Status)) {
-    DEBUG((DEBUG_INFO, "NTFS: Could not locate our instance\n"));
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: Could not locate our instance\n"));
     return Status;
   }
 
@@ -331,7 +331,7 @@ NTFSStop (
     &NTFS,
     NULL
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
   //
@@ -343,7 +343,7 @@ NTFSStop (
     This->DriverBindingHandle,
     Controller
     );
-  if (EFI_ERROR(Status)) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
