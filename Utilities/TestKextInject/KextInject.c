@@ -510,6 +510,16 @@ ApplyKernelPatches (
     } else {
       DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
     }
+
+    UINTN RegisterBasePmio = 0x03F8;
+    PatchSetPciSerialDeviceRegisterBase (RegisterBasePmio);
+    Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevicePmio - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevicePmio patch\n"));
+    }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));
     FailedToProcess = TRUE;
