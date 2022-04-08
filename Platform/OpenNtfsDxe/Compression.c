@@ -16,8 +16,8 @@
 extern UINTN  mFileRecordSize;
 extern UINTN  mSectorSize;
 extern UINTN  mClusterSize;
-extern UINT64 BufferSize;
 extern UINT64 mUnitSize;
+STATIC UINT64 mBufferSize;
 
 STATIC
 EFI_STATUS
@@ -243,7 +243,7 @@ DecompressBlock (
             return EFI_VOLUME_CORRUPTED;
           }
 
-          if (BufferSize < Length) {
+          if (mBufferSize < Length) {
             DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #1) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
@@ -253,7 +253,7 @@ DecompressBlock (
             ++ClearTextPointer;
           }
 
-          BufferSize -= Length;
+          mBufferSize -= Length;
         } else {
           //
           // Plain text
@@ -263,7 +263,7 @@ DecompressBlock (
             return Status;
           }
 
-          if (BufferSize == 0) {
+          if (mBufferSize == 0) {
             DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
@@ -271,7 +271,7 @@ DecompressBlock (
           Dest[ClearTextPointer++] = PlainText;
 
           --BlockLength;
-          --BufferSize;
+          --mBufferSize;
         }
 
         TagsByte >>= 1U;
@@ -294,14 +294,14 @@ DecompressBlock (
     }
 
     if ((Dest != NULL) && (SpareBytes != 0)) {
-      if (BufferSize < SpareBytes) {
+      if (mBufferSize < SpareBytes) {
         DEBUG ((DEBUG_INFO, "NTFS: (DecompressBlock #3) Buffer overflow.\n"));
         return EFI_VOLUME_CORRUPTED;
       }
 
       CopyMem (Dest, &Clusters->Cluster[Clusters->ClusterOffset], SpareBytes);
       Dest += SpareBytes;
-      BufferSize -= SpareBytes;
+      mBufferSize -= SpareBytes;
     }
 
     BlockLength -= SpareBytes;
@@ -391,7 +391,7 @@ ReadCompressedBlock (
   BlocksPerCluster = 0;
   ClustersPerBlock = 0;
 
-  BufferSize = BlocksTotal * COMPRESSION_BLOCK;
+  mBufferSize = BlocksTotal * COMPRESSION_BLOCK;
 
   if (mClusterSize >= COMPRESSION_BLOCK) {
     BlocksPerCluster = DivU64x64Remainder (mClusterSize, COMPRESSION_BLOCK, NULL);
@@ -452,14 +452,14 @@ ReadCompressedBlock (
 
       if (Runlist->Unit.Tail == 0) {
         if (Buffer != NULL) {
-          if (BufferSize < (SpareBlocks * COMPRESSION_BLOCK)) {
+          if (mBufferSize < (SpareBlocks * COMPRESSION_BLOCK)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #1) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
           ZeroMem (Buffer, SpareBlocks * COMPRESSION_BLOCK);
           Buffer += SpareBlocks * COMPRESSION_BLOCK;
-          BufferSize -= SpareBlocks * COMPRESSION_BLOCK;
+          mBufferSize -= SpareBlocks * COMPRESSION_BLOCK;
         }
       } else {
         while (SpareBlocks != 0) {
@@ -490,7 +490,7 @@ ReadCompressedBlock (
 
         Runlist->TargetVcn += ClearTextClusters;
         if (Buffer != NULL) {
-          if (BufferSize < (ClearTextClusters * mClusterSize)) {
+          if (mBufferSize < (ClearTextClusters * mClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
@@ -506,7 +506,7 @@ ReadCompressedBlock (
           }
 
           Buffer += ClearTextClusters * mClusterSize;
-          BufferSize -= ClearTextClusters * mClusterSize;
+          mBufferSize -= ClearTextClusters * mClusterSize;
         }
 
         SpareClusters -= ClearTextClusters;
@@ -515,7 +515,7 @@ ReadCompressedBlock (
 
       if (SpareClusters != 0) {
         if (Buffer != NULL) {
-          if (BufferSize < (SpareClusters * mClusterSize)) {
+          if (mBufferSize < (SpareClusters * mClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #3) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
@@ -531,7 +531,7 @@ ReadCompressedBlock (
           }
 
           Buffer += SpareClusters * mClusterSize;
-          BufferSize -= SpareClusters * mClusterSize;
+          mBufferSize -= SpareClusters * mClusterSize;
         }
         Runlist->TargetVcn += SpareClusters;
       }

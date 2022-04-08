@@ -9,9 +9,9 @@
 #include "NTFS.h"
 #include "Helper.h"
 
-extern UINTN mFileRecordSize;
-extern UINTN mIndexRecordSize;
-UINT64       BufferSize;
+extern UINTN  mFileRecordSize;
+extern UINTN  mIndexRecordSize;
+STATIC UINT64 mBufferSize;
 
 STATIC
 VOID
@@ -258,7 +258,7 @@ ListFile (
   IndexEntry = (INDEX_ENTRY *) Position;
 
   while (TRUE) {
-    if (BufferSize < sizeof (INDEX_ENTRY)) {
+    if (mBufferSize < sizeof (INDEX_ENTRY)) {
       DEBUG ((DEBUG_INFO, "NTFS: (ListFile #1) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
@@ -267,7 +267,7 @@ ListFile (
       break;
     }
 
-    if (BufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME))) {
+    if (mBufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME))) {
       DEBUG ((DEBUG_INFO, "NTFS: (ListFile #2) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
@@ -296,7 +296,7 @@ ListFile (
       CopyMem (&DirFile->Inode, IndexEntry->FileRecordNumber, 6);
       DirFile->AlteredTime = AttrFileName->AlteredTime;
 
-      if (BufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME) + AttrFileName->FilenameLen * sizeof (CHAR16))) {
+      if (mBufferSize < (sizeof (INDEX_ENTRY) + sizeof (ATTR_FILE_NAME) + AttrFileName->FilenameLen * sizeof (CHAR16))) {
         DEBUG ((DEBUG_INFO, "NTFS: (ListFile #3) INDEX_ENTRY is corrupted.\n"));
         FreePool (DirFile);
         return EFI_VOLUME_CORRUPTED;
@@ -339,14 +339,14 @@ ListFile (
       FreePool (DirFile);
     }
 
-    if ((BufferSize < IndexEntry->IndexEntryLength)
+    if ((mBufferSize < IndexEntry->IndexEntryLength)
       || (IndexEntry->IndexEntryLength == 0)) {
       DEBUG ((DEBUG_INFO, "NTFS: (ListFile #4) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
 
     IndexEntry = (INDEX_ENTRY *) ((UINT8 *) IndexEntry + IndexEntry->IndexEntryLength);
-    BufferSize -= IndexEntry->IndexEntryLength;
+    mBufferSize -= IndexEntry->IndexEntryLength;
   }
 
   return EFI_NOT_FOUND;
@@ -563,11 +563,11 @@ IterateDir (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    BufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((BufferSize < sizeof (ATTR_HEADER_RES)) ||
-        (BufferSize < (Res->NameOffset + 8)) ||
-        (BufferSize < Res->InfoOffset)) {
+    if ((mBufferSize < sizeof (ATTR_HEADER_RES)) ||
+        (mBufferSize < (Res->NameOffset + 8)) ||
+        (mBufferSize < Res->InfoOffset)) {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #1) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
@@ -585,18 +585,18 @@ IterateDir (
       continue;
     }
 
-    BufferSize -= Res->InfoOffset;
+    mBufferSize -= Res->InfoOffset;
 
     break;
   }
 
-  if (BufferSize < (sizeof (INDEX_ROOT) + Index->FirstEntryOffset)) {
+  if (mBufferSize < (sizeof (INDEX_ROOT) + Index->FirstEntryOffset)) {
     DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #2) $INDEX_ROOT is corrupted.\n"));
     FreeAttr (&Attr);
     return EFI_VOLUME_CORRUPTED;
   }
 
-  BufferSize -= sizeof (INDEX_ROOT) + Index->FirstEntryOffset;
+  mBufferSize -= sizeof (INDEX_ROOT) + Index->FirstEntryOffset;
 
   Status = ListFile (
     Dir,
@@ -621,10 +621,10 @@ IterateDir (
   }
 
   while ((Non = (ATTR_HEADER_NONRES *) FindAttr (&Attr, AT_BITMAP)) != NULL) {
-    BufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((BufferSize < sizeof (ATTR_HEADER_NONRES)) ||
-        (BufferSize < (Non->NameOffset + 8))) {
+    if ((mBufferSize < sizeof (ATTR_HEADER_NONRES)) ||
+        (mBufferSize < (Non->NameOffset + 8))) {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #3) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
@@ -648,7 +648,7 @@ IterateDir (
       }
 
       if (Non->NonResFlag == 0) {
-        if (BufferSize < (((ATTR_HEADER_RES *)Non)->InfoOffset + BitMapLen)) {
+        if (mBufferSize < (((ATTR_HEADER_RES *)Non)->InfoOffset + BitMapLen)) {
           DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #4) $INDEX_ROOT is corrupted.\n"));
           FreeAttr (&Attr);
           FreePool (BitMap);
@@ -680,10 +680,10 @@ IterateDir (
   Non = (ATTR_HEADER_NONRES *) LocateAttr (&Attr, Dir, AT_INDEX_ALLOCATION);
 
   while (Non != NULL) {
-    BufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
+    mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((BufferSize < sizeof (ATTR_HEADER_NONRES)) ||
-        (BufferSize < (Non->NameOffset + 8))) {
+    if ((mBufferSize < sizeof (ATTR_HEADER_NONRES)) ||
+        (mBufferSize < (Non->NameOffset + 8))) {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       return EFI_VOLUME_CORRUPTED;
@@ -751,7 +751,7 @@ IterateDir (
           return EFI_VOLUME_CORRUPTED;
         }
 
-        BufferSize = mIndexRecordSize - (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset);
+        mBufferSize = mIndexRecordSize - (sizeof (INDEX_HEADER) + IndexRecord->IndexEntriesOffset);
 
         Status = ListFile (
           Dir,
