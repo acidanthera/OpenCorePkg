@@ -1071,11 +1071,8 @@ mSerialDevicePmioFind[] = {
 };
 
 STATIC
-UINT8
-mSerialDevicePmioPort[] = {
-  0x00, 0x00              ///< To be set by PatchSetPciSerialDeviceRegisterBase()
-};
-STATIC_ASSERT (sizeof (mSerialDevicePmioPort) == sizeof (UINT16), "Unsupported mSerialDevicePmioPort");
+UINT16
+mPmioRegisterBase = 0;
 
 STATIC
 CONST UINTN
@@ -1091,7 +1088,7 @@ PatchSetPciSerialDeviceRegisterBase (
   //
   if (RegisterBase <= MAX_UINT16) {
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %u\n", RegisterBase));
-    CopyMem (mSerialDevicePmioPort, &RegisterBase, sizeof (UINT16));
+    CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (mPmioRegisterBase));
   }
 
   //
@@ -1145,8 +1142,9 @@ PatchCustomPciSerialPmio (
     // Patch PMIO.
     //
     if (FoundPmio) {
-      *WalkerPmio++ = (mSerialDevicePmioPort[0] & 0xF8U);
-      *WalkerPmio   = mSerialDevicePmioPort[1];
+      *WalkerPmio = (mPmioRegisterBase & 0xFFU) | (*WalkerPmio & 7U);
+      ++WalkerPmio;
+      *WalkerPmio = mPmioRegisterBase >> 8U;
 
       ++Count;
     }
@@ -1176,7 +1174,7 @@ PatchCustomPciSerialDevice (
   EFI_STATUS  Status;
 
   Status = EFI_INVALID_PARAMETER;
-  if (!IsZeroBuffer (mSerialDevicePmioPort, sizeof (UINT16))) {
+  if (mPmioRegisterBase != 0) {
     Status = PatchCustomPciSerialPmio (Patcher);
   }
 
