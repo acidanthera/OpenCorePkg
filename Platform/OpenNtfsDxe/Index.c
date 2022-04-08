@@ -16,10 +16,12 @@ UINT64       BufferSize;
 STATIC
 VOID
 FreeNode (
-  IN NTFS_FILE  *Node,
+  IN NTFS_FILE  *Node    OPTIONAL,
   IN FSHELP_CTX *Context
   )
 {
+  ASSERT (Context != NULL);
+
   if (Node != Context->RootNode) {
     if (Node != NULL) {
       FreePool (Node);
@@ -35,6 +37,8 @@ PopElement (
 {
   STACK_ELEMENT *Element;
 
+  ASSERT (Context != NULL);
+
   Element = Context->CurrentNode;
   Context->CurrentNode = Element->Parent;
   FreeNode (Element->Node, Context);
@@ -47,6 +51,8 @@ FreeStack (
   IN FSHELP_CTX *Context
   )
 {
+  ASSERT (Context != NULL);
+
   while (Context->CurrentNode != NULL) {
     PopElement (Context);
   }
@@ -58,6 +64,8 @@ GoUpALevel (
   IN FSHELP_CTX *Context
   )
 {
+  ASSERT (Context != NULL);
+
   if (Context->CurrentNode->Parent == NULL) {
     return;
   }
@@ -73,6 +81,9 @@ PushNode (
   )
 {
   STACK_ELEMENT *Next;
+
+  ASSERT (Context != NULL);
+  ASSERT (Node != NULL);
 
   Next = AllocateZeroPool (sizeof (STACK_ELEMENT));
   if (Next == NULL) {
@@ -93,6 +104,8 @@ GoToRoot (
   IN FSHELP_CTX *Context
   )
 {
+  ASSERT (Context != NULL);
+
   FreeStack (Context);
   return PushNode (Context, Context->RootNode, FSHELP_DIR);
 }
@@ -107,6 +120,10 @@ FindFileIter (
   )
 {
   INTN Result;
+
+  ASSERT (Name != NULL);
+  ASSERT (Node != NULL);
+  ASSERT (Context != NULL);
 
   if (FileType == FSHELP_UNKNOWN) {
     return EFI_NOT_FOUND;
@@ -141,6 +158,10 @@ NtfsDirHook (
   INT64       *Index = (INT64 *) &Info->FileSize;
   EFI_TIME    Time = { 1970, 01, 01, 00, 00, 00, 0, 0, 0, 0, 0};
   INT32       Mtime;
+
+  ASSERT (Name != NULL);
+  ASSERT (Node != NULL);
+  ASSERT (Info != NULL);
 
   if ((Name[0] == L'.') &&
      ((Name[1] == 0) || ((Name[1] == L'.') &&
@@ -196,6 +217,10 @@ NtfsDirIter (
   IN EFI_NTFS_FILE    *File
   )
 {
+  ASSERT (FileName != NULL);
+  ASSERT (Node != NULL);
+  ASSERT (File != NULL);
+
   if (StrCmp(FileName, File->BaseName) != 0) {
     FreeFile (Node);
     return EFI_NOT_FOUND;
@@ -225,6 +250,10 @@ ListFile (
   NTFS_FILE        *DirFile;
   INDEX_ENTRY      *IndexEntry;
   ATTR_FILE_NAME   *AttrFileName;
+
+  ASSERT (Dir != NULL);
+  ASSERT (Position != NULL);
+  ASSERT (FileOrCtx != NULL);
 
   IndexEntry = (INDEX_ENTRY *) Position;
 
@@ -339,6 +368,9 @@ FindFile (
   CHAR16           *Symlink;
   CHAR16           *PathPart;
 
+  ASSERT (CurrentPath != NULL);
+  ASSERT (Context != NULL);
+
   for (Name = CurrentPath; ; Name = Next) {
     FoundNode = NULL;
     FoundType  = FSHELP_UNKNOWN;
@@ -440,6 +472,10 @@ FsHelpFindFile (
   FSHELP_CTX      Context;
   FSHELP_FILETYPE FoundType;
 
+  ASSERT (Path != NULL);
+  ASSERT (RootNode != NULL);
+  ASSERT (FoundNode != NULL);
+
   Context.Path         = Path;
   Context.RootNode     = RootNode;
   Context.SymlinkDepth = 0;
@@ -498,6 +534,9 @@ IterateDir (
   UINTN               BitMapLen;
   UINT8               Bit;
   UINTN               Number;
+
+  ASSERT (Dir != NULL);
+  ASSERT (FileOrCtx != NULL);
 
   if (!Dir->InodeRead) {
     Status = InitFile (Dir, Dir->Inode);
@@ -755,6 +794,9 @@ RelativeToAbsolute (
   CHAR16 *End;
   UINT32 Skip = 0;
 
+  ASSERT (Dest != NULL);
+  ASSERT (Source != NULL);
+
   Buffer = AllocateZeroPool (StrSize (Source));
   BPointer = Buffer;
 
@@ -833,6 +875,8 @@ NtfsTimeToEfiTime (
   INT32        rem;
   INT32        y;
   CONST UINT16 *ip;
+
+  ASSERT (tp != NULL);
 
   days = t / SECS_PER_DAY;
   rem = t % SECS_PER_DAY;

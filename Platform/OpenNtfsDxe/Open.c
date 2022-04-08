@@ -145,6 +145,10 @@ FileReadDir (
   EFI_NTFS_FILE *TmpFile = NULL;
   INTN          Length;
 
+  ASSERT (File != NULL);
+  ASSERT (Size != NULL);
+  ASSERT ((Data != NULL) || ((Data == NULL) && (*Size == 0)));
+
   Info = (EFI_FILE_INFO *) Data;
 
   if (*Size < MINIMUM_INFO_LENGTH) {
@@ -232,6 +236,10 @@ Read (
   EFI_STATUS Status;
   UINT64     Remaining;
   NTFS_FILE  *BaseMftRecord;
+
+  ASSERT (File != NULL);
+  ASSERT (Size != NULL);
+  ASSERT ((Data != NULL) || ((Data == NULL) && (*Size == 0)));
 
   Remaining = (File->RootFile.DataAttributeSize > File->Offset) ?
    File->RootFile.DataAttributeSize - File->Offset : 0;

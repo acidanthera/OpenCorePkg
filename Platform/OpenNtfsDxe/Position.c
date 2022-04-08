@@ -19,6 +19,7 @@ FileGetPosition (
   EFI_NTFS_FILE  *File;
 
   ASSERT (This != NULL);
+  ASSERT (Position != NULL);
 
   File = (EFI_NTFS_FILE *) This;
 

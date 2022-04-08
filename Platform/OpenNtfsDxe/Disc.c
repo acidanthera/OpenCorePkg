@@ -317,21 +317,23 @@ InitAttr (
   FILE_RECORD_HEADER *Record;
   UINT64             AttrEnd;
 
+  ASSERT (Attr != NULL);
+  ASSERT (File != NULL);
+
   Record = (FILE_RECORD_HEADER *) File->FileRecord;
 
   Attr->BaseMftRecord = File;
   Attr->Flags = (File == &File->File->MftFile) ? NTFS_AF_MFT_FILE : 0;
 
   AttrEnd = Record->AttributeOffset + sizeof (ATTR_HEADER_RES);
-
-  if ((AttrEnd > mFileRecordSize) || (AttrEnd > Record->RealSize) ||
-     (Record->RealSize > Record->AllocatedSize)) {
+  if ((AttrEnd > mFileRecordSize)
+    || (AttrEnd > Record->RealSize)
+    || (Record->RealSize > Record->AllocatedSize)) {
     DEBUG ((DEBUG_INFO, "NTFS: (InitAttr) File record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
-  } else {
-    Attr->Next = File->FileRecord + Record->AttributeOffset;
   }
 
+  Attr->Next = File->FileRecord + Record->AttributeOffset;
   Attr->Last = NULL;
   Attr->ExtensionMftRecord = NULL;
   Attr->NonResAttrList = NULL;
@@ -348,6 +350,9 @@ LocateAttr (
 {
   EFI_STATUS         Status;
   UINT8              *AttrStart;
+
+  ASSERT (Attr != NULL);
+  ASSERT (Mft  != NULL);
 
   Status = InitAttr (Attr, Mft);
   if (EFI_ERROR (Status)) {
@@ -367,7 +372,7 @@ LocateAttr (
         break;
       }
 
-      if (Attr->Flags & NTFS_AF_ALST) {
+      if ((Attr->Flags & NTFS_AF_ALST) != 0) {
         return AttrStart;
       }
     }
@@ -403,7 +408,9 @@ FindAttr (
   FILE_RECORD_HEADER  *FRecord;
   UINT64              BufferSize;
 
-  if (Attr->Flags & NTFS_AF_ALST) {
+  ASSERT (Attr != NULL);
+
+  if ((Attr->Flags & NTFS_AF_ALST) != 0) {
   retry:
     while ((Attr->Next + sizeof (ATTR_LIST_RECORD)) <= Attr->Last) {
       Attr->Current = Attr->Next;
@@ -465,7 +472,7 @@ FindAttr (
         FRecord = (FILE_RECORD_HEADER *) Attr->ExtensionMftRecord;
         BufferSize = mFileRecordSize;
         if ((FRecord->AttributeOffset + sizeof (ATTR_HEADER_RES)) <= BufferSize) {
-          Res = (ATTR_HEADER_RES *)((UINT8 *) FRecord + FRecord->AttributeOffset);
+          Res = (ATTR_HEADER_RES *) ((UINT8 *) FRecord + FRecord->AttributeOffset);
           BufferSize -= FRecord->AttributeOffset;
         } else {
           DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) Extension record is corrupted.\n"));
@@ -478,18 +485,18 @@ FindAttr (
             return NULL;
           }
 
-          if ((Res->Type == LRecord->Type) &&
-              (Res->AttributeId == LRecord->AttributeId)) {
+          if ((Res->Type == LRecord->Type)
+            && (Res->AttributeId == LRecord->AttributeId)) {
             return (UINT8 *) Res;
           }
 
           if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) Extension record is corrupted.\n"));
             return NULL;
-          } else {
-            BufferSize -= Res->Length;
-            Res = (ATTR_HEADER_RES *)((UINT8 *) Res + Res->Length);
           }
+
+          BufferSize -= Res->Length;
+          Res = (ATTR_HEADER_RES *) ((UINT8 *) Res + Res->Length);
         }
 
         DEBUG ((DEBUG_INFO, "NTFS: Can\'t find 0x%X in attribute list\n", Attr->Current));
@@ -513,10 +520,10 @@ FindAttr (
     if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) File record is corrupted.\n"));
       return NULL;
-    } else {
-      BufferSize -= Res->Length;
-      Attr->Next += Res->Length;
     }
+
+    BufferSize -= Res->Length;
+    Attr->Next += Res->Length;
 
     if (Res->Type == AT_ATTRIBUTE_LIST) {
       Attr->Last = Attr->Current;
@@ -529,8 +536,9 @@ FindAttr (
     Attr->Current = Attr->Next;
     Res = (ATTR_HEADER_RES *) Attr->Current;
   }
-
-  /* Continue search in $ATTRIBUTE_LIST */
+  //
+  // Continue search in $ATTRIBUTE_LIST
+  //
   if (Attr->Last) {
     Attr->ExtensionMftRecord = AllocateZeroPool (mFileRecordSize);
     if (Attr->ExtensionMftRecord == NULL) {
@@ -668,6 +676,8 @@ InitFile (
   ATTR_HEADER_RES    *Attr;
   FILE_RECORD_HEADER *Record;
 
+  ASSERT (File != NULL);
+
   File->InodeRead = TRUE;
 
   File->FileRecord = AllocateZeroPool (mFileRecordSize);
@@ -742,9 +752,9 @@ FreeFile (
 
   FreeAttr (&File->Attr);
 
-  if ((File->FileRecord != NULL) &&
-      (File->FileRecord != File->File->FileSystem->RootIndex->FileRecord) &&
-      (File->FileRecord != File->File->FileSystem->MftStart->FileRecord)) {
+  if ((File->FileRecord != NULL)
+    && (File->FileRecord != File->File->FileSystem->RootIndex->FileRecord)
+    && (File->FileRecord != File->File->FileSystem->MftStart->FileRecord)) {
     FreePool (File->FileRecord);
   }
 }

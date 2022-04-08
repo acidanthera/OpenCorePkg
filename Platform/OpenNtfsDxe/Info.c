@@ -22,6 +22,9 @@ GetLabel (
   NTFS_FILE        *BaseMftRecord  = NULL;
   ATTR_HEADER_RES  *Res;
 
+  ASSERT (FileSystem != NULL);
+  ASSERT (Label != NULL);
+
   *Label = NULL;
 
   Status = FsHelpFindFile (L"/$Volume", FileSystem->RootIndex, &BaseMftRecord, FSHELP_REG);
@@ -109,6 +112,8 @@ FileGetInfo (
   UINTN                         Length = 0;
 
   ASSERT (This != NULL);
+  ASSERT (Type != NULL);
+  ASSERT (Len != NULL);
   ASSERT ((Data != NULL) || ((Data == NULL) && (*Len == 0)));
 
   File = (EFI_NTFS_FILE *) This;
