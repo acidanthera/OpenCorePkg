@@ -4,34 +4,62 @@
 **/
 
 #include <UserFile.h>
+#include <Library/DebugLib.h>
 #include <Library/MemoryAllocationLib.h>
 
-uint8_t *UserReadFile(const char *str, uint32_t *size) {
-  FILE *f = fopen(str, "rb");
+UINT8 *
+UserReadFile (
+  IN  CONST CHAR8 *FileName,
+  OUT UINT32      *Size
+  )
+{
+  FILE   *FilePtr;
+  INT64  FileSize;
+  UINT8  *Buffer;
 
-  if (!f) return NULL;
+  ASSERT (FileName != NULL);
+  ASSERT (Size != NULL);
 
-  fseek(f, 0, SEEK_END);
-  long fsize = ftell(f);
-  fseek(f, 0, SEEK_SET);
+  FilePtr = fopen (FileName, "rb");
+  if (FilePtr == NULL) {
+    return NULL;
+  }
 
-  uint8_t *string = AllocatePool(fsize + 1);
-  if (fsize > 0 && fread(string, fsize, 1, f) != 1)
-    abort();
-  fclose(f);
+  fseek (FilePtr, 0, SEEK_END);
+  FileSize = ftell (FilePtr);
+  fseek (FilePtr, 0, SEEK_SET);
 
-  string[fsize] = 0;
-  *size = fsize;
+  Buffer = AllocatePool (FileSize + 1);
+  if (Buffer == NULL
+    || (FileSize > 0 && fread (Buffer, FileSize, 1, FilePtr) != 1)) {
+    abort ();
+  }
+  fclose (FilePtr);
 
-  return string;
+  Buffer[FileSize] = 0;
+  *Size = FileSize;
+
+  return Buffer;
 }
 
-void UserWriteFile(const char *str, void *data, uint32_t size) {
-  FILE *Fh = fopen(str, "wb");
+VOID
+UserWriteFile (
+  IN  CONST CHAR8 *FileName,
+  IN  VOID        *Data,
+  IN  UINT32      Size
+  )
+{
+  FILE   *FilePtr;
 
-  if (!Fh) abort();
+  FilePtr = fopen (FileName, "wb");
+
+  if (FilePtr == NULL) {
+    abort ();
+  }
   
-  if (fwrite (data, size, 1, Fh) != 1)
-    abort();
-  fclose(Fh);
+  if (fwrite (Data, Size, 1, FilePtr) != 1) {
+    abort ();
+  }
+
+  fclose (FilePtr);
 }

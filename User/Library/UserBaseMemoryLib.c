@@ -17,13 +17,13 @@
 #include <malloc.h>
 #endif // WIN32
 
-UINTN mPoolAllocations;
-UINTN mPageAllocations;
+UINTN   mPoolAllocations;
+UINTN   mPageAllocations;
 
-UINT64 mPoolAllocationMask = MAX_UINT64;
-UINTN mPoolAllocationIndex;
-UINT64 mPageAllocationMask = MAX_UINT64;
-UINTN mPageAllocationIndex;
+UINT64  mPoolAllocationMask = MAX_UINT64;
+UINTN   mPoolAllocationIndex;
+UINT64  mPageAllocationMask = MAX_UINT64;
+UINTN   mPageAllocationIndex;
 
 VOID *
 EFIAPI
@@ -33,6 +33,9 @@ CopyMem (
   IN  UINTN       Length
   )
 {
+  ASSERT (DestinationBuffer != NULL);
+  ASSERT (SourceBuffer != NULL);
+
   return memmove (DestinationBuffer, SourceBuffer, Length);
 }
 
@@ -44,6 +47,8 @@ SetMem (
   IN  UINT8  Value
   )
 {
+  ASSERT (Buffer != NULL);
+
   return memset (Buffer, Value, Length);
 }
 
@@ -54,7 +59,9 @@ ZeroMem (
   IN  UINTN  Length
   )
 {
-  return memset (Buffer, 0, Length);
+  ASSERT (Buffer != NULL);
+
+  return SetMem (Buffer, 0, Length);
 }
 
 INTN
@@ -65,6 +72,9 @@ CompareMem (
   IN  UINTN       Length
   )
 {
+  ASSERT (DestinationBuffer != NULL);
+  ASSERT (SourceBuffer != NULL);
+
   return memcmp (DestinationBuffer, SourceBuffer, Length);
 }
 
@@ -96,13 +106,15 @@ AllocatePool (
   IN  UINTN  AllocationSize
   )
 {
-  VOID *p;
+  VOID *Buffer;
 
   if ((mPoolAllocationMask & (1ULL << mPoolAllocationIndex)) != 0) {
+    //
     // UEFI guarantees 8-byte alignment.
-    p = malloc ((AllocationSize + 7ULL) & ~7ULL);
+    //
+    Buffer = malloc ((AllocationSize + 7ULL) & ~7ULL);
   } else {
-    p = NULL;
+    Buffer = NULL;
   }
 
   ++mPoolAllocationIndex;
@@ -112,13 +124,16 @@ AllocatePool (
     DEBUG_POOL,
     "UMEM: Allocating pool %u at 0x%p\n",
     (UINT32) AllocationSize,
-    p
+    Buffer
     ));
-  ASSERT (((UINTN)p & 7ULL) == 0);
-  if (p != NULL) {
+
+  ASSERT (((UINTN) Buffer & 7ULL) == 0);
+
+  if (Buffer != NULL) {
     ++mPoolAllocations;
   }
-  return p;
+
+  return Buffer;
 }
 
 VOID *
@@ -170,7 +185,7 @@ ReallocatePool (
   NewBuffer = AllocateZeroPool (NewSize);
 
   if (NewBuffer != NULL && OldBuffer != NULL) {
-    memcpy (NewBuffer, OldBuffer, MIN (OldSize, NewSize));
+    CopyMem (NewBuffer, OldBuffer, MIN (OldSize, NewSize));
     FreePool (OldBuffer);
   }
 
@@ -190,7 +205,9 @@ AllocatePages (
     Memory = _aligned_malloc (Pages * EFI_PAGE_SIZE, EFI_PAGE_SIZE);
 #else // !WIN32
     Memory = NULL;
-    INTN  RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
+    INTN  RetVal;
+
+    RetVal = posix_memalign (&Memory, EFI_PAGE_SIZE, Pages * EFI_PAGE_SIZE);
     if (RetVal != 0) {
       DEBUG ((DEBUG_ERROR, "posix_memalign returns error %d\n", RetVal));
       Memory = NULL;
@@ -224,6 +241,7 @@ FreePool (
   )
 {
   ASSERT (Buffer != NULL);
+
   DEBUG ((
     DEBUG_POOL,
     "UMEM: Deallocating pool 0x%p\n",
@@ -253,7 +271,7 @@ FreePages (
 
   mPageAllocations -= Pages;
 
-  free (Buffer);
+  FreePool (Buffer);
 }
 
 GUID *
@@ -263,7 +281,10 @@ CopyGuid (
   IN  CONST GUID  *SourceGuid
   )
 {
-  memmove (DestinationGuid, SourceGuid, sizeof (GUID));
+  ASSERT (DestinationGuid != NULL);
+  ASSERT (SourceGuid != NULL);
+
+  CopyMem (DestinationGuid, SourceGuid, sizeof (GUID));
 
   return DestinationGuid;
 }
@@ -275,7 +296,10 @@ CompareGuid (
   IN  CONST GUID  *Guid2
   )
 {
-  return memcmp (Guid1, Guid2, sizeof (GUID)) == 0;
+  ASSERT (Guid1 != NULL);
+  ASSERT (Guid2 != NULL);
+
+  return CompareMem (Guid1, Guid2, sizeof (GUID)) == 0;
 }
 
 UINT16
@@ -286,7 +310,7 @@ ReadUnaligned16 (
 {
   UINT16 Value;
 
-  memmove (&Value, Buffer, sizeof (UINT16));
+  CopyMem (&Value, Buffer, sizeof (UINT16));
 
   return Value;
 }
@@ -300,7 +324,7 @@ WriteUnaligned16 (
 {
   ASSERT (Buffer != NULL);
 
-  memmove (Buffer, &Value, sizeof (UINT16));
+  CopyMem (Buffer, &Value, sizeof (UINT16));
 
   return Value;
 }
@@ -326,7 +350,9 @@ ReadUnaligned32 (
 {
   UINT32 Value;
 
-  memmove (&Value, Buffer, sizeof (UINT32));
+  ASSERT (Buffer != NULL);
+
+  CopyMem (&Value, Buffer, sizeof (UINT32));
 
   return Value;
 }
@@ -339,7 +365,9 @@ ReadUnaligned64 (
 {
   UINT64 Value;
 
-  memmove (&Value, Buffer, sizeof (UINT64));
+  ASSERT (Buffer != NULL);
+
+  CopyMem (&Value, Buffer, sizeof (UINT64));
 
   return Value;
 }
@@ -353,7 +381,7 @@ WriteUnaligned32 (
 {
   ASSERT (Buffer != NULL);
 
-  memmove (Buffer, &Value, sizeof (UINT32));
+  CopyMem (Buffer, &Value, sizeof (UINT32));
 
   return Value;
 }
@@ -367,7 +395,7 @@ WriteUnaligned64 (
 {
   ASSERT (Buffer != NULL);
 
-  memmove (Buffer, &Value, sizeof (UINT64));
+  CopyMem (Buffer, &Value, sizeof (UINT64));
 
   return Value;
 }

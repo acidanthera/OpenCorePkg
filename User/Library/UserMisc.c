@@ -52,7 +52,7 @@ AsmCpuid (
   OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-  #if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__)
   UINT32  EaxVal;
   UINT32  EbxVal;
   UINT32  EcxVal;
@@ -83,7 +83,7 @@ AsmCpuid (
   }
 
   return Index;
-  #else
+#else
   if (Eax != NULL) {
     *Eax = 0;
   }
@@ -98,7 +98,7 @@ AsmCpuid (
   }
 
   return 0;
-  #endif
+#endif
 }
 
 UINT32
@@ -111,7 +111,7 @@ AsmCpuidEx (
   OUT     UINT32                    *Edx   OPTIONAL
   )
 {
-  #if defined(__i386__) || defined(__x86_64__)
+#if defined(__i386__) || defined(__x86_64__)
   UINT32  EaxVal;
   UINT32  EbxVal;
   UINT32  EcxVal;
@@ -143,7 +143,7 @@ AsmCpuidEx (
   }
 
   return Index;
-  #else
+#else
   if (Eax != NULL) {
     *Eax = 0;
   }
@@ -158,7 +158,7 @@ AsmCpuidEx (
   }
 
   return 0;
-  #endif
+#endif
 }
 
 UINT32
@@ -310,6 +310,7 @@ IoRead32 (
   )
 {
   ASSERT ((Port & 3) == 0);
+
   return 0;
 }
 
@@ -321,6 +322,7 @@ IoWrite32 (
   )
 {
   ASSERT ((Port & 3) == 0);
+  
   return Value;
 }
 

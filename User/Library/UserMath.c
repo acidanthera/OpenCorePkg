@@ -31,7 +31,7 @@ DivU64x32Remainder (
   ASSERT (Divisor != 0);
 
   if (Remainder != NULL) {
-    *Remainder = (UINT32)(Dividend % Divisor);
+    *Remainder = (UINT32) (Dividend % Divisor);
   }
 
   return Dividend / Divisor;
