@@ -1079,7 +1079,7 @@ STATIC_ASSERT (sizeof (mSerialDevicePmioPort) == sizeof (UINT16), "Unsupported m
 
 STATIC
 CONST UINTN
-mInOutMaxDistance = 32;
+mInOutMaxDistance = 64;
 
 VOID
 PatchSetPciSerialDeviceRegisterBase (
