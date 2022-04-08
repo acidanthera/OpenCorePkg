@@ -1105,7 +1105,6 @@ PatchCustomPciSerialPmio (
   UINTN       Count;
   UINT8       *Walker;
   UINT8       *WalkerPmio;
-  BOOLEAN     FoundPmio;
   UINT8       *WalkerEnd;
   UINT8       *WalkerTmp;
 
@@ -1116,8 +1115,6 @@ PatchCustomPciSerialPmio (
   WalkerEnd = Walker + MachoGetFileSize (&Patcher->MachContext) - mInOutMaxDistance;
 
   while (Walker < WalkerEnd) {
-    FoundPmio = FALSE;
-
     if (Walker[0] == mSerialDevicePmioFind[0]
       && Walker[1] == mSerialDevicePmioFind[1]
       && (Walker[2] & 0xF8U) == mSerialDevicePmioFind[2]
@@ -1130,23 +1127,18 @@ PatchCustomPciSerialPmio (
         // Locate instruction in (0xEC) or out (0xEE).
         //
         if (*Walker == 0xEC || *Walker == 0xEE) {
-          FoundPmio = TRUE;
+          //
+          // Patch PMIO.
+          //
+          WalkerPmio[0] = (mPmioRegisterBase & 0xFFU) | (*WalkerPmio & 7U);
+          WalkerPmio[1] = mPmioRegisterBase >> 8U;
+
+          ++Count;
           break;
         }
 
         ++Walker;
       }
-    }
-
-    //
-    // Patch PMIO.
-    //
-    if (FoundPmio) {
-      *WalkerPmio = (mPmioRegisterBase & 0xFFU) | (*WalkerPmio & 7U);
-      ++WalkerPmio;
-      *WalkerPmio = mPmioRegisterBase >> 8U;
-
-      ++Count;
     }
 
     //
