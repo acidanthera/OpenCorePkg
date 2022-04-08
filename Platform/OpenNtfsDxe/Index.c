@@ -310,7 +310,8 @@ ListFile (
       FreePool (DirFile);
     }
 
-    if (BufferSize < IndexEntry->IndexEntryLength) {
+    if ((BufferSize < IndexEntry->IndexEntryLength)
+      || (IndexEntry->IndexEntryLength == 0)) {
       DEBUG ((DEBUG_INFO, "NTFS: (ListFile #4) INDEX_ENTRY is corrupted.\n"));
       return EFI_VOLUME_CORRUPTED;
     }
