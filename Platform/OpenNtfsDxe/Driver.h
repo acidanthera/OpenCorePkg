@@ -18,6 +18,8 @@
 #define MINIMUM_FS_INFO_LENGTH  (sizeof (EFI_FILE_SYSTEM_INFO) + MAX_PATH * sizeof(CHAR16))
 #define ATTRIBUTES_END_MARKER   0xFFFFFFFF
 #define MAX_FILE_SIZE           (MAX_UINT32 & ~7ULL)
+#define S_FILENAME              0x3
+#define S_SYMLINK               0xC
 
 /**
   ************
@@ -585,7 +587,7 @@ typedef struct _EFI_FS {
 **/
 typedef struct {
   UINT8  BootLoaderJump[3];
-  UINT8  SystemId[8];
+  UINT32 SystemId[2];
   UINT16 BytesPerSector;
   UINT8  SectorsPerCluster;
   UINT8  Unused1[7];

@@ -142,7 +142,7 @@ EFIAPI
 Fixup (
   IN UINT8       *Buffer,
   IN UINT64      Length,
-  IN CONST CHAR8 *Magic
+  IN UINT32      Magic
   );
 
 EFI_STATUS

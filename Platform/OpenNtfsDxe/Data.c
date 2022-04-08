@@ -168,7 +168,7 @@ ReadMftRecord (
     return Status;
   }
 
-  return Fixup (Buffer, mFileRecordSize, "FILE");
+  return Fixup (Buffer, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
 }
 
 EFI_STATUS
@@ -553,10 +553,10 @@ ReadSymlink (
   }
 
   switch (Symlink.Type) {
-    case (IS_ALIAS | IS_MICROSOFT | 0xC): // AT_SYMLINK
+    case (IS_ALIAS | IS_MICROSOFT | S_SYMLINK):
       Offset = sizeof (Symlink) + 4 + (UINT64) Symlink.SubstituteOffset;
       break;
-    case (IS_ALIAS | IS_MICROSOFT | 0x3): // AT_FILENAME
+    case (IS_ALIAS | IS_MICROSOFT | S_FILENAME):
       Offset = sizeof (Symlink) + (UINT64) Symlink.SubstituteOffset;
       break;
     default:

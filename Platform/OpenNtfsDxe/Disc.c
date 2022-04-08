@@ -111,11 +111,11 @@ NtfsMount (
     return Status;
   }
 
-  if ((CompareMem (Boot.SystemId, "NTFS", 4) != 0)
-  || (Boot.SectorsPerCluster == 0)
-  || ((Boot.SectorsPerCluster & (Boot.SectorsPerCluster - 1)) != 0)
-  || (Boot.BytesPerSector == 0)
-  || ((Boot.BytesPerSector & (Boot.BytesPerSector - 1)) != 0)) {
+  if ((Boot.SystemId[0] != SIGNATURE_32 ('N', 'T', 'F', 'S'))
+    || (Boot.SectorsPerCluster == 0)
+    || ((Boot.SectorsPerCluster & (Boot.SectorsPerCluster - 1)) != 0)
+    || (Boot.BytesPerSector == 0)
+    || ((Boot.BytesPerSector & (Boot.BytesPerSector - 1)) != 0)) {
     DEBUG ((DEBUG_INFO, "NTFS: (NtfsMount #1) BIOS Parameter Block is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -194,7 +194,11 @@ NtfsMount (
     return Status;
   }
 
-  Status = Fixup (RootFile->MftFile.FileRecord, mFileRecordSize, "FILE");
+  Status = Fixup (
+    RootFile->MftFile.FileRecord,
+    mFileRecordSize,
+    SIGNATURE_32 ('F', 'I', 'L', 'E')
+    );
   if (EFI_ERROR (Status)) {
     FreePool (RootFile->MftFile.FileRecord);
     FreePool (RootFile);
@@ -238,7 +242,7 @@ EFIAPI
 Fixup (
   IN UINT8       *Buffer,
   IN UINT64      Length,
-  IN CONST CHAR8 *Magic
+  IN UINT32      Magic
   )
 {
   FILE_RECORD_HEADER *Record;
@@ -248,7 +252,6 @@ Fixup (
   UINT8              *BufferEnd;
 
   ASSERT (Buffer != NULL);
-  ASSERT (Magic != NULL);
 
   Record = (FILE_RECORD_HEADER *) Buffer;
 
@@ -257,7 +260,7 @@ Fixup (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (Record->Magic != *((UINT32 *) Magic)) {
+  if (Record->Magic != Magic) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #2) Record is corrupted.\n"));
     return EFI_NOT_FOUND;
   }
@@ -442,7 +445,7 @@ FindAttr (
           //   return NULL;
           // }
           //
-          // Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, "FILE");
+          // Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
           // if (EFI_ERROR (Status)) {
           //   DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
           //   return NULL;

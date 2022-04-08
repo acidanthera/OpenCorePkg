@@ -691,7 +691,11 @@ IterateDir (
           return Status;
         }
 
-        Status = Fixup ((UINT8 *)IndexRecord, mIndexRecordSize, "INDX");
+        Status = Fixup (
+          (UINT8 *) IndexRecord,
+          mIndexRecordSize,
+          SIGNATURE_32 ('I', 'N', 'D', 'X')
+          );
         if (EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
