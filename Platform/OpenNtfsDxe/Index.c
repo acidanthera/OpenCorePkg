@@ -126,6 +126,7 @@ FindFileIter (
   ASSERT (Context != NULL);
 
   if (FileType == FSHELP_UNKNOWN) {
+    FreePool (Node);
     return EFI_NOT_FOUND;
   }
 
@@ -136,6 +137,7 @@ FindFileIter (
   }
 
   if (Result != 0) {
+    FreePool (Node);
     return EFI_NOT_FOUND;
   }
 
@@ -322,21 +324,22 @@ ListFile (
       switch (FunctionType) {
         case INFO_HOOK:
           Status = NtfsDirIter (Filename, Type, DirFile, FileOrCtx);
+          FreePool (DirFile);
           break;
         case DIR_HOOK:
           Status = NtfsDirHook (Filename, Type, DirFile, FileOrCtx);
+          FreePool (DirFile);
           break;
         case FILE_ITER:
-          Status = FindFileIter(Filename, Type, DirFile, FileOrCtx);
+          Status = FindFileIter (Filename, Type, DirFile, FileOrCtx);
           break;
       }
+
+      FreePool (Filename);
 
       if (Status == EFI_SUCCESS) {
         return EFI_SUCCESS;
       }
-
-      FreePool (Filename);
-      FreePool (DirFile);
     }
 
     if ((mBufferSize < IndexEntry->IndexEntryLength)
@@ -481,7 +484,7 @@ FsHelpFindFile (
   Context.SymlinkDepth = 0;
   Context.CurrentNode  = NULL;
 
-  if ((Path == NULL) || (Path[0] != L'/')) {
+  if (Path[0] != L'/') {
     DEBUG ((DEBUG_INFO, "NTFS: Invalid file name `%s'\n", Path));
     return EFI_INVALID_PARAMETER;
   }
@@ -505,15 +508,21 @@ FsHelpFindFile (
   Context.CurrentNode->Node = NULL;
   FreeStack (&Context);
 
-  if ((Type == FSHELP_REG) && (FoundType != Type)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Not a regular file\n"));
-    return EFI_VOLUME_CORRUPTED;
-  } else if ((Type == FSHELP_DIR) && (FoundType != Type)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Not a directory\n"));
-    return EFI_VOLUME_CORRUPTED;
+  if (FoundType != Type) {
+    if (*FoundNode != RootNode) {
+      FreePool (*FoundNode);
+    }
+
+    if (Type == FSHELP_REG) {
+      DEBUG ((DEBUG_INFO, "NTFS: Not a regular file\n"));
+    } else if (Type == FSHELP_DIR) {
+      DEBUG ((DEBUG_INFO, "NTFS: Not a directory\n"));
+    }
+
+    Status = EFI_VOLUME_CORRUPTED;
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 EFI_STATUS

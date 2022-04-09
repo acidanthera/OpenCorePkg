@@ -45,11 +45,13 @@ NtfsDir (
   }
 
   Status = IterateDir (Dir, File, FunctionType);
-  if (EFI_ERROR (Status)) {
-    return Status;
+
+  if (Dir != &File->RootFile) {
+    FreeFile (Dir);
+    FreePool (Dir);
   }
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 EFI_STATUS
@@ -79,19 +81,18 @@ NtfsOpen (
 
   if (BaseMftRecord != &File->RootFile) {
     CopyMem (&File->RootFile, BaseMftRecord, sizeof (*BaseMftRecord));
-    FreeFile (BaseMftRecord);
 
     if (!File->RootFile.InodeRead) {
       Status = InitFile (&File->RootFile, File->RootFile.Inode);
-      if (EFI_ERROR (Status)) {
-        return Status;
-      }
     }
+
+    FreeFile (BaseMftRecord);
+    FreePool (BaseMftRecord);
   }
 
   File->Offset = 0;
 
-  return EFI_SUCCESS;
+  return Status;
 }
 
 EFI_STATUS
