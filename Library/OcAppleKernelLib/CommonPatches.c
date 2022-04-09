@@ -1072,7 +1072,7 @@ mSerialDevicePmioFind[] = {
 
 STATIC
 UINT16
-mPmioRegisterBase = 0;
+mPmioRegisterBase = 0;    ///< To be set by PatchSetPciSerialDeviceRegisterBase()
 
 STATIC
 CONST UINTN
@@ -1087,7 +1087,7 @@ PatchSetPciSerialDeviceRegisterBase (
   // FIXME: This is really ugly, make quirks take a context param.
   //
   if (RegisterBase <= MAX_UINT16) {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %u\n", RegisterBase));
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %04X\n", RegisterBase));
     CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (mPmioRegisterBase));
   }
 
@@ -1147,13 +1147,13 @@ PatchCustomPciSerialPmio (
     ++Walker;
   }
 
-  if (Count != 0) {
+  if (Count > 0) {
     DEBUG ((DEBUG_INFO, "OCAK: Patched CustomPciSerialDevice PMIO port %u times\n", Count));
-  } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to patch CustomPciSerialDevice PMIO port!\n"));
+    return EFI_SUCCESS;
   }
 
-  return Count > 0 ? EFI_SUCCESS : EFI_NOT_FOUND;
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to patch CustomPciSerialDevice PMIO port!\n"));
+  return EFI_NOT_FOUND;
 }
 
 STATIC
@@ -1166,7 +1166,7 @@ PatchCustomPciSerialDevice (
   EFI_STATUS  Status;
 
   Status = EFI_INVALID_PARAMETER;
-  if (mPmioRegisterBase != 0) {
+  if (mPmioRegisterBase != 0 && mPmioRegisterBase != 0x3F8U) {
     Status = PatchCustomPciSerialPmio (Patcher);
   }
 
