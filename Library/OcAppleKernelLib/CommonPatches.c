@@ -1119,6 +1119,14 @@ PatchCustomPciSerialPmio (
       && Walker[1] == mSerialDevicePmioFind[1]
       && (Walker[2] & 0xF8U) == mSerialDevicePmioFind[2]
       && Walker[3] == mSerialDevicePmioFind[3]) {
+      DEBUG ((
+        DEBUG_INFO,
+        "OCAK: Matched PMIO serial register base <%X %X %X %X>\n",
+        Walker[0],
+        Walker[1],
+        Walker[2],
+        Walker[3]
+        ));
       WalkerPmio = &Walker[2];
 
       WalkerTmp = Walker + mInOutMaxDistance;
@@ -1127,6 +1135,12 @@ PatchCustomPciSerialPmio (
         // Locate instruction in (0xEC) or out (0xEE).
         //
         if (*Walker == 0xEC || *Walker == 0xEE) {
+          DEBUG ((
+            DEBUG_INFO,
+            "OCAK: Matched PMIO serial register base context in/out <%X>, patching register base\n",
+            *Walker
+            ));
+
           //
           // Patch PMIO.
           //

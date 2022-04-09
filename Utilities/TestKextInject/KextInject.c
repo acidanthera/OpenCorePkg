@@ -511,7 +511,7 @@ ApplyKernelPatches (
       DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
     }
 
-    UINTN RegisterBasePmio = 0x03F8;
+    UINTN RegisterBasePmio = 0x2008;
     PatchSetPciSerialDeviceRegisterBase (RegisterBasePmio);
     Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
     if (EFI_ERROR (Status)) {
