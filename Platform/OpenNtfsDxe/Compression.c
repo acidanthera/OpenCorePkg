@@ -375,7 +375,7 @@ STATIC
 EFI_STATUS
 ReadCompressedBlock (
   IN  RUNLIST *Runlist,
-  OUT UINT8   *Buffer      OPTIONAL,
+  OUT UINT8   *Dest        OPTIONAL,
   IN  UINTN   BlocksTotal
   )
 {
@@ -451,25 +451,25 @@ ReadCompressedBlock (
       }
 
       if (Runlist->Unit.Tail == 0) {
-        if (Buffer != NULL) {
+        if (Dest != NULL) {
           if (mBufferSize < (SpareBlocks * COMPRESSION_BLOCK)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #1) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
           }
 
-          ZeroMem (Buffer, SpareBlocks * COMPRESSION_BLOCK);
-          Buffer += SpareBlocks * COMPRESSION_BLOCK;
+          ZeroMem (Dest, SpareBlocks * COMPRESSION_BLOCK);
+          Dest += SpareBlocks * COMPRESSION_BLOCK;
           mBufferSize -= SpareBlocks * COMPRESSION_BLOCK;
         }
       } else {
         while (SpareBlocks != 0) {
-          Status = DecompressBlock (&Runlist->Unit, Buffer);
+          Status = DecompressBlock (&Runlist->Unit, Dest);
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          if (Buffer != NULL) {
-            Buffer += COMPRESSION_BLOCK;
+          if (Dest != NULL) {
+            Dest += COMPRESSION_BLOCK;
           }
 
           --SpareBlocks;
@@ -489,7 +489,7 @@ ReadCompressedBlock (
         }
 
         Runlist->TargetVcn += ClearTextClusters;
-        if (Buffer != NULL) {
+        if (Dest != NULL) {
           if (mBufferSize < (ClearTextClusters * mClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #2) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
@@ -499,13 +499,13 @@ ReadCompressedBlock (
             Runlist->Unit.FileSystem,
             Runlist->Unit.Elements[Runlist->Unit.Head].Lcn * mClusterSize,
             (UINTN) (ClearTextClusters * mClusterSize),
-            Buffer
+            Dest
             );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Buffer += ClearTextClusters * mClusterSize;
+          Dest += ClearTextClusters * mClusterSize;
           mBufferSize -= ClearTextClusters * mClusterSize;
         }
 
@@ -514,7 +514,7 @@ ReadCompressedBlock (
       }
 
       if (SpareClusters != 0) {
-        if (Buffer != NULL) {
+        if (Dest != NULL) {
           if (mBufferSize < (SpareClusters * mClusterSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (ReadCompressedBlock #3) Buffer overflow.\n"));
             return EFI_VOLUME_CORRUPTED;
@@ -524,13 +524,13 @@ ReadCompressedBlock (
             Runlist->Unit.FileSystem,
             (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
             (UINTN) (SpareClusters * mClusterSize),
-            Buffer
+            Dest
             );
           if (EFI_ERROR (Status)) {
             return Status;
           }
 
-          Buffer += SpareClusters * mClusterSize;
+          Dest += SpareClusters * mClusterSize;
           mBufferSize -= SpareClusters * mClusterSize;
         }
         Runlist->TargetVcn += SpareClusters;
