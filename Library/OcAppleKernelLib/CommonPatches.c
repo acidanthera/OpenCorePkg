@@ -1087,7 +1087,7 @@ PatchSetPciSerialDeviceRegisterBase (
   // FIXME: This is really ugly, make quirks take a context param.
   //
   if (RegisterBase <= MAX_UINT16) {
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port %04X\n", RegisterBase));
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port 0x%04X\n", RegisterBase));
     CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (mPmioRegisterBase));
   }
 
@@ -1121,7 +1121,7 @@ PatchCustomPciSerialPmio (
       && Walker[3] == mSerialDevicePmioFind[3]) {
       DEBUG ((
         DEBUG_INFO,
-        "OCAK: Matched PMIO serial register base <%X %X %X %X>\n",
+        "OCAK: Matched PMIO serial register base <%02X %02X %02X %02X>\n",
         Walker[0],
         Walker[1],
         Walker[2],
@@ -1137,15 +1137,18 @@ PatchCustomPciSerialPmio (
         if (*Walker == 0xEC || *Walker == 0xEE) {
           DEBUG ((
             DEBUG_INFO,
-            "OCAK: Matched PMIO serial register base context in/out <%X>, patching register base\n",
+            "OCAK: Matched PMIO serial register base context %a <%02X>, patching register base\n",
+            *Walker == 0xEC ? "in" : "out",
             *Walker
             ));
 
           //
           // Patch PMIO.
           //
+          DEBUG ((DEBUG_INFO, "OCAK: Before register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
           WalkerPmio[0] = (mPmioRegisterBase & 0xFFU) | (*WalkerPmio & 7U);
           WalkerPmio[1] = mPmioRegisterBase >> 8U;
+          DEBUG ((DEBUG_INFO, "OCAK: After register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
 
           ++Count;
           break;
