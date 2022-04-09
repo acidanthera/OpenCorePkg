@@ -61,7 +61,7 @@ ZeroMem (
 {
   ASSERT (Buffer != NULL);
 
-  return SetMem (Buffer, 0, Length);
+  return memset (Buffer, 0, Length);
 }
 
 INTN
