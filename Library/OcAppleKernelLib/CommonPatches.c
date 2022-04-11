@@ -1159,7 +1159,7 @@ PatchCustomPciSerialPmio (
           DEBUG ((DEBUG_VERBOSE, "OCAK: Before register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
           Pmio = mPmioRegisterBase + (*WalkerPmio & 7U) * mPmioRegisterStride;
           WalkerPmio[0] = Pmio & 0xFFU;
-          WalkerPmio[1] = Pmio >> 8U;
+          WalkerPmio[1] = (Pmio >> 8U) & 0xFFU;
           DEBUG ((DEBUG_VERBOSE, "OCAK: After register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
 
           ++Count;
