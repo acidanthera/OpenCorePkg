@@ -1095,7 +1095,7 @@ PatchSetPciSerialDevice (
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port 0x%04X\n", RegisterBase));
     CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (RegisterBase));
 
-    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device register stride  0x%u\n", RegisterStride));
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device register stride %u\n", RegisterStride));
     CopyMem (&mPmioRegisterStride, &RegisterStride, sizeof (RegisterStride));
   } else {
     DEBUG ((DEBUG_INFO, "OCAK: NOT registering unsupported PCI serial device register base 0x%X", RegisterBase));
@@ -1131,7 +1131,7 @@ PatchCustomPciSerialPmio (
       && (Walker[2] & 0xF8U) == mSerialDevicePmioFind[2]
       && Walker[3] == mSerialDevicePmioFind[3]) {
       DEBUG ((
-        DEBUG_INFO,
+        DEBUG_VERBOSE,
         "OCAK: Matched PMIO serial register base <%02X %02X %02X %02X>\n",
         Walker[0],
         Walker[1],

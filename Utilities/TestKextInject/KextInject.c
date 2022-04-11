@@ -562,8 +562,8 @@ OcGetFileSize (
 }
 
 int wrap_main(int argc, char** argv) {
-  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
-  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
 
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;
