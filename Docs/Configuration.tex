@@ -2582,7 +2582,8 @@ blocking.
   on a customised PCI serial device.
 
   The patch changes the PMIO register base address from the default range \texttt{0x3F8-0x3FF}
-  to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call.
+  to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that the
+  serial device will function correctly.
 
 \item
   \texttt{CustomSMBIOSGuid}\\
@@ -8789,10 +8790,18 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \item Refer to \texttt{boot-args} values such as \texttt{debug=0x100}, \texttt{keepsyms=1},
     \texttt{-v}, and similar.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
+  \item For macOS to correctly recognise and set up serial ports, the \texttt{CustomPciSerialDevice} quirk
+    may be enabled when a PCIe serial port card is installed.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this
     \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments are needed.
     Refer to the patches in Sample.plist when dying before serial init.
+  \item In lieu of the \texttt{msgbuf} boot argument, \href{https://github.com/acidanthera/DebugEnhancer}{DebugEnhancer}
+    can be a better solution since this argument no longer works on macOS 12 and above.
+  \item To have \texttt{kprintf} working properly, \texttt{Apple16X50PCI0} should be prevented from attaching,
+    by setting (i.e. \texttt{Delete}, then \texttt{Add}) the \texttt{class-code} property of the PCIe serial port device to \texttt{FFFFFFFF}
+    in \texttt{DeviceProperties} section. As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown at
+    \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954} may also be used.
   \item Always read the logs carefully.
   \end{itemize}
 
