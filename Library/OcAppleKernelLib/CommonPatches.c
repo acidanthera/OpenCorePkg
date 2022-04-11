@@ -1071,16 +1071,21 @@ mSerialDevicePmioFind[] = {
 };
 
 STATIC
-UINT16
-mPmioRegisterBase = 0;    ///< To be set by PatchSetPciSerialDeviceRegisterBase()
+UINTN
+mPmioRegisterBase = 0;    ///< To be set by PatchSetPciSerialDevice()
+
+STATIC
+UINT32
+mPmioRegisterStride = 1;  ///< To be set by PatchSetPciSerialDevice()
 
 STATIC
 CONST UINTN
 mInOutMaxDistance = 64;
 
 VOID
-PatchSetPciSerialDeviceRegisterBase (
-  IN  UINTN  RegisterBase
+PatchSetPciSerialDevice (
+  IN  UINTN  RegisterBase,
+  IN  UINT32 RegisterStride
   )
 {
   //
@@ -1088,7 +1093,12 @@ PatchSetPciSerialDeviceRegisterBase (
   //
   if (RegisterBase <= MAX_UINT16) {
     DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device PMIO port 0x%04X\n", RegisterBase));
-    CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (mPmioRegisterBase));
+    CopyMem (&mPmioRegisterBase, &RegisterBase, sizeof (RegisterBase));
+
+    DEBUG ((DEBUG_INFO, "OCAK: Registering PCI serial device register stride  0x%u\n", RegisterStride));
+    CopyMem (&mPmioRegisterStride, &RegisterStride, sizeof (RegisterStride));
+  } else {
+    DEBUG ((DEBUG_INFO, "OCAK: NOT registering unsupported PCI serial device register base 0x%X", RegisterBase));
   }
 
   //
@@ -1105,6 +1115,7 @@ PatchCustomPciSerialPmio (
   UINTN       Count;
   UINT8       *Walker;
   UINT8       *WalkerPmio;
+  UINTN       Pmio;
   UINT8       *WalkerEnd;
   UINT8       *WalkerTmp;
 
@@ -1136,7 +1147,7 @@ PatchCustomPciSerialPmio (
         //
         if (*Walker == 0xEC || *Walker == 0xEE) {
           DEBUG ((
-            DEBUG_INFO,
+            DEBUG_VERBOSE,
             "OCAK: Matched PMIO serial register base context %a <%02X>, patching register base\n",
             *Walker == 0xEC ? "in" : "out",
             *Walker
@@ -1145,10 +1156,11 @@ PatchCustomPciSerialPmio (
           //
           // Patch PMIO.
           //
-          DEBUG ((DEBUG_INFO, "OCAK: Before register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
-          WalkerPmio[0] = (mPmioRegisterBase & 0xFFU) | (*WalkerPmio & 7U);
-          WalkerPmio[1] = mPmioRegisterBase >> 8U;
-          DEBUG ((DEBUG_INFO, "OCAK: After register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
+          DEBUG ((DEBUG_VERBOSE, "OCAK: Before register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
+          Pmio = mPmioRegisterBase + (*WalkerPmio & 7U) * mPmioRegisterStride;
+          WalkerPmio[0] = Pmio & 0xFFU;
+          WalkerPmio[1] = Pmio >> 8U;
+          DEBUG ((DEBUG_VERBOSE, "OCAK: After register base patch <%02X %02X>\n", WalkerPmio[0], WalkerPmio[1]));
 
           ++Count;
           break;
@@ -1183,7 +1195,10 @@ PatchCustomPciSerialDevice (
   EFI_STATUS  Status;
 
   Status = EFI_INVALID_PARAMETER;
-  if (mPmioRegisterBase != 0 && mPmioRegisterBase != 0x3F8U) {
+  if (mPmioRegisterBase != 0
+    && mPmioRegisterBase != 0x3F8U
+    && mPmioRegisterStride > 1
+    && (mPmioRegisterBase + 7U * mPmioRegisterStride) <= MAX_UINT16) {
     Status = PatchCustomPciSerialPmio (Patcher);
   }
 

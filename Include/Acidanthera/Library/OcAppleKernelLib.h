@@ -1165,13 +1165,15 @@ PatchSetApfsTimeout (
   );
 
 /**
-  Set PCI serial device regiser base for KernelQuirkCustomPciSerialDevice quirk.
+  Set PCI serial device properties for KernelQuirkCustomPciSerialDevice quirk.
 
   @param[in]  RegisterBase   PCI serial device regiser base.
+  @param[in]  RegisterStride PCI serial device regiser stride.
 **/
 VOID
-PatchSetPciSerialDeviceRegisterBase (
-  IN  UINTN  RegisterBase
+PatchSetPciSerialDevice (
+  IN  UINTN  RegisterBase,
+  IN  UINT32 RegisterStride
   );
 
 /**

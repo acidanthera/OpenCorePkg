@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleImg4Lib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -95,6 +96,7 @@ OcKernelApplyPatches (
   UINT32                 MinKernel;
   BOOLEAN                IsKernelPatch;
   UINTN                  RegisterBase;
+  UINT32                 RegisterStride;
 
   IsKernelPatch = Context == NULL;
 
@@ -316,8 +318,9 @@ OcKernelApplyPatches (
 
     if (Config->Kernel.Quirks.CustomPciSerialDevice) {
       RegisterBase = GetSerialRegisterBase ();
-      if (RegisterBase != 0) {
-        PatchSetPciSerialDeviceRegisterBase (RegisterBase);
+      RegisterStride = PatchPcdGet32 (PcdSerialRegisterStride);
+      if (RegisterBase != 0 && RegisterStride > 1) {
+        PatchSetPciSerialDevice (RegisterBase, RegisterStride);
         OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
       } else {
         DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero!\n"));
