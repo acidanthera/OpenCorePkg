@@ -608,13 +608,13 @@ CheckMiscSerial (
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1199-L1200
   //
-  RegisterAccessWidth = Config->Misc.Serial.RegisterAccessWidth;
+  RegisterAccessWidth = Config->Misc.Serial.Custom.RegisterAccessWidth;
   if (RegisterAccessWidth != 8U && RegisterAccessWidth != 32U) {
     DEBUG ((DEBUG_WARN, "Misc->Serial->RegisterAccessWidth can only be 8 or 32!\n"));
     ++ErrorCount;
   }
 
-  BaudRate = Config->Misc.Serial.BaudRate;
+  BaudRate = Config->Misc.Serial.Custom.BaudRate;
   if (!ValidateBaudRate (BaudRate)) {
     ++ErrorCount;
   }
@@ -623,8 +623,8 @@ CheckMiscSerial (
   // Reference:
   // https://github.com/acidanthera/audk/blob/bb1bba3d776733c41dbfa2d1dc0fe234819a79f2/MdeModulePkg/MdeModulePkg.dec#L1393
   //
-  PciDeviceInfo = OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo);
-  PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
+  PciDeviceInfo = OC_BLOB_GET (&Config->Misc.Serial.Custom.PciDeviceInfo);
+  PciDeviceInfoSize = Config->Misc.Serial.Custom.PciDeviceInfo.Size;
   if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
     DEBUG ((DEBUG_WARN, "Size of Misc->Serial->PciDeviceInfo cannot exceed %u!\n", OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE));
     ++ErrorCount;

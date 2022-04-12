@@ -409,6 +409,7 @@ OcMiscEarlyInit (
   CONST CHAR8               *AsciiVault;
   OCS_VAULT_MODE            Vault;
   UINTN                     PciDeviceInfoSize;
+  BOOLEAN                   ShouldInitSerial;
 
   ConfigData = OcStorageReadFileUnicode (
     Storage,
@@ -473,32 +474,39 @@ OcMiscEarlyInit (
   }
 
   if (Config->Misc.Serial.Init) {
+    ShouldInitSerial = TRUE;
+    
     //
-    // Validate the size of PciDeviceInfo. Abort on error.
+    // Update PCD values if requested.
     //
-    PciDeviceInfoSize = Config->Misc.Serial.PciDeviceInfo.Size;
-    if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
-      DEBUG ((DEBUG_INFO, "OC: Aborting serial port init with borked PciDeviceInfo size %u\n", PciDeviceInfoSize));
-    } else {
+    if (Config->Misc.Serial.Override) {
       //
-      // Update PCD values.
+      // Validate the size of PciDeviceInfo. Abort on error.
       //
-      PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.PciDeviceInfo));
-      PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.RegisterAccessWidth);
-      PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.UseMmio);
-      PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.UseHardwareFlowControl);
-      PatchPcdSetBool (PcdSerialDetectCable, Config->Misc.Serial.DetectCable);
-      PatchPcdSet64 (PcdSerialRegisterBase, Config->Misc.Serial.RegisterBase);
-      PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.BaudRate);
-      PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.LineControl);
-      PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.FifoControl);
-      PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.ClockRate);
-      PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.ExtendedTxFifoSize);
-      PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.RegisterStride);
+      PciDeviceInfoSize = Config->Misc.Serial.Custom.PciDeviceInfo.Size;
+      if (PciDeviceInfoSize > OC_SERIAL_PCI_DEVICE_INFO_MAX_SIZE) {
+        DEBUG ((DEBUG_INFO, "OC: Aborting serial port init with borked PciDeviceInfo size %u\n", PciDeviceInfoSize));
+        ShouldInitSerial = FALSE;
+      } else {
+        PatchPcdSetPtr (PcdSerialPciDeviceInfo, &PciDeviceInfoSize, OC_BLOB_GET (&Config->Misc.Serial.Custom.PciDeviceInfo));
+        PatchPcdSet8 (PcdSerialRegisterAccessWidth, Config->Misc.Serial.Custom.RegisterAccessWidth);
+        PatchPcdSetBool (PcdSerialUseMmio, Config->Misc.Serial.Custom.UseMmio);
+        PatchPcdSetBool (PcdSerialUseHardwareFlowControl, Config->Misc.Serial.Custom.UseHardwareFlowControl);
+        PatchPcdSetBool (PcdSerialDetectCable, Config->Misc.Serial.Custom.DetectCable);
+        PatchPcdSet64 (PcdSerialRegisterBase, Config->Misc.Serial.Custom.RegisterBase);
+        PatchPcdSet32 (PcdSerialBaudRate, Config->Misc.Serial.Custom.BaudRate);
+        PatchPcdSet8 (PcdSerialLineControl, Config->Misc.Serial.Custom.LineControl);
+        PatchPcdSet8 (PcdSerialFifoControl, Config->Misc.Serial.Custom.FifoControl);
+        PatchPcdSet32 (PcdSerialClockRate, Config->Misc.Serial.Custom.ClockRate);
+        PatchPcdSet32 (PcdSerialExtendedTxFifoSize, Config->Misc.Serial.Custom.ExtendedTxFifoSize);
+        PatchPcdSet32 (PcdSerialRegisterStride, Config->Misc.Serial.Custom.RegisterStride);
+      }
+    }
 
-      //
-      // Initialize serial port.
-      //
+    //
+    // Initialize serial port.
+    //
+    if (ShouldInitSerial) {
       SerialPortInitialize ();
     }
   }

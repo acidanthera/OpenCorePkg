@@ -418,13 +418,12 @@ typedef enum {
 /// https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf
 /// https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec
 ///
-#define OC_MISC_SERIAL_FIELDS(_, __) \
+#define OC_MISC_SERIAL_CUSTOM_FIELDS(_, __) \
   _(UINT32                      , BaudRate                 ,      , 115200                           , ()) \
   _(UINT32                      , ClockRate                ,      , 1843200                          , ()) \
   _(BOOLEAN                     , DetectCable              ,      , FALSE                            , ()) \
   _(UINT32                      , ExtendedTxFifoSize       ,      , 64                               , ()) \
   _(UINT8                       , FifoControl              ,      , 7                                , ()) \
-  _(BOOLEAN                     , Init                     ,      , FALSE                            , ()) \
   _(UINT8                       , LineControl              ,      , 3                                , ()) \
   _(OC_DATA                     , PciDeviceInfo            ,      , OC_DATA_CONSTR ({0xFF}, _, __)   , OC_DESTR (OC_DATA)) \
   _(UINT8                       , RegisterAccessWidth      ,      , 8                                , ()) \
@@ -432,6 +431,12 @@ typedef enum {
   _(UINT32                      , RegisterStride           ,      , 1                                , ()) \
   _(BOOLEAN                     , UseHardwareFlowControl   ,      , FALSE                            , ()) \
   _(BOOLEAN                     , UseMmio                  ,      , FALSE                            , ())
+  OC_DECLARE (OC_MISC_SERIAL_CUSTOM)
+
+#define OC_MISC_SERIAL_FIELDS(_, __) \
+  _(OC_MISC_SERIAL_CUSTOM              , Custom    ,     , OC_CONSTR3 (OC_MISC_SERIAL_CUSTOM, _, __)         , OC_DESTR (OC_MISC_SERIAL_CUSTOM)) \
+  _(BOOLEAN                            , Init      ,     , FALSE                                             , ()) \
+  _(BOOLEAN                            , Override  ,     , FALSE                                             , ())
   OC_DECLARE (OC_MISC_SERIAL)
 
 #define OC_MISC_CONFIG_FIELDS(_, __) \
