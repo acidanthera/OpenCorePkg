@@ -434,7 +434,7 @@ typedef enum {
   OC_DECLARE (OC_MISC_SERIAL_CUSTOM)
 
 #define OC_MISC_SERIAL_FIELDS(_, __) \
-  _(OC_MISC_SERIAL_CUSTOM              , Custom    ,     , OC_CONSTR2 (OC_MISC_SERIAL_CUSTOM, _, __)         , OC_DESTR (OC_MISC_SERIAL_CUSTOM)) \
+  _(OC_MISC_SERIAL_CUSTOM              , Custom    ,     , OC_CONSTR3 (OC_MISC_SERIAL_CUSTOM, _, __)         , OC_DESTR (OC_MISC_SERIAL_CUSTOM)) \
   _(BOOLEAN                            , Init      ,     , FALSE                                             , ()) \
   _(BOOLEAN                            , Override  ,     , FALSE                                             , ())
   OC_DECLARE (OC_MISC_SERIAL)

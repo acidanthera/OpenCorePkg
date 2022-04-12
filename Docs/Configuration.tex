@@ -3176,9 +3176,13 @@ the default boot entry choice will remain changed until the next manual reconfig
   for serial ports to properly function. Values are listed and described in the
   \hyperref[miscserialprops]{Serial Properties} section below.
 
-  This section overrides the PCD values listed in
-  \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{BaseSerialPortLib16550.inf}.
+  When debugging with serial ports, \texttt{BaseSerialPortLib16550} only recognises internal ones
+  provided by the motherboard by default. This section overrides the PCD values listed in
+  \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{BaseSerialPortLib16550.inf}
+  such that external serial ports (e.g. from a PCI card) will also function properly.
   Refer to \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec} for the explanations of each key.
+
+  Specifically, when booting macOS, 
 
 \item
   \texttt{Tools}\label{misctools}\\
