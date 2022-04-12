@@ -350,8 +350,8 @@ ListFile (
       return EFI_VOLUME_CORRUPTED;
     }
 
-    IndexEntry = (INDEX_ENTRY *) ((UINT8 *) IndexEntry + IndexEntry->IndexEntryLength);
     mBufferSize -= IndexEntry->IndexEntryLength;
+    IndexEntry = (INDEX_ENTRY *) ((UINT8 *) IndexEntry + IndexEntry->IndexEntryLength);
   }
 
   return EFI_NOT_FOUND;

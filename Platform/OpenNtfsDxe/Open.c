@@ -205,7 +205,7 @@ FileReadDir (
     CopyMem (&Path[Length], Info->FileName, StrSize (Info->FileName));
     TmpFile->Path = Path;
 
-    Status = NtfsOpen(TmpFile);
+    Status = NtfsOpen (TmpFile);
     if (EFI_ERROR (Status)) {
       // DEBUG ((DEBUG_INFO, "NTFS: Unable to obtain the size of '%s'\n", Info->FileName));
     } else {
@@ -213,7 +213,7 @@ FileReadDir (
       Info->PhysicalSize = TmpFile->RootFile.DataAttributeSize;
     }
 
-    FreePool(TmpFile);
+    FreePool (TmpFile);
   }
 
   *Size = (UINTN) Info->Size;
