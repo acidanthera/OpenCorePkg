@@ -22,6 +22,25 @@ STATIC UINT64 mHashesMask = MAX_UINT64;
 STATIC UINTN mHashIndex = 0;
 STATIC UINTN mHashDependency;
 
+#ifdef COVERAGE_TEST
+typedef int64_t gcov_type;
+
+gcov_type __gcov_read_counter (void);
+
+void
+__gcov_merge_add (gcov_type *counters, unsigned n_counters)
+{
+  gcov_type prev;
+  for (; n_counters; counters++, n_counters--) {
+    prev = __gcov_read_counter ();
+    if (prev == 0 && *counters > 0) {
+      fprintf(stdout, "Coverage increased\n");
+    }
+    *counters += prev;
+  }
+}
+#endif
+
 BOOLEAN
 HashUpdate (
   IN OUT  VOID        *HashContext,
