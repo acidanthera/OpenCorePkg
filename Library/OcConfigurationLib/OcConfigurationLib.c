@@ -475,9 +475,9 @@ mMiscConfigurationSerialCustomSchema[] = {
 STATIC
 OC_SCHEMA
 mMiscConfigurationSerialSchema[] = {
-  OC_SCHEMA_DICT_OPT   ("Custom",   mMiscConfigurationSerialCustomSchema),
-  OC_SCHEMA_BOOLEAN_IN ("Init",     OC_GLOBAL_CONFIG, Misc.Serial.Init),
-  OC_SCHEMA_BOOLEAN_IN ("Override", OC_GLOBAL_CONFIG, Misc.Serial.Override)
+  OC_SCHEMA_DICT_OPT       ("Custom",   mMiscConfigurationSerialCustomSchema),
+  OC_SCHEMA_BOOLEAN_IN     ("Init",     OC_GLOBAL_CONFIG, Misc.Serial.Init),
+  OC_SCHEMA_BOOLEAN_IN_OPT ("Override", OC_GLOBAL_CONFIG, Misc.Serial.Override)
 };
 
 STATIC

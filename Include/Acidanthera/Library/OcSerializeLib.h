@@ -248,8 +248,16 @@ ParseSerialized (
   {(Name), PLIST_NODE_TYPE_ANY, FALSE, ParseSerializedValue,             \
     {.Value = {Offset, sizeof (Type), SourceType}}}
 
+#define OC_SCHEMA_VALUE_OPT(Name, Offset, Type, SourceType)              \
+  {(Name), PLIST_NODE_TYPE_ANY, TRUE, ParseSerializedValue,              \
+    {.Value = {Offset, sizeof (Type), SourceType}}}
+
 #define OC_SCHEMA_BLOB(Name, Offset, SourceType)                         \
   {(Name), PLIST_NODE_TYPE_ANY, FALSE, ParseSerializedBlob,              \
+    {.Blob = {Offset, SourceType}}}
+
+#define OC_SCHEMA_BLOB_OPT(Name, Offset, SourceType)                     \
+  {(Name), PLIST_NODE_TYPE_ANY, TRUE, ParseSerializedBlob,               \
     {.Blob = {Offset, SourceType}}}
 
 //
@@ -263,6 +271,8 @@ ParseSerialized (
 // M prefix stands for Meta, which means meta data type casting is used.
 // F suffix stands for Fixed, which means fixed file size is assumed.
 //
+// OPT suffix stands for Optional, which means such entry can be missing.
+//
 #define OC_SCHEMA_DICT(Name, Schema)                                     \
   {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedDict,             \
     {.Dict = {(Schema), ARRAY_SIZE (Schema)}}}
@@ -274,26 +284,50 @@ ParseSerialized (
 #define OC_SCHEMA_BOOLEAN(Name)                                          \
   OC_SCHEMA_VALUE (Name, 0, BOOLEAN, OC_SCHEMA_VALUE_BOOLEAN)
 
+#define OC_SCHEMA_BOOLEAN_OPT(Name)                                      \
+  OC_SCHEMA_VALUE_OPT (Name, 0, BOOLEAN, OC_SCHEMA_VALUE_BOOLEAN)
+
 #define OC_SCHEMA_INTEGER(Name, Type)                                    \
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_INTEGER)
+
+#define OC_SCHEMA_INTEGER_OPT(Name, Type)                                \
+  OC_SCHEMA_VALUE_OPT (Name, 0, Type, OC_SCHEMA_VALUE_INTEGER)
 
 #define OC_SCHEMA_STRING(Name)                                           \
   OC_SCHEMA_BLOB (Name, 0, OC_SCHEMA_BLOB_STRING)
 
+#define OC_SCHEMA_STRING_OPT(Name)                                       \
+  OC_SCHEMA_BLOB_OPT (Name, 0, OC_SCHEMA_BLOB_STRING)
+
 #define OC_SCHEMA_STRINGF(Name, Type)                                    \
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_STRING)
+
+#define OC_SCHEMA_STRINGF_OPT(Name, Type)                                \
+  OC_SCHEMA_VALUE_OPT (Name, 0, Type, OC_SCHEMA_VALUE_STRING)
 
 #define OC_SCHEMA_DATA(Name)                                             \
   OC_SCHEMA_BLOB (Name, 0, OC_SCHEMA_BLOB_DATA)
 
+#define OC_SCHEMA_DATA_OPT(Name)                                         \
+  OC_SCHEMA_BLOB_OPT (Name, 0, OC_SCHEMA_BLOB_DATA)
+
 #define OC_SCHEMA_DATAF(Name, Type)                                      \
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_DATA)
+
+#define OC_SCHEMA_DATAF_OPT(Name, Type)                                  \
+  OC_SCHEMA_VALUE_OPT (Name, 0, Type, OC_SCHEMA_VALUE_DATA)
 
 #define OC_SCHEMA_MDATA(Name)                                            \
   OC_SCHEMA_BLOB (Name, 0, OC_SCHEMA_BLOB_MDATA)
 
+#define OC_SCHEMA_MDATA_OPT(Name)                                        \
+  OC_SCHEMA_BLOB_OPT (Name, 0, OC_SCHEMA_BLOB_MDATA)
+
 #define OC_SCHEMA_MDATAF(Name, Type)                                     \
   OC_SCHEMA_VALUE (Name, 0, Type, OC_SCHEMA_VALUE_MDATA)
+
+#define OC_SCHEMA_MDATAF_OPT(Name, Type)                                 \
+  OC_SCHEMA_VALUE_OPT (Name, 0, Type, OC_SCHEMA_VALUE_MDATA)
 
 #define OC_SCHEMA_ARRAY(Name, ChildSchema)                               \
   {(Name), PLIST_NODE_TYPE_ARRAY, FALSE, ParseSerializedArray,           \
@@ -312,41 +346,70 @@ ParseSerialized (
 // Field represents item in the container type.
 // Schema represents element schema.
 //
-#define OC_SCHEMA_BOOLEAN_IN(Name, Type, Field)                          \
-  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+#define OC_SCHEMA_BOOLEAN_IN(Name, Type, Field)                              \
+  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),      \
     OC_SCHEMA_VALUE_BOOLEAN)
 
-#define OC_SCHEMA_INTEGER_IN(Name, Type, Field)                          \
-  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+#define OC_SCHEMA_BOOLEAN_IN_OPT(Name, Type, Field)                          \
+  OC_SCHEMA_VALUE_OPT (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+    OC_SCHEMA_VALUE_BOOLEAN)
+
+#define OC_SCHEMA_INTEGER_IN(Name, Type, Field)                              \
+  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),      \
     OC_SCHEMA_VALUE_INTEGER)
 
-#define OC_SCHEMA_STRING_IN(Name, Type, Field)                           \
+#define OC_SCHEMA_INTEGER_IN_OPT(Name, Type, Field)                          \
+  OC_SCHEMA_VALUE_OPT (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+    OC_SCHEMA_VALUE_INTEGER)
+
+#define OC_SCHEMA_STRING_IN(Name, Type, Field)                               \
   OC_SCHEMA_BLOB (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_STRING)
 
-#define OC_SCHEMA_STRINGF_IN(Name, Type, Field)                          \
-  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+#define OC_SCHEMA_STRING_IN_OPT(Name, Type, Field)                           \
+  OC_SCHEMA_BLOB_OPT (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_STRING)
+
+#define OC_SCHEMA_STRINGF_IN(Name, Type, Field)                              \
+  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),      \
     OC_SCHEMA_VALUE_STRING)
 
-#define OC_SCHEMA_DATA_IN(Name, Type, Field)                             \
+#define OC_SCHEMA_STRINGF_IN_OPT(Name, Type, Field)                          \
+  OC_SCHEMA_VALUE_OPT (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+    OC_SCHEMA_VALUE_STRING)
+
+#define OC_SCHEMA_DATA_IN(Name, Type, Field)                                 \
   OC_SCHEMA_BLOB (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_DATA)
 
-#define OC_SCHEMA_DATAF_IN(Name, Type, Field)                            \
-  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+#define OC_SCHEMA_DATA_IN_OPT(Name, Type, Field)                             \
+  OC_SCHEMA_BLOB_OPT (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_DATA)
+
+#define OC_SCHEMA_DATAF_IN(Name, Type, Field)                                \
+  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),      \
     OC_SCHEMA_VALUE_DATA)
 
-#define OC_SCHEMA_MDATA_IN(Name, Type, Field)                            \
+#define OC_SCHEMA_DATAF_IN_OPT(Name, Type, Field)                            \
+  OC_SCHEMA_VALUE_OPT (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+    OC_SCHEMA_VALUE_DATA)
+
+#define OC_SCHEMA_MDATA_IN(Name, Type, Field)                                \
   OC_SCHEMA_BLOB (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_MDATA)
 
-#define OC_SCHEMA_MDATAF_IN(Name, Type, Field)                           \
-  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+#define OC_SCHEMA_MDATA_IN_OPT(Name, Type, Field)                            \
+  OC_SCHEMA_BLOB_OPT (Name, OFFSET_OF (Type, Field), OC_SCHEMA_BLOB_MDATA)
+
+#define OC_SCHEMA_MDATAF_IN(Name, Type, Field)                               \
+  OC_SCHEMA_VALUE (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),      \
     OC_SCHEMA_VALUE_MDATA)
 
-#define OC_SCHEMA_ARRAY_IN(Name, Type, Field, ChildSchema)               \
-  {(Name), PLIST_NODE_TYPE_ARRAY, FALSE, ParseSerializedArray,           \
+#define OC_SCHEMA_MDATAF_IN_OPT(Name, Type, Field)                           \
+  OC_SCHEMA_VALUE_OPT (Name, OFFSET_OF (Type, Field), (((Type *)0)->Field),  \
+    OC_SCHEMA_VALUE_MDATA)
+
+#define OC_SCHEMA_ARRAY_IN(Name, Type, Field, ChildSchema)                   \
+  {(Name), PLIST_NODE_TYPE_ARRAY, FALSE, ParseSerializedArray,               \
     {.List = {OFFSET_OF (Type, Field), ChildSchema}}}
 
-#define OC_SCHEMA_MAP_IN(Name, Type, Field, ChildSchema)                 \
-  {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedMap,              \
+#define OC_SCHEMA_MAP_IN(Name, Type, Field, ChildSchema)                     \
+  {(Name), PLIST_NODE_TYPE_DICT, FALSE, ParseSerializedMap,                  \
     {.List = {OFFSET_OF (Type, Field), ChildSchema}}}
 
 #endif // OC_SERIALIZE_LIB_H
