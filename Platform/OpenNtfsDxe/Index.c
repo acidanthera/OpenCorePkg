@@ -24,6 +24,7 @@ FreeNode (
 
   if (Node != Context->RootNode) {
     if (Node != NULL) {
+      FreeFile (Node);
       FreePool (Node);
     }
   }
@@ -516,6 +517,7 @@ FsHelpFindFile (
 
   if (FoundType != Type) {
     if (*FoundNode != RootNode) {
+      FreeFile (*FoundNode);
       FreePool (*FoundNode);
     }
 
