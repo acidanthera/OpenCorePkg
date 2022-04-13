@@ -2582,19 +2582,19 @@ blocking.
   on a customised PCI serial device.
 
   The patch changes the PMIO register base address from the default range \texttt{0x3F8-0x3FF}
-  to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that the
-  serial device will function correctly.
+  to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that
+  the real PMIO address of the serial device will also be recognised by XNU.
 
   \emph{Note}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
-  to have \texttt{kprintf} working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
+  to have \texttt{kprintf} method working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
   the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
 
-  \emph{Note 2}: For this patch to be correctly applied, \texttt{Init} and \texttt{Override}
+  \emph{Note 2}: For this patch to be correctly applied, both \texttt{Init} and \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
 
-  \emph{Note 3}: Since this patch does not support MMIO, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must therefore be disabled.
+  \emph{Note 3}: Since this patch does not provide MMIO support, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must be disabled.
 
   \emph{Note 4}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
   \texttt{serialbaud=VALUE} boot argument, both of which should match against each other.
@@ -4476,7 +4476,7 @@ rm vault.pub
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Override serial port properties.
-  When this option is set to \texttt{false}, no keys from this section will be overridden.
+  When this option is set to \texttt{false}, no keys from \texttt{Custom} will be overridden.
 
   This option will override serial port properties listed in the \hyperref[miscserialcustprops]{\texttt{Serial Custom Properties}}
   section below.
@@ -4540,8 +4540,12 @@ rm vault.pub
   This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
-  \texttt{Note}: This option can be set with the help of
-  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/FindSerial}{\texttt{FindSerial.sh}}.
+  \emph{Note}: The maximum allowed size of this option is 41 bytes. Refer to
+  \href{https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743}{acidanthera/bugtracker\#1954}
+  for more details.
+
+  \emph{Note 2}: This option can be set by running the
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/FindSerial}{\texttt{FindSerial}} tool.
 
 \item
   \texttt{RegisterAccessWidth}\\
