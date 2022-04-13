@@ -2275,7 +2275,7 @@ PatchSetApfsTrimTimeout (
   //
   // Disable trim using another patch when timeout is 0.
   //
-  if (IsZeroBuffer (&mApfsDisableTrimPatch[2]), sizeof (UINT32)) {
+  if (IsZeroBuffer (&mApfsTimeoutReplace[2], sizeof (UINT32))) {
     Status = PatcherApplyGenericPatch (Patcher, &mApfsDisableTrimPatch);
     if (EFI_ERROR (Status)) {
       DEBUG ((DEBUG_INFO, "OCAK: Failed to apply patch ApfsDisableTrim - %r\n", Status));
