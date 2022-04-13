@@ -2587,7 +2587,7 @@ blocking.
 
   \emph{Note}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
   to have \texttt{kprintf} working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
-  the \texttt{class-code} property of the PCIe serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
+  the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
 
@@ -8837,13 +8837,13 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
     \texttt{-v}, and similar.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
   \item For macOS to correctly recognise and set up serial ports, the \texttt{CustomPciSerialDevice} quirk
-    may be enabled when a PCIe serial port card is installed.
+    may be enabled when a PCI serial port card is installed.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this
     \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments are needed.
     Refer to the patches in Sample.plist when dying before serial init.
-  \item In lieu of the \texttt{msgbuf} boot argument, \href{https://github.com/acidanthera/DebugEnhancer}{DebugEnhancer}
-    can be a better solution since this argument no longer works on macOS 12 and above.
+  \item In addition to the \texttt{msgbuf} boot argument, \href{https://github.com/acidanthera/DebugEnhancer}{DebugEnhancer}
+    may also be used for more debug prints to be available.
   \item Always read the logs carefully.
   \end{itemize}
 
