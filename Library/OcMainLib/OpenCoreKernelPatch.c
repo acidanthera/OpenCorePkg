@@ -316,7 +316,10 @@ OcKernelApplyPatches (
       OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, DarwinVersion, NULL, &KernelPatcher);
     }
 
-    if (Config->Kernel.Quirks.CustomPciSerialDevice) {
+    //
+    // Only apply the patch when Misc->Serial->Custom is set (i.e. Override).
+    //
+    if (Config->Misc.Serial.Override && Config->Kernel.Quirks.CustomPciSerialDevice) {
       RegisterBase = GetSerialRegisterBase ();
       RegisterStride = PatchPcdGet32 (PcdSerialRegisterStride);
       if ((RegisterBase != 0 && RegisterStride > 1)
@@ -324,7 +327,7 @@ OcKernelApplyPatches (
         PatchSetPciSerialDevice (RegisterBase, RegisterStride);
         OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
       } else {
-        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero!\n"));
+        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero/default value!\n"));
       }
     }
 
