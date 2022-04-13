@@ -2581,12 +2581,12 @@ blocking.
   \textbf{Description}: Performs change of PMIO register base address
   on a customised PCI serial device.
 
-  The patch changes the PMIO register base address from the default range \texttt{0x3F8-0x3FF}
-  to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that
+  The patch changes the PMIO register base address from the default \texttt{0x3F8-0x3FF}
+  assumed by XNU to the actucal one used by the PCI serial card, such that
   the real PMIO address of the serial device will also be recognised by XNU.
 
-  \emph{Note}: By default, serial logging is disabled. \texttt{serial=VALUE} boot argument should be
-  specified for XNU to print logs to the serial port.
+  \emph{Note}: By default, serial logging is disabled. \texttt{serial=3} boot argument, which enables serial input and output,
+  should be used for XNU to print logs to the serial port.
 
   \emph{Note 2}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
   to have \texttt{kprintf} method working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
@@ -2594,13 +2594,13 @@ blocking.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
 
-  \emph{Note 3}: For this patch to be correctly applied, both \texttt{Init} and \texttt{Override}
+  \emph{Note 3}: For this patch to be correctly applied, \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
 
   \emph{Note 4}: Since this patch does not provide MMIO support, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must be disabled.
 
   \emph{Note 5}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
-  \texttt{serialbaud=VALUE} boot argument, both of which should match against each other.
+  \texttt{serialbaud=VALUE} boot argument, both of which should match against each other. The default baud rate is \texttt{115200}.
 
 \item
   \texttt{CustomSMBIOSGuid}\\
@@ -3194,7 +3194,8 @@ the default boot entry choice will remain changed until the next manual reconfig
   Values are listed and described in the \hyperref[miscserialprops]{Serial Properties} and \hyperref[miscserialcustprops]{Serial Custom Properties} section below.
 
   By enabling \texttt{Init}, this section ensures that the serial port is initialised when it is not done by firmware.
-  In order for OpenCore to print logs to the serial port, bit \texttt{3} for \texttt{Target} under section \texttt{Misc->Debug} must be set.
+  In order for OpenCore to print logs to the serial port, bit \texttt{3} (i.e. serial logging) for \texttt{Target}
+  under section \texttt{Misc->Debug} must be set.
 
   When debugging with serial ports, \texttt{BaseSerialPortLib16550} only recognises internal ones
   provided by the motherboard by default. If the option \texttt{Override} is enabled, this section will override the PCD values listed in
@@ -4984,6 +4985,7 @@ troubleshooting:
   \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
   \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
   \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
+  \item \texttt{serial=VALUE} (configure serial logging mode)
   \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
   \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
@@ -8850,8 +8852,6 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \item Consider using serial port to inspect early kernel boot failures. For this
     \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments are needed.
     Refer to the patches in Sample.plist when dying before serial init.
-  \item In addition to the \texttt{msgbuf} boot argument, \href{https://github.com/acidanthera/DebugEnhancer}{DebugEnhancer}
-    may also be used for more debug prints to be available.
   \item Always read the logs carefully.
   \end{itemize}
 
