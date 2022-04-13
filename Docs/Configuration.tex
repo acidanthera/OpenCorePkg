@@ -3779,8 +3779,8 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   Two modes are supported:
   \begin{itemize}
     \tightlist
-    \item \texttt{+} --- Positive filtering: Only present selected modules.
-    \item \texttt{-} --- Negative filtering: Exclude selected modules.
+      \item \texttt{+} --- Positive filtering: Only present selected modules.
+      \item \texttt{-} --- Negative filtering: Exclude selected modules.
   \end{itemize}
   When multiple ones are selected, comma (\texttt{,}) should be used as the splitter.
   For instance, \texttt{+OCCPU,OCA,OCB} means \emph{only} \texttt{OCCPU}, \texttt{OCA}, \texttt{OCB} being printed,
@@ -4986,7 +4986,15 @@ troubleshooting:
   \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
   \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
   \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
-  \item \texttt{serial=VALUE} (configure serial logging mode)
+  \item \texttt{serial=VALUE} (configure serial logging mode) --- The following bits are used by XNU:
+    \begin{itemize}
+    \tightlist
+      \item \texttt{0x01} (\texttt{SERIALMODE\_OUTPUT}, bit \texttt{0}) --- Enable serial output.
+      \item \texttt{0x02} (\texttt{SERIALMODE\_INPUT}, bit \texttt{1}) --- Enable serial input.
+      \item \texttt{0x04} (\texttt{SERIALMODE\_SYNCDRAIN}, bit \texttt{2}) --- Enable serial drain synchronisation.
+      \item \texttt{0x08} (\texttt{SERIALMODE\_BASE\_TTY}, bit \texttt{3}) --- Load Base/Recovery/FVUnlock TTY.
+      \item \texttt{0x10} (\texttt{SERIALMODE\_NO\_IOLOG}, bit \texttt{4}) --- Prevent IOLogs writing to serial.
+    \end{itemize}
   \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
   \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
