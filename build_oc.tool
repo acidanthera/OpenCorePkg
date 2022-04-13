@@ -195,7 +195,7 @@ package() {
   utilScpts=(
     "LegacyBoot"
     "CreateVault"
-    "FindSerial"
+    "FindSerialPort"
     "macrecovery"
     "kpdescribe"
     "ShimToCert"
