@@ -2585,6 +2585,20 @@ blocking.
   to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that the
   serial device will function correctly.
 
+  \emph{Note}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
+  to have \texttt{kprintf} working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
+  the \texttt{class-code} property of the PCIe serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
+  As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
+  \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
+
+  \emph{Note 2}: For this patch to be correctly applied, \texttt{Init} and \texttt{Override}
+  must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
+
+  \emph{Note 3}: Since this patch does not support MMIO, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must therefore be disabled.
+
+  \emph{Note 4}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
+  \texttt{serialbaud=VALUE} boot argument, both of which should match against each other.
+
 \item
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -3172,17 +3186,21 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \texttt{Serial}\\
   \textbf{Type}: \texttt{plist\ dict}\\
-  \textbf{Description}: Configure PCD values required by \texttt{BaseSerialPortLib16550}
-  for serial ports to properly function. Values are listed and described in the
-  \hyperref[miscserialprops]{Serial Properties} section below.
+  \textbf{Description}: Perform serial port initialisation and
+  configure PCD values required by \texttt{BaseSerialPortLib16550} for serial ports to properly function.
+  Values are listed and described in the \hyperref[miscserialprops]{Serial Properties} and \hyperref[miscserialcustprops]{Serial Custom Properties} section below.
+
+  By enabling \texttt{Init}, this section ensures that the serial port is initialised when it is not done by firmware.
 
   When debugging with serial ports, \texttt{BaseSerialPortLib16550} only recognises internal ones
-  provided by the motherboard by default. This section overrides the PCD values listed in
+  provided by the motherboard by default. If the option \texttt{Override} is enabled, this section will override the PCD values listed in
   \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{BaseSerialPortLib16550.inf}
-  such that external serial ports (e.g. from a PCI card) will also function properly.
-  Refer to \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec} for the explanations of each key.
+  such that external serial ports (e.g. from a PCI card) will also function properly. Specifically, when troubleshooting macOS,
+  in addition to overriding these PCD values, it is also necessary to turn the \texttt{CustomPciSerialDevice} kernel quirk on in order for
+  the XNU to use such exterior serial ports.
 
-  Specifically, when booting macOS, 
+
+  Refer to \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec} for the explanations of each key.
 
 \item
   \texttt{Tools}\label{misctools}\\
@@ -4436,6 +4454,39 @@ rm vault.pub
 
 \begin{enumerate}
 \item
+  \texttt{Custom}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Update serial port properties in \texttt{BaseSerialPortLib16550}.
+
+  This section lists the PCD values that are used by the \texttt{BaseSerialPortLib16550}.
+
+\item
+  \texttt{Init}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform serial port initialisation.
+
+  This option will perform serial port initialisation within OpenCore prior to enabling
+  (any) debug logging.
+
+  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
+
+\item
+  \texttt{Override}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Override serial port properties.
+  When this option is set to \texttt{false}, no keys from this section will be overridden.
+
+  This option will override serial port properties listed in the \hyperref[miscserialcustprops]{\texttt{Serial Custom Properties}}
+  section below.
+
+\end{enumerate}
+
+\subsubsection{Serial Custom Properties}\label{miscserialcustprops}
+
+\begin{enumerate}
+\item
   \texttt{BaudRate}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{115200}\\
@@ -4472,18 +4523,6 @@ rm vault.pub
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
-  \texttt{Init}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Perform serial port initialisation.
-  When this option is set to \texttt{false}, no keys from this section will be overridden.
-
-  This option will perform serial port initialisation within OpenCore prior to enabling
-  (any) debug logging.
-
-  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
-
-\item
   \texttt{LineControl}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{0x07}\\
@@ -4500,6 +4539,9 @@ rm vault.pub
 
   This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+  \texttt{Note}: This option can be set with the help of
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/FindSerial}{\texttt{FindSerial.sh}}.
 
 \item
   \texttt{RegisterAccessWidth}\\
@@ -8802,10 +8844,6 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
     Refer to the patches in Sample.plist when dying before serial init.
   \item In lieu of the \texttt{msgbuf} boot argument, \href{https://github.com/acidanthera/DebugEnhancer}{DebugEnhancer}
     can be a better solution since this argument no longer works on macOS 12 and above.
-  \item To have \texttt{kprintf} working properly, \texttt{Apple16X50PCI0} should be prevented from attaching,
-    by setting (i.e. \texttt{Delete}, then \texttt{Add}) the \texttt{class-code} property of the PCIe serial port device to \texttt{FFFFFFFF}
-    in \texttt{DeviceProperties} section. As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown at
-    \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954} may also be used.
   \item Always read the logs carefully.
   \end{itemize}
 
