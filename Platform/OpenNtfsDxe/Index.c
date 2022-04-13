@@ -703,6 +703,7 @@ IterateDir (
         (mBufferSize < (Non->NameOffset + 8))) {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
+      FreePool (BitMap);
       return EFI_VOLUME_CORRUPTED;
     }
 
