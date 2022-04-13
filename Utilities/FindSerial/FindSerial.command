@@ -5,7 +5,7 @@
 # SPDX-License-Identifier: BSD-3-Clause
 ##
 
-ioreg -p IODeviceTree -lw0 | perl -e '
+serial_dev=$(ioreg -p IODeviceTree -lw0 | perl -e '
   $ioregpath=""; $pcipath=""; while (<>) {
     if ( /^([ |]*)\+\-o (.+)  <class (\w+)/ ) {
       $indent = (length $1) / 2; $name = $2; $class = $3;
@@ -33,4 +33,10 @@ ioreg -p IODeviceTree -lw0 | perl -e '
       }
     }
   }
-'
+')
+
+if [ "$serial_dev" = "" ]; then
+  echo "No serial device found!"
+fi
+
+exit 0
