@@ -1195,9 +1195,7 @@ PatchCustomPciSerialDevice (
   EFI_STATUS  Status;
 
   Status = EFI_INVALID_PARAMETER;
-  if (mPmioRegisterBase != 0
-    && mPmioRegisterBase != 0x3F8U
-    && mPmioRegisterStride > 1
+  if ((mPmioRegisterBase != 0 && mPmioRegisterStride > 1)
     && (mPmioRegisterBase + 7U * mPmioRegisterStride) <= MAX_UINT16) {
     Status = PatchCustomPciSerialPmio (Patcher);
   }

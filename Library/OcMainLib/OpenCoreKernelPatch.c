@@ -319,7 +319,8 @@ OcKernelApplyPatches (
     if (Config->Kernel.Quirks.CustomPciSerialDevice) {
       RegisterBase = GetSerialRegisterBase ();
       RegisterStride = PatchPcdGet32 (PcdSerialRegisterStride);
-      if (RegisterBase != 0 && RegisterStride > 1) {
+      if ((RegisterBase != 0 && RegisterStride > 1)
+        && RegisterBase != 0x3F8U) {
         PatchSetPciSerialDevice (RegisterBase, RegisterStride);
         OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
       } else {
