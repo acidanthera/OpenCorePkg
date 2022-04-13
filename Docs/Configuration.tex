@@ -2585,18 +2585,21 @@ blocking.
   to an actucal one retrieved by \texttt{GetSerialRegisterBase} function call, such that
   the real PMIO address of the serial device will also be recognised by XNU.
 
-  \emph{Note}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
+  \emph{Note}: By default, serial logging is disabled. \texttt{serial=VALUE} boot argument should be
+  specified for XNU to print logs to the serial port.
+
+  \emph{Note 2}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
   to have \texttt{kprintf} method working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
   the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
   As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
   \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
 
-  \emph{Note 2}: For this patch to be correctly applied, both \texttt{Init} and \texttt{Override}
+  \emph{Note 3}: For this patch to be correctly applied, both \texttt{Init} and \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
 
-  \emph{Note 3}: Since this patch does not provide MMIO support, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must be disabled.
+  \emph{Note 4}: Since this patch does not provide MMIO support, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must be disabled.
 
-  \emph{Note 4}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
+  \emph{Note 5}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
   \texttt{serialbaud=VALUE} boot argument, both of which should match against each other.
 
 \item
@@ -3191,6 +3194,7 @@ the default boot entry choice will remain changed until the next manual reconfig
   Values are listed and described in the \hyperref[miscserialprops]{Serial Properties} and \hyperref[miscserialcustprops]{Serial Custom Properties} section below.
 
   By enabling \texttt{Init}, this section ensures that the serial port is initialised when it is not done by firmware.
+  In order for OpenCore to print logs to the serial port, bit \texttt{3} for \texttt{Target} under section \texttt{Misc->Debug} must be set.
 
   When debugging with serial ports, \texttt{BaseSerialPortLib16550} only recognises internal ones
   provided by the motherboard by default. If the option \texttt{Override} is enabled, this section will override the PCD values listed in
