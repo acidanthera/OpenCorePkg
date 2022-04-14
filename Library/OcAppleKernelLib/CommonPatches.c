@@ -597,7 +597,7 @@ mRemoveUsbLimitIoP1Find[] = {
 };
 
 STATIC
-UINT8
+CONST UINT8
 mRemoveUsbLimitIoP1Replace[] = {
   0x40, 0x0F, 0x87
 };
