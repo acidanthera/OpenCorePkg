@@ -2598,7 +2598,7 @@ blocking.
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
 
   \emph{Note 4}: This patch is for PMIO support and is therefore not applied if \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} is false.
-  For MMIO, there are boot arguments \texttt{pcie_mmio_uart=ADDRESS} and \texttt{mmio_uart=ADDRESS} that allow the kernel to use MMIO for serial port access.
+  For MMIO, there are boot arguments \texttt{pcie\_mmio\_uart=ADDRESS} and \texttt{mmio\_uart=ADDRESS} that allow the kernel to use MMIO for serial port access.
 
   \emph{Note 5}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
   \texttt{serialbaud=VALUE} boot argument, both of which should match against each other. The default baud rate is \texttt{115200}.
