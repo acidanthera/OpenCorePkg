@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Thu Apr 14 12:58:52 2022
+%DIF ADD ../Configuration.tex        Thu Apr 14 13:03:12 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2638,7 +2638,44 @@ blocking.
   Only certain Xeon models typically benefit from the patch.
 
 \item
-  \texttt{CustomSMBIOSGuid}\\
+  \DIFaddbegin \texttt{\DIFadd{CustomPciSerialDevice}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Requirement}}\DIFadd{: 10.7}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Performs change of PMIO register base address
+  on a customised PCI serial device.
+}
+
+  \DIFadd{The patch changes the PMIO register base address that the XNU kernel uses for serial input and output,
+  from that of the default built-in COM1 serial port }\texttt{\DIFadd{0x3F8}}\DIFadd{, to the base address stored in the first
+  IO BAR of a specified PCI device or to a specific base address (e.g. }\texttt{\DIFadd{0x2F8}} \DIFadd{for COM2).
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: By default, serial logging is disabled. }\texttt{\DIFadd{serial=3}} \DIFadd{boot argument, which enables serial input and output,
+  should be used for XNU to print logs to the serial port.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: In addition to this patch, kext }\texttt{\DIFadd{Apple16X50PCI0}} \DIFadd{should be prevented from attaching
+  to have }\texttt{\DIFadd{kprintf}} \DIFadd{method working properly. This can be achieved by setting (i.e. }\texttt{\DIFadd{Delete}}\DIFadd{, then }\texttt{\DIFadd{Add}}\DIFadd{)
+  the }\texttt{\DIFadd{class-code}} \DIFadd{property of the PCI serial port device to }\texttt{\DIFadd{FFFFFFFF}} \DIFadd{in }\texttt{\DIFadd{DeviceProperties}} \DIFadd{section.
+  As an alternative solution, a codeless kext }\texttt{\DIFadd{PCIeSerialDisable.kext}} \DIFadd{shown in the spoiler }\texttt{\DIFadd{PCIeSerialDisable.kext/Contents/Info.plist}} \DIFadd{at
+  }\href{https://github.com/acidanthera/bugtracker/issues/1954}{\DIFadd{acidanthera/bugtracker\#1954}}\DIFadd{, may also be used.
+}
+
+  \emph{\DIFadd{Note 3}}\DIFadd{: For this patch to be correctly applied, }\texttt{\DIFadd{Override}}
+  \DIFadd{must be enabled with all keys properly set in }\texttt{\DIFadd{Custom}}\DIFadd{, under section }\texttt{\DIFadd{Misc->Serial}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note 4}}\DIFadd{: This patch is for PMIO support and is therefore not applied if }\texttt{\DIFadd{UseMmio}} \DIFadd{under section }\texttt{\DIFadd{Misc->Serial->Custom}} \DIFadd{is false.
+  For MMIO, there are boot arguments }\texttt{\DIFadd{pcie\_mmio\_uart=ADDRESS}} \DIFadd{and }\texttt{\DIFadd{mmio\_uart=ADDRESS}} \DIFadd{that allow the kernel to use MMIO for serial port access.
+}
+
+  \emph{\DIFadd{Note 5}}\DIFadd{: The serial baud rate must be correctly set in both }\texttt{\DIFadd{BaudRate}} \DIFadd{under section }\texttt{\DIFadd{Misc->Serial->Custom}} \DIFadd{and via
+  }\texttt{\DIFadd{serialbaud=VALUE}} \DIFadd{boot argument, both of which should match against each other. The default baud rate is }\texttt{\DIFadd{115200}}\DIFadd{.
+}
+
+\item
+  \DIFaddend \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.4\\
@@ -3230,14 +3267,26 @@ the default boot entry choice will remain changed until the next manual reconfig
 \item
   \DIFaddbegin \texttt{\DIFadd{Serial}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Configure PCD values required by }\texttt{\DIFadd{BaseSerialPortLib16550}}
-  \DIFadd{for serial ports to properly function. Values are listed and described in the
-  }\hyperref[miscserialprops]{Serial Properties} \DIFadd{section below.
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform serial port initialisation and
+  configure PCD values required by }\texttt{\DIFadd{BaseSerialPortLib16550}} \DIFadd{for serial ports to properly function.
+  Values are listed and described in the }\hyperref[miscserialprops]{Serial Properties} \DIFadd{and }\hyperref[miscserialcustprops]{Serial Custom Properties} \DIFadd{section below.
 }
 
-  \DIFadd{This section overrides the PCD values listed in
-  }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{\DIFadd{BaseSerialPortLib16550.inf}}\DIFadd{.
-  Refer to }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}} \DIFadd{for the explanations of each key.
+  \DIFadd{By enabling }\texttt{\DIFadd{Init}}\DIFadd{, this section ensures that the serial port is initialised when it is not done by firmware.
+  In order for OpenCore to print logs to the serial port, bit }\texttt{\DIFadd{3}} \DIFadd{(i.e. serial logging) for }\texttt{\DIFadd{Target}}
+  \DIFadd{under section }\texttt{\DIFadd{Misc->Debug}} \DIFadd{must be set.
+}
+
+  \DIFadd{When debugging with serial ports, }\texttt{\DIFadd{BaseSerialPortLib16550}} \DIFadd{only recognises internal ones
+  provided by the motherboard by default. If the option }\texttt{\DIFadd{Override}} \DIFadd{is enabled, this section will override the PCD values listed in
+  }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{\DIFadd{BaseSerialPortLib16550.inf}}
+  \DIFadd{such that external serial ports (e.g. from a PCI card) will also function properly. Specifically, when troubleshooting macOS,
+  in addition to overriding these PCD values, it is also necessary to turn the }\texttt{\DIFadd{CustomPciSerialDevice}} \DIFadd{kernel quirk on in order for
+  the XNU to use such exterior serial ports.
+}
+
+
+  \DIFadd{Refer to }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}} \DIFadd{for the explanations of each key.
 }
 
 \item
@@ -3815,8 +3864,8 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   Two modes are supported:
   \begin{itemize}
     \tightlist
-    \item \texttt{+} --- Positive filtering: Only present selected modules.
-    \item \texttt{-} --- Negative filtering: Exclude selected modules.
+      \item \texttt{+} --- Positive filtering: Only present selected modules.
+      \item \texttt{-} --- Negative filtering: Exclude selected modules.
   \end{itemize}
   When multiple ones are selected, comma (\texttt{,}) should be used as the splitter.
   For instance, \texttt{+OCCPU,OCA,OCB} means \emph{only} \texttt{OCCPU}, \texttt{OCA}, \texttt{OCB} being printed,
@@ -4547,6 +4596,47 @@ rm vault.pub
 
 \begin{enumerate}
 \item
+  \texttt{\DIFadd{Custom}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ dict}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Update serial port properties in }\texttt{\DIFadd{BaseSerialPortLib16550}}\DIFadd{.
+}
+
+  \DIFadd{This section lists the PCD values that are used by the }\texttt{\DIFadd{BaseSerialPortLib16550}}\DIFadd{.
+  When option }\texttt{\DIFadd{Override}} \DIFadd{is set to }\texttt{\DIFadd{false}}\DIFadd{, this dictionary is optional.
+}
+
+\item
+  \texttt{\DIFadd{Init}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Perform serial port initialisation.
+}
+
+  \DIFadd{This option will perform serial port initialisation within OpenCore prior to enabling
+  (any) debug logging.
+}
+
+  \DIFadd{Refer to the }\hyperref[troubleshootingdebug]{\texttt{Debugging}} \DIFadd{section for details.
+}
+
+\item
+  \texttt{\DIFadd{Override}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Override serial port properties.
+  When this option is set to }\texttt{\DIFadd{false}}\DIFadd{, no keys from }\texttt{\DIFadd{Custom}} \DIFadd{will be overridden.
+}
+
+  \DIFadd{This option will override serial port properties listed in the }\hyperref[miscserialcustprops]{\texttt{Serial Custom Properties}}
+  \DIFadd{section below.
+}
+
+\end{enumerate}
+
+\subsubsection{\DIFadd{Serial Custom Properties}}\label{miscserialcustprops}
+
+\begin{enumerate}
+\item
   \texttt{\DIFadd{BaudRate}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{115200}}\\
@@ -4591,21 +4681,6 @@ rm vault.pub
 }
 
 \item
-  \texttt{\DIFadd{Init}}\\
-  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
-  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Perform serial port initialisation.
-  When this option is set to }\texttt{\DIFadd{false}}\DIFadd{, no keys from this section will be overridden.
-}
-
-  \DIFadd{This option will perform serial port initialisation within OpenCore prior to enabling
-  (any) debug logging.
-}
-
-  \DIFadd{Refer to the }\hyperref[troubleshootingdebug]{\texttt{Debugging}} \DIFadd{section for details.
-}
-
-\item
   \texttt{\DIFadd{LineControl}}\\
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ integer}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{0x07}}\\
@@ -4625,6 +4700,15 @@ rm vault.pub
 
   \DIFadd{This option will override the value of }\texttt{\DIFadd{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}}
   \DIFadd{defined in }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}}\DIFadd{.
+}
+
+  \emph{\DIFadd{Note}}\DIFadd{: The maximum allowed size of this option is 41 bytes. Refer to
+  }\href{https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743}{\DIFadd{acidanthera/bugtracker\#1954}}
+  \DIFadd{for more details.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: This option can be set by running the
+  }\href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/FindSerialPort}{\texttt{\DIFadd{FindSerialPort}}} \DIFadd{tool.
 }
 
 \item
@@ -5072,7 +5156,16 @@ troubleshooting:
   \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
   \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
   \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
-  \item \texttt{slide=VALUE} (manually set KASLR slide)
+  \item \DIFaddbegin \texttt{\DIFadd{serial=VALUE}} \DIFadd{(configure serial logging mode) --- The following bits are used by XNU:
+    }\begin{itemize}
+    \tightlist
+      \item \texttt{\DIFadd{0x01}} \DIFadd{(}\texttt{\DIFadd{SERIALMODE\_OUTPUT}}\DIFadd{, bit }\texttt{\DIFadd{0}}\DIFadd{) --- Enable serial output.
+      }\item \texttt{\DIFadd{0x02}} \DIFadd{(}\texttt{\DIFadd{SERIALMODE\_INPUT}}\DIFadd{, bit }\texttt{\DIFadd{1}}\DIFadd{) --- Enable serial input.
+      }\item \texttt{\DIFadd{0x04}} \DIFadd{(}\texttt{\DIFadd{SERIALMODE\_SYNCDRAIN}}\DIFadd{, bit }\texttt{\DIFadd{2}}\DIFadd{) --- Enable serial drain synchronisation.
+      }\item \texttt{\DIFadd{0x08}} \DIFadd{(}\texttt{\DIFadd{SERIALMODE\_BASE\_TTY}}\DIFadd{, bit }\texttt{\DIFadd{3}}\DIFadd{) --- Load Base/Recovery/FVUnlock TTY.
+      }\item \texttt{\DIFadd{0x10}} \DIFadd{(}\texttt{\DIFadd{SERIALMODE\_NO\_IOLOG}}\DIFadd{, bit }\texttt{\DIFadd{4}}\DIFadd{) --- Prevent IOLogs writing to serial.
+    }\end{itemize}
+  \item \DIFaddend \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
   \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
   \item \texttt{-amd\_no\_dgpu\_accel} (alternative to \href{https://github.com/acidanthera/WhateverGreen}{WhateverGreen}'s \texttt{-radvesa} for new GPUs)
@@ -8932,7 +9025,9 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \tightlist
   \item Refer to \texttt{boot-args} values such as \texttt{debug=0x100}, \texttt{keepsyms=1},
     \texttt{-v}, and similar.
-  \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
+  \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties\DIFaddbegin \DIFadd{.
+  }\item \DIFadd{For macOS to correctly recognise and set up serial ports, the }\texttt{\DIFadd{CustomPciSerialDevice}} \DIFadd{quirk
+    may be enabled when a PCI serial port card is installed}\DIFaddend .
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this
     \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments are needed.
