@@ -2581,9 +2581,9 @@ blocking.
   \textbf{Description}: Performs change of PMIO register base address
   on a customised PCI serial device.
 
-  The patch changes the PMIO register base address from the default \texttt{0x3F8-0x3FF}
-  assumed by XNU to the actucal one used by the PCI serial card, such that
-  the real PMIO address of the serial device will also be recognised by XNU.
+  The patch changes the PMIO register base address that the XNU kernel uses for serial input and output,
+  from that of the default built-in COM1 serial port \texttt{0x3F8}, to the base address stored in the first
+  IO BAR of a specified PCI device or to a specific base address (e.g. \texttt{0x2F8} for COM2).
 
   \emph{Note}: By default, serial logging is disabled. \texttt{serial=3} boot argument, which enables serial input and output,
   should be used for XNU to print logs to the serial port.
@@ -2597,7 +2597,8 @@ blocking.
   \emph{Note 3}: For this patch to be correctly applied, \texttt{Override}
   must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
 
-  \emph{Note 4}: Since this patch does not provide MMIO support, \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} must be disabled.
+  \emph{Note 4}: This patch is for PMIO support and is therefore not applied if \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} is false.
+  For MMIO, there are boot arguments \texttt{pcie_mmio_uart=ADDRESS} and \texttt{mmio_uart=ADDRESS} that allow the kernel to use MMIO for serial port access.
 
   \emph{Note 5}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
   \texttt{serialbaud=VALUE} boot argument, both of which should match against each other. The default baud rate is \texttt{115200}.
