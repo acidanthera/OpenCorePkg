@@ -534,6 +534,10 @@ typedef enum {
   //
   KernelQuirkAppleXcpmForceBoost,
   //
+  // Apply regiser base change patch for customised PCI serial device to XNU.
+  //
+  KernelQuirkCustomPciSerialDevice,
+  //
   // Apply custom AppleSMBIOS kext GUID patch for Custom UpdateSMBIOSMode.
   //
   KernelQuirkCustomSmbiosGuid1,
@@ -1158,6 +1162,18 @@ KextFindKmodAddress (
 VOID
 PatchSetApfsTimeout (
   IN UINT32  Timeout
+  );
+
+/**
+  Set PCI serial device properties for KernelQuirkCustomPciSerialDevice quirk.
+
+  @param[in]  RegisterBase   PCI serial device regiser base.
+  @param[in]  RegisterStride PCI serial device regiser stride.
+**/
+VOID
+PatchSetPciSerialDevice (
+  IN  UINTN  RegisterBase,
+  IN  UINT32 RegisterStride
   );
 
 /**

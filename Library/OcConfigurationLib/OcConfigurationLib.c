@@ -51,6 +51,7 @@ OC_ARRAY_STRUCTORS (OC_MISC_BLESS_ARRAY)
 OC_STRUCTORS       (OC_MISC_BOOT, ())
 OC_STRUCTORS       (OC_MISC_DEBUG, ())
 OC_STRUCTORS       (OC_MISC_SECURITY, ())
+OC_STRUCTORS       (OC_MISC_SERIAL_CUSTOM, ())
 OC_STRUCTORS       (OC_MISC_SERIAL, ())
 OC_STRUCTORS       (OC_MISC_TOOLS_ENTRY, ())
 OC_ARRAY_STRUCTORS (OC_MISC_TOOLS_ARRAY)
@@ -354,6 +355,7 @@ mKernelQuirksSchema[] = {
   OC_SCHEMA_BOOLEAN_IN ("AppleXcpmCfgLock",        OC_GLOBAL_CONFIG, Kernel.Quirks.AppleXcpmCfgLock),
   OC_SCHEMA_BOOLEAN_IN ("AppleXcpmExtraMsrs",      OC_GLOBAL_CONFIG, Kernel.Quirks.AppleXcpmExtraMsrs),
   OC_SCHEMA_BOOLEAN_IN ("AppleXcpmForceBoost",     OC_GLOBAL_CONFIG, Kernel.Quirks.AppleXcpmForceBoost),
+  OC_SCHEMA_BOOLEAN_IN ("CustomPciSerialDevice",   OC_GLOBAL_CONFIG, Kernel.Quirks.CustomPciSerialDevice),
   OC_SCHEMA_BOOLEAN_IN ("CustomSMBIOSGuid",        OC_GLOBAL_CONFIG, Kernel.Quirks.CustomSmbiosGuid),
   OC_SCHEMA_BOOLEAN_IN ("DisableIoMapper",         OC_GLOBAL_CONFIG, Kernel.Quirks.DisableIoMapper),
   OC_SCHEMA_BOOLEAN_IN ("DisableLinkeditJettison", OC_GLOBAL_CONFIG, Kernel.Quirks.DisableLinkeditJettison),
@@ -455,20 +457,27 @@ mMiscConfigurationSecuritySchema[] = {
 
 STATIC
 OC_SCHEMA
+mMiscConfigurationSerialCustomSchema[] = {
+  OC_SCHEMA_INTEGER_IN ("BaudRate",               OC_GLOBAL_CONFIG, Misc.Serial.Custom.BaudRate),
+  OC_SCHEMA_INTEGER_IN ("ClockRate",              OC_GLOBAL_CONFIG, Misc.Serial.Custom.ClockRate),
+  OC_SCHEMA_BOOLEAN_IN ("DetectCable",            OC_GLOBAL_CONFIG, Misc.Serial.Custom.DetectCable),
+  OC_SCHEMA_INTEGER_IN ("ExtendedTxFifoSize",     OC_GLOBAL_CONFIG, Misc.Serial.Custom.ExtendedTxFifoSize),
+  OC_SCHEMA_INTEGER_IN ("FifoControl",            OC_GLOBAL_CONFIG, Misc.Serial.Custom.FifoControl),
+  OC_SCHEMA_INTEGER_IN ("LineControl",            OC_GLOBAL_CONFIG, Misc.Serial.Custom.LineControl),
+  OC_SCHEMA_DATA_IN    ("PciDeviceInfo",          OC_GLOBAL_CONFIG, Misc.Serial.Custom.PciDeviceInfo),
+  OC_SCHEMA_INTEGER_IN ("RegisterAccessWidth",    OC_GLOBAL_CONFIG, Misc.Serial.Custom.RegisterAccessWidth),
+  OC_SCHEMA_INTEGER_IN ("RegisterBase",           OC_GLOBAL_CONFIG, Misc.Serial.Custom.RegisterBase),
+  OC_SCHEMA_INTEGER_IN ("RegisterStride",         OC_GLOBAL_CONFIG, Misc.Serial.Custom.RegisterStride),
+  OC_SCHEMA_BOOLEAN_IN ("UseHardwareFlowControl", OC_GLOBAL_CONFIG, Misc.Serial.Custom.UseHardwareFlowControl),
+  OC_SCHEMA_BOOLEAN_IN ("UseMmio",                OC_GLOBAL_CONFIG, Misc.Serial.Custom.UseMmio),
+};
+
+STATIC
+OC_SCHEMA
 mMiscConfigurationSerialSchema[] = {
-  OC_SCHEMA_INTEGER_IN ("BaudRate",               OC_GLOBAL_CONFIG, Misc.Serial.BaudRate),
-  OC_SCHEMA_INTEGER_IN ("ClockRate",              OC_GLOBAL_CONFIG, Misc.Serial.ClockRate),
-  OC_SCHEMA_BOOLEAN_IN ("DetectCable",            OC_GLOBAL_CONFIG, Misc.Serial.DetectCable),
-  OC_SCHEMA_INTEGER_IN ("ExtendedTxFifoSize",     OC_GLOBAL_CONFIG, Misc.Serial.ExtendedTxFifoSize),
-  OC_SCHEMA_INTEGER_IN ("FifoControl",            OC_GLOBAL_CONFIG, Misc.Serial.FifoControl),
-  OC_SCHEMA_BOOLEAN_IN ("Init",                   OC_GLOBAL_CONFIG, Misc.Serial.Init),
-  OC_SCHEMA_INTEGER_IN ("LineControl",            OC_GLOBAL_CONFIG, Misc.Serial.LineControl),
-  OC_SCHEMA_DATA_IN    ("PciDeviceInfo",          OC_GLOBAL_CONFIG, Misc.Serial.PciDeviceInfo),
-  OC_SCHEMA_INTEGER_IN ("RegisterAccessWidth",    OC_GLOBAL_CONFIG, Misc.Serial.RegisterAccessWidth),
-  OC_SCHEMA_INTEGER_IN ("RegisterBase",           OC_GLOBAL_CONFIG, Misc.Serial.RegisterBase),
-  OC_SCHEMA_INTEGER_IN ("RegisterStride",         OC_GLOBAL_CONFIG, Misc.Serial.RegisterStride),
-  OC_SCHEMA_BOOLEAN_IN ("UseHardwareFlowControl", OC_GLOBAL_CONFIG, Misc.Serial.UseHardwareFlowControl),
-  OC_SCHEMA_BOOLEAN_IN ("UseMmio",                OC_GLOBAL_CONFIG, Misc.Serial.UseMmio),
+  OC_SCHEMA_DICT_OPT   ("Custom",   mMiscConfigurationSerialCustomSchema),
+  OC_SCHEMA_BOOLEAN_IN ("Init",     OC_GLOBAL_CONFIG, Misc.Serial.Init),
+  OC_SCHEMA_BOOLEAN_IN ("Override", OC_GLOBAL_CONFIG, Misc.Serial.Override)
 };
 
 STATIC

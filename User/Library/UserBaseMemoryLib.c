@@ -64,6 +64,27 @@ ZeroMem (
   return memset (Buffer, 0, Length);
 }
 
+BOOLEAN
+EFIAPI
+IsZeroBuffer (
+  IN CONST VOID  *Buffer,
+  IN UINTN       Length
+  )
+{
+  UINTN  Index;
+  UINT8  *Walker;
+
+  Walker = (UINT8 *) Buffer;
+
+  for (Index = 0; Index < Length; ++Index) {
+    if (Walker[Index] != 0) {
+      return FALSE;
+    }
+  }
+
+  return TRUE;
+}
+
 INTN
 EFIAPI
 CompareMem (
@@ -86,14 +107,14 @@ ScanMem16 (
   IN  UINT16      Value
   )
 {
-  UINT16  *Pointer;
+  UINT16  *Walker;
   UINTN   Index;
 
-  Pointer = (UINT16 *) Buffer;
+  Walker = (UINT16 *) Buffer;
 
   for (Index = 0; Index < Length; ++Index) {
-    if (Pointer[Index] == Value) {
-      return Pointer;
+    if (Walker[Index] == Value) {
+      return Walker;
     }
   }
 

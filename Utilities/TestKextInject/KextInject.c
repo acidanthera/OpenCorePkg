@@ -510,6 +510,17 @@ ApplyKernelPatches (
     } else {
       DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
     }
+
+    UINTN RegisterBasePmio = 0x2008;
+    UINT32 RegisterStride   = 4;
+    PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
+    Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevicePmio - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevicePmio patch\n"));
+    }
   } else {
     DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));
     FailedToProcess = TRUE;
@@ -551,8 +562,8 @@ OcGetFileSize (
 }
 
 int wrap_main(int argc, char** argv) {
-  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
-  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
+  PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
+  PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
 
   UINT32 AllocSize;
   PRELINKED_CONTEXT Context;

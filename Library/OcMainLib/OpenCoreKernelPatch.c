@@ -25,6 +25,7 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 #include <Library/OcAppleImg4Lib.h>
 #include <Library/OcStringLib.h>
 #include <Library/OcVirtualFsLib.h>
+#include <Library/PcdLib.h>
 #include <Library/PrintLib.h>
 #include <Library/UefiBootServicesTableLib.h>
 
@@ -60,6 +61,17 @@ OcKernelApplyQuirk (
   return EFI_UNSUPPORTED;
 }
 
+/**
+  Retrieve the I/O or MMIO base address register for the PCI UART device.
+  This function assumes Root Bus Numer is Zero, and enables I/O and MMIO in PCI UART
+  Device if they are not already enabled.
+  @return  The base address register of the UART device.
+**/
+UINTN
+GetSerialRegisterBase (
+  VOID
+  );
+
 VOID
 OcKernelApplyPatches (
   IN     OC_GLOBAL_CONFIG  *Config,
@@ -83,6 +95,8 @@ OcKernelApplyPatches (
   UINT32                 MaxKernel;
   UINT32                 MinKernel;
   BOOLEAN                IsKernelPatch;
+  UINTN                  RegisterBase;
+  UINT32                 RegisterStride;
 
   IsKernelPatch = Context == NULL;
 
@@ -300,6 +314,21 @@ OcKernelApplyPatches (
 
     if (Config->Kernel.Quirks.AppleXcpmForceBoost) {
       OcKernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, CacheType, DarwinVersion, NULL, &KernelPatcher);
+    }
+
+    //
+    // Only apply the patch when Misc->Serial->Custom is set (i.e. Override).
+    //
+    if (Config->Misc.Serial.Override && Config->Kernel.Quirks.CustomPciSerialDevice) {
+      RegisterBase = GetSerialRegisterBase ();
+      RegisterStride = PatchPcdGet32 (PcdSerialRegisterStride);
+      if ((RegisterBase != 0 && RegisterStride > 1)
+        && RegisterBase != 0x3F8U) {
+        PatchSetPciSerialDevice (RegisterBase, RegisterStride);
+        OcKernelApplyQuirk (KernelQuirkCustomPciSerialDevice, CacheType, DarwinVersion, NULL, &KernelPatcher);
+      } else {
+        DEBUG ((DEBUG_INFO, "OC: Aborting patching PciSerialDevice because RegisterBase is zero/default value!\n"));
+      }
     }
 
     if (Config->Kernel.Quirks.PanicNoKextDump) {
