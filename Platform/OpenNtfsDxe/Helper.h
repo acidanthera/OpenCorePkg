@@ -11,29 +11,19 @@
 
 #include "Driver.h"
 
-#define SECS_PER_HOUR           (60 * 60)
-#define SECS_PER_DAY            (SECS_PER_HOUR * 24)
 #define FSHELP_TYPE_MASK        0xff
 #define FSHELP_CASE_INSENSITIVE 0x100
-#define DIV(a, b)               ((a) / (b) - ((a) % (b) < 0))
-#define LEAPS_THRU_END_OF(y)    (DIV (y, 4) - DIV (y, 100) + DIV (y, 400))
 //
 // Leap year: is every 4 years, except every 100th isn't, and every 400th is.
 //
-#define __isleap(year) ((year) % 4 == 0 && ((year) % 100 != 0 || (year) % 400 == 0))
-//
-// Days before each month (0-12)
-//
-static const unsigned short int __mon_yday[2][13] = {
-  //
-  // Normal years
-  //
-  { 0, 31, 59, 90, 120, 151, 181, 212, 243, 273, 304, 334, 365 },
-  //
-  // Leap years
-  //
-  { 0, 31, 60, 91, 121, 152, 182, 213, 244, 274, 305, 335, 366 }
-};
+#define LEAP_YEAR ((Year % 400U == 0) || ((Year % 4U == 0) && (Year % 100U != 0)))
+#define YEAR_IN_100NS   (365ULL * DAY_IN_100NS)
+#define DAY_IN_100NS    (24ULL  * HOUR_IN_100NS)
+#define HOUR_IN_100NS   (60ULL  * MINUTE_IN_100NS)
+#define MINUTE_IN_100NS (60U    * SECOND_IN_100NS)
+#define SECOND_IN_100NS 10000000U
+#define UNIT_IN_NS      100U
+#define GREGORIAN_START 1601U
 
 typedef enum {
   FSHELP_UNKNOWN,
@@ -192,12 +182,6 @@ RelativeToAbsolute (
   IN  CHAR16 *Source
   );
 
-VOID
-NtfsTimeToEfiTime (
-  IN CONST INT32  t,
-  OUT EFI_TIME    *tp
-  );
-
 CHAR16 *
 ReadSymlink (
   IN NTFS_FILE  *Node
@@ -209,6 +193,12 @@ Decompress (
   IN  UINT64  Offset,
   IN  UINTN   Length,
   OUT UINT8   *Dest
+  );
+
+VOID
+NtfsToEfiTime (
+  EFI_TIME *EfiTime,
+  UINT64   NtfsTime
   );
 
 #endif // HELPER_H

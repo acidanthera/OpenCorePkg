@@ -613,7 +613,9 @@ typedef struct {
 typedef struct _NTFS_FILE {
   UINT8              *FileRecord;
   UINT64             DataAttributeSize;
+  UINT64             CreationTime;
   UINT64             AlteredTime;
+  UINT64             ReadTime;
   UINT64             Inode;
   BOOLEAN            InodeRead;
   NTFS_ATTR          Attr;
@@ -624,7 +626,6 @@ typedef struct _EFI_NTFS_FILE {
   EFI_FILE_PROTOCOL  EfiFile;
   BOOLEAN            IsDir;
   INT64              DirIndex;
-  INT32              Mtime;
   CHAR16             *Path;
   CHAR16             *BaseName;
   UINT64             Offset;

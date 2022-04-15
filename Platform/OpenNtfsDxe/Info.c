@@ -107,7 +107,6 @@ FileGetInfo (
   EFI_FILE_INFO                 *Info;
   EFI_FILE_SYSTEM_INFO          *FSInfo;
   EFI_FILE_SYSTEM_VOLUME_LABEL  *VLInfo;
-  EFI_TIME                      Time;
   CHAR16                        *Label;
   UINTN                         Length = 0;
 
@@ -141,10 +140,9 @@ FileGetInfo (
 
     Info->Size = (UINT64) Length;
     Info->Attribute = EFI_FILE_READ_ONLY;
-    NtfsTimeToEfiTime (File->Mtime, &Time);
-    CopyMem (&Info->CreateTime, &Time, sizeof (Time));
-    CopyMem (&Info->LastAccessTime, &Time, sizeof (Time));
-    CopyMem (&Info->ModificationTime, &Time, sizeof (Time));
+    NtfsToEfiTime (&Info->CreateTime, File->RootFile.CreationTime);
+    NtfsToEfiTime (&Info->LastAccessTime, File->RootFile.ReadTime);
+    NtfsToEfiTime (&Info->ModificationTime, File->RootFile.AlteredTime);
 
     if (File->IsDir) {
       Info->Attribute |= EFI_FILE_DIRECTORY;

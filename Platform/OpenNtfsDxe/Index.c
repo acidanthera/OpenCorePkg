@@ -12,6 +12,7 @@
 extern UINTN  mFileRecordSize;
 extern UINTN  mIndexRecordSize;
 STATIC UINT64 mBufferSize;
+STATIC UINT8  mDaysPerMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0 };
 
 STATIC
 VOID
@@ -159,8 +160,6 @@ NtfsDirHook (
 {
   EFI_STATUS  Status;
   INT64       *Index;
-  EFI_TIME    Time = {1970, 01, 01, 00, 00, 00, 0, 0, 0, 0, 0};
-  INT32       Mtime;
 
   ASSERT (Name != NULL);
   ASSERT (Node != NULL);
@@ -194,14 +193,9 @@ NtfsDirHook (
 
   Info->Size = sizeof (*Info) + StrnLenS (Info->FileName, MAX_PATH) * sizeof (CHAR16);
 
-  Mtime = (INT32) (DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
-    - 86400ULL * 365 * (1970 - 1601)
-    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100));
-
-  NtfsTimeToEfiTime (Mtime, &Time);
-  CopyMem (&Info->CreateTime, &Time, sizeof (Time));
-  CopyMem (&Info->LastAccessTime, &Time, sizeof (Time));
-  CopyMem (&Info->ModificationTime, &Time, sizeof (Time));
+  NtfsToEfiTime (&Info->CreateTime, Node->CreationTime);
+  NtfsToEfiTime (&Info->LastAccessTime, Node->ReadTime);
+  NtfsToEfiTime (&Info->ModificationTime, Node->AlteredTime);
 
   Info->Attribute = EFI_FILE_READ_ONLY;
   if ((FileType & FSHELP_TYPE_MASK) == FSHELP_DIR) {
@@ -232,9 +226,6 @@ NtfsDirIter (
   }
 
   File->IsDir = (BOOLEAN) ((FileType & FSHELP_TYPE_MASK) == FSHELP_DIR);
-  File->Mtime = (INT32) (DivU64x64Remainder (Node->AlteredTime, 10000000, NULL)
-    - 86400ULL * 365 * (1970 - 1601)
-    - 86400ULL * ((1970 - 1601) / 4) + 86400ULL * ((1970 - 1601) / 100));
   FreeFile (Node);
 
   return EFI_SUCCESS;
@@ -299,7 +290,9 @@ ListFile (
 
       DirFile->File = Dir->File;
       CopyMem (&DirFile->Inode, IndexEntry->FileRecordNumber, 6);
-      DirFile->AlteredTime = AttrFileName->AlteredTime;
+      DirFile->CreationTime = AttrFileName->CreationTime;
+      DirFile->AlteredTime  = AttrFileName->AlteredTime;
+      DirFile->ReadTime     = AttrFileName->ReadTime;
 
       if (mBufferSize < (sizeof (*IndexEntry) + sizeof (*AttrFileName) + AttrFileName->FilenameLen * sizeof (CHAR16))) {
         DEBUG ((DEBUG_INFO, "NTFS: (ListFile #3) INDEX_ENTRY is corrupted.\n"));
@@ -885,54 +878,84 @@ RelativeToAbsolute (
   return EFI_SUCCESS;
 }
 
+/**
+    NTFS Time is the number of 100ns units since Jan 1, 1601.
+    The signifigance of this date is that it is the beginning
+    of the first full century of the Gregorian Calendar.
+    The time displayed in Shell will only match the time
+    displayed in Windows if the Windows time zone is set to
+    Coordinated Universal Time (UTC). Otherwise, it will be
+    skewed by the time zone setting.
+**/
 VOID
-NtfsTimeToEfiTime (
-  IN CONST INT32  t,
-  OUT EFI_TIME    *tp
+NtfsToEfiTime (
+  EFI_TIME *EfiTime,
+  UINT64   NtfsTime
   )
 {
-  INT32        days;
-  INT32        rem;
-  INT32        y;
-  CONST UINT16 *ip;
+  UINT64 Remainder64;
+  UINT32 Remainder32;
+  UINT16 Year;
+  UINT8  Month;
+  UINT32 Day;
+  UINT32 LastDay;
+  UINT32 PrevLD;
+  UINT8  Index;
+  UINT64 Temp;
 
-  ASSERT (tp != NULL);
+  EfiTime->TimeZone = EFI_UNSPECIFIED_TIMEZONE;
+  EfiTime->Pad1     = 0;
+  EfiTime->Daylight = 0;
+  EfiTime->Pad2     = 0;
+  //
+  // Because calendars are 1-based (there is no day 0), we have to add
+  // a day's worth of 100-ns units to make these calcualtions come out correct.
+  //
+  Year = GREGORIAN_START;
+  for (Temp = NtfsTime + DAY_IN_100NS; Temp > YEAR_IN_100NS; Temp -= YEAR_IN_100NS) {
+    if (LEAP_YEAR) {
+      //
+      // Subtract an extra day for leap year
+      //
+      Temp -= DAY_IN_100NS;
+    }
+    ++Year;
+  }
+  //
+  // From what's left, get the day, hour, minute, second and nanosecond.
+  //
+  Day = (UINT32) DivU64x64Remainder (Temp, DAY_IN_100NS, &Remainder64);
+  if (Day == 0) {
+    //
+    // Special handling for last day of year
+    //
+    Year -= 1U;
+    Day = LEAP_YEAR ? 366U : 365U;
+  }
 
-  days = t / SECS_PER_DAY;
-  rem = t % SECS_PER_DAY;
-  while (rem < 0) {
-    rem += SECS_PER_DAY;
-    --days;
+  EfiTime->Year   = Year;
+  EfiTime->Hour   = (UINT8) DivU64x64Remainder (Remainder64, HOUR_IN_100NS, &Remainder64);
+  EfiTime->Minute = (UINT8) DivU64x32Remainder (Remainder64, MINUTE_IN_100NS, &Remainder32);
+  EfiTime->Second = (UINT8) (Remainder32 / SECOND_IN_100NS);
+  Remainder32 %= SECOND_IN_100NS;
+  EfiTime->Nanosecond = Remainder32 * UNIT_IN_NS;
+  //
+  // "Day" now contains the ordinal date. We have to convert that to month and day.
+  //
+  Month = 1U;
+  LastDay = 31U;
+  PrevLD = 0;
+  for (Index = 1U; Index < 13U; ++Index) {
+    if (Day > LastDay) {
+      Month += 1U;
+      PrevLD = LastDay;
+      LastDay += mDaysPerMonth[Index];
+      if ((Index == 1U) && LEAP_YEAR) {
+        ++LastDay;
+      }
+    }
   }
-  while (rem >= SECS_PER_DAY) {
-    rem -= SECS_PER_DAY;
-    ++days;
-  }
-  tp->Hour = (UINT8) (rem / SECS_PER_HOUR);
-  rem %= SECS_PER_HOUR;
-  tp->Minute = (UINT8) (rem / 60);
-  tp->Second = (UINT8) (rem % 60);
-  y = 1970;
 
-  while (days < 0 || days >= (__isleap (y) ? 366 : 365)) {
-    //
-    // Guess a corrected year, assuming 365 days per year.
-    //
-    INT32 yg = y + days / 365 - (days % 365 < 0);
-    //
-    // Adjust DAYS and Y to match the guessed year.
-    //
-    days -= ((yg - y) * 365
-      + LEAPS_THRU_END_OF (yg - 1)
-      - LEAPS_THRU_END_OF (y - 1));
-    y = yg;
-  }
-  tp->Year = (UINT16) y;
-  ip = __mon_yday[__isleap(y)];
-  for (y = 11; days < (long int) ip[y]; --y) {
-    continue;
-  }
-  days -= ip[y];
-  tp->Month = (UINT8) (y + 1);
-  tp->Day = (UINT8) (days + 1);
+  EfiTime->Month = Month;
+  EfiTime->Day = (UINT8) (Day - PrevLD);
 }
