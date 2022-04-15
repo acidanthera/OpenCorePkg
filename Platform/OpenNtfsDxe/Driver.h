@@ -107,9 +107,9 @@
   * Only $DATA Attribute can be compressed, or sparse, and only when it is non-resident.
 **/
 
-//
-// Table 2.1. Standard NTFS Attribute Types
-//
+///
+/// Table 2.1. Standard NTFS Attribute Types
+///
 enum {
   AT_STANDARD_INFORMATION = 0x10,
   AT_ATTRIBUTE_LIST       = 0x20,
@@ -128,9 +128,9 @@ enum {
   AT_PROPERTY_SET         = 0xF0,
 };
 
-//
-// Table 2.6. File Flags (Also called attributes in DOS terminology).
-//
+///
+/// Table 2.6. File Flags (Also called attributes in DOS terminology).
+///
 enum {
   ATTR_READ_ONLY   = 0x1,
   ATTR_HIDDEN      = 0x2,
@@ -149,9 +149,9 @@ enum {
   ATTR_INDEX_VIEW  = 0x20000000
 };
 
-//
-// Table 3.1. Layout of files on the Volume (Inodes).
-//
+///
+/// Table 3.1. Layout of files on the Volume (Inodes).
+///
 enum {
   MFT_FILE     =  0,
   MFTMIRR_FILE =  1,
@@ -172,34 +172,34 @@ enum {
   NTFS_AF_GPOS     = 4,
 };
 
-//
-// Table 4.6. Attribute flags
-//
+///
+/// Table 4.6. Attribute flags
+///
 enum {
   FLAG_COMPRESSED = 0x0001,
   FLAG_ENCRYPTED  = 0x4000,
   FLAG_SPARSE     = 0x8000
 };
 
-//
-// Table 4.22. File record flags
-//
+///
+/// Table 4.22. File record flags
+///
 enum {
   IS_IN_USE      = 0x01,
   IS_A_DIRECTORY = 0x02,
 };
 
-//
-// Table 2.30. Data entry flags
-//
+///
+/// Table 2.30. Data entry flags
+///
 enum {
   SUB_NODE         = 0x01,
   LAST_INDEX_ENTRY = 0x02,
 };
 
-//
-// 13.2. Possible Namespaces
-//
+///
+/// 13.2. Possible Namespaces
+///
 enum {
   POSIX     = 0,
   WINDOWS32 = 1,
@@ -207,9 +207,9 @@ enum {
   WIN32_DOS = 3,
 };
 
-//
-// Table 2.36. Reparse Tag Flags
-//
+///
+/// Table 2.36. Reparse Tag Flags
+///
 enum {
   IS_ALIAS        = 0x20000000,
   IS_HIGH_LATENCY = 0x40000000,
@@ -514,51 +514,6 @@ typedef struct {
   UINT8  Namespace;
 } ATTR_FILE_NAME;
 
-typedef struct {
-  INT32             Flags;
-  UINT8             *ExtensionMftRecord;
-  UINT8             *NonResAttrList;
-  UINT8             *Current;
-  UINT8             *Next;
-  UINT8             *Last;
-  struct _NTFS_FILE *BaseMftRecord;
-} NTFS_ATTR;
-
-typedef struct _NTFS_FILE {
-  UINT8                  *FileRecord;
-  UINT64                 DataAttributeSize;
-  UINT64                 AlteredTime;
-  UINT64                 Inode;
-  BOOLEAN                InodeRead;
-  NTFS_ATTR              Attr;
-  struct _EFI_NTFS_FILE  *File;
-} NTFS_FILE;
-
-typedef struct _EFI_NTFS_FILE {
-  EFI_FILE_PROTOCOL      EfiFile;
-  BOOLEAN                IsDir;
-  INT64                  DirIndex;
-  INT32                  Mtime;
-  CHAR16                 *Path;
-  CHAR16                 *BaseName;
-  UINT64                 Offset;
-  UINT32                 RefCount;
-  NTFS_FILE              RootFile;
-  NTFS_FILE              MftFile;
-  struct _EFI_FS         *FileSystem;
-} EFI_NTFS_FILE;
-
-typedef struct _EFI_FS {
-  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL FileIoInterface;
-  EFI_FILE_PROTOCOL               EfiFile;
-  EFI_BLOCK_IO_PROTOCOL           *BlockIo;
-  EFI_DISK_IO_PROTOCOL            *DiskIo;
-  EFI_DEVICE_PATH                 *DevicePath;
-  UINT64                          FirstMftRecord;
-  NTFS_FILE                       *RootIndex;
-  NTFS_FILE                       *MftStart;
-} EFI_FS;
-
 /**
    Table 3.19. Layout of the $Boot File's $DATA Attribute
    ____________________________________________________________________
@@ -607,34 +562,6 @@ typedef struct {
   UINT64 VolumeSerialNumber;
 } BOOT_FILE_DATA;
 
-typedef struct {
-  UINT64 Vcn;
-  UINT64 Lcn;
-} UNIT_ELEMENT;
-
-typedef struct {
-  EFI_FS        *FileSystem;
-  UINT8         Head;
-  UINT8         Tail;
-  UNIT_ELEMENT  Elements[16];
-  UINT64        CurrentVcn;
-  UINT8         *Cluster;
-  UINTN         ClusterOffset;
-  UINT64        SavedPosition;
-  UINT8         *ClearTextBlock;
-} COMPRESSED;
-
-typedef struct {
-  BOOLEAN    IsSparse;
-  UINT64     TargetVcn;
-  UINT64     CurrentVcn;
-  UINT64     CurrentLcn;
-  UINT64     NextVcn;
-  UINT8      *NextDataRun;
-  NTFS_ATTR  *Attr;
-  COMPRESSED Unit;
-} RUNLIST;
-
 /**
  * Table 2.32. Layout of the $REPARSE_POINT (0xC0) attribute (Microsoft Reparse Point)
    ____________________________________________________________________
@@ -668,5 +595,82 @@ typedef struct {
   UINT16 PrintLength;
 } SYMLINK;
 #pragma pack()
+
+typedef struct _NTFS_FILE     NTFS_FILE;
+typedef struct _EFI_NTFS_FILE EFI_NTFS_FILE;
+typedef struct _EFI_FS        EFI_FS;
+
+typedef struct {
+  INT32              Flags;
+  UINT8              *ExtensionMftRecord;
+  UINT8              *NonResAttrList;
+  UINT8              *Current;
+  UINT8              *Next;
+  UINT8              *Last;
+  NTFS_FILE          *BaseMftRecord;
+} NTFS_ATTR;
+
+typedef struct _NTFS_FILE {
+  UINT8              *FileRecord;
+  UINT64             DataAttributeSize;
+  UINT64             AlteredTime;
+  UINT64             Inode;
+  BOOLEAN            InodeRead;
+  NTFS_ATTR          Attr;
+  EFI_NTFS_FILE      *File;
+} NTFS_FILE;
+
+typedef struct _EFI_NTFS_FILE {
+  EFI_FILE_PROTOCOL  EfiFile;
+  BOOLEAN            IsDir;
+  INT64              DirIndex;
+  INT32              Mtime;
+  CHAR16             *Path;
+  CHAR16             *BaseName;
+  UINT64             Offset;
+  UINT32             RefCount;
+  NTFS_FILE          RootFile;
+  NTFS_FILE          MftFile;
+  EFI_FS             *FileSystem;
+} EFI_NTFS_FILE;
+
+typedef struct _EFI_FS {
+  EFI_SIMPLE_FILE_SYSTEM_PROTOCOL FileIoInterface;
+  EFI_FILE_PROTOCOL               EfiFile;
+  EFI_BLOCK_IO_PROTOCOL           *BlockIo;
+  EFI_DISK_IO_PROTOCOL            *DiskIo;
+  EFI_DEVICE_PATH                 *DevicePath;
+  UINT64                          FirstMftRecord;
+  NTFS_FILE                       *RootIndex;
+  NTFS_FILE                       *MftStart;
+} EFI_FS;
+
+typedef struct {
+  UINT64        Vcn;
+  UINT64        Lcn;
+} UNIT_ELEMENT;
+
+typedef struct {
+  EFI_FS        *FileSystem;
+  UINT8         Head;
+  UINT8         Tail;
+  UNIT_ELEMENT  Elements[16];
+  UINT64        CurrentVcn;
+  UINT8         *Cluster;
+  UINTN         ClusterOffset;
+  UINT64        SavedPosition;
+  UINT8         *ClearTextBlock;
+} COMPRESSED;
+
+typedef struct {
+  BOOLEAN       IsSparse;
+  UINT64        TargetVcn;
+  UINT64        CurrentVcn;
+  UINT64        CurrentLcn;
+  UINT64        NextVcn;
+  UINT8         *NextDataRun;
+  NTFS_ATTR     *Attr;
+  COMPRESSED    Unit;
+} RUNLIST;
 
 #endif // DRIVER_H

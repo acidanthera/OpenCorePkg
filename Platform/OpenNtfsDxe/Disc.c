@@ -31,8 +31,8 @@ NtfsDir (
 
   Dir = NULL;
 
-  CopyMem (&File->RootFile, FileSystem->RootIndex, sizeof (NTFS_FILE));
-  CopyMem (&File->MftFile, FileSystem->MftStart, sizeof (NTFS_FILE));
+  CopyMem (&File->RootFile, FileSystem->RootIndex, sizeof (File->RootFile));
+  CopyMem (&File->MftFile, FileSystem->MftStart, sizeof (File->MftFile));
 
   Status = FsHelpFindFile (
     Path,
@@ -66,8 +66,8 @@ NtfsOpen (
 
   BaseMftRecord = NULL;
 
-  CopyMem (&File->RootFile, File->FileSystem->RootIndex, sizeof (NTFS_FILE));
-  CopyMem (&File->MftFile, File->FileSystem->MftStart, sizeof (NTFS_FILE));
+  CopyMem (&File->RootFile, File->FileSystem->RootIndex, sizeof (File->RootFile));
+  CopyMem (&File->MftFile, File->FileSystem->MftStart, sizeof (File->MftFile));
 
   Status = FsHelpFindFile (
     File->Path,
@@ -107,7 +107,7 @@ NtfsMount (
 
   ASSERT (FileSystem != NULL);
 
-  Status = DiskRead (FileSystem, 0, sizeof (BOOT_FILE_DATA), &Boot);
+  Status = DiskRead (FileSystem, 0, sizeof (Boot), &Boot);
   if (EFI_ERROR (Status)) {
     return Status;
   }
@@ -168,7 +168,7 @@ NtfsMount (
     return EFI_OUT_OF_RESOURCES;
   }
 
-  CopyMem (RootFile, &FileSystem->EfiFile, sizeof (EFI_FILE_PROTOCOL));
+  CopyMem (RootFile, &FileSystem->EfiFile, sizeof (FileSystem->EfiFile));
 
   RootFile->IsDir         = TRUE;
   RootFile->Path          = L"/";
@@ -256,7 +256,7 @@ Fixup (
 
   Record = (FILE_RECORD_HEADER *) Buffer;
 
-  if (Length < sizeof (FILE_RECORD_HEADER)) {
+  if (Length < sizeof (*Record)) {
     DEBUG ((DEBUG_INFO, "NTFS: (Fixup #1) Record is corrupted.\n"));
     return EFI_VOLUME_CORRUPTED;
   }
@@ -413,7 +413,7 @@ FindAttr (
 
   if ((Attr->Flags & NTFS_AF_ALST) != 0) {
   retry:
-    while ((Attr->Next + sizeof (ATTR_LIST_RECORD)) <= Attr->Last) {
+    while ((Attr->Next + sizeof (*LRecord)) <= Attr->Last) {
       Attr->Current = Attr->Next;
       LRecord = (ATTR_LIST_RECORD *) Attr->Current;
 
@@ -472,7 +472,7 @@ FindAttr (
 
         FRecord = (FILE_RECORD_HEADER *) Attr->ExtensionMftRecord;
         BufferSize = mFileRecordSize;
-        if ((FRecord->AttributeOffset + sizeof (ATTR_HEADER_RES)) <= BufferSize) {
+        if ((FRecord->AttributeOffset + sizeof (*Res)) <= BufferSize) {
           Res = (ATTR_HEADER_RES *) ((UINT8 *) FRecord + FRecord->AttributeOffset);
           BufferSize -= FRecord->AttributeOffset;
         } else {
@@ -481,7 +481,7 @@ FindAttr (
         }
 
         while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
-          if (BufferSize < sizeof (ATTR_HEADER_RES)) {
+          if (BufferSize < sizeof (*Res)) {
             DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) Extension record is corrupted.\n"));
             return NULL;
           }
@@ -513,7 +513,7 @@ FindAttr (
   BufferSize = mFileRecordSize - (Attr->Current - Attr->BaseMftRecord->FileRecord);
 
   while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
-    if (BufferSize < sizeof (ATTR_HEADER_RES)) {
+    if (BufferSize < sizeof (*Res)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) File record is corrupted.\n"));
       return NULL;
     }
@@ -540,7 +540,7 @@ FindAttr (
   //
   // Continue search in $ATTRIBUTE_LIST
   //
-  if (Attr->Last) {
+  if (Attr->Last != NULL) {
     Attr->ExtensionMftRecord = AllocateZeroPool (mFileRecordSize);
     if (Attr->ExtensionMftRecord == NULL) {
       return NULL;
@@ -550,7 +550,7 @@ FindAttr (
     Res = (ATTR_HEADER_RES *) Attr->Last;
     BufferSize = mFileRecordSize - (Attr->Last - Attr->BaseMftRecord->FileRecord);
 
-    if (BufferSize < sizeof (ATTR_HEADER_RES)) {
+    if (BufferSize < sizeof (*Res)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) File record is corrupted.\n"));
       return NULL;
     }
@@ -559,7 +559,7 @@ FindAttr (
       NonRes = (ATTR_HEADER_NONRES *) Res;
       Attr->Current = (UINT8 *) NonRes;
 
-      if (BufferSize < sizeof (ATTR_HEADER_NONRES)) {
+      if (BufferSize < sizeof (*NonRes)) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #4) File record is corrupted.\n"));
         return NULL;
       }
@@ -596,7 +596,7 @@ FindAttr (
 
     Attr->Flags |= NTFS_AF_ALST;
     LRecord = (ATTR_LIST_RECORD *) Attr->Next;
-    while ((Attr->Next + sizeof (ATTR_LIST_RECORD)) < Attr->Last) {
+    while ((Attr->Next + sizeof (*LRecord)) < Attr->Last) {
       if ((LRecord->Type == Type) || (Type == 0)) {
         break;
       }
@@ -616,7 +616,7 @@ FindAttr (
       LRecord = (ATTR_LIST_RECORD *) Attr->Next;
     }
 
-    if ((Attr->Next + sizeof (ATTR_LIST_RECORD)) >= Attr->Last) {
+    if ((Attr->Next + sizeof (*LRecord)) >= Attr->Last) {
       return NULL;
     }
 
