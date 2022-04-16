@@ -2006,42 +2006,7 @@ PatchLegacyCommpage (
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFindV1[] = {
-  0x41, 0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 0
-  0xE9                                             ///< jmp
-};
-
-STATIC
-CONST UINT8
-mAquantiaEthernetPatchReplaceV1[] = {
-  0x41, 0xC7, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 1
-  0xE9                                             ///< jmp
-};
-
-STATIC
-CONST UINT8
-mAquantiaEthernetPatchMaskV1[] = {
-  0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
-  0xFF
-};
-
-STATIC
-PATCHER_GENERIC_PATCH
-mAquantiaEthernetPatchV1 = {
-  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetV1"),
-  .Base    = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
-  .Find    = mAquantiaEthernetPatchFindV1,
-  .Mask    = mAquantiaEthernetPatchMaskV1,
-  .Replace = mAquantiaEthernetPatchReplaceV1,
-  .ReplaceMask = mAquantiaEthernetPatchMaskV1,
-  .Size    = sizeof (mAquantiaEthernetPatchFindV1),
-  .Count   = 1,
-  .Skip    = 0
-};
-
-STATIC
-CONST UINT8
-mAquantiaEthernetPatchFindV2[] = {
+mAquantiaEthernetPatchFindShikumo[] = {
   0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
   0x0F, 0x84, 0x00, 0x00, 0x00, 0x00,  ///< je unsupported
   0x83, 0x7D                           ///< LBL:
@@ -2049,7 +2014,7 @@ mAquantiaEthernetPatchFindV2[] = {
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchFindMaskV2[] = {
+mAquantiaEthernetPatchFindMaskShikumo[] = {
   0xFF, 0xFF, 0x00, 0x00,
   0xFF, 0xFF, 0x00, 0x00, 0x00, 0x00,
   0xFF, 0xFF
@@ -2057,7 +2022,7 @@ mAquantiaEthernetPatchFindMaskV2[] = {
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplaceV2[] = {
+mAquantiaEthernetPatchReplaceShikumo[] = {
   0x83, 0x7D, 0x00, 0x00,              ///< cmp dword [rbp+whatever], whatever
   0xEB, 0x04, 0x90, 0x90, 0x90, 0x90,  ///< jmp LBL
   0x83, 0x7D                           ///< LBL:
@@ -2065,7 +2030,7 @@ mAquantiaEthernetPatchReplaceV2[] = {
 
 STATIC
 CONST UINT8
-mAquantiaEthernetPatchReplaceMaskV2[] = {
+mAquantiaEthernetPatchReplaceMaskShikumo[] = {
   0xFF, 0xFF, 0x00, 0x00,
   0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF,
   0xFF, 0xFF
@@ -2073,14 +2038,49 @@ mAquantiaEthernetPatchReplaceMaskV2[] = {
 
 STATIC
 PATCHER_GENERIC_PATCH
-mAquantiaEthernetPatchV2 = {
-  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetV2"),
+mAquantiaEthernetPatchShikumo = {
+  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetShikumo"),
   .Base    = "__ZN27AppleEthernetAquantiaAqtion5startEP9IOService",
-  .Find    = mAquantiaEthernetPatchFindV2,
-  .Mask    = mAquantiaEthernetPatchFindMaskV2,
-  .Replace = mAquantiaEthernetPatchReplaceV2,
-  .ReplaceMask = mAquantiaEthernetPatchReplaceMaskV2,
-  .Size    = sizeof (mAquantiaEthernetPatchFindV2),
+  .Find    = mAquantiaEthernetPatchFindShikumo,
+  .Mask    = mAquantiaEthernetPatchFindMaskShikumo,
+  .Replace = mAquantiaEthernetPatchReplaceShikumo,
+  .ReplaceMask = mAquantiaEthernetPatchReplaceMaskShikumo,
+  .Size    = sizeof (mAquantiaEthernetPatchFindShikumo),
+  .Count   = 1,
+  .Skip    = 0
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchFindMieze[] = {
+  0x41, 0xC7, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 0
+  0xE9                                             ///< jmp
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchReplaceMieze[] = {
+  0x41, 0xC7, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00,  ///< mov dword ptr [whatever], 1
+  0xE9                                             ///< jmp
+};
+
+STATIC
+CONST UINT8
+mAquantiaEthernetPatchMaskMieze[] = {
+  0xFF, 0xFF, 0x00, 0x00, 0xFF, 0x00, 0x00, 0x00,
+  0xFF
+};
+
+STATIC
+PATCHER_GENERIC_PATCH
+mAquantiaEthernetPatchMieze = {
+  .Comment = DEBUG_POINTER ("ForceAquantiaEthernetMieze"),
+  .Base    = "__ZN30AppleEthernetAquantiaAqtion10718checkConfigSupportERiS0_",
+  .Find    = mAquantiaEthernetPatchFindMieze,
+  .Mask    = mAquantiaEthernetPatchMaskMieze,
+  .Replace = mAquantiaEthernetPatchReplaceMieze,
+  .ReplaceMask = mAquantiaEthernetPatchMaskMieze,
+  .Size    = sizeof (mAquantiaEthernetPatchFindMieze),
   .Count   = 1,
   .Skip    = 0
 };
@@ -2095,36 +2095,34 @@ PatchAquantiaEthernet (
   EFI_STATUS   Status;
 
   ASSERT (Patcher != NULL);
-
-  //
-  // FIXME: Check whether any patches are required before 10.15.4.
-  //
   
   //
   // This patch is not required before macOS 10.15.4.
   //
   if (!OcMatchDarwinVersion (KernelVersion, KERNEL_VERSION (KERNEL_VERSION_CATALINA, 4, 0), 0)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet before %u\n", KernelVersion));
+    DEBUG ((DEBUG_INFO, "OCAK: Skipping patching AquantiaEthernet on %u\n", KernelVersion));
     return EFI_SUCCESS;
   }
-
+  
   //
-  // In most cases either patch will work fine.
-  // However, patch V2 by Shikumo is preferred.
-  // Thanks to Mieze and Shikumo for the patches.
+  // Shikumo's patch can be applied to a wider range, not limited to AQC 107 series,
+  // thus preferred.
   //
-  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV2);
+  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchShikumo);
   if (!EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v2\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet Shikumo\n"));
     return Status;
   }
 
-  DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v2 - %r, trying v1\n", Status));
-  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchV1);
+  //
+  // In case Shikumo's patch failed, try Mieze's so at least AQC 107 will work.
+  //
+  DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch Shikumo - %r, trying Mieze\n", Status));
+  Status = PatcherApplyGenericPatch (Patcher, &mAquantiaEthernetPatchMieze);
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch v1 - %r\n", Status));
+    DEBUG ((DEBUG_INFO, "OCAK: Failed to apply Aquantia Ethernet patch Mieze - %r\n", Status));
   } else {
-    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet v1\n"));
+    DEBUG ((DEBUG_INFO, "OCAK: Patch success Aquantia Ethernet Mieze\n"));
   }
 
   return Status;

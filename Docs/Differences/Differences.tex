@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
 %DIF DEL PreviousConfiguration.tex   Thu Mar 10 21:36:27 2022
-%DIF ADD ../Configuration.tex        Sat Apr 16 01:48:08 2022
+%DIF ADD ../Configuration.tex        Sat Apr 16 23:33:35 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2753,16 +2753,20 @@ blocking.
   \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
   \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
   \textbf{\DIFadd{Requirement}}\DIFadd{: 10.15.4}\\
-  \textbf{\DIFadd{Description}}\DIFadd{: Enable Aquantia AQtion AQC-107s based 10GbE network cards support.
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable Aquantia AQtion based 10GbE network cards support.
 }
 
-  \DIFadd{This option enables Aquantia AQtion AQC-107s based 10GbE network cards support,
+  \DIFadd{This option enables Aquantia AQtion based 10GbE network cards support,
   which used to work natively before macOS 10.15.4.
 }
 
   \emph{\DIFadd{Note}}\DIFadd{: In order for Aquantia cards to properly function,
   }\texttt{\DIFadd{DisableIoMapper}} \DIFadd{must be disabled, }\texttt{\DIFadd{DMAR}} \DIFadd{ACPI table must not be dropped,
   and }\texttt{\DIFadd{VT-d}} \DIFadd{must be enabled in BIOS.
+}
+
+  \emph{\DIFadd{Note 2}}\DIFadd{: While this patch should enable ethernet support for all Aquantia AQtion series,
+  it has only been tested on AQC-107s based 10GbE network cards.
 }
 
 \item

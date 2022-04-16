@@ -2682,14 +2682,17 @@ blocking.
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Requirement}: 10.15.4\\
-  \textbf{Description}: Enable Aquantia AQtion AQC-107s based 10GbE network cards support.
+  \textbf{Description}: Enable Aquantia AQtion based 10GbE network cards support.
 
-  This option enables Aquantia AQtion AQC-107s based 10GbE network cards support,
+  This option enables Aquantia AQtion based 10GbE network cards support,
   which used to work natively before macOS 10.15.4.
 
   \emph{Note}: In order for Aquantia cards to properly function,
   \texttt{DisableIoMapper} must be disabled, \texttt{DMAR} ACPI table must not be dropped,
   and \texttt{VT-d} must be enabled in BIOS.
+
+  \emph{Note 2}: While this patch should enable ethernet support for all Aquantia AQtion series,
+  it has only been tested on AQC-107s based 10GbE network cards.
 
 \item
   \texttt{ForceSecureBootScheme}\\
