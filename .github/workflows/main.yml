@@ -218,7 +218,7 @@ jobs:
 
       - name: Check documentation
         run: |
-          ./Docs/BuildDocs.tool
+          ./Docs/BuildDocs.tool --check-docs
 
   analyze-coverity:
     name: Analyze Coverity

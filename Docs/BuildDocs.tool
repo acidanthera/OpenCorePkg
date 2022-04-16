@@ -54,7 +54,9 @@ builddocs() {
   latexbuild Errata
 
   cd .. || abort "Unable to cd back to Docs directory"
+}
 
+checkdocs() {
   err=0
   if [ "$(which md5)" != "" ]; then
     HASH=$(md5 Configuration.tex | cut -f4 -d' ')
@@ -138,6 +140,12 @@ main() {
   fi
 
   builddocs
+
+  case "$1" in
+    -c|--check-docs )
+      checkdocs
+    ;;
+  esac
 }
 
 main "$@"
