@@ -494,7 +494,7 @@ FsHelpFindFile (
     return Status;
   }
 
-  Status = FindFile ((CHAR16 *)Path, &Context);
+  Status = FindFile ((CHAR16 *) Path, &Context);
   if (EFI_ERROR (Status)) {
     FreeStack (&Context);
     return Status;
@@ -692,8 +692,8 @@ IterateDir (
   while (Non != NULL) {
     mBufferSize = mFileRecordSize - (Attr.Current - Attr.BaseMftRecord->FileRecord);
 
-    if ((mBufferSize < sizeof (*Non)) ||
-        (mBufferSize < (Non->NameOffset + 8))) {
+    if ((mBufferSize < sizeof (*Non))
+      || (mBufferSize < (Non->NameOffset + 8))) {
       DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #5) $INDEX_ROOT is corrupted.\n"));
       FreeAttr (&Attr);
       if (BitIndex != NULL) {
@@ -772,18 +772,18 @@ IterateDir (
           FileOrCtx,
           FunctionType
           );
-        if (Status == EFI_SUCCESS) {
+        if (!EFI_ERROR (Status)) {
           FreeAttr (&Attr);
           FreePool (BitMap);
           FreePool (IndexRecord);
-          return EFI_SUCCESS;
+          return Status;
         }
       }
 
       Bit <<= 1;
       if (Bit == 0) {
         Bit = 1;
-        BitIndex++;
+        ++BitIndex;
       }
     }
 
@@ -805,10 +805,12 @@ RelativeToAbsolute (
   CHAR16 *BPointer;
   CHAR16 *Start;
   CHAR16 *End;
-  UINT32 Skip = 0;
+  UINT32 Skip;
 
   ASSERT (Dest != NULL);
   ASSERT (Source != NULL);
+
+  Skip = 0;
 
   Buffer = AllocateZeroPool (StrSize (Source));
   BPointer = Buffer;
@@ -817,37 +819,41 @@ RelativeToAbsolute (
   Start = End;
   while (Start > Source) {
     while (*Start != L'/') {
-      Start--;
+      --Start;
     }
 
     if ((Start[1] == L'.') && ((Start[2] == L'/') || (Start[2] == L'\0'))) {
       End = Start;
-      Start--;
+      --Start;
       continue;
     }
 
     if ((Start[1] == L'.') && (Start[2] == L'.') && ((Start[3] == L'/') || (Start[3] == L'\0'))) {
       End = Start;
-      Start--;
-      Skip++;
+      --Start;
+      ++Skip;
       continue;
     }
 
     if (Skip > 0) {
       End = Start;
-      Start--;
-      Skip--;
+      --Start;
+      --Skip;
       continue;
     }
 
-    CopyMem (BPointer, Start + 1, (End - Start - 1) * sizeof (CHAR16));
+    CopyMem (
+      BPointer,
+      Start + 1,
+      (End - Start - 1) * sizeof (CHAR16)
+      );
     BPointer += End - Start - 1;
 
     *BPointer = L'/';
-    BPointer++;
+    ++BPointer;
 
     End = Start;
-    Start--;
+    --Start;
   }
 
   if (Skip > 0) {
@@ -860,17 +866,21 @@ RelativeToAbsolute (
   Start = End - 1;
   while (Start > Buffer) {
     while ((Start >= Buffer) && (*Start != L'/')) {
-      Start--;
+      --Start;
     }
 
     *Dest = L'/';
-    Dest++;
+    ++Dest;
 
-    CopyMem (Dest, Start + 1, (End - Start - 1) * sizeof (CHAR16));
+    CopyMem (
+      Dest,
+      Start + 1,
+      (End - Start - 1) * sizeof (CHAR16)
+      );
     Dest += End - Start - 1;
 
     End = Start;
-    Start--;
+    --Start;
   }
 
   FreePool (Buffer);
@@ -903,13 +913,15 @@ NtfsToEfiTime (
   UINT8  Index;
   UINT64 Temp;
 
+  ASSERT (EfiTime != NULL);
+
   EfiTime->TimeZone = EFI_UNSPECIFIED_TIMEZONE;
   EfiTime->Pad1     = 0;
   EfiTime->Daylight = 0;
   EfiTime->Pad2     = 0;
   //
   // Because calendars are 1-based (there is no day 0), we have to add
-  // a day's worth of 100-ns units to make these calcualtions come out correct.
+  // a day's worth of 100-ns units to make these calculations come out correct.
   //
   Year = GREGORIAN_START;
   for (Temp = NtfsTime + DAY_IN_100NS; Temp > YEAR_IN_100NS; Temp -= YEAR_IN_100NS) {
