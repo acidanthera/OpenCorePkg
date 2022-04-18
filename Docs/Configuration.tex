@@ -4515,6 +4515,15 @@ rm vault.pub
   defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
+  \texttt{DetectCable}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable serial port cable detection.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialDetectCable}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
   \texttt{ExtendedTxFifoSize}\\
   \textbf{Type}: \texttt{plist\ integer}\\
   \textbf{Failsafe}: \texttt{64}\\

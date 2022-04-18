@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Apr 18 12:47:57 2022
-%DIF ADD ../Configuration.tex        Mon Apr 18 12:47:57 2022
+%DIF DEL PreviousConfiguration.tex   Mon Apr 18 20:59:43 2022
+%DIF ADD ../Configuration.tex        Mon Apr 18 21:05:53 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -4572,7 +4572,18 @@ rm vault.pub
   \textbf{Description}: Set the clock rate for serial port.
 
   This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate}
-  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+  \DIFaddbegin \DIFadd{defined in }\href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{\DIFadd{MdeModulePkg.dec}}\DIFadd{.
+}
+
+\item
+  \texttt{\DIFadd{DetectCable}}\\
+  \textbf{\DIFadd{Type}}\DIFadd{: }\texttt{\DIFadd{plist\ boolean}}\\
+  \textbf{\DIFadd{Failsafe}}\DIFadd{: }\texttt{\DIFadd{false}}\\
+  \textbf{\DIFadd{Description}}\DIFadd{: Enable serial port cable detection.
+}
+
+  \DIFadd{This option will override the value of }\texttt{\DIFadd{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialDetectCable}}
+  \DIFaddend defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
 
 \item
   \texttt{ExtendedTxFifoSize}\\
