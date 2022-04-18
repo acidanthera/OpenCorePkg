@@ -83,12 +83,12 @@ BigNumLeftShiftWords (
   ASSERT (Exponent < NumWordsResult);
   ASSERT (NumWordsResult - Exponent >= NumWordsA);
 
-  CopyMem (&Result[Exponent], A, (NumWordsResult - Exponent) * OC_BN_WORD_SIZE);
-  ZeroMem (Result, Exponent * OC_BN_WORD_SIZE);
+  CopyMem (&Result[Exponent], A, OC_BN_SIZE (NumWordsResult - Exponent));
+  ZeroMem (Result, OC_BN_SIZE (Exponent));
   if (NumWordsResult - Exponent > NumWordsA) {
     ZeroMem (
       &Result[NumWordsA + Exponent],
-      (NumWordsResult - Exponent - NumWordsA) * OC_BN_WORD_SIZE
+      OC_BN_SIZE (NumWordsResult - Exponent - NumWordsA)
       );
   }
 }
@@ -147,7 +147,7 @@ BigNumLeftShiftWordsAndBits (
   //
   // Zero everything outside of the previously set ranges.
   //
-  ZeroMem (Result, NumWords * OC_BN_WORD_SIZE);
+  ZeroMem (Result, OC_BN_SIZE (NumWords));
 }
 
 /**
@@ -222,8 +222,8 @@ BigNumRightShiftWords (
   ASSERT (Exponent < NumWordsResult);
   ASSERT (NumWordsResult - Exponent >= NumWordsA);
 
-  CopyMem (Result, &A[Exponent], (NumWordsResult - Exponent) * OC_BN_WORD_SIZE);
-  ZeroMem (&Result[NumWordsResult - Exponent], Exponent * OC_BN_WORD_SIZE);
+  CopyMem (Result, &A[Exponent], OC_BN_SIZE (NumWordsResult - Exponent));
+  ZeroMem (&Result[NumWordsResult - Exponent], OC_BN_SIZE (Exponent));
 }
 
 /**
@@ -317,7 +317,7 @@ BigNumRightShiftWordsAndBits (
   //
   // Zero everything outside of the previously set ranges.
   //
-  ZeroMem (&Result[Index - NumWords + 1], (NumWordsResult - (Index - NumWords + 1)) * OC_BN_WORD_SIZE);
+  ZeroMem (&Result[Index - NumWords + 1], OC_BN_SIZE (NumWordsResult - (Index - NumWords + 1)));
 }
 
 /**
@@ -569,18 +569,18 @@ BigNumMod (
   IN     CONST OC_BN_WORD  *A,
   IN     OC_BN_NUM_WORDS   NumWordsA,
   IN     CONST OC_BN_WORD  *B,
-  IN     OC_BN_WORD        *ModTmp
+  IN     OC_BN_WORD        *Scratch
   )
 {
   INTN  CmpResult;
 
-  OC_BN_NUM_BITS   SigBitsModTmp;
-  OC_BN_NUM_WORDS  SigWordsModTmp;
-
-  OC_BN_NUM_BITS   BigDivExp;
-  OC_BN_WORD       *BigDiv;
-  OC_BN_NUM_BITS   SigBitsBigDiv;
-  OC_BN_NUM_WORDS  SigWordsBigDiv;
+  OC_BN_NUM_BITS  SigBitsModTmp;
+  OC_BN_NUM_WORDS SigWordsModTmp;
+  OC_BN_WORD      *ModTmp;
+  OC_BN_NUM_BITS  BigDivExp;
+  OC_BN_WORD      *BigDiv;
+  OC_BN_NUM_BITS  SigBitsBigDiv;
+  OC_BN_NUM_WORDS SigWordsBigDiv;
 
   OC_BN_NUM_BITS  DeltaBits;
 
@@ -599,12 +599,8 @@ BigNumMod (
   ++SigWordsModTmp;
   ASSERT (SigBitsModTmp == BigNumSignificantBits (A, SigWordsModTmp));
 
-  STATIC_ASSERT (
-    OC_BN_MAX_SIZE <= MAX_UINTN / 2,
-    "An overflow verification must be added"
-    );
-
-  BigDiv         = &ModTmp[SigWordsModTmp];
+  ModTmp         = &Scratch[0];
+  BigDiv         = &Scratch[SigWordsModTmp];
   SigWordsBigDiv = SigWordsModTmp;
   //
   // Invariant: BigDiv > ModTmp / 2
@@ -614,7 +610,7 @@ BigNumMod (
   // otherwise ModTmp is not modified. BigDiv is iteratively reduced such that
   // ModTmp >= BigDiv [2]. The loop terminates once BigDiv < B yields true [3].
   //
-  CopyMem (ModTmp, A, SigWordsModTmp * OC_BN_WORD_SIZE);
+  CopyMem (ModTmp, A, OC_BN_SIZE (SigWordsModTmp));
   //
   // Initialisation:
   // A bit-shift by x is equal to multiplying the operand with 2^x.
@@ -745,7 +741,7 @@ BigNumMod (
   // Assuming correctness, the modulus cannot be larger than the divisor.
   //
   ASSERT (BigNumMostSignificantWord (ModTmp, SigWordsModTmp) + 1 <= NumWordsRest);
-  CopyMem (Result, ModTmp, NumWordsRest * OC_BN_WORD_SIZE);
+  CopyMem (Result, ModTmp, OC_BN_SIZE (NumWordsRest));
 }
 
 VOID
@@ -760,10 +756,9 @@ BigNumParseBuffer (
   OC_BN_WORD  Tmp;
 
   ASSERT (Result != NULL);
-  ASSERT (NumWords * OC_BN_WORD_SIZE == BufferSize);
+  ASSERT (OC_BN_SIZE (NumWords) == BufferSize);
   ASSERT (Buffer != NULL);
   ASSERT (BufferSize > 0);
-  ASSERT ((BufferSize % OC_BN_WORD_SIZE) == 0);
 
   for (Index = OC_BN_WORD_SIZE; Index <= BufferSize; Index += OC_BN_WORD_SIZE) {
     if (OC_BN_WORD_SIZE == sizeof (UINT32)) {

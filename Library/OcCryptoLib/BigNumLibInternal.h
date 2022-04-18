@@ -95,7 +95,7 @@ BigNumOrWord (
   @param[in]     A             The dividend.
   @param[in]     NumWordsA     The number of Words of A.
   @param[in]     B             The divisor.
-  @param[in]     ModTmp        Scratch buffer 2 * NumWordsA * OC_BN_WORD_SIZE.
+  @param[in]     Scratch       Scratch buffer 2 * OC_BN_SIZE (NumWordsA).
 **/
 VOID
 BigNumMod (
@@ -104,7 +104,7 @@ BigNumMod (
   IN     CONST OC_BN_WORD  *A,
   IN     OC_BN_NUM_WORDS   NumWordsA,
   IN     CONST OC_BN_WORD  *B,
-  IN     OC_BN_WORD        *ModTmp
+  IN     OC_BN_WORD        *Scratch
   );
 
 /**

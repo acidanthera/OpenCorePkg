@@ -55,7 +55,7 @@ STATIC CONST UINT8  mPkcsDigestEncodingPrefixSha512[] = {
 STATIC
 BOOLEAN
 InternalRsaModulusSizeIsAllowed (
-  IN UINTN  ModulusSize
+  IN OC_BN_SIZE  ModulusSize
   )
 {
   //
@@ -163,7 +163,7 @@ STATIC
 BOOLEAN
 RsaVerifySigHashFromProcessed (
   IN CONST OC_BN_WORD  *N,
-  IN UINTN             NumWords,
+  IN OC_BN_NUM_WORDS   NumWords,
   IN OC_BN_WORD        N0Inv,
   IN CONST OC_BN_WORD  *RSqrMod,
   IN UINT32            Exponent,
@@ -178,7 +178,7 @@ RsaVerifySigHashFromProcessed (
   BOOLEAN  Result;
   INTN     CmpResult;
 
-  UINTN  ModulusSize;
+  OC_BN_SIZE  ModulusSize;
 
   OC_BN_WORD  *EncryptedSigNum;
   OC_BN_WORD  *DecryptedSigNum;
@@ -258,7 +258,7 @@ RsaVerifySigHashFromProcessed (
   // Verify the Signature size matches the Modulus size.
   // This implicitly verifies it's a multiple of the Word size.
   //
-  ModulusSize = NumWords * OC_BN_WORD_SIZE;
+  ModulusSize = OC_BN_SIZE (NumWords);
   if (!InternalRsaModulusSizeIsAllowed (ModulusSize)) {
     return FALSE;
   }
@@ -496,14 +496,13 @@ RsaVerifySigDataFromData (
   IN OC_SIG_HASH_TYPE  Algorithm
   )
 {
-  UINTN            ModulusNumWordsTmp;
-  OC_BN_NUM_WORDS  ModulusNumWords;
+  OC_BN_NUM_WORDS ModulusNumWords;
 
-  VOID        *Memory;
-  VOID        *Mont;
-  OC_BN_WORD  *N;
-  OC_BN_WORD  *RSqrMod;
-  VOID        *Scratch;
+  OC_BN_WORD      *Memory;
+  VOID            *Mont;
+  OC_BN_WORD      *N;
+  OC_BN_WORD      *RSqrMod;
+  VOID            *Scratch;
 
   OC_BN_WORD  N0Inv;
   BOOLEAN     Result;
@@ -516,14 +515,18 @@ RsaVerifySigDataFromData (
   ASSERT (Data != NULL);
   ASSERT (DataSize > 0);
 
-  ModulusNumWordsTmp = ModulusSize / OC_BN_WORD_SIZE;
-  if (  (ModulusNumWordsTmp > OC_BN_MAX_LEN)
-     || ((ModulusSize % OC_BN_WORD_SIZE) != 0))
-  {
+  if (ModulusSize > OC_BN_MONT_MAX_SIZE
+   || (ModulusSize % OC_BN_WORD_SIZE) != 0) {
     return FALSE;
   }
-
-  ModulusNumWords = (OC_BN_NUM_WORDS)ModulusNumWordsTmp;
+  STATIC_ASSERT (
+    RSA_MOD_MAX_SIZE <= OC_BN_MONT_MAX_SIZE,
+    "The usage of BIG_NUM_MONT_PARAMS_SCRATCH_SIZE may be unsafe"
+    );
+  //
+  // By definition: ModulusNumWords <= OC_BN_MONT_MAX_SIZE <= OC_BN_MAX_SIZE.
+  //
+  ModulusNumWords = (OC_BN_NUM_WORDS) (ModulusSize / OC_BN_WORD_SIZE);
 
   STATIC_ASSERT (
     OC_BN_MAX_SIZE <= MAX_UINTN / 2,
@@ -537,9 +540,9 @@ RsaVerifySigDataFromData (
     return FALSE;
   }
 
-  N       = (OC_BN_WORD *)Memory;
-  RSqrMod = (OC_BN_WORD *)((UINTN)N + ModulusSize);
-  Mont    = (UINT8 *)Memory + 2 * ModulusSize;
+  N       = &Memory[0 * ModulusNumWords];
+  RSqrMod = &Memory[1 * ModulusNumWords];
+  Mont    = &Memory[2 * ModulusNumWords];
 
   BigNumParseBuffer (N, ModulusNumWords, Modulus, ModulusSize);
 

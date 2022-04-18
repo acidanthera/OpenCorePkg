@@ -422,11 +422,19 @@ SigVerifyShaHashBySize (
   IN UINTN        HashSize
   );
 
+#define RSA_MOD_MAX_SIZE  BASE_16KB
+
 /**
-  @param[in] ModulusSize    Modulus size in bytes.
+  @param[in] ModulusSize  Modulus size in bytes. Must be at most
+                          RSA_MOD_MAX_SIZE.
 **/
 #define RSA_SCRATCH_BUFFER_SIZE(ModulusSize) \
-  ((ModulusSize) * 3)
+  ((ModulusSize) * 3U)
+
+STATIC_ASSERT (
+  RSA_MOD_MAX_SIZE <= MAX_UINTN / 3U,
+  "The definition of RSA_SCRATCH_BUFFER_SIZE may cause an overflow"
+  );
 
 /**
   Verify a RSA PKCS1.5 signature against an expected hash.

@@ -33,9 +33,36 @@ typedef UINTN OC_BN_WORD;
 // Declarations regarding the maximum size of OC_BN structures.
 //
 typedef UINT16 OC_BN_NUM_WORDS;
+typedef UINT32 OC_BN_SIZE;
 typedef UINT32 OC_BN_NUM_BITS;
-#define OC_BN_MAX_SIZE  MAX_UINT16
-#define OC_BN_MAX_LEN   (OC_BN_MAX_SIZE / OC_BN_WORD_SIZE)
+#define OC_BN_MAX_SIZE  ((OC_BN_SIZE) SIZE_64KB)
+#define OC_BN_MAX_LEN   ((OC_BN_NUM_WORDS) (OC_BN_MAX_SIZE / OC_BN_WORD_SIZE))
+
+/**
+  The size, in Bytes, required to store a BigNum with NumWords words.
+ 
+  @param[in] NumWords  The number of Words. Must be at most OC_BN_MAX_LEN.
+**/
+#define OC_BN_SIZE(NumWords)  \
+  ((OC_BN_SIZE) (NumWords) * OC_BN_WORD_SIZE)
+
+STATIC_ASSERT (
+  OC_BN_MAX_LEN <= MAX_UINTN / OC_BN_WORD_SIZE,
+  "The definition of OC_BN_SIZE may cause an overflow"
+  );
+
+/**
+  The size, in Bits, required to store a BigNum with NumWords words.
+ 
+  @param[in] NumWords  The number of Words. Must be at most OC_BN_MAX_LEN.
+**/
+#define OC_BN_BITS(NumWords)  \
+  ((OC_BN_NUM_BITS) OC_BN_SIZE (NumWords) * OC_CHAR_BIT)
+
+STATIC_ASSERT (
+  OC_BN_BITS (OC_BN_MAX_LEN) <= MAX_UINTN / OC_CHAR_BIT,
+  "The definition of OC_BN_BITS may cause an overflow"
+  );
 
 //
 // Primitives
@@ -76,19 +103,50 @@ BigNumSwapWord (
 // Montgomery arithmetics
 //
 
+#define OC_BN_MONT_MAX_LEN   (OC_BN_MAX_LEN / 2U - 1U)
+#define OC_BN_MONT_MAX_SIZE  (OC_BN_SIZE (OC_BN_MONT_MAX_LEN))
+
+/**
+  The length, in BigNum words, of RSqr.
+ 
+  @param[in] NumWords  The number of Words of N. Must be at most
+                       OC_BN_MONT_MAX_LEN.
+**/
+#define OC_BN_MONT_RSQR_LEN(NumWords)  ((OC_BN_NUM_WORDS) (((NumWords) + 1U) * 2U))
+
+STATIC_ASSERT (
+  OC_BN_MONT_RSQR_LEN (OC_BN_MONT_MAX_LEN) == OC_BN_MAX_LEN,
+  "The definition of OC_BN_MONT_RSQR_LEN is faulty"
+  );
+
+/**
+  The size, in Bytes, of RSqr.
+ 
+  @param[in] NumWords  The number of Words of N. Must be at most
+                       OC_BN_MONT_MAX_LEN.
+**/
+#define OC_BN_MONT_RSQR_SIZE(NumWords)  (OC_BN_SIZE (OC_BN_MONT_RSQR_LEN (NumWords)))
+
 /**
   1 + 2 * NumWords for RSqr, and then twice more than that for Mod.
-
-  @param[in] NumWords   The number of Words of RSqrMod and N.
+ 
+  @param[in] NumWords  The number of Words of RSqrMod and N. Must be at most
+                       OC_BN_MONT_MAX_LEN.
 **/
 #define BIG_NUM_MONT_PARAMS_SCRATCH_SIZE(NumWords) \
-  ((1 + 2 * NumWords) * 3 * OC_BN_WORD_SIZE)
+  (OC_BN_MONT_RSQR_SIZE (NumWords) * 3U)
+
+STATIC_ASSERT (
+  OC_BN_MONT_RSQR_SIZE (OC_BN_MONT_MAX_SIZE) <= MAX_UINTN / 3,
+  "The definition of BIG_NUM_MONT_PARAMS_SCRATCH_SIZE may cause an overflow"
+  );
 
 /**
   Calculates the Montgomery Inverse and R^2 mod N.
 
   @param[in,out] RSqrMod   The buffer to return R^2 mod N into.
-  @param[in]     NumWords  The number of Words of RSqrMod and N.
+  @param[in]     NumWords  The number of Words of RSqrMod and N. Must be at most
+                           OC_BN_MONT_MAX_LEN.
   @param[in]     N         The Montgomery Modulus.
   @param[in]     Scratch   Scratch buffer BIG_NUM_MONT_PARAMS_SCRATCH_SIZE(NumWords).
 

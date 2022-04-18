@@ -160,14 +160,15 @@ BigNumCalculateMontParams (
   IN     OC_BN_WORD        *Scratch
   )
 {
-  OC_BN_WORD       N0Inv;
-  UINT32           NumBits;
-  OC_BN_NUM_WORDS  NumWordsRSqr;
-  OC_BN_NUM_WORDS  NumWordsMod;
-  OC_BN_WORD       *RSqr;
+  OC_BN_WORD      N0Inv;
+  OC_BN_NUM_BITS  NumBits;
+  OC_BN_NUM_WORDS NumWordsRSqr;
+  OC_BN_WORD      *RSqr;
+  OC_BN_WORD      *Scratch2;
 
   ASSERT (RSqrMod != NULL);
   ASSERT (NumWords > 0);
+  ASSERT (NumWords <= OC_BN_MONT_MAX_LEN);
   ASSERT (N != NULL);
   //
   // Calculate the Montgomery Inverse.
@@ -179,32 +180,26 @@ BigNumCalculateMontParams (
   if (N0Inv == 0) {
     return 0;
   }
-
-  NumBits = NumWords * OC_BN_WORD_SIZE * OC_CHAR_BIT;
-
-  STATIC_ASSERT (
-    OC_BN_MAX_SIZE * OC_CHAR_BIT <= ((MAX_UINTN - 1) / 2) - (OC_CHAR_BIT - 1),
-    "An overflow verification must be added"
-    );
   //
-  // Considering NumBits can at most be MAX_UINT16 * OC_CHAR_BIT, this cannot
-  // overflow.
+  // This cannot overflow because it holds that NumWords <= OC_BN_MONT_MAX_LEN.
   //
-  NumWordsRSqr = (OC_BN_NUM_WORDS)(1 + 2 * NumWords);
-  NumWordsMod  = 2 * NumWordsRSqr;
+  NumWordsRSqr = OC_BN_MONT_RSQR_LEN (NumWords);
 
-  RSqr = Scratch + NumWordsMod;
+  RSqr     = &Scratch[0];
+  Scratch2 = &Scratch[NumWordsRSqr];
 
   //
   // Calculate Montgomery's R^2 mod N.
   //
-  ZeroMem (RSqr, NumWordsRSqr * OC_BN_WORD_SIZE);
+  ZeroMem (RSqr, OC_BN_SIZE (NumWordsRSqr));
   //
-  // 2 * NumBits cannot overflow as per above.
+  // Considering NumBits can be at most MAX_UINT16 * OC_CHAR_BIT, this cannot
+  // overflow.
   //
+  NumBits = OC_BN_BITS (NumWords);
   BigNumOrWord (RSqr, NumWordsRSqr, 1, 2 * NumBits);
 
-  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Scratch);
+  BigNumMod (RSqrMod, NumWords, RSqr, NumWordsRSqr, N, Scratch2);
 
   return N0Inv;
 }
@@ -419,7 +414,7 @@ BigNumMontMul (
   ASSERT (N != NULL);
   ASSERT (N0Inv != 0);
 
-  ZeroMem (Result, (UINTN)NumWords * OC_BN_WORD_SIZE);
+  ZeroMem (Result, OC_BN_SIZE (NumWords));
   //
   // RowIndex is used as an index into the words of A. Because this domain
   // operates in mod 2^#Bits (word), 'row results' do not require multiplication
@@ -536,7 +531,7 @@ BigNumMontMul1 (
   ASSERT (N != NULL);
   ASSERT (N0Inv != 0);
 
-  ZeroMem (Result, (UINTN)NumWords * OC_BN_WORD_SIZE);
+  ZeroMem (Result, OC_BN_SIZE (NumWords));
   //
   // Perform the entire standard multiplication and one Montgomery Reduction.
   //
