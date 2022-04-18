@@ -145,13 +145,11 @@ typedef struct SHA512_CONTEXT_ {
 
 typedef SHA512_CONTEXT SHA384_CONTEXT;
 
-#pragma pack(push, 1)
-
 ///
 /// The structure describing the RSA Public Key format.
 /// The exponent is always 65537.
 ///
-typedef PACKED struct {
+typedef struct {
   ///
   /// The number of 64-bit values of N and RSqrMod each.
   ///
@@ -166,7 +164,12 @@ typedef PACKED struct {
   UINT64    N0Inv;
 } OC_RSA_PUBLIC_KEY_HDR;
 
-typedef PACKED struct {
+STATIC_ASSERT (
+  sizeof (OC_RSA_PUBLIC_KEY_HDR) == 16,
+  "The PK header struct is malformed."
+  );
+
+typedef struct {
   ///
   /// The RSA Public Key header structure.
   ///
@@ -177,7 +180,10 @@ typedef PACKED struct {
   UINT64                   Data[];
 } OC_RSA_PUBLIC_KEY;
 
-#pragma pack(pop)
+STATIC_ASSERT (
+  sizeof (OC_RSA_PUBLIC_KEY_HDR) == sizeof (OC_RSA_PUBLIC_KEY_HDR),
+  "The PK struct is malformed."
+  );
 
 //
 // Functions prototypes

@@ -17,14 +17,12 @@
 #include <Library/OcAppleKeysLib.h>
 #include <Library/OcMiscLib.h>
 
-#pragma pack(push, 1)
-
 ///
 /// The data size of a 2048 Bits RSA Public Key. Includes N and R^2 mod N.
 ///
 #define OC_RSA_PK_2048_NUM_BYTES  (2 * (2048 / OC_CHAR_BIT))
 
-typedef PACKED struct {
+typedef struct {
   ///
   /// RSA Public Key header structure.
   ///
@@ -37,8 +35,6 @@ typedef PACKED struct {
     UINT64    Qwords[OC_RSA_PK_2048_NUM_BYTES / sizeof (UINT64)];
   }                     Data;
 } OC_RSA_PUBLIC_KEY_2048;
-
-#pragma pack(pop)
 
 //
 // Verify the structure size equals to the header plus two times the key size
