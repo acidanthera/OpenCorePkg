@@ -44,7 +44,7 @@
   captionpos=b,
   basicstyle=\ttfamily\normalsize,
   keepspaces=true,
-  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python},
+  morekeywords={git, make, build, ioreg, grep, nvram, sort, sudo, diskutil, gfxutil, strings, dd, cut, python3},
   literate =
     {"}{{\textquotedbl}}1
     {'}{{\textquotesingle}}1
@@ -94,7 +94,7 @@
 
        \vspace{0.2in}
 
-       Reference Manual (0.7.9)
+       Reference Manual (0.8.0)
 
        \vspace{0.2in}
 
@@ -395,7 +395,7 @@ Root configuration entries consist of the following:
 
 Basic validation of an \texttt{OC\ config} file is possible using
 the \texttt{ocvalidate} utility. Please note that the version of \texttt{ocvalidate}
-used must match the OpenCore release and that nothwithstanding this, it may not
+used must match the OpenCore release and that notwithstanding this, it may not
 detect all configuration issues present in an \texttt{OC\ config} file.
 
 \emph{Note}: To maintain system integrity, properties typically have predefined values even
@@ -2574,6 +2574,36 @@ blocking.
   Only certain Xeon models typically benefit from the patch.
 
 \item
+  \texttt{CustomPciSerialDevice}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.7\\
+  \textbf{Description}: Performs change of PMIO register base address
+  on a customised PCI serial device.
+
+  The patch changes the PMIO register base address that the XNU kernel uses for serial input and output,
+  from that of the default built-in COM1 serial port \texttt{0x3F8}, to the base address stored in the first
+  IO BAR of a specified PCI device or to a specific base address (e.g. \texttt{0x2F8} for COM2).
+
+  \emph{Note}: By default, serial logging is disabled. \texttt{serial=3} boot argument, which enables serial input and output,
+  should be used for XNU to print logs to the serial port.
+
+  \emph{Note 2}: In addition to this patch, kext \texttt{Apple16X50PCI0} should be prevented from attaching
+  to have \texttt{kprintf} method working properly. This can be achieved by setting (i.e. \texttt{Delete}, then \texttt{Add})
+  the \texttt{class-code} property of the PCI serial port device to \texttt{FFFFFFFF} in \texttt{DeviceProperties} section.
+  As an alternative solution, a codeless kext \texttt{PCIeSerialDisable.kext} shown in the spoiler \texttt{PCIeSerialDisable.kext/Contents/Info.plist} at
+  \href{https://github.com/acidanthera/bugtracker/issues/1954}{acidanthera/bugtracker\#1954}, may also be used.
+
+  \emph{Note 3}: For this patch to be correctly applied, \texttt{Override}
+  must be enabled with all keys properly set in \texttt{Custom}, under section \texttt{Misc->Serial}.
+
+  \emph{Note 4}: This patch is for PMIO support and is therefore not applied if \texttt{UseMmio} under section \texttt{Misc->Serial->Custom} is false.
+  For MMIO, there are boot arguments \texttt{pcie\_mmio\_uart=ADDRESS} and \texttt{mmio\_uart=ADDRESS} that allow the kernel to use MMIO for serial port access.
+
+  \emph{Note 5}: The serial baud rate must be correctly set in both \texttt{BaudRate} under section \texttt{Misc->Serial->Custom} and via
+  \texttt{serialbaud=VALUE} boot argument, both of which should match against each other. The default baud rate is \texttt{115200}.
+
+\item
   \texttt{CustomSMBIOSGuid}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\
@@ -2646,6 +2676,23 @@ blocking.
 
   \emph{Note}: This option should be avoided whenever possible. Modern firmware
   typically have compatible AHCI controllers.
+
+\item
+  \texttt{ForceAquantiaEthernet}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Requirement}: 10.15.4\\
+  \textbf{Description}: Enable Aquantia AQtion based 10GbE network cards support.
+
+  This option enables Aquantia AQtion based 10GbE network cards support,
+  which used to work natively before macOS 10.15.4.
+
+  \emph{Note}: In order for Aquantia cards to properly function,
+  \texttt{DisableIoMapper} must be disabled, \texttt{DMAR} ACPI table must not be dropped,
+  and \texttt{VT-d} must be enabled in BIOS.
+
+  \emph{Note 2}: While this patch should enable ethernet support for all Aquantia AQtion series,
+  it has only been tested on AQC-107s based 10GbE network cards.
 
 \item
   \texttt{ForceSecureBootScheme}\\
@@ -2761,17 +2808,23 @@ blocking.
 
   One way to workaround the problem is to increase the timeout to an extremely
   high value, which at the cost of slow boot times (extra minutes) will
-  ensure that all the blocks are trimmed. Set this option to a high value,
-  such as \texttt{4294967295}, to ensure that all blocks are trimmed.
+  ensure that all the blocks are trimmed. Setting this option to a high value,
+  such as \texttt{4294967295} ensures that all blocks are trimmed.
   Alternatively, use over-provisioning, if supported, or create
   a dedicated unmapped partition where the reserve blocks can be found
-  by the controller. Conversely, the trim operation can be disabled by
-  setting a very low timeout value. e.g. \texttt{999}. Refer to this
+  by the controller. Conversely, the trim operation can be mostly disabled by
+  setting a very low timeout value, while \texttt{0} entirely disables it. Refer to this
   \href{https://interface31.ru/tech_it/2015/04/mozhno-li-effektivno-ispolzovat-ssd-bez-podderzhki-trim.html}{article}
   for details.
 
-  On macOS 12+, it is no longer possible to set trim timeout for APFS filesystems.
-  However, trim can be disabled when the timeout value is set to \texttt{0}.
+  \emph{Note}: The failsafe value \texttt{-1} indicates that this patch will not be applied,
+  such that \texttt{apfs.kext} will remain untouched.
+
+  \emph{Note 2}: On macOS 12.0 and above, it is no longer possible to specify trim timeout.
+  However, it can be disabled by setting \texttt{0}.
+
+  \emph{Note 3}: Trim operations are \emph{only} affected at booting phase when the startup volume is mounted.
+  Either specifying timeout, or completely disabling trim with \texttt{0}, will not affect normal macOS running.
 
 \item
   \texttt{ThirdPartyDrives}\\
@@ -3136,6 +3189,27 @@ the default boot entry choice will remain changed until the next manual reconfig
   \textbf{Type}: \texttt{plist\ dict}\\
   \textbf{Description}: Apply the security configuration described in the
   \hyperref[miscsecurityprops]{Security Properties} section below.
+
+\item
+  \texttt{Serial}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Perform serial port initialisation and
+  configure PCD values required by \texttt{BaseSerialPortLib16550} for serial ports to properly function.
+  Values are listed and described in the \hyperref[miscserialprops]{Serial Properties} and \hyperref[miscserialcustprops]{Serial Custom Properties} section below.
+
+  By enabling \texttt{Init}, this section ensures that the serial port is initialised when it is not done by firmware.
+  In order for OpenCore to print logs to the serial port, bit \texttt{3} (i.e. serial logging) for \texttt{Target}
+  under section \texttt{Misc->Debug} must be set.
+
+  When debugging with serial ports, \texttt{BaseSerialPortLib16550} only recognises internal ones
+  provided by the motherboard by default. If the option \texttt{Override} is enabled, this section will override the PCD values listed in
+  \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/Library/BaseSerialPortLib16550/BaseSerialPortLib16550.inf}{BaseSerialPortLib16550.inf}
+  such that external serial ports (e.g. from a PCI card) will also function properly. Specifically, when troubleshooting macOS,
+  in addition to overriding these PCD values, it is also necessary to turn the \texttt{CustomPciSerialDevice} kernel quirk on in order for
+  the XNU to use such exterior serial ports.
+
+
+  Refer to \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec} for the explanations of each key.
 
 \item
   \texttt{Tools}\label{misctools}\\
@@ -3659,7 +3733,7 @@ the default boot entry choice will remain changed until the next manual reconfig
 
 \begin{lstlisting}[label=kpanic, style=ocbash]
 cat Kernel.panic | grep macOSProcessedStackshotData |
-  python -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
+  python3 -c 'import json,sys;print(json.load(sys.stdin)["macOSPanicString"])'
 \end{lstlisting}
 
 \item
@@ -3709,8 +3783,8 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
   Two modes are supported:
   \begin{itemize}
     \tightlist
-    \item \texttt{+} --- Positive filtering: Only present selected modules.
-    \item \texttt{-} --- Negative filtering: Exclude selected modules.
+      \item \texttt{+} --- Positive filtering: Only present selected modules.
+      \item \texttt{-} --- Negative filtering: Exclude selected modules.
   \end{itemize}
   When multiple ones are selected, comma (\texttt{,}) should be used as the splitter.
   For instance, \texttt{+OCCPU,OCA,OCB} means \emph{only} \texttt{OCCPU}, \texttt{OCA}, \texttt{OCB} being printed,
@@ -3723,26 +3797,6 @@ cat Kernel.panic | grep macOSProcessedStackshotData |
 
   \emph{Note 2}: Messages printed before the configuration of log protocol
   cannot be filtered.
-
-\item
-  \texttt{SerialInit}\\
-  \textbf{Type}: \texttt{plist\ boolean}\\
-  \textbf{Failsafe}: \texttt{false}\\
-  \textbf{Description}: Perform serial port initialisation.
-
-  This option will perform serial port initialisation within OpenCore prior to enabling
-  (any) debug logging. Serial port configuration is defined via PCDs at compile time
-  in \texttt{gEfiMdeModulePkgTokenSpaceGuid} GUID.
-
-  Default values as found in \texttt{MdeModulePkg.dec} are as follows:
-
-  \begin{itemize}
-  \tightlist
-    \item \texttt{PcdSerialBaudRate} --- Baud rate: \texttt{115200}.
-    \item \texttt{PcdSerialLineControl} --- Line control: no parity, 8 data bits, 1 stop bit.
-  \end{itemize}
-
-  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
 
 \item
   \texttt{SysReport}\\
@@ -4405,6 +4459,151 @@ rm vault.pub
 
 \end{enumerate}
 
+\subsection{Serial Properties}\label{miscserialprops}
+
+\begin{enumerate}
+\item
+  \texttt{Custom}\\
+  \textbf{Type}: \texttt{plist\ dict}\\
+  \textbf{Description}: Update serial port properties in \texttt{BaseSerialPortLib16550}.
+
+  This section lists the PCD values that are used by the \texttt{BaseSerialPortLib16550}.
+  When option \texttt{Override} is set to \texttt{false}, this dictionary is optional.
+
+\item
+  \texttt{Init}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Perform serial port initialisation.
+
+  This option will perform serial port initialisation within OpenCore prior to enabling
+  (any) debug logging.
+
+  Refer to the \hyperref[troubleshootingdebug]{\texttt{Debugging}} section for details.
+
+\item
+  \texttt{Override}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Override serial port properties.
+  When this option is set to \texttt{false}, no keys from \texttt{Custom} will be overridden.
+
+  This option will override serial port properties listed in the \hyperref[miscserialcustprops]{\texttt{Serial Custom Properties}}
+  section below.
+
+\end{enumerate}
+
+\subsubsection{Serial Custom Properties}\label{miscserialcustprops}
+
+\begin{enumerate}
+\item
+  \texttt{BaudRate}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{115200}\\
+  \textbf{Description}: Set the baud rate for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialBaudRate}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{ClockRate}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{1843200}\\
+  \textbf{Description}: Set the clock rate for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialClockRate}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{ExtendedTxFifoSize}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{64}\\
+  \textbf{Description}: Set the extended transmit FIFO size for serial port.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialExtendedTxFifoSize}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{FifoControl}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0x07}\\
+  \textbf{Description}: Configure serial port FIFO Control settings.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialFifoControl}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{LineControl}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0x07}\\
+  \textbf{Description}: Configure serial port Line Control settings.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialLineControl}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{PciDeviceInfo}\\
+  \textbf{Type}: \texttt{plist\ data}\\
+  \textbf{Failsafe}: \texttt{0xFF}\\
+  \textbf{Description}: Set PCI serial device information.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialPciDeviceInfo}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+  \emph{Note}: The maximum allowed size of this option is 41 bytes. Refer to
+  \href{https://github.com/acidanthera/bugtracker/issues/1954#issuecomment-1084220743}{acidanthera/bugtracker\#1954}
+  for more details.
+
+  \emph{Note 2}: This option can be set by running the
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/FindSerialPort}{\texttt{FindSerialPort}} tool.
+
+\item
+  \texttt{RegisterAccessWidth}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{8}\\
+  \textbf{Description}: Set serial port register access width.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterAccessWidth}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{RegisterBase}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{0x03F8}\\
+  \textbf{Description}: Set the base address of serial port registers.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterBase}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{RegisterStride}\\
+  \textbf{Type}: \texttt{plist\ integer}\\
+  \textbf{Failsafe}: \texttt{1}\\
+  \textbf{Description}: Set the serial port register stride in bytes.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialRegisterStride}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{UseHardwareFlowControl}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Enable serial port hardware flow control.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseHardwareFlowControl}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\item
+  \texttt{UseMmio}\\
+  \textbf{Type}: \texttt{plist\ boolean}\\
+  \textbf{Failsafe}: \texttt{false}\\
+  \textbf{Description}: Indicate whether the serial port registers are in MMIO space.
+
+  This option will override the value of \texttt{gEfiMdeModulePkgTokenSpaceGuid.PcdSerialUseMmio}
+  defined in \href{https://github.com/acidanthera/audk/blob/master/MdeModulePkg/MdeModulePkg.dec}{MdeModulePkg.dec}.
+
+\end{enumerate}
+
 \subsection{Entry Properties}\label{miscentryprops}
 
 \begin{enumerate}
@@ -4593,8 +4792,9 @@ limitations that should be considered for certain use cases.
   Variables allowed to be set must be specified in \texttt{LegacySchema}.
 
   Third-party scripts may be used to create \texttt{nvram.plist}
-  file. An example of such script can be found in \texttt{Utilities}. The use of third-party
-  scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
+  file. An example of such script can be found in
+  \href{https://github.com/acidanthera/OpenCorePkg/tree/master/Utilities/LogoutHook}{\texttt{Utilities/LogoutHook}}.
+  The use of third-party scripts may require \texttt{ExposeSensitiveData} set to \texttt{0x3} to provide
   \texttt{boot-path} variable with the OpenCore EFI partition UUID.
 
   \textbf{Warning}: This feature can be dangerous, as it passes unprotected data to
@@ -4791,6 +4991,15 @@ troubleshooting:
   \item \texttt{lapic\_dont\_panic=1} (disable lapic spurious interrupt panic on AP cores)
   \item \texttt{panic\_on\_display\_hang=1} (trigger panic on display hang)
   \item \texttt{panic\_on\_gpu\_hang=1} (trigger panic on GPU hang)
+  \item \texttt{serial=VALUE} (configure serial logging mode) --- The following bits are used by XNU:
+    \begin{itemize}
+    \tightlist
+      \item \texttt{0x01} (\texttt{SERIALMODE\_OUTPUT}, bit \texttt{0}) --- Enable serial output.
+      \item \texttt{0x02} (\texttt{SERIALMODE\_INPUT}, bit \texttt{1}) --- Enable serial input.
+      \item \texttt{0x04} (\texttt{SERIALMODE\_SYNCDRAIN}, bit \texttt{2}) --- Enable serial drain synchronisation.
+      \item \texttt{0x08} (\texttt{SERIALMODE\_BASE\_TTY}, bit \texttt{3}) --- Load Base/Recovery/FVUnlock TTY.
+      \item \texttt{0x10} (\texttt{SERIALMODE\_NO\_IOLOG}, bit \texttt{4}) --- Prevent IOLogs writing to serial.
+    \end{itemize}
   \item \texttt{slide=VALUE} (manually set KASLR slide)
   \item \texttt{smcdebug=VALUE} (\texttt{AppleSMC} debug mask)
   \item \texttt{spin\_wait\_for\_gpu=1} (reduces GPU timeout on high load)
@@ -7995,6 +8204,8 @@ on most Apple hardware, and possibly some others) may be specified in \texttt{UE
   \textbf{Failsafe}: \texttt{false}\\
   \textbf{Description}: Enable AVX vector acceleration of SHA-512 and SHA-384 hashing algorithms.
 
+  \emph{Note}: This option may cause issues on certain laptop firmwares, including Lenovo.
+
   \item
   \texttt{EnableVmx}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
@@ -8593,7 +8804,7 @@ may also help.
 
 To obtain the log during boot serial port debugging can be used. Serial port
 debugging is enabled in \texttt{Target}, e.g. \texttt{0xB} for onscreen with serial. To
-initialise serial within OpenCore use \texttt{SerialInit} configuration option.
+initialise serial within OpenCore use \texttt{Init} configuration option under \texttt{Misc->Serial} with other values properly set.
 For macOS the best choice is CP2102-based UART devices. Connect motherboard \texttt{TX}
 to USB UART \texttt{RX}, and motherboard \texttt{GND} to USB UART \texttt{GND}. Use
 \texttt{screen} utility to get the output, or download GUI software, such as
@@ -8649,6 +8860,8 @@ than 1 meter to avoid output corruption. To additionally enable XNU kernel seria
   \item Refer to \texttt{boot-args} values such as \texttt{debug=0x100}, \texttt{keepsyms=1},
     \texttt{-v}, and similar.
   \item Do not forget about \texttt{AppleDebug} and \texttt{ApplePanic} properties.
+  \item For macOS to correctly recognise and set up serial ports, the \texttt{CustomPciSerialDevice} quirk
+    may be enabled when a PCI serial port card is installed.
   \item Take care of \texttt{Booter}, \texttt{Kernel}, and \texttt{UEFI} quirks.
   \item Consider using serial port to inspect early kernel boot failures. For this
     \texttt{debug=0x108}, \texttt{serial=5}, and \texttt{msgbuf=1048576} boot arguments are needed.
