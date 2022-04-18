@@ -101,8 +101,8 @@ ifeq ($(FUZZ_MEM),)
 endif
 
 ifeq ($(COVERAGE),1)
-	CFLAGS  += -fprofile-arcs -ftest-coverage -D COVERAGE_TEST
-	LDFLAGS += --coverage
+	CFLAGS  += --coverage -D COVERAGE_TEST
+	LDFLAGS += --coverage -Wl,-wrap,llvm_gcda_emit_arcs
 endif
 
 ifeq ($(DEBUG),1)
@@ -292,13 +292,13 @@ sydr-import-check: $(PRODUCT) FORCE
 	@for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f > /dev/null ; done || true
 	@for f in sydr-fuzz-out/corpus/*
 	do
-		if [ -n "$$(./$(PRODUCT) $$f)" ]; then \
+		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
 				cp $$f $(FUZZ_DIR)/; \
 		fi
 	done || true
 	@for f in sydr-fuzz-out/security/*
 	do
-		if [ -n "$$(./$(PRODUCT) $$f)" ]; then \
+		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
 				cp $$f $(FUZZ_DIR)/; \
 		fi
 	done || true
