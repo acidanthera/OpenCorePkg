@@ -381,15 +381,14 @@ PeCoffVerifyAppleSignature (
   IN OUT UINT32  *ImageSize
   )
 {
-  EFI_STATUS                  ImageStatus;
-  PE_COFF_IMAGE_CONTEXT       ImageContext;
-  APPLE_SIGNATURE_CONTEXT     SignatureContext;
-  UINT8                       Hash[SHA256_DIGEST_SIZE];
-  BOOLEAN                     Success;
-  APPLE_EFI_CERTIFICATE_INFO  *CertInfo;
-  UINT32                      SecDirOffset;
-  UINT32                      SignedFileSize;
-  VOID                        *Scratch;
+  EFI_STATUS                      ImageStatus;
+  PE_COFF_IMAGE_CONTEXT           ImageContext;
+  APPLE_SIGNATURE_CONTEXT         SignatureContext;
+  UINT8                           Hash[SHA256_DIGEST_SIZE];
+  BOOLEAN                         Success;
+  APPLE_EFI_CERTIFICATE_INFO      *CertInfo;
+  UINT32                          SecDirOffset;
+  UINT32                          SignedFileSize;
 
   ImageStatus = PeCoffInitializeContext (
                   &ImageContext,
@@ -443,29 +442,17 @@ PeCoffVerifyAppleSignature (
     &Hash[0]
     );
 
-  Scratch = AllocatePool (
-              RSA_SCRATCH_BUFFER_SIZE (
-                SignatureContext.PublicKey->Hdr.NumQwords * sizeof (UINT64)
-                )
-              );
-  if (Scratch == NULL) {
-    return EFI_OUT_OF_RESOURCES;
-  }
-
   //
   // Verify signature
   //
-  Success = RsaVerifySigHashFromKey (
-              SignatureContext.PublicKey,
-              SignatureContext.Signature,
-              sizeof (SignatureContext.Signature),
-              &Hash[0],
-              sizeof (Hash),
-              OcSigHashTypeSha256,
-              Scratch
-              );
-
-  FreePool (Scratch);
+  Success = RsaVerifySigHashFromKeyDynalloc (
+    SignatureContext.PublicKey,
+    SignatureContext.Signature,
+    sizeof (SignatureContext.Signature),
+    &Hash[0],
+    sizeof (Hash),
+    OcSigHashTypeSha256
+    );
 
   if (!Success) {
     return EFI_SECURITY_VIOLATION;

@@ -105,31 +105,19 @@ OcAppleChunklistVerifySignature (
   IN     CONST OC_RSA_PUBLIC_KEY     *PublicKey
   )
 {
-  VOID     *Scratch;
-  BOOLEAN  Result;
+  BOOLEAN Result;
 
   ASSERT (Context != NULL);
   ASSERT (Context->Signature != NULL);
 
-  Scratch = AllocatePool (
-              RSA_SCRATCH_BUFFER_SIZE (PublicKey->Hdr.NumQwords * sizeof (UINT64))
-              );
-
-  if (Scratch == NULL) {
-    return FALSE;
-  }
-
-  Result = RsaVerifySigHashFromKey (
+  Result = RsaVerifySigHashFromKeyDynalloc (
              PublicKey,
              Context->Signature->Signature,
              sizeof (Context->Signature->Signature),
              Context->Hash,
              sizeof (Context->Hash),
-             OcSigHashTypeSha256,
-             Scratch
+             OcSigHashTypeSha256
              );
-
-  FreePool (Scratch);
 
   DEBUG_CODE_BEGIN ();
   if (Result) {

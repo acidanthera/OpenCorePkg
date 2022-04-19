@@ -462,6 +462,34 @@ RsaVerifySigHashFromKey (
   IN VOID                     *Scratch
   );
 
+#ifndef OC_CRYPTO_NDYNALLOC
+
+/**
+  Verify a RSA PKCS1.5 signature against an expected hash.
+  The exponent is always 65537 as per the format specification.
+
+  @param[in] Key            The RSA Public Key.
+  @param[in] Signature      The RSA signature to be verified.
+  @param[in] SignatureSize  Size, in bytes, of Signature.
+  @param[in] Hash           The Hash digest of the signed data.
+  @param[in] HashSize       Size, in bytes, of Hash.
+  @param[in] Algorithm      The RSA algorithm used.
+
+  @returns  Whether the signature has been successfully verified as valid.
+
+**/
+BOOLEAN
+RsaVerifySigHashFromKeyDynalloc (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Hash,
+  IN UINTN                    HashSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
+  );
+
+#endif // OC_CRYPTO_NDYNALLOC
+
 /**
   Verify RSA PKCS1.5 signed data against its signature.
   The modulus' size must be a multiple of the configured BIGNUM word size.
@@ -489,6 +517,36 @@ RsaVerifySigDataFromKey (
   IN OC_SIG_HASH_TYPE         Algorithm,
   IN VOID                     *Scratch
   );
+
+#ifndef OC_CRYPTO_NDYNALLOC
+
+/**
+  Verify RSA PKCS1.5 signed data against its signature.
+  The modulus' size must be a multiple of the configured BIGNUM word size.
+  This will be true for any conventional RSA, which use two's potencies.
+  The exponent is always 65537 as per the format specification.
+
+  @param[in] Key            The RSA Public Key.
+  @param[in] Signature      The RSA signature to be verified.
+  @param[in] SignatureSize  Size, in bytes, of Signature.
+  @param[in] Data           The signed data to verify.
+  @param[in] DataSize       Size, in bytes, of Data.
+  @param[in] Algorithm      The RSA algorithm used.
+
+  @returns  Whether the signature has been successfully verified as valid.
+
+**/
+BOOLEAN
+RsaVerifySigDataFromKeyDynalloc (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Data,
+  IN UINTN                    DataSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
+  );
+
+#endif // OC_CRYPTO_NDYNALLOC
 
 /**
   Verify RSA PKCS1.5 signed data against its signature.

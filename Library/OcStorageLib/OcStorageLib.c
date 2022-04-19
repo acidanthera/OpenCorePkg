@@ -130,9 +130,7 @@ OcStorageInitializeVault (
   IN     UINT32              SignatureSize OPTIONAL
   )
 {
-  VOID  *Scratch;
-
-  if ((Signature != NULL) && (Vault == NULL)) {
+  if (Signature != NULL && Vault == NULL) {
     DEBUG ((DEBUG_ERROR, "OCST: Missing vault with signature\n"));
     return EFI_SECURITY_VIOLATION;
   }
@@ -145,21 +143,10 @@ OcStorageInitializeVault (
   if (Signature != NULL) {
     ASSERT (StorageKey != NULL);
 
-    Scratch = AllocatePool (
-                RSA_SCRATCH_BUFFER_SIZE (StorageKey->Hdr.NumQwords * sizeof (UINT64))
-                );
-
-    if (Scratch == NULL) {
-      return EFI_SECURITY_VIOLATION;
-    }
-
-    if (!RsaVerifySigDataFromKey (StorageKey, Signature, SignatureSize, Vault, VaultSize, OcSigHashTypeSha256, Scratch)) {
+    if (!RsaVerifySigDataFromKeyDynalloc (StorageKey, Signature, SignatureSize, Vault, VaultSize, OcSigHashTypeSha256)) {
       DEBUG ((DEBUG_ERROR, "OCST: Invalid vault signature\n"));
-      FreePool (Scratch);
       return EFI_SECURITY_VIOLATION;
     }
-
-    FreePool (Scratch);
   }
 
   OC_STORAGE_VAULT_CONSTRUCT (&Context->Vault, sizeof (Context->Vault));

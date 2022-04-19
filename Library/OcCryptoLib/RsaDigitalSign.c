@@ -274,14 +274,14 @@ RsaVerifySigHashFromProcessed (
 
   BigNumParseBuffer (
     EncryptedSigNum,
-    (OC_BN_NUM_WORDS)NumWords,
+    NumWords,
     Signature,
     SignatureSize
     );
 
   Result = BigNumPowMod (
              DecryptedSigNum,
-             (OC_BN_NUM_WORDS)NumWords,
+             NumWords,
              EncryptedSigNum,
              Exponent,
              N,
@@ -551,7 +551,10 @@ RsaVerifySigDataFromData (
     FreePool (Memory);
     return FALSE;
   }
-
+  //
+  // This usage of RSA_SCRATCH_BUFFER_SIZE may overflow. However, the caller
+  // will error in this case before accessing the buffer.
+  //
   Scratch = AllocatePool (RSA_SCRATCH_BUFFER_SIZE (ModulusSize));
   if (Scratch == NULL) {
     FreePool (Memory);
@@ -606,7 +609,7 @@ RsaVerifySigHashFromKey (
   //
   return RsaVerifySigHashFromProcessed (
            (OC_BN_WORD *)Key->Data,
-           Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
+           (OC_BN_NUM_WORDS) Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
            (OC_BN_WORD)Key->Hdr.N0Inv,
            (OC_BN_WORD *)&Key->Data[Key->Hdr.NumQwords],
            0x10001,
@@ -618,6 +621,50 @@ RsaVerifySigHashFromKey (
            Scratch
            );
 }
+
+#ifndef OC_CRYPTO_NDYNALLOC
+
+BOOLEAN
+RsaVerifySigHashFromKeyDynalloc (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Hash,
+  IN UINTN                    HashSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
+  )
+{
+  BOOLEAN Result;
+  VOID    *Scratch;
+
+  ASSERT (Key != NULL);
+  //
+  // This usage of RSA_SCRATCH_BUFFER_SIZE may overflow. However, the caller
+  // will error in this case before accessing the buffer.
+  //
+  Scratch = AllocatePool (
+    RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE) Key->Hdr.NumQwords * sizeof (UINT64))
+    );
+  if (Scratch == NULL) {
+    return FALSE;
+  }
+
+  Result = RsaVerifySigHashFromKey (
+             Key,
+             Signature,
+             SignatureSize,
+             Hash,
+             HashSize,
+             Algorithm,
+             Scratch
+             );
+  
+  FreePool (Scratch);
+
+  return Result;
+}
+
+#endif // OC_CRYPTO_NDYNALLOC
 
 BOOLEAN
 RsaVerifySigDataFromKey (
@@ -646,7 +693,7 @@ RsaVerifySigDataFromKey (
   //
   return RsaVerifySigDataFromProcessed (
            (OC_BN_WORD *)Key->Data,
-           Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
+           (OC_BN_NUM_WORDS) Key->Hdr.NumQwords * (8 / OC_BN_WORD_SIZE),
            (OC_BN_WORD)Key->Hdr.N0Inv,
            (OC_BN_WORD *)&Key->Data[Key->Hdr.NumQwords],
            0x10001,
@@ -658,3 +705,47 @@ RsaVerifySigDataFromKey (
            Scratch
            );
 }
+
+#ifndef OC_CRYPTO_NDYNALLOC
+
+BOOLEAN
+RsaVerifySigDataFromKeyDynalloc (
+  IN CONST OC_RSA_PUBLIC_KEY  *Key,
+  IN CONST UINT8              *Signature,
+  IN UINTN                    SignatureSize,
+  IN CONST UINT8              *Data,
+  IN UINTN                    DataSize,
+  IN OC_SIG_HASH_TYPE         Algorithm
+  )
+{
+  BOOLEAN Result;
+  VOID    *Scratch;
+
+  ASSERT (Key != NULL);
+  //
+  // This usage of RSA_SCRATCH_BUFFER_SIZE may overflow. However, the caller
+  // will error in this case before accessing the buffer.
+  //
+  Scratch = AllocatePool (
+    RSA_SCRATCH_BUFFER_SIZE ((OC_BN_SIZE) Key->Hdr.NumQwords * sizeof (UINT64))
+    );
+  if (Scratch == NULL) {
+    return FALSE;
+  }
+
+  Result = RsaVerifySigDataFromKey (
+             Key,
+             Signature,
+             SignatureSize,
+             Data,
+             DataSize,
+             Algorithm,
+             Scratch
+             );
+  
+  FreePool (Scratch);
+
+  return Result;
+}
+
+#endif // OC_CRYPTO_NDYNALLOC
