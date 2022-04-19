@@ -13,6 +13,7 @@ extern UINTN  mFileRecordSize;
 extern UINTN  mIndexRecordSize;
 STATIC UINT64 mBufferSize;
 STATIC UINT8  mDaysPerMonth[] = { 31, 28, 31, 30, 31, 30, 31, 31, 30, 31, 30, 31, 0 };
+INT64  mIndexCounter;
 
 STATIC
 VOID
@@ -159,13 +160,10 @@ NtfsDirHook (
   )
 {
   EFI_STATUS  Status;
-  INT64       *Index;
 
   ASSERT (Name != NULL);
   ASSERT (Node != NULL);
   ASSERT (Info != NULL);
-
-  Index = (INT64 *) &Info->FileSize;
 
   if ((Name[0] == L'.')
     && ((Name[1] == 0) || ((Name[1] == L'.')
@@ -174,7 +172,7 @@ NtfsDirHook (
     return EFI_NOT_FOUND;
   }
 
-  if ((*Index)-- != 0) {
+  if ((mIndexCounter)-- != 0) {
     FreeFile (Node);
     return EFI_NOT_FOUND;
   }

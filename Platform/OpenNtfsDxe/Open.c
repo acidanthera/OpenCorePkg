@@ -9,6 +9,8 @@
 #include "NTFS.h"
 #include "Helper.h"
 
+extern INT64  mIndexCounter;
+
 EFI_STATUS
 EFIAPI
 FileOpen (
@@ -140,7 +142,6 @@ FileReadDir (
 {
   EFI_STATUS    Status;
   EFI_FILE_INFO *Info;
-  INT64         *Index;
   CHAR16        Path[MAX_PATH];
   EFI_NTFS_FILE *TmpFile = NULL;
   INTN          Length;
@@ -156,11 +157,8 @@ FileReadDir (
     return EFI_BUFFER_TOO_SMALL;
   }
 
-  Index = (INT64 *) &Info->FileSize;
-
   ZeroMem (Data, *Size);
   Info->Size = *Size;
-  *Index = File->DirIndex;
 
   Status = StrCpyS (Path, MAX_PATH, File->Path);
   if (EFI_ERROR (Status)) {
@@ -174,8 +172,9 @@ FileReadDir (
     Length++;
   }
 
+  mIndexCounter = File->DirIndex;
   Status = NtfsDir (File->FileSystem, File->Path, Data, DIR_HOOK);
-  if (*Index >= 0) {
+  if (mIndexCounter >= 0) {
     //
     // No entries left
     //
@@ -187,9 +186,7 @@ FileReadDir (
     DEBUG ((DEBUG_INFO, "NTFS: Directory listing failed.\n"));
     return Status;
   }
-  //
-  // Reset Index/FileSize
-  //
+
   Info->FileSize = 0;
   Info->PhysicalSize = 0;
 
