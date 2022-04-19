@@ -76,7 +76,7 @@ FileOpen (
     }
   }
 
-  ZeroMem (CleanPath, MAX_PATH * sizeof (CHAR16));
+  ZeroMem (CleanPath, sizeof (CleanPath));
   Status = RelativeToAbsolute (CleanPath, Path);
   if (EFI_ERROR (Status)) {
     return Status;

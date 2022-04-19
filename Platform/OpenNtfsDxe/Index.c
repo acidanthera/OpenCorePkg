@@ -302,7 +302,7 @@ ListFile (
 
       Filename = AllocateZeroPool ((AttrFileName->FilenameLen + 1) * sizeof (CHAR16));
       if (Filename == NULL) {
-        DEBUG ((DEBUG_INFO, "failed to allocate buffer for Filename\n"));
+        DEBUG ((DEBUG_INFO, "NTFS: Failed to allocate buffer for Filename\n"));
         FreePool (DirFile);
         return EFI_OUT_OF_RESOURCES;
       }

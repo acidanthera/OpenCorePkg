@@ -36,7 +36,7 @@ GetLabel (
   if (!BaseMftRecord->InodeRead) {
     BaseMftRecord->FileRecord = AllocateZeroPool (mFileRecordSize);
     if (BaseMftRecord->FileRecord == NULL) {
-      DEBUG ((DEBUG_INFO, "Failed to allocate buffer for FileRecord.\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Failed to allocate buffer for FileRecord.\n"));
       FreeFile (BaseMftRecord);
       FreePool (BaseMftRecord);
       return EFI_OUT_OF_RESOURCES;
@@ -65,9 +65,16 @@ GetLabel (
     // The Volume Name is not terminated with a Unicode NULL.
     // Its name's length is the size of the attribute as stored in the header.
     //
+    if (Res->InfoLength > (MAX_FILE_SIZE - sizeof (CHAR16))) {
+      DEBUG ((DEBUG_INFO, "NTFS: Volume Name is too huge.\n"));
+      FreeFile (BaseMftRecord);
+      FreePool (BaseMftRecord);
+      return EFI_VOLUME_CORRUPTED;
+    }
+
     *Label = AllocateZeroPool (Res->InfoLength + sizeof (CHAR16));
     if (*Label == NULL) {
-      DEBUG ((DEBUG_INFO, "Failed to allocate buffer for *Label\n"));
+      DEBUG ((DEBUG_INFO, "NTFS: Failed to allocate buffer for *Label\n"));
       FreeFile (BaseMftRecord);
       FreePool (BaseMftRecord);
       return EFI_OUT_OF_RESOURCES;
@@ -124,9 +131,9 @@ FileGetInfo (
     Info = (EFI_FILE_INFO *) Data;
 
     if (File->BaseName != NULL) {
-      Length = sizeof (EFI_FILE_INFO) + StrSize (File->BaseName);
+      Length = sizeof (SIZE_OF_EFI_FILE_INFO) + StrSize (File->BaseName);
     } else if (File->Path != NULL) {
-      Length = sizeof (EFI_FILE_INFO) + StrSize (File->Path);
+      Length = sizeof (SIZE_OF_EFI_FILE_INFO) + StrSize (File->Path);
     } else {
       return EFI_VOLUME_CORRUPTED;
     }
@@ -136,7 +143,7 @@ FileGetInfo (
       return EFI_BUFFER_TOO_SMALL;
     }
 
-    ZeroMem (Data, sizeof (EFI_FILE_INFO));
+    ZeroMem (Data, sizeof (SIZE_OF_EFI_FILE_INFO));
 
     Info->Size = (UINT64) Length;
     Info->Attribute = EFI_FILE_READ_ONLY;
@@ -171,7 +178,7 @@ FileGetInfo (
       return EFI_BUFFER_TOO_SMALL;
     }
 
-    FSInfo->ReadOnly = 1;
+    FSInfo->ReadOnly = TRUE;
     FSInfo->BlockSize = File->FileSystem->BlockIo->Media->BlockSize;
     if (FSInfo->BlockSize  == 0) {
       DEBUG ((DEBUG_INFO, "NTFS: Corrected Media BlockSize\n"));

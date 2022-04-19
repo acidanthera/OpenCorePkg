@@ -56,7 +56,7 @@ NTFSEntryPoint (
       EFI_OPEN_PROTOCOL_GET_PROTOCOL
       );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not open loaded image protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not open loaded image protocol - %r\n", Status));
     return Status;
   }
 
@@ -72,7 +72,7 @@ NTFSEntryPoint (
       NULL
       );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not bind driver\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not bind driver - %r\n", Status));
     return Status;
   }
 
@@ -88,7 +88,7 @@ UnloadNTFSDriver (
   )
 {
   EFI_HANDLE *Buffer;
-  UINTN      NoOfHandles;
+  UINTN      NumOfHandles;
   UINTN      Index;
   EFI_STATUS Status;
 
@@ -96,14 +96,14 @@ UnloadNTFSDriver (
     AllHandles,
     NULL,
     NULL,
-    &NoOfHandles,
+    &NumOfHandles,
     &Buffer
     );
   if (EFI_ERROR (Status)) {
     return Status;
   }
 
-  for (Index = 0; Index < NoOfHandles; Index++) {
+  for (Index = 0; Index < NumOfHandles; Index++) {
     gBS->DisconnectController (Buffer[Index], ImageHandle, NULL);
   }
 
@@ -222,7 +222,7 @@ NTFSStart (
     EFI_OPEN_PROTOCOL_GET_PROTOCOL
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not access BlockIO protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not access BlockIO protocol - %r\n", Status));
     FreePool (Instance);
     return Status;
   }
@@ -236,7 +236,7 @@ NTFSStart (
     EFI_OPEN_PROTOCOL_BY_DRIVER
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not access DiskIO protocol\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not access DiskIO protocol - %r\n", Status));
     FreePool (Instance);
     return Status;
   }
@@ -267,8 +267,8 @@ NTFSStart (
     NULL
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not install simple file system protocol\n"));
-    Status = gBS->CloseProtocol (
+    DEBUG ((DEBUG_INFO, "NTFS: Could not install simple file system protocol - %r\n", Status));
+    gBS->CloseProtocol (
       Controller,
       &gEfiDiskIoProtocolGuid,
       This->DriverBindingHandle,
@@ -313,7 +313,7 @@ NTFSStop (
     EFI_OPEN_PROTOCOL_GET_PROTOCOL
     );
   if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_INFO, "NTFS: Could not locate our instance\n"));
+    DEBUG ((DEBUG_INFO, "NTFS: Could not locate our instance - %r\n", Status));
     return Status;
   }
 

@@ -101,7 +101,7 @@ GetTwoDataRunBytes (
     return Status;
   }
 
-  *Result = (((UINT16) ByteHigh) << 8U) + ByteLow;
+  *Result = (((UINT16) ByteHigh) << 8U) | ByteLow;
 
   return EFI_SUCCESS;
 }
@@ -212,7 +212,7 @@ DecompressBlock (
           }
         }
 
-        if ((TagsByte & 1U) == 1) {
+        if ((TagsByte & 1U) != 0) {
           //
           // Back-reference
           //
