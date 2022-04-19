@@ -25,14 +25,7 @@ gNTFSDriverBinding = {
   .Supported           = NTFSSupported,
   .Start               = NTFSStart,
   .Stop                = NTFSStop,
-  //
-  // UDK/MdeModulePkg/Core/Dxe/Hand/DriverSupport.c
-  // CoreConnectSingleController():589 states
-  // "Sort the remaining DriverBinding Protocol based on their Version field from
-  // highest to lowest." Thus if NTFSVersion > FatVersion, it will somehow
-  // override Fat driver. FatVersion == 0xa.
-  //
-  .Version             = 0x09,
+  .Version             = 0x10,
   .ImageHandle         = NULL,
   .DriverBindingHandle = NULL
 };
@@ -131,32 +124,63 @@ NTFSSupported (
   IN EFI_DEVICE_PATH_PROTOCOL    *RemainingDevicePath
   )
 {
-  EFI_STATUS            Status;
-  EFI_DISK_IO_PROTOCOL  *DiskIo;
+  EFI_STATUS   Status;
+  EFI_FS       *Instance;
+
+  Instance = AllocateZeroPool (sizeof (EFI_FS));
+  if (Instance == NULL) {
+    DEBUG ((DEBUG_INFO, "NTFS: Out of memory.\n"));
+    return EFI_UNSUPPORTED;
+  }
+
+  Status = gBS->OpenProtocol (
+    Controller,
+    &gEfiBlockIoProtocolGuid,
+    (VOID **) &Instance->BlockIo,
+    This->DriverBindingHandle,
+    Controller,
+    EFI_OPEN_PROTOCOL_GET_PROTOCOL
+    );
+  if (EFI_ERROR (Status)) {
+    FreePool (Instance);
+    return Status;
+  }
 
   Status = gBS->OpenProtocol (
     Controller,
     &gEfiDiskIoProtocolGuid,
-    (VOID **)&DiskIo,
+    (VOID **) &Instance->DiskIo,
     This->DriverBindingHandle,
     Controller,
     EFI_OPEN_PROTOCOL_BY_DRIVER
     );
   if (EFI_ERROR (Status)) {
+    FreePool (Instance);
     return Status;
   }
 
-  Status = gBS->CloseProtocol (
+  Status = NtfsMount (Instance);
+  if (EFI_ERROR (Status)) {
+    DEBUG ((DEBUG_INFO, "NTFS: This is not NTFS Volume.\n"));
+    Status = EFI_UNSUPPORTED;
+  } else {
+    FreeAttr (&Instance->RootIndex->Attr);
+    FreeAttr (&Instance->MftStart->Attr);
+    FreePool (Instance->RootIndex->FileRecord);
+    FreePool (Instance->MftStart->FileRecord);
+    FreePool (Instance->RootIndex->File);
+  }
+
+  gBS->CloseProtocol (
     Controller,
     &gEfiDiskIoProtocolGuid,
     This->DriverBindingHandle,
     Controller
     );
-  if (EFI_ERROR (Status)) {
-    return Status;
-  }
 
-  return EFI_SUCCESS;
+  FreePool (Instance);
+
+  return Status;
 }
 
 STATIC
