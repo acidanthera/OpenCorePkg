@@ -101,8 +101,12 @@ ifeq ($(FUZZ_MEM),)
 endif
 
 ifeq ($(COVERAGE),1)
-	CFLAGS  += -fprofile-arcs -ftest-coverage -D COVERAGE_TEST
-	LDFLAGS += --coverage
+	CFLAGS  += --coverage -D COVERAGE_TEST
+	ifeq ($(DIST),Darwin)
+	  LDFLAGS += --coverage
+	else
+	  LDFLAGS += --coverage -Wl,-wrap,llvm_gcda_emit_arcs
+	endif
 endif
 
 ifeq ($(DEBUG),1)
@@ -288,13 +292,28 @@ sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/corpus
 	./$(PROJECT)$(SUFFIX) -merge=1 $(FUZZ_DIR) sydr-fuzz-out/security
 
+sydr-import-check: $(PRODUCT) FORCE
+	@for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f > /dev/null ; done || true
+	@for f in sydr-fuzz-out/corpus/*
+	do
+		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
+				cp $$f $(FUZZ_DIR)/; \
+		fi
+	done || true
+	@for f in sydr-fuzz-out/security/*
+	do
+		if [ -n "$$(./$(PRODUCT) $$f | grep CoverageHit)" ]; then \
+				cp $$f $(FUZZ_DIR)/; \
+		fi
+	done || true
+
 coverage: $(PRODUCT) FORCE
 	@$(LCOV) --version
 	@rm -rf COVERAGE
 	@$(MKDIR) COVERAGE
 	$(LCOV) --no-checksum --zerocounters --directory .
 	$(LCOV) --no-checksum --capture --initial --directory . --output-file COVERAGE/trace.lcov_base
-	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f ; done || true
+	for f in $(FUZZ_DIR)/*; do  ./$(PRODUCT) $$f > /dev/null ; done || true
 	$(LCOV) --no-checksum --capture --directory . --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info || exit 1
 	$(LCOV) --no-checksum -a COVERAGE/trace.lcov_base -a COVERAGE/trace.lcov_info --rc lcov_branch_coverage=1 --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_tmp || exit 1
 	$(LCOV) --no-checksum -r COVERAGE/trace.lcov_tmp /usr/include/\* --rc lcov_branch_coverage=1  --rc lcov_excl_br_line='LCOV_EXCL_BR_LINE|ASSERT' --output-file COVERAGE/trace.lcov_info_final || exit 1

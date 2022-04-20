@@ -76,6 +76,8 @@ CC=clang DEBUG=1 SYDR=1 make sydr-fuzz
 CC=clang DEBUG=1 SYDR=1 make sydr-fuzz-security
 # Import Sydr inputs to FUZZDICT.
 CC=clang DEBUG=1 SYDR=1 make sydr-fuzz-import
+make clean
+COVERAGE=1 DEBUG=1 make sydr-import-check
 # LCOV is required for running this command.
 make clean
 COVERAGE=1 DEBUG=1 make coverage
