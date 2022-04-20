@@ -433,8 +433,8 @@ FindAttr (
         if (Attr->Flags & NTFS_AF_MFT_FILE) {
           Status = DiskRead (
             Attr->BaseMftRecord->File->FileSystem,
-            ReadUnaligned32((UINT32 *)(Attr->Current + 0x10)),
-            512,
+            ReadUnaligned32 ((UINT32 *) (Attr->Current + 0x10)),
+            mFileRecordSize / 2,
             Attr->ExtensionMftRecord
             );
           if (EFI_ERROR (Status)) {
@@ -444,9 +444,9 @@ FindAttr (
 
           Status = DiskRead (
             Attr->BaseMftRecord->File->FileSystem,
-            ReadUnaligned32((UINT32 *)(Attr->Current + 0x14)),
-            512,
-            Attr->ExtensionMftRecord + 512
+            ReadUnaligned32 ((UINT32 *) (Attr->Current + 0x14)),
+            mFileRecordSize / 2,
+            Attr->ExtensionMftRecord + mFileRecordSize / 2
             );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
@@ -633,28 +633,28 @@ FindAttr (
         return NULL;
       }
 
-      AttrStart = Attr->Next + ReadUnaligned16((UINT16 *)(AttrStart + 0x04));
+      AttrStart = Attr->Next + ReadUnaligned16 ((UINT16 *) (AttrStart + 0x04));
       while ((AttrStart + sizeof (UINT32) + sizeof (UINT16)) < Attr->Last) {
-        if (*(UINT32 *)AttrStart != Type) {
+        if (ReadUnaligned32 ((UINT32 *) AttrStart) != Type) {
           break;
         }
 
         Status = ReadAttr (
           Attr,
           AttrStart + 0x10,
-          ReadUnaligned32((UINT32 *)(AttrStart + 0x10)) * mFileRecordSize,
+          ReadUnaligned32 ((UINT32 *) (AttrStart + 0x10)) * mFileRecordSize,
           mFileRecordSize
           );
         if (EFI_ERROR (Status)) {
           return NULL;
         }
 
-        if (ReadUnaligned16((UINT16 *)(AttrStart + 4)) == 0) {
+        if (ReadUnaligned16 ((UINT16 *) (AttrStart + 4)) == 0) {
           DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
           return NULL;
         }
 
-        AttrStart += ReadUnaligned16((UINT16 *)(AttrStart + 4));
+        AttrStart += ReadUnaligned16 ((UINT16 *) (AttrStart + 4));
       }
       Attr->Next = Attr->Current;
       Attr->Flags &= ~NTFS_AF_GPOS;
