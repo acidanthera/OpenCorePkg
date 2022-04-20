@@ -626,8 +626,8 @@ FindAttr (
       AttrStart = Attr->Current;
 
       if (BufferSize >= 0x18) {
-        *(UINT32 *) (AttrStart + 0x10) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize);
-        *(UINT32 *) (AttrStart + 0x14) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize + 1);
+        WriteUnaligned32 ((UINT32 *) (AttrStart + 0x10), (UINT32) (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize));
+        WriteUnaligned32 ((UINT32 *) (AttrStart + 0x14), (UINT32) (Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize + 1));
       } else {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
         return NULL;

@@ -378,8 +378,8 @@ ReadData (
       Sector1 = Runlist->CurrentLcn * mClusterSize / mSectorSize;
     }
 
-    *(UINT32 *) Dest = (UINT32) Sector0;
-    *(UINT32 *) (Dest + 4) = (UINT32) Sector1;
+    WriteUnaligned32 ((UINT32 *) Dest, (UINT32) Sector0);
+    WriteUnaligned32 ((UINT32 *) (Dest + 4), (UINT32) Sector1);
 
     FreePool (Runlist);
     return EFI_SUCCESS;
