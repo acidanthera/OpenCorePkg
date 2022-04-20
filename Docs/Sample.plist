@@ -309,6 +309,8 @@
 			<true/>
 			<key>DevirtualiseMmio</key>
 			<false/>
+			<key>DisableExternalAppleGpu</key>
+			<false/>
 			<key>DisableSingleUser</key>
 			<false/>
 			<key>DisableVariableWrite</key>

@@ -2,6 +2,7 @@ OpenCore Changelog
 ==================
 #### v0.8.1
 - Improved `ExtendBTFeatureFlags` quirk on newer macOS versions, thx @lvs1974
+- Added `DisableExternalAppleGpu` to disable external GPUs on real Macs
 
 #### v0.8.0
 - Added support for early log preservation

@@ -137,6 +137,7 @@
   _(BOOLEAN                     , AllowRelocationBlock      ,     , FALSE  , ()) \
   _(BOOLEAN                     , AvoidRuntimeDefrag        ,     , FALSE  , ()) \
   _(BOOLEAN                     , DevirtualiseMmio          ,     , FALSE  , ()) \
+  _(BOOLEAN                     , DisableExternalAppleGpu   ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableSingleUser         ,     , FALSE  , ()) \
   _(BOOLEAN                     , DisableVariableWrite      ,     , FALSE  , ()) \
   _(BOOLEAN                     , DiscardHibernateMap       ,     , FALSE  , ()) \
