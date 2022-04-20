@@ -102,7 +102,11 @@ endif
 
 ifeq ($(COVERAGE),1)
 	CFLAGS  += --coverage -D COVERAGE_TEST
-	LDFLAGS += --coverage -Wl,-wrap,llvm_gcda_emit_arcs
+	ifeq ($(DIST),Darwin)
+	  LDFLAGS += --coverage
+	else
+	  LDFLAGS += --coverage -Wl,-wrap,llvm_gcda_emit_arcs
+	endif
 endif
 
 ifeq ($(DEBUG),1)

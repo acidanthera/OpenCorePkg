@@ -9,10 +9,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
 
 #ifdef COVERAGE_TEST
 #if defined(__clang__)
 void __wrap_llvm_gcda_emit_arcs (uint32_t num_counters, uint64_t *counters);
+void __real_llvm_gcda_emit_arcs (uint32_t num_counters, uint64_t *counters);
 #elif defined (__GNUC__)
 typedef int64_t gcov_type;
 
