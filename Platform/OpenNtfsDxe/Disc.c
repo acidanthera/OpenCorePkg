@@ -431,33 +431,33 @@ FindAttr (
 
       if ((LRecord->Type == Type) || (Type == 0)) {
         if (Attr->Flags & NTFS_AF_MFT_FILE) {
-          // Status = DiskRead (
-          //   Attr->BaseMftRecord->File->FileSystem,
-          //   ReadUnaligned32((UINT32 *)(Attr->Current + 0x10)),
-          //   512,
-          //   Attr->ExtensionMftRecord
-          //   );
-          // if (EFI_ERROR (Status)) {
-          //   DEBUG ((DEBUG_INFO, "NTFS: Could not read first part of extension record.\n"));
-          //   return NULL;
-          // }
-          //
-          // Status = DiskRead (
-          //   Attr->BaseMftRecord->File->FileSystem,
-          //   ReadUnaligned32((UINT32 *)(Attr->Current + 0x14)),
-          //   512,
-          //   Attr->ExtensionMftRecord + 512
-          //   );
-          // if (EFI_ERROR (Status)) {
-          //   DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
-          //   return NULL;
-          // }
-          //
-          // Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
-          // if (EFI_ERROR (Status)) {
-          //   DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
-          //   return NULL;
-          // }
+          Status = DiskRead (
+            Attr->BaseMftRecord->File->FileSystem,
+            ReadUnaligned32((UINT32 *)(Attr->Current + 0x10)),
+            512,
+            Attr->ExtensionMftRecord
+            );
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_INFO, "NTFS: Could not read first part of extension record.\n"));
+            return NULL;
+          }
+
+          Status = DiskRead (
+            Attr->BaseMftRecord->File->FileSystem,
+            ReadUnaligned32((UINT32 *)(Attr->Current + 0x14)),
+            512,
+            Attr->ExtensionMftRecord + 512
+            );
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
+            return NULL;
+          }
+
+          Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
+          if (EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
+            return NULL;
+          }
         } else {
           Status = ReadMftRecord (
             Attr->BaseMftRecord->File,
@@ -620,45 +620,45 @@ FindAttr (
       return NULL;
     }
 
-    // if ((Attr->Flags & NTFS_AF_MFT_FILE) && (Type == AT_DATA)) {
-    //   Attr->Flags |= NTFS_AF_GPOS;
-    //   Attr->Current = Attr->Next;
-    //   AttrStart = Attr->Current;
-    //
-    //   if (BufferSize >= 0x18) {
-    //     *(UINT32 *) (AttrStart + 0x10) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize);
-    //     *(UINT32 *) (AttrStart + 0x14) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize + 1);
-    //   } else {
-    //     DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
-    //     return NULL;
-    //   }
-    //
-    //   AttrStart = Attr->Next + ReadUnaligned16((UINT16 *)(AttrStart + 0x04));
-    //   while ((AttrStart + sizeof (UINT32) + sizeof (UINT16)) < Attr->Last) {
-    //     if (*(UINT32 *)AttrStart != Type) {
-    //       break;
-    //     }
-    //
-    //     Status = ReadAttr (
-    //       Attr,
-    //       AttrStart + 0x10,
-    //       ReadUnaligned32((UINT32 *)(AttrStart + 0x10)) * mFileRecordSize,
-    //       mFileRecordSize
-    //       );
-    //     if (EFI_ERROR (Status)) {
-    //       return NULL;
-    //     }
-    //
-    //     if (ReadUnaligned16((UINT16 *)(AttrStart + 4)) == 0) {
-    //       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
-    //       return NULL;
-    //     }
-    //
-    //     AttrStart += ReadUnaligned16((UINT16 *)(AttrStart + 4));
-    //   }
-    //   Attr->Next = Attr->Current;
-    //   Attr->Flags &= ~NTFS_AF_GPOS;
-    // }
+    if ((Attr->Flags & NTFS_AF_MFT_FILE) && (Type == AT_DATA)) {
+      Attr->Flags |= NTFS_AF_GPOS;
+      Attr->Current = Attr->Next;
+      AttrStart = Attr->Current;
+
+      if (BufferSize >= 0x18) {
+        *(UINT32 *) (AttrStart + 0x10) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize);
+        *(UINT32 *) (AttrStart + 0x14) = (UINT32)(Attr->BaseMftRecord->File->FileSystem->FirstMftRecord / mSectorSize + 1);
+      } else {
+        DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
+        return NULL;
+      }
+
+      AttrStart = Attr->Next + ReadUnaligned16((UINT16 *)(AttrStart + 0x04));
+      while ((AttrStart + sizeof (UINT32) + sizeof (UINT16)) < Attr->Last) {
+        if (*(UINT32 *)AttrStart != Type) {
+          break;
+        }
+
+        Status = ReadAttr (
+          Attr,
+          AttrStart + 0x10,
+          ReadUnaligned32((UINT32 *)(AttrStart + 0x10)) * mFileRecordSize,
+          mFileRecordSize
+          );
+        if (EFI_ERROR (Status)) {
+          return NULL;
+        }
+
+        if (ReadUnaligned16((UINT16 *)(AttrStart + 4)) == 0) {
+          DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
+          return NULL;
+        }
+
+        AttrStart += ReadUnaligned16((UINT16 *)(AttrStart + 4));
+      }
+      Attr->Next = Attr->Current;
+      Attr->Flags &= ~NTFS_AF_GPOS;
+    }
 
     goto retry;
   }

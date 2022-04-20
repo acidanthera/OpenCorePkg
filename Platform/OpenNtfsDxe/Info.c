@@ -185,7 +185,10 @@ FileGetInfo (
       FSInfo->BlockSize = 512;
     }
     FSInfo->VolumeSize = (File->FileSystem->BlockIo->Media->LastBlock + 1) * FSInfo->BlockSize;
-    FSInfo->FreeSpace = 0; /* The device is Read Only */
+    //
+    // The device is Read Only
+    //
+    FSInfo->FreeSpace = 0;
 
     Length = *Len - sizeof (EFI_FILE_SYSTEM_INFO);
     Status = FileGetInfo (

@@ -257,9 +257,9 @@ ReadData (
   RUNLIST            *Runlist;
   ATTR_HEADER_NONRES *NonRes;
   ATTR_HEADER_RES    *Res;
-  // UINT64             Sector0;
-  // UINT64             Sector1;
-  // UINT64             OffsetInsideCluster;
+  UINT64             Sector0;
+  UINT64             Sector1;
+  UINT64             OffsetInsideCluster;
   UINT64             BufferSize;
 
   if (Length == 0) {
@@ -335,7 +335,8 @@ ReadData (
     return EFI_VOLUME_CORRUPTED;
   }
 
-  if (((NonRes->Flags & FLAG_COMPRESSED) != 0) // && ((Attr->Flags & NTFS_AF_GPOS) == 0))
+  if (((NonRes->Flags & FLAG_COMPRESSED) != 0)
+    && ((Attr->Flags & NTFS_AF_GPOS) == 0)
     && (NonRes->Type == AT_DATA)) {
     if (NonRes->CompressionUnitSize != 4) {
       DEBUG ((DEBUG_INFO, "NTFS: Invalid copmression unit size.\n"));
@@ -359,30 +360,30 @@ ReadData (
     }
   }
 
-  // if (Attr->Flags & NTFS_AF_GPOS) {
-  //   OffsetInsideCluster = Offset & (mClusterSize - 1);
-  //
-  //   Sector0 = ((Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
-  //             * mClusterSize + OffsetInsideCluster) / mSectorSize;
-  //
-  //   Sector1 = Sector0 + 1;
-  //   if (Sector1 == ((Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
-  //                  * mClusterSize) / mSectorSize) {
-  //     Status = ReadRunListElement (Runlist);
-  //     if (EFI_ERROR (Status)) {
-  //       FreePool (Runlist);
-  //       return EFI_VOLUME_CORRUPTED;
-  //     }
-  //
-  //     Sector1 = Runlist->CurrentLcn * mClusterSize / mSectorSize;
-  //   }
-  //
-  //   *(UINT32 *) Dest = (UINT32) Sector0;
-  //   *(UINT32 *) (Dest + 4) = (UINT32) Sector1;
-  //
-  //   FreePool (Runlist);
-  //   return EFI_SUCCESS;
-  // }
+  if (Attr->Flags & NTFS_AF_GPOS) {
+    OffsetInsideCluster = Offset & (mClusterSize - 1);
+
+    Sector0 = ((Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
+              * mClusterSize + OffsetInsideCluster) / mSectorSize;
+
+    Sector1 = Sector0 + 1;
+    if (Sector1 == ((Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
+                   * mClusterSize) / mSectorSize) {
+      Status = ReadRunListElement (Runlist);
+      if (EFI_ERROR (Status)) {
+        FreePool (Runlist);
+        return EFI_VOLUME_CORRUPTED;
+      }
+
+      Sector1 = Runlist->CurrentLcn * mClusterSize / mSectorSize;
+    }
+
+    *(UINT32 *) Dest = (UINT32) Sector0;
+    *(UINT32 *) (Dest + 4) = (UINT32) Sector1;
+
+    FreePool (Runlist);
+    return EFI_SUCCESS;
+  }
 
   Status = ReadClusters (
     Runlist,
