@@ -243,3 +243,4 @@ jobs:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
           COVERITY_BUILD_COMMAND: ../build_oc.tool --skip-tests --skip-package RELEASE
+          MAKE: /usr/bin/make
