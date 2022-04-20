@@ -1006,13 +1006,20 @@ OcExitBootServices (
   }
 
   if (BootCompat->Settings.DisableExternalAppleGpu) {
-    gRT->SetVariable (
+    Status = gRT->SetVariable (
       L"gpu-power-prefs",
       &gApplePersonalizationVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
       sizeof (DisabledGpu),
       &DisabledGpu
       );
+    DEBUG ((
+      DEBUG_INFO,
+      "OCABC: Setting %g:gpu-power-prefs to %u - %r\n",
+      &gApplePersonalizationVariableGuid,
+      DisabledGpu,
+      Status
+      ));
   }
 
   //
