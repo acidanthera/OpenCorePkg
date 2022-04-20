@@ -131,9 +131,9 @@ FileGetInfo (
     Info = (EFI_FILE_INFO *) Data;
 
     if (File->BaseName != NULL) {
-      Length = sizeof (SIZE_OF_EFI_FILE_INFO) + StrSize (File->BaseName);
+      Length = sizeof (EFI_FILE_INFO) + StrSize (File->BaseName);
     } else if (File->Path != NULL) {
-      Length = sizeof (SIZE_OF_EFI_FILE_INFO) + StrSize (File->Path);
+      Length = sizeof (EFI_FILE_INFO) + StrSize (File->Path);
     } else {
       return EFI_VOLUME_CORRUPTED;
     }
@@ -143,7 +143,7 @@ FileGetInfo (
       return EFI_BUFFER_TOO_SMALL;
     }
 
-    ZeroMem (Data, sizeof (SIZE_OF_EFI_FILE_INFO));
+    ZeroMem (Data, sizeof (EFI_FILE_INFO));
 
     Info->Size = (UINT64) Length;
     Info->Attribute = EFI_FILE_READ_ONLY;
