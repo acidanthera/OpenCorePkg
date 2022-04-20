@@ -337,7 +337,7 @@ ReadData (
 
   if (((NonRes->Flags & FLAG_COMPRESSED) != 0) // && ((Attr->Flags & NTFS_AF_GPOS) == 0))
     && (NonRes->Type == AT_DATA)) {
-    if (NonRes->CompressionUnitSize > 63) {
+    if (NonRes->CompressionUnitSize != 4) {
       DEBUG ((DEBUG_INFO, "NTFS: Invalid copmression unit size.\n"));
       FreePool (Runlist);
       return EFI_VOLUME_CORRUPTED;
