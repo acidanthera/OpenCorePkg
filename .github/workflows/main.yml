@@ -222,12 +222,17 @@ jobs:
 
   analyze-coverity:
     name: Analyze Coverity
-    runs-on: macos-latest
+    runs-on: ubuntu-latest
     env:
       JOB_TYPE: COVERITY
     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install curl
 
       - name: CI Bootstrap
         run: |
@@ -238,9 +243,8 @@ jobs:
       - name: Run Coverity
         working-directory: UDK
         run: |
-          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap.sh) && eval "$src" || exit 1
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap-linux.sh) && eval "$src" || exit 1
         env:
           COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
           COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
           COVERITY_BUILD_COMMAND: ../build_oc.tool --skip-tests --skip-package RELEASE
-          MAKE: /Applications/Xcode_12.5.1.app/Contents/Developer/usr/bin/make
