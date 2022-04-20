@@ -135,6 +135,10 @@ typedef struct OC_ABC_SETTINGS_ {
   ///
   BOOLEAN  ForceExitBootServices;
   ///
+  /// Disable external GPUs on real Macs.
+  ///
+  BOOLEAN  DisableExternalAppleGpu;
+  ///
   /// Disable NVRAM variable write support to protect from malware or to prevent
   /// buggy NVRAM implementations cause system issues.
   ///

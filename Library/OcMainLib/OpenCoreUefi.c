@@ -653,27 +653,28 @@ OcLoadBooterUefiSupport (
 
   ZeroMem (&AbcSettings, sizeof (AbcSettings));
 
-  AbcSettings.AvoidRuntimeDefrag     = Config->Booter.Quirks.AvoidRuntimeDefrag;
-  AbcSettings.DevirtualiseMmio       = Config->Booter.Quirks.DevirtualiseMmio;
-  AbcSettings.DisableSingleUser      = Config->Booter.Quirks.DisableSingleUser;
-  AbcSettings.DisableVariableWrite   = Config->Booter.Quirks.DisableVariableWrite;
-  AbcSettings.ProtectSecureBoot      = Config->Booter.Quirks.ProtectSecureBoot;
-  AbcSettings.DiscardHibernateMap    = Config->Booter.Quirks.DiscardHibernateMap;
-  AbcSettings.AllowRelocationBlock   = Config->Booter.Quirks.AllowRelocationBlock;
-  AbcSettings.EnableSafeModeSlide    = Config->Booter.Quirks.EnableSafeModeSlide;
-  AbcSettings.EnableWriteUnprotector = Config->Booter.Quirks.EnableWriteUnprotector;
-  AbcSettings.ForceExitBootServices  = Config->Booter.Quirks.ForceExitBootServices;
-  AbcSettings.ForceBooterSignature   = Config->Booter.Quirks.ForceBooterSignature;
+  AbcSettings.AvoidRuntimeDefrag      = Config->Booter.Quirks.AvoidRuntimeDefrag;
+  AbcSettings.DevirtualiseMmio        = Config->Booter.Quirks.DevirtualiseMmio;
+  AbcSettings.DisableExternalAppleGpu = Config->Booter.Quirks.DisableExternalAppleGpu;
+  AbcSettings.DisableSingleUser       = Config->Booter.Quirks.DisableSingleUser;
+  AbcSettings.DisableVariableWrite    = Config->Booter.Quirks.DisableVariableWrite;
+  AbcSettings.ProtectSecureBoot       = Config->Booter.Quirks.ProtectSecureBoot;
+  AbcSettings.DiscardHibernateMap     = Config->Booter.Quirks.DiscardHibernateMap;
+  AbcSettings.AllowRelocationBlock    = Config->Booter.Quirks.AllowRelocationBlock;
+  AbcSettings.EnableSafeModeSlide     = Config->Booter.Quirks.EnableSafeModeSlide;
+  AbcSettings.EnableWriteUnprotector  = Config->Booter.Quirks.EnableWriteUnprotector;
+  AbcSettings.ForceExitBootServices   = Config->Booter.Quirks.ForceExitBootServices;
+  AbcSettings.ForceBooterSignature    = Config->Booter.Quirks.ForceBooterSignature;
   CopyMem (AbcSettings.BooterSignature, Signature, sizeof (AbcSettings.BooterSignature));
-  AbcSettings.ProtectMemoryRegions   = Config->Booter.Quirks.ProtectMemoryRegions;
-  AbcSettings.ProvideCustomSlide     = Config->Booter.Quirks.ProvideCustomSlide;
-  AbcSettings.ProvideMaxSlide        = Config->Booter.Quirks.ProvideMaxSlide;
-  AbcSettings.ProtectUefiServices    = Config->Booter.Quirks.ProtectUefiServices;
-  AbcSettings.RebuildAppleMemoryMap  = Config->Booter.Quirks.RebuildAppleMemoryMap;
-  AbcSettings.ResizeAppleGpuBars     = Config->Booter.Quirks.ResizeAppleGpuBars;
-  AbcSettings.SetupVirtualMap        = Config->Booter.Quirks.SetupVirtualMap;
-  AbcSettings.SignalAppleOS          = Config->Booter.Quirks.SignalAppleOS;
-  AbcSettings.SyncRuntimePermissions = Config->Booter.Quirks.SyncRuntimePermissions;
+  AbcSettings.ProtectMemoryRegions    = Config->Booter.Quirks.ProtectMemoryRegions;
+  AbcSettings.ProvideCustomSlide      = Config->Booter.Quirks.ProvideCustomSlide;
+  AbcSettings.ProvideMaxSlide         = Config->Booter.Quirks.ProvideMaxSlide;
+  AbcSettings.ProtectUefiServices     = Config->Booter.Quirks.ProtectUefiServices;
+  AbcSettings.RebuildAppleMemoryMap   = Config->Booter.Quirks.RebuildAppleMemoryMap;
+  AbcSettings.ResizeAppleGpuBars      = Config->Booter.Quirks.ResizeAppleGpuBars;
+  AbcSettings.SetupVirtualMap         = Config->Booter.Quirks.SetupVirtualMap;
+  AbcSettings.SignalAppleOS           = Config->Booter.Quirks.SignalAppleOS;
+  AbcSettings.SyncRuntimePermissions  = Config->Booter.Quirks.SyncRuntimePermissions;
 
   //
   // Handle MmioWhitelist patches.

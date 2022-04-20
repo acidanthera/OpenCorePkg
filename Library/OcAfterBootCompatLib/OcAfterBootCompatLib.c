@@ -112,10 +112,11 @@ OcAbcInitialize (
 
   DEBUG ((
     DEBUG_INFO,
-    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOSU %d NOVRWR %d NOSB %d FBSIG %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
+    "OCABC: ALRBL %d RTDFRG %d DEVMMIO %d NOEGPU %d NOSU %d NOVRWR %d NOSB %d FBSIG %d NOHBMAP %d SMSLIDE %d WRUNPROT %d\n",
     Settings->AllowRelocationBlock,
     Settings->AvoidRuntimeDefrag,
     Settings->DevirtualiseMmio,
+    Settings->DisableExternalAppleGpu,
     Settings->DisableSingleUser,
     Settings->ForceBooterSignature,
     Settings->DisableVariableWrite,
