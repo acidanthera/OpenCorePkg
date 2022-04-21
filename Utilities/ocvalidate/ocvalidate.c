@@ -83,7 +83,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   //
   // Print usage.
   //
-  if (argc != 2 || (argc > 1 && AsciiStrCmp (argv[1], "--version") == 0)) {
+  if (argc != 2) {
     DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/config.plist>\n\n", argv[0]));
     return -1;
   }
