@@ -363,19 +363,28 @@ ReadData (
   if (Attr->Flags & NTFS_AF_GPOS) {
     OffsetInsideCluster = Offset & (mClusterSize - 1);
 
-    Sector0 = ((Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
-              * mClusterSize + OffsetInsideCluster) / mSectorSize;
+    Sector0 = DivU64x64Remainder (
+      (Runlist->TargetVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize + OffsetInsideCluster,
+      mSectorSize,
+      NULL
+      );
 
     Sector1 = Sector0 + 1;
-    if (Sector1 == ((Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn)
-                   * mClusterSize) / mSectorSize) {
+    if (Sector1 == DivU64x64Remainder (
+      (Runlist->NextVcn - Runlist->CurrentVcn + Runlist->CurrentLcn) * mClusterSize,
+      mSectorSize,
+      NULL)) {
       Status = ReadRunListElement (Runlist);
       if (EFI_ERROR (Status)) {
         FreePool (Runlist);
         return EFI_VOLUME_CORRUPTED;
       }
 
-      Sector1 = Runlist->CurrentLcn * mClusterSize / mSectorSize;
+      Sector1 = DivU64x64Remainder (
+        Runlist->CurrentLcn * mClusterSize,
+        mSectorSize,
+        NULL
+        );
     }
 
     WriteUnaligned32 ((UINT32 *) Dest, (UINT32) Sector0);
