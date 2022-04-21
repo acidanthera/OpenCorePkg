@@ -737,10 +737,12 @@ FreeAttr (
 
   if (Attr->ExtensionMftRecord != NULL) {
     FreePool (Attr->ExtensionMftRecord);
+    Attr->ExtensionMftRecord = NULL;
   }
 
   if (Attr->NonResAttrList != NULL) {
     FreePool (Attr->NonResAttrList);
+    Attr->NonResAttrList = NULL;
   }
 }
 
@@ -757,5 +759,6 @@ FreeFile (
     && (File->FileRecord != File->File->FileSystem->RootIndex->FileRecord)
     && (File->FileRecord != File->File->FileSystem->MftStart->FileRecord)) {
     FreePool (File->FileRecord);
+    File->FileRecord = NULL;
   }
 }
