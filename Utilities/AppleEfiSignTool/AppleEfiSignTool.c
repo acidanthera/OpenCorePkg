@@ -179,12 +179,16 @@ LLVMFuzzerTestOneInput (
   )
 {
 #if 0
-  APFS_DRIVER_VERSION *DriverVersion;
-  EFI_STATUS Status = PeCoffGetApfsDriverVersion ((UINT8*)Data, (UINT32)Size, &DriverVersion);
+  APFS_DRIVER_VERSION  *DriverVersion;
+  EFI_STATUS           Status;
+  volatile UINTN       Walker;
+  UINTN                Index;
+
+  Status = PeCoffGetApfsDriverVersion ((UINT8 *) Data, (UINT32) Size, &DriverVersion);
   if (!EFI_ERROR (Status)) {
-    volatile size_t p = 0;
-    for (size_t i = 0; i < sizeof (*DriverVersion); i++) {
-      p += ((uint8_t *)DriverVersion)[i];
+    Walker = 0;
+    for (Index = 0; Index < sizeof (*DriverVersion); ++Index) {
+      Walker += ((UINT8 *) DriverVersion)[Index];
     }
   }
 #endif
