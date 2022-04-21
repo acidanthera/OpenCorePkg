@@ -157,6 +157,7 @@ jobs:
   analyze-uncrustify:
     name: Analyze Uncrustify
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
 
