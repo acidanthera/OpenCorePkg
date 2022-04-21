@@ -16,38 +16,70 @@ WITHOUT WARRANTIES OR REPRESENTATIONS OF ANY KIND, EITHER EXPRESS OR IMPLIED.
 
 **/
 
-#include <errno.h>
-#include <unistd.h>
-#include <stdlib.h>
-#include <stdbool.h>
-#include <string.h>
-#include <UserFile.h>
-#include <Library/OcPeCoffExtLib.h>
-#include <Library/OcMachoLib.h>
+#include <Library/BaseMemoryLib.h>
 #include <Library/DebugLib.h>
+#include <Library/MemoryAllocationLib.h>
+#include <Library/OcMachoLib.h>
+#include <Library/OcPeCoffExtLib.h>
 #include <Library/PcdLib.h>
 
-static char UsageBanner[] = "AppleEfiSignTool v1.0 – Tool for verifying Apple EFI binaries\n"
-                            "It supports PE and Fat binaries.\n"
-                            "Usage:\n"
-                            "  -i : input file\n"
-                            "  -h : show this text\n"
-                            "Example: ./AppleEfiSignTool -i apfs.efi\n";
+#include <UserFile.h>
 
-enum {
+#define  APPLE_EFI_SIGN_TOOL_VERSION  "1.0"
+
+typedef enum {
   PE_ARCH_32,
   PE_ARCH_64,
   PE_ARCH_ANY
-};
+} PE_IMAGE_ARCH;
 
-static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int arch) {
-  EFI_STATUS Status = EFI_SUCCESS;
-  uint32_t OrgImageSize = ImageSize;
-  const char *Slice;
-  if (arch == PE_ARCH_32) {
+STATIC
+VOID
+PrintHelp (
+  VOID
+  )
+{
+  DEBUG ((
+    DEBUG_ERROR,
+    "AppleEfiSignTool v%a – Tool for verifying Apple EFI binaries\n",
+    APPLE_EFI_SIGN_TOOL_VERSION
+    ));
+  DEBUG ((DEBUG_ERROR, "It supports PE and Fat binaries.\n"));
+
+  DEBUG ((DEBUG_ERROR, "Usage: ./AppleEfiSignTool <path/to/image>\n"));
+  DEBUG ((DEBUG_ERROR, "Example: ./AppleEfiSignTool path/to/apfs.efi\n"));
+}
+
+/**
+  Verify PE image signature.
+
+  @param[in,out]  Image      A pointer to image file buffer.
+  @param[in]      ImageSize  Size of Image.
+  @param[out]     IsFat      Will be set to TRUE if Image is a FAT binary.
+  @param[in]      Arch       Image architechure.
+
+  @return  0 if Image is successfully verified, otherwise EXIT_FAILURE.
+**/
+STATIC
+INT32
+VerifySignature (
+  IN  OUT  UINT8          *Image,
+  IN       UINT32         ImageSize,
+      OUT  BOOLEAN        *IsFat,
+  IN       PE_IMAGE_ARCH  Arch
+  )
+{
+  EFI_STATUS   Status;
+  UINT32       OrgImageSize;
+  CONST CHAR8  *Slice;
+
+  Status       = EFI_SUCCESS;
+  OrgImageSize = ImageSize;
+
+  if (Arch == PE_ARCH_32) {
     Status = FatFilterArchitecture32 (&Image, &ImageSize);
     Slice = "32-bit";
-  } else if (arch == PE_ARCH_64) {
+  } else if (Arch == PE_ARCH_64) {
     Status = FatFilterArchitecture64 (&Image, &ImageSize);
     Slice = "64-bit";
   } else {
@@ -58,12 +90,12 @@ static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int 
     return 0;
   }
 
-  if (OrgImageSize == ImageSize && arch != PE_ARCH_ANY) {
+  if (OrgImageSize == ImageSize && Arch != PE_ARCH_ANY) {
     return 0;
   }
 
   if (OrgImageSize != ImageSize) {
-    *IsFat = true;
+    *IsFat = TRUE;
   }
 
   DEBUG ((DEBUG_ERROR, "SIGN: Discovered %a slice\n", Slice));
@@ -82,64 +114,49 @@ static int VerifySignature(uint8_t *Image, uint32_t ImageSize, bool *IsFat, int 
   if (EFI_ERROR (Status)) {
     return EXIT_FAILURE;
   }
+
   return 0;
 }
 
-int ENTRY_POINT(int argc, char *argv[]) {
-  int Opt;
+int ENTRY_POINT(int argc, const char *argv[]) {
+  CONST CHAR8          *ImageFileName;
+  UINT32               ImageSize;
+  UINT8                *ImageFileBuffer;
+  BOOLEAN              IsFat;
+  INT32                RetVal;
+  APFS_DRIVER_VERSION  *DriverVersion;
+  EFI_STATUS           Status;
 
+  //
+  // Enable PCD debug logging.
+  //
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
-  if (argc < 2) {
-    puts(UsageBanner);
-    exit(EXIT_FAILURE);
+  //
+  // Print usage.
+  //
+  if (argc != 2) {
+    PrintHelp ();
+    return EXIT_FAILURE;
   }
 
-  uint8_t *Image      = NULL;
-  uint32_t ImageSize  = 0;
-
-  while ((Opt = getopt (argc, argv, "i:vh")) != -1) {
-    switch (Opt) {
-      case 'i': {
-        //
-        // Open input file
-        //
-        Image = UserReadFile(optarg, &ImageSize);
-        if (Image == NULL) {
-          printf("Cannot read: %s\n", optarg);
-          exit(EXIT_FAILURE);
-        }
-        break;
-      }
-      case 'h': {
-        puts(UsageBanner);
-        free(Image);
-        exit(0);
-        break;
-      }
-      default:
-        puts(UsageBanner);
-        free(Image);
-        exit(EXIT_FAILURE);
-    }
+  ImageFileName   = argv[1];
+  ImageFileBuffer = UserReadFile (ImageFileName, &ImageSize);
+  if (ImageFileBuffer == NULL) {
+    DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ImageFileName));
+    return EXIT_FAILURE;
   }
 
-  if (Image == NULL) {
-    puts(UsageBanner);
-    exit(EXIT_FAILURE);
+  IsFat   = FALSE;
+  RetVal  = EXIT_SUCCESS;
+  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_32);
+  RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_64);
+  if (!IsFat) {
+    RetVal |= VerifySignature (ImageFileBuffer, ImageSize, &IsFat, PE_ARCH_ANY);
   }
 
-  bool HasFat = false;
-  int code = EXIT_SUCCESS;
-  code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_32);
-  code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_64);
-  if (!HasFat) {
-    code |= VerifySignature(Image, ImageSize, &HasFat, PE_ARCH_ANY);
-  }
-
-  APFS_DRIVER_VERSION *DriverVersion;
-  EFI_STATUS Status = PeCoffGetApfsDriverVersion (Image, ImageSize, &DriverVersion);
+  Status = PeCoffGetApfsDriverVersion (ImageFileBuffer, ImageSize, &DriverVersion);
   if (!EFI_ERROR (Status)) {
     DEBUG ((
       DEBUG_ERROR,
@@ -150,32 +167,44 @@ int ENTRY_POINT(int argc, char *argv[]) {
       ));
   }
 
-  free(Image);
+  FreePool (ImageFileBuffer);
 
-  return code;
+  return RetVal;
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+INT32
+LLVMFuzzerTestOneInput (
+  IN  CONST UINT8  *Data,
+  IN        UINTN  Size
+  )
+{
 #if 0
-  APFS_DRIVER_VERSION *DriverVersion;
-  EFI_STATUS Status = PeCoffGetApfsDriverVersion ((UINT8*)Data, (UINT32)Size, &DriverVersion);
+  APFS_DRIVER_VERSION  *DriverVersion;
+  EFI_STATUS           Status;
+  volatile UINTN       Walker;
+  UINTN                Index;
+
+  Status = PeCoffGetApfsDriverVersion ((UINT8 *) Data, (UINT32) Size, &DriverVersion);
   if (!EFI_ERROR (Status)) {
-    volatile size_t p = 0;
-    for (size_t i = 0; i < sizeof (*DriverVersion); i++) {
-      p += ((uint8_t *)DriverVersion)[i];
+    Walker = 0;
+    for (Index = 0; Index < sizeof (*DriverVersion); ++Index) {
+      Walker += ((UINT8 *) DriverVersion)[Index];
     }
   }
 #endif
 
+  VOID    *Copy;
+  UINT32  NewSize;
+
   if (Size > 0 && Size <= 1024*1024*1024) {
-    void *Copy = malloc(Size);
-    if (Copy == NULL) {
-      abort();
+    Copy = AllocatePool (Size);
+    if (Copy != NULL) {
+      CopyMem (Copy, Data, Size);
+      
+      NewSize = (UINT32) Size;
+      PeCoffVerifyAppleSignature (Copy, &NewSize);
+      FreePool (Copy);
     }
-    memcpy(Copy, Data, Size);
-    UINT32  NewSize = (UINT32) Size;
-    PeCoffVerifyAppleSignature(Copy, &NewSize);
-    free(Copy);
   }
 
   return 0;
