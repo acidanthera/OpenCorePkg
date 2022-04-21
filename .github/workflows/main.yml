@@ -175,6 +175,12 @@ jobs:
         env:
           WORK_BRANCH: ${{ github.ref_name }}
 
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v2
+        with:
+          name: Uncrustify Artifacts
+          path: uncrustify.diff
+
   analyze-scripts:
     name: Analyze Scripts
     runs-on: macos-latest
