@@ -581,6 +581,8 @@ IterateDir (
       return EFI_VOLUME_CORRUPTED;
     }
 
+    mBufferSize -= Res->InfoOffset;
+
     if ((Res->NonResFlag != 0)
       || (Res->NameLength != 4)
       || (Res->NameOffset != sizeof (*Res))
@@ -588,12 +590,16 @@ IterateDir (
       continue;
     }
 
+    if (mBufferSize < sizeof (*Index)) {
+      DEBUG ((DEBUG_INFO, "NTFS: (IterateDir #1.1) $INDEX_ROOT is corrupted.\n"));
+      FreeAttr (&Attr);
+      return EFI_VOLUME_CORRUPTED;
+    }
+
     Index = (ATTR_INDEX_ROOT *) ((UINT8 *) Res + Res->InfoOffset);
     if (Index->Root.Type != AT_FILENAME) {
       continue;
     }
-
-    mBufferSize -= Res->InfoOffset;
 
     break;
   }

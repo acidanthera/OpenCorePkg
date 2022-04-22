@@ -250,6 +250,7 @@ Read (
   Status = ReadAttr (&BaseMftRecord->Attr, Data, File->Offset, *Size);
   if (EFI_ERROR (Status)) {
     *Size = 0;
+    FreeAttr (&BaseMftRecord->Attr);
     return Status;
   }
 

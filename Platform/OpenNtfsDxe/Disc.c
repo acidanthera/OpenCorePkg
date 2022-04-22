@@ -577,6 +577,7 @@ FindAttr (
       Status = ReadData (Attr, AttrStart, Attr->NonResAttrList, 0, (UINTN) NonRes->RealSize);
       if (EFI_ERROR (Status)) {
         DEBUG ((DEBUG_INFO, "NTFS: Failed to read non-resident attribute list\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -652,6 +653,7 @@ FindAttr (
           mFileRecordSize
           );
         if (EFI_ERROR (Status)) {
+          FreeAttr (Attr);
           return NULL;
         }
 

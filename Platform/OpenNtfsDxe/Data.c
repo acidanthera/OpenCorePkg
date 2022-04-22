@@ -165,6 +165,7 @@ ReadMftRecord (
     );
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "NTFS: Could not read MFT Record 0x%Lx\n", RecordNumber));
+    FreeAttr (&File->MftFile.Attr);
     return Status;
   }
 
@@ -565,6 +566,7 @@ ReadSymlink (
 
   Status = ReadAttr (&File->Attr, (UINT8 *) &Symlink, 0, sizeof (Symlink));
   if (EFI_ERROR (Status)) {
+    FreeAttr (&File->Attr);
     return NULL;
   }
 
@@ -587,6 +589,7 @@ ReadSymlink (
 
   Status = ReadAttr (&File->Attr, (UINT8 *) Substitute, Offset, Symlink.SubstituteLength);
   if (EFI_ERROR (Status)) {
+    FreeAttr (&File->Attr);
     FreePool (Substitute);
     return NULL;
   }
