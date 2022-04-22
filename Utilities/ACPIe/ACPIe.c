@@ -21,6 +21,7 @@
 
   @param[in]   Status  Error occured in the parser.
 **/
+STATIC
 VOID
 PrintParserError (
   IN EFI_STATUS Status
@@ -31,31 +32,29 @@ PrintParserError (
       break;
 
     case EFI_INVALID_PARAMETER:
-      printf ("EXIT: Invalid parameter!\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: Invalid parameter!\n"));
       break;
 
     case EFI_DEVICE_ERROR:
-      printf ("EXIT: ACPI table is incorrect or not supported by parser!\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: ACPI table is incorrect or not supported by parser!\n"));
       break;
 
     case EFI_NOT_FOUND:
-      printf ("EXIT: No entry found in the table.\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: No entry found in the table.\n"));
       break;
 
     case EFI_OUT_OF_RESOURCES:
-      printf ("EXIT: ACPI table has too much nesting!\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: ACPI table has too much nesting!\n"));
       break;
 
     case EFI_LOAD_ERROR:
-      printf ("EXIT: File error in table file!\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: File error in table file!\n"));
       break;
 
     default:
-      printf ("EXIT: Unknown error!\n");
+      DEBUG ((DEBUG_ERROR, "EXIT: Unknown error!\n"));
       break;
   }
-
-  return;
 }
 
 /**
@@ -74,17 +73,18 @@ PrintParserError (
   @retval EFI_LOAD_ERROR        Wrong path to the file or the file can't
                                 be opened.
 **/
+STATIC
 EFI_STATUS
 AcpiFindEntryInFile (
-  IN     CONST CHAR8 *FileName,
-  IN     CONST CHAR8 *PathString,
-  IN     UINT8       Entry,
-     OUT UINT32      *Offset
+  IN     CONST CHAR8  *FileName,
+  IN     CONST CHAR8  *PathString,
+  IN     UINT8        Entry,
+     OUT UINT32       *Offset
   )
 {
-  UINT8               *TableStart;
-  EFI_STATUS          Status;
-  UINT32              TableLength;
+  UINT8       *TableStart;
+  EFI_STATUS  Status;
+  UINT32      TableLength;
 
   TableStart = UserReadFile (FileName, &TableLength);
   if (TableStart == NULL) {
@@ -94,7 +94,7 @@ AcpiFindEntryInFile (
 
   Status = AcpiFindEntryInMemory (TableStart, PathString, Entry, Offset, TableLength);
 
-  FreePool(TableStart);
+  FreePool (TableStart);
 
   return Status;
 }
@@ -117,8 +117,8 @@ ENTRY_POINT (
   )                     // ENTRY_POINT
 
 {
-  UINT32     ReturnedOffset;
-  EFI_STATUS Status;
+  UINT32      ReturnedOffset;
+  EFI_STATUS  Status;
 
 #if defined(VERBOSE) && !defined(FUZZING_TEST)
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_VERBOSE | DEBUG_INFO;
@@ -127,96 +127,93 @@ ENTRY_POINT (
 
   switch (argc) {
     case 5:
-
       if ((argv[1][0] == '-' && argv[1][1] == 'f') || (argv[1][0] == '-' && argv[1][1] == 'a')) {
         ReturnedOffset = 0;
 
         if (argv[1][0] == '-' && argv[1][1] == 'f') {
           DEBUG ((DEBUG_VERBOSE, "Entered main (file)\n"));
           Status = AcpiFindEntryInFile (
-            argv[2],
-            argv[3],
-            atoi (argv[4]),
-            &ReturnedOffset
-            );
+                     argv[2],
+                     argv[3],
+                     atoi (argv[4]),
+                     &ReturnedOffset
+                     );
 
-          if (Status == EFI_SUCCESS) {
-            printf ("Returned offset: %d\n", ReturnedOffset);
-          } else {
-            PrintParserError (Status);
-          }
-
-          return 0;
-        } else {
-          DEBUG ((DEBUG_VERBOSE, "Entered main (address)\n"));
-          Status = AcpiFindEntryInFile (
-            argv[2],
-            argv[3],
-            atoi (argv[4]),
-            &ReturnedOffset
-            );
-
-          if (Status == EFI_SUCCESS) {
-            printf ("Returned offset: %d\n", ReturnedOffset);
+          if (!EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_ERROR, "Returned offset: %d\n", ReturnedOffset));
           } else {
             PrintParserError (Status);
           }
 
           return 0;
         }
-      } else {
-        printf ("Usage: ACPIe -f *file* *search path* [number of occurance]\n");
-        return 2;
+
+        DEBUG ((DEBUG_VERBOSE, "Entered main (address)\n"));
+        Status = AcpiFindEntryInFile (
+                   argv[2],
+                   argv[3],
+                   atoi (argv[4]),
+                   &ReturnedOffset
+                   );
+
+        if (!EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "Returned offset: %d\n", ReturnedOffset));
+        } else {
+          PrintParserError (Status);
+        }
+
+        return 0;
       }
+
+      DEBUG ((DEBUG_ERROR, "Usage: ACPIe -f *file* *search path* [number of occurance]\n"));
+      return 2;
 
       break;
 
     case 4:
-
       if ((argv[1][0] == '-' && argv[1][1] == 'f') || (argv[1][0] == '-' && argv[1][1] == 'a')) {
-
         if (argv[1][0] == '-' && argv[1][1] == 'f') {
           DEBUG ((DEBUG_VERBOSE, "Entered main (file)\n"));
           Status = AcpiFindEntryInFile (
-            argv[2],
-            argv[3],
-            1,
-            &ReturnedOffset
-            );
+                     argv[2],
+                     argv[3],
+                     1,
+                     &ReturnedOffset
+                     );
 
-          if (Status == EFI_SUCCESS) {
-            printf ("Returned offset: %d\n", ReturnedOffset);
-          } else {
-            PrintParserError (Status);
-          }
-
-          return 0;
-        } else {
-          DEBUG ((DEBUG_VERBOSE, "Entered main (address)\n"));
-          Status = AcpiFindEntryInFile (
-            argv[2],
-            argv[3],
-            1,
-            &ReturnedOffset
-            );
-
-          if (Status == EFI_SUCCESS) {
-            printf ("Returned offset: %d\n", ReturnedOffset);
+          if (!EFI_ERROR (Status)) {
+            DEBUG ((DEBUG_ERROR, "Returned offset: %d\n", ReturnedOffset));
           } else {
             PrintParserError (Status);
           }
 
           return 0;
         }
-      } else {
-        printf ("Usage: ACPIe -f *file* *search path* [number of occurance]\n");
-        return 2;
+
+        DEBUG ((DEBUG_VERBOSE, "Entered main (address)\n"));
+        Status = AcpiFindEntryInFile (
+                   argv[2],
+                   argv[3],
+                   1,
+                   &ReturnedOffset
+                   );
+
+        if (!EFI_ERROR (Status)) {
+          DEBUG ((DEBUG_ERROR, "Returned offset: %d\n", ReturnedOffset));
+        } else {
+          PrintParserError (Status);
+        }
+
+        return 0;
       }
+
+      DEBUG ((DEBUG_ERROR, "Usage: ACPIe -f *file* *search path* [number of occurance]\n"));
+      return 2;
 
       break;
 
     default:
-      printf ("Usage: ACPIe -f *file* *search path* [number of occurance]\n");
+      DEBUG ((DEBUG_ERROR, "Usage: ACPIe -f *file* *search path* [number of occurance]\n"));
       return 0;
 
       break;
@@ -233,7 +230,7 @@ LLVMFuzzerTestOneInput (
   if (Size > 0) {
     UINT32 offset = 0;
     AcpiFindEntryInMemory (
-      (UINT8 *)Data, "_SB.PCI0.GFX0",
+      (UINT8 *) Data, "_SB.PCI0.GFX0",
       1,
       &offset,
       (UINT32) Size
