@@ -21,11 +21,11 @@ GuiBmpToImage (
   IN     UINTN      BmpImageSize
   )
 {
-  EFI_STATUS                    Status;
-  EFI_GRAPHICS_OUTPUT_BLT_PIXEL *Buffer;
-  UINTN                         BufferSize;
-  UINTN                         BmpHeight;
-  UINTN                         BmpWidth;
+  EFI_STATUS                     Status;
+  EFI_GRAPHICS_OUTPUT_BLT_PIXEL  *Buffer;
+  UINTN                          BufferSize;
+  UINTN                          BmpHeight;
+  UINTN                          BmpWidth;
 
   ASSERT (Image != NULL);
   ASSERT (BmpImage != NULL);
@@ -44,28 +44,32 @@ GuiBmpToImage (
     return Status;
   }
   // TODO: Update the lib?
-  ASSERT ((UINT32)BmpHeight == BmpHeight);
-  ASSERT ((UINT32)BmpWidth  == BmpWidth);
+  ASSERT ((UINT32) BmpHeight == BmpHeight);
+  ASSERT ((UINT32) BmpWidth  == BmpWidth);
 
-  Image->Height = (UINT32)BmpHeight;
-  Image->Width  = (UINT32)BmpWidth;
+  Image->Height = (UINT32) BmpHeight;
+  Image->Width  = (UINT32) BmpWidth;
   Image->Buffer = Buffer;
   return EFI_SUCCESS;
 }
 
-int main (int argc, char** argv)
+int main (int argc, const char *argv[])
 {
-  BOOLEAN Result;
-  GUI_FONT_CONTEXT Context;
-  uint8_t          *FontImage;
-  uint32_t         FontImageSize;
-  uint8_t          *FontMetrics;
-  uint32_t         FontMetricsSize;
-  GUI_IMAGE        Label;
-  EFI_STATUS       Status;
-  VOID             *BmpImage;
-  UINT32           BmpImageSize;
-  FILE *write_ptr;
+  BOOLEAN           Result;
+  GUI_FONT_CONTEXT  Context;
+  UINT8             *FontImage;
+  UINT32            FontImageSize;
+  UINT8             *FontMetrics;
+  UINT32            FontMetricsSize;
+  GUI_IMAGE         Label;
+  EFI_STATUS        Status;
+  VOID              *BmpImage;
+  UINT32            BmpImageSize;
+
+  if (argc != 3) {
+    DEBUG ((DEBUG_ERROR, "./Bmf <FontImage> <FontMetrics>"));
+    return -1;
+  }
 
   FontImage   = UserReadFile (argv[1], &FontImageSize);
   FontMetrics = UserReadFile (argv[2], &FontMetricsSize);
@@ -75,7 +79,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  Result = GuiGetLabel (&Label, &Context, L"Time Machine HD", sizeof ("Time Machine HD") - 1, FALSE);
+  Result = GuiGetLabel (&Label, &Context, L"Time Machine HD", L_STR_LEN ("Time Machine HD"), FALSE);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: label failed\n"));
     return -1;
@@ -96,11 +100,7 @@ int main (int argc, char** argv)
     return -1;
   }
 
-  write_ptr = fopen ("Label.bmp", "wb");
-  if (write_ptr != NULL) {
-    fwrite (BmpImage, BmpImageSize, 1, write_ptr);
-  }
-  fclose (write_ptr);
+  UserWriteFile ("Label.bmp", BmpImage, BmpImageSize);
 
   FreePool (BmpImage);
 
