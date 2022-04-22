@@ -15,7 +15,12 @@
 
 #define  NUM_EXTENTS  20
 
-int ENTRY_POINT (int argc, const char *argv[]) {
+INT32
+ENTRY_POINT (
+  IN INT32        Argc,
+  IN CONST CHAR8  *Argv[]
+  )
+{
   int                          Index;
   BOOLEAN                      DmgContextValid;
   UINT8                        *Dmg;
@@ -30,22 +35,22 @@ int ENTRY_POINT (int argc, const char *argv[]) {
   UINT32                       Index2;
   OC_APPLE_CHUNKLIST_CONTEXT   ChunklistContext;
 
-  if (argc < 2) {
+  if (Argc < 2) {
     DEBUG ((DEBUG_ERROR, "Please provide a valid Disk Image path\n"));
     return -1;
   }
   
-  if ((argc % 2) != 1) {
+  if ((Argc % 2) != 1) {
     DEBUG ((DEBUG_ERROR, "Please provide a chunklist file for each DMG, enter \'n\' to skip\n"));
   }
 
-  for (Index = 1; Index < (argc - 1); Index += 2) {
+  for (Index = 1; Index < (Argc - 1); Index += 2) {
     DmgContextValid = FALSE;
     Dmg             = NULL;
     Chunklist       = NULL;
     UncompDmg       = NULL;
 
-    if ((Dmg = UserReadFile (argv[Index], &DmgSize)) == NULL) {
+    if ((Dmg = UserReadFile (Argv[Index], &DmgSize)) == NULL) {
       DEBUG ((DEBUG_ERROR, "Read fail\n"));
       goto ContinueDmgLoop;
     }
@@ -72,8 +77,8 @@ int ENTRY_POINT (int argc, const char *argv[]) {
 
     DmgContextValid = TRUE;
 
-    if (AsciiStrCmp (argv[Index + 1], "n") != 0) {
-      if ((Chunklist = UserReadFile (argv[Index + 1], &ChunklistSize)) == NULL) {
+    if (AsciiStrCmp (Argv[Index + 1], "n") != 0) {
+      if ((Chunklist = UserReadFile (Argv[Index + 1], &ChunklistSize)) == NULL) {
         DEBUG ((DEBUG_ERROR, "Read fail\n"));
         goto ContinueDmgLoop;
       }
@@ -145,7 +150,12 @@ int ENTRY_POINT (int argc, const char *argv[]) {
   return 0;
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+INT32
+LLVMFuzzerTestOneInput (
+  IN  CONST UINT8  *Data,
+  IN  UINTN        Size
+  )
+{
   #define  MAX_INPUT   256
   #define  MAX_OUTPUT  4096
 

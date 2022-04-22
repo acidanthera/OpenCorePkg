@@ -18,7 +18,12 @@ UefiMain (
   return EFI_SUCCESS;
 }
 
-int main(int argc, const char *argv[]) {
+INT32
+ENTRY_POINT (
+  IN INT32        Argc,
+  IN CONST CHAR8  *Argv[]
+  )
+{
   UefiMain (gImageHandle, gST);
 
   return 0;

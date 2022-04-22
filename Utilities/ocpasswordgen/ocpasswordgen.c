@@ -9,7 +9,12 @@
 #include <Library/OcCryptoLib.h>
 #include <UserPseudoRandom.h>
 
-int main(void) {
+INT32
+ENTRY_POINT (
+  IN INT32        Argc,
+  IN CONST CHAR8  *Argv[]
+  )
+{
   CHAR8   Char;
   UINT8   Password[OC_PASSWORD_MAX_LEN];
   UINT8   PasswordLen;

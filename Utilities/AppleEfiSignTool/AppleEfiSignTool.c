@@ -118,7 +118,12 @@ VerifySignature (
   return 0;
 }
 
-int ENTRY_POINT(int argc, const char *argv[]) {
+INT32
+ENTRY_POINT (
+  IN INT32        Argc,
+  IN CONST CHAR8  *Argv[]
+  )
+{
   CONST CHAR8          *ImageFileName;
   UINT32               ImageSize;
   UINT8                *ImageFileBuffer;
@@ -136,12 +141,12 @@ int ENTRY_POINT(int argc, const char *argv[]) {
   //
   // Print usage.
   //
-  if (argc != 2) {
+  if (Argc != 2) {
     PrintHelp ();
     return EXIT_FAILURE;
   }
 
-  ImageFileName   = argv[1];
+  ImageFileName   = Argv[1];
   ImageFileBuffer = UserReadFile (ImageFileName, &ImageSize);
   if (ImageFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ImageFileName));
@@ -175,7 +180,7 @@ int ENTRY_POINT(int argc, const char *argv[]) {
 INT32
 LLVMFuzzerTestOneInput (
   IN  CONST UINT8  *Data,
-  IN        UINTN  Size
+  IN  UINTN        Size
   )
 {
 #if 0

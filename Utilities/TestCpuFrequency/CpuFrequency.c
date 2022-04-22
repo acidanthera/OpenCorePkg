@@ -33,7 +33,12 @@ STATIC FREQUENCY_TEST mTests[] = {
   { 2389242546 /* Hz */, 2400 /* MHz, Raw 2389 MHz */, "C2D P8600" },
 };
 
-int main() {
+INT32
+ENTRY_POINT (
+  IN INT32        Argc,
+  IN CONST CHAR8  *Argv[]
+  )
+{
   int     RetVal;
   UINT16  Read;
   UINTN   Index;
