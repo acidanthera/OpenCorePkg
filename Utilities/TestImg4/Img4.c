@@ -6,22 +6,23 @@
 
 #include <UserFile.h>
 
-#include <Base.h>
-
 #include <Protocol/AppleSecureBoot.h>
+
+#include <Library/MemoryAllocationLib.h>
 #include <Library/OcCryptoLib.h>
 
-#include "libDER/oids.h"
-#include "libDERImg4/Img4oids.h"
-#include "libDERImg4/libDERImg4.h"
+#include <libDER/oids.h>
+#include <libDERImg4/Img4oids.h>
+#include <libDERImg4/libDERImg4.h>
 
-EFI_GUID gAppleSecureBootVariableGuid;
-
-void InternalDebugEnvInfo (
-  const DERImg4Environment  *Env
+STATIC
+VOID
+InternalDebugEnvInfo (
+  IN CONST  DERImg4Environment  *Env
   )
 {
-  printf (
+  DEBUG ((
+    DEBUG_ERROR,
     "\nEcid: %llx\n"
     "BoardId: %x\n"
     "ChipId: %x\n"
@@ -33,7 +34,7 @@ void InternalDebugEnvInfo (
     "EffectiveSecurityMode: %x\n"
     "InternalUseOnlyUnit: %x\n"
     "Xugs: %x\n\n",
-    (unsigned long long)Env->ecid,
+    (UINT64) Env->ecid,
     Env->boardId,
     Env->chipId,
     Env->certificateEpoch,
@@ -44,26 +45,20 @@ void InternalDebugEnvInfo (
     Env->effectiveSecurityMode,
     Env->internalUseOnlyUnit,
     Env->xugs
-    );
+    ));
 }
 
-int debugManifest (char *manifestName)
+STATIC
+INT32
+DebugManifest (
+  IN CONST CHAR8  *ManifestName
+  )
 {
-  void *Manifest;
-  uint32_t ManSize;
-  DERImg4ManifestInfo ManInfo;
-
-  Manifest = UserReadFile (manifestName, &ManSize);
-  if (Manifest == NULL) {
-    printf ("\n!!! read error !!!\n");
-    return -1;
-  }
-
   //
   // The keys are iterated in the order in which they are defined here in
   // AppleBds to validate any loaded image.
   //
-  uint32_t objs[] = {
+  STATIC CONST UINT32  Objs[] = {
     APPLE_SB_OBJ_EFIBOOT,
     APPLE_SB_OBJ_EFIBOOT_DEBUG,
     APPLE_SB_OBJ_EFIBOOT_BASE,
@@ -78,122 +73,167 @@ int debugManifest (char *manifestName)
     APPLE_SB_OBJ_KERNEL_DEBUG,
   };
 
-  uint32_t success = 0;
+  UINT8                *Manifest;
+  UINT32               ManSize;
+  DERImg4ManifestInfo  ManInfo;
+  UINT32               Success;
+  UINT32               Index;
+  DERReturn            RetVal;
 
-  for (uint32_t i = 0; i < ARRAY_SIZE(objs); i++) {
-    DERReturn r = DERImg4ParseManifest (
-      &ManInfo,
-      Manifest,
-      ManSize,
-      objs[i]
-      );
+  Manifest = UserReadFile (ManifestName, &ManSize);
+  if (Manifest == NULL) {
+    DEBUG ((DEBUG_ERROR, "\n!!! read error !!!\n"));
+    return -1;
+  }
 
-    if (r == DR_Success) {
-      printf ("Manifest has %c%c%c%c\n",
-        ((char *)&objs[i])[3], ((char *)&objs[i])[2], ((char *)&objs[i])[1], ((char *)&objs[i])[0]);
+  Success = 0;
+  for (Index = 0; Index < ARRAY_SIZE (Objs); ++Index) {
+    RetVal = DERImg4ParseManifest (
+               &ManInfo,
+               Manifest,
+               ManSize,
+               Objs[Index]
+               );
+
+    if (RetVal == DR_Success) {
+      DEBUG ((
+        DEBUG_ERROR,
+        "Manifest has %c%c%c%c\n",
+        ((CHAR8 *) &Objs[Index])[3],
+        ((CHAR8 *) &Objs[Index])[2],
+        ((CHAR8 *) &Objs[Index])[1],
+        ((CHAR8 *) &Objs[Index])[0]
+        ));
       InternalDebugEnvInfo (&ManInfo.environment);
-      ++success;
+      ++Success;
     }
   }
 
-  free (Manifest);
+  FreePool (Manifest);
 
-  if (success == 0) {
-    printf ("Supplied manifest is not valid or has no known objects!\n");
+  if (Success == 0) {
+    DEBUG ((DEBUG_ERROR, "Supplied manifest is not valid or has no known objects!\n"));
     return -1;
   }
 
   return 0;
 }
 
-int verifyImg4 (char *imageName, char *manifestName, char *type)
+STATIC
+INT32
+VerifyImg4 (
+  IN CONST CHAR8  *ImageName,
+  IN CONST CHAR8  *ManifestName,
+  IN CONST CHAR8  *type
+  )
 {
-  void *Manifest, *Image;
-  uint32_t ManSize, ImgSize;
-  DERImg4ManifestInfo ManInfo;
+  UINT8                *Manifest;
+  UINT8                *Image;
+  UINT32               ManSize;
+  UINT32               ImgSize;
+  DERImg4ManifestInfo  ManInfo;
+  DERReturn            RetVal;
+  INTN                 CmpResult;
 
-  Manifest = UserReadFile (manifestName, &ManSize);
+  Manifest = UserReadFile (ManifestName, &ManSize);
   if (Manifest == NULL) {
-    printf ("\n!!! read error !!!\n");
+    DEBUG ((DEBUG_ERROR, "\n!!! read error !!!\n"));
     return -1;
   }
 
-  DERReturn r = DERImg4ParseManifest (
-                  &ManInfo,
-                  Manifest,
-                  ManSize,
-                  SIGNATURE_32 (type[3], type[2], type[1], type[0])
-                  );
-  free (Manifest);
-  if (r != DR_Success) {
-    printf ("\n !!! DERImg4ParseManifest failed - %d !!!\n", r);
+  RetVal = DERImg4ParseManifest (
+             &ManInfo,
+             Manifest,
+             ManSize,
+             SIGNATURE_32 (type[3], type[2], type[1], type[0])
+             );
+  FreePool (Manifest);
+  if (RetVal != DR_Success) {
+    DEBUG ((DEBUG_ERROR, "\n !!! DERImg4ParseManifest failed - %d !!!\n", RetVal));
     return -1;
   }
 
   InternalDebugEnvInfo (&ManInfo.environment);
 
-  Image = UserReadFile (imageName, &ImgSize);
+  Image = UserReadFile (ImageName, &ImgSize);
   if (Image == NULL) {
-    printf ("\n!!! read error !!!\n");
+    DEBUG ((DEBUG_ERROR, "\n!!! read error !!!\n"));
     return -1;
   }
 
-  printf("ManInfo.imageDigestSize %02X%02X%02X%02X %zu\n",
-    ManInfo.imageDigest[0], ManInfo.imageDigest[1],
-    ManInfo.imageDigest[2], ManInfo.imageDigest[3],
-    ManInfo.imageDigestSize);
+  DEBUG ((
+    DEBUG_ERROR,
+    "ManInfo.imageDigestSize %02X%02X%02X%02X %u\n",
+    ManInfo.imageDigest[0],
+    ManInfo.imageDigest[1],
+    ManInfo.imageDigest[2],
+    ManInfo.imageDigest[3],
+    ManInfo.imageDigestSize
+    ));
 
-  INTN CmpResult = SigVerifyShaHashBySize (
-                     Image,
-                     ImgSize,
-                     ManInfo.imageDigest,
-                     ManInfo.imageDigestSize
-                     );
+  CmpResult = SigVerifyShaHashBySize (
+                Image,
+                ImgSize,
+                ManInfo.imageDigest,
+                ManInfo.imageDigestSize
+                );
 
-  free (Image);
+  FreePool (Image);
 
   if (CmpResult != 0) {
-    printf ("\n!!! digest mismatch !!!\n");
+    DEBUG ((DEBUG_ERROR, "\n!!! digest mismatch !!!\n"));
     return -1;
   }
 
   return 0;
 }
 
-int ENTRY_POINT (int argc, char *argv[])
+INT32
+ENTRY_POINT (
+  INT32 argc,
+  char *argv[]
+  )
 {
+  INT32  RetVal;
+  INT32  Index;
+
   if (argc < 2 || ((argc % 3) != 1 && argc != 2)) {
-    printf ("Img4 ([image path] [manifest path] [object type])*\n");
-    printf ("Img4 [manifest path]\n");
+    DEBUG ((DEBUG_ERROR, "Usage: ./Img4 ([image path] [manifest path] [object type])*\n"));
+    DEBUG ((DEBUG_ERROR, "Usage: Img4 [manifest path]\n"));
     return -1;
   }
 
   if (argc == 2) {
-    return debugManifest(argv[1]);
+    return DebugManifest (argv[1]);
   }
 
-  int r = 0;
-  for (int i = 1; i < (argc - 1); i += 3) {
-    if (strlen (argv[i + 2]) != 4) {
-      printf ("Object types require exactly 4 characters.\n");
+  RetVal = 0;
+  for (Index = 1; Index < (argc - 1); Index += 3) {
+    if (AsciiStrLen (argv[Index + 2]) != 4) {
+      DEBUG ((DEBUG_ERROR, "Object types require exactly 4 characters.\n"));
       return -1;
     }
 
-    r = verifyImg4 (
-          argv[i + 0],
-          argv[i + 1],
-          argv[i + 2]
-          );
-    if (r != 0) {
-      return r;
+    RetVal = VerifyImg4 (
+               argv[Index + 0],
+               argv[Index + 1],
+               argv[Index + 2]
+               );
+    if (RetVal != 0) {
+      return RetVal;
     }
   }
 
-  return r;
+  return RetVal;
 }
 
-int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
-  const uint32_t signatures[] = {
+INT32
+LLVMFuzzerTestOneInput (
+  IN CONST UINT8  *Data,
+  IN       UINTN  Size
+  )
+{
+  STATIC CONST UINT32  Signatures[] = {
     APPLE_SB_OBJ_EFIBOOT,
     APPLE_SB_OBJ_EFIBOOT_DEBUG,
     APPLE_SB_OBJ_EFIBOOT_BASE,
@@ -206,17 +246,19 @@ int LLVMFuzzerTestOneInput(const uint8_t *Data, size_t Size) {
     APPLE_SB_OBJ_DTHU
   };
 
+  DERImg4ManifestInfo  ManInfo;
+  UINTN                Index;
+
   if (Data == NULL || Size == 0) {
     return 0;
   }
 
-  DERImg4ManifestInfo ManInfo;
-  for (unsigned int i = 0; i < ARRAY_SIZE (signatures); ++i) {
+  for (Index = 0; Index < ARRAY_SIZE (Signatures); ++Index) {
     DERImg4ParseManifest (
       &ManInfo,
       Data,
       Size,
-      signatures[i]
+      Signatures[Index]
       );
   }
 
