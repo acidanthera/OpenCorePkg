@@ -541,6 +541,10 @@ FindAttr (
   // Continue search in $ATTRIBUTE_LIST
   //
   if (Attr->Last != NULL) {
+    if (Attr->ExtensionMftRecord != NULL) {
+      FreePool (Attr->ExtensionMftRecord);
+    }
+
     Attr->ExtensionMftRecord = AllocateZeroPool (mFileRecordSize);
     if (Attr->ExtensionMftRecord == NULL) {
       return NULL;
@@ -567,6 +571,10 @@ FindAttr (
       if (NonRes->RealSize > MAX_FILE_SIZE) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr) File is too huge.\n"));
         return NULL;
+      }
+
+      if (Attr->NonResAttrList != NULL) {
+        FreePool (Attr->NonResAttrList);
       }
 
       Attr->NonResAttrList = AllocateZeroPool ((UINTN) NonRes->RealSize);
