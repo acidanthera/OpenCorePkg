@@ -23,7 +23,7 @@ InternalDebugEnvInfo (
 {
   DEBUG ((
     DEBUG_ERROR,
-    "\nEcid: %llx\n"
+    "\nEcid: %Lx\n"
     "BoardId: %x\n"
     "ChipId: %x\n"
     "CertificateEpoch: %x\n"
