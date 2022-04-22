@@ -419,6 +419,7 @@ FindAttr (
 
       if (BufferSize < LRecord->RecordLength) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #0) $ATTRIBUTE_LIST is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -426,6 +427,7 @@ FindAttr (
       BufferSize -= LRecord->RecordLength;
       if (Attr->Next <= Attr->Current) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) $ATTRIBUTE_LIST is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -439,6 +441,7 @@ FindAttr (
             );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read first part of extension record.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
 
@@ -450,12 +453,14 @@ FindAttr (
             );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read second part of extension record.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
 
           Status = Fixup (Attr->ExtensionMftRecord, mFileRecordSize, SIGNATURE_32 ('F', 'I', 'L', 'E'));
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Fixup failed.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
         } else {
@@ -466,6 +471,7 @@ FindAttr (
             );
           if (EFI_ERROR (Status)) {
             DEBUG ((DEBUG_INFO, "NTFS: Could not read extension record.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
         }
@@ -477,12 +483,14 @@ FindAttr (
           BufferSize -= FRecord->AttributeOffset;
         } else {
           DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) Extension record is corrupted.\n"));
+          FreeAttr (Attr);
           return NULL;
         }
 
         while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
           if (BufferSize < sizeof (*Res)) {
             DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) Extension record is corrupted.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
 
@@ -493,6 +501,7 @@ FindAttr (
 
           if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
             DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) Extension record is corrupted.\n"));
+            FreeAttr (Attr);
             return NULL;
           }
 
@@ -501,10 +510,12 @@ FindAttr (
         }
 
         DEBUG ((DEBUG_INFO, "NTFS: Can\'t find 0x%X in attribute list\n", Attr->Current));
+        FreeAttr (Attr);
         return NULL;
       }
     }
 
+    FreeAttr (Attr);
     return NULL;
   }
 
@@ -515,11 +526,13 @@ FindAttr (
   while ((BufferSize >= sizeof (UINT32)) && (Res->Type != ATTRIBUTES_END_MARKER)) {
     if (BufferSize < sizeof (*Res)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #1) File record is corrupted.\n"));
+      FreeAttr (Attr);
       return NULL;
     }
 
     if ((Res->Length == 0) || (Res->Length >= BufferSize)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) File record is corrupted.\n"));
+      FreeAttr (Attr);
       return NULL;
     }
 
@@ -547,6 +560,7 @@ FindAttr (
 
     Attr->ExtensionMftRecord = AllocateZeroPool (mFileRecordSize);
     if (Attr->ExtensionMftRecord == NULL) {
+      FreeAttr (Attr);
       return NULL;
     }
 
@@ -556,6 +570,7 @@ FindAttr (
 
     if (BufferSize < sizeof (*Res)) {
       DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) File record is corrupted.\n"));
+      FreeAttr (Attr);
       return NULL;
     }
 
@@ -565,11 +580,13 @@ FindAttr (
 
       if (BufferSize < sizeof (*NonRes)) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #4) File record is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
       if (NonRes->RealSize > MAX_FILE_SIZE) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr) File is too huge.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -579,6 +596,7 @@ FindAttr (
 
       Attr->NonResAttrList = AllocateZeroPool ((UINTN) NonRes->RealSize);
       if (Attr->NonResAttrList == NULL) {
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -599,6 +617,7 @@ FindAttr (
         BufferSize -= Res->InfoOffset;
       } else {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #5) File record is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
     }
@@ -612,11 +631,13 @@ FindAttr (
 
       if (BufferSize < LRecord->RecordLength) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #2) $ATTRIBUTE_LIST is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
       if (LRecord->RecordLength == 0) {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #3) $ATTRIBUTE_LIST is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -626,6 +647,7 @@ FindAttr (
     }
 
     if ((Attr->Next + sizeof (*LRecord)) >= Attr->Last) {
+      FreeAttr (Attr);
       return NULL;
     }
 
@@ -645,6 +667,7 @@ FindAttr (
           );
       } else {
         DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #7) File record is corrupted.\n"));
+        FreeAttr (Attr);
         return NULL;
       }
 
@@ -667,6 +690,7 @@ FindAttr (
 
         if (ReadUnaligned16 ((UINT16 *) (AttrStart + 4)) == 0) {
           DEBUG ((DEBUG_INFO, "NTFS: (FindAttr #8) File record is corrupted.\n"));
+          FreeAttr (Attr);
           return NULL;
         }
 
@@ -679,6 +703,7 @@ FindAttr (
     goto retry;
   }
 
+  FreeAttr (Attr);
   return NULL;
 }
 
