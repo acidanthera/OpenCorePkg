@@ -203,7 +203,12 @@ PeCoffTestLoadFull (
   return Status;
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+int
+LLVMFuzzerTestOneInput (
+  const uint8_t  *Data,
+  size_t         Size
+  )
+{
   if (Size == 0)
     return 0;
 
@@ -229,7 +234,12 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   return 0;
 }
 
-int ENTRY_POINT (int argc, char *argv[]) {
+int
+ENTRY_POINT (
+  int   argc,
+  char  *argv[]
+  )
+{
   if (argc < 2) {
     printf ("Please provide a valid PE image path\n");
     return -1;

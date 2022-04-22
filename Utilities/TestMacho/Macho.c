@@ -271,7 +271,12 @@ static int FeedMacho(void *file, uint32_t size) {
   return code != 963;
 }
 
-int ENTRY_POINT(int argc, char** argv) {
+int
+ENTRY_POINT (
+  int   argc,
+  char  *argv[]
+  )
+{
   uint32_t f;
   uint8_t *b;
   if ((b = UserReadFile(argc > 1 ? argv[1] : "kernel", &f)) == NULL) {
@@ -282,7 +287,12 @@ int ENTRY_POINT(int argc, char** argv) {
   return FeedMacho (b, f);
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+int
+LLVMFuzzerTestOneInput (
+  const uint8_t  *Data,
+  size_t         Size
+  )
+{
   if (Size > 0) {
     VOID *NewData = AllocatePool (Size);
     if (NewData) {

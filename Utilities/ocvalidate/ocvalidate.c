@@ -60,10 +60,10 @@ CheckConfig (
   return ErrorCount;
 }
 
-INT32
+int
 ENTRY_POINT (
-  IN INT32        Argc,
-  IN CONST CHAR8  *Argv[]
+  int   argc,
+  char  *argv[]
   )
 {
   UINT8              *ConfigFileBuffer;
@@ -88,15 +88,15 @@ ENTRY_POINT (
   //
   // Print usage.
   //
-  if (Argc != 2) {
-    DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/config.plist>\n\n", Argv[0]));
+  if (argc != 2) {
+    DEBUG ((DEBUG_ERROR, "Usage: %a <path/to/config.plist>\n\n", argv[0]));
     return -1;
   }
 
   //
   // Read config file (Only one single config is supported).
   //
-  ConfigFileName   = Argv[1];
+  ConfigFileName   = argv[1];
   ConfigFileBuffer = UserReadFile (ConfigFileName, &ConfigFileSize);
   if (ConfigFileBuffer == NULL) {
     DEBUG ((DEBUG_ERROR, "Failed to read %a\n", ConfigFileName));
@@ -152,10 +152,10 @@ ENTRY_POINT (
   return 0;
 }
 
-INT32
+int
 LLVMFuzzerTestOneInput (
-  IN  CONST UINT8  *Data,
-  IN  UINTN        Size
+  const uint8_t  *Data,
+  size_t         Size
   )
 {
   VOID              *NewData;

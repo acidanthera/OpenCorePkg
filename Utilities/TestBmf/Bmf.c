@@ -53,10 +53,10 @@ GuiBmpToImage (
   return EFI_SUCCESS;
 }
 
-INT32
+int
 ENTRY_POINT (
-  IN INT32        Argc,
-  IN CONST CHAR8  *Argv[]
+  int   argc,
+  char  *argv[]
   )
 {
   BOOLEAN           Result;
@@ -70,13 +70,13 @@ ENTRY_POINT (
   VOID              *BmpImage;
   UINT32            BmpImageSize;
 
-  if (Argc != 3) {
+  if (argc != 3) {
     DEBUG ((DEBUG_ERROR, "./Bmf <FontImage> <FontMetrics>"));
     return -1;
   }
 
-  FontImage   = UserReadFile (Argv[1], &FontImageSize);
-  FontMetrics = UserReadFile (Argv[2], &FontMetricsSize);
+  FontImage   = UserReadFile (argv[1], &FontImageSize);
+  FontMetrics = UserReadFile (argv[2], &FontMetricsSize);
   Result      = GuiFontConstruct (&Context, FontImage, FontImageSize, FontMetrics, FontMetricsSize, 1);
   if (!Result) {
     DEBUG ((DEBUG_WARN, "BMF: Helvetica failed\n"));

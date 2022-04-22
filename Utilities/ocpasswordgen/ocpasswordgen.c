@@ -9,10 +9,9 @@
 #include <Library/OcCryptoLib.h>
 #include <UserPseudoRandom.h>
 
-INT32
+int
 ENTRY_POINT (
-  IN INT32        Argc,
-  IN CONST CHAR8  *Argv[]
+  void
   )
 {
   CHAR8   Char;

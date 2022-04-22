@@ -799,7 +799,12 @@ int wrap_main(int argc, char** argv) {
   return 0;
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+int
+LLVMFuzzerTestOneInput (
+  const uint8_t  *Data,
+  size_t         Size
+  )
+{
   UINT32 PrelinkedSize;
   UINT32 AllocSize;
   UINT8  *Prelinked;
@@ -854,7 +859,12 @@ INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
   return 0;
 }
 
-int ENTRY_POINT(int argc, char *argv[]) {
+int
+ENTRY_POINT (
+  int   argc,
+  char  *argv[]
+  )
+{
   int code = wrap_main(argc, argv);
   if (FailedToProcess) {
     code = -1;

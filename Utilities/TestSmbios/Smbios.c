@@ -69,7 +69,12 @@ bool doDump = false;
 SMBIOS_TABLE_ENTRY_POINT        gSmbios;
 SMBIOS_TABLE_3_0_ENTRY_POINT    gSmbios3;
 
-int ENTRY_POINT(int argc, char** argv) {
+int
+ENTRY_POINT (
+  int   argc,
+  char  *argv[]
+  )
+{
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
@@ -124,7 +129,12 @@ int ENTRY_POINT(int argc, char** argv) {
   return 0;
 }
 
-INT32 LLVMFuzzerTestOneInput(CONST UINT8 *Data, UINTN Size) {
+int
+LLVMFuzzerTestOneInput (
+  const uint8_t  *Data,
+  size_t         Size
+  )
+{
   if (Size > 0) {
     VOID *NewData = AllocatePool (Size);
     if (NewData) {

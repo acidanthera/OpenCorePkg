@@ -110,12 +110,11 @@ AcpiFindEntryInFile (
    @param[in] Entry     Number of required entry.
 
  **/
-INT32
+int
 ENTRY_POINT (
-  IN INT32       argc,
-  IN CONST CHAR8 *argv[]
-  )                     // ENTRY_POINT
-
+  int   argc,
+  char  *argv[]
+  )
 {
   UINT32      ReturnedOffset;
   EFI_STATUS  Status;
@@ -221,10 +220,11 @@ ENTRY_POINT (
 
   return 0;
 }
-INT32
+
+int
 LLVMFuzzerTestOneInput (
-  CONST UINT8 *Data,
-  UINTN       Size
+  const uint8_t  *Data,
+  size_t         Size
   )
 {
   if (Size > 0) {

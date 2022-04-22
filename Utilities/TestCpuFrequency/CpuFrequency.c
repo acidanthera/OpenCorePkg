@@ -35,8 +35,7 @@ STATIC FREQUENCY_TEST mTests[] = {
 
 INT32
 ENTRY_POINT (
-  IN INT32        Argc,
-  IN CONST CHAR8  *Argv[]
+  void
   )
 {
   int     RetVal;

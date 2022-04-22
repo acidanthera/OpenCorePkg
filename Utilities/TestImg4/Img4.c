@@ -188,36 +188,36 @@ VerifyImg4 (
   return 0;
 }
 
-INT32
+int
 ENTRY_POINT (
-  IN INT32        Argc,
-  IN CONST CHAR8  *Argv[]
+  int   argc,
+  char  *argv[]
   )
 {
   INT32  RetVal;
   INT32  Index;
 
-  if (Argc < 2 || ((Argc % 3) != 1 && Argc != 2)) {
+  if (argc < 2 || ((argc % 3) != 1 && argc != 2)) {
     DEBUG ((DEBUG_ERROR, "Usage: ./Img4 ([image path] [manifest path] [object type])*\n"));
     DEBUG ((DEBUG_ERROR, "Usage: Img4 [manifest path]\n"));
     return -1;
   }
 
-  if (Argc == 2) {
-    return DebugManifest (Argv[1]);
+  if (argc == 2) {
+    return DebugManifest (argv[1]);
   }
 
   RetVal = 0;
-  for (Index = 1; Index < (Argc - 1); Index += 3) {
-    if (AsciiStrLen (Argv[Index + 2]) != 4) {
+  for (Index = 1; Index < (argc - 1); Index += 3) {
+    if (AsciiStrLen (argv[Index + 2]) != 4) {
       DEBUG ((DEBUG_ERROR, "Object types require exactly 4 characters.\n"));
       return -1;
     }
 
     RetVal = VerifyImg4 (
-               Argv[Index + 0],
-               Argv[Index + 1],
-               Argv[Index + 2]
+               argv[Index + 0],
+               argv[Index + 1],
+               argv[Index + 2]
                );
     if (RetVal != 0) {
       return RetVal;
@@ -227,10 +227,10 @@ ENTRY_POINT (
   return RetVal;
 }
 
-INT32
+int
 LLVMFuzzerTestOneInput (
-  IN CONST UINT8  *Data,
-  IN UINTN        Size
+  const uint8_t  *Data,
+  size_t         Size
   )
 {
   STATIC CONST UINT32  Signatures[] = {
