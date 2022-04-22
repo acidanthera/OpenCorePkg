@@ -13,7 +13,6 @@
 **/
 
 #include <Library/DebugLib.h>
-#include <Library/MemoryAllocationLib.h>
 #include <Library/OcTemplateLib.h>
 #include <Library/OcSerializeLib.h>
 #include <Library/OcMiscLib.h>
@@ -27,9 +26,7 @@
 STATIC BOOLEAN FailedToProcess = FALSE;
 STATIC UINT32  KernelVersion   = 0;
 
-STATIC
-CHAR8
-KextInfoPlistData[] = {
+STATIC CHAR8 KextInfoPlistData[] = {
   0x3C, 0x3F, 0x78, 0x6D, 0x6C, 0x20, 0x76, 0x65,
   0x72, 0x73, 0x69, 0x6F, 0x6E, 0x3D, 0x22, 0x31,
   0x2E, 0x30, 0x22, 0x20, 0x65, 0x6E, 0x63, 0x6F,
@@ -181,10 +178,18 @@ KextInfoPlistData[] = {
   0x6C, 0x69, 0x73, 0x74, 0x3E
 };
 
+long long current_timestamp() {
+    struct timeval te;
+    gettimeofday(&te, NULL); // get current time
+    long long milliseconds = te.tv_sec*1000LL + te.tv_usec/1000; // calculate milliseconds
+    // printf("milliseconds: %lld\n", milliseconds);
+    return milliseconds;
+}
+
 STATIC
 UINT8
 DisableIOAHCIPatchReplace[] = {
-  0x31, 0xC0, 0xC3 ///< xor eax, eax ; ret
+  0x31, 0xC0, 0xC3 // xor eax, eax ; ret
 };
 
 STATIC
@@ -203,7 +208,7 @@ DisableIOAHCIPatch = {
 STATIC
 UINT8
 DisableKernelLog[] = {
-  0xC3 ///< ret
+  0xC3
 };
 
 STATIC
@@ -218,25 +223,21 @@ DisableIoLogPatch = {
   .Skip    = 0
 };
 
-STATIC EFI_FILE_PROTOCOL NilFileProtocol;
-
-STATIC UINT8   *mPrelinked    = NULL;
-STATIC UINT32  mPrelinkedSize = 0;
-
 STATIC
 VOID
 ApplyKextPatches (
-  IN OUT  PRELINKED_CONTEXT  *Context
+  PRELINKED_CONTEXT  *Context
   )
 {
   EFI_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
   Status = PatcherInitContextFromPrelinked (
-             &Patcher,
-             Context,
-             "com.apple.iokit.IOAHCIFamily"
-             );
+    &Patcher,
+    Context,
+    "com.apple.iokit.IOAHCIFamily"
+    );
+
   if (!EFI_ERROR (Status)) {
     Status = PatcherApplyGenericPatch (&Patcher, &DisableIOAHCIPatch);
     if (EFI_ERROR (Status)) {
@@ -251,10 +252,11 @@ ApplyKextPatches (
   }
 
   Status = PatcherInitContextFromPrelinked (
-             &Patcher,
-             Context,
-             "com.apple.iokit.IOHIDFamily"
-             );
+    &Patcher,
+    Context,
+    "com.apple.iokit.IOHIDFamily"
+    );
+
   if (!EFI_ERROR (Status)) {
     Status = PatcherBlockKext (&Patcher);
     if (EFI_ERROR (Status)) {
@@ -269,10 +271,11 @@ ApplyKextPatches (
   }
 
   Status = PatcherInitContextFromPrelinked (
-             &Patcher,
-             Context,
-             "com.apple.driver.Intel82574LEthernet"
-             );
+    &Patcher,
+    Context,
+    "com.apple.driver.Intel82574LEthernet"
+    );
+
   if (!EFI_ERROR (Status)) {
     Status = PatcherExcludePrelinkedKext ("com.apple.driver.Intel82574LEthernet", &Patcher, Context);
     if (EFI_ERROR (Status)) {
@@ -407,7 +410,6 @@ ApplyKextPatches (
   }
 }
 
-STATIC
 VOID
 ApplyKernelPatches (
   IN OUT UINT8   *Kernel,
@@ -417,114 +419,118 @@ ApplyKernelPatches (
   EFI_STATUS       Status;
   PATCHER_CONTEXT  Patcher;
 
-  OC_CPU_INFO      CpuInfo;
-
-  STATIC UINT32    VirtualCpuid[4]     = {0, 0, 0, 0};
-  STATIC UINT32    VirtualCpuidMask[4] = {0xFFFFFFFF, 0, 0, 0};
-
-  STATIC UINTN     RegisterBasePmio    = 0x2008;
-  STATIC UINT32    RegisterStride      = 4;
-
   Status = PatcherInitContextFromBuffer (
-             &Patcher,
-             Kernel,
-             Size,
-             FALSE
-             );
-  if (EFI_ERROR (Status)) {
+    &Patcher,
+    Kernel,
+    Size,
+    FALSE
+    );
+
+  if (!EFI_ERROR (Status)) {
+    Status = PatcherApplyGenericPatch (&Patcher, &DisableIoLogPatch);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] DisableIoLogPatch kernel patch - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] DisableIoLogPatch kernel patch\n"));
+    }
+
+    UINT32  VirtualCpuid[4]     = {0, 0, 0, 0};
+    UINT32  VirtualCpuidMask[4] = {0xFFFFFFFF, 0, 0, 0};
+    OC_CPU_INFO CpuInfo;
+    memset(&CpuInfo, 0, sizeof(CpuInfo));
+
+    Status = PatchKernelCpuId (
+      &Patcher,
+      &CpuInfo,
+      VirtualCpuid,
+      VirtualCpuidMask,
+      KernelVersion
+      );
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] CPUID kernel patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmCfgLock - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmCfgLock patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmExtraMsrs - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmExtraMsrs patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmForceBoost - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmForceBoost patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkPanicNoKextDump, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPanicNoKextDump - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPanicNoKextDump patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkLapicKernelPanic, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLapicKernelPanic - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLapicKernelPanic patch\n"));
+    }
+
+
+    Status = KernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPowerTimeoutKernelPanic - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPowerTimeoutKernelPanic patch\n"));
+    }
+
+    Status = KernelApplyQuirk (KernelQuirkSegmentJettison, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkSegmentJettison - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
+    }
+
+    UINTN RegisterBasePmio = 0x2008;
+    UINT32 RegisterStride   = 4;
+    PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
+    Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
+    if (EFI_ERROR (Status)) {
+      DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevicePmio - %r\n", Status));
+      FailedToProcess = TRUE;
+    } else {
+      DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevicePmio patch\n"));
+    }
+  } else {
     DEBUG ((DEBUG_WARN, "Failed to find kernel - %r\n", Status));
     FailedToProcess = TRUE;
-    return;
-  }
-
-  Status = PatcherApplyGenericPatch (&Patcher, &DisableIoLogPatch);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] DisableIoLogPatch kernel patch - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] DisableIoLogPatch kernel patch\n"));
-  }
-
-  ZeroMem (&CpuInfo, sizeof (CpuInfo));
-  Status = PatchKernelCpuId (
-    &Patcher,
-    &CpuInfo,
-    VirtualCpuid,
-    VirtualCpuidMask,
-    KernelVersion
-    );
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] CPUID kernel patch - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] CPUID kernel patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkAppleXcpmCfgLock, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmCfgLock - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmCfgLock patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkAppleXcpmExtraMsrs, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmExtraMsrs - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmExtraMsrs patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkAppleXcpmForceBoost, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkAppleXcpmForceBoost - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkAppleXcpmForceBoost patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkPanicNoKextDump, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPanicNoKextDump - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPanicNoKextDump patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkLapicKernelPanic, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkLapicKernelPanic - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkLapicKernelPanic patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkPowerTimeoutKernelPanic, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkPowerTimeoutKernelPanic - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkPowerTimeoutKernelPanic patch\n"));
-  }
-
-  Status = KernelApplyQuirk (KernelQuirkSegmentJettison, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] KernelQuirkSegmentJettison - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] KernelQuirkSegmentJettison patch\n"));
-  }
-
-  PatchSetPciSerialDevice (RegisterBasePmio, RegisterStride);
-  Status = KernelApplyQuirk (KernelQuirkCustomPciSerialDevice, &Patcher, KernelVersion);
-  if (EFI_ERROR (Status)) {
-    DEBUG ((DEBUG_WARN, "[FAIL] CustomPciSerialDevicePmio - %r\n", Status));
-    FailedToProcess = TRUE;
-  } else {
-    DEBUG ((DEBUG_WARN, "[OK] CustomPciSerialDevicePmio patch\n"));
   }
 }
+
+static EFI_FILE_PROTOCOL nilFilProtocol;
+
+UINT8  *Prelinked;
+UINT32 PrelinkedSize;
 
 EFI_STATUS
 OcGetFileData (
@@ -534,13 +540,13 @@ OcGetFileData (
   OUT UINT8              *Buffer
   )
 {
-  ASSERT (File == &NilFileProtocol);
+  ASSERT (File == &nilFilProtocol);
 
-  if ((UINT64) Position + Size > mPrelinkedSize) {
+  if ((UINT64) Position + Size > PrelinkedSize) {
     return EFI_INVALID_PARAMETER;
   }
 
-  CopyMem (&Buffer[0], &mPrelinked[Position], Size);
+  memcpy (&Buffer[0], &Prelinked[Position], Size);
   return EFI_SUCCESS;
 }
 
@@ -550,118 +556,103 @@ OcGetFileSize (
   OUT UINT32             *Size
   )
 {
-  ASSERT (File == &NilFileProtocol);
-  *Size = mPrelinkedSize;
+  ASSERT (File == &nilFilProtocol);
+  *Size = PrelinkedSize;
   return EFI_SUCCESS;
 }
 
-int
-WrapMain (
-  int   argc,
-  char  *argv[]
-  )
-{
-  UINT32 AllocSize;
-  PRELINKED_CONTEXT Context;
-  CONST CHAR8 *FileName;
-  UINT32 ReservedInfoSize;
-  UINT32 ReservedExeSize;
-  int argi;
-  UINT8  *TestData;
-  UINT32 TestDataSize;
-  CHAR8  *TestPlist;
-  UINT32 TestPlistSize;
-  UINT32 LinkedExpansion;
-  UINT8 *NewPrelinked;
-  UINT32 NewPrelinkedSize;
-  UINT8 Sha384[48];
-  BOOLEAN Is32Bit;
-  EFI_STATUS Status;
-  PATCHER_CONTEXT        Patcher;
-
+int wrap_main(int argc, char** argv) {
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO | DEBUG_VERBOSE;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO | DEBUG_VERBOSE;
 
-  FileName = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
-  if ((mPrelinked = UserReadFile (FileName, &mPrelinkedSize)) == NULL) {
-    DEBUG ((DEBUG_ERROR, "Read fail %a\n", FileName));
+  UINT32 AllocSize;
+  PRELINKED_CONTEXT Context;
+  const char *name = argc > 1 ? argv[1] : "/System/Library/PrelinkedKernels/prelinkedkernel";
+  if ((Prelinked = UserReadFile(name, &PrelinkedSize)) == NULL) {
+    printf("Read fail %s\n", name);
     return -1;
   }
 
-  ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
-  ReservedExeSize  = 0;
+  UINT32 ReservedInfoSize = PRELINK_INFO_RESERVE_SIZE;
+  UINT32 ReservedExeSize  = 0;
 
-  for (argi = 0; argc - argi > 2; argi += 2) {
-    TestData      = NULL;
-    TestDataSize  = 0;
-    TestPlist     = NULL;
-    TestPlistSize = 0;
+  for (int argi = 0; argc - argi > 2; argi += 2) {
+    UINT8  *TestData = NULL;
+    UINT32 TestDataSize = 0;
+    CHAR8  *TestPlist = NULL;
+    UINT32 TestPlistSize = 0;
 
     if (argc - argi > 2) {
       if (argv[argi + 2][0] == 'n' && argv[argi + 2][1] == 0) {
         TestData = NULL;
         TestDataSize = 0;
       } else {
-        TestData = UserReadFile (argv[argi + 2], &TestDataSize);
+        TestData = UserReadFile(argv[argi + 2], &TestDataSize);
         if (TestData == NULL) {
-          DEBUG ((DEBUG_ERROR, "Read data fail %a\n", argv[argi + 2]));
-          abort ();
+          printf("Read data fail %s\n", argv[argi + 2]);
+          abort();
           return -1;
         }
       }
     }
 
     if (argc - argi > 3) {
-      TestPlist = (CHAR8 *) UserReadFile (argv[argi + 3], &TestPlistSize);
+      TestPlist = (CHAR8*) UserReadFile(argv[argi + 3], &TestPlistSize);
       if (TestPlist == NULL) {
-        DEBUG ((DEBUG_ERROR, "Read plist fail\n"));
-        FreePool (TestData);
-        abort ();
+        printf("Read plist fail\n");
+        free(TestData);
+        abort();
         return -1;
       }
 
-      FreePool (TestPlist);
+      free(TestPlist);
     }
 
     EFI_STATUS Status = PrelinkedReserveKextSize (
-                          &ReservedInfoSize,
-                          &ReservedExeSize,
-                          TestPlistSize,
-                          TestData,
-                          TestDataSize,
-                          FALSE
-                          );
-    FreePool (TestData);
+      &ReservedInfoSize,
+      &ReservedExeSize,
+      TestPlistSize,
+      TestData,
+      TestDataSize,
+      FALSE
+      );
+
+    free(TestData);
+
     if (EFI_ERROR (Status)) {
-      DEBUG ((
-        DEBUG_ERROR,
-        "OC: Failed to fit kext %a\n",
+      printf (
+        "OC: Failed to fit kext %s\n",
         argv[argi + 2]
-        ));
+        );
       FailedToProcess = TRUE;
     }
   }
 
-  LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
+  UINT32 LinkedExpansion = KcGetSegmentFixupChainsSize (ReservedExeSize);
   if (LinkedExpansion == 0) {
     FailedToProcess = TRUE;
     return -1;
   }
 
-  Status = ReadAppleKernel (
-             &NilFileProtocol,
-             FALSE,
-             &Is32Bit,
-             &NewPrelinked,
-             &NewPrelinkedSize,
-             &AllocSize,
-             ReservedInfoSize + ReservedExeSize + LinkedExpansion,
-             Sha384
-             );
+  UINT8 *NewPrelinked;
+  UINT32 NewPrelinkedSize;
+  UINT8 Sha384[48];
+  BOOLEAN Is32Bit;
+  EFI_STATUS Status = ReadAppleKernel (
+    &nilFilProtocol,
+    FALSE,
+    &Is32Bit,
+    &NewPrelinked,
+    &NewPrelinkedSize,
+    &AllocSize,
+    ReservedInfoSize + ReservedExeSize + LinkedExpansion,
+    Sha384
+    );
+
   if (!EFI_ERROR (Status)) {
-    FreePool (mPrelinked);
-    mPrelinked     = NewPrelinked;
-    mPrelinkedSize = NewPrelinkedSize;
+    free(Prelinked);
+    Prelinked = NewPrelinked;
+    PrelinkedSize = NewPrelinkedSize;
     DEBUG ((DEBUG_WARN, "[OK] Sha384 is %02X%02X%02X%02X\n", Sha384[0], Sha384[1], Sha384[2], Sha384[3]));
   } else {
     DEBUG ((DEBUG_WARN, "[FAIL] Kernel unpack failure - %r\n", Status));
@@ -669,7 +660,7 @@ WrapMain (
     return -1;
   }
 
-  KernelVersion = OcKernelReadDarwinVersion (mPrelinked, mPrelinkedSize);
+  KernelVersion = OcKernelReadDarwinVersion (Prelinked, PrelinkedSize);
   if (KernelVersion != 0) {
     DEBUG ((DEBUG_WARN, "[OK] Got version %u\n", KernelVersion));
   } else {
@@ -677,14 +668,16 @@ WrapMain (
     FailedToProcess = TRUE;
   }
 
-  ApplyKernelPatches (mPrelinked, mPrelinkedSize);
 
+  ApplyKernelPatches (Prelinked, PrelinkedSize);
+
+  PATCHER_CONTEXT        Patcher;
   Status = PatcherInitContextFromBuffer (
-             &Patcher,
-             mPrelinked,
-             mPrelinkedSize,
-             FALSE
-             );
+    &Patcher,
+    Prelinked,
+    PrelinkedSize,
+    FALSE
+    );
   if (!EFI_ERROR (Status)) {
     DEBUG ((DEBUG_WARN, "[OK] Patcher init success\n"));
   } else {
@@ -692,7 +685,8 @@ WrapMain (
     FailedToProcess = TRUE;
   }
 
-  Status = PrelinkedContextInit (&Context, mPrelinked, mPrelinkedSize, AllocSize, FALSE);
+  Status = PrelinkedContextInit (&Context, Prelinked, PrelinkedSize, AllocSize, FALSE);
+
   if (!EFI_ERROR (Status)) {
     ApplyKextPatches (&Context);
     
@@ -704,15 +698,16 @@ WrapMain (
     }
 
     Status = PrelinkedInjectKext (
-               &Context,
-               NULL,
-               "/Library/Extensions/PlistKext.kext",
-               KextInfoPlistData,
-               sizeof (KextInfoPlistData),
-               NULL,
-               NULL,
-               0
-               );
+      &Context,
+      NULL,
+      "/Library/Extensions/PlistKext.kext",
+      KextInfoPlistData,
+      sizeof (KextInfoPlistData),
+      NULL,
+      NULL,
+      0
+      );
+
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[OK] PlistKext.kext injected - %r\n", Status));
     } else {
@@ -720,21 +715,23 @@ WrapMain (
       FailedToProcess = TRUE;
     }
 
-    //
-    // TODO
-    //
     int c = 0;
 
     while (argc > 2) {
+      UINT8  *TestData = NULL;
+      UINT32 TestDataSize = 0;
+      CHAR8  *TestPlist = NULL;
+      UINT32 TestPlistSize = 0;
+
       if (argc > 2) {
         if (argv[2][0] == 'n' && argv[2][1] == 0) {
           TestData = NULL;
           TestDataSize = 0;
         } else {
-          TestData = UserReadFile (argv[2], &TestDataSize);
+          TestData = UserReadFile(argv[2], &TestDataSize);
           if (TestData == NULL) {
-            DEBUG ((DEBUG_ERROR, "Read data fail %a\n", argv[argi + 2]));
-            abort ();
+            printf("Read data fail %s\n", argv[2]);
+            abort();
             return -1;
           }
         }
@@ -743,8 +740,8 @@ WrapMain (
       if (argc > 3) {
         TestPlist = (CHAR8*) UserReadFile(argv[3], &TestPlistSize);
         if (TestPlist == NULL) {
-          DEBUG ((DEBUG_ERROR, "Read plist fail\n"));
-          abort ();
+          printf("Read plist fail\n");
+          abort();
           return -1;
         }
       }
@@ -782,7 +779,7 @@ WrapMain (
 
     Status = PrelinkedInjectComplete (&Context);
 
-    UserWriteFile("out.bin", mPrelinked, Context.PrelinkedSize);
+    UserWriteFile("out.bin", Prelinked, Context.PrelinkedSize);
 
     if (!EFI_ERROR (Status)) {
       DEBUG ((DEBUG_WARN, "[OK] Prelink inject complete success\n"));
@@ -797,7 +794,7 @@ WrapMain (
     FailedToProcess = TRUE;
   }
 
-  free(mPrelinked);
+  free(Prelinked);
 
   return 0;
 }
@@ -868,7 +865,7 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  int code = WrapMain (argc, argv);
+  int code = wrap_main(argc, argv);
   if (FailedToProcess) {
     code = -1;
   }
