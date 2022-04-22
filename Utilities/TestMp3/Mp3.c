@@ -18,11 +18,6 @@
 #include <Library/OcMp3Lib.h>
 #include <Library/OcMiscLib.h>
 
-#include <string.h>
-#include <sys/time.h>
-#include <stdio.h>
-#include <stdint.h>
-
 #include <UserFile.h>
 
 int
@@ -31,35 +26,37 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
-  uint32_t size;
-  uint8_t *buffer;
-  if ((buffer = UserReadFile(argc > 1 ? argv[1] : "test.mp3", &size)) == NULL) {
-    printf("Read fail\n");
+  UINT32  Size;
+  UINT8   *Buffer;
+
+  if ((Buffer = UserReadFile (argc > 1 ? argv[1] : "test.mp3", &Size)) == NULL) {
+    DEBUG ((DEBUG_ERROR, "Read fail\n"));
     return -1;
   }
 
-  void *outbuffer;
-  uint32_t outsize;
-  EFI_AUDIO_IO_PROTOCOL_FREQ freq;
-  EFI_AUDIO_IO_PROTOCOL_BITS bits;
-  UINT8                      channels;
+  VOID                        *OutBuffer;
+  UINT32                      OutSize;
+  EFI_AUDIO_IO_PROTOCOL_FREQ  Freq;
+  EFI_AUDIO_IO_PROTOCOL_BITS  Bits;
+  UINT8                       Channels;
+  EFI_STATUS                  Status;
 
-  EFI_STATUS Status = OcDecodeMp3 (
-    buffer,
-    size,
-    &outbuffer,
-    &outsize,
-    &freq,
-    &bits,
-    &channels
+  Status = OcDecodeMp3 (
+    Buffer,
+    Size,
+    &OutBuffer,
+    &OutSize,
+    &Freq,
+    &Bits,
+    &Channels
     );
 
-  FreePool(buffer);
+  FreePool (Buffer);
 
   if (!EFI_ERROR (Status)) {
-    printf("Decode success %u\n", outsize);
-    UserWriteFile("test.bin", outbuffer, outsize);
-    FreePool(outbuffer);
+    DEBUG ((DEBUG_ERROR, "Decode success %u\n", OutSize));
+    UserWriteFile ("test.bin", OutBuffer, OutSize);
+    FreePool (OutBuffer);
     return 0;
   }
 
@@ -73,24 +70,26 @@ LLVMFuzzerTestOneInput (
   size_t         Size
   )
 {
-  if (Size > 0) {
-    void *outbuffer;
-    uint32_t outsize;
-    EFI_AUDIO_IO_PROTOCOL_FREQ freq;
-    EFI_AUDIO_IO_PROTOCOL_BITS bits;
-    UINT8                      channels;
+  VOID        *OutBuffer;
+  UINT32      OutSize;
+  EFI_STATUS  Status;
 
-    EFI_STATUS Status = OcDecodeMp3 (
+  if (Size > 0) {
+    EFI_AUDIO_IO_PROTOCOL_FREQ  Freq;
+    EFI_AUDIO_IO_PROTOCOL_BITS  Bits;
+    UINT8                       Channels;
+
+    Status = OcDecodeMp3 (
       Data,
       Size,
-      &outbuffer,
-      &outsize,
-      &freq,
-      &bits,
-      &channels
+      &OutBuffer,
+      &OutSize,
+      &Freq,
+      &Bits,
+      &Channels
       );
     if (!EFI_ERROR (Status)) {
-      FreePool(outbuffer);
+      FreePool (OutBuffer);
     }
   }
   return 0;
