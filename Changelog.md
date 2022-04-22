@@ -1,5 +1,8 @@
 OpenCore Changelog
 ==================
+#### v0.8.1
+- Fixed `ExtendBTFeatureFlags` quirk on newer macOS versions, thx @lvs1974
+
 #### v0.8.0
 - Added support for early log preservation
 - Switched to Python 3 in scripts (use `python /path/to/script` to force Python 2)

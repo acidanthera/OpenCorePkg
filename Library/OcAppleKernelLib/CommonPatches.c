@@ -1819,6 +1819,20 @@ mBTFeatureFlagsPatchV2 = {
 };
 
 STATIC
+PATCHER_GENERIC_PATCH
+mBTFeatureFlagsPatchV3 = {
+  .Comment     = DEBUG_POINTER ("BTFeatureFlagsV3"),
+  .Base        = "__ZN17IOBluetoothDevice25setDeviceSupportedFeatureEj",
+  .Find        = NULL,
+  .Mask        = NULL,
+  .Replace     = mBTFeatureFlagsReplace,
+  .ReplaceMask = NULL,
+  .Size        = sizeof (mBTFeatureFlagsReplace),
+  .Count       = 1,
+  .Skip        = 0
+};
+
+STATIC
 EFI_STATUS
 PatchBTFeatureFlags (
   IN OUT PATCHER_CONTEXT    *Patcher,
@@ -1837,9 +1851,13 @@ PatchBTFeatureFlags (
   Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV1);
   if (EFI_ERROR (Status)) {
     DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v1 - %r, trying v2\n", Status));
-    Status = PatcherApplyGenericPatch (Patcher,&mBTFeatureFlagsPatchV2);
+    Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV2);
     if (EFI_ERROR (Status)) {
-      DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v2 - %r\n", Status));
+      DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v2 - %r, trying v3\n", Status));
+      Status = PatcherApplyGenericPatch (Patcher, &mBTFeatureFlagsPatchV3);
+      if (EFI_ERROR (Status)) {
+        DEBUG ((DEBUG_INFO, "OCAK: Failed to find BT FeatureFlags symbol v3 - %r\n", Status));
+      }
     }
   }
 
