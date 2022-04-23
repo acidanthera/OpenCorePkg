@@ -22,6 +22,7 @@ STATIC UINT64 mHashesMask = MAX_UINT64;
 STATIC UINTN mHashIndex = 0;
 STATIC UINTN mHashDependency;
 
+STATIC
 BOOLEAN
 HashUpdate (
   IN OUT  VOID        *HashContext,
@@ -29,52 +30,52 @@ HashUpdate (
   IN      UINTN       DataLength
   )
 {
-  CONST UINT8 *D = (CONST UINT8 *)Data;
+  CONST UINT8 *D;
+
+  D = (CONST UINT8 *) Data;
 
   (VOID) HashContext;
 
-  BOOLEAN p;
+  BOOLEAN P;
 
   for (UINTN i = 0; i < DataLength; i++)
     mHashDependency += D[i];
 
   if ((mHashesMask & (1ULL << mHashIndex)) != 0) {
-    p = TRUE;
+    P = TRUE;
   } else {
-    p = FALSE;
+    P = FALSE;
   }
 
   ++mHashIndex;
   mHashIndex &= 63U;
 
-  return p;
+  return P;
 }
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 PeCoffTestRtReloc (
-  PE_COFF_IMAGE_CONTEXT  *Context
+  IN OUT  PE_COFF_IMAGE_CONTEXT  *Context
   )
 {
-  RETURN_STATUS                   Status;
-  PE_COFF_RUNTIME_CONTEXT *RtCtx;
-  UINT32                         RtCtxSize;
+  EFI_STATUS               Status;
+  PE_COFF_RUNTIME_CONTEXT  *RtCtx;
+  UINT32                   RtCtxSize;
 
   Status = PeCoffRelocationDataSize (Context, &RtCtxSize);
 
-  if (Status != RETURN_SUCCESS) {
-    return RETURN_UNSUPPORTED;
+  if (!EFI_ERROR (Status)) {
+    return EFI_UNSUPPORTED;
   }
 
   RtCtx = AllocatePool (RtCtxSize);
-
   if (RtCtx == NULL) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   Status = PeCoffRelocateImage (Context, 0x69696969, RtCtx, RtCtxSize);
-
-  if (Status != RETURN_SUCCESS) {
+  if (!EFI_ERROR (Status)) {
     FreePool (RtCtx);
     return Status;
   }
@@ -87,22 +88,21 @@ PeCoffTestRtReloc (
 }
 
 STATIC
-RETURN_STATUS
+EFI_STATUS
 PeCoffTestLoad (
-  PE_COFF_IMAGE_CONTEXT *Context,
-  VOID                  *Destination,
-  UINT32                DestinationSize
+  IN OUT  PE_COFF_IMAGE_CONTEXT  *Context,
+     OUT  VOID                   *Destination,
+  IN      UINT32                 DestinationSize
   )
 {
-  RETURN_STATUS  Status;
-  CHAR8         *PdbPath;
-  UINT32        PdbPathSize;
+  EFI_STATUS  Status;
+  CHAR8       *PdbPath;
+  UINT32      PdbPathSize;
 
   (VOID) PeCoffLoadImage (Context, Destination, DestinationSize);
 
   Status = PeCoffGetPdbPath (Context, &PdbPath, &PdbPathSize);
-
-  if (Status == RETURN_SUCCESS) {
+  if (!EFI_ERROR (Status)) {
     ZeroMem (PdbPath, PdbPathSize);
   }
 
@@ -113,87 +113,100 @@ PeCoffTestLoad (
       Status = PeCoffTestRtReloc (Context);
     }
   }
-
-  if (Status != RETURN_SUCCESS) {
+  if (EFI_ERROR (Status)) {
     return Status;
   }
 
   PeCoffDiscardSections (Context);
 
-  return RETURN_SUCCESS;
+  return EFI_SUCCESS;
 }
 
-static void loadConfig(const uint8_t *data, size_t size) {
-  mHashDependency = 0;
-  mHashIndex = 0;
-  UINT32 Off = sizeof(UINT8);
-  UINT32 LastByte = data[size - Off];
-  PcdGetBool(PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
-  PcdGetBool(PcdImageLoaderHashProhibitOverlap) = (LastByte & 2U) != 0;
-  PcdGetBool(PcdImageLoaderLoadHeader) = (LastByte & 4U) != 0;
-  PcdGetBool(PcdImageLoaderSupportArmThumb) = (LastByte & 8U) != 0;
-  PcdGetBool(PcdImageLoaderForceLoadDebug) = (LastByte & 16U) != 0;
-  PcdGetBool(PcdImageLoaderTolerantLoad) = (LastByte & 32U) != 0;
-  PcdGetBool(PcdImageLoaderSupportDebug) = (LastByte & 64U) != 0;
-  Off += sizeof(UINT64);
-  if (size >= Off)
-    memcpy(&mPoolAllocationMask, &data[size - Off], sizeof(UINT64));
-  else
-    mPoolAllocationMask = MAX_UINT64;
-  Off += sizeof(UINT64);
-  if (size >= Off)
-    memcpy(&mPageAllocationMask, &data[size - Off], sizeof(UINT64));
-  else
-    mPageAllocationMask = MAX_UINT64;
-  Off += sizeof(UINT64);
-  if (size >= Off)
-    memcpy(&mHashesMask, &data[size - Off], sizeof(UINT64));
-  else
-    mHashesMask = MAX_UINT64;
-}
-
-RETURN_STATUS
-PeCoffTestLoadFull (
-  IN VOID    *FileBuffer,
-  IN UINT32  FileSize
+STATIC
+VOID
+LoadConfig (
+  IN  CONST UINT8  *Data,
+  IN  UINTN        Size
   )
 {
-  RETURN_STATUS         Status;
-  BOOLEAN               Result;
-  PE_COFF_IMAGE_CONTEXT Context;
-  VOID                  *Destination;
-  UINT32                DestinationSize;
+  UINT32 Off;
+  UINT32 LastByte;
 
-  Status = PeCoffInitializeContext (&Context, FileBuffer, FileSize);
+  mHashDependency = 0;
+  mHashIndex = 0;
+  Off = sizeof (UINT8);
+  LastByte = Data[Size - Off];
 
-  if (Status != RETURN_SUCCESS) {
-    return RETURN_UNSUPPORTED;
+  PcdGetBool (PcdImageLoaderRtRelocAllowTargetMismatch) = (LastByte & 1U) != 0;
+  PcdGetBool (PcdImageLoaderHashProhibitOverlap) = (LastByte & 2U) != 0;
+  PcdGetBool (PcdImageLoaderLoadHeader) = (LastByte & 4U) != 0;
+  PcdGetBool (PcdImageLoaderSupportArmThumb) = (LastByte & 8U) != 0;
+  PcdGetBool (PcdImageLoaderForceLoadDebug) = (LastByte & 16U) != 0;
+  PcdGetBool (PcdImageLoaderTolerantLoad) = (LastByte & 32U) != 0;
+  PcdGetBool (PcdImageLoaderSupportDebug) = (LastByte & 64U) != 0;
+
+  Off += sizeof (UINT64);
+  if (Size >= Off) {
+    CopyMem (&mPoolAllocationMask, &Data[Size - Off], sizeof (UINT64));
+  } else {
+    mPoolAllocationMask = MAX_UINT64;
   }
 
-  UINT8 HashContext;
+  Off += sizeof (UINT64);
+  if (Size >= Off) {
+    CopyMem (&mPageAllocationMask, &Data[Size - Off], sizeof (UINT64));
+  } else {
+    mPageAllocationMask = MAX_UINT64;
+  }
+
+  Off += sizeof (UINT64);
+  if (Size >= Off) {
+    CopyMem (&mHashesMask, &Data[Size - Off], sizeof (UINT64));
+  } else {
+    mHashesMask = MAX_UINT64;
+  }
+}
+
+STATIC
+EFI_STATUS
+PeCoffTestLoadFull (
+  IN  CONST VOID  *FileBuffer,
+  IN  UINT32      FileSize
+  )
+{
+  EFI_STATUS             Status;
+  BOOLEAN                Result;
+  PE_COFF_IMAGE_CONTEXT  Context;
+  VOID                   *Destination;
+  UINT32                 DestinationSize;
+  UINT8                  HashContext;
+
+  Status = PeCoffInitializeContext (&Context, FileBuffer, FileSize);
+  if (EFI_ERROR (Status)) {
+    return EFI_UNSUPPORTED;
+  }
+  
   Result = PeCoffHashImage (
              &Context,
              HashUpdate,
              &HashContext
              );
-
   if (!Result) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   DestinationSize = Context.SizeOfImage + Context.SizeOfImageDebugAdd;
-
   if (OcOverflowAddU32 (DestinationSize, Context.SectionAlignment, &DestinationSize)) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   if (DestinationSize >= BASE_16MB) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   Destination = AllocatePages (EFI_SIZE_TO_PAGES (DestinationSize));
   if (Destination == NULL) {
-    return RETURN_UNSUPPORTED;
+    return EFI_UNSUPPORTED;
   }
 
   Status = PeCoffTestLoad (&Context, Destination, DestinationSize);
@@ -209,19 +222,21 @@ LLVMFuzzerTestOneInput (
   size_t         Size
   )
 {
-  if (Size == 0)
+  VOID  *NewData;
+  if (Size == 0) {
     return 0;
+  }
 
-  //PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
-  //PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
+  // PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
+  // PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
 
-  loadConfig(Data, Size);
+  LoadConfig (Data, Size);
 
-  void *p = AllocatePool(Size);
-  if (p != NULL) {
-    memcpy(p, Data, Size);
-    PeCoffTestLoadFull(p, Size);
-    FreePool(p);
+  NewData = AllocatePool (Size);
+  if (NewData != NULL) {
+    CopyMem (NewData, Data, Size);
+    PeCoffTestLoadFull(NewData, Size);
+    FreePool(NewData);
   }
 
   DEBUG ((
@@ -240,26 +255,27 @@ ENTRY_POINT (
   char  *argv[]
   )
 {
+  UINT8       *Image;
+  UINT32      ImageSize;
+  EFI_STATUS  Status;
+
   if (argc < 2) {
-    printf ("Please provide a valid PE image path\n");
+    DEBUG ((DEBUG_ERROR, "Please provide a valid PE image path\n"));
     return -1;
   }
 
   PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_INFO;
   PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_INFO;
 
-  //PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
-  //PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
-
-  uint8_t *Image;
-  uint32_t ImageSize;
+  // PcdGet32 (PcdFixedDebugPrintErrorLevel) |= DEBUG_POOL | DEBUG_PAGE;
+  // PcdGet32 (PcdDebugPrintErrorLevel)      |= DEBUG_POOL | DEBUG_PAGE;
 
   if ((Image = UserReadFile (argv[1], &ImageSize)) == NULL) {
-    printf ("Read fail\n");
+    DEBUG ((DEBUG_ERROR, "Read fail\n"));
     return 1;
   }
 
-  EFI_STATUS Status = LLVMFuzzerTestOneInput (Image, ImageSize);
+  Status = LLVMFuzzerTestOneInput (Image, ImageSize);
   FreePool(Image);
   if (EFI_ERROR (Status)) {
     return 1;
