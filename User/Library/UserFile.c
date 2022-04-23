@@ -65,15 +65,33 @@ UserReadFile (
     return NULL;
   }
 
-  fseek (FilePtr, 0, SEEK_END);
+  if (fseek (FilePtr, 0, SEEK_END) != 0) {
+    fclose (FilePtr);
+    return NULL;
+  }
+
   FileSize = ftell (FilePtr);
-  fseek (FilePtr, 0, SEEK_SET);
+  if (FileSize <= 0) {
+    fclose (FilePtr);
+    return NULL;
+  }
+
+  if (fseek (FilePtr, 0, SEEK_SET) != 0) {
+    fclose (FilePtr);
+    return NULL;
+  }
 
   Buffer = AllocatePool (FileSize + 1);
-  if (Buffer == NULL
-    || (FileSize > 0 && fread (Buffer, FileSize, 1, FilePtr) != 1)) {
-    abort ();
+  if (Buffer == NULL) {
+    fclose (FilePtr);
+    return NULL;
   }
+
+  if (fread (Buffer, FileSize, 1, FilePtr) != 1) {
+    fclose (FilePtr);
+    return NULL;
+  }
+  
   fclose (FilePtr);
 
   Buffer[FileSize] = 0;
