@@ -157,8 +157,37 @@ jobs:
   analyze-uncrustify:
     name: Analyze Uncrustify
     runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install curl git unzip
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - name: Run Uncrustify
+        run: |
+          src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/uncrustify/uncrustify/uncstrap.sh) && eval "$src" || exit 1
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: Uncrustify Artifacts
+          path: uncrustify.diff
+
+  analyze-uncrustify-pr:
+    name: Analyze Uncrustify (PR)
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.event_name == 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
 
       - name: Install Dependencies
         run: |
