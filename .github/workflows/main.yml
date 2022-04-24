@@ -178,7 +178,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Uncrustify Artifacts
-          path: uncrustify.diff
+          path: ./uncrustify.diff
 
   analyze-uncrustify-pr:
     name: Analyze Uncrustify (PR)
@@ -206,7 +206,7 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: Uncrustify Artifacts
-          path: uncrustify.diff
+          path: ./uncrustify.diff
 
   analyze-scripts:
     name: Analyze Scripts
