@@ -157,7 +157,6 @@ jobs:
   analyze-uncrustify:
     name: Analyze Uncrustify
     runs-on: ubuntu-latest
-    if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
       - uses: actions/checkout@v2
 
@@ -171,10 +170,11 @@ jobs:
           src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
 
       - name: Run Uncrustify
+        if: github.repository_owner == 'acidanthera' && github.event_name == 'pull_request'
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/uncrustify/uncrustify/uncstrap.sh) && eval "$src" || exit 1
-        env:
-          WORK_BRANCH: ${{ github.ref_name }}
 
       - name: Upload to Artifacts
         uses: actions/upload-artifact@v2
