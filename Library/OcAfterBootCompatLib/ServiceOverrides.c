@@ -1006,13 +1006,21 @@ OcExitBootServices (
   }
 
   if (BootCompat->Settings.DisableExternalAppleGpu) {
-    gRT->SetVariable (
+    Status = gRT->SetVariable (
       L"gpu-power-prefs",
       &gApplePersonalizationVariableGuid,
       EFI_VARIABLE_BOOTSERVICE_ACCESS | EFI_VARIABLE_RUNTIME_ACCESS | EFI_VARIABLE_NON_VOLATILE,
       sizeof (DisabledGpu),
       &DisabledGpu
       );
+    //
+    // Try to brute-force the value of Status.
+    // All possible values can be found at
+    // https://github.com/acidanthera/audk/blob/d2f79716cb67c0487433b159f882015773dd18b7/MdePkg/Include/Uefi/UefiBaseType.h#L111-L150
+    //
+    if (Status == EFI_SUCCESS) {
+      DirectResetCold ();
+    }
   }
 
   //
