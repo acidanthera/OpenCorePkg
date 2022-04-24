@@ -951,8 +951,7 @@ OcExitBootServices (
   EFI_STATUS               Status;
   BOOT_COMPAT_CONTEXT      *BootCompat;
   UINTN                    Index;
-
-  STATIC UINT32            DisabledGpu = 1U;
+  UINT32                   DisabledGpu;
 
   BootCompat = GetBootCompatContext ();
 
@@ -1006,6 +1005,7 @@ OcExitBootServices (
   }
 
   if (BootCompat->Settings.DisableExternalAppleGpu) {
+    DisabledGpu = 1U;
     Status = gRT->SetVariable (
       L"gpu-power-prefs",
       &gApplePersonalizationVariableGuid,
