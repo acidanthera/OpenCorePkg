@@ -171,13 +171,10 @@ jobs:
 
       - name: Run Uncrustify
         env:
-          PR_NUMBER: ${{ github.event.pull_request.number }}
           REPO_OWNER: ${{ github.repository_owner }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
           WORK_BRANCH: ${{ github.ref_name }}
         run: |
-          echo "PR_NUMBER: $PR_NUMBER"
-          echo "REPO_OWNER: $REPO_OWNER"
-          echo "WORK_BRANCH: $WORK_BRANCH"
           src=$(curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/uncrustify/uncrustify/uncstrap.sh) && eval "$src" || exit 1
 
       - name: Upload to Artifacts
