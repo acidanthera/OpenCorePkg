@@ -65,8 +65,7 @@ PeCoffTestRtReloc (
   UINT32                   RtCtxSize;
 
   Status = PeCoffRelocationDataSize (Context, &RtCtxSize);
-
-  if (!EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     return EFI_UNSUPPORTED;
   }
 
@@ -76,7 +75,7 @@ PeCoffTestRtReloc (
   }
 
   Status = PeCoffRelocateImage (Context, 0x69696969, RtCtx, RtCtxSize);
-  if (!EFI_ERROR (Status)) {
+  if (EFI_ERROR (Status)) {
     FreePool (RtCtx);
     return Status;
   }
