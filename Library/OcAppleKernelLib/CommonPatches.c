@@ -106,7 +106,7 @@ PatchAppleCpuPmCfgLock (
         break;
       }
 
-      if (  ((Walker[0] == 0xC9) && (Walker[1] == 0xC3))  ///< leave; ret
+      if (  ((Walker[0] == 0xC9) && (Walker[1] == 0xC3)) ///< leave; ret
          || ((Walker[0] == 0x5D) && (Walker[1] == 0xC3))) ///< pop rbp; ret
       //
       // Stop searching upon matching return sequences.
@@ -116,7 +116,7 @@ PatchAppleCpuPmCfgLock (
         break;
       }
 
-      if (  ((Walker[0] == 0xB9) && (Walker[3] == 0) && (Walker[4] == 0))     ///< mov ecx, 00000xxxxh
+      if (  ((Walker[0] == 0xB9) && (Walker[3] == 0) && (Walker[4] == 0)) ///< mov ecx, 00000xxxxh
          || ((Walker[0] == 0x66) && (Walker[1] == 0xB9) && (Walker[3] == 0))) ///< mov cx, 00xxh
       //
       // Stop searching upon matching reassign sequences.
