@@ -1,4 +1,4 @@
-name: CI
+name: Uncrustify
 
 on:
   push:
@@ -12,7 +12,7 @@ env:
 
 jobs:
   analyze-uncrustify:
-    name: Analyze Uncrustify
+    name: Check Codestyle
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v3

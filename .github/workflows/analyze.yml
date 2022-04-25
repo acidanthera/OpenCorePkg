@@ -1,0 +1,107 @@
+name: Analyze
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  PROJECT_TYPE: UEFI
+
+jobs:
+  analyze-scripts:
+    name: Scripts
+    runs-on: macos-latest
+    env:
+      JOB_TYPE: ANALYZE
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          brew install shellcheck
+          python3 -m pip install pyyaml
+        env:
+          HOMEBREW_NO_INSTALL_CLEANUP: 1
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - name: Run shellcheck
+        run: find . \( -name "*.tool" -o -name "*.command" -o -name "*.sh" \) -exec sh -c 'for TargetFile; do shellcheck --severity=info "${TargetFile}" || exit 1; done' sh {} +
+
+      - name: Check AppleModels
+        working-directory: AppleModels
+        run: |
+          pwd
+          ls
+          python3 ./update_generated.py  || exit 1
+          if [ "$(git status --porcelain)" != "" ]; then echo "DataBase desync"; exit 1 ; fi
+
+      - name: Lint Samples
+        run: |
+          File='Docs/Sample.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+          File='Docs/SampleCustom.plist'
+          plutil -lint "${File}" || exit 1
+          /usr/libexec/PlistBuddy -c 'Save' "${File}"
+          awk ' /<data>$/     {inside=1; printf $0; next}
+                /<\/data>$/   {inside=0; print "</data>"; next}
+                inside        {gsub ("\t", "", $0); printf $0; next}
+                              {print}' "${File}" > "${File}.tmp" && mv "${File}.tmp" "${File}"
+          if [ "$(git diff ${File})" != '' ]; then echo "Not in Xcode style or not in alphabetical order!!"; exit 1 ; fi
+
+  analyze-docs-linux:
+    name: Documentation
+    runs-on: ubuntu-latest
+    if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install texlive latexdiff
+
+      - name: Check documentation
+        run: ./Docs/BuildDocs.tool --check-docs
+
+  analyze-coverity:
+    name: Coverity
+    runs-on: ubuntu-latest
+    env:
+      JOB_TYPE: COVERITY
+      TOOLCHAINS: GCC5
+    if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install curl nasm uuid-dev libssl-dev iasl
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - run: ./build_oc.tool --skip-build --skip-package
+
+      - name: Run Coverity
+        working-directory: UDK
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/coverity/covstrap-linux.sh) && eval "$src" || exit 1
+        env:
+          COVERITY_SCAN_TOKEN: ${{ secrets.COVERITY_SCAN_TOKEN }}
+          COVERITY_SCAN_EMAIL: ${{ secrets.COVERITY_SCAN_EMAIL }}
+          COVERITY_BUILD_COMMAND: ../build_oc.tool --skip-tests --skip-package RELEASE
