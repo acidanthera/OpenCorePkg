@@ -21,7 +21,7 @@ jobs:
     env:
       JOB_TYPE: BUILD
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Add Linux Toolchain
         run: brew tap FiloSottile/homebrew-musl-cross
@@ -46,7 +46,7 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: macOS XCODE5 Artifacts
           path: Binaries/*.zip
@@ -63,7 +63,7 @@ jobs:
     name: Build Linux CLANGPDB/GCC5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -82,7 +82,7 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Linux CLANGPDB-GCC5 Artifacts
           path: Binaries/*.zip
@@ -93,7 +93,7 @@ jobs:
     env:
       TOOLCHAINS: CLANGDWARF
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -119,7 +119,7 @@ jobs:
           make pdf &> log.txt || abort
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Linux CLANGDWARF Artifacts
           path: Binaries/*.zip
@@ -134,7 +134,7 @@ jobs:
       run:
         shell: bash
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -149,10 +149,36 @@ jobs:
       - run: ./build_oc.tool
 
       - name: Upload to Artifacts
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v3
         with:
           name: Windows Artifacts
           path: Binaries/*.zip
+
+  analyze-uncrustify:
+    name: Analyze Uncrustify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install curl git unzip
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - name: Run Uncrustify
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/uncrustify/uncstrap.sh) && eval "$src" || exit 1
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Uncrustify Artifacts
+          path: ./uncrustify.diff
 
   analyze-scripts:
     name: Analyze Scripts
@@ -160,7 +186,7 @@ jobs:
     env:
       JOB_TYPE: ANALYZE
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -209,7 +235,7 @@ jobs:
     runs-on: ubuntu-latest
     if: github.repository_owner == 'acidanthera' && github.ref_name == 'master'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
@@ -228,7 +254,7 @@ jobs:
       TOOLCHAINS: GCC5
     if: github.repository_owner == 'acidanthera' && github.event_name != 'pull_request'
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: Install Dependencies
         run: |
