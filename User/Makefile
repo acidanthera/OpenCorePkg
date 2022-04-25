@@ -96,6 +96,10 @@ ifeq ($(FUZZ_JOBS),)
 	FUZZ_JOBS = 2
 endif
 
+ifeq ($(FUZZ_SECURITY_JOBS),)
+	FUZZ_SECURITY_JOBS = 4
+endif
+
 ifeq ($(FUZZ_MEM),)
 	FUZZ_MEM = 8192
 endif
@@ -280,11 +284,12 @@ sydr-fuzz: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 		[libfuzzer]
 		path = "$(PROJECT)$(SUFFIX)"
 		args = "-jobs=$(FUZZ_JOBS) -workers=$(FUZZ_JOBS) -rss_limit_mb=$(FUZZ_MEM) $(FUZZ_DIR)"
+		merge = false
 	EOF
 	UBSAN_OPTIONS='halt_on_error=1' sydr-fuzz run -f
 
 sydr-fuzz-security: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
-	sydr-fuzz security
+	sydr-fuzz security --jobs $(FUZZ_SECURITY_JOBS)
 
 sydr-fuzz-import: $(PROJECT).sydr$(SUFFIX) $(PROJECT)$(SUFFIX) FORCE
 	@$(MKDIR) sydr-fuzz-out/corpus
