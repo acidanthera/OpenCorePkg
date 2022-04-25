@@ -1,7 +1,7 @@
 \documentclass[]{article}
 %DIF LATEXDIFF DIFFERENCE FILE
-%DIF DEL PreviousConfiguration.tex   Mon Apr 18 20:59:43 2022
-%DIF ADD ../Configuration.tex        Mon Apr 18 21:05:53 2022
+%DIF DEL PreviousConfiguration.tex   Fri Apr 22 22:56:12 2022
+%DIF ADD ../Configuration.tex        Mon Apr 25 14:46:15 2022
 
 \usepackage{lmodern}
 \usepackage{amssymb,amsmath}
@@ -2754,7 +2754,16 @@ blocking.
   \emph{Note 2}: While this patch should enable ethernet support for all Aquantia AQtion series,
   it has only been tested on AQC-107s based 10GbE network cards.
 
-\item
+  \DIFaddbegin \emph{\DIFadd{Note 3}}\DIFadd{: To address }\texttt{\DIFadd{AppleVTD}} \DIFadd{incompatibilities after applying this quirk,
+  the }\texttt{\DIFadd{Reserved Memory Region}} \DIFadd{section of the corresponding device in the }\texttt{\DIFadd{DMAR}}
+  \DIFadd{ACPI table might be removed. This table should be disassembled and edited, then recompiled to
+  }\texttt{\DIFadd{AML}} \DIFadd{with tool }\texttt{\DIFadd{iASL}}\DIFadd{. For the patched }\texttt{\DIFadd{DMAR}} \DIFadd{table to be }\hyperref[acpipropsadd]{added}\DIFadd{,
+  the original one should be }\hyperref[acpipropsdelete]{deleted}\DIFadd{.
+  More details can be found at
+  }\href{https://github.com/acidanthera/OpenCorePkg/commit/24414555f2c07e06a3674ec7a2aa1ce4860bbcc7#commitcomment-70530145}{\DIFadd{comment on commit 2441455}}\DIFadd{.
+}
+
+\DIFaddend \item
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
   \textbf{Failsafe}: \texttt{false}\\

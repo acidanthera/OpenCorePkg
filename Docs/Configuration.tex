@@ -2694,6 +2694,14 @@ blocking.
   \emph{Note 2}: While this patch should enable ethernet support for all Aquantia AQtion series,
   it has only been tested on AQC-107s based 10GbE network cards.
 
+  \emph{Note 3}: To address \texttt{AppleVTD} incompatibilities after applying this quirk,
+  the \texttt{Reserved Memory Region} section of the corresponding device in the \texttt{DMAR}
+  ACPI table might be removed. This table should be disassembled and edited, then recompiled to
+  \texttt{AML} with tool \texttt{iASL}. For the patched \texttt{DMAR} table to be \hyperref[acpipropsadd]{added},
+  the original one should be \hyperref[acpipropsdelete]{deleted}.
+  More details can be found at
+  \href{https://github.com/acidanthera/OpenCorePkg/commit/24414555f2c07e06a3674ec7a2aa1ce4860bbcc7#commitcomment-70530145}{comment on commit 2441455}.
+
 \item
   \texttt{ForceSecureBootScheme}\\
   \textbf{Type}: \texttt{plist\ boolean}\\
