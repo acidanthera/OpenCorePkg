@@ -1,0 +1,38 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+  release:
+    types: [published]
+
+env:
+  PROJECT_TYPE: UEFI
+
+jobs:
+  analyze-uncrustify:
+    name: Analyze Uncrustify
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Install Dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get install curl git unzip
+
+      - name: CI Bootstrap
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/ci-bootstrap.sh) && eval "$src" || exit 1
+
+      - name: Run Uncrustify
+        run: |
+          src=$(/usr/bin/curl -Lfs https://raw.githubusercontent.com/acidanthera/ocbuild/master/uncrustify/uncstrap.sh) && eval "$src" || exit 1
+
+      - name: Upload to Artifacts
+        uses: actions/upload-artifact@v3
+        if: failure()
+        with:
+          name: Uncrustify Artifacts
+          path: ./uncrustify.diff
